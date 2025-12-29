@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>維修保養管理 - 保固申請暨維修處理單（檢視）</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body data-page="view">
+  <div class="page">
+    <div class="shell">
+      <main class="content">
+        <div class="content__header">
+          <div class="content__title">保固申請暨維修處理單（檢視）</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__head">
+            <div class="panel__hint">此為檢視模式；如需修改請切換至編輯。</div>
+            <div class="panel__headActions">
+              <button class="btn btn-outline-secondary btn-sm" type="button" id="btnPrint"><i class="bi bi-printer"></i> 列印A4</button>
+              <a class="btn btn-outline-secondary btn-sm" href="./list.html" id="btnGoList">返回</a>
+              <a class="btn btn-primary btn-sm" href="./edit.html" id="btnGoEdit"><i class="bi bi-pencil-square"></i> 編輯</a>
+              <a class="btn btn-outline-primary btn-sm" href="./index.html" id="btnGoCreate"><i class="bi bi-plus-lg"></i> 新增</a>
+            </div>
+          </div>
+
+          <section class="section">
+            <div class="section__title">基本資料</div>
+            <div class="formGrid formGrid--table formGrid--auto2 viewMode">
+              <div class="field">
+                <div class="field__label">保固代表</div>
+                <div class="field__control"><div class="viewText" data-bind="warrantyRep"></div></div>
+              </div>
+              <div class="field">
+                <div class="field__label">通知時間</div>
+                <div class="field__control"><div class="viewText" data-bind="notifyDate"></div></div>
+              </div>
+
+              <div class="field">
+                <div class="field__label">船名（艦號）</div>
+                <div class="field__control"><div class="viewText" data-bind="shipName"></div></div>
+              </div>
+              <div class="field">
+                <div class="field__label">可執行保固維修日期</div>
+                <div class="field__control"><div class="viewText" data-bind="warrantyDate"></div></div>
+              </div>
+
+              <div class="field field--span2 field--full">
+                <div class="field__label">保固或維修地點</div>
+                <div class="field__control"><div class="viewText" data-bind="location"></div></div>
+              </div>
+
+              <div class="field">
+                <div class="field__label">承辦單位</div>
+                <div class="field__control"><div class="viewText" data-bind="unit"></div></div>
+              </div>
+              <div class="field">
+                <div class="field__label">單位主管</div>
+                <div class="field__control"><div class="viewText" data-bind="manager"></div></div>
+              </div>
+
+              <div class="field field--span2 field--full">
+                <div class="field__label">承辦人</div>
+                <div class="field__control">
+                  <div class="viewContact">
+                    <div class="viewContact__row"><div class="viewK">姓名：</div><div class="viewV" data-bind="handler.name"></div></div>
+                    <div class="viewContact__row"><div class="viewK">電話：</div><div class="viewV" data-bind="handler.phone"></div></div>
+                    <div class="viewContact__row"><div class="viewK">傳真：</div><div class="viewV" data-bind="handler.fax"></div></div>
+                    <div class="viewContact__row"><div class="viewK">手機：</div><div class="viewV" data-bind="handler.mobile"></div></div>
+                    <div class="viewContact__row"><div class="viewK">Email：</div><div class="viewV" data-bind="handler.email"></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field field--span3 field--full">
+                <div class="field__label">保固或維修事項</div>
+                <div class="field__control"><div class="viewRich" data-bind-html="warrantyItems"></div></div>
+              </div>
+
+              <div class="field field--span3 field--full">
+                <div class="field__label">備註</div>
+                <div class="field__control">
+                  <div class="viewAttach">
+                    <div class="viewAttach__head">附件檔案</div>
+                    <div class="viewAttach__list" id="viewAttachList"></div>
+                  </div>
+                  <div class="mt8">
+                    <div class="muted">說明</div>
+                    <div class="viewText viewText--box" data-bind="note"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section__title">船廠確認欄</div>
+            <div class="formGrid formGrid--tight formGrid--table formGrid--auto2 viewMode">
+              <div class="field">
+                <div class="field__label">單號</div>
+                <div class="field__control"><div class="viewText" data-bind="yard.no"></div></div>
+              </div>
+              <div class="field">
+                <div class="field__label">收件日期</div>
+                <div class="field__control"><div class="viewText" data-bind="yard.recvDate"></div></div>
+              </div>
+
+              <div class="field field--full">
+                <div class="field__label">船廠船號</div>
+                <div class="field__control"><div class="viewText" data-bind="yard.yardShipNo"></div></div>
+              </div>
+
+              <div class="field">
+                <div class="field__label">責任判定</div>
+                <div class="field__control"><div class="viewText" data-bind="yard.resp"></div></div>
+              </div>
+
+              <div class="field">
+                <div class="field__label">預定修復日期</div>
+                <div class="field__control"><div class="viewText" data-bind="yard.planFix"></div></div>
+              </div>
+              <div class="field">
+                <div class="field__label">開始修復日期</div>
+                <div class="field__control"><div class="viewText" data-bind="yard.startFix"></div></div>
+              </div>
+              <div class="field">
+                <div class="field__label">實際修復日期</div>
+                <div class="field__control"><div class="viewText" data-bind="yard.actualFix"></div></div>
+              </div>
+
+              <div class="field field--span2 field--full">
+                <div class="field__label">使用天數 / 人力</div>
+                <div class="field__control">
+                  <div class="viewContact">
+                    <div class="viewContact__row"><div class="viewK">施工天數：</div><div class="viewV" data-bind="yard.workDays"></div></div>
+                    <div class="viewContact__row"><div class="viewK">使用人力：</div><div class="viewV" data-bind="yard.manpower"></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field field--span3 field--full">
+                <div class="field__label">維修處理經過</div>
+                <div class="field__control"><div class="viewRich" data-bind-html="yard.process"></div></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section__title">維修保固更換零、配件清單</div>
+            <div class="tableWrap">
+              <table class="table table--responsive">
+                <thead>
+                  <tr>
+                    <th style="width:18%;">品名</th>
+                    <th style="width:22%;">規格</th>
+                    <th style="width:10%;">數量</th>
+                    <th style="width:26%;">物料來源</th>
+                    <th style="width:18%;">備註</th>
+                  </tr>
+                </thead>
+                <tbody id="viewPartsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section__title">檢查測試與簽章</div>
+            <div class="formGrid formGrid--tight formGrid--table formGrid--auto2 viewMode">
+              <div class="field field--span3 field--full">
+                <div class="field__label">檢查測試結果</div>
+                <div class="field__control">
+                  <div class="viewText" data-bind="test.result"></div>
+                  <div class="mt8 viewRich" data-bind-html="test.note"></div>
+                </div>
+              </div>
+
+              <div class="field field--span3 field--full">
+                <div class="field__label">簽章紙本附件</div>
+                <div class="field__control">
+                  <div class="viewAttach">
+                    <div class="viewAttach__head">紙本掃描/照片</div>
+                    <div class="viewAttach__list" id="viewPaperList"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="panel__foot">
+            <a class="btn btn-outline-secondary" href="./index.html" role="button">切換編輯</a>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="./view.js"></script>
+</body>
+</html>
