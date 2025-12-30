@@ -299,7 +299,8 @@ body {
   border-radius: 6px;
   display: flex;
   align-items: center;
-  padding: 0 12px
+  padding: 0 12px;
+  justify-content: space-between;
 }
 
 .content__title {
@@ -381,12 +382,12 @@ body {
   border-radius: 4px;
   outline: none;
   background: #fff;
-  font-size: 12px
+  font-size: 1rem;
 }
 
 .input {
-  height: 30px;
-  padding: 0 10px
+  height: 35px;
+  padding: 0 10px;
 }
 
 .textarea {
@@ -600,6 +601,7 @@ body {
   border-bottom: 1px solid #e6e9ef;
   vertical-align: middle;
   text-align: left !important;
+  height: 45px;
 }
 
 .table tbody tr:last-child td {
@@ -785,12 +787,6 @@ textarea,
 select,
 button,
 label {
-  font-size: 1em;
-}
-
-.input,
-.textarea,
-.btn {
   font-size: 1em;
 }
 
@@ -1479,4 +1475,186 @@ label {
   right: 0;
   z-index: 2000;
   /* above cards/tables */
+}
+/* ===== Materials (DataTables + Filters) ===== */
+.section--flatTop{ padding-top: 0; }
+
+.materialsFilters{
+  background:#fff;
+  border: 1px solid #e6e9ef;
+  border-radius: 6px;
+  padding: 14px 12px;
+}
+
+.materialsFilters__grid{
+  display:grid;
+  grid-template-columns: 220px 220px 1fr auto;
+  gap: 12px;
+  align-items:end;
+}
+
+.materialsFilters__label{
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.materialsFilters__item--actions{
+  display:flex;
+  gap: 10px;
+  justify-content:flex-start;
+  flex-wrap: wrap;
+}
+
+.tableWrap--materials{ overflow-x:auto; }
+
+.plusDot{
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(34,197,94,.12);
+  border: 2px solid rgba(34,197,94,.55);
+  color: #22c55e;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 900;
+}
+
+.matImg{
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f5f7fb;
+  border: 1px solid #e6e9ef;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+}
+
+.matImg img{
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 10px rgba(0,0,0,.12));
+}
+
+.matActions{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  justify-content:flex-start;
+}
+
+.iconAct{
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ef;
+  background: #fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.iconAct:hover{ background:#f7f9fd; }
+.iconAct--edit{ color:#1f5fcf; }
+.iconAct--del{ color:#ef4444; }
+
+/* Use external filter panel; hide DataTables built-in search */
+div.dataTables_wrapper div.dataTables_filter{ display:none; }
+
+@media (max-width: 980px){
+  .materialsFilters__grid{ grid-template-columns: 1fr; }
+  .materialsFilters__item--actions{ justify-content:flex-end; }
+}
+
+/* ===== Materials (物料管理 / 裝備項目管理) ===== */
+.section--flatTop{ padding-top: 0; }
+
+.materialsFilters{
+  padding: 14px 12px 6px;
+  background: #fff;
+}
+
+.materialsFilters__grid{
+  display: grid;
+  grid-template-columns: 220px 220px 1fr auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.materialsFilters__label{
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.materialsFilters__item--actions{
+  display:flex;
+  gap: 10px;
+}
+
+.tableWrap--materials{ overflow-x: auto; }
+
+.plusDot{
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34,197,94,.12);
+  border: 2px solid rgba(34,197,94,.55);
+  color: #22c55e;
+  font-weight: 900;
+}
+
+.matImg{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: #f5f7fb;
+  border: 1px solid #e6e9ef;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.matImg img{
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 10px rgba(0,0,0,.12));
+}
+
+.matActions{
+  display:flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.iconAct{
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ef;
+  background: #fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.iconAct:hover{ background:#f7f9fd; }
+
+.iconAct--edit{ color:#1677ff; }
+.iconAct--del{ color:#ef4444; }
+
+/* RWD */
+@media (max-width: 980px){
+  .materialsFilters__grid{ grid-template-columns: 1fr; }
+  .materialsFilters__item--actions{ justify-content:flex-start; }
 }
