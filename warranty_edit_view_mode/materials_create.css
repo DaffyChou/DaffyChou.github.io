@@ -1,0 +1,126 @@
+/* ===== Stepper ===== */
+.stepper{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  padding:10px 12px;
+  border:1px solid #e6e9ef;
+  border-radius:10px;
+  background:#fff;
+  margin:12px;
+}
+
+.step{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #e6e9ef;
+  background:#f7f9fd;
+  color:#111827;
+  font-size:12px;
+  font-weight:700;
+}
+
+.step__num{
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #e6e9ef;
+  background:#fff;
+  color:#1f5fcf;
+  font-weight:900;
+}
+
+.step.is-active{
+  border-color:#2a6bd7;
+  background:#eff6ff;
+}
+
+.step.is-active .step__num{
+  border-color:#2a6bd7;
+  background:#2a6bd7;
+  color:#fff;
+}
+
+/* ===== Form Card ===== */
+.materialsMain--create{
+  padding-bottom:12px;
+}
+
+.formCard{
+  margin:12px;
+  border:1px solid #e6e9ef;
+  border-radius:10px;
+  overflow:hidden;
+  background:#fff;
+}
+
+.formCard__head{
+  padding:12px 12px 10px;
+  border-bottom:1px solid #eef2f7;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.formCard__title{ font-weight:900; }
+.formCard__sub{ font-size:12px; color:#6b7280; margin-top:2px; }
+
+/* ===== Helper ===== */
+.req{ color:#ef4444; font-weight:900; margin-left:4px; }
+
+.okBadge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid #bbf7d0;
+  background:#f0fdf4;
+  color:#166534;
+  font-size:12px;
+  font-weight:800;
+}
+
+.warnBadge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid #fed7aa;
+  background:#fff7ed;
+  color:#9a3412;
+  font-size:12px;
+  font-weight:800;
+}
+
+/* ===== Sticky Actions ===== */
+.stickyActions{
+  position:sticky;
+  bottom:0;
+  padding:10px 12px;
+  background:rgba(245,247,251,.92);
+  border-top:1px solid #e6e9ef;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  z-index:10;
+}
+
+/* ===== Tree select ===== */
+.treeNode__pick{
+  margin-left:auto;
+  padding:4px 8px;
+  border:1px solid #e6e9ef;
+  border-radius:999px;
+  background:#fff;
+  font-size:12px;
+  color:#1f5fcf;
+}

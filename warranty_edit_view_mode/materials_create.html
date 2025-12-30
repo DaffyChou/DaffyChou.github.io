@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>物料管理 - 新增物料</title>
+
+  <!-- Bootstrap 5 (same stack as provided pages) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- Project styles -->
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./materials_tree.css">
+
+  <style>
+    /* Page-specific (lightweight) */
+    .stepper{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      padding:10px 12px; border:1px solid #e6e9ef; border-radius:10px; background:#fff;
+      margin: 12px;
+    }
+    .step{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid #e6e9ef; background:#f7f9fd; color:#111827;
+      font-size:12px; font-weight:700;
+    }
+    .step__num{
+      width:22px; height:22px; border-radius:999px;
+      display:inline-flex; align-items:center; justify-content:center;
+      border:1px solid #e6e9ef; background:#fff; color:#1f5fcf; font-weight:900;
+    }
+    .step.is-active{
+      border-color:#2a6bd7; background:#eff6ff;
+    }
+    .step.is-active .step__num{
+      border-color:#2a6bd7; background:#2a6bd7; color:#fff;
+    }
+
+    .materialsMain--create{ padding-bottom: 12px; }
+    .formCard{
+      margin: 12px;
+      border: 1px solid #e6e9ef;
+      border-radius: 10px;
+      overflow: hidden;
+      background:#fff;
+    }
+    .formCard__head{
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid #eef2f7;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .formCard__title{ font-weight:900; }
+    .formCard__sub{ font-size:12px; color:#6b7280; margin-top:2px; }
+    .formCard__body{ padding: 0; }
+
+    .hintInline{
+      color:#6b7280; font-size:12px;
+      display:flex; gap:8px; align-items:flex-start;
+    }
+    .hintInline i{ color:#1f5fcf; margin-top:2px; }
+
+    .req{ color:#ef4444; font-weight:900; margin-left:4px; }
+    .okBadge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:4px 8px; border-radius:999px;
+      border:1px solid #bbf7d0; background:#f0fdf4; color:#166534;
+      font-size:12px; font-weight:800;
+    }
+    .warnBadge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:4px 8px; border-radius:999px;
+      border:1px solid #fed7aa; background:#fff7ed; color:#9a3412;
+      font-size:12px; font-weight:800;
+    }
+
+    .pnCheck{
+      display:flex; align-items:center; gap:10px;
+    }
+    .pnCheck .input{ flex: 1 1 auto; }
+    .pnCheck__state{ flex: 0 0 auto; }
+
+    .stickyActions{
+      position: sticky;
+      bottom: 0;
+      padding: 10px 12px;
+      background: rgba(245,247,251,.92);
+      backdrop-filter: blur(6px);
+      border-top: 1px solid #e6e9ef;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      z-index: 10;
+    }
+
+    /* Make left tree selectable in create mode */
+    .treeNode__pick{
+      margin-left:auto;
+      display:inline-flex; align-items:center; gap:6px;
+      padding:4px 8px;
+      border:1px solid #e6e9ef;
+      border-radius:999px;
+      background:#fff;
+      font-size:12px;
+      color:#1f5fcf;
+    }
+    .treeNode__pick:hover{ background:#eff6ff; border-color:#93c5fd; }
+
+    .selectedPath{
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .selectedPath__val{
+      font-weight:800;
+      color:#111827;
+      word-break: break-word;
+    }
+    .selectedPath__meta{
+      font-size:12px;
+      color:#6b7280;
+    }
+  </style>
+</head>
+
+<body data-page="materials-create">
+  <div class="page">
+    <div class="shell">
+      <main class="content">
+        <!-- Header (match materials_tree.html style) -->
+        <div class="content__header">
+          <div class="content__title">物料管理</div>
+          <div class="content__actions d-flex gap-2">
+            <a class="btn btn-outline-secondary btn-sm" href="./materials_tree.html">
+              <i class="bi bi-list-ul me-1"></i>返回列表
+            </a>
+            <a class="btn btn-outline-secondary btn-sm" href="./list.html">維修保養管理</a>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__head">
+            <div class="panel__hint">
+              以「物料主檔」為核心建立資料；系統/裝備採樹狀選取，降低重複與分類錯誤。
+            </div>
+            <div class="panel__headActions">
+              <button class="btn btn-outline-secondary btn-sm" type="button" id="btnDraft">
+                <i class="bi bi-save2 me-1"></i>儲存草稿
+              </button>
+              <button class="btn btn-primary btn-sm" type="button" id="btnCreate">
+                <i class="bi bi-check2-circle me-1"></i>建立物料
+              </button>
+            </div>
+          </div>
+
+          <div class="materialsLayout">
+            <!-- Left: tree (reuse same visual language) -->
+            <aside class="materialsAside">
+              <div class="materialsAside__head">
+                <div class="materialsAside__title">構型（選擇歸屬）</div>
+                <div class="materialsAside__sub">點選節點右側「選取」帶入主檔</div>
+              </div>
+              <div class="materialsTree" id="materialsTree" aria-label="構型樹"></div>
+            </aside>
+
+            <!-- Right: create form -->
+            <section class="materialsMain materialsMain--create">
+              <div class="stepper" aria-label="新增步驟">
+                <div class="step is-active"><span class="step__num">1</span>基本資料</div>
+                <div class="step"><span class="step__num">2</span>系統/裝備</div>
+                <div class="step"><span class="step__num">3</span>庫存管理</div>
+                <div class="step"><span class="step__num">4</span>附件/備註</div>
+              </div>
+
+              <!-- Card A -->
+              <div class="formCard">
+                <div class="formCard__head">
+                  <div>
+                    <div class="formCard__title">Step 1｜物料基本資料</div>
+                    <div class="formCard__sub">對應列表欄位：料號 / 中文名稱 / 英文名稱 / 規格 / 製造商 / 供應商 / 單價</div>
+                  </div>
+                  <div class="hintInline">
+                    <i class="bi bi-info-circle"></i>
+                    <div>必填欄位以<span class="req">*</span>標示；料號會即時檢查是否重複。</div>
+                  </div>
+                </div>
+
+                <div class="formCard__body">
+                  <div class="formGrid formGrid--table formGrid--auto2">
+                    <div class="field">
+                      <div class="field__label">料號（PN）<span class="req">*</span></div>
+                      <div class="field__control">
+                        <div class="pnCheck">
+                          <input class="input" id="pn" type="text" placeholder="例如：BULB-24V-15W-01" />
+                          <span class="pnCheck__state" id="pnState">
+                            <span class="warnBadge"><i class="bi bi-search"></i>尚未檢查</span>
+                          </span>
+                        </div>
+                        <div class="mt8 muted">建議：統一命名規則，以利跨系統比對與採購。</div>
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">單價</div>
+                      <div class="field__control">
+                        <input class="input" id="unitPrice" type="number" min="0" step="1" placeholder="例如：3600" />
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">中文名稱<span class="req">*</span></div>
+                      <div class="field__control">
+                        <input class="input" id="nameZh" type="text" placeholder="例如：小型螺口燈泡" />
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">英文名稱</div>
+                      <div class="field__control">
+                        <input class="input" id="nameEn" type="text" placeholder="例如：Small Screw Bulb" />
+                      </div>
+                    </div>
+
+                    <div class="field field--full">
+                      <div class="field__label">規格</div>
+                      <div class="field__control">
+                        <input class="input" id="spec" type="text" placeholder="例如：24V / 15W、Ø920mm / 3pcs set" />
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">製造商</div>
+                      <div class="field__control">
+                        <select class="input" id="maker">
+                          <option value="">— 請選擇 —</option>
+                          <option>SAMYUNG</option>
+                          <option>MAN B&W</option>
+                          <option>Wärtsilä</option>
+                          <option>MITSUBISHI</option>
+                          <option>RENK</option>
+                          <option>Marine Power Inc.</option>
+                          <option>AuxiEngine Co.</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">供應商</div>
+                      <div class="field__control">
+                        <select class="input" id="vendor">
+                          <option value="">— 請選擇 —</option>
+                          <option>A廠商</option>
+                          <option>B廠商</option>
+                          <option>C廠商</option>
+                          <option>D廠商</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card B -->
+              <div class="formCard">
+                <div class="formCard__head">
+                  <div>
+                    <div class="formCard__title">Step 2｜系統 / 裝備關聯</div>
+                    <div class="formCard__sub">對應列表欄位：位置 / 適用裝備名稱 / 適用裝備英文名稱（並與左側構型樹對齊）</div>
+                  </div>
+                  <div class="hintInline">
+                    <i class="bi bi-diagram-3"></i>
+                    <div>建議先在左側選取構型節點，再填寫位置與適用裝備資訊。</div>
+                  </div>
+                </div>
+
+                <div class="formCard__body">
+                  <div class="formGrid formGrid--table formGrid--auto2">
+                    <div class="field field--full">
+                      <div class="field__label">構型路徑（由左側選取）<span class="req">*</span></div>
+                      <div class="field__control">
+                        <div class="selectedPath">
+                          <div class="selectedPath__val" id="pathText">尚未選取</div>
+                          <div class="selectedPath__meta">系統將以此路徑作為左側樹狀歸屬與後續查詢索引。</div>
+                        </div>
+                        <input type="hidden" id="path" value="">
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">位置</div>
+                      <div class="field__control">
+                        <select class="input" id="location">
+                          <option value="">— 請選擇 —</option>
+                          <option>羅經艙</option>
+                          <option>艦橋</option>
+                          <option>機艙</option>
+                          <option>機艙／主機</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">適用裝備名稱</div>
+                      <div class="field__control">
+                        <input class="input" id="equipZh" type="text" placeholder="例如：磁羅經系統 / 推進系統" />
+                      </div>
+                    </div>
+
+                    <div class="field field--full">
+                      <div class="field__label">適用裝備英文名稱</div>
+                      <div class="field__control">
+                        <input class="input" id="equipEn" type="text" placeholder="例如：Magnetic Compass System / Propulsion System" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card C -->
+              <div class="formCard">
+                <div class="formCard__head">
+                  <div>
+                    <div class="formCard__title">Step 3｜庫存與管理</div>
+                    <div class="formCard__sub">對應列表欄位：庫存數量；並保留後續「庫存異動流程」擴充空間</div>
+                  </div>
+                  <div class="hintInline">
+                    <i class="bi bi-box-seam"></i>
+                    <div>新增時僅設定初始值；後續異動建議走專屬流程以保留稽核軌跡。</div>
+                  </div>
+                </div>
+
+                <div class="formCard__body">
+                  <div class="formGrid formGrid--table formGrid--auto2">
+                    <div class="field">
+                      <div class="field__label">初始庫存</div>
+                      <div class="field__control">
+                        <input class="input" id="stockQty" type="number" min="0" step="1" placeholder="例如：2687" />
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">庫存上限</div>
+                      <div class="field__control">
+                        <input class="input" id="stockMax" type="number" min="0" step="1" placeholder="例如：50000" />
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">安全庫存</div>
+                      <div class="field__control">
+                        <input class="input" id="safetyStock" type="number" min="0" step="1" placeholder="例如：5000" />
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">管理單位</div>
+                      <div class="field__control">
+                        <select class="input" id="mgmtUnit">
+                          <option value="">— 請選擇 —</option>
+                          <option>A單位</option>
+                          <option>B單位</option>
+                          <option>C單位</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="field field--full">
+                      <div class="field__label">管制設定</div>
+                      <div class="field__control">
+                        <div class="checks checks--inline">
+                          <label class="check"><input id="isControlled" type="checkbox" /> 高價值 / 關鍵零件（建議啟用後續簽核）</label>
+                        </div>
+                        <div class="mt8 muted">提示：若啟用管制，後續請購/領用可納入簽核與稽核。</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card D -->
+              <div class="formCard">
+                <div class="formCard__head">
+                  <div>
+                    <div class="formCard__title">Step 4｜附件 / 備註</div>
+                    <div class="formCard__sub">支援替代料號、規格書/圖紙/證書等文件上傳</div>
+                  </div>
+                </div>
+
+                <div class="formCard__body">
+                  <div class="formGrid formGrid--table">
+                    <div class="field">
+                      <div class="field__label">替代料號</div>
+                      <div class="field__control">
+                        <input class="input" id="altPns" type="text" placeholder="以逗號分隔，例如：BULB-24V-15W-02, BULB-24V-15W-03" />
+                        <div class="mt8 muted">進階版本可改為多選關聯既有物料。</div>
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">附件上傳</div>
+                      <div class="field__control">
+                        <div class="attachBox">
+                          <div class="attachHead">
+                            <div class="muted">附件檔案（可新增多筆；每筆可填說明）</div>
+                            <button class="btn btn-outline-secondary" type="button" id="addAttach">
+                              <i class="bi bi-paperclip me-1"></i>新增附件
+                            </button>
+                          </div>
+                          <div class="attachList" id="attachList"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="field__label">備註</div>
+                      <div class="field__control">
+                        <textarea class="textarea" id="note" rows="3" placeholder="補充說明（例如：替代料條件、保存方式、採購注意事項）"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="stickyActions">
+                  <a class="btn btn-outline-secondary" href="./materials_tree.html">
+                    取消
+                  </a>
+                  <button class="btn btn-outline-secondary" type="button" id="btnDraft2">
+                    儲存草稿
+                  </button>
+                  <button class="btn btn-primary" type="button" id="btnCreate2">
+                    建立物料
+                  </button>
+                </div>
+              </div>
+
+            </section>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ====== Minimal, self-contained demo logic (no backend required) ======
+
+    // Demo tree data (replace with your real structure / materials_tree.js when wiring API)
+    const TREE = {
+      name: "全部系統",
+      children: [
+        { name: "磁羅經系統", children: [
+          { name: "羅經櫃 (Binnacle)", children: [
+            { name: "方位鏡 (Azimuth Circle)", children: [] },
+            { name: "磁羅經盒 (Compass Box)", children: [] },
+            { name: "燈光控制設備 (Control Unit)", children: [] }
+          ]}
+        ]},
+        { name: "推進系統 (Propulsion System)", children: [
+          { name: "原動機 (Main Engine)", children: [
+            { name: "主機本體", children: [
+              { name: "氣缸單元", children: [] }
+            ]}
+          ]},
+          { name: "傳動系統 (Transmission)", children: [] },
+          { name: "螺旋槳系統 (Propulsor)", children: [] }
+        ]}
+      ]
+    };
+
+    const $tree = document.getElementById('materialsTree');
+    const $path = document.getElementById('path');
+    const $pathText = document.getElementById('pathText');
+
+    function el(tag, cls, html){
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (html != null) n.innerHTML = html;
+      return n;
+    }
+
+    function renderNode(node, pathArr){
+      const hasChildren = (node.children && node.children.length);
+      const row = el('div', 'treeNode');
+      const toggle = el('div', 'treeNode__toggle' + (hasChildren ? '' : ' is-leaf'), hasChildren ? '＋' : '');
+      const label = el('div', 'treeNode__label', node.name);
+      const pick = el('button', 'treeNode__pick', '<i class="bi bi-check2"></i>選取');
+
+      let open = true;
+
+      row.appendChild(toggle);
+      row.appendChild(label);
+      row.appendChild(pick);
+
+      const wrap = el('div', '');
+      wrap.appendChild(row);
+
+      const childWrap = el('div', 'treeChildren');
+      if (!hasChildren) childWrap.style.display = 'none';
+
+      if (hasChildren){
+        node.children.forEach(ch => {
+          childWrap.appendChild(renderNode(ch, [...pathArr, node.name]));
+        });
+        wrap.appendChild(childWrap);
+      }
+
+      toggle.addEventListener('click', () => {
+        if (!hasChildren) return;
+        open = !open;
+        childWrap.style.display = open ? '' : 'none';
+        toggle.textContent = open ? '－' : '＋';
+      });
+
+      pick.addEventListener('click', () => {
+        const fullPath = [...pathArr, node.name].filter(Boolean).join(' / ');
+        $path.value = fullPath;
+        $pathText.textContent = fullPath || '尚未選取';
+        flash(row);
+      });
+
+      return wrap;
+    }
+
+    function flash(node){
+      node.classList.add('is-active');
+      setTimeout(() => node.classList.remove('is-active'), 900);
+    }
+
+    // Render tree
+    TREE.children.forEach(ch => {
+      $tree.appendChild(renderNode(ch, [TREE.name]));
+    });
+
+    // PN check (demo: treat some PNs as existing)
+    const EXISTING = new Set(['BULB-24V-15W-01','ME-PR-92-01','ME-INJ-92-03']);
+    const $pn = document.getElementById('pn');
+    const $pnState = document.getElementById('pnState');
+
+    function setPnState(ok, text){
+      $pnState.innerHTML = ok
+        ? '<span class="okBadge"><i class="bi bi-check2"></i>' + text + '</span>'
+        : '<span class="warnBadge"><i class="bi bi-exclamation-triangle"></i>' + text + '</span>';
+    }
+
+    let pnTimer = null;
+    $pn.addEventListener('input', () => {
+      clearTimeout(pnTimer);
+      setPnState(false, '檢查中…');
+      pnTimer = setTimeout(() => {
+        const v = ($pn.value || '').trim().toUpperCase();
+        if (!v) return setPnState(false, '尚未檢查');
+        if (EXISTING.has(v)) return setPnState(false, '料號已存在（請改用編輯或更換料號）');
+        setPnState(true, '可用');
+      }, 250);
+    });
+
+    // Attachments repeater (reuse CSS patterns from provided styles.css)
+    const $attachList = document.getElementById('attachList');
+    const $addAttach = document.getElementById('addAttach');
+
+    function addAttachRow(){
+      const item = document.createElement('div');
+      item.className = 'attachItem';
+
+      const file = document.createElement('div');
+      file.className = 'attachItem__file';
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.className = 'form-control form-control-sm';
+      const fileName = document.createElement('div');
+      fileName.className = 'upload-filename text-muted';
+      fileName.textContent = '尚未選擇檔案';
+      fileInput.addEventListener('change', () => {
+        fileName.textContent = fileInput.files?.[0]?.name || '尚未選擇檔案';
+      });
+      file.appendChild(fileInput);
+      file.appendChild(fileName);
+
+      const desc = document.createElement('div');
+      desc.className = 'attachItem__desc';
+      const label = document.createElement('label');
+      label.textContent = '說明';
+      const descInput = document.createElement('input');
+      descInput.type = 'text';
+      descInput.className = 'input';
+      desc.appendChild(label);
+      desc.appendChild(descInput);
+
+      const actions = document.createElement('div');
+      actions.className = 'rowActions';
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'btn btn-outline-danger btn-sm';
+      rm.textContent = '移除';
+      rm.addEventListener('click', () => item.remove());
+      actions.appendChild(rm);
+
+      item.appendChild(file);
+      item.appendChild(desc);
+      item.appendChild(actions);
+      $attachList.appendChild(item);
+    }
+
+    $addAttach.addEventListener('click', addAttachRow);
+    addAttachRow();
+
+    // Create / Draft actions (demo)
+    function validate(){
+      const pn = ($pn.value || '').trim();
+      const nameZh = (document.getElementById('nameZh').value || '').trim();
+      const path = ($path.value || '').trim();
+      if (!pn) return { ok:false, msg:'請填寫「料號（PN）」' };
+      if (EXISTING.has(pn.toUpperCase())) return { ok:false, msg:'料號已存在，請更換或改用編輯' };
+      if (!nameZh) return { ok:false, msg:'請填寫「中文名稱」' };
+      if (!path) return { ok:false, msg:'請先於左側構型樹選取歸屬路徑' };
+      return { ok:true };
+    }
+
+    function toast(msg, ok){
+      const div = document.createElement('div');
+      div.className = 'toast align-items-center text-bg-' + (ok ? 'success' : 'danger') + ' border-0';
+      div.role = 'alert';
+      div.ariaLive = 'assertive';
+      div.ariaAtomic = 'true';
+      div.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">${msg}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>`;
+      document.body.appendChild(div);
+      div.style.position = 'fixed';
+      div.style.right = '14px';
+      div.style.bottom = '14px';
+      div.style.zIndex = '9999';
+      const t = new bootstrap.Toast(div, { delay: 2400 });
+      t.show();
+      div.addEventListener('hidden.bs.toast', () => div.remove());
+    }
+
+    function onCreate(){
+      const v = validate();
+      if (!v.ok) return toast(v.msg, false);
+      toast('物料建立成功（Demo）。下一步：串接 API 儲存並回到列表。', true);
+    }
+    function onDraft(){
+      toast('已儲存草稿（Demo）。', true);
+    }
+
+    document.getElementById('btnCreate').addEventListener('click', onCreate);
+    document.getElementById('btnCreate2').addEventListener('click', onCreate);
+    document.getElementById('btnDraft').addEventListener('click', onDraft);
+    document.getElementById('btnDraft2').addEventListener('click', onDraft);
+  </script>
+</body>
+</html>
