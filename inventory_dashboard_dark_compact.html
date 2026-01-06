@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8" />
   <title>Inventory Insights - Fleet & Vessel Inventory Dashboard</title>
@@ -16,1277 +17,1735 @@
   <script src="https://code.highcharts.com/modules/exporting.js"></script>
 
   <style>
-    :root{
+    :root {
       --bg: #131313;
       --panel: #292929;
       --panel-2: #1e1e1e;
       --border: #313131;
       --soft: #373737;
-      --text:#ffffff;
+      --text: #ffffff;
       --muted: #999999;
-      --green:#22c55e;
-      --green-2:#10b981;
-      --orange:#f59e0b;
-      --yellow:#fbbf24;
-      --cyan:#22d3ee;
+      --green: #22c55e;
+      --green-2: #10b981;
+      --orange: #f59e0b;
+      --yellow: #fbbf24;
+      --cyan: #22d3ee;
       --radius: .25rem;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
-      background:var(--bg);
-      color:var(--text);
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC",
+        system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      /* 基礎字體 16px */
+      letter-spacing: .2px;
+    }
+
+
+    .wrap {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 16px 18px 28px
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px
+    }
+
+    .title {
+      font-weight: 700;
+      font-size: 22px
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .chip {
+      border: 1px solid var(--soft);
+      background: var(--panel-2);
+      color: #999999;
+      font-size: 12px;
+      padding: .125rem .5rem;
+      border-radius: 999px;
+      margin: .25rem .5rem
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 1rem 0;
+    }
+
+    .fg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
       font-size: 14px;
-      letter-spacing:.2px;
+      color: var(--muted)
     }
 
-    .wrap{max-width:1480px;margin:0 auto;padding:16px 18px 28px}
-    .header{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px
-    }
-    .title{font-weight:700;font-size:22px}
-    .subtitle{font-size:12px;color:var(--muted)}
-    .chip{border:1px solid var(--soft);background:var(--panel-2);color:#999999;font-size:12px;padding:.125rem .5rem;border-radius:999px;margin:.25rem .5rem}
-
-    .filters{display:flex;flex-wrap:wrap;gap:10px;margin:1rem 0;}
-    .fg{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted)}
-    select{
-      min-width:150px;
-      border-radius:.25rem;
-      border:1px solid var(--soft);
-      padding:.5rem .25rem;
-      outline:none;
+    select {
+      min-width: 150px;
+      border-radius: .25rem;
+      border: 1px solid var(--soft);
+      padding: .5rem .25rem;
+      outline: none;
     }
 
-    .pill-switch{display:inline-flex;border:1px solid var(--muted);border-radius:.25rem;overflow:hidden}
-    .pill-switch button{
-      border:0;
-      background:transparent;
-      color:var(--text);
-      padding:.4rem .75rem;
-      cursor:pointer;
+    .pill-switch {
+      display: inline-flex;
+      border: 1px solid var(--muted);
+      border-radius: .25rem;
+      overflow: hidden
     }
-    .pill-switch button+button{border-left:1px solid var(--soft)}
-    .pill-switch .active{background:#bbbbbb;color:#0f172a;font-weight:600}
 
-    .dr{display:flex;align-items:center;gap:6px}
-    .dr select{min-width:120px}
+    .pill-switch button {
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      padding: .4rem .75rem;
+      cursor: pointer;
+    }
 
-    .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
-    .card-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
-    .card-title{font-size:20px;font-weight:700;line-height:1.25;display:block}
-    .card-title-s{font-size:14px;font-weight:700}
-    .card-meta{font-size:11px;color:var(--muted)}
+    .pill-switch button+button {
+      border-left: 1px solid var(--soft)
+    }
 
-    .kpi{font-size:22px;font-weight:700;margin-top:4px}
-    .kpi .unit{font-size:11px;color:var(--muted);margin-left:4px}
-    .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;border-radius:.25rem;padding:2px 8px}
-    .pill.ok{background:rgba(16,185,129,.15);border:1px solid #115e38;color:#bff0d1}
-    .btn{border:1px solid var(--soft);background:transparent;color:#e5e7eb;border-radius:.25rem;padding:4px 10px;font-size:11px;cursor:pointer}
-    .btn:hover{background:#0f1318}
-    .btn.active{background:#e5e7eb;color:#0f172a;border-color:#e5e7eb}
+    .pill-switch .active {
+      background: #bbbbbb;
+      color: #0f172a;
+      font-weight: 600
+    }
 
-    .grid{display:grid;gap:10px}
-    .g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-    .g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-    @media (max-width:1100px){.g-3,.g-2{grid-template-columns:1fr}}
+    .dr {
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
 
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    th,td{padding:6px 10px;text-align:left}
-    th{color:#c7d0dc;border-bottom:1px solid var(--soft);white-space:nowrap;background:var(--panel)}
-    td{border-bottom:1px solid var(--border);color:#e9edf2}
-    tr:nth-child(even) td{background:var(--panel)}
-    .row-group{background:var(--panel);cursor:pointer}
-    .row-group:hover td{background:#20262f}
-    .row-detail{display:none;cursor:pointer}
-    .row-detail:hover td{background:#20262f}
-    .arrow{width:22px;text-align:center;color:#9aa6b2;font-size:11px;cursor:pointer}
-    .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px}
-    .d1{background:#22d3ee}.d2{background:#10b981}.d3{background:#fb923c}.d4{background:#a855f7}.d5{background:#ef5da8}.d6{background:#f97316}
+    .dr select {
+      min-width: 120px
+    }
 
-    .tag{font-size:11px;padding:2px 8px;border-radius:.25rem;border:1px solid var(--soft);background:var(--panel-2)}
-    .tag.red{border-color:#ef4444;background:#3b0a0a;color:#ffd0d0;box-shadow:0 0 8px rgba(239,68,68,.4)}
-    .tag.yellow{border-color:#f59e0b;background:#3a2806;color:#ffd67c}
-    .tag.green{border-color:#10b981;background:#0b2f23;color:#c9ffed}
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .35)
+    }
 
-    .hc{height:240px}
-    .hc-tall{height:260px}
+    .card-h {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 8px
+    }
 
-    .dataTables_wrapper{color:#c7d0dc;font-size:11px;border-radius:0}
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.25;
+      display: block
+    }
+
+    .card-title-s {
+      font-size: 14px;
+      font-weight: 700
+    }
+
+    .card-meta {
+      font-size: 14px;
+      color: var(--muted)
+    }
+
+    .kpi {
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 4px
+    }
+
+    .kpi .unit {
+      font-size: 14px;
+      color: var(--muted);
+      margin-left: 4px
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      border-radius: .25rem;
+      padding: 2px 8px
+    }
+
+    .pill.ok {
+      background: rgba(16, 185, 129, .15);
+      border: 1px solid #115e38;
+      color: #bff0d1
+    }
+
+    .btn {
+      border: 1px solid var(--soft);
+      background: transparent;
+      color: #e5e7eb;
+      border-radius: .25rem;
+      padding: 4px 10px;
+      font-size: 14px;
+      cursor: pointer
+    }
+
+    .btn:hover {
+      background: #0f1318
+    }
+
+    .btn.active {
+      background: #e5e7eb;
+      color: #0f172a;
+      border-color: #e5e7eb
+    }
+
+    .grid {
+      display: grid;
+      gap: 10px
+    }
+
+    .g-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .g-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    @media (max-width:1100px) {
+
+      .g-3,
+      .g-2 {
+        grid-template-columns: 1fr
+      }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      /* font-size: 12px */
+    }
+
+    th,
+    td {
+      padding: 6px 10px;
+      text-align: left
+    }
+
+    th {
+      color: #c7d0dc;
+      border-bottom: 1px solid var(--soft);
+      white-space: nowrap;
+      background: var(--panel)
+    }
+
+    td {
+      border-bottom: 1px solid var(--border);
+      color: #e9edf2
+    }
+
+    tr:nth-child(even) td {
+      background: var(--panel)
+    }
+
+    .row-group {
+      background: var(--panel);
+      cursor: pointer
+    }
+
+    .row-group:hover td {
+      background: #20262f
+    }
+
+    .row-detail {
+      display: none;
+      cursor: pointer
+    }
+
+    .row-detail:hover td {
+      background: #20262f
+    }
+
+    .arrow {
+      width: 22px;
+      text-align: center;
+      color: #9aa6b2;
+      font-size: 14px;
+      cursor: pointer
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px
+    }
+
+    .d1 {
+      background: #22d3ee
+    }
+
+    .d2 {
+      background: #10b981
+    }
+
+    .d3 {
+      background: #fb923c
+    }
+
+    .d4 {
+      background: #a855f7
+    }
+
+    .d5 {
+      background: #ef5da8
+    }
+
+    .d6 {
+      background: #f97316
+    }
+
+    .tag {
+      font-size: 14px;
+      padding: 2px 8px;
+      border-radius: .25rem;
+      border: 1px solid var(--soft);
+      background: var(--panel-2)
+    }
+
+    .tag.red {
+      border-color: #ef4444;
+      background: #3b0a0a;
+      color: #ffd0d0;
+      box-shadow: 0 0 8px rgba(239, 68, 68, .4)
+    }
+
+    .tag.yellow {
+      border-color: #f59e0b;
+      background: #3a2806;
+      color: #ffd67c
+    }
+
+    .tag.green {
+      border-color: #10b981;
+      background: #0b2f23;
+      color: #c9ffed
+    }
+
+    .hc {
+      height: 240px
+    }
+
+    .hc-tall {
+      height: 260px
+    }
+
+    .dataTables_wrapper {
+      color: #c7d0dc;
+      font-size: 14px;
+      border-radius: 0
+    }
+
     .dataTables_wrapper .dataTables_length select,
-    .dataTables_wrapper .dataTables_filter input{
-      background:var(--panel);border:1px solid var(--soft);color:#e9edf2;border-radius:0;padding:2px 6px;font-size:11px
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button{
-      background:var(--panel);border:1px solid var(--soft)!important;color:#e9edf2!important;border-radius:0!important;padding:2px 6px!important;margin:0 2px!important
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current{
-      background:#e5e7eb!important;color:#0f172a!important;border-color:#e5e7eb!important
+    .dataTables_wrapper .dataTables_filter input {
+      background: var(--panel);
+      border: 1px solid var(--soft);
+      color: #e9edf2;
+      border-radius: 0;
+      padding: 2px 6px;
+      font-size: 14px
     }
 
-    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:flex-start;padding-top:60px;z-index:50}
-    .modal{width:1200px;max-width:96%;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 24px 64px rgba(0,0,0,.6);padding:12px 14px 16px}
-    .modal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-    .m-title{font-size:20px;margin-bottom:.25rem;font-weight:700}
-    .m-sub{font-size:11px;color:var(--muted)}
-    .close{background:transparent;border:0;color:#93a1b2;font-size:18px;cursor:pointer}
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      background: var(--panel);
+      border: 1px solid var(--soft) !important;
+      color: #e9edf2 !important;
+      border-radius: 0 !important;
+      padding: 2px 6px !important;
+      margin: 0 2px !important
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: #e5e7eb !important;
+      color: #0f172a !important;
+      border-color: #e5e7eb !important
+    }
+
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .6);
+      display: none;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 60px;
+      z-index: 50
+    }
+
+    .modal {
+      width: 1200px;
+      max-width: 96%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, .6);
+      padding: 12px 14px 16px
+    }
+
+    .modal-h {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px
+    }
+
+    .m-title {
+      font-size: 20px;
+      margin-bottom: .25rem;
+      font-weight: 700
+    }
+
+    .m-sub {
+      font-size: 14px;
+      color: var(--muted)
+    }
+
+    .close {
+      background: transparent;
+      border: 0;
+      color: #93a1b2;
+      font-size: 18px;
+      cursor: pointer
+    }
   </style>
 </head>
+
 <body>
-<div class="wrap">
+  <div class="wrap">
 
-  <div class="header">
-    <div>
-      <div class="title">進銷存管理 Inventory Management</div>
+    <div class="header">
+      <div>
+        <div class="title">進銷存管理 Inventory Management</div>
+      </div>
+      <div class="chip">Dark · Compact UI</div>
     </div>
-    <div class="chip">Dark · Compact UI</div>
-  </div>
-
-  <!-- Filters -->
-  <div class="filters">
-    <div class="fg">
-      <span>船舶 Vessel</span>
-      <select id="vesselFilter">
-        <option value="ALL">全部船舶（Fleet）</option>
-        <option value="YUANSHUN">源順</option>
-        <option value="WEISHUN">匯順</option>
-        <option value="JINBAO">金保順</option>
-        <option value="FENGSHUN">豐順</option>
-        <option value="JINGSHUN">景順</option>
-        <option value="SHORE">岸端倉庫（Shore）</option>
-      </select>
-    </div>
-
-    <div class="fg">
-      <span>日期類型 Date Type</span>
-      <div class="pill-switch" id="dateType">
-        <button class="active" data-type="year">年</button>
-        <button data-type="quarter">季</button>
-        <button data-type="month">月</button>
-        <button data-type="week">週</button>
-        <button data-type="day">日</button>
-      </div>
-    </div>
-
-    <div class="fg">
-      <span>日期區間 Date Range</span>
-
-      <!-- Year -->
-      <div class="dr dr-g" data-type="year">
-        <select id="yearFrom"><option value="0" selected>2022</option><option value="1">2023</option><option value="2">2024</option></select>
-        <span>至</span>
-        <select id="yearTo"><option value="0">2022</option><option value="1">2023</option><option value="2" selected>2024</option></select>
-      </div>
-
-      <!-- Quarter -->
-      <div class="dr dr-g" data-type="quarter" style="display:none">
-        <select id="yearFrom-"><option value="2" selected>2024</option></select>
-        <select id="qFrom">
-          <option value="0" selected>第1季</option><option value="1">第2季</option><option value="2">第3季</option><option value="3">第4季</option>
-        </select>
-        <span>至</span>
-        <select id="yearTo-"><option value="2" selected>2024</option></select>
-        <select id="qTo">
-          <option value="0">第1季</option><option value="1">第2季</option><option value="2">第3季</option><option value="3" selected>第4季</option>
-        </select>
-      </div>
-
-      <!-- Month -->
-      <div class="dr dr-g" data-type="month" style="display:none">
-        <select id="yearFrom--"><option value="2" selected>2024</option></select>
-        <select id="mFrom">
-          <option value="0" selected>01 月</option><option value="1">02 月</option><option value="2">03 月</option><option value="3">04 月</option>
-          <option value="4">05 月</option><option value="5">06 月</option><option value="6">07 月</option><option value="7">08 月</option>
-          <option value="8">09 月</option><option value="9">10 月</option><option value="10">11 月</option><option value="11">12 月</option>
-        </select>
-        <span>至</span>
-        <select id="yearTo--"><option value="2" selected>2024</option></select>
-        <select id="mTo">
-          <option value="0">01 月</option><option value="1">02 月</option><option value="2">03 月</option><option value="3">04 月</option>
-          <option value="4">05 月</option><option value="5">06 月</option><option value="6">07 月</option><option value="7">08 月</option>
-          <option value="8">09 月</option><option value="9">10 月</option><option value="10">11 月</option><option value="11" selected>12 月</option>
-        </select>
-      </div>
-
-      <!-- Week -->
-      <div class="dr dr-g" data-type="week" style="display:none">
-        <select id="yearFrom---"><option value="2" selected>2024</option></select>
-        <select id="wFrom">
-          <option value="0" selected>第 41 週</option><option value="1">第 42 週</option><option value="2">第 43 週</option><option value="3">第 44 週</option>
-          <option value="4">第 45 週</option><option value="5">第 46 週</option><option value="6">第 47 週</option><option value="7">第 48 週</option>
-          <option value="8">第 49 週</option><option value="9">第 50 週</option><option value="10">第 51 週</option><option value="11">第 52 週</option>
-        </select>
-        <span>至</span>
-        <select id="yearTo----"><option value="2" selected>2024</option></select>
-        <select id="wTo">
-          <option value="0">第 41 週</option><option value="1">第 42 週</option><option value="2">第 43 週</option><option value="3">第 44 週</option>
-          <option value="4">第 45 週</option><option value="5">第 46 週</option><option value="6">第 47 週</option><option value="7">第 48 週</option>
-          <option value="8">第 49 週</option><option value="9">第 50 週</option><option value="10">第 51 週</option><option value="11" selected>第 52 週</option>
-        </select>
-      </div>
-
-      <!-- Day -->
-      <div class="dr dr-g" data-type="day" style="display:none">
-        <select id="yearFrom-----"><option value="2" selected>2024</option></select>
-        <select id="dFrom">
-          <option value="0" selected>11/01</option><option value="1">11/02</option><option value="2">11/03</option><option value="3">11/04</option>
-          <option value="4">11/05</option><option value="5">11/06</option><option value="6">11/07</option><option value="7">11/08</option>
-          <option value="8">11/09</option><option value="9">11/10</option><option value="10">11/11</option><option value="11">11/12</option>
-        </select>
-        <span>至</span>
-        <select id="yearTo-----"><option value="2" selected>2024</option></select>
-        <select id="dTo">
-          <option value="0">11/01</option><option value="1">11/02</option><option value="2">11/03</option><option value="3">11/04</option>
-          <option value="4">11/05</option><option value="5">11/06</option><option value="6">11/07</option><option value="7">11/08</option>
-          <option value="8">11/09</option><option value="9">11/10</option><option value="10">11/11</option><option value="11" selected>11/12</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- Snapshot -->
-  <div class="card" style="margin-bottom:12px">
-    <div class="card-h">
-      <div class="card-title">船舶 × 倉庫價值與請購狀態總覽</div>
-      <div class="card-meta">點「全倉合計」切換單船；點子列切換「單船＋單倉庫」。左邊三角可收合 / 展開。</div>
-    </div>
-    <table id="snapshot">
-      <thead>
-        <tr>
-          <th style="width:22px"></th>
-          <th>船舶 / 倉庫</th>
-          <th>庫存金額</th>
-          <th>重要物料 / 短缺</th>
-          <th>已請購未入庫</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- 源順 -->
-        <tr class="row-group" data-group="YUANSHUN" data-vessel="YUANSHUN" data-expanded="0">
-          <td class="arrow">▶</td>
-          <td><span class="dot d1"></span><b>源順 - 全倉合計</b></td>
-          <td>USD 185,320</td>
-          <td class="g-st"></td>
-          <td>5</td>
-        </tr>
-        <tr class="row-detail" data-group="YUANSHUN" data-vessel="YUANSHUN" data-warehouse="DECK">
-          <td></td><td style="padding-left:26px">└ 甲板 Deck</td>
-          <td>USD 62,430</td>
-          <td><span class="tag yellow">1 接近最低庫存</span></td>
-          <td>2</td>
-        </tr>
-        <tr class="row-detail" data-group="YUANSHUN" data-vessel="YUANSHUN" data-warehouse="ENGINE">
-          <td></td><td style="padding-left:26px">└ 機艙 Engine</td>
-          <td>USD 122,890</td>
-          <td><span class="tag red">1 重要物料缺料</span></td>
-          <td>3</td>
-        </tr>
-
-        <!-- 匯順 -->
-        <tr class="row-group" data-group="WEISHUN" data-vessel="WEISHUN" data-expanded="0">
-          <td class="arrow">▶</td>
-          <td><span class="dot d2"></span><b>匯順 - 全倉合計</b></td>
-          <td>USD 153,080</td>
-          <td class="g-st"></td>
-          <td>4</td>
-        </tr>
-        <tr class="row-detail" data-group="WEISHUN" data-vessel="WEISHUN" data-warehouse="DECK">
-          <td></td><td style="padding-left:26px">└ 甲板 Deck</td>
-          <td>USD 55,200</td>
-          <td><span class="tag green">正常</span></td>
-          <td>1</td>
-        </tr>
-        <tr class="row-detail" data-group="WEISHUN" data-vessel="WEISHUN" data-warehouse="ENGINE">
-          <td></td><td style="padding-left:26px">└ 機艙 Engine</td>
-          <td>USD 97,880</td>
-          <td><span class="tag yellow">1 接近最低庫存</span></td>
-          <td>3</td>
-        </tr>
-
-        <!-- 金保順 -->
-        <tr class="row-group" data-group="JINBAO" data-vessel="JINBAO" data-expanded="0">
-          <td class="arrow">▶</td>
-          <td><span class="dot d3"></span><b>金保順 - 全倉合計</b></td>
-          <td>USD 126,220</td>
-          <td class="g-st"></td>
-          <td>2</td>
-        </tr>
-        <tr class="row-detail" data-group="JINBAO" data-vessel="JINBAO" data-warehouse="DECK">
-          <td></td><td style="padding-left:26px">└ 甲板 Deck</td>
-          <td>USD 44,920</td>
-          <td><span class="tag red">1 重要物料缺料</span></td>
-          <td>1</td>
-        </tr>
-        <tr class="row-detail" data-group="JINBAO" data-vessel="JINBAO" data-warehouse="ENGINE">
-          <td></td><td style="padding-left:26px">└ 機艙 Engine</td>
-          <td>USD 81,300</td>
-          <td><span class="tag">監控中</span></td>
-          <td>1</td>
-        </tr>
-
-        <!-- 豐順 -->
-        <tr class="row-group" data-group="FENGSHUN" data-vessel="FENGSHUN" data-expanded="0">
-          <td class="arrow">▶</td>
-          <td><span class="dot d4"></span><b>豐順 - 全倉合計</b></td>
-          <td>USD 156,200</td>
-          <td class="g-st"></td>
-          <td>3</td>
-        </tr>
-        <tr class="row-detail" data-group="FENGSHUN" data-vessel="FENGSHUN" data-warehouse="DECK">
-          <td></td><td style="padding-left:26px">└ 甲板 Deck</td>
-          <td>USD 52,780</td>
-          <td><span class="tag green">正常</span></td>
-          <td>1</td>
-        </tr>
-        <tr class="row-detail" data-group="FENGSHUN" data-vessel="FENGSHUN" data-warehouse="ENGINE">
-          <td></td><td style="padding-left:26px">└ 機艙 Engine</td>
-          <td>USD 103,420</td>
-          <td><span class="tag yellow">1 接近最低庫存</span></td>
-          <td>2</td>
-        </tr>
-
-        <!-- 景順 -->
-        <tr class="row-group" data-group="JINGSHUN" data-vessel="JINGSHUN" data-expanded="0">
-          <td class="arrow">▶</td>
-          <td><span class="dot d5"></span><b>景順 - 全倉合計</b></td>
-          <td>USD 118,400</td>
-          <td class="g-st"></td>
-          <td>3</td>
-        </tr>
-        <tr class="row-detail" data-group="JINGSHUN" data-vessel="JINGSHUN" data-warehouse="DECK">
-          <td></td><td style="padding-left:26px">└ 甲板 Deck</td>
-          <td>USD 38,600</td>
-          <td><span class="tag green">正常</span></td>
-          <td>1</td>
-        </tr>
-        <tr class="row-detail" data-group="JINGSHUN" data-vessel="JINGSHUN" data-warehouse="ENGINE">
-          <td></td><td style="padding-left:26px">└ 機艙 Engine</td>
-          <td>USD 79,800</td>
-          <td><span class="tag yellow">1 接近最低庫存</span></td>
-          <td>2</td>
-        </tr>
-
-        <!-- 岸倉 -->
-        <tr class="row-group" data-group="SHORE" data-vessel="SHORE" data-expanded="0">
-          <td class="arrow"></td>
-          <td><span class="dot d6"></span>岸端 / 台北港倉庫（Shore）</td>
-          <td>USD 55,000</td>
-          <td><span class="tag">供五艘船共用備品</span></td>
-          <td>5</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Views -->
-  <div class="card">
-    <div id="fleetView">
+    <!-- Snapshot -->
+    <div class="card" style="margin-bottom:12px">
       <div class="card-h">
-        <div class="card-title">船隊物料使用總覽 <span class="chip">Fleet Level</span></div>
-        <div class="card-meta">遵循版面風格與配色；文字全部白色系。</div>
+        <div class="card-title">船舶 × 倉庫價值與請購狀態總覽</div>
+        <div class="card-meta">點「全倉合計」切換單船；點子列切換「單船＋單倉庫」。左邊三角可收合 / 展開。</div>
+      </div>
+      <table id="snapshot">
+        <thead>
+          <tr>
+            <th style="width:22px"></th>
+            <th>船舶 / 倉庫</th>
+            <th>庫存金額</th>
+            <th>重要物料 / 短缺</th>
+            <th>已請購未入庫</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 源順 -->
+          <tr class="row-group" data-group="YUANSHUN" data-vessel="YUANSHUN" data-expanded="0">
+            <td class="arrow">▶</td>
+            <td><span class="dot d1"></span><b>源順 - 全倉合計</b></td>
+            <td>USD 185,320</td>
+            <td class="g-st"></td>
+            <td>5</td>
+          </tr>
+          <tr class="row-detail" data-group="YUANSHUN" data-vessel="YUANSHUN" data-warehouse="DECK">
+            <td></td>
+            <td style="padding-left:26px">└ 甲板 Deck</td>
+            <td>USD 62,430</td>
+            <td><span class="tag yellow">1 接近最低庫存</span></td>
+            <td>2</td>
+          </tr>
+          <tr class="row-detail" data-group="YUANSHUN" data-vessel="YUANSHUN" data-warehouse="ENGINE">
+            <td></td>
+            <td style="padding-left:26px">└ 機艙 Engine</td>
+            <td>USD 122,890</td>
+            <td><span class="tag red">1 重要物料缺料</span></td>
+            <td>3</td>
+          </tr>
+
+          <!-- 匯順 -->
+          <tr class="row-group" data-group="WEISHUN" data-vessel="WEISHUN" data-expanded="0">
+            <td class="arrow">▶</td>
+            <td><span class="dot d2"></span><b>匯順 - 全倉合計</b></td>
+            <td>USD 153,080</td>
+            <td class="g-st"></td>
+            <td>4</td>
+          </tr>
+          <tr class="row-detail" data-group="WEISHUN" data-vessel="WEISHUN" data-warehouse="DECK">
+            <td></td>
+            <td style="padding-left:26px">└ 甲板 Deck</td>
+            <td>USD 55,200</td>
+            <td><span class="tag green">正常</span></td>
+            <td>1</td>
+          </tr>
+          <tr class="row-detail" data-group="WEISHUN" data-vessel="WEISHUN" data-warehouse="ENGINE">
+            <td></td>
+            <td style="padding-left:26px">└ 機艙 Engine</td>
+            <td>USD 97,880</td>
+            <td><span class="tag yellow">1 接近最低庫存</span></td>
+            <td>3</td>
+          </tr>
+
+          <!-- 金保順 -->
+          <tr class="row-group" data-group="JINBAO" data-vessel="JINBAO" data-expanded="0">
+            <td class="arrow">▶</td>
+            <td><span class="dot d3"></span><b>金保順 - 全倉合計</b></td>
+            <td>USD 126,220</td>
+            <td class="g-st"></td>
+            <td>2</td>
+          </tr>
+          <tr class="row-detail" data-group="JINBAO" data-vessel="JINBAO" data-warehouse="DECK">
+            <td></td>
+            <td style="padding-left:26px">└ 甲板 Deck</td>
+            <td>USD 44,920</td>
+            <td><span class="tag red">1 重要物料缺料</span></td>
+            <td>1</td>
+          </tr>
+          <tr class="row-detail" data-group="JINBAO" data-vessel="JINBAO" data-warehouse="ENGINE">
+            <td></td>
+            <td style="padding-left:26px">└ 機艙 Engine</td>
+            <td>USD 81,300</td>
+            <td><span class="tag">監控中</span></td>
+            <td>1</td>
+          </tr>
+
+          <!-- 豐順 -->
+          <tr class="row-group" data-group="FENGSHUN" data-vessel="FENGSHUN" data-expanded="0">
+            <td class="arrow">▶</td>
+            <td><span class="dot d4"></span><b>豐順 - 全倉合計</b></td>
+            <td>USD 156,200</td>
+            <td class="g-st"></td>
+            <td>3</td>
+          </tr>
+          <tr class="row-detail" data-group="FENGSHUN" data-vessel="FENGSHUN" data-warehouse="DECK">
+            <td></td>
+            <td style="padding-left:26px">└ 甲板 Deck</td>
+            <td>USD 52,780</td>
+            <td><span class="tag green">正常</span></td>
+            <td>1</td>
+          </tr>
+          <tr class="row-detail" data-group="FENGSHUN" data-vessel="FENGSHUN" data-warehouse="ENGINE">
+            <td></td>
+            <td style="padding-left:26px">└ 機艙 Engine</td>
+            <td>USD 103,420</td>
+            <td><span class="tag yellow">1 接近最低庫存</span></td>
+            <td>2</td>
+          </tr>
+
+          <!-- 景順 -->
+          <tr class="row-group" data-group="JINGSHUN" data-vessel="JINGSHUN" data-expanded="0">
+            <td class="arrow">▶</td>
+            <td><span class="dot d5"></span><b>景順 - 全倉合計</b></td>
+            <td>USD 118,400</td>
+            <td class="g-st"></td>
+            <td>3</td>
+          </tr>
+          <tr class="row-detail" data-group="JINGSHUN" data-vessel="JINGSHUN" data-warehouse="DECK">
+            <td></td>
+            <td style="padding-left:26px">└ 甲板 Deck</td>
+            <td>USD 38,600</td>
+            <td><span class="tag green">正常</span></td>
+            <td>1</td>
+          </tr>
+          <tr class="row-detail" data-group="JINGSHUN" data-vessel="JINGSHUN" data-warehouse="ENGINE">
+            <td></td>
+            <td style="padding-left:26px">└ 機艙 Engine</td>
+            <td>USD 79,800</td>
+            <td><span class="tag yellow">1 接近最低庫存</span></td>
+            <td>2</td>
+          </tr>
+
+          <!-- 岸倉 -->
+          <tr class="row-group" data-group="SHORE" data-vessel="SHORE" data-expanded="0">
+            <td class="arrow"></td>
+            <td><span class="dot d6"></span>岸端 / 台北港倉庫（Shore）</td>
+            <td>USD 55,000</td>
+            <td><span class="tag">供五艘船共用備品</span></td>
+            <td>5</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="fg">
+        <span>船舶 Vessel</span>
+        <select id="vesselFilter">
+          <option value="ALL">全部船舶（Fleet）</option>
+          <option value="YUANSHUN">源順</option>
+          <option value="WEISHUN">匯順</option>
+          <option value="JINBAO">金保順</option>
+          <option value="FENGSHUN">豐順</option>
+          <option value="JINGSHUN">景順</option>
+          <option value="SHORE">岸端倉庫（Shore）</option>
+        </select>
       </div>
 
-      <div class="grid g-3">
-        <div class="card">
-          <div class="card-h"><div class="card-title-s">總船隊金額</div><div class="card-meta">依日期區間統計。</div></div>
-          <div class="kpi"><span id="fleetTotalAmount">0</span> <span class="unit">USD</span></div>
-          <div class="pill ok" style="margin-top:6px">▲ <span id="fleetTotalChange">+0.0%</span> vs 上期（示意）</div>
+      <div class="fg">
+        <span>日期類型 Date Type</span>
+        <div class="pill-switch" id="dateType">
+          <button class="active" data-type="year">年</button>
+          <button data-type="quarter">季</button>
+          <button data-type="month">月</button>
+          <button data-type="week">週</button>
+          <button data-type="day">日</button>
+        </div>
+      </div>
+
+      <div class="fg">
+        <span>日期區間 Date Range</span>
+
+        <!-- Year -->
+        <div class="dr dr-g" data-type="year">
+          <select id="yearFrom">
+            <option value="0" selected>2022</option>
+            <option value="1">2023</option>
+            <option value="2">2024</option>
+          </select>
+          <span>至</span>
+          <select id="yearTo">
+            <option value="0">2022</option>
+            <option value="1">2023</option>
+            <option value="2" selected>2024</option>
+          </select>
         </div>
 
-        <div class="card">
-          <div class="card-h"><div class="card-title-s">缺料與警戒物料</div><div class="card-meta">可另開視窗檢視細項。</div></div>
-          <div class="kpi"><span id="criticalTotalCount">0</span> <span class="unit">筆</span></div>
-          <div style="margin-top:6px">
-            <button id="btnOpenCritical" class="btn">缺料</button>
-            <button id="btnOpenWarning" class="btn" style="margin-left:6px">警戒</button>
+        <!-- Quarter -->
+        <div class="dr dr-g" data-type="quarter" style="display:none">
+          <select id="yearFrom-">
+            <option value="2" selected>2024</option>
+          </select>
+          <select id="qFrom">
+            <option value="0" selected>第1季</option>
+            <option value="1">第2季</option>
+            <option value="2">第3季</option>
+            <option value="3">第4季</option>
+          </select>
+          <span>至</span>
+          <select id="yearTo-">
+            <option value="2" selected>2024</option>
+          </select>
+          <select id="qTo">
+            <option value="0">第1季</option>
+            <option value="1">第2季</option>
+            <option value="2">第3季</option>
+            <option value="3" selected>第4季</option>
+          </select>
+        </div>
+
+        <!-- Month -->
+        <div class="dr dr-g" data-type="month" style="display:none">
+          <select id="yearFrom--">
+            <option value="2" selected>2024</option>
+          </select>
+          <select id="mFrom">
+            <option value="0" selected>01 月</option>
+            <option value="1">02 月</option>
+            <option value="2">03 月</option>
+            <option value="3">04 月</option>
+            <option value="4">05 月</option>
+            <option value="5">06 月</option>
+            <option value="6">07 月</option>
+            <option value="7">08 月</option>
+            <option value="8">09 月</option>
+            <option value="9">10 月</option>
+            <option value="10">11 月</option>
+            <option value="11">12 月</option>
+          </select>
+          <span>至</span>
+          <select id="yearTo--">
+            <option value="2" selected>2024</option>
+          </select>
+          <select id="mTo">
+            <option value="0">01 月</option>
+            <option value="1">02 月</option>
+            <option value="2">03 月</option>
+            <option value="3">04 月</option>
+            <option value="4">05 月</option>
+            <option value="5">06 月</option>
+            <option value="6">07 月</option>
+            <option value="7">08 月</option>
+            <option value="8">09 月</option>
+            <option value="9">10 月</option>
+            <option value="10">11 月</option>
+            <option value="11" selected>12 月</option>
+          </select>
+        </div>
+
+        <!-- Week -->
+        <div class="dr dr-g" data-type="week" style="display:none">
+          <select id="yearFrom---">
+            <option value="2" selected>2024</option>
+          </select>
+          <select id="wFrom">
+            <option value="0" selected>第 41 週</option>
+            <option value="1">第 42 週</option>
+            <option value="2">第 43 週</option>
+            <option value="3">第 44 週</option>
+            <option value="4">第 45 週</option>
+            <option value="5">第 46 週</option>
+            <option value="6">第 47 週</option>
+            <option value="7">第 48 週</option>
+            <option value="8">第 49 週</option>
+            <option value="9">第 50 週</option>
+            <option value="10">第 51 週</option>
+            <option value="11">第 52 週</option>
+          </select>
+          <span>至</span>
+          <select id="yearTo----">
+            <option value="2" selected>2024</option>
+          </select>
+          <select id="wTo">
+            <option value="0">第 41 週</option>
+            <option value="1">第 42 週</option>
+            <option value="2">第 43 週</option>
+            <option value="3">第 44 週</option>
+            <option value="4">第 45 週</option>
+            <option value="5">第 46 週</option>
+            <option value="6">第 47 週</option>
+            <option value="7">第 48 週</option>
+            <option value="8">第 49 週</option>
+            <option value="9">第 50 週</option>
+            <option value="10">第 51 週</option>
+            <option value="11" selected>第 52 週</option>
+          </select>
+        </div>
+
+        <!-- Day -->
+        <div class="dr dr-g" data-type="day" style="display:none">
+          <select id="yearFrom-----">
+            <option value="2" selected>2024</option>
+          </select>
+          <select id="dFrom">
+            <option value="0" selected>11/01</option>
+            <option value="1">11/02</option>
+            <option value="2">11/03</option>
+            <option value="3">11/04</option>
+            <option value="4">11/05</option>
+            <option value="5">11/06</option>
+            <option value="6">11/07</option>
+            <option value="7">11/08</option>
+            <option value="8">11/09</option>
+            <option value="9">11/10</option>
+            <option value="10">11/11</option>
+            <option value="11">11/12</option>
+          </select>
+          <span>至</span>
+          <select id="yearTo-----">
+            <option value="2" selected>2024</option>
+          </select>
+          <select id="dTo">
+            <option value="0">11/01</option>
+            <option value="1">11/02</option>
+            <option value="2">11/03</option>
+            <option value="3">11/04</option>
+            <option value="4">11/05</option>
+            <option value="5">11/06</option>
+            <option value="6">11/07</option>
+            <option value="7">11/08</option>
+            <option value="8">11/09</option>
+            <option value="9">11/10</option>
+            <option value="10">11/11</option>
+            <option value="11" selected>11/12</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Views -->
+    <div class="card">
+      <div id="fleetView">
+        <div class="card-h">
+          <div class="card-title">船隊物料使用總覽 <span class="chip">Fleet Level</span></div>
+          <div class="card-meta">遵循版面風格與配色；文字全部白色系。</div>
+        </div>
+
+        <div class="grid g-3">
+          <div class="card">
+            <div class="card-h">
+              <div class="card-title-s">總船隊金額</div>
+              <div class="card-meta">依日期區間統計。</div>
+            </div>
+            <div class="kpi"><span id="fleetTotalAmount">0</span> <span class="unit">USD</span></div>
+            <div class="pill ok" style="margin-top:6px">▲ <span id="fleetTotalChange">+0.0%</span> vs 上期（示意）</div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div class="card-title-s">缺料與警戒物料</div>
+              <div class="card-meta">可另開視窗檢視細項。</div>
+            </div>
+            <div class="kpi"><span id="criticalTotalCount">0</span> <span class="unit">筆</span></div>
+            <div style="margin-top:6px">
+              <button id="btnOpenCritical" class="btn">缺料</button>
+              <button id="btnOpenWarning" class="btn" style="margin-left:6px">警戒</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div class="card-title-s">重要物料短缺</div>
+              <div class="card-meta">涉及重要配件之缺料或警戒。</div>
+            </div>
+            <div class="kpi"><span id="importantVesselCount">0</span> <span class="unit">艘</span></div>
+            <div style="margin-top:6px"><span class="tag red">重要物料缺料 / 即將耗盡</span></div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-h"><div class="card-title-s">重要物料短缺</div><div class="card-meta">涉及重要配件之缺料或警戒。</div></div>
-          <div class="kpi"><span id="importantVesselCount">0</span> <span class="unit">艘</span></div>
-          <div style="margin-top:6px"><span class="tag red">重要物料缺料 / 即將耗盡</span></div>
+        <div class="card" style="margin-top:10px">
+          <div class="card-h">
+            <div class="card-title">各船出入庫金額</div>
+            <div class="card-meta">依日期區間統計每日出庫 / 入庫。</div>
+          </div>
+          <div id="fleetInOutChart" class="hc-tall"></div>
         </div>
       </div>
 
-      <div class="card" style="margin-top:10px">
-        <div class="card-h"><div class="card-title">各船出入庫金額</div><div class="card-meta">依日期區間統計每日出庫 / 入庫。</div></div>
-        <div id="fleetInOutChart" class="hc-tall"></div>
-      </div>
-    </div>
-
-    <div id="vesselView" style="display:none">
-      <div class="card-h">
-        <div class="card-title">單船物料與資金視角<span class="chip" id="vesselScopeChip">Per Vessel</span></div>
-        <div class="card-meta" id="vesselScopeDesc">目前範圍：源順 / 全倉。</div>
-      </div>
-
-      <div class="card">
+      <div id="vesselView" style="display:none">
         <div class="card-h">
-          <div class="card-title-s">本船倉庫總額</div>
-          <div class="card-meta" id="vesselScopeLabelRight">目前範圍：全倉</div>
+          <div class="card-title">單船物料與資金視角<span class="chip" id="vesselScopeChip">Per Vessel</span></div>
+          <div class="card-meta" id="vesselScopeDesc">目前範圍：源順 / 全倉。</div>
         </div>
-        <div class="kpi" id="vesselTotalAmount">USD 0</div>
-        <div class="card-meta" id="vesselSubBreakdown" style="margin-top:6px">甲板 Deck：USD 0 ｜ 機艙 Engine：USD 0</div>
-      </div>
 
-      <div class="grid g-2" style="margin-top:.75rem">
         <div class="card">
-          <div class="card-h"><div class="card-title">出入庫金額走勢</div><div class="card-meta" id="vesselInOutCaption">依目前船舶＋倉庫範圍。</div></div>
-          <div id="vesselInOutChart" class="hc-tall"></div>
+          <div class="card-h">
+            <div class="card-title-s">本船倉庫總額</div>
+            <div class="card-meta" id="vesselScopeLabelRight">目前範圍：全倉</div>
+          </div>
+          <div class="kpi" id="vesselTotalAmount">USD 0</div>
+          <div class="card-meta" id="vesselSubBreakdown" style="margin-top:6px">甲板 Deck：USD 0 ｜ 機艙 Engine：USD 0</div>
         </div>
-        <div class="card">
-          <div class="card-h"><div class="card-title" id="vesselPieTitle">本船資金結構</div><div class="card-meta" id="vesselPieMeta">全倉：甲板 / 機艙；單倉：物料 / 配件 / 維修。</div></div>
-          <div id="vesselCapitalChart" class="hc"></div>
+
+        <div class="grid g-2" style="margin-top:.75rem">
+          <div class="card">
+            <div class="card-h">
+              <div class="card-title">出入庫金額走勢</div>
+              <div class="card-meta" id="vesselInOutCaption">依目前船舶＋倉庫範圍。</div>
+            </div>
+            <div id="vesselInOutChart" class="hc-tall"></div>
+          </div>
+          <div class="card">
+            <div class="card-h">
+              <div class="card-title" id="vesselPieTitle">本船資金結構</div>
+              <div class="card-meta" id="vesselPieMeta">全倉：甲板 / 機艙；單倉：物料 / 配件 / 維修。</div>
+            </div>
+            <div id="vesselCapitalChart" class="hc"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:.75rem">
+          <div class="card-h">
+            <div class="card-title">庫存總表</div>
+            <div class="card-meta">倉庫 × 分類（含維修）。</div>
+          </div>
+          <table id="inventorySummaryTable" class="display" style="width:100%">
+            <thead>
+              <tr>
+                <th>倉庫 / 區域</th>
+                <th>分類</th>
+                <th>品項數</th>
+                <th>庫存件數</th>
+                <th>庫存金額</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin-top:.75rem">
+          <div class="card-h">
+            <div class="card-title">已請購未入庫</div>
+            <div class="card-meta">僅顯示目前「船舶＋倉庫」。</div>
+          </div>
+          <table id="openPrTable" class="display" style="width:100%">
+            <thead>
+              <tr>
+                <th>請購單號</th>
+                <th>物料</th>
+                <th>船舶</th>
+                <th>倉庫</th>
+                <th>金額</th>
+                <th>請購狀態</th>
+                <th>請購日期</th>
+                <th>預計到貨</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
+    </div>
 
-      <div class="card" style="margin-top:.75rem">
-        <div class="card-h"><div class="card-title">庫存總表</div><div class="card-meta">倉庫 × 分類（含維修）。</div></div>
-        <table id="inventorySummaryTable" class="display" style="width:100%">
-          <thead>
-            <tr><th>倉庫 / 區域</th><th>分類</th><th>品項數</th><th>庫存件數</th><th>庫存金額</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+  </div>
 
-      <div class="card" style="margin-top:.75rem">
-        <div class="card-h"><div class="card-title">已請購未入庫</div><div class="card-meta">僅顯示目前「船舶＋倉庫」。</div></div>
-        <table id="openPrTable" class="display" style="width:100%">
-          <thead>
-          <tr><th>請購單號</th><th>物料</th><th>船舶</th><th>倉庫</th><th>金額</th><th>請購狀態</th><th>請購日期</th><th>預計到貨</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+  <!-- Critical modal -->
+  <div class="backdrop" id="criticalModal">
+    <div class="modal">
+      <div class="modal-h">
+        <div>
+          <div class="m-title">缺料與警戒物料 · Critical & Warning</div>
+          <div class="m-sub">可切換「缺料 / 警戒」，顯示已請購／未請購、重要配件註記與請購日期。</div>
+        </div>
+        <button class="close" id="criticalClose">✕</button>
       </div>
+      <div style="margin:6px 0 8px">
+        <button id="criticalTabShortage" class="btn active">缺料</button>
+        <button id="criticalTabWarning" class="btn" style="margin-left:6px">警戒</button>
+      </div>
+      <table id="criticalTable" class="display" style="width:100%">
+        <thead>
+          <tr>
+            <th>狀態</th>
+            <th>船舶</th>
+            <th>倉庫</th>
+            <th>物料</th>
+            <th>重要配件</th>
+            <th>請購狀態</th>
+            <th>請購日期</th>
+            <th>備註</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </div>
 
-</div>
+  <script>
+    /* ===== 時間維度 ===== */
+    const timeCategories = {
+      year: ['2022', '2023', '2024'],
+      quarter: ['2024Q1', '2024Q2', '2024Q3', '2024Q4'],
+      month: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
+      week: ['41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52'],
+      day: ['11/01', '11/02', '11/03', '11/04', '11/05', '11/06', '11/07', '11/08', '11/09', '11/10', '11/11', '11/12']
+    };
 
-<!-- Critical modal -->
-<div class="backdrop" id="criticalModal">
-  <div class="modal">
-    <div class="modal-h">
-      <div>
-        <div class="m-title">缺料與警戒物料 · Critical & Warning</div>
-        <div class="m-sub">可切換「缺料 / 警戒」，顯示已請購／未請購、重要配件註記與請購日期。</div>
-      </div>
-      <button class="close" id="criticalClose">✕</button>
-    </div>
-    <div style="margin:6px 0 8px">
-      <button id="criticalTabShortage" class="btn active">缺料</button>
-      <button id="criticalTabWarning" class="btn" style="margin-left:6px">警戒</button>
-    </div>
-    <table id="criticalTable" class="display" style="width:100%">
-      <thead>
-        <tr><th>狀態</th><th>船舶</th><th>倉庫</th><th>物料</th><th>重要配件</th><th>請購狀態</th><th>請購日期</th><th>備註</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
+    const fleetInOutBase = {
+      out: [1500, 2200, 3100, 3600, 3900, 4300, 1800, 3200, 3600, 4050, 4400, 4800],
+      in: [800, 1200, 1900, 2100, 2300, 2600, 900, 1700, 1900, 2100, 2250, 2500]
+    };
+    const fleetYear = { out: [12000, 14500, 17500], in: [7000, 8300, 9600] };
+    const fleetQuarter = { out: [6000, 7200, 8100, 9200], in: [3500, 3900, 4200, 4600] };
 
-<script>
-/* ===== 時間維度 ===== */
-const timeCategories={
-  year:['2022','2023','2024'],
-  quarter:['2024Q1','2024Q2','2024Q3','2024Q4'],
-  month:['01','02','03','04','05','06','07','08','09','10','11','12'],
-  week:['41','42','43','44','45','46','47','48','49','50','51','52'],
-  day:['11/01','11/02','11/03','11/04','11/05','11/06','11/07','11/08','11/09','11/10','11/11','11/12']
-};
+    /* ===== 各船金額（跟 Snapshot / 庫存表同步） ===== */
+    const vesselsMeta = {
+      YUANSHUN: { name: '源順', deckAmount: 62430, engineAmount: 122890 },
+      WEISHUN: { name: '匯順', deckAmount: 55200, engineAmount: 97880 },
+      JINBAO: { name: '金保順', deckAmount: 44920, engineAmount: 81300 },
+      FENGSHUN: { name: '豐順', deckAmount: 52780, engineAmount: 103420 },
+      JINGSHUN: { name: '景順', deckAmount: 38600, engineAmount: 79800 },
+      SHORE: { name: '岸端倉庫', deckAmount: 0, engineAmount: 55000 }
+    };
 
-const fleetInOutBase={
-  out:[1500,2200,3100,3600,3900,4300,1800,3200,3600,4050,4400,4800],
-  in:[800,1200,1900,2100,2300,2600,900,1700,1900,2100,2250,2500]
-};
-const fleetYear={out:[12000,14500,17500], in:[7000,8300,9600]};
-const fleetQuarter={out:[6000,7200,8100,9200], in:[3500,3900,4200,4600]};
-
-/* ===== 各船金額（跟 Snapshot / 庫存表同步） ===== */
-const vesselsMeta={
-  YUANSHUN:{name:'源順', deckAmount:62430, engineAmount:122890},
-  WEISHUN:{name:'匯順', deckAmount:55200, engineAmount:97880},
-  JINBAO:{name:'金保順', deckAmount:44920, engineAmount:81300},
-  FENGSHUN:{name:'豐順', deckAmount:52780, engineAmount:103420},
-  JINGSHUN:{name:'景順', deckAmount:38600, engineAmount:79800},
-  SHORE:{name:'岸端倉庫', deckAmount:0, engineAmount:55000}
-};
-
-const vesselInOutBase={
-  YUANSHUN:{
-    DECK:{out:[300,400,500,600,700,800,200,400,500,550,600,650], in:[200,250,300,350,400,450,150,230,260,280,320,340]},
-    ENGINE:{out:[600,800,1000,1100,1200,1500,700,1200,1300,1400,1600,1800], in:[400,500,650,700,750,900,450,700,800,900,950,1100]}
-  },
-  WEISHUN:{
-    DECK:{out:[200,260,280,300,320,350,160,200,240,260,280,300], in:[150,180,200,220,230,250,120,160,170,190,200,210]},
-    ENGINE:{out:[400,450,500,550,600,650,300,420,440,460,500,540], in:[220,240,260,280,300,320,160,210,220,230,240,260]}
-  },
-  JINBAO:{
-    DECK:{out:[240,260,280,300,320,340,200,220,240,260,280,300], in:[160,180,190,210,220,230,140,150,160,170,180,190]},
-    ENGINE:{out:[500,540,580,620,660,700,320,380,420,460,500,540], in:[260,280,300,320,340,360,180,220,240,260,280,300]}
-  },
-  FENGSHUN:{
-    DECK:{out:[260,280,300,320,340,360,180,220,260,280,300,320], in:[170,180,200,210,230,240,140,150,170,180,190,210]},
-    ENGINE:{out:[520,560,600,640,680,720,340,420,440,480,520,560], in:[270,290,310,330,350,370,190,230,250,270,290,310]}
-  },
-  JINGSHUN:{
-    DECK:{out:[220,240,260,280,300,320,160,200,220,240,260,280], in:[150,160,180,190,210,220,130,140,150,170,180,190]},
-    ENGINE:{out:[480,520,560,600,640,680,320,380,420,440,480,520], in:[250,270,290,310,330,350,180,220,240,260,280,300]}
-  }
-};
-
-/* ===== 庫存總表（各倉 / 分類金額加總 = Snapshot 子列金額） ===== */
-const inventoryRows=[
-  // 源順
-  {vessel:'YUANSHUN',warehouse:'DECK',warehouseLabel:'源順 - 甲板倉庫',category:'物料',skus:80,qty:1500,amount:22000},
-  {vessel:'YUANSHUN',warehouse:'DECK',warehouseLabel:'源順 - 甲板倉庫',category:'配件',skus:60,qty:900,amount:18000},
-  {vessel:'YUANSHUN',warehouse:'DECK',warehouseLabel:'源順 - 甲板倉庫',category:'維修',skus:20,qty:400,amount:22430},
-  {vessel:'YUANSHUN',warehouse:'ENGINE',warehouseLabel:'源順 - 機艙倉庫',category:'物料',skus:100,qty:1800,amount:42000},
-  {vessel:'YUANSHUN',warehouse:'ENGINE',warehouseLabel:'源順 - 機艙倉庫',category:'配件',skus:60,qty:800,amount:28000},
-  {vessel:'YUANSHUN',warehouse:'ENGINE',warehouseLabel:'源順 - 機艙倉庫',category:'維修',skus:80,qty:1380,amount:52890},
-
-  // 匯順
-  {vessel:'WEISHUN',warehouse:'DECK',warehouseLabel:'匯順 - 甲板倉庫',category:'物料',skus:90,qty:1700,amount:25000},
-  {vessel:'WEISHUN',warehouse:'DECK',warehouseLabel:'匯順 - 甲板倉庫',category:'維修',skus:35,qty:600,amount:30200},
-  {vessel:'WEISHUN',warehouse:'ENGINE',warehouseLabel:'匯順 - 機艙倉庫',category:'物料',skus:150,qty:2400,amount:52000},
-  {vessel:'WEISHUN',warehouse:'ENGINE',warehouseLabel:'匯順 - 機艙倉庫',category:'配件',skus:70,qty:900,amount:45880},
-
-  // 金保順
-  {vessel:'JINBAO',warehouse:'DECK',warehouseLabel:'金保順 - 甲板倉庫',category:'物料',skus:100,qty:1800,amount:27000},
-  {vessel:'JINBAO',warehouse:'DECK',warehouseLabel:'金保順 - 甲板倉庫',category:'配件',skus:40,qty:600,amount:17920},
-  {vessel:'JINBAO',warehouse:'ENGINE',warehouseLabel:'金保順 - 機艙倉庫',category:'物料',skus:180,qty:2800,amount:54000},
-  {vessel:'JINBAO',warehouse:'ENGINE',warehouseLabel:'金保順 - 機艙倉庫',category:'維修',skus:60,qty:900,amount:27300},
-
-  // 豐順（新加，金額合計對應 Snapshot）
-  {vessel:'FENGSHUN',warehouse:'DECK',warehouseLabel:'豐順 - 甲板倉庫',category:'物料',skus:95,qty:1600,amount:22000},
-  {vessel:'FENGSHUN',warehouse:'DECK',warehouseLabel:'豐順 - 甲板倉庫',category:'配件',skus:50,qty:700,amount:18000},
-  {vessel:'FENGSHUN',warehouse:'DECK',warehouseLabel:'豐順 - 甲板倉庫',category:'維修',skus:30,qty:500,amount:12780},
-  {vessel:'FENGSHUN',warehouse:'ENGINE',warehouseLabel:'豐順 - 機艙倉庫',category:'物料',skus:160,qty:2600,amount:45000},
-  {vessel:'FENGSHUN',warehouse:'ENGINE',warehouseLabel:'豐順 - 機艙倉庫',category:'配件',skus:80,qty:900,amount:30000},
-  {vessel:'FENGSHUN',warehouse:'ENGINE',warehouseLabel:'豐順 - 機艙倉庫',category:'維修',skus:70,qty:1100,amount:28420},
-
-  // 景順（新加）
-  {vessel:'JINGSHUN',warehouse:'DECK',warehouseLabel:'景順 - 甲板倉庫',category:'物料',skus:80,qty:1400,amount:16000},
-  {vessel:'JINGSHUN',warehouse:'DECK',warehouseLabel:'景順 - 甲板倉庫',category:'配件',skus:45,qty:650,amount:12600},
-  {vessel:'JINGSHUN',warehouse:'DECK',warehouseLabel:'景順 - 甲板倉庫',category:'維修',skus:25,qty:450,amount:10000},
-  {vessel:'JINGSHUN',warehouse:'ENGINE',warehouseLabel:'景順 - 機艙倉庫',category:'物料',skus:150,qty:2500,amount:35000},
-  {vessel:'JINGSHUN',warehouse:'ENGINE',warehouseLabel:'景順 - 機艙倉庫',category:'配件',skus:70,qty:900,amount:24800},
-  {vessel:'JINGSHUN',warehouse:'ENGINE',warehouseLabel:'景順 - 機艙倉庫',category:'維修',skus:60,qty:1000,amount:20000},
-
-  // 岸端
-  {vessel:'SHORE',warehouse:'SHORE',warehouseLabel:'台北港倉庫（Shore）',category:'物料',skus:85,qty:1200,amount:55000}
-];
-
-/* ===== PR 清單（保留簡單示意，但跟部分 critical 有勾上） ===== */
-const prRows = [
-  // ===== 源順 YUANSHUN =====
-  // 機艙 Engine：3 筆
-  {
-    id: 'PR-2024-00123',
-    item: 'Main Engine Fuel Filter',
-    vesselKey: 'YUANSHUN',
-    vessel: '源順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '源順 - 機艙',
-    amount: 12500,
-    prStatus: '已請購',
-    prDate: '2024/03/05',
-    eta: '2024/03/18'
-  },
-  {
-    id: 'PR-2024-00124',
-    item: 'LO Filter Element (Set A)',
-    vesselKey: 'YUANSHUN',
-    vessel: '源順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '源順 - 機艙',
-    amount: 8300,
-    prStatus: '已請購',
-    prDate: '2024/03/06',
-    eta: '2024/03/19'
-  },
-  {
-    id: 'PR-2024-00125',
-    item: 'LO Filter Element (Set B)',
-    vesselKey: 'YUANSHUN',
-    vessel: '源順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '源順 - 機艙',
-    amount: 7900,
-    prStatus: '已請購',
-    prDate: '2024/03/07',
-    eta: '2024/03/20'
-  },
-  // 甲板 Deck：2 筆
-  {
-    id: 'PR-2024-00178',
-    item: 'Deck Paint (Anti-corrosion)',
-    vesselKey: 'YUANSHUN',
-    vessel: '源順',
-    warehouse: 'DECK',
-    warehouseLabel: '源順 - 甲板',
-    amount: 4200,
-    prStatus: '已請購',
-    prDate: '2024/03/08',
-    eta: '2024/03/26'
-  },
-  {
-    id: 'PR-2024-00179',
-    item: 'Non-skid Deck Paint',
-    vesselKey: 'YUANSHUN',
-    vessel: '源順',
-    warehouse: 'DECK',
-    warehouseLabel: '源順 - 甲板',
-    amount: 2800,
-    prStatus: '已請購',
-    prDate: '2024/03/09',
-    eta: '2024/03/27'
-  },
-
-  // ===== 匯順 WEISHUN =====
-  // 甲板 Deck：1 筆
-  {
-    id: 'PR-2024-00189',
-    item: 'Safety Gloves',
-    vesselKey: 'WEISHUN',
-    vessel: '匯順',
-    warehouse: 'DECK',
-    warehouseLabel: '匯順 - 甲板',
-    amount: 2150,
-    prStatus: '已請購',
-    prDate: '2024/03/10',
-    eta: '2024/04/02'
-  },
-  // 機艙 Engine：3 筆
-  {
-    id: 'PR-2024-00190',
-    item: 'Bilge Pump Spares',
-    vesselKey: 'WEISHUN',
-    vessel: '匯順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '匯順 - 機艙',
-    amount: 3600,
-    prStatus: '已請購',
-    prDate: '2024/03/11',
-    eta: '2024/04/03'
-  },
-  {
-    id: 'PR-2024-00191',
-    item: 'Fuel Oil Transfer Pump Kit',
-    vesselKey: 'WEISHUN',
-    vessel: '匯順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '匯順 - 機艙',
-    amount: 5400,
-    prStatus: '已請購',
-    prDate: '2024/03/12',
-    eta: '2024/04/04'
-  },
-  {
-    id: 'PR-2024-00192',
-    item: 'Cylinder Oil (Barrel)',
-    vesselKey: 'WEISHUN',
-    vessel: '匯順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '匯順 - 機艙',
-    amount: 7200,
-    prStatus: '已請購',
-    prDate: '2024/03/13',
-    eta: '2024/04/05'
-  },
-
-  // ===== 金保順 JINBAO =====
-  // 甲板 Deck：1 筆
-  {
-    id: 'PR-2024-00195',
-    item: 'Mooring Rope',
-    vesselKey: 'JINBAO',
-    vessel: '金保順',
-    warehouse: 'DECK',
-    warehouseLabel: '金保順 - 甲板',
-    amount: 5600,
-    prStatus: '已請購',
-    prDate: '2024/03/14',
-    eta: '2024/04/06'
-  },
-  // 機艙 Engine：1 筆
-  {
-    id: 'PR-2024-00201',
-    item: 'Spare Pump Seal Kit',
-    vesselKey: 'JINBAO',
-    vessel: '金保順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '金保順 - 機艙',
-    amount: 6800,
-    prStatus: '已請購',
-    prDate: '2024/03/15',
-    eta: '2024/04/05'
-  },
-
-  // ===== 豐順 FENGSHUN =====
-  // 甲板 Deck：1 筆
-  {
-    id: 'PR-2024-00216',
-    item: 'Navigational Bulbs',
-    vesselKey: 'FENGSHUN',
-    vessel: '豐順',
-    warehouse: 'DECK',
-    warehouseLabel: '豐順 - 甲板',
-    amount: 1050,
-    prStatus: '已請購',
-    prDate: '2024/03/16',
-    eta: '2024/04/09'
-  },
-  // 機艙 Engine：2 筆
-  {
-    id: 'PR-2024-00217',
-    item: 'Spare Pump Kit',
-    vesselKey: 'FENGSHUN',
-    vessel: '豐順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '豐順 - 機艙',
-    amount: 4800,
-    prStatus: '已請購',
-    prDate: '2024/03/17',
-    eta: '2024/04/10'
-  },
-  {
-    id: 'PR-2024-00218',
-    item: 'Engine Room Fan Motor',
-    vesselKey: 'FENGSHUN',
-    vessel: '豐順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '豐順 - 機艙',
-    amount: 3950,
-    prStatus: '已請購',
-    prDate: '2024/03/18',
-    eta: '2024/04/11'
-  },
-
-  // ===== 景順 JINGSHUN =====
-  // 甲板 Deck：1 筆
-  {
-    id: 'PR-2024-00220',
-    item: 'Anti-slip Tape',
-    vesselKey: 'JINGSHUN',
-    vessel: '景順',
-    warehouse: 'DECK',
-    warehouseLabel: '景順 - 甲板',
-    amount: 1350,
-    prStatus: '已請購',
-    prDate: '2024/03/19',
-    eta: '2024/04/12'
-  },
-  // 機艙 Engine：2 筆
-  {
-    id: 'PR-2024-00221',
-    item: 'Cylinder Oil (Barrel)',
-    vesselKey: 'JINGSHUN',
-    vessel: '景順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '景順 - 機艙',
-    amount: 8200,
-    prStatus: '已請購',
-    prDate: '2024/03/20',
-    eta: '2024/04/13'
-  },
-  {
-    id: 'PR-2024-00222',
-    item: 'ME Lube Oil Filter',
-    vesselKey: 'JINGSHUN',
-    vessel: '景順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '景順 - 機艙',
-    amount: 6100,
-    prStatus: '已請購',
-    prDate: '2024/03/21',
-    eta: '2024/04/14'
-  },
-
-  // ===== 岸端倉庫 SHORE =====
-  // SHORE：5 筆
-  {
-    id: 'PR-2024-00225',
-    item: 'Cylinder Oil (Barrel)',
-    vesselKey: 'SHORE',
-    vessel: '岸端倉庫',
-    warehouse: 'SHORE',
-    warehouseLabel: '台北港倉庫',
-    amount: 9600,
-    prStatus: '已請購',
-    prDate: '2024/03/15',
-    eta: '2024/04/12'
-  },
-  {
-    id: 'PR-2024-00226',
-    item: 'Hydraulic Oil (Drum)',
-    vesselKey: 'SHORE',
-    vessel: '岸端倉庫',
-    warehouse: 'SHORE',
-    warehouseLabel: '台北港倉庫',
-    amount: 8800,
-    prStatus: '已請購',
-    prDate: '2024/03/16',
-    eta: '2024/04/13'
-  },
-  {
-    id: 'PR-2024-00227',
-    item: 'Spare Mooring Rope',
-    vesselKey: 'SHORE',
-    vessel: '岸端倉庫',
-    warehouse: 'SHORE',
-    warehouseLabel: '台北港倉庫',
-    amount: 7200,
-    prStatus: '已請購',
-    prDate: '2024/03/17',
-    eta: '2024/04/14'
-  },
-  {
-    id: 'PR-2024-00228',
-    item: 'Ballast Valve Kit',
-    vesselKey: 'SHORE',
-    vessel: '岸端倉庫',
-    warehouse: 'SHORE',
-    warehouseLabel: '台北港倉庫',
-    amount: 5400,
-    prStatus: '已請購',
-    prDate: '2024/03/18',
-    eta: '2024/04/15'
-  },
-  {
-    id: 'PR-2024-00229',
-    item: 'Safety Helmet',
-    vesselKey: 'SHORE',
-    vessel: '岸端倉庫',
-    warehouse: 'SHORE',
-    warehouseLabel: '台北港倉庫',
-    amount: 2600,
-    prStatus: '已請購',
-    prDate: '2024/03/19',
-    eta: '2024/04/16'
-  }
-];
-
-
-/* ===== Critical Rows：跟 Snapshot 的紅 / 黃標籤一致 ===== */
-// 缺料 / 警戒物料清單（與總覽表一致：2 缺料、4 警戒，2 艘船為重要物料）
-const criticalRows = [
-  // --- 缺料（2 筆）---
-  {
-    status: '缺料',
-    vesselKey: 'YUANSHUN',
-    vessel: '源順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '機艙',
-    item: 'LO Filter Element',
-    important: true,                  // 重要配件
-    prStatus: '未請購',
-    prDate: '',
-    remark: '主機潤滑油過濾器，庫存為 0，建議立即請購。',
-    index: 0                          // 2022 區間
-  },
-  {
-    status: '缺料',
-    vesselKey: 'JINBAO',
-    vessel: '金保順',
-    warehouse: 'DECK',
-    warehouseLabel: '甲板',
-    item: 'Mooring Rope',
-    important: false,
-    prStatus: '已請購',
-    prDate: '2023/11/02',
-    remark: '繫纜索具，已請購待到貨。',
-    index: 1                          // 2023 區間
-  },
-
-  // --- 警戒（4 筆）---
-  {
-    status: '警戒',
-    vesselKey: 'YUANSHUN',
-    vessel: '源順',
-    warehouse: 'DECK',
-    warehouseLabel: '甲板',
-    item: 'Deck Paint',
-    important: false,
-    prStatus: '已請購',
-    prDate: '2024/01/08',
-    remark: '防腐漆，庫存接近最低。',
-    index: 2                          // 2024 區間
-  },
-  {
-    status: '警戒',
-    vesselKey: 'WEISHUN',
-    vessel: '匯順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '機艙',
-    item: 'Fuel Pump Gasket',
-    important: false,
-    prStatus: '已請購',
-    prDate: '2023/07/15',
-    remark: '備品餘量略低，下一次保養前需補足。',
-    index: 1
-  },
-  {
-    status: '警戒',
-    vesselKey: 'FENGSHUN',
-    vessel: '豐順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '機艙',
-    item: 'Spare Pump Kit',
-    important: true,                  // 第二艘重要配件
-    prStatus: '未請購',
-    prDate: '',
-    remark: '關鍵備品，建議優先請購。',
-    index: 2
-  },
-  {
-    status: '警戒',
-    vesselKey: 'JINGSHUN',
-    vessel: '景順',
-    warehouse: 'ENGINE',
-    warehouseLabel: '機艙',
-    item: 'Cylinder Oil (Drums)',
-    important: false,
-    prStatus: '已請購',
-    prDate: '2024/02/20',
-    remark: '剩餘庫存低於一個月用量。',
-    index: 2
-  }
-];
-
-
-/* ===== Helpers ===== */
-let currentDateType='year';
-let currentWarehouseScope='ALL';
-function getRange(){
-  let f=0,t=0;
-  if(currentDateType==='year'){f=+$('#yearFrom').val();t=+$('#yearTo').val()}
-  if(currentDateType==='quarter'){f=+$('#qFrom').val();t=+$('#qTo').val()}
-  if(currentDateType==='month'){f=+$('#mFrom').val();t=+$('#mTo').val()}
-  if(currentDateType==='week'){f=+$('#wFrom').val();t=+$('#wTo').val()}
-  if(currentDateType==='day'){f=+$('#dFrom').val();t=+$('#dTo').val()}
-  if(f>t){let tmp=f;f=t;t=tmp}
-  return {from:f,to:t}
-}
-function cut(arr,f,t){return arr.slice(f,t+1)}
-
-/* ===== Highcharts defaults ===== */
-Highcharts.setOptions({
-  chart:{backgroundColor:'#292929',style:{fontFamily:'system-ui,-apple-system,"Segoe UI",Roboto,Arial'}},
-  title:{text:''},credits:{enabled:false},
-  legend:{itemStyle:{color:'#e8edf4',fontSize:'12px'}},
-  xAxis:{lineColor:'#394150',tickColor:'#394150',labels:{style:{color:'#ffffff',fontSize:'12px'}}},
-  yAxis:{gridLineColor:'#292929',labels:{style:{color:'#ffffff',fontSize:'14px'}},title:{text:null}},
-  tooltip:{backgroundColor:'#292929',borderColor:'#394150',style:{color:'#ffffff',fontSize:'12px'}},
-  colors:['#10b981','#22d3ee','#f59e0b','#fbbf24','#60a5fa','#c084fc']
-});
-
-let fleetChart, vesselInOutChart, vesselPieChart, invDT, prDT, critDT;
-
-/* ===== Init charts ===== */
-function initCharts(){
-  fleetChart=Highcharts.chart('fleetInOutChart',{
-    chart:{type:'column'},
-    plotOptions:{column:{borderWidth:0,stacking:'normal'}},
-    xAxis:{categories:[]},
-    series:[{name:'出庫 Out',data:[]},{name:'入庫 In',data:[]}]
-  });
-  vesselInOutChart=Highcharts.chart('vesselInOutChart',{
-    chart:{type:'column'},
-    xAxis:{categories:[]},
-    plotOptions:{column:{borderWidth:0}},
-    series:[
-      {name:'Deck - 出庫 Out',data:[]},
-      {name:'Deck - 入庫 In',data:[]},
-      {name:'Engine - 出庫 Out',data:[]},
-      {name:'Engine - 入庫 In',data:[]}
-    ]
-  });
-  vesselPieChart=Highcharts.chart('vesselCapitalChart',{
-    chart:{type:'pie'},
-    plotOptions:{pie:{
-      innerSize:'55%',
-      dataLabels:{enabled:true,style:{color:'#e9edf2',textOutline:'none',fontSize:'11px'},
-        formatter(){return this.point.name+'<br/>USD '+Highcharts.numberFormat(this.y,0)}
+    const vesselInOutBase = {
+      YUANSHUN: {
+        DECK: { out: [300, 400, 500, 600, 700, 800, 200, 400, 500, 550, 600, 650], in: [200, 250, 300, 350, 400, 450, 150, 230, 260, 280, 320, 340] },
+        ENGINE: { out: [600, 800, 1000, 1100, 1200, 1500, 700, 1200, 1300, 1400, 1600, 1800], in: [400, 500, 650, 700, 750, 900, 450, 700, 800, 900, 950, 1100] }
+      },
+      WEISHUN: {
+        DECK: { out: [200, 260, 280, 300, 320, 350, 160, 200, 240, 260, 280, 300], in: [150, 180, 200, 220, 230, 250, 120, 160, 170, 190, 200, 210] },
+        ENGINE: { out: [400, 450, 500, 550, 600, 650, 300, 420, 440, 460, 500, 540], in: [220, 240, 260, 280, 300, 320, 160, 210, 220, 230, 240, 260] }
+      },
+      JINBAO: {
+        DECK: { out: [240, 260, 280, 300, 320, 340, 200, 220, 240, 260, 280, 300], in: [160, 180, 190, 210, 220, 230, 140, 150, 160, 170, 180, 190] },
+        ENGINE: { out: [500, 540, 580, 620, 660, 700, 320, 380, 420, 460, 500, 540], in: [260, 280, 300, 320, 340, 360, 180, 220, 240, 260, 280, 300] }
+      },
+      FENGSHUN: {
+        DECK: { out: [260, 280, 300, 320, 340, 360, 180, 220, 260, 280, 300, 320], in: [170, 180, 200, 210, 230, 240, 140, 150, 170, 180, 190, 210] },
+        ENGINE: { out: [520, 560, 600, 640, 680, 720, 340, 420, 440, 480, 520, 560], in: [270, 290, 310, 330, 350, 370, 190, 230, 250, 270, 290, 310] }
+      },
+      JINGSHUN: {
+        DECK: { out: [220, 240, 260, 280, 300, 320, 160, 200, 220, 240, 260, 280], in: [150, 160, 180, 190, 210, 220, 130, 140, 150, 170, 180, 190] },
+        ENGINE: { out: [480, 520, 560, 600, 640, 680, 320, 380, 420, 440, 480, 520], in: [250, 270, 290, 310, 330, 350, 180, 220, 240, 260, 280, 300] }
       }
-    }},
-    series:[{name:'Value',data:[]}]
-  });
-}
+    };
 
-/* ===== Init DataTables ===== */
-function initTables(){
-  invDT=$('#inventorySummaryTable').DataTable({
-    paging:false,searching:false,info:false,ordering:true,
-    language:{url:'https://cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json'}
-  });
-  prDT=$('#openPrTable').DataTable({
-    paging:true,pageLength:5,lengthChange:false,searching:true,ordering:true,
-    language:{url:'https://cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json'}
-  });
-  critDT=$('#criticalTable').DataTable({
-    paging:true,pageLength:10,lengthChange:false,searching:true,ordering:true,
-    language:{url:'https://cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json'}
-  });
-}
+    /* ===== 庫存總表（各倉 / 分類金額加總 = Snapshot 子列金額） ===== */
+    const inventoryRows = [
+      // 源順
+      { vessel: 'YUANSHUN', warehouse: 'DECK', warehouseLabel: '源順 - 甲板倉庫', category: '物料', skus: 80, qty: 1500, amount: 22000 },
+      { vessel: 'YUANSHUN', warehouse: 'DECK', warehouseLabel: '源順 - 甲板倉庫', category: '配件', skus: 60, qty: 900, amount: 18000 },
+      { vessel: 'YUANSHUN', warehouse: 'DECK', warehouseLabel: '源順 - 甲板倉庫', category: '維修', skus: 20, qty: 400, amount: 22430 },
+      { vessel: 'YUANSHUN', warehouse: 'ENGINE', warehouseLabel: '源順 - 機艙倉庫', category: '物料', skus: 100, qty: 1800, amount: 42000 },
+      { vessel: 'YUANSHUN', warehouse: 'ENGINE', warehouseLabel: '源順 - 機艙倉庫', category: '配件', skus: 60, qty: 800, amount: 28000 },
+      { vessel: 'YUANSHUN', warehouse: 'ENGINE', warehouseLabel: '源順 - 機艙倉庫', category: '維修', skus: 80, qty: 1380, amount: 52890 },
 
-/* ===== Fleet update ===== */
-function updateFleet(){
-  const {from,to}=getRange();
-  let cats=[],out=[],inn=[];
-  if(currentDateType==='year'){
-    cats=timeCategories.year.slice(from,to+1);
-    out=cut(fleetYear.out,from,to);
-    inn=cut(fleetYear.in,from,to);
-  }else if(currentDateType==='quarter'){
-    cats=timeCategories.quarter.slice(from,to+1);
-    out=cut(fleetQuarter.out,from,to);
-    inn=cut(fleetQuarter.in,from,to);
-  }else{
-    const all=timeCategories[currentDateType];
-    cats=all.slice(from,to+1);
-    out=cut(fleetInOutBase.out,from,to);
-    inn=cut(fleetInOutBase.in,from,to);
-  }
-  const total=out.reduce((a,b)=>a+b,0)+inn.reduce((a,b)=>a+b,0);
-  $('#fleetTotalAmount').text(Highcharts.numberFormat(total,0));
-  $('#fleetTotalChange').text(((total/(total*0.88)-1)*100).toFixed(1)+'%');
+      // 匯順
+      { vessel: 'WEISHUN', warehouse: 'DECK', warehouseLabel: '匯順 - 甲板倉庫', category: '物料', skus: 90, qty: 1700, amount: 25000 },
+      { vessel: 'WEISHUN', warehouse: 'DECK', warehouseLabel: '匯順 - 甲板倉庫', category: '維修', skus: 35, qty: 600, amount: 30200 },
+      { vessel: 'WEISHUN', warehouse: 'ENGINE', warehouseLabel: '匯順 - 機艙倉庫', category: '物料', skus: 150, qty: 2400, amount: 52000 },
+      { vessel: 'WEISHUN', warehouse: 'ENGINE', warehouseLabel: '匯順 - 機艙倉庫', category: '配件', skus: 70, qty: 900, amount: 45880 },
 
-  fleetChart.xAxis[0].setCategories(cats,false);
-  fleetChart.series[0].setData(out,false);
-  fleetChart.series[1].setData(inn,false);
-  fleetChart.redraw();
+      // 金保順
+      { vessel: 'JINBAO', warehouse: 'DECK', warehouseLabel: '金保順 - 甲板倉庫', category: '物料', skus: 100, qty: 1800, amount: 27000 },
+      { vessel: 'JINBAO', warehouse: 'DECK', warehouseLabel: '金保順 - 甲板倉庫', category: '配件', skus: 40, qty: 600, amount: 17920 },
+      { vessel: 'JINBAO', warehouse: 'ENGINE', warehouseLabel: '金保順 - 機艙倉庫', category: '物料', skus: 180, qty: 2800, amount: 54000 },
+      { vessel: 'JINBAO', warehouse: 'ENGINE', warehouseLabel: '金保順 - 機艙倉庫', category: '維修', skus: 60, qty: 900, amount: 27300 },
 
-  const filtered=criticalRows.filter(r=>r.index>=from && r.index<=to);
-  $('#criticalTotalCount').text(filtered.length);
-  const importantVessels=new Set(filtered.filter(r=>r.important).map(r=>r.vesselKey));
-  $('#importantVesselCount').text(importantVessels.size);
-}
+      // 豐順（新加，金額合計對應 Snapshot）
+      { vessel: 'FENGSHUN', warehouse: 'DECK', warehouseLabel: '豐順 - 甲板倉庫', category: '物料', skus: 95, qty: 1600, amount: 22000 },
+      { vessel: 'FENGSHUN', warehouse: 'DECK', warehouseLabel: '豐順 - 甲板倉庫', category: '配件', skus: 50, qty: 700, amount: 18000 },
+      { vessel: 'FENGSHUN', warehouse: 'DECK', warehouseLabel: '豐順 - 甲板倉庫', category: '維修', skus: 30, qty: 500, amount: 12780 },
+      { vessel: 'FENGSHUN', warehouse: 'ENGINE', warehouseLabel: '豐順 - 機艙倉庫', category: '物料', skus: 160, qty: 2600, amount: 45000 },
+      { vessel: 'FENGSHUN', warehouse: 'ENGINE', warehouseLabel: '豐順 - 機艙倉庫', category: '配件', skus: 80, qty: 900, amount: 30000 },
+      { vessel: 'FENGSHUN', warehouse: 'ENGINE', warehouseLabel: '豐順 - 機艙倉庫', category: '維修', skus: 70, qty: 1100, amount: 28420 },
 
-/* ===== Vessel update ===== */
-function updateVessel(){
-  const vKey=$('#vesselFilter').val();
-  const meta=vesselsMeta[vKey];
-  if(!meta) return;
-  const isAll=(currentWarehouseScope==='ALL');
-  const isSingle=(currentWarehouseScope==='DECK'||currentWarehouseScope==='ENGINE');
+      // 景順（新加）
+      { vessel: 'JINGSHUN', warehouse: 'DECK', warehouseLabel: '景順 - 甲板倉庫', category: '物料', skus: 80, qty: 1400, amount: 16000 },
+      { vessel: 'JINGSHUN', warehouse: 'DECK', warehouseLabel: '景順 - 甲板倉庫', category: '配件', skus: 45, qty: 650, amount: 12600 },
+      { vessel: 'JINGSHUN', warehouse: 'DECK', warehouseLabel: '景順 - 甲板倉庫', category: '維修', skus: 25, qty: 450, amount: 10000 },
+      { vessel: 'JINGSHUN', warehouse: 'ENGINE', warehouseLabel: '景順 - 機艙倉庫', category: '物料', skus: 150, qty: 2500, amount: 35000 },
+      { vessel: 'JINGSHUN', warehouse: 'ENGINE', warehouseLabel: '景順 - 機艙倉庫', category: '配件', skus: 70, qty: 900, amount: 24800 },
+      { vessel: 'JINGSHUN', warehouse: 'ENGINE', warehouseLabel: '景順 - 機艙倉庫', category: '維修', skus: 60, qty: 1000, amount: 20000 },
 
-  $('#vesselScopeChip').text(vKey==='SHORE'?'Shore Only':(isAll?'Per Vessel · 全倉庫':'Per Vessel · 單倉庫'));
-  $('#vesselScopeDesc').text(
-    vKey==='SHORE'
-      ? '目前範圍：岸端倉庫（獨立）。'
-      : (isAll ? `目前範圍：${meta.name} / 甲板＋機艙。`
-               : `目前範圍：${meta.name} / ${(currentWarehouseScope==='DECK'?'甲板':'機艙')}。`)
-  );
+      // 岸端
+      { vessel: 'SHORE', warehouse: 'SHORE', warehouseLabel: '台北港倉庫（Shore）', category: '物料', skus: 85, qty: 1200, amount: 55000 }
+    ];
 
-  let deck=meta.deckAmount||0, eng=meta.engineAmount||0, scope=0;
-  if(vKey==='SHORE'){ scope=deck+eng; deck=0; }
-  else if(isAll){ scope=deck+eng; }
-  else if(currentWarehouseScope==='DECK'){ scope=deck; eng=0; }
-  else if(currentWarehouseScope==='ENGINE'){ scope=eng; deck=0; }
+    /* ===== PR 清單（保留簡單示意，但跟部分 critical 有勾上） ===== */
+    const prRows = [
+      // ===== 源順 YUANSHUN =====
+      // 機艙 Engine：3 筆
+      {
+        id: 'PR-2024-00123',
+        item: 'Main Engine Fuel Filter',
+        vesselKey: 'YUANSHUN',
+        vessel: '源順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '源順 - 機艙',
+        amount: 12500,
+        prStatus: '已請購',
+        prDate: '2024/03/05',
+        eta: '2024/03/18'
+      },
+      {
+        id: 'PR-2024-00124',
+        item: 'LO Filter Element (Set A)',
+        vesselKey: 'YUANSHUN',
+        vessel: '源順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '源順 - 機艙',
+        amount: 8300,
+        prStatus: '已請購',
+        prDate: '2024/03/06',
+        eta: '2024/03/19'
+      },
+      {
+        id: 'PR-2024-00125',
+        item: 'LO Filter Element (Set B)',
+        vesselKey: 'YUANSHUN',
+        vessel: '源順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '源順 - 機艙',
+        amount: 7900,
+        prStatus: '已請購',
+        prDate: '2024/03/07',
+        eta: '2024/03/20'
+      },
+      // 甲板 Deck：2 筆
+      {
+        id: 'PR-2024-00178',
+        item: 'Deck Paint (Anti-corrosion)',
+        vesselKey: 'YUANSHUN',
+        vessel: '源順',
+        warehouse: 'DECK',
+        warehouseLabel: '源順 - 甲板',
+        amount: 4200,
+        prStatus: '已請購',
+        prDate: '2024/03/08',
+        eta: '2024/03/26'
+      },
+      {
+        id: 'PR-2024-00179',
+        item: 'Non-skid Deck Paint',
+        vesselKey: 'YUANSHUN',
+        vessel: '源順',
+        warehouse: 'DECK',
+        warehouseLabel: '源順 - 甲板',
+        amount: 2800,
+        prStatus: '已請購',
+        prDate: '2024/03/09',
+        eta: '2024/03/27'
+      },
 
-  $('#vesselTotalAmount').text('USD '+Highcharts.numberFormat(scope,0));
-  $('#vesselSubBreakdown').text(`甲板 Deck：USD ${Highcharts.numberFormat(deck,0)} ｜ 機艙 Engine：USD ${Highcharts.numberFormat(eng,0)}`);
-  $('#vesselScopeLabelRight').text(vKey==='SHORE'?'目前範圍：Shore':(isAll?'目前範圍：全倉':'目前範圍：單倉庫'));
+      // ===== 匯順 WEISHUN =====
+      // 甲板 Deck：1 筆
+      {
+        id: 'PR-2024-00189',
+        item: 'Safety Gloves',
+        vesselKey: 'WEISHUN',
+        vessel: '匯順',
+        warehouse: 'DECK',
+        warehouseLabel: '匯順 - 甲板',
+        amount: 2150,
+        prStatus: '已請購',
+        prDate: '2024/03/10',
+        eta: '2024/04/02'
+      },
+      // 機艙 Engine：3 筆
+      {
+        id: 'PR-2024-00190',
+        item: 'Bilge Pump Spares',
+        vesselKey: 'WEISHUN',
+        vessel: '匯順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '匯順 - 機艙',
+        amount: 3600,
+        prStatus: '已請購',
+        prDate: '2024/03/11',
+        eta: '2024/04/03'
+      },
+      {
+        id: 'PR-2024-00191',
+        item: 'Fuel Oil Transfer Pump Kit',
+        vesselKey: 'WEISHUN',
+        vessel: '匯順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '匯順 - 機艙',
+        amount: 5400,
+        prStatus: '已請購',
+        prDate: '2024/03/12',
+        eta: '2024/04/04'
+      },
+      {
+        id: 'PR-2024-00192',
+        item: 'Cylinder Oil (Barrel)',
+        vesselKey: 'WEISHUN',
+        vessel: '匯順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '匯順 - 機艙',
+        amount: 7200,
+        prStatus: '已請購',
+        prDate: '2024/03/13',
+        eta: '2024/04/05'
+      },
 
-  const {from,to}=getRange();
-  const base=timeCategories[(currentDateType==='year'||currentDateType==='quarter')?'month':currentDateType];
-  const cats=base.slice(from,to+1);
-  vesselInOutChart.xAxis[0].setCategories(cats,false);
+      // ===== 金保順 JINBAO =====
+      // 甲板 Deck：1 筆
+      {
+        id: 'PR-2024-00195',
+        item: 'Mooring Rope',
+        vesselKey: 'JINBAO',
+        vessel: '金保順',
+        warehouse: 'DECK',
+        warehouseLabel: '金保順 - 甲板',
+        amount: 5600,
+        prStatus: '已請購',
+        prDate: '2024/03/14',
+        eta: '2024/04/06'
+      },
+      // 機艙 Engine：1 筆
+      {
+        id: 'PR-2024-00201',
+        item: 'Spare Pump Seal Kit',
+        vesselKey: 'JINBAO',
+        vessel: '金保順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '金保順 - 機艙',
+        amount: 6800,
+        prStatus: '已請購',
+        prDate: '2024/03/15',
+        eta: '2024/04/05'
+      },
 
-  if(vKey==='SHORE'){
-    vesselInOutChart.update({
-      series:[
-        {name:'Shore - 出庫 Out',data:cut(fleetInOutBase.out,from,to)},
-        {name:'Shore - 入庫 In',data:cut(fleetInOutBase.in,from,to)},
-        {name:'',data:[]},{name:'',data:[]}
-      ]
-    },false);
-  }else if(isSingle){
-    const wh=vesselInOutBase[vKey][currentWarehouseScope];
-    vesselInOutChart.update({
-      series:[
-        {name:`${currentWarehouseScope==='DECK'?'Deck':'Engine'} - 出庫 Out`,data:cut(wh.out,from,to)},
-        {name:`${currentWarehouseScope==='DECK'?'Deck':'Engine'} - 入庫 In`,data:cut(wh.in,from,to)},
-        {name:'',data:[]},{name:'',data:[]}
-      ]
-    },false);
-  }else{
-    const d=vesselInOutBase[vKey].DECK;
-    const e=vesselInOutBase[vKey].ENGINE;
-    vesselInOutChart.update({
-      series:[
-        {name:'Deck - 出庫 Out',data:cut(d.out,from,to)},
-        {name:'Deck - 入庫 In',data:cut(d.in,from,to)},
-        {name:'Engine - 出庫 Out',data:cut(e.out,from,to)},
-        {name:'Engine - 入庫 In',data:cut(e.in,from,to)}
-      ]
-    },false);
-  }
-  vesselInOutChart.redraw();
+      // ===== 豐順 FENGSHUN =====
+      // 甲板 Deck：1 筆
+      {
+        id: 'PR-2024-00216',
+        item: 'Navigational Bulbs',
+        vesselKey: 'FENGSHUN',
+        vessel: '豐順',
+        warehouse: 'DECK',
+        warehouseLabel: '豐順 - 甲板',
+        amount: 1050,
+        prStatus: '已請購',
+        prDate: '2024/03/16',
+        eta: '2024/04/09'
+      },
+      // 機艙 Engine：2 筆
+      {
+        id: 'PR-2024-00217',
+        item: 'Spare Pump Kit',
+        vesselKey: 'FENGSHUN',
+        vessel: '豐順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '豐順 - 機艙',
+        amount: 4800,
+        prStatus: '已請購',
+        prDate: '2024/03/17',
+        eta: '2024/04/10'
+      },
+      {
+        id: 'PR-2024-00218',
+        item: 'Engine Room Fan Motor',
+        vesselKey: 'FENGSHUN',
+        vessel: '豐順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '豐順 - 機艙',
+        amount: 3950,
+        prStatus: '已請購',
+        prDate: '2024/03/18',
+        eta: '2024/04/11'
+      },
 
-  if(isSingle && vKey!=='SHORE'){
-    $('#vesselPieTitle').text('倉庫分類金額結構');
-    $('#vesselPieMeta').text('單倉視角：物料 / 配件 / 維修。');
-    const r=inventoryRows.filter(x=>x.vessel===vKey && x.warehouse===currentWarehouseScope);
-    vesselPieChart.series[0].setData(r.map(x=>({name:x.category,y:x.amount})),true);
-  }else{
-    $('#vesselPieTitle').text('本船資金結構');
-    $('#vesselPieMeta').text('全倉：甲板 / 機艙；岸端視角為其總額。');
-    vesselPieChart.series[0].setData([
-      {name:'Deck',y:meta.deckAmount||0},
-      {name:'Engine',y:meta.engineAmount||0}
-    ],true);
-  }
+      // ===== 景順 JINGSHUN =====
+      // 甲板 Deck：1 筆
+      {
+        id: 'PR-2024-00220',
+        item: 'Anti-slip Tape',
+        vesselKey: 'JINGSHUN',
+        vessel: '景順',
+        warehouse: 'DECK',
+        warehouseLabel: '景順 - 甲板',
+        amount: 1350,
+        prStatus: '已請購',
+        prDate: '2024/03/19',
+        eta: '2024/04/12'
+      },
+      // 機艙 Engine：2 筆
+      {
+        id: 'PR-2024-00221',
+        item: 'Cylinder Oil (Barrel)',
+        vesselKey: 'JINGSHUN',
+        vessel: '景順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '景順 - 機艙',
+        amount: 8200,
+        prStatus: '已請購',
+        prDate: '2024/03/20',
+        eta: '2024/04/13'
+      },
+      {
+        id: 'PR-2024-00222',
+        item: 'ME Lube Oil Filter',
+        vesselKey: 'JINGSHUN',
+        vessel: '景順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '景順 - 機艙',
+        amount: 6100,
+        prStatus: '已請購',
+        prDate: '2024/03/21',
+        eta: '2024/04/14'
+      },
 
-  if(invDT){
-    invDT.clear();
-    let rows=inventoryRows.filter(x=>x.vessel===vKey);
-    if(isSingle) rows=rows.filter(x=>x.warehouse===currentWarehouseScope);
-    else if(vKey!=='SHORE') rows=rows.filter(x=>x.warehouse==='DECK'||x.warehouse==='ENGINE');
-    rows.forEach(r=>invDT.row.add([
-      r.warehouseLabel,r.category,r.skus,r.qty,'USD '+Highcharts.numberFormat(r.amount,0)
-    ]));
-    invDT.draw();
-  }
+      // ===== 岸端倉庫 SHORE =====
+      // SHORE：5 筆
+      {
+        id: 'PR-2024-00225',
+        item: 'Cylinder Oil (Barrel)',
+        vesselKey: 'SHORE',
+        vessel: '岸端倉庫',
+        warehouse: 'SHORE',
+        warehouseLabel: '台北港倉庫',
+        amount: 9600,
+        prStatus: '已請購',
+        prDate: '2024/03/15',
+        eta: '2024/04/12'
+      },
+      {
+        id: 'PR-2024-00226',
+        item: 'Hydraulic Oil (Drum)',
+        vesselKey: 'SHORE',
+        vessel: '岸端倉庫',
+        warehouse: 'SHORE',
+        warehouseLabel: '台北港倉庫',
+        amount: 8800,
+        prStatus: '已請購',
+        prDate: '2024/03/16',
+        eta: '2024/04/13'
+      },
+      {
+        id: 'PR-2024-00227',
+        item: 'Spare Mooring Rope',
+        vesselKey: 'SHORE',
+        vessel: '岸端倉庫',
+        warehouse: 'SHORE',
+        warehouseLabel: '台北港倉庫',
+        amount: 7200,
+        prStatus: '已請購',
+        prDate: '2024/03/17',
+        eta: '2024/04/14'
+      },
+      {
+        id: 'PR-2024-00228',
+        item: 'Ballast Valve Kit',
+        vesselKey: 'SHORE',
+        vessel: '岸端倉庫',
+        warehouse: 'SHORE',
+        warehouseLabel: '台北港倉庫',
+        amount: 5400,
+        prStatus: '已請購',
+        prDate: '2024/03/18',
+        eta: '2024/04/15'
+      },
+      {
+        id: 'PR-2024-00229',
+        item: 'Safety Helmet',
+        vesselKey: 'SHORE',
+        vessel: '岸端倉庫',
+        warehouse: 'SHORE',
+        warehouseLabel: '台北港倉庫',
+        amount: 2600,
+        prStatus: '已請購',
+        prDate: '2024/03/19',
+        eta: '2024/04/16'
+      }
+    ];
 
-  if(prDT){
-    prDT.clear();
-    let rows=prRows.filter(r=>r.vesselKey===vKey);
-    if(isSingle) rows=rows.filter(r=>r.warehouse===currentWarehouseScope);
-    else if(vKey!=='SHORE') rows=rows.filter(r=>r.warehouse==='DECK'||r.warehouse==='ENGINE');
-    rows.forEach(r=>prDT.row.add([
-      r.id,r.item,r.vessel,r.warehouseLabel,
-      'USD '+Highcharts.numberFormat(r.amount,0),
-      r.prStatus,r.prDate||'-',r.eta
-    ]));
-    prDT.draw();
-  }
-}
 
-/* ===== Snapshot logic ===== */
-function initSnapshot(){
-  ['YUANSHUN','WEISHUN','JINBAO','FENGSHUN','JINGSHUN'].forEach(g=>{
-    const row=document.querySelector('.row-group[data-group="'+g+'"]');
-    if(!row) return;
-    const cell=row.querySelector('.g-st');
-    const hasC=criticalRows.some(r=>r.vesselKey===g && r.status==='缺料');
-    const hasW=criticalRows.some(r=>r.vesselKey===g && r.status==='警戒');
-    cell.innerHTML = hasC
-      ? '<span class="tag red">重要物料缺料</span>'
-      : (hasW ? '<span class="tag yellow">有警戒物料</span>' : '<span class="tag green">正常</span>');
-  });
+    /* ===== Critical Rows：跟 Snapshot 的紅 / 黃標籤一致 ===== */
+    // 缺料 / 警戒物料清單（與總覽表一致：2 缺料、4 警戒，2 艘船為重要物料）
+    const criticalRows = [
+      // --- 缺料（2 筆）---
+      {
+        status: '缺料',
+        vesselKey: 'YUANSHUN',
+        vessel: '源順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '機艙',
+        item: 'LO Filter Element',
+        important: true,                  // 重要配件
+        prStatus: '未請購',
+        prDate: '',
+        remark: '主機潤滑油過濾器，庫存為 0，建議立即請購。',
+        index: 0                          // 2022 區間
+      },
+      {
+        status: '缺料',
+        vesselKey: 'JINBAO',
+        vessel: '金保順',
+        warehouse: 'DECK',
+        warehouseLabel: '甲板',
+        item: 'Mooring Rope',
+        important: false,
+        prStatus: '已請購',
+        prDate: '2023/11/02',
+        remark: '繫纜索具，已請購待到貨。',
+        index: 1                          // 2023 區間
+      },
 
-  document.querySelectorAll('.arrow').forEach(a=>{
-    a.addEventListener('click',e=>{
-      const row=a.parentElement;
-      const group=row.getAttribute('data-group');
-      const exp=row.getAttribute('data-expanded')==='1';
-      document.querySelectorAll('.row-detail[data-group="'+group+'"]').forEach(d=>{
-        d.style.display=exp?'none':'table-row';
+      // --- 警戒（4 筆）---
+      {
+        status: '警戒',
+        vesselKey: 'YUANSHUN',
+        vessel: '源順',
+        warehouse: 'DECK',
+        warehouseLabel: '甲板',
+        item: 'Deck Paint',
+        important: false,
+        prStatus: '已請購',
+        prDate: '2024/01/08',
+        remark: '防腐漆，庫存接近最低。',
+        index: 2                          // 2024 區間
+      },
+      {
+        status: '警戒',
+        vesselKey: 'WEISHUN',
+        vessel: '匯順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '機艙',
+        item: 'Fuel Pump Gasket',
+        important: false,
+        prStatus: '已請購',
+        prDate: '2023/07/15',
+        remark: '備品餘量略低，下一次保養前需補足。',
+        index: 1
+      },
+      {
+        status: '警戒',
+        vesselKey: 'FENGSHUN',
+        vessel: '豐順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '機艙',
+        item: 'Spare Pump Kit',
+        important: true,                  // 第二艘重要配件
+        prStatus: '未請購',
+        prDate: '',
+        remark: '關鍵備品，建議優先請購。',
+        index: 2
+      },
+      {
+        status: '警戒',
+        vesselKey: 'JINGSHUN',
+        vessel: '景順',
+        warehouse: 'ENGINE',
+        warehouseLabel: '機艙',
+        item: 'Cylinder Oil (Drums)',
+        important: false,
+        prStatus: '已請購',
+        prDate: '2024/02/20',
+        remark: '剩餘庫存低於一個月用量。',
+        index: 2
+      }
+    ];
+
+
+    /* ===== Helpers ===== */
+    let currentDateType = 'year';
+    let currentWarehouseScope = 'ALL';
+    function getRange() {
+      let f = 0, t = 0;
+      if (currentDateType === 'year') { f = +$('#yearFrom').val(); t = +$('#yearTo').val() }
+      if (currentDateType === 'quarter') { f = +$('#qFrom').val(); t = +$('#qTo').val() }
+      if (currentDateType === 'month') { f = +$('#mFrom').val(); t = +$('#mTo').val() }
+      if (currentDateType === 'week') { f = +$('#wFrom').val(); t = +$('#wTo').val() }
+      if (currentDateType === 'day') { f = +$('#dFrom').val(); t = +$('#dTo').val() }
+      if (f > t) { let tmp = f; f = t; t = tmp }
+      return { from: f, to: t }
+    }
+    function cut(arr, f, t) { return arr.slice(f, t + 1) }
+
+    /* ===== Highcharts defaults ===== */
+    Highcharts.setOptions({
+      chart: { backgroundColor: '#292929', style: { fontFamily: 'system-ui,-apple-system,"Segoe UI",Roboto,Arial' } },
+      title: { text: '' }, credits: { enabled: false },
+      legend: { itemStyle: { color: '#e8edf4', fontSize: '12px' } },
+      xAxis: { lineColor: '#394150', tickColor: '#394150', labels: { style: { color: '#ffffff', fontSize: '12px' } } },
+      yAxis: { gridLineColor: '#292929', labels: { style: { color: '#ffffff', fontSize: '14px' } }, title: { text: null } },
+      tooltip: { backgroundColor: '#292929', borderColor: '#394150', style: { color: '#ffffff', fontSize: '12px' } },
+      colors: ['#10b981', '#22d3ee', '#f59e0b', '#fbbf24', '#60a5fa', '#c084fc']
+    });
+
+    let fleetChart, vesselInOutChart, vesselPieChart, invDT, prDT, critDT;
+
+    /* ===== Init charts ===== */
+    function initCharts() {
+      fleetChart = Highcharts.chart('fleetInOutChart', {
+        chart: { type: 'column' },
+        plotOptions: { column: { borderWidth: 0, stacking: 'normal' } },
+        xAxis: { categories: [] },
+        series: [{ name: '出庫 Out', data: [] }, { name: '入庫 In', data: [] }]
       });
-      row.setAttribute('data-expanded',exp?'0':'1');
-      a.textContent=exp?'▶':'▼';
-      e.stopPropagation();
-    });
-  });
+      vesselInOutChart = Highcharts.chart('vesselInOutChart', {
+        chart: { type: 'column' },
+        xAxis: { categories: [] },
+        plotOptions: { column: { borderWidth: 0 } },
+        series: [
+          { name: 'Deck - 出庫 Out', data: [] },
+          { name: 'Deck - 入庫 In', data: [] },
+          { name: 'Engine - 出庫 Out', data: [] },
+          { name: 'Engine - 入庫 In', data: [] }
+        ]
+      });
+      vesselPieChart = Highcharts.chart('vesselCapitalChart', {
+        chart: { type: 'pie' },
+        plotOptions: {
+          pie: {
+            innerSize: '55%',
+            dataLabels: {
+              enabled: true, style: { color: '#e9edf2', textOutline: 'none', fontSize: '14px' },
+              formatter() { return this.point.name + '<br/>USD ' + Highcharts.numberFormat(this.y, 0) }
+            }
+          }
+        },
+        series: [{ name: 'Value', data: [] }]
+      });
+    }
 
-  document.querySelectorAll('.row-group').forEach(r=>{
-    r.addEventListener('click',()=>{
-      const v=r.getAttribute('data-vessel');
-      $('#vesselFilter').val(v);
-      currentWarehouseScope=(v==='SHORE')?'SHORE':'ALL';
+    /* ===== Init DataTables ===== */
+    function initTables() {
+      invDT = $('#inventorySummaryTable').DataTable({
+        paging: false, searching: false, info: false, ordering: true,
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json' }
+      });
+      prDT = $('#openPrTable').DataTable({
+        paging: true, pageLength: 5, lengthChange: false, searching: true, ordering: true,
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json' }
+      });
+      critDT = $('#criticalTable').DataTable({
+        paging: true, pageLength: 10, lengthChange: false, searching: true, ordering: true,
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json' }
+      });
+    }
+
+    /* ===== Fleet update ===== */
+    function updateFleet() {
+      const { from, to } = getRange();
+      let cats = [], out = [], inn = [];
+      if (currentDateType === 'year') {
+        cats = timeCategories.year.slice(from, to + 1);
+        out = cut(fleetYear.out, from, to);
+        inn = cut(fleetYear.in, from, to);
+      } else if (currentDateType === 'quarter') {
+        cats = timeCategories.quarter.slice(from, to + 1);
+        out = cut(fleetQuarter.out, from, to);
+        inn = cut(fleetQuarter.in, from, to);
+      } else {
+        const all = timeCategories[currentDateType];
+        cats = all.slice(from, to + 1);
+        out = cut(fleetInOutBase.out, from, to);
+        inn = cut(fleetInOutBase.in, from, to);
+      }
+      const total = out.reduce((a, b) => a + b, 0) + inn.reduce((a, b) => a + b, 0);
+      $('#fleetTotalAmount').text(Highcharts.numberFormat(total, 0));
+      $('#fleetTotalChange').text(((total / (total * 0.88) - 1) * 100).toFixed(1) + '%');
+
+      fleetChart.xAxis[0].setCategories(cats, false);
+      fleetChart.series[0].setData(out, false);
+      fleetChart.series[1].setData(inn, false);
+      fleetChart.redraw();
+
+      const filtered = criticalRows.filter(r => r.index >= from && r.index <= to);
+      $('#criticalTotalCount').text(filtered.length);
+      const importantVessels = new Set(filtered.filter(r => r.important).map(r => r.vesselKey));
+      $('#importantVesselCount').text(importantVessels.size);
+    }
+
+    /* ===== Vessel update ===== */
+    function updateVessel() {
+      const vKey = $('#vesselFilter').val();
+      const meta = vesselsMeta[vKey];
+      if (!meta) return;
+      const isAll = (currentWarehouseScope === 'ALL');
+      const isSingle = (currentWarehouseScope === 'DECK' || currentWarehouseScope === 'ENGINE');
+
+      $('#vesselScopeChip').text(vKey === 'SHORE' ? 'Shore Only' : (isAll ? 'Per Vessel · 全倉庫' : 'Per Vessel · 單倉庫'));
+      $('#vesselScopeDesc').text(
+        vKey === 'SHORE'
+          ? '目前範圍：岸端倉庫（獨立）。'
+          : (isAll ? `目前範圍：${meta.name} / 甲板＋機艙。`
+            : `目前範圍：${meta.name} / ${(currentWarehouseScope === 'DECK' ? '甲板' : '機艙')}。`)
+      );
+
+      let deck = meta.deckAmount || 0, eng = meta.engineAmount || 0, scope = 0;
+      if (vKey === 'SHORE') { scope = deck + eng; deck = 0; }
+      else if (isAll) { scope = deck + eng; }
+      else if (currentWarehouseScope === 'DECK') { scope = deck; eng = 0; }
+      else if (currentWarehouseScope === 'ENGINE') { scope = eng; deck = 0; }
+
+      $('#vesselTotalAmount').text('USD ' + Highcharts.numberFormat(scope, 0));
+      $('#vesselSubBreakdown').text(`甲板 Deck：USD ${Highcharts.numberFormat(deck, 0)} ｜ 機艙 Engine：USD ${Highcharts.numberFormat(eng, 0)}`);
+      $('#vesselScopeLabelRight').text(vKey === 'SHORE' ? '目前範圍：Shore' : (isAll ? '目前範圍：全倉' : '目前範圍：單倉庫'));
+
+      const { from, to } = getRange();
+      const base = timeCategories[(currentDateType === 'year' || currentDateType === 'quarter') ? 'month' : currentDateType];
+      const cats = base.slice(from, to + 1);
+      vesselInOutChart.xAxis[0].setCategories(cats, false);
+
+      if (vKey === 'SHORE') {
+        vesselInOutChart.update({
+          series: [
+            { name: 'Shore - 出庫 Out', data: cut(fleetInOutBase.out, from, to) },
+            { name: 'Shore - 入庫 In', data: cut(fleetInOutBase.in, from, to) },
+            { name: '', data: [] }, { name: '', data: [] }
+          ]
+        }, false);
+      } else if (isSingle) {
+        const wh = vesselInOutBase[vKey][currentWarehouseScope];
+        vesselInOutChart.update({
+          series: [
+            { name: `${currentWarehouseScope === 'DECK' ? 'Deck' : 'Engine'} - 出庫 Out`, data: cut(wh.out, from, to) },
+            { name: `${currentWarehouseScope === 'DECK' ? 'Deck' : 'Engine'} - 入庫 In`, data: cut(wh.in, from, to) },
+            { name: '', data: [] }, { name: '', data: [] }
+          ]
+        }, false);
+      } else {
+        const d = vesselInOutBase[vKey].DECK;
+        const e = vesselInOutBase[vKey].ENGINE;
+        vesselInOutChart.update({
+          series: [
+            { name: 'Deck - 出庫 Out', data: cut(d.out, from, to) },
+            { name: 'Deck - 入庫 In', data: cut(d.in, from, to) },
+            { name: 'Engine - 出庫 Out', data: cut(e.out, from, to) },
+            { name: 'Engine - 入庫 In', data: cut(e.in, from, to) }
+          ]
+        }, false);
+      }
+      vesselInOutChart.redraw();
+
+      if (isSingle && vKey !== 'SHORE') {
+        $('#vesselPieTitle').text('倉庫分類金額結構');
+        $('#vesselPieMeta').text('單倉視角：物料 / 配件 / 維修。');
+        const r = inventoryRows.filter(x => x.vessel === vKey && x.warehouse === currentWarehouseScope);
+        vesselPieChart.series[0].setData(r.map(x => ({ name: x.category, y: x.amount })), true);
+      } else {
+        $('#vesselPieTitle').text('本船資金結構');
+        $('#vesselPieMeta').text('全倉：甲板 / 機艙；岸端視角為其總額。');
+        vesselPieChart.series[0].setData([
+          { name: 'Deck', y: meta.deckAmount || 0 },
+          { name: 'Engine', y: meta.engineAmount || 0 }
+        ], true);
+      }
+
+      if (invDT) {
+        invDT.clear();
+        let rows = inventoryRows.filter(x => x.vessel === vKey);
+        if (isSingle) rows = rows.filter(x => x.warehouse === currentWarehouseScope);
+        else if (vKey !== 'SHORE') rows = rows.filter(x => x.warehouse === 'DECK' || x.warehouse === 'ENGINE');
+        rows.forEach(r => invDT.row.add([
+          r.warehouseLabel, r.category, r.skus, r.qty, 'USD ' + Highcharts.numberFormat(r.amount, 0)
+        ]));
+        invDT.draw();
+      }
+
+      if (prDT) {
+        prDT.clear();
+        let rows = prRows.filter(r => r.vesselKey === vKey);
+        if (isSingle) rows = rows.filter(r => r.warehouse === currentWarehouseScope);
+        else if (vKey !== 'SHORE') rows = rows.filter(r => r.warehouse === 'DECK' || r.warehouse === 'ENGINE');
+        rows.forEach(r => prDT.row.add([
+          r.id, r.item, r.vessel, r.warehouseLabel,
+          'USD ' + Highcharts.numberFormat(r.amount, 0),
+          r.prStatus, r.prDate || '-', r.eta
+        ]));
+        prDT.draw();
+      }
+    }
+
+    /* ===== Snapshot logic ===== */
+    function initSnapshot() {
+      ['YUANSHUN', 'WEISHUN', 'JINBAO', 'FENGSHUN', 'JINGSHUN'].forEach(g => {
+        const row = document.querySelector('.row-group[data-group="' + g + '"]');
+        if (!row) return;
+        const cell = row.querySelector('.g-st');
+        const hasC = criticalRows.some(r => r.vesselKey === g && r.status === '缺料');
+        const hasW = criticalRows.some(r => r.vesselKey === g && r.status === '警戒');
+        cell.innerHTML = hasC
+          ? '<span class="tag red">重要物料缺料</span>'
+          : (hasW ? '<span class="tag yellow">有警戒物料</span>' : '<span class="tag green">正常</span>');
+      });
+
+      document.querySelectorAll('.arrow').forEach(a => {
+        a.addEventListener('click', e => {
+          const row = a.parentElement;
+          const group = row.getAttribute('data-group');
+          const exp = row.getAttribute('data-expanded') === '1';
+          document.querySelectorAll('.row-detail[data-group="' + group + '"]').forEach(d => {
+            d.style.display = exp ? 'none' : 'table-row';
+          });
+          row.setAttribute('data-expanded', exp ? '0' : '1');
+          a.textContent = exp ? '▶' : '▼';
+          e.stopPropagation();
+        });
+      });
+
+      document.querySelectorAll('.row-group').forEach(r => {
+        r.addEventListener('click', () => {
+          const v = r.getAttribute('data-vessel');
+          $('#vesselFilter').val(v);
+          currentWarehouseScope = (v === 'SHORE') ? 'SHORE' : 'ALL';
+          switchView();
+        });
+      });
+
+      document.querySelectorAll('.row-detail').forEach(r => {
+        r.addEventListener('click', e => {
+          $('#vesselFilter').val(r.getAttribute('data-vessel'));
+          currentWarehouseScope = r.getAttribute('data-warehouse');
+          switchView();
+          e.stopPropagation();
+        });
+      });
+    }
+
+    /* ===== Critical modal ===== */
+    function openCritical(type) {
+      $('#criticalTabShortage').toggleClass('active', type === '缺料');
+      $('#criticalTabWarning').toggleClass('active', type === '警戒');
+      const { from, to } = getRange();
+      const rows = criticalRows.filter(r => r.status === type && r.index >= from && r.index <= to);
+      critDT.clear();
+      rows.forEach(r => {
+        critDT.row.add([
+          r.status,
+          r.vessel,
+          r.warehouseLabel,
+          r.item,
+          r.important ? '重要配件' : '-',
+          r.prStatus,
+          r.prDate || '-',
+          r.remark
+        ]);
+      });
+      critDT.draw();
+      $('#criticalModal').css('display', 'flex');
+    }
+    const closeCritical = () => $('#criticalModal').hide();
+
+    /* ===== View switch ===== */
+    function switchView() {
+      const v = $('#vesselFilter').val();
+      if (v === 'ALL') {
+        $('#fleetView').show();
+        $('#vesselView').hide();
+        updateFleet();
+      } else {
+        $('#fleetView').hide();
+        $('#vesselView').show();
+        if (v !== 'SHORE' && currentWarehouseScope === 'SHORE') { currentWarehouseScope = 'ALL'; }
+        updateVessel();
+      }
+    }
+
+    /* ===== init ===== */
+    $(function () {
+      $.extend(true, $.fn.dataTable.defaults, { dom: 'lrtip' });
+
+      initCharts();
+      initTables();
+      initSnapshot();
+
+      $('#dateType button').on('click', function () {
+        $('#dateType button').removeClass('active');
+        $(this).addClass('active');
+        currentDateType = $(this).data('type');
+        $('.dr-g').hide().filter('[data-type="' + currentDateType + '"]').show();
+        switchView();
+      });
+      $('#yearFrom,#yearTo,#qFrom,#qTo,#mFrom,#mTo,#wFrom,#wTo,#dFrom,#dTo').on('change', switchView);
+
+      $('#vesselFilter').on('change', function () {
+        const v = $(this).val();
+        currentWarehouseScope = (v === 'SHORE') ? 'SHORE' : 'ALL';
+        switchView();
+      });
+
+      $('#btnOpenCritical').on('click', () => openCritical('缺料'));
+      $('#btnOpenWarning').on('click', () => openCritical('警戒'));
+      $('#criticalClose').on('click', closeCritical);
+      $('#criticalModal').on('click', e => { if (e.target === e.currentTarget) closeCritical(); });
+      $('#criticalTabShortage').on('click', () => openCritical('缺料'));
+      $('#criticalTabWarning').on('click', () => openCritical('警戒'));
+
       switchView();
     });
-  });
-
-  document.querySelectorAll('.row-detail').forEach(r=>{
-    r.addEventListener('click',e=>{
-      $('#vesselFilter').val(r.getAttribute('data-vessel'));
-      currentWarehouseScope=r.getAttribute('data-warehouse');
-      switchView();
-      e.stopPropagation();
-    });
-  });
-}
-
-/* ===== Critical modal ===== */
-function openCritical(type){
-  $('#criticalTabShortage').toggleClass('active',type==='缺料');
-  $('#criticalTabWarning').toggleClass('active',type==='警戒');
-  const {from,to}=getRange();
-  const rows=criticalRows.filter(r=>r.status===type && r.index>=from && r.index<=to);
-  critDT.clear();
-  rows.forEach(r=>{
-    critDT.row.add([
-      r.status,
-      r.vessel,
-      r.warehouseLabel,
-      r.item,
-      r.important?'重要配件':'-',
-      r.prStatus,
-      r.prDate||'-',
-      r.remark
-    ]);
-  });
-  critDT.draw();
-  $('#criticalModal').css('display','flex');
-}
-const closeCritical=()=>$('#criticalModal').hide();
-
-/* ===== View switch ===== */
-function switchView(){
-  const v=$('#vesselFilter').val();
-  if(v==='ALL'){
-    $('#fleetView').show();
-    $('#vesselView').hide();
-    updateFleet();
-  }else{
-    $('#fleetView').hide();
-    $('#vesselView').show();
-    if(v!=='SHORE' && currentWarehouseScope==='SHORE'){ currentWarehouseScope='ALL'; }
-    updateVessel();
-  }
-}
-
-/* ===== init ===== */
-$(function(){
-  $.extend(true,$.fn.dataTable.defaults,{dom:'lrtip'});
-
-  initCharts();
-  initTables();
-  initSnapshot();
-
-  $('#dateType button').on('click',function(){
-    $('#dateType button').removeClass('active');
-    $(this).addClass('active');
-    currentDateType=$(this).data('type');
-    $('.dr-g').hide().filter('[data-type="'+currentDateType+'"]').show();
-    switchView();
-  });
-  $('#yearFrom,#yearTo,#qFrom,#qTo,#mFrom,#mTo,#wFrom,#wTo,#dFrom,#dTo').on('change',switchView);
-
-  $('#vesselFilter').on('change',function(){
-    const v=$(this).val();
-    currentWarehouseScope=(v==='SHORE')?'SHORE':'ALL';
-    switchView();
-  });
-
-  $('#btnOpenCritical').on('click',()=>openCritical('缺料'));
-  $('#btnOpenWarning').on('click',()=>openCritical('警戒'));
-  $('#criticalClose').on('click',closeCritical);
-  $('#criticalModal').on('click',e=>{ if(e.target===e.currentTarget) closeCritical(); });
-  $('#criticalTabShortage').on('click',()=>openCritical('缺料'));
-  $('#criticalTabWarning').on('click',()=>openCritical('警戒'));
-
-  switchView();
-});
-</script>
+  </script>
 </body>
+
 </html>
