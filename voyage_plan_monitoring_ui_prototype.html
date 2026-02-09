@@ -1,0 +1,1790 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Voyage Plan Monitoring System – 互動式 UI 原型</title>
+
+  <!-- Leaflet (Map) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet.draw (Geofence) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#111a2e;
+      --panel2:#0f172a;
+      --text:#e5e7eb;
+      --muted:#9aa4b2;
+      --brand:#60a5fa;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --line:#26324a;
+      --chip:#17213a;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    *{box-sizing:border-box;}
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 800px at 15% 10%, rgba(96,165,250,.18), transparent 55%),
+                  radial-gradient(900px 700px at 85% 30%, rgba(34,197,94,.10), transparent 50%),
+                  var(--bg);
+      color:var(--text);
+      overflow:hidden;
+    }
+    a{color:inherit}
+    .app{
+      display:grid;
+      grid-template-columns: 280px 1fr 380px;
+      grid-template-rows: 64px 1fr;
+      height:100%;
+      gap:12px;
+      padding:12px;
+    }
+    header{
+      grid-column:1 / -1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(17,26,46,.92), rgba(15,23,42,.92));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .logo{
+      width:36px;height:36px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(96,165,250,1), rgba(34,197,94,1));
+      box-shadow: 0 10px 20px rgba(0,0,0,.35);
+    }
+    .top-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .pill{
+      display:flex; gap:8px; align-items:center;
+      padding:8px 10px;
+      border:1px solid var(--line);
+      background: rgba(11,18,32,.55);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size:12px;
+    }
+    .btn{
+      border:1px solid var(--line);
+      background: rgba(17,26,46,.7);
+      color: var(--text);
+      padding:9px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:13px;
+      transition:.15s transform, .15s background, .15s border;
+      user-select:none;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(17,26,46,.9); border-color:#35518a;}
+    .btn.primary{background: rgba(96,165,250,.18); border-color: rgba(96,165,250,.45);}
+    .btn.danger{background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.45);}
+    .btn.ghost{background: transparent;}
+    .btn.small{padding:7px 10px; border-radius: 10px; font-size:12px;}
+    .btn:disabled{opacity:.5; cursor:not-allowed; transform:none;}
+    .kbd{
+      font-family:var(--mono);
+      font-size:11px;
+      color:#cbd5e1;
+      padding:2px 6px;
+      border:1px solid var(--line);
+      border-bottom-color:#17213a;
+      border-radius: 8px;
+      background: rgba(2,6,23,.35);
+    }
+
+    aside, main, .right{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(17,26,46,.72);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      min-height: 0;
+    }
+
+    /* Left nav */
+    .nav{
+      display:flex;
+      flex-direction:column;
+      height:100%;
+    }
+    .nav .section{padding:14px 14px 8px; color: var(--muted); font-size:12px; letter-spacing:.3px;}
+    .nav-items{display:flex; flex-direction:column; gap:6px; padding:0 10px 12px;}
+    .nav-item{
+      display:flex; gap:10px; align-items:center;
+      padding:10px 10px;
+      border-radius: 14px;
+      cursor:pointer;
+      border:1px solid transparent;
+      color: #dbeafe;
+    }
+    .nav-item:hover{background: rgba(96,165,250,.10); border-color: rgba(96,165,250,.18);}
+    .nav-item.active{background: rgba(96,165,250,.18); border-color: rgba(96,165,250,.30);}
+    .nav-ico{
+      width:30px; height:30px; border-radius: 12px;
+      display:grid; place-items:center;
+      background: rgba(2,6,23,.30);
+      border:1px solid rgba(148,163,184,.18);
+      color:#bfdbfe;
+      flex:0 0 auto;
+    }
+    .nav-title{font-weight:700;}
+    .nav-sub{font-size:12px; color: var(--muted); margin-top:2px;}
+
+    /* Main */
+    .view{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .view-header{
+      padding:14px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      background: rgba(15,23,42,.9);
+    }
+    .hgroup h1{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+    .hgroup p{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size:12.5px;
+      line-height:1.35;
+    }
+    .view-body{
+      flex:1;
+      display:grid;
+      grid-template-columns: 1fr;
+      min-height:0;
+    }
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:12px;
+      padding:12px;
+      min-height:0;
+      height:100%;
+    }
+    .card{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(2,6,23,.22);
+      overflow:hidden;
+      min-height:0;
+    }
+    .card-h{
+      padding:12px 12px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: rgba(2,6,23,.25);
+    }
+    .card-h .title{font-weight:800; font-size:13px;}
+    .card-b{padding:12px; min-height:0;}
+    .grid-2{display:grid; grid-template-columns: 1fr 1fr; gap:10px;}
+    .metric{
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(11,18,32,.50);
+    }
+    .metric .k{color: var(--muted); font-size:12px;}
+    .metric .v{margin-top:6px; font-size:18px; font-weight:900;}
+    .metric .t{margin-top:6px; font-size:12px; color: var(--muted);}
+    .badge{
+      font-size:11px;
+      padding:4px 8px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(23,33,58,.75);
+      color:#cbd5e1;
+      white-space:nowrap;
+    }
+    .badge.ok{border-color: rgba(34,197,94,.55); background: rgba(34,197,94,.12); color:#bbf7d0;}
+    .badge.warn{border-color: rgba(245,158,11,.55); background: rgba(245,158,11,.12); color:#fde68a;}
+    .badge.bad{border-color: rgba(239,68,68,.55); background: rgba(239,68,68,.12); color:#fecaca;}
+    .row{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(38,50,74,.65);
+    }
+    .row:last-child{border-bottom:none;}
+    .row .left{display:flex; gap:10px; align-items:center; min-width:0;}
+    .dot{
+      width:10px;height:10px;border-radius:999px;background: var(--muted);
+      box-shadow: 0 0 0 4px rgba(148,163,184,.12);
+      flex:0 0 auto;
+    }
+    .dot.ok{background: var(--ok); box-shadow: 0 0 0 4px rgba(34,197,94,.14);}
+    .dot.warn{background: var(--warn); box-shadow: 0 0 0 4px rgba(245,158,11,.14);}
+    .dot.bad{background: var(--bad); box-shadow: 0 0 0 4px rgba(239,68,68,.14);}
+    .row .meta{min-width:0;}
+    .row .meta .a{font-weight:800; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .row .meta .b{margin-top:2px; color: var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .row .right{display:flex; gap:8px; align-items:center; flex:0 0 auto;}
+    .form-row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .input, select, textarea{
+      width:100%;
+      padding:10px 10px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(2,6,23,.35);
+      color: var(--text);
+      outline:none;
+      font-size:13px;
+    }
+    select{cursor:pointer;}
+    textarea{min-height:86px; resize:vertical;}
+    .help{margin-top:8px; color: var(--muted); font-size:12px; line-height:1.35;}
+    .tiny{font-size:12px; color: var(--muted);}
+    .hr{height:1px; background: rgba(38,50,74,.7); margin:12px 0;}
+    #map{height:100%; min-height:460px;}
+    .map-tools{
+      position:absolute; z-index:500; top:12px; left:12px;
+      display:flex; gap:8px; flex-wrap:wrap;
+    }
+    .map-wrap{position:relative; height:100%; min-height:0;}
+    .table{
+      width:100%;
+      border-collapse: collapse;
+      font-size:12.5px;
+    }
+    .table th,.table td{
+      text-align:left;
+      padding:10px 10px;
+      border-bottom:1px solid rgba(38,50,74,.65);
+      vertical-align:top;
+    }
+    .table th{color: var(--muted); font-weight:700; background: rgba(2,6,23,.20); position:sticky; top:0;}
+    .scroll{overflow:auto; max-height:100%;}
+    .chip{
+      display:inline-flex; gap:6px; align-items:center;
+      padding:6px 8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.22);
+      background: rgba(23,33,58,.55);
+      color:#e2e8f0;
+      font-size:12px;
+    }
+    .chip .mini{font-family:var(--mono); font-size:11px; color:#cbd5e1;}
+    /* Right panel (Alert/Detail) */
+    .right{
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .right .head{
+      padding:12px 12px;
+      border-bottom:1px solid var(--line);
+      background: rgba(15,23,42,.92);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .right .body{padding:12px; overflow:auto; min-height:0;}
+    .kv{display:grid; grid-template-columns: 120px 1fr; gap:8px 10px; font-size:12.5px;}
+    .kv .k{color: var(--muted);}
+    .kv .v{color: var(--text);}
+    .footerbar{
+      padding:10px 12px;
+      border-top:1px solid var(--line);
+      background: rgba(2,6,23,.18);
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+    }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background: rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center; z-index:10000;
+      padding:14px;
+    }
+    .modal{
+      width:min(760px, 100%);
+      border:1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(17,26,46,.95);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modal .mh{
+      padding:12px 12px;
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      background: rgba(15,23,42,.95);
+    }
+    .modal .mh .t{font-weight:900;}
+    .modal .mb{padding:12px;}
+    .modal .mf{padding:12px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:10px;}
+    .toast{
+      position:fixed;
+      bottom:16px; left:50%;
+      transform: translateX(-50%);
+      display:none;
+      padding:10px 12px;
+      border:1px solid rgba(148,163,184,.25);
+      background: rgba(2,6,23,.85);
+      color: var(--text);
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      z-index:20000;
+      font-size:12.5px;
+    }
+    .muted{color:var(--muted);}
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <div style="font-size:14px;">航行安全監控航線｜互動式 UI 原型</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px;">Voyage Plan Monitoring System (Prototype)</div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="pill" title="監控基準：僅監控 Active Voyage Plan">
+          <span class="kbd">Active Plan</span>
+          <span id="activePlanPill">YM UNICORN · Rev.2</span>
+        </div>
+        <div class="pill" title="事件先行：事件 → 告警 → 處置閉環">
+          <span class="kbd">Event→Alert</span>
+          <span id="eventPipePill">3 events / 1 alert</span>
+        </div>
+        <button class="btn primary" id="btnSim">模擬事件 (Demo)</button>
+        <button class="btn ghost" id="btnHelp">快速導覽</button>
+      </div>
+    </header>
+
+    <aside class="nav">
+      <div class="section">OPERATIONS</div>
+      <div class="nav-items" id="nav">
+        <div class="nav-item active" data-view="warroom">
+          <div class="nav-ico">🛰️</div>
+          <div>
+            <div class="nav-title">戰情室看板</div>
+            <div class="nav-sub">船隊總覽 · 地圖疊圖 · Timeline</div>
+          </div>
+        </div>
+        <div class="nav-item" data-view="plans">
+          <div class="nav-ico">🗂️</div>
+          <div>
+            <div class="nav-title">Voyage Plan 管理</div>
+            <div class="nav-sub">匯入 · 版本 · Active Plan</div>
+          </div>
+        </div>
+        <div class="nav-item" data-view="alerts">
+          <div class="nav-ico">🚨</div>
+          <div>
+            <div class="nav-title">告警處置管理</div>
+            <div class="nav-sub">Ack · Assign · Close · 留痕</div>
+          </div>
+        </div>
+        <div class="nav-item" data-view="geofence">
+          <div class="nav-ico">🧭</div>
+          <div>
+            <div class="nav-title">電子圍籬</div>
+            <div class="nav-sub">多邊形/圓形 · 生效窗</div>
+          </div>
+        </div>
+        <div class="nav-item" data-view="audit">
+          <div class="nav-ico">🧾</div>
+          <div>
+            <div class="nav-title">稽核與回溯</div>
+            <div class="nav-sub">版本差異 · 事件依據 · 紀錄</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">SHORTCUTS</div>
+      <div class="nav-items">
+        <div class="nav-item" id="jumpCritical">
+          <div class="nav-ico">⚡</div>
+          <div>
+            <div class="nav-title">跳到高嚴重度告警</div>
+            <div class="nav-sub">把反應時間壓到最短</div>
+          </div>
+        </div>
+        <div class="nav-item" id="exportMock">
+          <div class="nav-ico">⬇️</div>
+          <div>
+            <div class="nav-title">匯出報表 (Mock)</div>
+            <div class="nav-sub">CSV / PDF (尚未實作)</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="view">
+      <div class="view-header">
+        <div class="hgroup">
+          <h1 id="viewTitle">戰情室看板</h1>
+          <p id="viewDesc">以「生效之航行計畫 (Active Voyage Plan)」作為唯一監控基準，疊加 AIS/LRIT/SDataPro 航跡，並以事件→告警→處置形成閉環。</p>
+        </div>
+        <div class="form-row">
+          <select id="selVessel" style="width:220px;">
+            <option value="YM UNICORN">YM UNICORN</option>
+            <option value="YM CONSTANCY">YM CONSTANCY</option>
+            <option value="YM CREDIBILITY">YM CREDIBILITY</option>
+          </select>
+          <select id="selMode" style="width:160px;">
+            <option value="live">Live</option>
+            <option value="replay">Replay</option>
+          </select>
+          <button class="btn small" id="btnCenter">定位船舶</button>
+        </div>
+      </div>
+
+      <div class="view-body" id="viewContainer">
+        <!-- injected by JS -->
+      </div>
+    </main>
+
+    <section class="right">
+      <div class="head">
+        <div style="min-width:0;">
+          <div style="font-weight:900; font-size:13px;">告警詳情 / 工作流</div>
+          <div class="tiny" id="rightHint">選取一筆告警以檢視觸發依據、門檻、Plan 版本與處置留痕。</div>
+        </div>
+        <span class="badge" id="rightStatus">—</span>
+      </div>
+
+      <div class="body">
+        <div id="emptyDetail" class="muted" style="line-height:1.6;">
+          目前沒有選取告警。<br/>
+          <span class="muted">小提醒：真正的戰情室不是「看得到」就算交付，而是「看得到 + 做得到 + 留得住」。</span>
+        </div>
+
+        <div id="detail" style="display:none;">
+          <div class="kv" id="detailKv"></div>
+          <div class="hr"></div>
+
+          <div class="card" style="margin-bottom:12px;">
+            <div class="card-h">
+              <div class="title">處置紀錄（可稽核）</div>
+              <span class="badge" id="auditBadge">Log: 0</span>
+            </div>
+            <div class="card-b">
+              <div id="log" class="scroll" style="max-height:160px;"></div>
+              <div class="hr"></div>
+              <textarea id="txtNote" placeholder="新增備註（例：已聯繫船長，確認因避風改道；預計 30 分鐘內回到走廊範圍）"></textarea>
+              <div class="form-row" style="margin-top:10px; justify-content:flex-end;">
+                <button class="btn small" id="btnAddNote">寫入留痕</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div class="title">通知內容（Email / Push 範本）</div>
+              <button class="btn small" id="btnPreviewMail">預覽</button>
+            </div>
+            <div class="card-b">
+              <div class="tiny muted" id="mailPreview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footerbar">
+        <div class="tiny"><span class="muted">SLA:</span> Ack 5m · Close 60m (Demo)</div>
+        <div class="form-row" style="justify-content:flex-end;">
+          <button class="btn small" id="btnAck" disabled>Ack</button>
+          <button class="btn small" id="btnAssign" disabled>Assign</button>
+          <button class="btn small danger" id="btnClose" disabled>Close</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
+        <div class="t" id="modalTitle">—</div>
+        <button class="btn small ghost" id="modalClose">✕</button>
+      </div>
+      <div class="mb" id="modalBody"></div>
+      <div class="mf">
+        <button class="btn" id="modalOk">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">已更新</div>
+
+<script>
+/** =========
+ *  Prototype State (in-memory)
+ *  ========= */
+const nowISO = () => new Date().toISOString();
+const fmtTime = (iso) => {
+  const d = new Date(iso);
+  const pad = (n)=> String(n).padStart(2,'0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
+const state = {
+  vessel: "YM UNICORN",
+  mode: "live",
+  activePlan: { vessel:"YM UNICORN", rev:"Rev.2", uploadedAt: nowISO(), reason:"Weather reroute" },
+  plans: [
+    { vessel:"YM UNICORN", rev:"Rev.1", uploadedAt: new Date(Date.now()-1000*60*60*14).toISOString(), reason:"Initial plan", active:false, waypoints: [
+      [25.042,121.565],[24.6,121.2],[24.0,120.8],[23.4,120.3],[22.6,120.0],[21.9,120.1],[21.3,120.4],[20.8,121.0]
+    ]},
+    { vessel:"YM UNICORN", rev:"Rev.2", uploadedAt: new Date(Date.now()-1000*60*60*3).toISOString(), reason:"Weather adjustment", active:true, waypoints: [
+      [25.042,121.565],[24.7,121.4],[24.2,121.0],[23.7,120.5],[22.9,120.2],[22.1,120.35],[21.4,120.7],[20.9,121.2]
+    ]},
+    { vessel:"YM CONSTANCY", rev:"Rev.1", uploadedAt: new Date(Date.now()-1000*60*60*8).toISOString(), reason:"Initial plan", active:true, waypoints: [
+      [22.62,120.30],[22.2,120.0],[21.9,119.7],[21.5,119.5],[21.0,119.3],[20.6,119.25],[20.2,119.3]
+    ]},
+    { vessel:"YM CREDIBILITY", rev:"Rev.1", uploadedAt: new Date(Date.now()-1000*60*60*10).toISOString(), reason:"Initial plan", active:true, waypoints: [
+      [24.15,120.67],[23.8,120.4],[23.2,120.1],[22.6,119.9],[22.0,119.8],[21.5,119.85]
+    ]}
+  ],
+  geofences: [
+    { id:"GF-001", name:"軍演區 (Demo)", type:"polygon", active:true, window:"2026-02-05 00:00–23:59", severity:"warn",
+      coords:[[22.4,120.0],[22.4,120.8],[21.8,120.7],[21.9,120.0]] },
+    { id:"GF-002", name:"限制海域 (Demo)", type:"circle", active:true, window:"Always", severity:"bad",
+      center:[22.1,120.35], radiusM: 45000 }
+  ],
+  events: [
+    { id:"EVT-10021", type:"Speed", vessel:"YM UNICORN", time: new Date(Date.now()-1000*60*22).toISOString(),
+      lat:22.32, lon:120.55, sog: 2.1, cog: 85, planRev:"Rev.2", threshold:"SOG < 3kn for 20m (N>=4)", status:"event" },
+    { id:"EVT-10022", type:"XTD", vessel:"YM UNICORN", time: new Date(Date.now()-1000*60*13).toISOString(),
+      lat:22.18, lon:120.48, sog: 14.2, cog: 192, planRev:"Rev.2", threshold:"XTD 2.4nm > 2.0nm for 10m (N>=3)", status:"alert", severity:"warn" },
+    { id:"EVT-10023", type:"Zone", vessel:"YM CONSTANCY", time: new Date(Date.now()-1000*60*9).toISOString(),
+      lat:22.05, lon:120.33, sog: 12.2, cog: 210, planRev:"Rev.1", threshold:"Approach Restricted Zone < 5nm (T>=5m)", status:"event" }
+  ],
+  alerts: [
+    { id:"ALT-20011", eventId:"EVT-10022", vessel:"YM UNICORN", severity:"warn", status:"OPEN",
+      createdAt: new Date(Date.now()-1000*60*13).toISOString(), ackAt:null, assignedTo:null, closedAt:null,
+      summary:"航線偏離超過安全走廊 (XTD)", detail:"XTD 2.4nm > 2.0nm 持續 10 分鐘 (N>=3)，關聯 Active Plan Rev.2",
+      logs: [
+        { t: new Date(Date.now()-1000*60*12).toISOString(), by:"system", msg:"Alert generated from event EVT-10022" }
+      ]
+    }
+  ],
+  selectedAlertId: null
+};
+
+/** =========
+ *  View definitions
+ *  ========= */
+const views = {
+  warroom: {
+    title:"戰情室看板",
+    desc:"船隊即時狀態總覽；單船視圖：航線（Plan）與航跡（Track）比對；事件/告警時間軸並可快速跳轉處置。",
+    render: renderWarRoom
+  },
+  plans: {
+    title:"Voyage Plan 管理中心",
+    desc:"匯入航行計畫並進行版本管理；每艘船僅允許一個生效計畫 (Active Voyage Plan)，切換需留存原因與操作者。",
+    render: renderPlans
+  },
+  alerts: {
+    title:"告警處置管理",
+    desc:"以『事件先行』設計驅動：事件保存 → 告警通知 → Ack/Assign/Close 形成閉環，確保可治理、可追溯。",
+    render: renderAlerts
+  },
+  geofence: {
+    title:"電子圍籬",
+    desc:"建立/編輯/停用電子圍籬（多邊形/圓形），設定區域類型與生效時間窗，供監控引擎判斷。",
+    render: renderGeofence
+  },
+  audit: {
+    title:"稽核與回溯",
+    desc:"記錄 Plan 版本差異、事件觸發依據、門檻條件與處置留痕，支援事故回溯與合規檢查。",
+    render: renderAudit
+  }
+};
+
+let currentView = "warroom";
+let map, planLayer, trackLayer, geofenceLayer, drawLayer, playbackTimer;
+
+/** =========
+ *  Utilities
+ *  ========= */
+function toast(msg="已更新"){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=> el.style.display='none', 1600);
+}
+function byId(id){return document.getElementById(id);}
+function setPills(){
+  byId('activePlanPill').textContent = `${state.vessel} · ${getActivePlan(state.vessel)?.rev || '—'}`;
+  const ev = state.events.length;
+  const al = state.alerts.filter(a=>a.status!=="CLOSED").length;
+  byId('eventPipePill').textContent = `${ev} events / ${al} alerts`;
+}
+function getActivePlan(vessel){
+  return state.plans.find(p=>p.vessel===vessel && p.active) || null;
+}
+function severityBadge(sev){
+  if(sev==="ok") return `<span class="badge ok">OK</span>`;
+  if(sev==="warn") return `<span class="badge warn">WARN</span>`;
+  if(sev==="bad") return `<span class="badge bad">CRITICAL</span>`;
+  return `<span class="badge">—</span>`;
+}
+function dotClass(sev){
+  if(sev==="ok") return "ok";
+  if(sev==="warn") return "warn";
+  if(sev==="bad") return "bad";
+  return "";
+}
+function computeFleetHealth(){
+  // simplistic: OPEN warn=+1, bad=+2
+  let score = 0;
+  for(const a of state.alerts){
+    if(a.status==="CLOSED") continue;
+    score += (a.severity==="bad") ? 2 : 1;
+  }
+  if(score===0) return {label:"Stable", sev:"ok", hint:"無未結案告警"};
+  if(score<=2) return {label:"Watch", sev:"warn", hint:"建議加強值班關注"};
+  return {label:"High Risk", sev:"bad", hint:"建議啟動升級處置"};
+}
+
+function openModal(title, bodyHTML){
+  byId('modalTitle').textContent = title;
+  byId('modalBody').innerHTML = bodyHTML;
+  byId('modalBackdrop').style.display='flex';
+}
+function closeModal(){ byId('modalBackdrop').style.display='none'; }
+byId('modalClose').addEventListener('click', closeModal);
+byId('modalOk').addEventListener('click', closeModal);
+byId('modalBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='modalBackdrop') closeModal(); });
+
+/** =========
+ *  Navigation + global controls
+ *  ========= */
+function setView(viewKey){
+  currentView = viewKey;
+  // nav UI
+  document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+    el.classList.toggle('active', el.dataset.view===viewKey);
+  });
+
+  // header
+  byId('viewTitle').textContent = views[viewKey].title;
+  byId('viewDesc').textContent  = views[viewKey].desc;
+
+  // render
+  views[viewKey].render();
+  setPills();
+}
+document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+  el.addEventListener('click', ()=> setView(el.dataset.view));
+});
+
+byId('selVessel').addEventListener('change', (e)=>{
+  state.vessel = e.target.value;
+  // keep pills synced
+  setPills();
+  // rerender current view + map overlays
+  setView(currentView);
+});
+byId('selMode').addEventListener('change', (e)=>{
+  state.mode = e.target.value;
+  setView(currentView);
+});
+
+byId('btnHelp').addEventListener('click', ()=>{
+  openModal("快速導覽（2 分鐘上手）", `
+    <div style="line-height:1.7;">
+      <div class="chip">🛰️ <b>戰情室看板</b> <span class="mini">Plan vs Track</span></div>
+      <p class="muted">把船隊狀態、地圖疊圖、事件/告警時間軸放在同一個決策視窗。</p>
+      <div class="chip">🚨 <b>告警處置</b> <span class="mini">Ack/Assign/Close</span></div>
+      <p class="muted">每筆告警都要有處理結果與留痕；否則就只是「通知噪音」。</p>
+      <div class="chip">🧭 <b>電子圍籬</b> <span class="mini">Draw</span></div>
+      <p class="muted">支援多邊形/圓形，並可設定生效時間窗（Demo 版）。</p>
+      <div class="chip">🧾 <b>稽核回溯</b> <span class="mini">Audit-ready</span></div>
+      <p class="muted">事件保存、門檻、Plan 版本、處置紀錄，讓合規與事故回放能「一句話對得上資料」。</p>
+      <p style="margin-top:10px;">試試：按右上角 <b>模擬事件</b>，再到 <b>告警處置</b> 走完整個閉環。</p>
+    </div>
+  `);
+});
+
+byId('jumpCritical').addEventListener('click', ()=>{
+  const crit = state.alerts.find(a=>a.status!=="CLOSED" && a.severity==="bad") || state.alerts.find(a=>a.status!=="CLOSED");
+  if(!crit){ toast("目前無未結案告警"); return; }
+  setView("alerts");
+  selectAlert(crit.id);
+  toast("已跳轉至告警");
+});
+
+byId('exportMock').addEventListener('click', ()=>{
+  openModal("匯出報表（Mock）", `
+    <p class="muted" style="line-height:1.7;">原型版先示範資訊架構：實際系統可依稽核/內控需求匯出：</p>
+    <ul style="margin:0; padding-left:18px; line-height:1.8;">
+      <li>Plan 版本切換紀錄（Rev, 時間, 原因, 操作者）</li>
+      <li>事件清單（類型, 門檻, N/T 去噪條件, 船位依據）</li>
+      <li>告警處置閉環（Ack/Assign/Close, 備註, 聯繫紀錄）</li>
+    </ul>
+    <div class="hr"></div>
+    <div class="muted">（先不產檔，避免你以為我真的幫你送去稽核了 😄）</div>
+  `);
+});
+
+byId('btnSim').addEventListener('click', ()=>{
+  simulateEventAndMaybeAlert();
+  setView(currentView);
+  toast("已產生模擬事件");
+});
+
+/** =========
+ *  Right panel (detail)
+ *  ========= */
+function selectAlert(alertId){
+  state.selectedAlertId = alertId;
+  const a = state.alerts.find(x=>x.id===alertId);
+  if(!a){ renderRightPanel(); return; }
+  renderRightPanel();
+  // focus map if available
+  if(map){
+    const ev = state.events.find(e=>e.id===a.eventId);
+    if(ev) map.setView([ev.lat, ev.lon], 7, {animate:true});
+  }
+}
+
+function renderRightPanel(){
+  const empty = byId('emptyDetail');
+  const detail = byId('detail');
+  const btnAck = byId('btnAck');
+  const btnAssign = byId('btnAssign');
+  const btnClose = byId('btnClose');
+
+  const a = state.alerts.find(x=>x.id===state.selectedAlertId) || null;
+  if(!a){
+    empty.style.display='block';
+    detail.style.display='none';
+    byId('rightStatus').textContent = "—";
+    btnAck.disabled = true; btnAssign.disabled = true; btnClose.disabled = true;
+    return;
+  }
+
+  empty.style.display='none';
+  detail.style.display='block';
+
+  const ev = state.events.find(e=>e.id===a.eventId);
+  const plan = getActivePlan(a.vessel);
+  const statusBadge = a.status==="OPEN" ? (a.severity==="bad" ? "CRITICAL · OPEN" : "WARN · OPEN") : (a.status==="ACK" ? "ACKED" : "CLOSED");
+  byId('rightStatus').textContent = statusBadge;
+  byId('rightStatus').className = `badge ${a.severity==="bad" ? "bad" : (a.severity==="warn" ? "warn" : "")}`;
+
+  const kv = [
+    ["告警 ID", `<span class="chip"><span class="mini">${a.id}</span></span>`],
+    ["事件 ID", `<span class="chip"><span class="mini">${a.eventId}</span></span>`],
+    ["船舶", a.vessel],
+    ["嚴重度", a.severity==="bad" ? "CRITICAL" : "WARN"],
+    ["狀態", a.status],
+    ["摘要", a.summary],
+    ["觸發原因", a.detail],
+    ["Plan 版本", (ev?.planRev || plan?.rev || "—")],
+    ["時間", `${new Date(a.createdAt).toLocaleString()}`],
+    ["位置", ev ? `${ev.lat.toFixed(4)}, ${ev.lon.toFixed(4)}` : "—"],
+    ["航行狀態", ev ? `SOG ${ev.sog}kn · COG ${ev.cog}°` : "—"],
+    ["門檻/去噪", ev?.threshold || "—"]
+  ];
+  byId('detailKv').innerHTML = kv.map(([k,v])=> `<div class="k">${k}</div><div class="v">${v}</div>`).join("");
+
+  // log
+  const logEl = byId('log');
+  logEl.innerHTML = a.logs.map(x=>`
+    <div class="row" style="border:0; padding:8px 0;">
+      <div class="left">
+        <div class="dot ${x.by==='system' ? 'warn' : 'ok'}"></div>
+        <div class="meta">
+          <div class="a">${x.msg}</div>
+          <div class="b">${fmtTime(x.t)} · ${x.by}</div>
+        </div>
+      </div>
+    </div>
+  `).join("") || `<div class="muted">尚無紀錄</div>`;
+  byId('auditBadge').textContent = `Log: ${a.logs.length}`;
+
+  // mail preview
+  const mail = composeMail(a, ev);
+  byId('mailPreview').innerHTML = `<div style="white-space:pre-wrap; font-family:var(--mono); font-size:11.5px; line-height:1.55;">${escapeHtml(mail)}</div>`;
+
+  // buttons
+  btnAck.disabled = (a.status!=="OPEN");
+  btnAssign.disabled = (a.status==="CLOSED");
+  btnClose.disabled = (a.status==="CLOSED");
+}
+
+function escapeHtml(str){
+  return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+
+byId('btnAddNote').addEventListener('click', ()=>{
+  const a = state.alerts.find(x=>x.id===state.selectedAlertId);
+  if(!a) return;
+  const note = byId('txtNote').value.trim();
+  if(!note){ toast("請輸入備註"); return; }
+  a.logs.push({t: nowISO(), by:"operator", msg: note});
+  byId('txtNote').value="";
+  renderRightPanel();
+  toast("已寫入留痕");
+});
+
+byId('btnPreviewMail').addEventListener('click', ()=>{
+  const a = state.alerts.find(x=>x.id===state.selectedAlertId);
+  if(!a) return;
+  const ev = state.events.find(e=>e.id===a.eventId);
+  openModal("Email/Push 通知預覽（Demo）", `
+    <div class="muted" style="line-height:1.7;">此內容符合『事件摘要、觸發原因/門檻、關聯 Plan 版本、回到戰情室連結』的通知要求（Demo 版）。</div>
+    <div class="hr"></div>
+    <pre style="white-space:pre-wrap; font-family:var(--mono); font-size:12px; line-height:1.55; margin:0;">${escapeHtml(composeMail(a, ev))}</pre>
+  `);
+});
+
+byId('btnAck').addEventListener('click', ()=>{
+  const a = state.alerts.find(x=>x.id===state.selectedAlertId);
+  if(!a || a.status!=="OPEN") return;
+  a.status="ACK";
+  a.ackAt=nowISO();
+  a.logs.push({t:nowISO(), by:"operator", msg:`Acked by duty officer`});
+  renderRightPanel();
+  setPills();
+  toast("已 Ack");
+});
+
+byId('btnAssign').addEventListener('click', ()=>{
+  const a = state.alerts.find(x=>x.id===state.selectedAlertId);
+  if(!a || a.status==="CLOSED") return;
+  openModal("Assign（Demo）", `
+    <div class="grid-2">
+      <div>
+        <div class="tiny muted">指派給</div>
+        <select id="assignTo" class="input">
+          <option>Duty Team A</option>
+          <option>Duty Team B</option>
+          <option>Marine Ops Manager</option>
+        </select>
+      </div>
+      <div>
+        <div class="tiny muted">優先級</div>
+        <select id="assignPrio" class="input">
+          <option>Normal</option>
+          <option>High</option>
+          <option>Immediate</option>
+        </select>
+      </div>
+    </div>
+    <div class="help">小而美的規則：Assign 不改變事實（事件），只改變行動（告警責任）。</div>
+  `);
+  // override OK action for this modal instance
+  const ok = byId('modalOk');
+  const prev = ok.onclick;
+  ok.onclick = ()=>{
+    const to = byId('assignTo')?.value || "—";
+    const pr = byId('assignPrio')?.value || "—";
+    a.assignedTo = to;
+    a.logs.push({t:nowISO(), by:"operator", msg:`Assigned to ${to} (Priority: ${pr})`});
+    renderRightPanel();
+    toast("已指派");
+    closeModal();
+    ok.onclick = prev;
+  };
+});
+
+byId('btnClose').addEventListener('click', ()=>{
+  const a = state.alerts.find(x=>x.id===state.selectedAlertId);
+  if(!a || a.status==="CLOSED") return;
+  openModal("Close（結案）", `
+    <div class="muted" style="line-height:1.7;">結案會封存告警並留下原因；這是稽核/回溯最關鍵的一步。</div>
+    <div class="hr"></div>
+    <div class="tiny muted">結案原因</div>
+    <textarea id="closeReason" placeholder="例：已確認避風改道屬計畫內調整；船舶已回到安全走廊範圍，無後續風險。"></textarea>
+  `);
+  const ok = byId('modalOk');
+  const prev = ok.onclick;
+  ok.onclick = ()=>{
+    const reason = byId('closeReason')?.value?.trim() || "Closed";
+    a.status="CLOSED";
+    a.closedAt=nowISO();
+    a.logs.push({t:nowISO(), by:"operator", msg:`Closed: ${reason}`});
+    renderRightPanel();
+    setPills();
+    toast("已結案");
+    closeModal();
+    ok.onclick = prev;
+  };
+});
+
+/** =========
+ *  Mail template (Demo)
+ *  ========= */
+function composeMail(alert, ev){
+  const planRev = ev?.planRev || getActivePlan(alert.vessel)?.rev || "—";
+  const pos = ev ? `${ev.lat.toFixed(4)}, ${ev.lon.toFixed(4)}` : "—";
+  const time = new Date(alert.createdAt).toISOString().replace('T',' ').slice(0,19) + " UTC";
+  const reason = ev?.threshold || alert.detail;
+  const link = `https://warroom.example/ships/${encodeURIComponent(alert.vessel)}/alerts/${alert.id}`;
+  return [
+    `Subject: [${alert.severity==="bad"?"CRITICAL":"WARN"}] ${alert.vessel} - ${alert.summary}`,
+    ``,
+    `Event Summary:`,
+    `- Alert ID: ${alert.id}`,
+    `- Event ID: ${alert.eventId}`,
+    `- Time (UTC): ${time}`,
+    `- Position: ${pos}`,
+    `- Plan Version: ${planRev}`,
+    ``,
+    `Trigger Reason / Threshold:`,
+    `- ${reason}`,
+    ``,
+    `Action Required:`,
+    `- Please acknowledge receipt and provide status update / corrective action.`,
+    ``,
+    `War Room Link:`,
+    `- ${link}`
+  ].join("\n");
+}
+
+/** =========
+ *  War Room view
+ *  ========= */
+function renderWarRoom(){
+  const container = byId('viewContainer');
+  container.innerHTML = `
+    <div class="split">
+      <div class="card">
+        <div class="card-h">
+          <div class="title">單船視圖｜航線(Plan) vs 航跡(Track)</div>
+          <div class="form-row">
+            <button class="btn small" id="togglePlan">切換 Plan</button>
+            <button class="btn small" id="toggleTrack">切換 Track</button>
+            <button class="btn small" id="toggleFence">切換 Geofence</button>
+          </div>
+        </div>
+        <div class="card-b" style="padding:0;">
+          <div class="map-wrap">
+            <div class="map-tools">
+              <span class="badge" id="mapModeBadge">${state.mode==="live"?"LIVE":"REPLAY"}</span>
+              <span class="badge">${state.vessel}</span>
+              <span class="badge" id="mapPlanBadge">Plan: ${getActivePlan(state.vessel)?.rev || "—"}</span>
+            </div>
+            <div id="map"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px; min-height:0;">
+        <div class="card">
+          <div class="card-h">
+            <div class="title">船隊即時狀態總覽</div>
+            <span class="badge ${computeFleetHealth().sev}">${computeFleetHealth().label}</span>
+          </div>
+          <div class="card-b">
+            <div class="grid-2">
+              <div class="metric">
+                <div class="k">OPEN Alerts</div>
+                <div class="v">${state.alerts.filter(a=>a.status!=="CLOSED").length}</div>
+                <div class="t">${computeFleetHealth().hint}</div>
+              </div>
+              <div class="metric">
+                <div class="k">Active Plans</div>
+                <div class="v">${new Set(state.plans.filter(p=>p.active).map(p=>p.vessel)).size}</div>
+                <div class="t">每艘船 1 個 Active Plan</div>
+              </div>
+            </div>
+            <div class="hr"></div>
+            <div class="tiny muted">近 60 分鐘事件摘要</div>
+            <div style="margin-top:10px;">
+              ${renderEventRows(state.events.slice().sort((a,b)=>b.time.localeCompare(a.time)).slice(0,6))}
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="min-height:0;">
+          <div class="card-h">
+            <div class="title">事件/告警時間軸 (Timeline)</div>
+            <button class="btn small" id="btnGoAlerts">前往處置</button>
+          </div>
+          <div class="card-b scroll" style="max-height:320px;">
+            ${renderTimeline()}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  initMap();
+
+  byId('btnGoAlerts').addEventListener('click', ()=> setView("alerts"));
+  byId('togglePlan').addEventListener('click', ()=> {
+    if(planLayer){ const vis = map.hasLayer(planLayer); vis ? map.removeLayer(planLayer) : planLayer.addTo(map); }
+  });
+  byId('toggleTrack').addEventListener('click', ()=> {
+    if(trackLayer){ const vis = map.hasLayer(trackLayer); vis ? map.removeLayer(trackLayer) : trackLayer.addTo(map); }
+  });
+  byId('toggleFence').addEventListener('click', ()=> {
+    if(geofenceLayer){ const vis = map.hasLayer(geofenceLayer); vis ? map.removeLayer(geofenceLayer) : geofenceLayer.addTo(map); }
+  });
+
+  byId('btnCenter').onclick = ()=> {
+    const plan = getActivePlan(state.vessel);
+    const center = plan?.waypoints?.[Math.floor(plan.waypoints.length/2)] || [22.3,120.6];
+    map.setView(center, 7, {animate:true});
+  };
+}
+
+function renderEventRows(events){
+  if(!events.length) return `<div class="muted">尚無事件</div>`;
+  return events.map(e=>{
+    const sev = (e.type==="XTD") ? "warn" : (e.type==="Zone" ? "bad" : "ok");
+    return `
+      <div class="row">
+        <div class="left">
+          <div class="dot ${dotClass(sev)}"></div>
+          <div class="meta">
+            <div class="a">${e.vessel} · ${e.type} · ${fmtTime(e.time)}</div>
+            <div class="b">${e.threshold}</div>
+          </div>
+        </div>
+        <div class="right">
+          ${e.status==="alert" ? `<span class="badge warn">Alert</span>` : `<span class="badge">Event</span>`}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderTimeline(){
+  const items = [];
+  const events = state.events.slice().sort((a,b)=>b.time.localeCompare(a.time));
+  for(const e of events){
+    const a = state.alerts.find(x=>x.eventId===e.id);
+    const sev = a ? a.severity : (e.type==="Zone" ? "bad" : (e.type==="XTD" ? "warn" : "ok"));
+    items.push(`
+      <div class="row" style="cursor:pointer;" onclick="window.__selectFromTimeline('${a? a.id : ''}','${e.id}')">
+        <div class="left">
+          <div class="dot ${dotClass(sev)}"></div>
+          <div class="meta">
+            <div class="a">${e.vessel} · ${a ? "ALERT" : "EVENT"} · ${e.type}</div>
+            <div class="b">${fmtTime(e.time)} · Plan ${e.planRev} · ${e.threshold}</div>
+          </div>
+        </div>
+        <div class="right">
+          ${a ? `<span class="badge ${a.severity}">${a.status}</span>` : `<span class="badge">Logged</span>`}
+        </div>
+      </div>
+    `);
+  }
+  return items.join("");
+}
+window.__selectFromTimeline = (alertId, eventId)=>{
+  if(alertId){
+    selectAlert(alertId);
+    setView("alerts");
+  }else{
+    // center map on event (if on warroom)
+    const e = state.events.find(x=>x.id===eventId);
+    if(e && map){
+      map.setView([e.lat, e.lon], 7, {animate:true});
+      toast("已定位事件");
+    }
+  }
+};
+
+/** =========
+ *  Plans view
+ *  ========= */
+function renderPlans(){
+  const container = byId('viewContainer');
+  const plans = state.plans.filter(p=>p.vessel===state.vessel).sort((a,b)=>b.uploadedAt.localeCompare(a.uploadedAt));
+  const active = getActivePlan(state.vessel);
+
+  container.innerHTML = `
+    <div style="padding:12px; height:100%; display:grid; grid-template-columns: 1fr 1fr; gap:12px; min-height:0;">
+      <div class="card">
+        <div class="card-h">
+          <div class="title">匯入航行計畫（文件/數位資料）</div>
+          <span class="badge">Upload</span>
+        </div>
+        <div class="card-b">
+          <div class="tiny muted">檔案上傳（Demo，不讀檔）</div>
+          <input class="input" type="file" id="filePlan" accept=".pdf,.docx,.xlsx,.csv" />
+          <div class="hr"></div>
+
+          <div class="grid-2">
+            <div>
+              <div class="tiny muted">版本原因</div>
+              <input class="input" id="inpReason" placeholder="例：氣象因素調整 / 人為改道" />
+            </div>
+            <div>
+              <div class="tiny muted">設定為 Active Plan</div>
+              <select class="input" id="selActive">
+                <option value="yes">是</option>
+                <option value="no">否</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top:10px; justify-content:flex-end;">
+            <button class="btn primary" id="btnImport">匯入並解析（Mock）</button>
+          </div>
+
+          <div class="help">
+            匯入後會自動產生版本號（Rev.n），並可切換「監控基準」為最新生效版本；舊版本封存以供差異比對與稽核回溯。
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="min-height:0;">
+        <div class="card-h">
+          <div class="title">版本清單｜${state.vessel}</div>
+          <span class="badge ok">Active: ${active?.rev || "—"}</span>
+        </div>
+        <div class="card-b scroll" style="padding:0;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width:110px;">版本</th>
+                <th>匯入時間</th>
+                <th>原因</th>
+                <th style="width:130px;">動作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${plans.map(p=>`
+                <tr>
+                  <td><span class="chip"><span class="mini">${p.rev}</span></span> ${p.active? `<span class="badge ok" style="margin-left:6px;">Active</span>`:""}</td>
+                  <td>${new Date(p.uploadedAt).toLocaleString()}</td>
+                  <td>${p.reason || "-"}</td>
+                  <td>
+                    <button class="btn small ${p.active?'':'primary'}" onclick="window.__setActivePlan('${p.vessel}','${p.rev}')">${p.active?'已生效':'設為 Active'}</button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+
+  byId('btnImport').addEventListener('click', ()=>{
+    const reason = byId('inpReason').value.trim() || "Imported";
+    const setActive = byId('selActive').value === "yes";
+    const vessel = state.vessel;
+
+    const existing = state.plans.filter(p=>p.vessel===vessel);
+    const nextRev = "Rev." + (existing.length + 1);
+
+    // create a slightly perturbed waypoint list based on current active
+    const base = getActivePlan(vessel)?.waypoints || [[22.3,120.4],[21.9,120.6],[21.5,120.9]];
+    const waypoints = base.map(([lat,lon], idx)=> [lat + (Math.random()-0.5)*0.12, lon + (Math.random()-0.5)*0.12]);
+
+    state.plans.push({
+      vessel, rev: nextRev, uploadedAt: nowISO(), reason,
+      active: false,
+      waypoints
+    });
+    if(setActive){
+      state.plans.forEach(p=>{ if(p.vessel===vessel) p.active = (p.rev===nextRev); });
+      // create audit log as an "event" (mock)
+      state.events.unshift({
+        id:"EVT-" + Math.floor(10000+Math.random()*89999),
+        type:"PlanChange",
+        vessel,
+        time: nowISO(),
+        lat: waypoints[0][0],
+        lon: waypoints[0][1],
+        sog: 0, cog: 0,
+        planRev: nextRev,
+        threshold:`Plan switched to ${nextRev} (Reason: ${reason})`,
+        status:"event"
+      });
+    }
+    toast("已匯入（Mock）");
+    setView("plans");
+  });
+}
+
+window.__setActivePlan = (vessel, rev)=>{
+  state.plans.forEach(p=>{ if(p.vessel===vessel) p.active = (p.rev===rev); });
+  state.events.unshift({
+    id:"EVT-" + Math.floor(10000+Math.random()*89999),
+    type:"PlanChange",
+    vessel,
+    time: nowISO(),
+    lat: getActivePlan(vessel)?.waypoints?.[0]?.[0] || 22.3,
+    lon: getActivePlan(vessel)?.waypoints?.[0]?.[1] || 120.4,
+    sog: 0, cog: 0,
+    planRev: rev,
+    threshold:`Monitoring baseline switched to Active Plan ${rev}`,
+    status:"event"
+  });
+  toast("已切換 Active Plan");
+  setView("warroom");
+};
+
+/** =========
+ *  Alerts view
+ *  ========= */
+function renderAlerts(){
+  const container = byId('viewContainer');
+  const openAlerts = state.alerts.slice().sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+
+  container.innerHTML = `
+    <div style="padding:12px; height:100%; display:grid; grid-template-columns: 1fr; gap:12px; min-height:0;">
+      <div class="card" style="min-height:0;">
+        <div class="card-h">
+          <div class="title">告警列表（可篩選）</div>
+          <div class="form-row">
+            <select id="fltStatus" style="width:150px;">
+              <option value="ALL">狀態：全部</option>
+              <option value="OPEN">OPEN</option>
+              <option value="ACK">ACK</option>
+              <option value="CLOSED">CLOSED</option>
+            </select>
+            <select id="fltSev" style="width:160px;">
+              <option value="ALL">嚴重度：全部</option>
+              <option value="bad">CRITICAL</option>
+              <option value="warn">WARN</option>
+            </select>
+            <input id="fltKeyword" class="input" style="width:220px;" placeholder="關鍵字（船名/ID/類型）" />
+          </div>
+        </div>
+        <div class="card-b scroll" style="padding:0;">
+          <table class="table" id="alertsTable">
+            <thead>
+              <tr>
+                <th style="width:120px;">嚴重度</th>
+                <th style="width:140px;">狀態</th>
+                <th>摘要</th>
+                <th style="width:180px;">船舶</th>
+                <th style="width:220px;">時間</th>
+                <th style="width:110px;">動作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${openAlerts.map(a=>`
+                <tr data-id="${a.id}" style="cursor:pointer;">
+                  <td>${a.severity==="bad" ? `<span class="badge bad">CRITICAL</span>` : `<span class="badge warn">WARN</span>`}</td>
+                  <td><span class="badge ${a.status==="CLOSED"?"":"ok"}">${a.status}</span></td>
+                  <td>${a.summary}<div class="tiny muted" style="margin-top:4px;">${a.detail}</div></td>
+                  <td>${a.vessel}</td>
+                  <td>${new Date(a.createdAt).toLocaleString()}</td>
+                  <td><button class="btn small" onclick="window.__openAlert('${a.id}')">開啟</button></td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // row click
+  document.querySelectorAll('#alertsTable tbody tr').forEach(tr=>{
+    tr.addEventListener('click', ()=>{
+      const id = tr.getAttribute('data-id');
+      selectAlert(id);
+      // highlight
+      document.querySelectorAll('#alertsTable tbody tr').forEach(x=>x.style.background="");
+      tr.style.background = "rgba(96,165,250,.10)";
+    });
+  });
+
+  // filters
+  const applyFilters = ()=>{
+    const st = byId('fltStatus').value;
+    const sev = byId('fltSev').value;
+    const kw = (byId('fltKeyword').value || "").toLowerCase().trim();
+    document.querySelectorAll('#alertsTable tbody tr').forEach(tr=>{
+      const id = tr.getAttribute('data-id');
+      const a = state.alerts.find(x=>x.id===id);
+      const passSt = (st==="ALL") || (a.status===st);
+      const passSev = (sev==="ALL") || (a.severity===sev);
+      const text = `${a.id} ${a.eventId} ${a.vessel} ${a.summary} ${a.detail}`.toLowerCase();
+      const passKw = !kw || text.includes(kw);
+      tr.style.display = (passSt && passSev && passKw) ? "" : "none";
+    });
+  };
+  byId('fltStatus').addEventListener('change', applyFilters);
+  byId('fltSev').addEventListener('change', applyFilters);
+  byId('fltKeyword').addEventListener('input', applyFilters);
+
+  // keep right panel
+  renderRightPanel();
+}
+
+window.__openAlert = (id)=>{
+  selectAlert(id);
+  toast("已開啟告警");
+};
+
+/** =========
+ *  Geofence view
+ *  ========= */
+function renderGeofence(){
+  const container = byId('viewContainer');
+  container.innerHTML = `
+    <div class="split">
+      <div class="card">
+        <div class="card-h">
+          <div class="title">地圖繪製｜電子圍籬 (Demo)</div>
+          <div class="form-row">
+            <button class="btn small" id="btnClearFence">清除繪製</button>
+            <button class="btn small primary" id="btnSaveFence">儲存圍籬（Mock）</button>
+          </div>
+        </div>
+        <div class="card-b" style="padding:0;">
+          <div class="map-wrap">
+            <div class="map-tools">
+              <span class="badge">Draw: Polygon / Circle</span>
+              <span class="badge">Window: 可設定</span>
+            </div>
+            <div id="map"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="min-height:0;">
+        <div class="card-h">
+          <div class="title">圍籬清單</div>
+          <span class="badge">${state.geofences.length} items</span>
+        </div>
+        <div class="card-b scroll" style="padding:0;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width:110px;">ID</th>
+                <th>名稱</th>
+                <th style="width:120px;">類型</th>
+                <th style="width:120px;">狀態</th>
+                <th style="width:120px;">動作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${state.geofences.map(g=>`
+                <tr>
+                  <td><span class="chip"><span class="mini">${g.id}</span></span></td>
+                  <td>${g.name}<div class="tiny muted" style="margin-top:4px;">Window: ${g.window}</div></td>
+                  <td>${g.type}</td>
+                  <td>${g.active ? `<span class="badge ok">Active</span>` : `<span class="badge">Off</span>`}</td>
+                  <td><button class="btn small" onclick="window.__focusFence('${g.id}')">定位</button></td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+
+  initMap({enableDraw:true, showPlan:true, showTrack:false, showGeofence:true});
+
+  byId('btnClearFence').addEventListener('click', ()=>{
+    if(drawLayer) drawLayer.clearLayers();
+    toast("已清除繪製");
+  });
+
+  byId('btnSaveFence').addEventListener('click', ()=>{
+    // take first drawn layer as new geofence (demo)
+    const layers = [];
+    drawLayer.eachLayer(l=> layers.push(l));
+    if(!layers.length){ toast("請先繪製 Polygon 或 Circle"); return; }
+
+    const l = layers[layers.length-1];
+    const id = "GF-" + String(100 + Math.floor(Math.random()*900)).padStart(3,'0');
+    const name = "自訂圍籬 " + id;
+    let gf;
+    if(l instanceof L.Circle){
+      const c = l.getLatLng();
+      gf = {id, name, type:"circle", active:true, window:"Custom", severity:"warn", center:[c.lat, c.lng], radiusM: l.getRadius()};
+    }else{
+      const pts = l.getLatLngs()[0].map(x=>[x.lat,x.lng]);
+      gf = {id, name, type:"polygon", active:true, window:"Custom", severity:"warn", coords:pts};
+    }
+    state.geofences.unshift(gf);
+    toast("已儲存圍籬（Mock）");
+    setView("geofence");
+  });
+}
+
+window.__focusFence = (id)=>{
+  const g = state.geofences.find(x=>x.id===id);
+  if(!g || !map) return;
+  if(g.type==="circle"){
+    map.setView(g.center, 7, {animate:true});
+  }else{
+    const bounds = L.latLngBounds(g.coords);
+    map.fitBounds(bounds.pad(0.2));
+  }
+  toast("已定位圍籬");
+};
+
+/** =========
+ *  Audit view
+ *  ========= */
+function renderAudit(){
+  const container = byId('viewContainer');
+  const plan = getActivePlan(state.vessel);
+  const planHistory = state.plans.filter(p=>p.vessel===state.vessel).sort((a,b)=>b.uploadedAt.localeCompare(a.uploadedAt));
+  const events = state.events.filter(e=>e.vessel===state.vessel).sort((a,b)=>b.time.localeCompare(a.time));
+
+  container.innerHTML = `
+    <div style="padding:12px; height:100%; display:grid; grid-template-columns: 1fr; gap:12px; min-height:0;">
+      <div class="card">
+        <div class="card-h">
+          <div class="title">稽核重點（Audit-Ready Checklist）</div>
+          <span class="badge">Demo</span>
+        </div>
+        <div class="card-b">
+          <div class="grid-2">
+            <div class="metric">
+              <div class="k">Active Plan</div>
+              <div class="v">${plan?.rev || "—"}</div>
+              <div class="t">監控基準（僅 Active Plan）</div>
+            </div>
+            <div class="metric">
+              <div class="k">Traceability</div>
+              <div class="v">${events.length}</div>
+              <div class="t">事件保存 + 告警閉環留痕</div>
+            </div>
+          </div>
+          <div class="hr"></div>
+          <div class="muted" style="line-height:1.75;">
+            ✓ 版本切換原因與時間<br/>
+            ✓ 事件觸發門檻與去噪條件（N 筆 / T 分鐘）<br/>
+            ✓ 關聯航行計畫版本（Active Plan Version）<br/>
+            ✓ 告警處置流程（Ack/Assign/Close）與備註留痕
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="min-height:0;">
+        <div class="card-h">
+          <div class="title">Plan 版本歷程｜${state.vessel}</div>
+          <span class="badge">${planHistory.length} versions</span>
+        </div>
+        <div class="card-b scroll" style="padding:0;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width:120px;">版本</th>
+                <th>匯入時間</th>
+                <th>原因</th>
+                <th style="width:120px;">差異（Mock）</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${planHistory.map((p,idx)=>`
+                <tr>
+                  <td>${p.active? `<span class="badge ok">Active</span>`:""} <span class="chip" style="margin-left:6px;"><span class="mini">${p.rev}</span></span></td>
+                  <td>${new Date(p.uploadedAt).toLocaleString()}</td>
+                  <td>${p.reason || "-"}</td>
+                  <td>${idx<planHistory.length-1 ? `${(Math.random()*2.5+0.3).toFixed(2)}nm` : "—"}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/** =========
+ *  Map init + overlays
+ *  ========= */
+function initMap(opts={}){
+  const {enableDraw=false, showPlan=true, showTrack=true, showGeofence=true} = opts;
+
+  // clear old timer
+  if(playbackTimer){ clearInterval(playbackTimer); playbackTimer=null; }
+
+  // destroy old map instance (Leaflet doesn't like re-init on same div without cleanup)
+  if(map){
+    map.off();
+    map.remove();
+  }
+
+  map = L.map('map', { zoomControl:true }).setView([22.3, 120.6], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  planLayer = L.layerGroup();
+  trackLayer = L.layerGroup();
+  geofenceLayer = L.layerGroup();
+  drawLayer = L.featureGroup().addTo(map);
+
+  if(showPlan) drawPlan();
+  if(showTrack) drawTrack();
+  if(showGeofence) drawGeofences();
+
+  if(showPlan || showTrack || showGeofence){
+    const bounds = [];
+    planLayer.eachLayer(l=> { if(l.getBounds) bounds.push(l.getBounds()); });
+    trackLayer.eachLayer(l=> { if(l.getBounds) bounds.push(l.getBounds()); });
+    geofenceLayer.eachLayer(l=> { if(l.getBounds) bounds.push(l.getBounds()); });
+    if(bounds.length){
+      let b = bounds[0];
+      for(let i=1;i<bounds.length;i++) b = b.extend(bounds[i]);
+      map.fitBounds(b.pad(0.15));
+    }
+  }
+
+  if(showPlan) planLayer.addTo(map);
+  if(showTrack) trackLayer.addTo(map);
+  if(showGeofence) geofenceLayer.addTo(map);
+
+  if(enableDraw){
+    const drawControl = new L.Control.Draw({
+      edit: { featureGroup: drawLayer },
+      draw: {
+        polyline: false,
+        rectangle: false,
+        marker: false,
+        circlemarker: false,
+        polygon: { allowIntersection: false, showArea: true },
+        circle: true
+      }
+    });
+    map.addControl(drawControl);
+
+    map.on(L.Draw.Event.CREATED, function (e) {
+      drawLayer.addLayer(e.layer);
+      toast("已新增繪製圖形");
+    });
+  }
+
+  // playback for demo
+  if(state.mode==="replay"){
+    startReplay();
+  }
+}
+
+function drawPlan(){
+  const plan = getActivePlan(state.vessel);
+  if(!plan) return;
+  const pts = plan.waypoints.map(([lat,lon])=> [lat,lon]);
+  const line = L.polyline(pts, { weight:4, opacity:0.9 });
+  planLayer.addLayer(line);
+
+  // safety corridor (XTD) demo: buffer via offset polyline is non-trivial; we fake with wide semi-transparent line
+  const corridor = L.polyline(pts, { weight:14, opacity:0.18 });
+  planLayer.addLayer(corridor);
+
+  pts.forEach((p,idx)=>{
+    const m = L.circleMarker(p, { radius:4, opacity:0.9, fillOpacity:0.85 });
+    m.bindTooltip(`WP${idx+1} · ${p[0].toFixed(3)}, ${p[1].toFixed(3)} · ${plan.rev}`, {direction:"top"});
+    planLayer.addLayer(m);
+  });
+}
+
+function genTrackPointsFromPlan(plan){
+  // Create a plausible track around the plan for demo
+  const pts = [];
+  const wps = plan.waypoints;
+  for(let i=0;i<wps.length-1;i++){
+    const [aLat,aLon] = wps[i];
+    const [bLat,bLon] = wps[i+1];
+    const steps = 12;
+    for(let s=0;s<steps;s++){
+      const t = s/steps;
+      const lat = aLat + (bLat-aLat)*t + (Math.random()-0.5)*0.06;
+      const lon = aLon + (bLon-aLon)*t + (Math.random()-0.5)*0.06;
+      pts.push([lat,lon]);
+    }
+  }
+  return pts;
+}
+
+function drawTrack(){
+  const plan = getActivePlan(state.vessel);
+  if(!plan) return;
+
+  const pts = genTrackPointsFromPlan(plan);
+  const line = L.polyline(pts, { weight:3, opacity:0.9, dashArray:"6 6" });
+  trackLayer.addLayer(line);
+
+  // current position marker
+  const cur = pts[pts.length-1];
+  const m = L.marker(cur);
+  m.bindPopup(`<b>${state.vessel}</b><br/>SOG 14.2kn · COG 192°<br/><span class="muted">(${cur[0].toFixed(4)}, ${cur[1].toFixed(4)})</span>`);
+  trackLayer.addLayer(m);
+
+  // mark event points for this vessel
+  state.events.filter(e=>e.vessel===state.vessel).forEach(e=>{
+    const isAlert = state.alerts.some(a=>a.eventId===e.id && a.status!=="CLOSED");
+    const sev = isAlert ? (state.alerts.find(a=>a.eventId===e.id)?.severity || "warn") : (e.type==="Zone" ? "bad" : (e.type==="XTD" ? "warn" : "ok"));
+    const mk = L.circleMarker([e.lat,e.lon], { radius:7, opacity:0.9, fillOpacity:0.65 });
+    mk.bindPopup(`
+      <div style="font-family:var(--sans);">
+        <b>${isAlert ? "ALERT" : "EVENT"} · ${e.type}</b><br/>
+        <span class="muted">${e.id} · ${fmtTime(e.time)}</span><br/>
+        Plan: ${e.planRev}<br/>
+        ${e.threshold}<br/>
+        <button class="btn small" style="margin-top:8px;" onclick="window.__openFromMap('${e.id}')">${isAlert ? "開啟告警" : "查看事件"}</button>
+      </div>
+    `);
+    // color is default; we keep it neutral to respect constraints (no explicit colors in this prototype)
+    trackLayer.addLayer(mk);
+  });
+}
+
+window.__openFromMap = (eventId)=>{
+  const alert = state.alerts.find(a=>a.eventId===eventId && a.status!=="CLOSED");
+  if(alert){
+    setView("alerts");
+    selectAlert(alert.id);
+  }else{
+    openModal("事件詳情（Event）", `
+      <div class="muted">此事件尚未升級為告警（Demo）。若門檻/持續時間達成，即可由事件中心轉入告警中心。</div>
+      <div class="hr"></div>
+      <pre style="white-space:pre-wrap; font-family:var(--mono); font-size:12px; line-height:1.55; margin:0;">${escapeHtml(JSON.stringify(state.events.find(e=>e.id===eventId), null, 2))}</pre>
+    `);
+  }
+};
+
+function drawGeofences(){
+  state.geofences.forEach(g=>{
+    if(!g.active) return;
+    if(g.type==="circle"){
+      const c = L.circle(g.center, { radius: g.radiusM, opacity:0.85, fillOpacity:0.08 });
+      c.bindTooltip(`${g.name} · ${g.id} · ${g.window}`);
+      geofenceLayer.addLayer(c);
+    }else{
+      const p = L.polygon(g.coords, { opacity:0.85, fillOpacity:0.08 });
+      p.bindTooltip(`${g.name} · ${g.id} · ${g.window}`);
+      geofenceLayer.addLayer(p);
+    }
+  });
+}
+
+function startReplay(){
+  // Simple animation: move a marker along plan path
+  const plan = getActivePlan(state.vessel);
+  if(!plan) return;
+  const pts = genTrackPointsFromPlan(plan);
+  let idx = 0;
+  const marker = L.marker(pts[0]).addTo(map);
+  playbackTimer = setInterval(()=>{
+    idx = (idx+1) % pts.length;
+    marker.setLatLng(pts[idx]);
+  }, 450);
+}
+
+/** =========
+ *  Event simulation (demo)
+ *  ========= */
+function simulateEventAndMaybeAlert(){
+  const vessel = state.vessel;
+  const plan = getActivePlan(vessel) || state.plans.find(p=>p.vessel===vessel);
+  const base = plan?.waypoints?.[Math.floor((plan.waypoints.length-1)*Math.random())] || [22.2,120.5];
+
+  const types = ["XTD","Speed","Zone","Anchor"];
+  const type = types[Math.floor(Math.random()*types.length)];
+  const id = "EVT-" + Math.floor(10000+Math.random()*89999);
+  const lat = base[0] + (Math.random()-0.5)*0.25;
+  const lon = base[1] + (Math.random()-0.5)*0.25;
+
+  let threshold = "";
+  let severity = "warn";
+  let toAlert = false;
+
+  if(type==="XTD"){
+    const xtd = (Math.random()*2.8+0.6).toFixed(1);
+    threshold = `XTD ${xtd}nm > 2.0nm for 10m (N>=3)`;
+    toAlert = Number(xtd) > 2.0;
+    severity = Number(xtd) > 2.6 ? "bad" : "warn";
+  }else if(type==="Speed"){
+    const sog = (Math.random()*5.0).toFixed(1);
+    threshold = `SOG ${sog}kn < 3kn for 20m (N>=4)`;
+    toAlert = Number(sog) < 2.5;
+    severity = "warn";
+  }else if(type==="Zone"){
+    const dist = (Math.random()*8.0).toFixed(1);
+    threshold = `Approach Restricted Zone < ${dist}nm (T>=5m)`;
+    toAlert = Number(dist) < 5.0;
+    severity = "bad";
+  }else{
+    threshold = `Anchor drift beyond boundary (T>=8m)`;
+    toAlert = Math.random() > 0.45;
+    severity = "warn";
+  }
+
+  const ev = {
+    id, type, vessel,
+    time: nowISO(),
+    lat, lon,
+    sog: (Math.random()*16+1).toFixed(1),
+    cog: Math.floor(Math.random()*360),
+    planRev: plan?.rev || "—",
+    threshold,
+    status: toAlert ? "alert" : "event",
+    severity
+  };
+  state.events.unshift(ev);
+
+  if(toAlert){
+    const aid = "ALT-" + Math.floor(10000+Math.random()*89999);
+    state.alerts.unshift({
+      id: aid,
+      eventId: id,
+      vessel,
+      severity,
+      status:"OPEN",
+      createdAt: nowISO(),
+      ackAt:null,
+      assignedTo:null,
+      closedAt:null,
+      summary: type==="XTD" ? "航線偏離超過安全走廊 (XTD)" :
+               type==="Zone" ? "接近限制/高風險海域 (Zone)" :
+               type==="Speed" ? "航速異常或停滯 (Speed)" : "漂航/下錨超界 (Anchor)",
+      detail: `${threshold}，關聯 Active Plan ${plan?.rev || "—"}`,
+      logs: [{t: nowISO(), by:"system", msg:`Alert generated from event ${id}`}]
+    });
+  }
+}
+
+/** =========
+ *  Init
+ *  ========= */
+function init(){
+  // initial right panel
+  renderRightPanel();
+  // initial view
+  setView("warroom");
+}
+init();
+</script>
+</body>
+</html>
