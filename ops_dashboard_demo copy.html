@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YangMing Marine - Fleet Safety Operation Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --ym-teal: #009688; --ym-dark: #0f172a; --ym-panel: #1e293b; --chat-captain: #134e4a; --chat-user: #334155; }
+        body { background-color: var(--ym-dark); color: #e2e8f0; font-family: 'Microsoft JhengHei', sans-serif; }
+        
+        .hidden-view { display: none !important; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Map Customization */
+        .leaflet-container { background: #0b1120; }
+        .leaflet-popup-content-wrapper { background: rgba(15, 23, 42, 0.95); color: white; border: 1px solid #009688; border-radius: 8px; }
+        .leaflet-popup-tip { background: rgba(15, 23, 42, 0.95); border-top: 1px solid #009688; }
+        
+        /* Waypoint Marker Style */
+        .wp-label { background: transparent; border: none; box-shadow: none; }
+        .wp-icon { color: #2dd4bf; text-shadow: 0 0 5px rgba(0,0,0,0.5); transition: transform 0.2s; }
+        .wp-icon:hover { transform: scale(1.2); color: white; }
+
+        /* UI Components from Images */
+        .setting-box { background-color: #172033; border: 1px solid #334155; border-radius: 8px; }
+        .chat-bubble { padding: 12px; border-radius: 12px; font-size: 0.9rem; position: relative; max-width: 85%; margin-bottom: 12px; }
+        .chat-user { background-color: var(--chat-user); border: 1px solid #475569; color: #e2e8f0; border-top-left-radius: 2px; }
+        .chat-captain { background-color: rgba(0, 150, 136, 0.2); border: 1px solid rgba(0, 150, 136, 0.4); color: #ccfbf1; border-top-right-radius: 2px; margin-left: auto; }
+        
+        /* Pulse Animation */
+        .pulse-red { animation: pulse-red 2s infinite; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <header class="h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-5 shrink-0 z-50 shadow-md">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-teal-700 rounded flex items-center justify-center font-bold text-white text-xl shadow-lg">Y</div>
+            <div>
+                <h1 class="text-lg font-bold tracking-wide text-white">YM 航行安全戰情室</h1>
+                <p class="text-[10px] text-slate-400 uppercase">Shore-based Fleet Operation Center</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-6">
+            <button onclick="switchMainView('global-alerts')" class="flex items-center gap-3 bg-red-900/20 border border-red-500/30 px-4 py-1.5 rounded-full hover:bg-red-900/40 transition cursor-pointer group">
+                <span class="flex h-2 w-2 relative" id="header-ping">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+                <span class="text-xs text-red-300 font-bold group-hover:text-white transition">異常告警: <span id="header-alert-count">2</span></span>
+            </button>
+            <div class="w-px h-8 bg-slate-700"></div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <div class="text-sm font-bold text-slate-200">User A (岸端監管)</div>
+                    <div class="text-xs text-slate-500">權限: Admin</div>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-user-shield text-slate-400"></i></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <nav class="w-20 bg-slate-900 border-r border-slate-700 flex flex-col items-center py-6 shrink-0 z-40 gap-4">
+            <button onclick="switchMainView('dashboard')" id="nav-dashboard" class="w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-1 transition bg-teal-600/20 text-teal-400 border border-teal-500/50 shadow-[0_0_15px_rgba(20,184,166,0.2)]">
+                <i class="fa-solid fa-map-location-dot text-xl"></i><span class="text-[9px] font-bold">監控</span>
+            </button>
+            <button onclick="switchMainView('global-alerts')" id="nav-alerts" class="w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-1 transition text-slate-400 hover:text-white hover:bg-slate-800">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i><span class="text-[9px] font-bold">告警</span>
+            </button>
+        </nav>
+
+        <main class="flex-1 relative bg-slate-800 overflow-hidden">
+            
+            <div id="view-dashboard" class="w-full h-full flex fade-in">
+                <div class="w-96 bg-slate-900 border-r border-slate-700 flex flex-col z-20 shadow-xl">
+                    <div class="p-4 border-b border-slate-700 bg-slate-800/50">
+                        <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700 mb-3">
+                            <button onclick="setFilter('all')" id="filter-all" class="flex-1 py-1.5 text-xs font-bold rounded text-slate-400 hover:text-white transition">全船隊 (25)</button>
+                            <button onclick="setFilter('mine')" id="filter-mine" class="flex-1 py-1.5 text-xs font-bold rounded bg-teal-600 text-white shadow transition">我的管轄 (8)</button>
+                            <button onclick="setFilter('abnormal')" id="filter-abnormal" class="flex-1 py-1.5 text-xs font-bold rounded text-red-400 hover:text-white hover:bg-red-900/30 transition">異常 (5)</button>
+                        </div>
+                        <div class="relative">
+                            <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                            <input type="text" id="ship-search" onkeyup="renderShipList()" placeholder="搜尋船名 / IMO..." class="w-full bg-slate-900 border border-slate-600 rounded pl-8 py-2 text-sm text-white focus:border-teal-500 outline-none">
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-y-auto" id="ship-list-container"></div>
+                    <div class="p-2 bg-slate-900 border-t border-slate-700 text-center text-[10px] text-slate-500">共 25 艘船舶連線中</div>
+                </div>
+
+                <div class="flex-1 relative">
+                    <div id="map-main" class="w-full h-full z-0 bg-slate-800"></div>
+                    <div class="absolute bottom-6 right-6 bg-slate-900/90 p-3 rounded-lg border border-slate-600 text-xs text-white z-[400] shadow-lg pointer-events-none">
+                        <div class="font-bold text-slate-400 mb-2 border-b border-slate-700 pb-1">圖資說明 (參考圖4/5)</div>
+                        <div class="flex items-center gap-2 mb-1"><span class="w-3 h-3 rounded-full bg-teal-500"></span> 正常船舶</div>
+                        <div class="flex items-center gap-2 mb-1"><span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span> 異常船舶</div>
+                        <div class="flex items-center gap-2 mb-1"><i class="fa-solid fa-location-arrow text-teal-400 text-[10px]"></i> 航線轉向點 (可點擊)</div>
+                        <div class="flex items-center gap-2 mb-1"><span class="w-3 h-3 border border-red-500 bg-red-500/20"></span> 電子圍籬 (ECA/No-Go)</div>
+                        <div class="flex items-center gap-2 mb-1"><span class="w-3 h-3 border border-orange-500 border-dashed"></span> 漂航/錨地圈</div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-1 bg-teal-500/30 border border-teal-500"></span> 安全走廊 (XTD)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-global-alerts" class="w-full h-full hidden-view p-8 overflow-y-auto fade-in flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <span class="bg-red-500 w-2 h-8 rounded"></span> 全域告警中心
+                    </h2>
+                    <div class="bg-slate-800 rounded-lg p-1 border border-slate-600 flex">
+                        <button onclick="setAlertScope('all')" id="scope-all" class="px-4 py-1.5 text-xs font-bold rounded text-slate-400 hover:text-white transition">顯示：全船隊</button>
+                        <button onclick="setAlertScope('mine')" id="scope-mine" class="px-4 py-1.5 text-xs font-bold rounded bg-slate-600 text-white shadow transition">顯示：我的管轄</button>
+                    </div>
+                </div>
+                <div class="flex border-b border-slate-700 mb-4">
+                    <button onclick="switchAlertTab('active')" id="tab-ga-active" class="px-6 py-3 text-sm font-bold text-red-400 border-b-2 border-red-400 transition">未結案 (Active)</button>
+                    <button onclick="switchAlertTab('history')" id="tab-ga-history" class="px-6 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-white transition">歷史紀錄 (History)</button>
+                </div>
+                <div class="bg-slate-900 rounded-lg border border-slate-700 overflow-hidden shadow-lg flex-1">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-800 text-slate-400 uppercase text-xs font-bold">
+                            <tr>
+                                <th class="px-6 py-4">狀態</th><th class="px-6 py-4">嚴重度</th><th class="px-6 py-4">類型</th><th class="px-6 py-4">船舶</th><th class="px-6 py-4">管轄人</th><th class="px-6 py-4">時間 (UTC)</th><th class="px-6 py-4">數值</th><th class="px-6 py-4 text-right">功能</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700 text-slate-300" id="global-alert-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-detail" class="w-full h-full hidden-view flex flex-col bg-slate-900 fade-in absolute inset-0 z-50">
+                <div class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6 shrink-0 shadow-md">
+                    <div class="flex items-center gap-4">
+                        <button onclick="closeDetailView()" class="text-slate-400 hover:text-white text-sm flex items-center gap-2 font-bold px-3 py-1 rounded hover:bg-slate-700 transition"><i class="fa-solid fa-arrow-left"></i> 返回總覽</button>
+                        <div class="w-px h-6 bg-slate-600"></div>
+                        <h2 class="text-xl font-bold text-white tracking-wide" id="detail-title">YM WELLNESS</h2>
+                        <span id="detail-status-badge" class="px-2 py-0.5 rounded text-xs border font-bold">Normal</span>
+                    </div>
+                </div>
+                <div class="flex border-b border-slate-700 bg-slate-800/50 px-6">
+                    <button onclick="switchTab('monitoring')" id="tab-monitoring" class="px-6 py-3 text-sm font-bold text-teal-400 border-b-2 border-teal-400 transition">即時監控</button>
+                    <button onclick="switchTab('history')" id="tab-history" class="px-6 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-white transition">歷史告警</button>
+                    <button onclick="switchTab('plans')" id="tab-plans" class="px-6 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-white transition">計畫履歷</button>
+                    <button onclick="switchTab('settings')" id="tab-settings" class="px-6 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-white transition ml-auto border-l border-slate-700">監控參數</button>
+                </div>
+
+                <div id="content-monitoring" class="flex-1 relative tab-content flex">
+                    <div class="w-80 bg-slate-900 border-r border-slate-700 p-4 space-y-4 shrink-0 overflow-y-auto">
+                        <div id="active-alert-widget" class="hidden-view bg-red-900/10 border border-red-500 rounded p-4 shadow-lg pulse-red">
+                            <div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-triangle-exclamation text-red-500 text-xl"></i><h3 class="font-bold text-red-400">即時告警 (Active)</h3></div>
+                            <div class="text-white font-bold text-lg mb-1" id="active-alert-type">XTD 嚴重偏離</div>
+                            <div class="text-xs text-slate-300 mb-3" id="active-alert-val">數值: 2.4nm</div>
+                            <button onclick="openModal()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 rounded text-sm shadow"><i class="fa-regular fa-comments mr-1"></i> 處置 / 結案</button>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded border border-slate-700">
+                            <h4 class="text-xs text-slate-400 uppercase font-bold mb-3 flex justify-between">監控設定狀態 <i class="fa-solid fa-ruler-combined text-teal-500"></i></h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center"><span class="text-xs text-slate-400">當前航段</span><span class="text-xs font-bold text-blue-400">大洋 (Open Sea)</span></div>
+                                <div class="flex justify-between items-center"><span class="text-xs text-slate-400">XTD 門檻</span><span class="text-xs font-mono font-bold text-teal-400" id="mon-xtd">2.0 nm</span></div>
+                                <div class="flex justify-between items-center"><span class="text-xs text-slate-400">漂航限制</span><span class="text-xs font-mono font-bold text-orange-400" id="mon-drift">停用</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded border border-slate-700">
+                            <h4 class="text-xs text-slate-400 uppercase font-bold mb-2">海氣象 (Weather)</h4>
+                            <div class="grid grid-cols-2 gap-2 text-center">
+                                <div class="bg-slate-900 p-2 rounded"><div class="text-[10px] text-slate-500">Wind</div><div class="font-bold text-yellow-400">BF 7</div></div>
+                                <div class="bg-slate-900 p-2 rounded"><div class="text-[10px] text-slate-500">Wave</div><div class="font-bold text-white">4.5 m</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-1 relative"><div id="map-detail" class="w-full h-full z-0 bg-slate-800"></div></div>
+                </div>
+
+                <div id="content-history" class="flex-1 overflow-y-auto hidden-view tab-content p-8">
+                    <div class="max-w-5xl mx-auto"><h3 class="text-xl font-bold text-white mb-6">歷史告警紀錄</h3><div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden"><table class="w-full text-sm text-left"><thead class="bg-slate-900 text-slate-400 uppercase text-xs font-bold"><tr><th class="px-6 py-4">狀態</th><th class="px-6 py-4">類型</th><th class="px-6 py-4">時間</th><th class="px-6 py-4">處置人</th></tr></thead><tbody class="divide-y divide-slate-700 text-slate-300"><tr><td class="px-6 py-4"><span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-xs font-bold">已結案</span></td><td class="px-6 py-4 font-bold text-white">航速異常低</td><td class="px-6 py-4 text-xs">2026-02-01 08:00 UTC</td><td class="px-6 py-4 text-xs">User A</td></tr></tbody></table></div></div>
+                </div>
+
+                <div id="content-plans" class="flex-1 overflow-y-auto hidden-view tab-content p-8">
+                    <div class="max-w-5xl mx-auto"><h3 class="text-xl font-bold text-white mb-6">航行計畫版本履歷</h3><div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden"><table class="w-full text-sm text-left"><thead class="bg-slate-900 text-slate-400 uppercase text-xs font-bold"><tr><th class="px-6 py-4">版本</th><th class="px-6 py-4">接收時間</th><th class="px-6 py-4">來源</th><th class="px-6 py-4">狀態</th></tr></thead><tbody class="divide-y divide-slate-700 text-slate-300" id="plan-history-body"></tbody></table></div></div>
+                </div>
+
+                <div id="content-settings" class="flex-1 overflow-y-auto hidden-view tab-content p-8">
+                    <div class="max-w-3xl mx-auto bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-2xl">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-teal-400"><i class="fa-solid fa-sliders"></i></div>
+                            <div><h3 class="text-lg font-bold text-white">個別船舶監控參數</h3><p class="text-sm text-slate-500">此設定僅套用於: <span class="text-teal-400 font-bold" id="setting-ship-name">YM WELLNESS</span></p></div>
+                        </div>
+
+                        <h4 class="text-sm font-bold text-teal-500 uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-ruler-horizontal"></i> 1. 航道偏離監控 (XTD LIMITS)</h4>
+                        <div class="grid grid-cols-2 gap-6 mb-8">
+                            <div class="setting-box p-5">
+                                <label class="block text-xs text-slate-400 mb-2 font-bold uppercase">大洋航段 (OPEN SEA)</label>
+                                <div class="flex items-center gap-2"><input type="number" class="bg-slate-900 border border-slate-600 rounded p-2 text-white w-full text-lg font-mono" value="2"><span class="text-slate-500 font-bold">nm</span></div>
+                                <p class="text-[10px] text-slate-600 mt-2">適用於離岸 > 50nm 區域</p>
+                            </div>
+                            <div class="setting-box p-5">
+                                <label class="block text-xs text-slate-400 mb-2 font-bold uppercase">近岸/港口 (COASTAL/PORT)</label>
+                                <div class="flex items-center gap-2"><input type="number" class="bg-slate-900 border border-slate-600 rounded p-2 text-white w-full text-lg font-mono" value="0.5"><span class="text-slate-500 font-bold">nm</span></div>
+                                <p class="text-[10px] text-slate-600 mt-2">適用於進出港或受限水域</p>
+                            </div>
+                        </div>
+
+                        <h4 class="text-sm font-bold text-yellow-500 uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-anchor"></i> 2. 錨地/漂航警戒 (ANCHORAGE MONITORING)</h4>
+                        <div class="setting-box p-6 mb-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <span class="text-white font-bold">啟用抵港前錨地監控</span>
+                                <div class="relative inline-block w-12 h-6"><input type="checkbox" class="peer absolute w-full h-full opacity-0 cursor-pointer" checked><div class="block bg-slate-600 w-full h-full rounded-full peer-checked:bg-yellow-500 transition-colors"></div><div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-6"></div></div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <label class="text-xs text-slate-500 font-bold uppercase">下錨警戒圈半徑</label>
+                                <input type="range" class="flex-1 h-2 bg-slate-700 rounded-lg accent-yellow-500" min="0.1" max="2.0" step="0.1">
+                                <div class="bg-slate-800 border border-slate-600 px-3 py-1 rounded text-white font-mono font-bold w-20 text-center">1 nm</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end"><button class="bg-teal-600 text-white px-6 py-2 rounded font-bold shadow hover:bg-teal-500 transition">儲存設定</button></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="resolution-modal" class="fixed inset-0 bg-black/80 z-[1000] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl w-[650px] shadow-2xl animate-fade-in flex flex-col max-h-[80vh]">
+            <div class="p-4 border-b border-slate-700 bg-slate-900/80 rounded-t-xl flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-red-500/20 p-2 rounded text-red-500"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div><h3 class="text-lg font-bold text-white" id="modal-alert-title">航道嚴重偏移 (XTD > 2.0nm)</h3><p class="text-xs text-slate-400">觸發時間: 2026-02-05 16:30 UTC</p></div>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 bg-slate-900/50 space-y-4" id="chat-container">
+                <div class="text-xs text-slate-500 uppercase font-bold mb-2">最新對話紀錄 (Audit Log)</div>
+                <div class="flex flex-col items-start fade-in">
+                    <div class="text-xs text-slate-400 mb-1 ml-1">岸端監管 (User A)</div>
+                    <div class="chat-bubble chat-user">已發送 Email 詢問船長偏航原因，目前海況不佳。</div>
+                </div>
+                <div class="flex flex-col items-end fade-in">
+                    <div class="text-xs text-teal-400 mb-1 mr-1">船長回報 (Captain)</div>
+                    <div class="chat-bubble chat-captain">Received. Deviated due to heavy traffic and fishing nets on port side. Returning to track shortly.</div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-700 bg-slate-800 rounded-b-xl">
+                <textarea id="log-input" class="w-full bg-slate-900 border border-slate-600 rounded p-3 text-white h-20 outline-none focus:border-teal-500 mb-3 text-sm" placeholder="輸入新的處置備註或結案說明..."></textarea>
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="action" value="track" checked class="accent-teal-500"><span class="text-sm text-slate-300">持續追蹤 (Investigating)</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="action" value="close" class="accent-teal-500"><span class="text-sm text-slate-300">確認結案 (Close Case)</span></label>
+                    </div>
+                    <button onclick="submitResolution()" class="bg-teal-600 hover:bg-teal-500 text-white px-6 py-2 rounded font-bold text-sm shadow flex items-center gap-2"><i class="fa-regular fa-paper-plane"></i> 送出紀錄</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // --- DATA ---
+        // 1. Key Ships (Scenario-based)
+        const keyShips = [
+            { 
+                id: 101, name: "YM WELLNESS", role: "mine", status: "Abnormal", type: 'XTD', lat: 22.1, lon: 119.8, xtd: 2.4, 
+                // Waypoints with ETA/DTG for Map Interactivity
+                waypoints: [
+                    { lat: 22.6, lon: 120.25, name: "WP-01", eta: "02/05 14:00", dtg: "Passed" },
+                    { lat: 22.4, lon: 120.0, name: "WP-02", eta: "02/05 16:30", dtg: "15 NM" },
+                    { lat: 21.5, lon: 119.5, name: "WP-03", eta: "02/05 20:00", dtg: "60 NM" }
+                ],
+                plan: [[22.6, 120.25], [22.4, 120.0], [21.5, 119.5], [20.0, 118.5]], 
+                track: [[22.6, 120.25], [22.4, 120.1], [22.2, 119.9], [22.1, 119.8]],
+                ecaZone: [[22.2, 119.4], [22.5, 119.4], [22.5, 119.7], [22.2, 119.7]] // Electronic Fence Data
+            },
+            { id: 102, name: "YM VIGOR", role: "mine", status: "Abnormal", type: 'Drifting', lat: 30.0, lon: 135.0, driftRadius: 3.0, driftActual: 3.8, track: [[30.0, 135.0], [30.05, 135.05], [30.1, 135.1]] },
+            { id: 103, name: "YM TARGET", role: "mine", status: "Normal", lat: 22.58, lon: 120.25, xtd: 0.1, plan: [[22.55, 120.30], [22.58, 120.25]], track: [[22.55, 120.30], [22.58, 120.25]] }
+        ];
+
+        // 2. Generate Fleet
+        const shipNames = ["YM WONDROUS", "YM TOTALITY", "YM EVOLUTION", "YM ESSENCE", "YM HARMONY", "YM ORCHID", "YM UBIQUITY", "YM UTILITY", "YM UNIFORMITY", "YM UPWARD", "YM UNANIMITY", "YM WINDOW", "YM WIDTH", "YM WINNER", "YM WITNESS", "YM WREATH", "YM MUTUALITY", "YM MILESTONE", "YM MOTION", "YM MOBILITY"];
+        function generateFleet() {
+            let fleet = [...keyShips];
+            shipNames.forEach((name, i) => {
+                const isMine = i < 5; 
+                const isAbnormal = i === 7;
+                const lat = 10 + Math.random() * 30;
+                const lon = 110 + Math.random() * 30;
+                fleet.push({
+                    id: 200 + i, name: name, role: isMine ? "mine" : "other", status: isAbnormal ? "Abnormal" : "Normal", type: isAbnormal ? 'Speed' : null,
+                    lat: lat, lon: lon, xtd: isAbnormal ? '0.0' : '0.2',
+                    plan: [[lat+2, lon-2], [lat, lon]], track: [[lat+2, lon-2], [lat, lon]]
+                });
+            });
+            return fleet;
+        }
+        const fleetData = generateFleet();
+
+        // 3. Alerts Data
+        const globalAlerts = [
+            { status: 'Active', severity: 'High', type: 'XTD 嚴重偏離', ship: 'YM WELLNESS', owner: 'User A', time: '10:30 UTC', val: '2.4 nm' },
+            { status: 'Active', severity: 'High', type: '漂移超出限制', ship: 'YM VIGOR', owner: 'User A', time: '09:15 UTC', val: 'Radius > 3nm' },
+            { status: 'History', severity: 'Low', type: '航速異常低', ship: 'YM TARGET', owner: 'User A', time: 'Yesterday', val: '8.0 kn' }
+        ];
+
+        // 4. Plan History
+        const planHistoryData = [
+            { ver: 'Rev. 03', date: '2026-02-08 10:00', source: 'StormGeo API', note: 'Avoid Typhoon', status: 'Active' },
+            { ver: 'Rev. 02', date: '2026-02-05 14:30', source: 'Manual Upload', note: 'Initial Plan', status: 'Archived' },
+            { ver: 'Rev. 01', date: '2026-02-01 09:00', source: 'System Auto', note: 'Draft', status: 'Draft' }
+        ];
+
+        let mapMain, mapDetail;
+        let mainLayers = L.layerGroup();
+        let detailLayers = L.layerGroup();
+        let currentFilter = 'all';
+
+        window.onload = function() {
+            mapMain = L.map('map-main', {zoomControl: true, attributionControl: false}).setView([20, 125], 4);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(mapMain);
+            mainLayers.addTo(mapMain);
+            renderShipList();
+            renderGlobalAlerts('all', 'active');
+        };
+
+        // --- SHARED MAP DRAWING (CONSISTENCY) ---
+        function drawShipLayer(layerGroup, ship) {
+            layerGroup.clearLayers();
+            const iconColor = ship.status === 'Abnormal' ? '#ef4444' : '#2dd4bf';
+            const shipIcon = L.divIcon({className: '', html: `<i class="fa-solid fa-location-arrow text-2xl drop-shadow-md" style="color:${iconColor}; transform: rotate(45deg);"></i>`});
+            L.marker([ship.lat, ship.lon], {icon: shipIcon}).addTo(layerGroup);
+
+            if(ship.type === 'Drifting') {
+                L.circle([ship.lat, ship.lon], {radius: 50000, color: '#f97316', dashArray: '10,5', fill: false, weight: 2}).addTo(layerGroup);
+                if(ship.track) L.polyline(ship.track, {color: '#ef4444', weight: 3}).addTo(layerGroup);
+            } else if (ship.plan) {
+                // 1. Safe Corridor (Image 4 style: Blue/Teal transparent lane)
+                L.polyline(ship.plan, {color: '#2dd4bf', weight: 40, opacity: 0.15}).addTo(layerGroup);
+                // 2. Planned Route (Solid line)
+                L.polyline(ship.plan, {color: '#2dd4bf', weight: 2}).addTo(layerGroup);
+                // 3. Track (Red if Abnormal)
+                const trackColor = ship.status === 'Abnormal' ? '#ef4444' : '#ffffff';
+                L.polyline(ship.track, {color: trackColor, weight: 3}).addTo(layerGroup);
+
+                // 4. Waypoints (Interactive Arrows from Image 4)
+                if(ship.waypoints) {
+                    ship.waypoints.forEach(wp => {
+                        const wpIcon = L.divIcon({className: 'wp-label', html: `<i class="fa-solid fa-caret-up text-xl wp-icon" style="transform: rotate(45deg);"></i>`});
+                        L.marker([wp.lat, wp.lon], {icon: wpIcon}).addTo(layerGroup)
+                         .bindPopup(`
+                            <div class="font-bold text-teal-400 mb-1">${wp.name}</div>
+                            <div class="text-xs text-white">ETA: ${wp.eta}</div>
+                            <div class="text-xs text-slate-300">DTG: ${wp.dtg}</div>
+                         `);
+                    });
+                }
+                
+                // 5. Electronic Fence (ECA Zone from Image 5)
+                if(ship.ecaZone) {
+                    L.polygon(ship.ecaZone, {color: '#ef4444', weight: 1, fillColor: '#ef4444', fillOpacity: 0.2}).addTo(layerGroup)
+                     .bindTooltip("ECA Zone / No-Go Area", {permanent: true, direction: "center", className: "bg-transparent border-none text-red-500 font-bold shadow-none"});
+                }
+            }
+        }
+
+        // --- DASHBOARD ---
+        function setFilter(type) {
+            currentFilter = type;
+            document.querySelectorAll('[id^="filter-"]').forEach(b => b.className = "flex-1 py-1.5 text-xs font-bold rounded text-slate-400 hover:text-white transition");
+            if(type === 'mine') document.getElementById('filter-mine').className = "flex-1 py-1.5 text-xs font-bold rounded bg-teal-600 text-white shadow transition";
+            else if(type === 'all') document.getElementById('filter-all').className = "flex-1 py-1.5 text-xs font-bold rounded bg-teal-600 text-white shadow transition";
+            else if(type === 'abnormal') document.getElementById('filter-abnormal').className = "flex-1 py-1.5 text-xs font-bold rounded bg-red-600 text-white shadow transition";
+            renderShipList();
+        }
+
+        function renderShipList() {
+            const container = document.getElementById('ship-list-container');
+            container.innerHTML = '';
+            mainLayers.clearLayers();
+            const term = document.getElementById('ship-search').value.toLowerCase();
+            const filtered = fleetData.filter(s => {
+                const matchRole = currentFilter==='all' || (currentFilter==='mine' && s.role==='mine') || (currentFilter==='abnormal' && s.status==='Abnormal');
+                const matchSearch = s.name.toLowerCase().includes(term);
+                return matchRole && matchSearch;
+            });
+            filtered.forEach(ship => {
+                const color = ship.status === 'Abnormal' ? '#ef4444' : '#2dd4bf';
+                L.circleMarker([ship.lat, ship.lon], {radius: 4, color: color, fillOpacity: 1, weight: 1}).addTo(mainLayers).bindPopup(ship.name);
+                const div = document.createElement('div');
+                div.className = `p-4 border-b border-slate-700 hover:bg-slate-800 transition cursor-pointer border-l-4 ${ship.status==='Abnormal'?'border-l-red-500 bg-red-900/5':'border-l-transparent'}`;
+                div.onclick = (e) => { if(!e.target.closest('button')) flyToShip(ship); };
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-1"><span class="font-bold text-white text-sm">${ship.name}</span><span class="text-[10px] px-1.5 py-0.5 rounded font-bold ${ship.status==='Abnormal'?'bg-red-600 text-white':'bg-teal-600 text-white'}">${ship.status}</span></div>
+                    <div class="flex justify-between items-end"><div class="text-xs text-slate-400">${ship.type==='Drifting'?'Drifting':(ship.xtd?'XTD: '+ship.xtd+'nm':'On Track')}</div><button onclick="openDetailView(${ship.id})" class="text-[10px] bg-slate-700 hover:bg-teal-600 text-white px-3 py-1.5 rounded transition shadow border border-slate-600 font-bold">進入詳細戰情 <i class="fa-solid fa-arrow-right ml-1"></i></button></div>`;
+                container.appendChild(div);
+            });
+        }
+
+        function flyToShip(ship) {
+            mainLayers.eachLayer(l => { if(!(l instanceof L.CircleMarker)) mainLayers.removeLayer(l); });
+            drawShipLayer(mainLayers, ship);
+            mapMain.flyTo([ship.lat, ship.lon], 7);
+        }
+
+        // --- GLOBAL ALERTS ---
+        function renderGlobalAlerts(scope, tab) {
+            const tbody = document.getElementById('global-alert-tbody');
+            tbody.innerHTML = '';
+            const filtered = globalAlerts.filter(a => {
+                const matchTab = a.status.toLowerCase() === tab;
+                const matchScope = scope === 'all' || (scope === 'mine' && a.owner === 'User A');
+                return matchTab && matchScope;
+            });
+            filtered.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-700 hover:bg-slate-800 transition";
+                const badge = a.status==='Active' ? '<span class="bg-red-900/30 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-xs font-bold">處理中</span>' : '<span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-xs font-bold">已結案</span>';
+                tr.innerHTML = `<td class="px-6 py-4">${badge}</td><td class="px-6 py-4"><span class="${a.severity==='High'?'text-red-500 font-bold':(a.severity==='Med'?'text-yellow-500':'text-slate-400')}">${a.severity}</span></td><td class="px-6 py-4 font-bold text-white">${a.type}</td><td class="px-6 py-4 text-white">${a.ship}</td><td class="px-6 py-4 text-teal-400">${a.owner}</td><td class="px-6 py-4 text-slate-400 text-xs">${a.time}</td><td class="px-6 py-4 font-mono text-xs">${a.val}</td><td class="px-6 py-4 text-right"><button class="text-xs text-slate-400 border border-slate-600 px-2 py-1 rounded">檢視</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+        function setAlertScope(scope) { renderGlobalAlerts(scope, 'active'); }
+        function switchAlertTab(tab) { renderGlobalAlerts('all', tab); }
+
+        // --- DETAIL VIEW ---
+        function openDetailView(id) {
+            document.querySelectorAll('main > div').forEach(el => el.classList.add('hidden-view'));
+            document.getElementById('view-detail').classList.remove('hidden-view');
+            const ship = fleetData.find(s => s.id === id);
+            document.getElementById('detail-title').innerText = ship.name;
+            document.getElementById('setting-ship-name').innerText = ship.name;
+            const badge = document.getElementById('detail-status-badge');
+            badge.innerText = ship.status;
+            badge.className = ship.status === 'Abnormal' ? "px-2 py-0.5 rounded text-xs border font-bold border-red-500 text-red-400" : "px-2 py-0.5 rounded text-xs border font-bold border-teal-500 text-teal-400";
+            
+            const alertWidget = document.getElementById('active-alert-widget');
+            if(ship.status === 'Abnormal') {
+                alertWidget.classList.remove('hidden-view');
+                document.getElementById('active-alert-type').innerText = ship.type === 'Drifting' ? '即時告警：漂移超出限制' : '即時告警：XTD 嚴重偏離';
+                document.getElementById('active-alert-val').innerText = ship.type === 'Drifting' ? `半徑: ${ship.driftActual}nm` : `偏離: ${ship.xtd}nm`;
+            } else {
+                alertWidget.classList.add('hidden-view');
+            }
+
+            // Populate Plan History
+            const planBody = document.getElementById('plan-history-body');
+            planBody.innerHTML = '';
+            planHistoryData.forEach(p => {
+                planBody.innerHTML += `<tr class="hover:bg-slate-700/50"><td class="px-6 py-4 font-mono font-bold text-teal-400">${p.ver}</td><td class="px-6 py-4 text-xs">${p.date}</td><td class="px-6 py-4 text-xs">${p.source}</td><td class="px-6 py-4 text-xs ${p.status==='Active'?'text-green-400 font-bold':'text-slate-500'}">${p.status}</td></tr>`;
+            });
+
+            // Detail Map
+            if(!mapDetail) {
+                mapDetail = L.map('map-detail', {zoomControl: false}).setView([20,120], 5);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(mapDetail);
+                detailLayers.addTo(mapDetail);
+            }
+            drawShipLayer(detailLayers, ship);
+            mapDetail.setView([ship.lat, ship.lon], 8);
+            switchTab('monitoring');
+        }
+
+        function closeDetailView() { switchMainView('dashboard'); }
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden-view'));
+            document.getElementById(`content-${tab}`).classList.remove('hidden-view');
+            if(tab === 'monitoring') setTimeout(() => mapDetail.invalidateSize(), 100);
+        }
+
+        // --- CHAT MODAL ---
+        function openModal() { document.getElementById('resolution-modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('resolution-modal').classList.add('hidden'); }
+        function submitResolution() {
+            const txt = document.getElementById('log-input').value;
+            if(txt) {
+                const chat = document.getElementById('chat-container');
+                chat.innerHTML += `<div class="flex flex-col items-start fade-in"><div class="text-xs text-slate-400 mb-1 ml-1">岸端監管 (User A)</div><div class="chat-bubble chat-user">${txt}</div></div>`;
+                document.getElementById('log-input').value = '';
+                chat.scrollTop = chat.scrollHeight;
+                setTimeout(() => { alert('處置紀錄已送出'); closeModal(); }, 500);
+            }
+        }
+        function switchMainView(view) {
+            document.querySelectorAll('main > div').forEach(el => el.classList.add('hidden-view'));
+            document.getElementById(`view-${view}`).classList.remove('hidden-view');
+            if(view === 'dashboard') mapMain.invalidateSize();
+        }
+    </script>
+</body>
+</html>
