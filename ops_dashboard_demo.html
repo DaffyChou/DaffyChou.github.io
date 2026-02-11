@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YangMing Marine - Fleet Safety Operation Center (v11.2)</title>
+    <title>YangMing Marine - Fleet Safety Operation Center (v11.4)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -318,22 +318,22 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- DATA PREPARATION (REALISTIC ROUTES) ---
+        // --- DATA PREPARATION (REALISTIC ROUTES WITH LAND AVOIDANCE) ---
         
         // Scenario 1: YM WELLNESS (Singapore -> Colombo)
-        // Corrected route to go around Sumatra (Malacca Strait -> Banda Aceh -> Indian Ocean)
+        // Corrected route to go NORTH of Banda Aceh to avoid Sumatra land mass
         const wellnessPlan = [
             [1.26, 103.8], // Singapore
-            [1.5, 103.0],  // Malacca Strait
-            [2.8, 101.0],  // Malacca Strait
-            [5.0, 98.0],   // Malacca Strait Exit
-            [6.1, 95.3],   // Off Banda Aceh (Turn)
+            [1.5, 103.0],  // Malacca Strait Entrance
+            [2.8, 101.0],  // Malacca Strait Mid
+            [5.2, 98.0],   // Malacca Strait North
+            [6.4, 95.3],   // Waypoint: North of Weh Island/Banda Aceh (Safe Water)
             [6.0, 90.0],   // Indian Ocean
             [6.0, 85.0],   // Indian Ocean
             [6.9, 79.8]    // Colombo
         ];
         
-        // Create a visual "Corridor Polygon" based on the realistic plan
+        // Create a visual "Corridor Polygon"
         const leftBank = [];
         const rightBank = [];
         wellnessPlan.forEach((p, index) => {
@@ -346,7 +346,7 @@
 
         // Deviation Track (Start normally, then drift South in Indian Ocean)
         const wellnessTrack = [
-            [1.26, 103.8], [1.5, 103.0], [2.8, 101.0], [5.0, 98.0], [6.1, 95.3], // On Plan
+            [1.26, 103.8], [1.5, 103.0], [2.8, 101.0], [5.2, 98.0], [6.4, 95.3], // On Plan
             [5.8, 92.0], // Slight drift
             [5.0, 88.0], // Major deviation South
             [4.5, 86.0]  // Further deviation
@@ -354,15 +354,15 @@
 
 
         // Scenario 2: YM INCEPTION (Hong Kong -> Laem Chabang)
-        // Corrected route to go around Vietnam (Paracel -> Con Son -> Gulf of Thailand)
+        // Corrected route to go SOUTH of Con Son to avoid Vietnam/Cambodia land
         const inceptionPlan = [
             [22.3, 114.1], // Hong Kong
             [19.0, 113.0], // South China Sea
-            [15.0, 111.0], // Off Da Nang
-            [10.0, 109.0], // Off South Vietnam
-            [8.4, 106.5],  // Con Son Island (Turn)
-            [8.8, 104.0],  // Entering Gulf of Thailand
-            [12.5, 100.8], // Approach
+            [15.0, 111.5], // Off Da Nang (Wide berth)
+            [10.0, 109.5], // Off South Vietnam (Wide berth)
+            [7.5, 106.0],  // Waypoint: South of Con Son Island / Ca Mau Peninsula (Clear of land)
+            [8.5, 103.0],  // Entering Gulf of Thailand (Center)
+            [11.0, 101.5], // Mid Gulf
             [13.1, 100.8]  // Laem Chabang Port
         ];
         const inceptionAnchor = [13.1, 100.8]; // Laem Chabang Anchorage
@@ -377,29 +377,34 @@
 
 
         // Scenario 3: YM TOTALITY (Kaohsiung -> Ningbo)
-        // Corrected route: Taiwan Strait -> East China Sea (Avoid Mainland & Taiwan land)
+        // Corrected route: Taiwan Strait Centerline -> East China Sea (Avoid Mainland & Taiwan land)
         const totalityPlan = [
-            [22.6, 120.3], // Kaohsiung
-            [23.5, 119.5], // Taiwan Strait (Midline)
-            [25.0, 119.8], // Taiwan Strait (North)
-            [27.0, 121.5], // East China Sea
-            [29.0, 122.2], // Approach Zhoushan
-            [29.8, 122.0]  // Ningbo / Zhoushan Port Area
+            [22.6, 120.2], // Kaohsiung Harbor Exit
+            [23.5, 119.6], // Taiwan Strait (Safe Centerline, West of Penghu)
+            [25.5, 120.6], // Northern Taiwan Strait (Centerline)
+            [28.0, 122.5], // East China Sea (Open Water)
+            [29.5, 124.0], // Waypoint: East of Zhoushan Islands (Safe approach around military zone)
+            [30.5, 123.5], // Approach from North East
+            [29.8, 122.5]  // Ningbo / Zhoushan Port Area
         ];
         
-        // Track: Cuts corner into Military Zone
+        // Track: Cuts corner into Irregular Military Zone
         const totalityTrack = [
-            [27.0, 121.5], 
-            [28.5, 122.5], // Deviating East
-            [29.5, 122.8], // Entering Zone
-            [30.0, 122.9]  // Deep in Zone
+            [28.0, 122.5], // From ECS
+            [29.0, 122.8], // Deviating slightly West of plan
+            [29.8, 123.0]  // END POINT: Inside the Irregular Polygon
         ];
 
-        // Military Zone (Purely at Sea, East of Zhoushan)
-        // Adjusted to ensure it doesn't overlap islands
+        // Military Zone (Irregular Shape East of Zhoushan)
+        // Simulated complex NOTAM area
         const militaryZoneCoords = [
-            [30.5, 122.6], [30.5, 123.5], 
-            [29.5, 123.5], [29.5, 122.6]
+            [30.5, 122.5], // NW Corner
+            [30.5, 123.2], // NE Extended
+            [30.0, 123.5], // East Edge
+            [29.5, 123.2], // SE Corner
+            [29.8, 122.8], // Re-entrant point (concave)
+            [29.5, 122.5], // SW Corner
+            [30.0, 122.4]  // West Edge Bulge
         ];
 
 
@@ -428,7 +433,7 @@
             { 
                 id: 103, name: "YM TOTALITY", role: "mine", status: "Abnormal", type: 'MilitaryZone', 
                 startPort: "TWKHH", endPort: "CNNGB",
-                lat: 30.0, lon: 122.9, 
+                lat: 29.8, lon: 123.0, 
                 militaryZone: militaryZoneCoords,
                 plan: totalityPlan, track: totalityTrack,
                 alertVal: "Restricted Area",
@@ -519,6 +524,7 @@
                 // Draw Military Polygon
                 L.polygon(ship.militaryZone, {
                     color: '#ef4444', weight: 2, fillColor: '#ef4444', fillOpacity: 0.3,
+                    // Simulate pattern with CSS class in real app, here simple fill
                 }).addTo(layerGroup).bindTooltip("軍事演習區 (禁止進入)", {permanent: true, direction: "center", className: "text-red-500 font-bold bg-transparent border-none text-lg"});
                 
                 // Safe Plan (Green)
@@ -590,6 +596,7 @@
 
         function switchAlertTab(tab) {
             renderGlobalAlerts('all', tab); 
+            // Update Tab UI manually for brevity
         }
 
         function renderGlobalAlerts(scope, tab) {
@@ -638,6 +645,10 @@
                     document.getElementById('mon-segment').innerText = "港外錨地";
                     document.getElementById('mon-drift').innerText = "2.0 nm";
                     document.getElementById('mon-xtd').innerText = "N/A";
+                } else if (ship.type === 'MilitaryZone') {
+                    document.getElementById('mon-segment').innerText = "禁航區周邊";
+                    document.getElementById('mon-xtd').innerText = "N/A";
+                    document.getElementById('mon-drift').innerText = "N/A";
                 }
             } else {
                 alertWidget.classList.add('hidden-view');
