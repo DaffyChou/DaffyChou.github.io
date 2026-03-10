@@ -344,8 +344,11 @@
                     <button onclick="switchTab('plans')" id="tab-plans"
                         class="px-6 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-white transition">計畫履歷
                         (Plans)</button>
-                    <button onclick="switchTab('settings')" id="tab-settings"
-                        class="px-6 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-white transition ml-auto border-l border-slate-700">監控參數</button>
+                    <!-- <button onclick="switchTab('settings')" id="tab-settings" class="px-6 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-white transition ml-auto border-l border-slate-700">監控參數</button> -->
+                    <button onclick="openSettingsModal()" id="tab-settings"
+                        class="px-6 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-white transition ml-auto border-l border-slate-700">
+                        監控參數
+                    </button>
                 </div>
 
                 <div id="content-monitoring" class="flex-1 relative tab-content flex">
@@ -430,12 +433,83 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-700 text-slate-300">
                                     <tr class="hover:bg-slate-700/50 transition">
-                                        <td class="px-6 py-4"><span
+                                        <td class="px-6 py-4">
+                                            <span
                                                 class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-[10px] font-bold">已結案</span>
                                         </td>
                                         <td class="px-6 py-4 font-bold text-white">XTD 偏離安全走廊</td>
                                         <td class="px-6 py-4 text-xs">2026-03-10 10:30</td>
-                                        <td class="px-6 py-4 text-xs">已電聯二副確認校正航向</td>
+                                        <td class="px-6 py-4 text-xs">已電聯二副確認校正航向，係因避讓漁船群導致。</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button onclick="alert('載入歷史圖資回放...')"
+                                                class="text-xs bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded transition">查看圖資</button>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="hover:bg-slate-700/50 transition">
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-[10px] font-bold">已結案</span>
+                                        </td>
+                                        <td class="px-6 py-4 font-bold text-white">錨位異常漂移 (Drifting)</td>
+                                        <td class="px-6 py-4 text-xs">2026-03-09 14:15</td>
+                                        <td class="px-6 py-4 text-xs">受強勁流向影響，船端已加強主機備便並重拋錨。</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button onclick="alert('載入歷史圖資回放...')"
+                                                class="text-xs bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded transition">查看圖資</button>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="hover:bg-slate-700/50 transition">
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="bg-amber-900/40 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded text-[10px] font-bold">持續追蹤</span>
+                                        </td>
+                                        <td class="px-6 py-4 font-bold text-white">侵入軍演禁航區</td>
+                                        <td class="px-6 py-4 text-xs">2026-03-08 22:45</td>
+                                        <td class="px-6 py-4 text-xs text-amber-200">已警告船端立即轉向，目前正緩慢駛離禁區。</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button onclick="alert('載入歷史圖資回放...')"
+                                                class="text-xs bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded transition">查看圖資</button>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="hover:bg-slate-700/50 transition">
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-[10px] font-bold">已結案</span>
+                                        </td>
+                                        <td class="px-6 py-4 font-bold text-white">航速異常低於門檻</td>
+                                        <td class="px-6 py-4 text-xs">2026-03-05 03:20</td>
+                                        <td class="px-6 py-4 text-xs">主機臨時維修，已通報當地港務局並恢復航行。</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button onclick="alert('載入歷史圖資回放...')"
+                                                class="text-xs bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded transition">查看圖資</button>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="hover:bg-slate-700/50 transition">
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-[10px] font-bold">已結案</span>
+                                        </td>
+                                        <td class="px-6 py-4 font-bold text-white">通訊訊號遺失 (Signal Lost)</td>
+                                        <td class="px-6 py-4 text-xs">2026-03-01 12:00</td>
+                                        <td class="px-6 py-4 text-xs">通過衛星盲區，恢復通訊後確認船舶一切正常。</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button onclick="alert('載入歷史圖資回放...')"
+                                                class="text-xs bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded transition">查看圖資</button>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="hover:bg-slate-700/50 transition">
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-[10px] font-bold">已結案</span>
+                                        </td>
+                                        <td class="px-6 py-4 font-bold text-white">ETA 嚴重偏離 (Delay)</td>
+                                        <td class="px-6 py-4 text-xs">2026-02-28 09:00</td>
+                                        <td class="px-6 py-4 text-xs">受強熱帶氣旋影響採取避碰路徑，延誤 12 小時。</td>
                                         <td class="px-6 py-4 text-right">
                                             <button onclick="alert('載入歷史圖資回放...')"
                                                 class="text-xs bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded transition">查看圖資</button>
@@ -471,10 +545,10 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-700 text-slate-300" id="plan-history-body">
                                     <tr class="bg-teal-900/10 border-l-4 border-l-teal-500">
-                                        <td class="px-6 py-4 font-mono font-bold text-teal-400">Rev. 03</td>
-                                        <td class="px-6 py-4 text-xs">2026-03-05 10:00 UTC</td>
-                                        <td class="px-6 py-4 text-xs font-bold text-slate-200">Shore System</td>
-                                        <td class="px-6 py-4 text-xs italic">常規計畫更新</td>
+                                        <td class="px-6 py-4 font-mono font-bold text-teal-400">Rev. 05</td>
+                                        <td class="px-6 py-4 text-xs">2026-03-10 14:20 UTC</td>
+                                        <td class="px-6 py-4 text-xs font-bold text-slate-200">Manual Upload</td>
+                                        <td class="px-6 py-4 text-xs italic">配合 101 船位異常進行避碰路徑修正</td>
                                         <td class="px-6 py-4">
                                             <span
                                                 class="px-2 py-0.5 bg-green-900/30 text-green-400 border border-green-500/30 rounded text-[10px] font-bold">ACTIVE</span>
@@ -484,12 +558,73 @@
                                                 class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded border border-slate-600 transition">查看航點</button>
                                         </td>
                                     </tr>
+
+                                    <tr class="hover:bg-slate-700/30 transition">
+                                        <td class="px-6 py-4 font-mono font-bold text-slate-400">Rev. 04</td>
+                                        <td class="px-6 py-4 text-xs">2026-03-08 09:15 UTC</td>
+                                        <td class="px-6 py-4 text-xs font-bold text-slate-400">Shore System</td>
+                                        <td class="px-6 py-4 text-xs italic text-slate-500">氣象導航優化 (Weather Routing)
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="px-2 py-0.5 bg-slate-700 text-slate-400 border border-slate-600 rounded text-[10px] font-bold">ARCHIVED</span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button
+                                                class="text-xs text-slate-400 hover:text-white transition">查看航點</button>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="hover:bg-slate-700/30 transition">
+                                        <td class="px-6 py-4 font-mono font-bold text-slate-400">Rev. 03</td>
+                                        <td class="px-6 py-4 text-xs">2026-03-05 10:00 UTC</td>
+                                        <td class="px-6 py-4 text-xs font-bold text-slate-400">Shore System</td>
+                                        <td class="px-6 py-4 text-xs italic text-slate-500">常規計畫更新</td>
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="px-2 py-0.5 bg-slate-700 text-slate-400 border border-slate-600 rounded text-[10px] font-bold">ARCHIVED</span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button
+                                                class="text-xs text-slate-400 hover:text-white transition">查看航點</button>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="hover:bg-slate-700/30 transition">
+                                        <td class="px-6 py-4 font-mono font-bold text-slate-400">Rev. 02</td>
+                                        <td class="px-6 py-4 text-xs">2026-02-28 18:30 UTC</td>
+                                        <td class="px-6 py-4 text-xs font-bold text-slate-400">Vessel ECDIS</td>
+                                        <td class="px-6 py-4 text-xs italic text-slate-500">船端二副修正第 WP08 至 WP12 點位</td>
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="px-2 py-0.5 bg-slate-700 text-slate-400 border border-slate-600 rounded text-[10px] font-bold">ARCHIVED</span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button
+                                                class="text-xs text-slate-400 hover:text-white transition">查看航點</button>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="hover:bg-slate-700/30 transition">
+                                        <td class="px-6 py-4 font-mono font-bold text-slate-400">Rev. 01</td>
+                                        <td class="px-6 py-4 text-xs">2026-02-25 12:00 UTC</td>
+                                        <td class="px-6 py-4 text-xs font-bold text-slate-400">Manual Upload</td>
+                                        <td class="px-6 py-4 text-xs italic text-slate-500">初始出港航行計畫 (Original)</td>
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="px-2 py-0.5 bg-slate-700 text-slate-400 border border-slate-600 rounded text-[10px] font-bold">ARCHIVED</span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button
+                                                class="text-xs text-slate-400 hover:text-white transition">查看航點</button>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-                <div id="content-settings" class="flex-1 overflow-y-auto hidden-view tab-content p-8">
+                <!-- <div id="content-settings" class="flex-1 overflow-y-auto hidden-view tab-content p-8">
                     <div
                         class="max-w-3xl mx-auto bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-2xl fade-in">
                         <h3 class="text-xl font-bold text-white mb-8 flex items-center gap-3">
@@ -574,10 +709,10 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <div id="import-modal"
-                    class="fixed inset-0 bg-black/80 z-[1000] hidden flex items-center justify-center backdrop-blur-sm">
+                    class="fixed inset-0 bg-black/60 z-[1000] hidden flex items-center justify-center backdrop-blur-sm">
                     <div class="bg-slate-800 border border-slate-600 rounded-xl w-[500px] shadow-2xl p-6 fade-in">
                         <div class="flex justify-between items-center mb-5 border-b border-slate-700 pb-3">
                             <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -635,12 +770,102 @@
                         </div>
                     </div>
                 </div>
+                <div id="settings-modal"
+                    class="fixed inset-0 bg-black/60 z-[1000] hidden flex items-center justify-center backdrop-blur-sm">
+                    <div
+                        class="bg-slate-800 border border-slate-600 rounded-xl w-[600px] shadow-2xl animate-fade-in overflow-hidden">
+                        <div class="p-5 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-3">
+                                <i class="fa-solid fa-sliders text-teal-500"></i> 個別船舶監控參數設定
+                            </h3>
+                            <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white transition">
+                                <i class="fa-solid fa-xmark text-xl"></i>
+                            </button>
+                        </div>
+
+                        <div class="p-6 space-y-8 overflow-y-auto max-h-[75vh]">
+                            <section>
+                                <h4 class="text-xs font-bold text-teal-500 uppercase mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-ruler-horizontal"></i> 1. 航道偏離監控 (XTD Threshold)
+                                </h4>
+                                <div
+                                    class="grid grid-cols-2 gap-4 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 mb-2 font-bold uppercase">大洋航段
+                                            (Open Sea) / nm</label>
+                                        <input type="number" step="0.1"
+                                            class="w-full bg-slate-800 border border-slate-600 p-2 rounded text-white font-mono focus:border-teal-500 outline-none transition"
+                                            value="5.0">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 mb-2 font-bold uppercase">近岸航段
+                                            (Coastal) / nm</label>
+                                        <input type="number" step="0.1"
+                                            class="w-full bg-slate-800 border border-slate-600 p-2 rounded text-white font-mono focus:border-teal-500 outline-none transition"
+                                            value="2.0">
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="bg-slate-900/30 p-4 rounded-lg border border-slate-700/50">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="text-xs font-bold text-yellow-500 uppercase flex items-center gap-2">
+                                        <i class="fa-solid fa-anchor"></i> 2. 錨位圈監控 (Anchoring Circle)
+                                    </h4>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer">
+                                        <div
+                                            class="w-10 h-5 bg-slate-700 rounded-full peer peer-checked:bg-yellow-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full">
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <input type="range" min="0.1" max="5.0" step="0.1" value="2.0"
+                                        class="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                                        oninput="this.nextElementSibling.innerText = parseFloat(this.value).toFixed(1) + ' nm'">
+                                    <span class="text-white font-mono font-bold text-xs w-12 text-right">2.0 nm</span>
+                                </div>
+                            </section>
+
+                            <section class="bg-slate-900/30 p-4 rounded-lg border border-slate-700/50">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="text-xs font-bold text-orange-500 uppercase flex items-center gap-2">
+                                        <i class="fa-solid fa-arrows-spin"></i> 3. 漂航圈監控 (Drifting Alarm)
+                                    </h4>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer">
+                                        <div
+                                            class="w-10 h-5 bg-slate-900 rounded-full peer peer-checked:bg-orange-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full">
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <input type="range" min="0.5" max="10.0" step="0.5" value="3.0"
+                                        class="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                                        oninput="this.nextElementSibling.innerText = parseFloat(this.value).toFixed(1) + ' nm'">
+                                    <span class="text-white font-mono font-bold text-xs w-12 text-right">3.0 nm</span>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div class="p-6 border-t border-slate-700 flex flex-col gap-3">
+                            <button onclick="syncSettings()"
+                                class="w-full bg-teal-600 hover:bg-teal-500 text-white py-3 rounded-lg font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> 同步參數至船端 (Sync to Vessel)
+                            </button>
+                            <button onclick="closeSettingsModal()"
+                                class="w-full text-slate-400 hover:text-white text-[11px] font-bold uppercase tracking-widest transition">
+                                返回戰情室畫面 / Back to Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 
     <div id="resolution-modal"
-        class="fixed inset-0 bg-black/80 z-[1000] hidden flex items-center justify-center backdrop-blur-sm">
+        class="fixed inset-0 bg-black/60 z-[1000] hidden flex items-center justify-center backdrop-blur-sm">
         <div
             class="bg-slate-800 border border-slate-600 rounded-xl w-[550px] shadow-2xl animate-fade-in overflow-hidden">
             <div class="p-5 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
@@ -1014,7 +1239,6 @@
         function openModal() { document.getElementById('resolution-modal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('resolution-modal').classList.add('hidden'); }
         // --- 計畫履歷相關功能 ---
-        // --- 計畫履歷管理功能 ---
         function openImportModal() {
             document.getElementById('import-modal').classList.remove('hidden');
         }
@@ -1075,6 +1299,32 @@
 
             alert('成功匯入新版本！系統已自動將當前航線更新為 Rev. 04');
             closeImportModal();
+        }
+        // --- 監控參數彈窗邏輯 ---
+        function openSettingsModal() {
+            // 顯示 Modal
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            // 隱藏 Modal
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function syncSettings() {
+            const btn = event.currentTarget;
+            const originalContent = btn.innerHTML;
+
+            // 模擬同步動畫
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin"></i> 同步中 (Syncing...)';
+
+            setTimeout(() => {
+                alert('監控參數已成功下發至船端系統 (OBU Sync Success)');
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+                closeSettingsModal();
+            }, 1500);
         }
     </script>
 </body>
