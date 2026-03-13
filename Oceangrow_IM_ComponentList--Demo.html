@@ -206,7 +206,7 @@
             // 填充表格
             let tableHtml = "";
             fullData.forEach((d, i) => {
-                tableHtml += `<tr><td class="text-center">${i+1}</td><td class="fw-bold">${d.p}</td><td class="text-primary">${d.c}</td><td>${d.n}</td><td>${d.f}</td><td>${d.u}</td><td>-</td><td class="text-center op-icons"><i class="far fa-eye text-primary" onclick="location.href='Oceangrow_IM_ComponentList--Demo-view.html'"></i><i class="fas fa-pencil-alt text-warning" onclick="location.href='Oceangrow_IM_ComponentList--Demo-edit.html'"></i><i class="fas fa-power-off text-danger"></i></td></tr>`;
+                tableHtml += `<tr><td class="text-center">${i+1}</td><td class="fw-bold">${d.p}</td><td>${d.c}</td><td>${d.n}</td><td>${d.f}</td><td>${d.u}</td><td>-</td><td class="text-center op-icons"><i class="far fa-eye text-primary" onclick="location.href='Oceangrow_IM_ComponentList--Demo-view.html'"></i><i class="fas fa-pencil-alt text-warning" onclick="location.href='Oceangrow_IM_ComponentList--Demo-edit.html'"></i><i class="fas fa-power-off text-danger"></i></td></tr>`;
             });
             $('#tableBody').html(tableHtml);
 

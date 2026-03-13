@@ -5,57 +5,205 @@
     <title>編輯配件資料</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f3f4f7; font-family: "Microsoft JhengHei", sans-serif; font-size: 13px; }
-        .info-grid .row { margin: 0; padding: 6px 0; border-bottom: 1px solid #eee; align-items: center; }
+        
+        /* 1. 基本資料區塊樣式：白灰相間 */
+        .info-grid .row { margin: 0; padding: 8px 0; border-bottom: 1px solid #eee; align-items: center; }
         .info-grid .row:nth-child(even) { background-color: #f8f9fa; }
-        .info-label { font-weight: bold; text-align: right; color: #666; width: 120px; }
+        .info-grid .row:nth-child(odd) { background-color: #ffffff; }
+        .info-label { font-weight: bold; text-align: right; color: #666; width: 140px; }
+        
         .product-img { width: 180px; height: 180px; background: #000; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; }
         .section-title { font-size: 15px; font-weight: bold; margin: 25px 0 10px; border-left: 5px solid #3b5bdb; padding-left: 10px; }
-        .table-custom thead th { background-color: #1a1a1a !important; color: #9ca3af !important; border: none !important; }
-        .table-custom td { border: none !important; border-bottom: 1px solid #eee !important; }
+        
+        /* 2. 列表樣式：黑表頭、無垂直線、白灰相間 */
+        .table-custom thead th { background-color: #1a1a1a !important; color: #9ca3af !important; border: none !important; font-weight: normal; }
+        .table-custom td { border: none !important; border-bottom: 1px solid #eee !important; padding: 10px; }
         .table-custom tbody tr:nth-of-type(even) { background-color: #f2f2f2 !important; }
+        .table-custom tbody tr:nth-of-type(odd) { background-color: #ffffff !important; }
+        
+        .status-badge { background-color: #198754; color: white; padding: 2px 10px; border-radius: 4px; }
     </style>
 </head>
 <body class="p-4">
-    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-2"><li class="breadcrumb-item text-primary">Home</li><li class="breadcrumb-item text-primary">配件資料管理</li><li class="breadcrumb-item active">編輯配件資料</li></ol></nav>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item text-primary" style="cursor:pointer" onclick="location.href='Oceangrow_IM_ComponentList--Demo.html'">Home</li>
+            <li class="breadcrumb-item text-primary">配件資料管理</li>
+            <li class="breadcrumb-item active">編輯配件資料</li>
+        </ol>
+    </nav>
+
     <div class="card shadow-sm border-0 rounded-0">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom-0">
             <h4 class="mb-0 fw-bold">配件管理</h4>
             <div>
-                <button class="btn btn-primary btn-sm px-3 me-1" onclick="alert('儲存成功！'); location.href='Oceangrow_IM_ComponentList--Demo.html'">儲存</button>
-                <button class="btn btn-outline-secondary btn-sm px-3 me-1">列印</button>
+                <button class="btn btn-primary btn-sm px-4 me-1" onclick="alert('儲存成功！'); location.href='Oceangrow_IM_ComponentList--Demo.html'"><i class="fas fa-save"></i> 儲存</button>
+                <button class="btn btn-outline-secondary btn-sm px-3 me-1"><i class="fas fa-print"></i> 列印</button>
                 <button class="btn btn-secondary btn-sm px-3" onclick="location.href='Oceangrow_IM_ComponentList--Demo.html'">返回</button>
             </div>
         </div>
+
         <div class="card-body pt-0">
             <h5 class="fw-bold mb-3">編輯配件資料</h5>
-            <div class="text-end mb-2">資料狀態：<select class="form-select-sm"><option>啟用</option><option>停用</option></select></div>
+            <div class="text-end mb-2">
+                資料狀態：
+                <select class="form-select-sm">
+                    <option selected>啟用</option>
+                    <option>停用</option>
+                </select>
+            </div>
             
             <div class="border">
                 <div class="bg-light p-2 border-bottom fw-bold">配件基本資料</div>
                 <div class="d-flex">
-                    <div class="p-3 border-end bg-light"><div class="product-img"><i class="fas fa-image text-white fa-2x"></i></div></div>
+                    <div class="p-3 border-end bg-light">
+                        <div class="product-img">
+                            <i class="fas fa-image text-white fa-3x"></i>
+                        </div>
+                    </div>
                     <div class="flex-grow-1 info-grid">
-                        <div class="row"><div class="col-2 info-label">料號：</div><div class="col-9"><input type="text" class="form-control form-control-sm" value="B-6236812"></div></div>
-                        <div class="row"><div class="col-2 info-label">配件名稱：</div><div class="col-9"><input type="text" class="form-control form-control-sm" value="百寶袋"></div></div>
-                        <div class="row"><div class="col-2 info-label">原廠資訊：</div><div class="col-9"><input type="text" class="form-control form-control-sm" value="22世紀"></div></div>
-                        <div class="row"><div class="col-2 info-label">單位：</div><div class="col-9"><input type="text" class="form-control form-control-sm" value="個"></div></div>
-                        <div class="row border-bottom-0 align-items-start"><div class="col-2 info-label mt-1">備註：</div><div class="col-9"><textarea class="form-control form-control-sm" rows="4">備註測試內容...</textarea></div></div>
+                        <div class="row">
+                            <div class="col-2 info-label">PART NO：</div>
+                            <div class="col-9">
+                                <input type="text" class="form-control form-control-sm" value="90101-22">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2 info-label">總成：</div>
+                            <div class="col-9">
+                                <select class="form-select form-select-sm">
+                                    <option selected>主機總成</option>
+                                    <option>發電機總成</option>
+                                    <option>壓艙水泵總成</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2 info-label">配件名：</div>
+                            <div class="col-9">
+                                <input type="text" class="form-control form-control-sm" value="缸蓋 Cylinder Cover (Standard)">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2 info-label">廠家：</div>
+                            <div class="col-9">
+                                <input type="text" class="form-control form-control-sm" value="曼恩 MAN Energy Solutions (Denmark)">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2 info-label">單位：</div>
+                            <div class="col-9">
+                                <select class="form-select form-select-sm" style="width: 100px;">
+                                    <option>PCS</option>
+                                    <option selected>SET</option>
+                                    <option>UNIT</option>
+                                    <option>KIT</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2 info-label">產品圖片：</div>
+                            <div class="col-9">
+                                <div class="input-group input-group-sm w-50">
+                                    <label class="btn btn-outline-secondary" for="imgUpload">選擇檔案</label>
+                                    <input type="file" id="imgUpload" class="d-none">
+                                    <input type="text" id="fileNameDisplay" class="form-control bg-white" value="MAN-CC-90101.jpg" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row border-bottom-0 align-items-start">
+                            <div class="col-2 info-label mt-1">備註：</div>
+                            <div class="col-9">
+                                <textarea class="form-control form-control-sm" rows="3">-</textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="section-title">庫存管理</div>
             <table class="table table-custom datatable-init w-100">
-                <thead><tr><th>#</th><th>船舶</th><th>倉庫別</th><th>庫存量</th><th>供應商</th></tr></thead>
-                <tbody><tr><td class="text-center">1</td><td>景順</td><td>甲板</td><td>90</td><td>雙葉國際</td></tr></tbody>
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>船舶</th>
+                        <th>倉庫別</th>
+                        <th>最低要求</th>
+                        <th>庫存量</th>
+                        <th>庫存價值</th>
+                        <th>幣別</th>
+                        <th>廠家</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td class="text-primary">景順</td>
+                        <td class="text-primary">甲板</td>
+                        <td>0</td>
+                        <td>90</td>
+                        <td>9,900</td>
+                        <td>新台幣</td>
+                        <td>曼恩 MAN Energy Solutions (Denmark)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section-title">歷史報價紀錄 (船東)</div>
+            <table class="table table-custom datatable-init w-100">
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>船舶</th>
+                        <th>請購主旨</th>
+                        <th>報價單編號</th>
+                        <th>廠家</th>
+                        <th>數量</th>
+                        <th>單價</th>
+                        <th>總額</th>
+                        <th>報價日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td>景順</td>
+                        <td class="text-primary">test 景順 配件申請</td>
+                        <td>QO-202512-0001</td>
+                        <td>曼恩 MAN Energy Solutions (Denmark)</td>
+                        <td>90</td>
+                        <td>110</td>
+                        <td>9,900</td>
+                        <td>2025/12/07</td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script>$(document).ready(function(){ $('.datatable-init').DataTable({"language":{"url":"//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json"}, "stripeClasses": [], "dom": 'rtip'}); });</script>
+    <script>
+        $(document).ready(function(){
+            $('.datatable-init').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json"
+                },
+                "stripeClasses": [], 
+                "dom": 'rtip',
+                "ordering": false
+            });
+
+            // 處理檔案選取顯示名稱
+            $('#imgUpload').on('change', function(e){
+                const fileName = e.target.files[0] ? e.target.files[0].name : "未選擇任何檔案";
+                $('#fileNameDisplay').val(fileName);
+            });
+        });
+    </script>
 </body>
 </html>

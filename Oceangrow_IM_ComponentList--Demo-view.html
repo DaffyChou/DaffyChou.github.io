@@ -2,19 +2,23 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>查看配件資料</title>
+    <title>海發船舶智慧系統 - 查看配件資料</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f3f4f7; font-family: "Microsoft JhengHei", sans-serif; font-size: 13px; }
+        /* 列表樣式：黑表頭、無垂直線、白灰相間 */
         .table-custom thead th { background-color: #1a1a1a !important; color: #9ca3af !important; border: none !important; font-weight: normal; }
         .table-custom td { border: none !important; border-bottom: 1px solid #eee !important; padding: 10px; }
         .table-custom tbody tr:nth-of-type(even) { background-color: #f2f2f2 !important; }
+        .table-custom tbody tr:nth-of-type(odd) { background-color: #ffffff !important; }
         
-        .info-grid .row { margin: 0; padding: 10px 0; border-bottom: 1px solid #eee; }
+        /* 基本資料區塊樣式 */
+        .info-grid .row { margin: 0; padding: 10px 0; border-bottom: 1px solid #eee; align-items: center; }
         .info-grid .row:nth-child(even) { background-color: #f8f9fa; }
-        .info-label { font-weight: bold; text-align: right; color: #666; width: 120px; }
+        .info-grid .row:nth-child(odd) { background-color: #ffffff; }
+        .info-label { font-weight: bold; text-align: right; color: #666; width: 140px; }
         
         .section-title { font-size: 15px; font-weight: bold; margin: 25px 0 10px; border-left: 5px solid #3b5bdb; padding-left: 10px; }
         .product-img { width: 180px; height: 180px; background: #000; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; }
@@ -22,15 +26,23 @@
     </style>
 </head>
 <body class="p-4">
-    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-2"><li class="breadcrumb-item text-primary">Home</li><li class="breadcrumb-item text-primary">配件資料管理</li><li class="breadcrumb-item active">查看配件資料</li></ol></nav>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item text-primary" style="cursor:pointer" onclick="location.href='Oceangrow_IM_ComponentList--Demo.html'">Home</li>
+            <li class="breadcrumb-item text-primary">配件資料管理</li>
+            <li class="breadcrumb-item active">查看配件資料</li>
+        </ol>
+    </nav>
+
     <div class="card shadow-sm border-0 rounded-0">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom-0">
             <h4 class="mb-0 fw-bold">配件管理</h4>
             <div>
-                <button class="btn btn-outline-secondary btn-sm px-3 me-1">列印</button>
+                <button class="btn btn-outline-secondary btn-sm px-3 me-1"><i class="fas fa-print"></i> 列印</button>
                 <button class="btn btn-secondary btn-sm px-3" onclick="location.href='Oceangrow_IM_ComponentList--Demo.html'">返回</button>
             </div>
         </div>
+
         <div class="card-body pt-0">
             <h5 class="fw-bold mb-3">查看配件資料</h5>
             <div class="text-end mb-2">資料狀態：<span class="status-badge">啟用</span></div>
@@ -38,33 +50,151 @@
             <div class="border">
                 <div class="bg-light p-2 border-bottom fw-bold">配件基本資料</div>
                 <div class="d-flex">
-                    <div class="p-3 border-end bg-light"><div class="product-img"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCI+PGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iMzAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg=="></div></div>
+                    <div class="p-3 border-end bg-light">
+                        <div class="product-img">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCI+PGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iMzAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==">
+                        </div>
+                    </div>
                     <div class="flex-grow-1 info-grid">
-                        <div class="row"><div class="col-2 info-label">料號：</div><div class="col-9">B-6236812</div></div>
-                        <div class="row"><div class="col-2 info-label">配件名稱：</div><div class="col-9">百寶袋</div></div>
-                        <div class="row"><div class="col-2 info-label">原廠資訊：</div><div class="col-9">22世紀</div></div>
-                        <div class="row"><div class="col-2 info-label">單位：</div><div class="col-9">個</div></div>
-                        <div class="row border-bottom-0"><div class="col-2 info-label">備註：</div><div class="col-9 text-muted small">備註測試內容... (依據截圖長度自動換行)</div></div>
+                        <div class="row">
+                            <div class="col-2 info-label">PART NO：</div>
+                            <div class="col-9 fw-bold">90101-22</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2 info-label">總成：</div>
+                            <div class="col-9">主機總成</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2 info-label">配件名：</div>
+                            <div class="col-9">缸蓋 Cylinder Cover (Standard)</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2 info-label">廠家：</div>
+                            <div class="col-9">曼恩 MAN Energy Solutions (Denmark)</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2 info-label">單位：</div>
+                            <div class="col-9">SET</div>
+                        </div>
+                        <div class="row border-bottom-0">
+                            <div class="col-2 info-label">備註：</div>
+                            <div class="col-9 text-muted">-</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="section-title">庫存管理</div>
             <table class="table table-custom datatable-init w-100">
-                <thead><tr><th>#</th><th>船舶</th><th>倉庫別</th><th>最低要求</th><th>庫存量</th><th>庫存價值</th><th>幣別</th><th>供應商</th></tr></thead>
-                <tbody><tr><td class="text-center">1</td><td class="text-primary">景順</td><td class="text-primary">甲板</td><td>0</td><td>90</td><td>9,900</td><td>新台幣</td><td>雙葉國際貿易股份有限公司</td></tr></tbody>
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>船舶</th>
+                        <th>倉庫別</th>
+                        <th>最低要求</th>
+                        <th>庫存量</th>
+                        <th>庫存價值</th>
+                        <th>幣別</th>
+                        <th>廠家</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td class="text-primary">景順</td>
+                        <td class="text-primary">甲板</td>
+                        <td>0</td>
+                        <td>90</td>
+                        <td>9,900</td>
+                        <td>新台幣</td>
+                        <td>曼恩 MAN Energy Solutions (Denmark)</td>
+                    </tr>
+                </tbody>
             </table>
 
             <div class="section-title">歷史報價紀錄 (船東)</div>
             <table class="table table-custom datatable-init w-100">
-                <thead><tr><th>#</th><th>船舶</th><th>請購主旨</th><th>報價單編號</th><th>詢價單編號</th><th>供應商</th><th>數量</th><th>單價</th><th>總額</th><th>幣別</th><th>報價日期</th></tr></thead>
-                <tbody><tr><td class="text-center">1</td><td>景順</td><td class="text-primary">test 景順 配件申請</td><td>QO-202512-0001</td><td>RFQ-202512-0001</td><td>雙葉國際</td><td>90</td><td>110</td><td>9,900</td><td>美元</td><td>2025/12/07</td></tr></tbody>
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>船舶</th>
+                        <th>請購主旨</th>
+                        <th>報價單編號</th>
+                        <th>詢價單編號</th>
+                        <th>廠家</th>
+                        <th>數量</th>
+                        <th>單價</th>
+                        <th>總額</th>
+                        <th>幣別</th>
+                        <th>報價日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td>景順</td>
+                        <td class="text-primary">test 景順 配件申請</td>
+                        <td>QO-202512-0001</td>
+                        <td>RFQ-202512-0001</td>
+                        <td>曼恩 MAN Energy Solutions (Denmark)</td>
+                        <td>90</td>
+                        <td>110</td>
+                        <td>9,900</td>
+                        <td>美元</td>
+                        <td>2025/12/07</td>
+                    </tr>
+                </tbody>
             </table>
-            </div>
+
+            <div class="section-title">歷史詢價紀錄 (廠商)</div>
+            <table class="table table-custom datatable-init w-100">
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>船舶</th>
+                        <th>請購主旨</th>
+                        <th>詢價單編號</th>
+                        <th>廠家</th>
+                        <th>數量</th>
+                        <th>單價</th>
+                        <th>總額</th>
+                        <th>幣別</th>
+                        <th>詢價日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td>景順</td>
+                        <td class="text-primary">test 景順 配件申請</td>
+                        <td>RFQ-202512-0001</td>
+                        <td>曼恩 MAN Energy Solutions (Denmark)</td>
+                        <td>90</td>
+                        <td>100</td>
+                        <td>9,000</td>
+                        <td>美元</td>
+                        <td>2025/12/02</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script>$(document).ready(function(){ $('.datatable-init').DataTable({"language":{"url":"//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json"}, "stripeClasses": [], "dom": 'rtip'}); });</script>
+    <script>
+        $(document).ready(function(){
+            $('.datatable-init').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json"
+                },
+                "stripeClasses": [], 
+                "dom": 'rtip',
+                "ordering": false
+            });
+        });
+    </script>
 </body>
 </html>
