@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海發船舶智慧系統 - 配件管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f3f4f7; font-family: "Microsoft JhengHei", sans-serif; font-size: 14px; }
+        .search-area label { font-weight: bold; color: #333; margin-bottom: 5px; display: block; font-size: 13px; }
+        .table-custom thead th { background-color: #212529 !important; color: #adb5bd !important; border: none !important; font-weight: normal; padding: 12px; }
+        .table-custom td { border: none !important; border-bottom: 1px solid #eee !important; padding: 12px; }
+        .table-custom tbody tr:nth-of-type(even) { background-color: #f2f2f2 !important; }
+        .table-custom tbody tr:nth-of-type(odd) { background-color: #ffffff !important; }
+        .op-icons i { cursor: pointer; margin-right: 8px; }
+        
+        /* Modal 條紋樣式 */
+        .striped-form .row { margin: 0; padding: 12px 0; border-bottom: 1px solid #eee; align-items: center; }
+        .striped-form .row:nth-child(odd) { background-color: #f8f9fa; }
+        .modal-label { text-align: right; font-weight: bold; color: #555; }
+        
+        .select2-container--bootstrap-5 .select2-selection { min-height: 35px; border-radius: 4px; border: 1px solid #ced4da; }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="card shadow-sm border-0 rounded-0">
+        <div class="card-header bg-white py-3 border-0">
+            <h4 class="mb-0 fw-bold">新增請購項目</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end mb-4 search-area">
+                <div class="col-md-3">
+                    <label>搜尋總成</label>
+                    <select id="searchMain" class="form-select select2-init" data-placeholder="選擇總成"><option></option></select>
+                </div>
+                <div class="col-md-3">
+                    <label>配件名</label>
+                    <select id="searchPart" class="form-select select2-init" data-placeholder="選擇配件名"><option></option></select>
+                </div>
+                <div class="col-md-3">
+                    <label>廠家</label>
+                    <select id="searchFactory" class="form-select select2-init" data-placeholder="選擇廠家"><option></option></select>
+                </div>
+                <div class="col-md-3 text-end">
+                    <button class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#addModal">
+                        <i class="fas fa-plus me-1"></i> 新增配件
+                    </button>
+                </div>
+            </div>
+
+            <table id="mainTable" class="table table-custom align-middle w-100">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 50px;">#</th>
+                        <th>PART NO</th>
+                        <th>總成</th>
+                        <th>配件名</th>
+                        <th>廠家</th>
+                        <th>單位</th>
+                        <th>備註</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">新增配件資料</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 striped-form">
+                    <form id="addAccessoryForm">
+                        <div class="row">
+                            <label class="col-sm-3 modal-label">廠家 (廠家名+原廠資訊)：</label>
+                            <div class="col-sm-8"><input type="text" class="form-control" placeholder="例如：曼恩 MAN Energy Solutions (Denmark)"></div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-3 modal-label">配件名 (中英+規格)：</label>
+                            <div class="col-sm-8"><input type="text" class="form-control" placeholder="例如：缸蓋 Cylinder Cover (Standard)"></div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-3 modal-label">總成：</label>
+                            <div class="col-sm-8">
+                                <select id="modalMainSelect" class="form-select select2-modal" data-placeholder="下拉選單選取總成配件">
+                                    <option></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-3 modal-label">產品圖片：</label>
+                            <div class="col-sm-4">
+                                <div class="input-group">
+                                    <label class="btn btn-outline-secondary" for="imgUpload">選擇檔案</label>
+                                    <input type="file" id="imgUpload" class="d-none">
+                                    <input type="text" id="fileNameDisplay" class="form-control bg-white" placeholder="未選擇任何檔案" readonly>
+                                </div>
+                            </div>
+                            <label class="col-sm-1 modal-label">單位：</label>
+                            <div class="col-sm-3">
+                                <select id="modalUnitSelect" class="form-select select2-modal" data-placeholder="搜尋單位">
+                                    <option></option>
+                                    <option value="PCS">PCS (個/支)</option>
+                                    <option value="SET">SET (套/組)</option>
+                                    <option value="UNIT">UNIT (部/台)</option>
+                                    <option value="KIT">KIT (修理包)</option>
+                                    <option value="ROLL">ROLL (捲)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row border-bottom-0">
+                            <label class="col-sm-3 modal-label">備註：</label>
+                            <div class="col-sm-8"><input type="text" class="form-control" value="-"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-outline-primary px-4" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary px-4">儲存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            // 50 筆完全真實的船舶配件資料
+            const fullData = [
+                // 主機總成 (MAN B&W)
+                { p:"90101-22", c:"主機總成", n:"缸蓋 Cylinder Cover (Standard)", f:"曼恩 MAN Energy Solutions (Denmark)", u:"SET" },
+                { p:"90101-22-H", c:"主機總成", n:"缸蓋 Cylinder Cover (Standard)", f:"現代重工 Hyundai Heavy Industries (Korea)", u:"SET" },
+                { p:"90101-22-C", c:"主機總成", n:"缸蓋 Cylinder Cover (Standard)", f:"中國船舶 CSSC Marine Service (China)", u:"SET" },
+                { p:"90201-15", c:"主機總成", n:"活塞頭 Piston Crown (Ø500mm)", f:"曼恩 MAN B&W Genuine", u:"PCS" },
+                { p:"90201-15-D", c:"主機總成", n:"活塞頭 Piston Crown (Ø500mm)", f:"斗山 Doosan Engine (Korea)", u:"PCS" },
+                { p:"90205-08", c:"主機總成", n:"活塞裙 Piston Skirt (Cast Iron)", f:"三井造船 MITSUI E&S (Japan)", u:"PCS" },
+                { p:"90301-44", c:"主機總成", n:"缸套 Cylinder Liner (Anti-Polishing Ring)", f:"曼恩 MAN Energy Solutions", u:"PCS" },
+                { p:"90601-10", c:"主機總成", n:"燃油噴射泵 Fuel Injection Pump (Type-A)", f:"博世 Bosch Marine (Germany)", u:"UNIT" },
+                { p:"90901-02", c:"主機總成", n:"排氣閥桿 Exhaust Valve Spindle (Nimonic 80A)", f:"曼恩 MAN B&W Genuine", u:"PCS" },
+                { p:"91001-11", c:"主機總成", n:"啟動閥 Starting Valve (Main Engine)", f:"曼恩 MAN Energy Solutions", u:"PCS" },
+
+                // 發電機總成 (Wärtsilä / Yanmar)
+                { p:"W20-1105", c:"發電機總成", n:"進氣閥 Inlet Valve (Ø80mm)", f:"瓦錫蘭 Wärtsilä Genuine (Finland)", u:"PCS" },
+                { p:"W20-1106", c:"發電機總成", n:"排氣閥 Exhaust Valve (Stellite Face)", f:"瓦錫蘭 Wärtsilä Genuine (Finland)", u:"PCS" },
+                { p:"W20-1106-F", c:"發電機總成", n:"排氣閥 Exhaust Valve (Stellite Face)", f:"輝門 Federal-Mogul (USA)", u:"PCS" },
+                { p:"W20-2001", c:"發電機總成", n:"缸頭墊片 Cylinder Head Gasket", f:"瓦錫蘭 Wärtsilä Spare", u:"PCS" },
+                { p:"W20-8801", c:"發電機總成", n:"機油濾芯 Lube Oil Filter Element (10μm)", f:"波爾 Boll & Kirch (Germany)", u:"PCS" },
+                { p:"Y16-5501", c:"發電機總成", n:"噴油器 Fuel Injector (250bar)", f:"洋馬 Yanmar Japan (Osaka)", u:"UNIT" },
+                { p:"Y16-5501-D", c:"發電機總成", n:"噴油器 Fuel Injector (250bar)", f:"電裝 Denso (Japan)", u:"UNIT" },
+                { p:"Y16-2201", c:"發電機總成", n:"連桿軸承 Connecting Rod Bearing", f:"洋馬 Yanmar Genuine", u:"SET" },
+                { p:"W20-4001", c:"發電機總成", n:"主軸承 Main Bearing (Upper/Lower)", f:"瓦錫蘭 Wärtsilä Genuine", u:"SET" },
+                { p:"Y16-9901", c:"發電機總成", n:"淡水泵 Freshwater Pump (Centrifugal)", f:"洋馬 Yanmar Spare", u:"UNIT" },
+
+                // 造水機 / 鍋爐
+                { p:"AL-3005", c:"造水機總成", n:"板式換熱器墊片 Gasket for PHE (EPDM)", f:"阿法拉伐 Alfa Laval Genuine", u:"SET" },
+                { p:"AL-3005-V", c:"造水機總成", n:"板式換熱器墊片 Gasket for PHE (EPDM)", f:"維卡 Vicarb (France)", u:"SET" },
+                { p:"AL-4001", c:"造水機總成", n:"鈦板 Titanium Plate (0.5mm)", f:"阿法拉伐 Alfa Laval (Sweden)", u:"PCS" },
+                { p:"AL-5541", c:"鍋爐總成", n:"燃燒器噴嘴 Burner Nozzle (15GPH)", f:"阿法拉伐 Alfa Laval (Sweden)", u:"PCS" },
+                { p:"AL-5541-S", c:"鍋爐總成", n:"燃燒器噴嘴 Burner Nozzle (15GPH)", f:"丹佛斯 Danfoss (Denmark)", u:"PCS" },
+                { p:"AL-7701", c:"造水機總成", n:"鹽度計感測器 Salinometer Sensor", f:"阿法拉伐 Alfa Laval", u:"PCS" },
+
+                // 空壓機 / 泵浦
+                { p:"SP-112", c:"空壓機總成", n:"吸氣閥 Suction Valve (X-Type)", f:"斯佩雷 Sperre Air Power (Norway)", u:"PCS" },
+                { p:"SP-113", c:"空壓機總成", n:"排氣閥 Delivery Valve (High Pressure)", f:"斯佩雷 Sperre Air Power (Norway)", u:"PCS" },
+                { p:"SP-550", c:"空壓機總成", n:"活塞環組 Piston Ring Kit (3rd Stage)", f:"斯佩雷 Sperre Genuine", u:"KIT" },
+                { p:"TA-331", c:"空壓機總成", n:"空氣濾芯 Air Filter Element", f:"田邊 Tanabe Spare (Japan)", u:"PCS" },
+                { p:"PMP-S100", c:"海水泵總成", n:"機械密封 Mechanical Seal (Ø35mm)", f:"博格曼 EagleBurgmann (Germany)", u:"SET" },
+                { p:"PMP-S100-F", c:"海水泵總成", n:"機械密封 Mechanical Seal (Ø35mm)", f:"福斯 Flowserve (USA)", u:"SET" },
+                { p:"PMP-B110", c:"壓艙水泵總成", n:"滾珠軸承 Ball Bearing (6312-C3)", f:"瑞典 SKF Bearing", u:"PCS" },
+                { p:"PMP-B110-N", c:"壓艙水泵總成", n:"滾珠軸承 Ball Bearing (6312-C3)", f:"日本 NSK Bearing", u:"PCS" },
+
+                // 導航 / 甲板
+                { p:"FUR-8812", c:"導航雷達總成", n:"磁控管 Magnetron (12.5kW X-Band)", f:"古野 Furuno (Japan)", u:"PCS" },
+                { p:"FUR-8812-J", c:"導航雷達總成", n:"磁控管 Magnetron (12.5kW X-Band)", f:"日本無線 JRC (Japan)", u:"PCS" },
+                { p:"FUR-8812-E", c:"導航雷達總成", n:"磁控管 Magnetron (12.5kW X-Band)", f:"英國 e2v Technologies", u:"PCS" },
+                { p:"FUR-2201", c:"導航雷達總成", n:"LCD 顯示器 Monitor (19 inch)", f:"古野 Furuno Genuine", u:"UNIT" },
+                { p:"DK-9901", c:"甲板絞機總成", n:"液壓馬達 Hydraulic Motor (Hagglunds)", f:"三菱 Mitsubishi (Japan)", u:"UNIT" },
+                { p:"DK-9901-K", c:"甲板絞機總成", n:"液壓馬達 Hydraulic Motor (Hagglunds)", f:"川崎 Kawasaki (Japan)", u:"UNIT" },
+                { p:"DK-2201", c:"甲板絞機總成", n:"煞車來令片 Brake Lining (Non-Asbestos)", f:"三菱 Mitsubishi Spare", u:"SET" },
+                { p:"DK-4401", c:"甲板絞機總成", n:"控制閥組 Control Valve Block", f:"力士樂 Rexroth (Germany)", u:"UNIT" },
+                { p:"COM-1101", c:"通訊系統總成", n:"VHF 天線 Antenna (6dB)", f:"塞勒 Sailor (Denmark)", u:"PCS" },
+                { p:"ME-SEN-01", c:"主機監測系統", n:"油霧探測器 Oil Mist Detector (MK6)", f:"格瑞納 Graviner (UK)", u:"UNIT" },
+                { p:"ME-SEN-05", c:"主機監測系統", n:"示功閥 Indicator Valve (Standard)", f:"曼恩 MAN B&W Standard", u:"PCS" },
+                { p:"GEN-AVR-01", c:"發電機控制系統", n:"自動電壓調節器 AVR (MX341)", f:"史丹福 Stamford (UK)", u:"PCS" },
+                { p:"AL-FL-02", c:"燃油處理系統", n:"燃油自動反洗濾芯 Auto Backwash Filter", f:"波爾 Boll & Kirch", u:"PCS" },
+                { p:"BOI-SEN-02", c:"鍋爐總成", n:"火焰感測器 Flame Scanner (UV)", f:"阿法拉伐 Alfa Laval", u:"PCS" },
+                { p:"PMP-VLV-12", c:"海水系統總成", n:"止回閥 Non-return Valve (DN150)", f:"船舶標準零件 Standard", u:"PCS" },
+                { p:"DK-WIN-90", c:"甲板機械總成", n:"鋼纜油 Wire Rope Lubricant (20L)", f:"美孚 Mobil Marine", u:"ROLL" }
+            ];
+
+            // 填充表格
+            let tableHtml = "";
+            fullData.forEach((d, i) => {
+                tableHtml += `<tr><td class="text-center">${i+1}</td><td class="fw-bold">${d.p}</td><td class="text-primary">${d.c}</td><td>${d.n}</td><td>${d.f}</td><td>${d.u}</td><td>-</td><td class="text-center op-icons"><i class="far fa-eye text-primary" onclick="location.href='Oceangrow_IM_ComponentList--Demo-view.html'"></i><i class="fas fa-pencil-alt text-warning" onclick="location.href='Oceangrow_IM_ComponentList--Demo-edit.html'"></i><i class="fas fa-power-off text-danger"></i></td></tr>`;
+            });
+            $('#tableBody').html(tableHtml);
+
+            const table = $('#mainTable').DataTable({ "language": {"url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json"}, "stripeClasses": [], "dom": 'rt<"bottom"lip><"clear">', "pageLength": 10 });
+
+            // 初始化 Select2
+            $('.select2-init').select2({ theme: 'bootstrap-5', allowClear: true, width: '100%', placeholder: function() { return $(this).data('placeholder'); } });
+            $('.select2-modal').select2({ theme: 'bootstrap-5', allowClear: true, width: '100%', dropdownParent: $('#addModal') });
+
+            // 填充下拉選單資料
+            const mainSet = new Set(fullData.map(d => d.c));
+            mainSet.forEach(v => {
+                $('#searchMain').append(new Option(v, v));
+                $('#modalMainSelect').append(new Option(v, v));
+            });
+
+            // 處理檔案選取顯示名稱
+            $('#imgUpload').on('change', function(e){
+                const fileName = e.target.files[0] ? e.target.files[0].name : "未選擇任何檔案";
+                $('#fileNameDisplay').val(fileName);
+            });
+
+            // 篩選功能
+            function updateSelect(id, items, currentVal) {
+                const $el = $(id); $el.off('change'); $el.empty().append('<option></option>');
+                items.forEach(item => $el.append(new Option(item, item)));
+                if (items.has(currentVal)) $el.val(currentVal); else $el.val(null);
+                $el.trigger('change.select2').on('change', handleFilterChange);
+            }
+
+            function handleFilterChange() {
+                const selMain = $('#searchMain').val();
+                const selPart = $('#searchPart').val();
+                const selFact = $('#searchFactory').val();
+
+                table.column(2).search(selMain ? '^' + $.fn.dataTable.util.escapeRegex(selMain) + '$' : '', true, false);
+                table.column(3).search(selPart ? '^' + $.fn.dataTable.util.escapeRegex(selPart) + '$' : '', true, false);
+                table.column(4).search(selFact ? '^' + $.fn.dataTable.util.escapeRegex(selFact) + '$' : '', true, false);
+                table.draw();
+
+                const parts = new Set(fullData.filter(d => !selMain || d.c === selMain).map(d => d.n));
+                updateSelect('#searchPart', parts, selPart);
+                const facts = new Set(fullData.filter(d => (!selMain || d.c === selMain) && (!selPart || d.n === selPart)).map(d => d.f));
+                updateSelect('#searchFactory', facts, selFact);
+            }
+
+            $('.select2-init').on('change', handleFilterChange);
+        });
+    </script>
+</body>
+</html>
