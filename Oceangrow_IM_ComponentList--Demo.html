@@ -11,8 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body { background-color: #f3f4f7; font-family: "Microsoft JhengHei", sans-serif; font-size: 14px; }
-        .search-area label { font-weight: bold; color: #333; margin-bottom: 5px; display: block; font-size: 13px; }
+        body { background-color: #f3f4f7; font-family: "Microsoft JhengHei", sans-serif; font-size: 1rem; }
+        .search-area label { font-weight: bold; color: #333; margin-bottom: 5px; display: block; font-size: .75rem; }
         .table-custom thead th { background-color: #212529 !important; color: #adb5bd !important; border: none !important; font-weight: normal; padding: 12px; }
         .table-custom td { border: none !important; border-bottom: 1px solid #eee !important; padding: 12px; }
         .table-custom tbody tr:nth-of-type(even) { background-color: #f2f2f2 !important; }
@@ -63,6 +63,7 @@
                         <th>配件名</th>
                         <th>廠家</th>
                         <th>單位</th>
+                        <th class="text-center">狀態</th>
                         <th>備註</th>
                         <th class="text-center">操作</th>
                     </tr>
@@ -82,11 +83,11 @@
                 <div class="modal-body p-0 striped-form">
                     <form id="addAccessoryForm">
                         <div class="row">
-                            <label class="col-sm-3 modal-label">廠家 (廠家名+原廠資訊)：</label>
+                            <label class="col-sm-3 modal-label">廠家：</label>
                             <div class="col-sm-8"><input type="text" class="form-control" placeholder="例如：曼恩 MAN Energy Solutions (Denmark)"></div>
                         </div>
                         <div class="row">
-                            <label class="col-sm-3 modal-label">配件名 (中英+規格)：</label>
+                            <label class="col-sm-3 modal-label">配件名：</label>
                             <div class="col-sm-8"><input type="text" class="form-control" placeholder="例如：缸蓋 Cylinder Cover (Standard)"></div>
                         </div>
                         <div class="row">
@@ -106,7 +107,7 @@
                                     <input type="text" id="fileNameDisplay" class="form-control bg-white" placeholder="未選擇任何檔案" readonly>
                                 </div>
                             </div>
-                            <label class="col-sm-1 modal-label">單位：</label>
+                            <label class="col-sm-auto modal-label">單位：</label>
                             <div class="col-sm-3">
                                 <select id="modalUnitSelect" class="form-select select2-modal" data-placeholder="搜尋單位">
                                     <option></option>
@@ -143,70 +144,71 @@
             // 50 筆完全真實的船舶配件資料
             const fullData = [
                 // 主機總成 (MAN B&W)
-                { p:"90101-22", c:"主機總成", n:"缸蓋 Cylinder Cover (Standard)", f:"曼恩 MAN Energy Solutions (Denmark)", u:"SET" },
-                { p:"90101-22-H", c:"主機總成", n:"缸蓋 Cylinder Cover (Standard)", f:"現代重工 Hyundai Heavy Industries (Korea)", u:"SET" },
-                { p:"90101-22-C", c:"主機總成", n:"缸蓋 Cylinder Cover (Standard)", f:"中國船舶 CSSC Marine Service (China)", u:"SET" },
-                { p:"90201-15", c:"主機總成", n:"活塞頭 Piston Crown (Ø500mm)", f:"曼恩 MAN B&W Genuine", u:"PCS" },
-                { p:"90201-15-D", c:"主機總成", n:"活塞頭 Piston Crown (Ø500mm)", f:"斗山 Doosan Engine (Korea)", u:"PCS" },
-                { p:"90205-08", c:"主機總成", n:"活塞裙 Piston Skirt (Cast Iron)", f:"三井造船 MITSUI E&S (Japan)", u:"PCS" },
-                { p:"90301-44", c:"主機總成", n:"缸套 Cylinder Liner (Anti-Polishing Ring)", f:"曼恩 MAN Energy Solutions", u:"PCS" },
-                { p:"90601-10", c:"主機總成", n:"燃油噴射泵 Fuel Injection Pump (Type-A)", f:"博世 Bosch Marine (Germany)", u:"UNIT" },
-                { p:"90901-02", c:"主機總成", n:"排氣閥桿 Exhaust Valve Spindle (Nimonic 80A)", f:"曼恩 MAN B&W Genuine", u:"PCS" },
-                { p:"91001-11", c:"主機總成", n:"啟動閥 Starting Valve (Main Engine)", f:"曼恩 MAN Energy Solutions", u:"PCS" },
+                { p:"90101-22", c:"主機總成", n:"缸蓋 Cylinder Cover (Standard)", f:"曼恩 MAN Energy Solutions (Denmark)", u:"SET",s: 0 },
+                { p:"90101-22-H", c:"主機總成", n:"缸蓋 Cylinder Cover (Standard)", f:"現代重工 Hyundai Heavy Industries (Korea)", u:"SET",s: 1 },
+                { p:"90101-22-C", c:"主機總成", n:"缸蓋 Cylinder Cover (Standard)", f:"中國船舶 CSSC Marine Service (China)", u:"SET",s: 1 },
+                { p:"90201-15", c:"主機總成", n:"活塞頭 Piston Crown (Ø500mm)", f:"曼恩 MAN B&W Genuine", u:"PCS",s: 1 },
+                { p:"90201-15-D", c:"主機總成", n:"活塞頭 Piston Crown (Ø500mm)", f:"斗山 Doosan Engine (Korea)", u:"PCS",s: 0 },
+                { p:"90205-08", c:"主機總成", n:"活塞裙 Piston Skirt (Cast Iron)", f:"三井造船 MITSUI E&S (Japan)", u:"PCS",s: 0 },
+                { p:"90301-44", c:"主機總成", n:"缸套 Cylinder Liner (Anti-Polishing Ring)", f:"曼恩 MAN Energy Solutions", u:"PCS" ,s: 1},
+                { p:"90601-10", c:"主機總成", n:"燃油噴射泵 Fuel Injection Pump (Type-A)", f:"博世 Bosch Marine (Germany)", u:"UNIT",s: 1 },
+                { p:"90901-02", c:"主機總成", n:"排氣閥桿 Exhaust Valve Spindle (Nimonic 80A)", f:"曼恩 MAN B&W Genuine", u:"PCS",s: 1 },
+                { p:"91001-11", c:"主機總成", n:"啟動閥 Starting Valve (Main Engine)", f:"曼恩 MAN Energy Solutions", u:"PCS",s: 1 },
 
                 // 發電機總成 (Wärtsilä / Yanmar)
-                { p:"W20-1105", c:"發電機總成", n:"進氣閥 Inlet Valve (Ø80mm)", f:"瓦錫蘭 Wärtsilä Genuine (Finland)", u:"PCS" },
-                { p:"W20-1106", c:"發電機總成", n:"排氣閥 Exhaust Valve (Stellite Face)", f:"瓦錫蘭 Wärtsilä Genuine (Finland)", u:"PCS" },
-                { p:"W20-1106-F", c:"發電機總成", n:"排氣閥 Exhaust Valve (Stellite Face)", f:"輝門 Federal-Mogul (USA)", u:"PCS" },
-                { p:"W20-2001", c:"發電機總成", n:"缸頭墊片 Cylinder Head Gasket", f:"瓦錫蘭 Wärtsilä Spare", u:"PCS" },
-                { p:"W20-8801", c:"發電機總成", n:"機油濾芯 Lube Oil Filter Element (10μm)", f:"波爾 Boll & Kirch (Germany)", u:"PCS" },
-                { p:"Y16-5501", c:"發電機總成", n:"噴油器 Fuel Injector (250bar)", f:"洋馬 Yanmar Japan (Osaka)", u:"UNIT" },
-                { p:"Y16-5501-D", c:"發電機總成", n:"噴油器 Fuel Injector (250bar)", f:"電裝 Denso (Japan)", u:"UNIT" },
-                { p:"Y16-2201", c:"發電機總成", n:"連桿軸承 Connecting Rod Bearing", f:"洋馬 Yanmar Genuine", u:"SET" },
-                { p:"W20-4001", c:"發電機總成", n:"主軸承 Main Bearing (Upper/Lower)", f:"瓦錫蘭 Wärtsilä Genuine", u:"SET" },
-                { p:"Y16-9901", c:"發電機總成", n:"淡水泵 Freshwater Pump (Centrifugal)", f:"洋馬 Yanmar Spare", u:"UNIT" },
+                { p:"W20-1105", c:"發電機總成", n:"進氣閥 Inlet Valve (Ø80mm)", f:"瓦錫蘭 Wärtsilä Genuine (Finland)", u:"PCS",s: 1 },
+                { p:"W20-1106", c:"發電機總成", n:"排氣閥 Exhaust Valve (Stellite Face)", f:"瓦錫蘭 Wärtsilä Genuine (Finland)", u:"PCS",s: 0 },
+                { p:"W20-1106-F", c:"發電機總成", n:"排氣閥 Exhaust Valve (Stellite Face)", f:"輝門 Federal-Mogul (USA)", u:"PCS",s: 1 },
+                { p:"W20-2001", c:"發電機總成", n:"缸頭墊片 Cylinder Head Gasket", f:"瓦錫蘭 Wärtsilä Spare", u:"PCS",s: 1 },
+                { p:"W20-8801", c:"發電機總成", n:"機油濾芯 Lube Oil Filter Element (10μm)", f:"波爾 Boll & Kirch (Germany)", u:"PCS",s: 1 },
+                { p:"Y16-5501", c:"發電機總成", n:"噴油器 Fuel Injector (250bar)", f:"洋馬 Yanmar Japan (Osaka)", u:"UNIT",s: 1 },
+                { p:"Y16-5501-D", c:"發電機總成", n:"噴油器 Fuel Injector (250bar)", f:"電裝 Denso (Japan)", u:"UNIT",s: 1 },
+                { p:"Y16-2201", c:"發電機總成", n:"連桿軸承 Connecting Rod Bearing", f:"洋馬 Yanmar Genuine", u:"SET",s: 1 },
+                { p:"W20-4001", c:"發電機總成", n:"主軸承 Main Bearing (Upper/Lower)", f:"瓦錫蘭 Wärtsilä Genuine", u:"SET",s: 1 },
+                { p:"Y16-9901", c:"發電機總成", n:"淡水泵 Freshwater Pump (Centrifugal)", f:"洋馬 Yanmar Spare", u:"UNIT",s: 1 },
 
                 // 造水機 / 鍋爐
-                { p:"AL-3005", c:"造水機總成", n:"板式換熱器墊片 Gasket for PHE (EPDM)", f:"阿法拉伐 Alfa Laval Genuine", u:"SET" },
-                { p:"AL-3005-V", c:"造水機總成", n:"板式換熱器墊片 Gasket for PHE (EPDM)", f:"維卡 Vicarb (France)", u:"SET" },
-                { p:"AL-4001", c:"造水機總成", n:"鈦板 Titanium Plate (0.5mm)", f:"阿法拉伐 Alfa Laval (Sweden)", u:"PCS" },
-                { p:"AL-5541", c:"鍋爐總成", n:"燃燒器噴嘴 Burner Nozzle (15GPH)", f:"阿法拉伐 Alfa Laval (Sweden)", u:"PCS" },
-                { p:"AL-5541-S", c:"鍋爐總成", n:"燃燒器噴嘴 Burner Nozzle (15GPH)", f:"丹佛斯 Danfoss (Denmark)", u:"PCS" },
-                { p:"AL-7701", c:"造水機總成", n:"鹽度計感測器 Salinometer Sensor", f:"阿法拉伐 Alfa Laval", u:"PCS" },
+                { p:"AL-3005", c:"造水機總成", n:"板式換熱器墊片 Gasket for PHE (EPDM)", f:"阿法拉伐 Alfa Laval Genuine", u:"SET",s: 1 },
+                { p:"AL-3005-V", c:"造水機總成", n:"板式換熱器墊片 Gasket for PHE (EPDM)", f:"維卡 Vicarb (France)", u:"SET",s: 1 },
+                { p:"AL-4001", c:"造水機總成", n:"鈦板 Titanium Plate (0.5mm)", f:"阿法拉伐 Alfa Laval (Sweden)", u:"PCS",s: 1 },
+                { p:"AL-5541", c:"鍋爐總成", n:"燃燒器噴嘴 Burner Nozzle (15GPH)", f:"阿法拉伐 Alfa Laval (Sweden)", u:"PCS",s: 1 },
+                { p:"AL-5541-S", c:"鍋爐總成", n:"燃燒器噴嘴 Burner Nozzle (15GPH)", f:"丹佛斯 Danfoss (Denmark)", u:"PCS",s: 1 },
+                { p:"AL-7701", c:"造水機總成", n:"鹽度計感測器 Salinometer Sensor", f:"阿法拉伐 Alfa Laval", u:"PCS",s: 1 },
 
                 // 空壓機 / 泵浦
-                { p:"SP-112", c:"空壓機總成", n:"吸氣閥 Suction Valve (X-Type)", f:"斯佩雷 Sperre Air Power (Norway)", u:"PCS" },
-                { p:"SP-113", c:"空壓機總成", n:"排氣閥 Delivery Valve (High Pressure)", f:"斯佩雷 Sperre Air Power (Norway)", u:"PCS" },
-                { p:"SP-550", c:"空壓機總成", n:"活塞環組 Piston Ring Kit (3rd Stage)", f:"斯佩雷 Sperre Genuine", u:"KIT" },
-                { p:"TA-331", c:"空壓機總成", n:"空氣濾芯 Air Filter Element", f:"田邊 Tanabe Spare (Japan)", u:"PCS" },
-                { p:"PMP-S100", c:"海水泵總成", n:"機械密封 Mechanical Seal (Ø35mm)", f:"博格曼 EagleBurgmann (Germany)", u:"SET" },
-                { p:"PMP-S100-F", c:"海水泵總成", n:"機械密封 Mechanical Seal (Ø35mm)", f:"福斯 Flowserve (USA)", u:"SET" },
-                { p:"PMP-B110", c:"壓艙水泵總成", n:"滾珠軸承 Ball Bearing (6312-C3)", f:"瑞典 SKF Bearing", u:"PCS" },
-                { p:"PMP-B110-N", c:"壓艙水泵總成", n:"滾珠軸承 Ball Bearing (6312-C3)", f:"日本 NSK Bearing", u:"PCS" },
+                { p:"SP-112", c:"空壓機總成", n:"吸氣閥 Suction Valve (X-Type)", f:"斯佩雷 Sperre Air Power (Norway)", u:"PCS",s: 1 },
+                { p:"SP-113", c:"空壓機總成", n:"排氣閥 Delivery Valve (High Pressure)", f:"斯佩雷 Sperre Air Power (Norway)", u:"PCS",s: 1 },
+                { p:"SP-550", c:"空壓機總成", n:"活塞環組 Piston Ring Kit (3rd Stage)", f:"斯佩雷 Sperre Genuine", u:"KIT",s: 1 },
+                { p:"TA-331", c:"空壓機總成", n:"空氣濾芯 Air Filter Element", f:"田邊 Tanabe Spare (Japan)", u:"PCS",s: 1 },
+                { p:"PMP-S100", c:"海水泵總成", n:"機械密封 Mechanical Seal (Ø35mm)", f:"博格曼 EagleBurgmann (Germany)", u:"SET",s: 1 },
+                { p:"PMP-S100-F", c:"海水泵總成", n:"機械密封 Mechanical Seal (Ø35mm)", f:"福斯 Flowserve (USA)", u:"SET",s: 1 },
+                { p:"PMP-B110", c:"壓艙水泵總成", n:"滾珠軸承 Ball Bearing (6312-C3)", f:"瑞典 SKF Bearing", u:"PCS",s: 1 },
+                { p:"PMP-B110-N", c:"壓艙水泵總成", n:"滾珠軸承 Ball Bearing (6312-C3)", f:"日本 NSK Bearing", u:"PCS",s: 1 },
 
                 // 導航 / 甲板
-                { p:"FUR-8812", c:"導航雷達總成", n:"磁控管 Magnetron (12.5kW X-Band)", f:"古野 Furuno (Japan)", u:"PCS" },
-                { p:"FUR-8812-J", c:"導航雷達總成", n:"磁控管 Magnetron (12.5kW X-Band)", f:"日本無線 JRC (Japan)", u:"PCS" },
-                { p:"FUR-8812-E", c:"導航雷達總成", n:"磁控管 Magnetron (12.5kW X-Band)", f:"英國 e2v Technologies", u:"PCS" },
-                { p:"FUR-2201", c:"導航雷達總成", n:"LCD 顯示器 Monitor (19 inch)", f:"古野 Furuno Genuine", u:"UNIT" },
-                { p:"DK-9901", c:"甲板絞機總成", n:"液壓馬達 Hydraulic Motor (Hagglunds)", f:"三菱 Mitsubishi (Japan)", u:"UNIT" },
-                { p:"DK-9901-K", c:"甲板絞機總成", n:"液壓馬達 Hydraulic Motor (Hagglunds)", f:"川崎 Kawasaki (Japan)", u:"UNIT" },
-                { p:"DK-2201", c:"甲板絞機總成", n:"煞車來令片 Brake Lining (Non-Asbestos)", f:"三菱 Mitsubishi Spare", u:"SET" },
-                { p:"DK-4401", c:"甲板絞機總成", n:"控制閥組 Control Valve Block", f:"力士樂 Rexroth (Germany)", u:"UNIT" },
-                { p:"COM-1101", c:"通訊系統總成", n:"VHF 天線 Antenna (6dB)", f:"塞勒 Sailor (Denmark)", u:"PCS" },
-                { p:"ME-SEN-01", c:"主機監測系統", n:"油霧探測器 Oil Mist Detector (MK6)", f:"格瑞納 Graviner (UK)", u:"UNIT" },
-                { p:"ME-SEN-05", c:"主機監測系統", n:"示功閥 Indicator Valve (Standard)", f:"曼恩 MAN B&W Standard", u:"PCS" },
-                { p:"GEN-AVR-01", c:"發電機控制系統", n:"自動電壓調節器 AVR (MX341)", f:"史丹福 Stamford (UK)", u:"PCS" },
-                { p:"AL-FL-02", c:"燃油處理系統", n:"燃油自動反洗濾芯 Auto Backwash Filter", f:"波爾 Boll & Kirch", u:"PCS" },
-                { p:"BOI-SEN-02", c:"鍋爐總成", n:"火焰感測器 Flame Scanner (UV)", f:"阿法拉伐 Alfa Laval", u:"PCS" },
-                { p:"PMP-VLV-12", c:"海水系統總成", n:"止回閥 Non-return Valve (DN150)", f:"船舶標準零件 Standard", u:"PCS" },
-                { p:"DK-WIN-90", c:"甲板機械總成", n:"鋼纜油 Wire Rope Lubricant (20L)", f:"美孚 Mobil Marine", u:"ROLL" }
+                { p:"FUR-8812", c:"導航雷達總成", n:"磁控管 Magnetron (12.5kW X-Band)", f:"古野 Furuno (Japan)", u:"PCS",s: 1 },
+                { p:"FUR-8812-J", c:"導航雷達總成", n:"磁控管 Magnetron (12.5kW X-Band)", f:"日本無線 JRC (Japan)", u:"PCS",s: 1 },
+                { p:"FUR-8812-E", c:"導航雷達總成", n:"磁控管 Magnetron (12.5kW X-Band)", f:"英國 e2v Technologies", u:"PCS",s: 1 },
+                { p:"FUR-2201", c:"導航雷達總成", n:"LCD 顯示器 Monitor (19 inch)", f:"古野 Furuno Genuine", u:"UNIT",s: 1 },
+                { p:"DK-9901", c:"甲板絞機總成", n:"液壓馬達 Hydraulic Motor (Hagglunds)", f:"三菱 Mitsubishi (Japan)", u:"UNIT",s: 1 },
+                { p:"DK-9901-K", c:"甲板絞機總成", n:"液壓馬達 Hydraulic Motor (Hagglunds)", f:"川崎 Kawasaki (Japan)", u:"UNIT",s: 1 },
+                { p:"DK-2201", c:"甲板絞機總成", n:"煞車來令片 Brake Lining (Non-Asbestos)", f:"三菱 Mitsubishi Spare", u:"SET",s: 1 },
+                { p:"DK-4401", c:"甲板絞機總成", n:"控制閥組 Control Valve Block", f:"力士樂 Rexroth (Germany)", u:"UNIT",s: 1 },
+                { p:"COM-1101", c:"通訊系統總成", n:"VHF 天線 Antenna (6dB)", f:"塞勒 Sailor (Denmark)", u:"PCS",s: 1 },
+                { p:"ME-SEN-01", c:"主機監測系統", n:"油霧探測器 Oil Mist Detector (MK6)", f:"格瑞納 Graviner (UK)", u:"UNIT",s: 1 },
+                { p:"ME-SEN-05", c:"主機監測系統", n:"示功閥 Indicator Valve (Standard)", f:"曼恩 MAN B&W Standard", u:"PCS",s: 1 },
+                { p:"GEN-AVR-01", c:"發電機控制系統", n:"自動電壓調節器 AVR (MX341)", f:"史丹福 Stamford (UK)", u:"PCS",s: 1 },
+                { p:"AL-FL-02", c:"燃油處理系統", n:"燃油自動反洗濾芯 Auto Backwash Filter", f:"波爾 Boll & Kirch", u:"PCS",s: 1 },
+                { p:"BOI-SEN-02", c:"鍋爐總成", n:"火焰感測器 Flame Scanner (UV)", f:"阿法拉伐 Alfa Laval", u:"PCS",s: 1 },
+                { p:"PMP-VLV-12", c:"海水系統總成", n:"止回閥 Non-return Valve (DN150)", f:"船舶標準零件 Standard", u:"PCS",s: 1 },
+                { p:"DK-WIN-90", c:"甲板機械總成", n:"鋼纜油 Wire Rope Lubricant (20L)", f:"美孚 Mobil Marine", u:"ROLL",s: 1 }
             ];
 
             // 填充表格
             let tableHtml = "";
             fullData.forEach((d, i) => {
-                tableHtml += `<tr><td class="text-center">${i+1}</td><td class="fw-bold">${d.p}</td><td>${d.c}</td><td>${d.n}</td><td>${d.f}</td><td>${d.u}</td><td>-</td><td class="text-center op-icons"><i class="far fa-eye text-primary" onclick="location.href='Oceangrow_IM_ComponentList--Demo-view.html'"></i><i class="fas fa-pencil-alt text-warning" onclick="location.href='Oceangrow_IM_ComponentList--Demo-edit.html'"></i><i class="fas fa-power-off text-danger"></i></td></tr>`;
+                const statusHtml = d.s === 1 ? '<span class="btn px-2 py-0 d-block rounded-1 bg-success text-white">啟用</span>' : '<span class="btn px-2 py-0 d-block rounded-1 bg-white border">停用</span>';
+                tableHtml += `<tr><td class="text-center">${i+1}</td><td class="fw-bold">${d.p}</td><td>${d.c}</td><td>${d.n}</td><td>${d.f}</td><td>${d.u}</td><td class="text-center">${statusHtml}</td><td>-</td><td class="text-center op-icons"><i class="far fa-eye text-primary" onclick="location.href='Oceangrow_IM_ComponentList--Demo-view.html'"></i><i class="fas fa-pencil-alt text-warning" onclick="location.href='Oceangrow_IM_ComponentList--Demo-edit.html'"></i><i class="fas fa-power-off text-danger"></i></td></tr>`;
             });
             $('#tableBody').html(tableHtml);
 
