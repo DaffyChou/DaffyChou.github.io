@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>所有船舶油耗紀錄 - SLAB Bunker</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+    <style>
+        /* ================= DataTables 黑暗模式客製化 ================= */
+        body {
+            font-size: 1rem; /* 全域 16px */
+        }
+
+        .dataTables_filter, .dataTables_length {
+            display: none;
+        }
+
+        table.dataTable {
+            border-bottom: 1px solid #374151;
+            margin-top: 1rem !important;
+            margin-bottom: 1rem !important;
+        }
+
+        /* 標題字級改成 14px */
+        table.dataTable thead th {
+            background-color: #111827; 
+            color: #93c5fd; 
+            border-bottom: 1px solid #374151;
+            padding: 12px 10px;
+            font-weight: 600;
+            font-size: 14px !important; 
+        }
+
+        table.dataTable tbody tr {
+            background-color: #1f2937; 
+            color: #e5e7eb; 
+            border-bottom: 1px solid #374151;
+            transition: background-color 0.2s;
+        }
+
+        table.dataTable tbody tr:hover {
+            background-color: #374151; 
+        }
+
+        table.dataTable tbody tr.shown {
+            background-color: #374151; 
+        }
+
+        table.dataTable tbody td {
+            padding: 14px 10px;
+            font-size: 1rem !important; 
+            vertical-align: middle;
+        }
+
+        /* 讓展開列滿版無 padding */
+        table.dataTable tbody tr.child td.child {
+            padding: 0 !important;
+        }
+
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            color: #9ca3af !important; 
+            margin-top: 1rem;
+            font-size: 1rem !important; 
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            color: #9ca3af !important;
+            border: 1px solid #4b5563 !important; 
+            background-color: transparent !important;
+            border-radius: 6px;
+            margin-left: 4px;
+            padding: 6px 14px !important;
+            font-size: 1rem !important; 
+            transition: all 0.2s;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background-color: #374151 !important; 
+            color: white !important;
+            border-color: #6b7280 !important; 
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background-color: #2563eb !important; 
+            color: white !important;
+            border-color: #2563eb !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: transparent !important;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-100 p-6 md:p-10 font-sans min-h-screen relative text-base">
+
+    <div class="max-w-screen-2xl mx-auto">
+        <div class="mb-6 border-b border-gray-700 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end">
+            <div class="mb-4 md:mb-0 flex items-center">
+                <a href="CSE-BunkerTracking-Dashboard-demo.html" class="mr-4 p-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 transition" title="Back to Dashboard">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </a>
+                <h1 class="text-3xl font-bold text-white border-l-4 border-emerald-500 pl-4 mb-2" data-i18n="mainTitleRecords">
+                    所有船舶油耗紀錄</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <select id="lang-switcher" onchange="changeLanguage(this.value)"
+                    class="bg-gray-700 text-white border border-gray-500 rounded px-3 py-2 text-base focus:outline-none focus:border-blue-400 font-bold cursor-pointer hover:bg-gray-600 transition">
+                    <option value="zh">繁體中文</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-6 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-lg flex flex-wrap items-center space-x-2 md:space-x-4">
+            <input type="text" id="custom-search-input" placeholder="請輸入文字..." 
+                   class="bg-gray-700 text-white text-base border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-blue-500 w-64 md:w-80 placeholder-gray-400 shadow-inner">
+            <button onclick="clearSearch()" class="px-5 py-2 text-base border border-blue-500 text-blue-400 rounded hover:bg-blue-900/50 transition shadow" data-i18n="btnCancel">
+                清除
+            </button>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 w-full overflow-hidden">
+            <div class="overflow-x-auto w-full pb-4">
+                <table id="records-table" class="display w-full whitespace-nowrap">
+                    <thead>
+                        <tr>
+                            <th class="w-5 text-left" data-i18n="thId"></th>
+                            <th class="w-24 text-left" data-i18n="thImo"></th>
+                            <th class="text-left" data-i18n="thVessel"></th>
+                            <th class="text-left" data-i18n="thRoute"></th>
+                            <th class="text-left" data-i18n="thDates"></th>
+                            <th class="text-left" data-i18n="thTime"></th>
+                            <th class="text-left" data-i18n="thEff"></th>
+                            <th class="text-left" data-i18n="thFuel"></th>
+                            <th class="text-left" data-i18n="thActions"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ================= Tooltip 渲染輔助函數 =================
+        function renderTH(title, subtitle, desc) {
+            return `
+                <div class="flex items-center space-x-1.5 relative">
+                    <span class="text-gray-300">${title}</span>
+                    <div class="group outline-none cursor-pointer flex items-center" tabindex="0" onclick="event.stopPropagation()">
+                        <svg class="w-3.5 h-3.5 text-gray-500 hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        
+                        <div class="absolute top-full left-0 mt-2 hidden group-hover:block group-focus:block w-56 p-3 bg-gray-700 text-gray-200 text-xs rounded-lg shadow-2xl border border-gray-500 z-[999] whitespace-normal text-left font-normal leading-relaxed cursor-default">
+                            <div class="text-gray-300">${desc}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ================= 字典檔 (i18n Dictionary) =================
+        const i18n = {
+            'zh': {
+                mainTitleRecords: '所有船舶油耗紀錄',
+                btnCancel: '清除',
+                btnExpand: '展開',
+                btnCollapse: '收合',
+                btnInventory: '盤點',
+                btnAlerts: '警示',
+                
+                // 第一欄 ID 取消說明，純顯示 #
+                thId: '#', 
+                thImo: renderTH('IMO', 'IMO Number', '國際海事組織 (International Maritime Organization) 船舶識別編號。'),
+                thVessel: renderTH('船舶名稱', 'Vessel Name', '執行此航次任務的船舶名稱與代號。'),
+                thRoute: renderTH('近期航線', 'Recent Voyages', '該航次起訖港口的派任路線。'),
+                thDates: renderTH('航次日期 (起迄)', 'Voyage Dates', '該航次出發與抵達的日期區間。'),
+                thTime: renderTH('航行時間', 'Sailing Time', '海上航行的總時數計算。'),
+                thEff: renderTH('燃油效率 (nm/mt)', 'Fuel Efficiency', '<b>公式：對水航距 (nm) ÷ 總耗油 (mt)</b><br><span class="text-gray-400 mt-1 block">代表每噸燃油能航行的海浬數，數值越高越好。</span>'),
+                thFuel: renderTH('總消耗油量 (mt)', 'Total Fuel Consumed', '航次累計消耗的燃油總噸數 (Metric Tons)。'),
+                thActions: renderTH('操作', 'Actions', '可展開紀錄盤點明細或發送異常警示通知。'),
+
+                dtSearch: '搜尋:',
+                dtNext: '下一頁',
+                dtPrev: '上一頁',
+                dtInfo: '顯示第 _START_ 到 _END_ 項結果，總共 _TOTAL_ 項。',
+                dtEmpty: '顯示第 0 到 0 項結果，總共 0 項。',
+                dtZero: '找不到符合的紀錄'
+            },
+            'en': {
+                mainTitleRecords: 'All Vessel Fuel Records',
+                btnCancel: 'Clear',
+                btnExpand: 'Expand',
+                btnCollapse: 'Collapse',
+                btnInventory: 'Inventory',
+                btnAlerts: 'Alerts',
+                
+                thId: '#',
+                thImo: renderTH('IMO Number', '國際海事組織編號', 'International Maritime Organization vessel identification number.'),
+                thVessel: renderTH('Vessel Name', '船舶名稱', 'The name and code of the vessel executing the voyage.'),
+                thRoute: renderTH('Recent Voyages', '近期航線', 'Departure to destination route mapping.'),
+                thDates: renderTH('Voyage Dates', '航次日期', 'Departure and arrival date range.'),
+                thTime: renderTH('Sailing Time', '航行時間', 'Total sailing hours at sea.'),
+                thEff: renderTH('Fuel Eff. (nm/mt)', '燃油效率', '<b>Formula: Distance STW (nm) ÷ Total Fuel (mt)</b><br><span class="text-gray-400 mt-1 block">Nautical miles per metric ton of fuel. Higher is better.</span>'),
+                thFuel: renderTH('Total Fuel (mt)', '總消耗油量', 'Total consumed fuel in metric tons for the voyage.'),
+                thActions: renderTH('Actions', '操作', 'Expand details for inventory checking or send alert notifications.'),
+
+                dtSearch: 'Search:',
+                dtNext: 'Next',
+                dtPrev: 'Previous',
+                dtInfo: 'Showing _START_ to _END_ of _TOTAL_ entries',
+                dtEmpty: 'Showing 0 to 0 of 0 entries',
+                dtZero: 'No matching records found'
+            }
+        };
+
+        let lang = 'zh';
+
+        function changeLanguage(selectedLang) {
+            lang = selectedLang;
+            const dict = i18n[lang];
+
+            // 收合所有開啟的子表，避免語系切換文字錯亂
+            if ($.fn.DataTable.isDataTable('#records-table')) {
+                const table = $('#records-table').DataTable();
+                table.rows().every(function () {
+                    if (this.child.isShown()) {
+                        this.child.hide();
+                        $(this.node()).removeClass('shown');
+                    }
+                });
+            }
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) el.innerHTML = dict[key];
+            });
+
+            // 更新展開按鈕
+            document.querySelectorAll('.btn-expand-text').forEach(el => {
+                el.innerText = dict.btnExpand;
+            });
+            document.querySelectorAll('.btn-details svg').forEach(el => {
+                el.style.transform = 'rotate(0deg)';
+            });
+
+            // 更新操作按鈕的語系
+            document.querySelectorAll('.btn-inv-text').forEach(el => {
+                el.innerText = dict.btnInventory;
+            });
+            document.querySelectorAll('.btn-alt-text').forEach(el => {
+                el.innerText = dict.btnAlerts;
+            });
+
+            if ($.fn.DataTable.isDataTable('#records-table')) {
+                const table = $('#records-table').DataTable();
+                table.context[0].oLanguage.sSearch = dict.dtSearch;
+                table.context[0].oLanguage.oPaginate.sNext = dict.dtNext;
+                table.context[0].oLanguage.oPaginate.sPrevious = dict.dtPrev;
+                table.context[0].oLanguage.sInfo = dict.dtInfo;
+                table.context[0].oLanguage.sInfoEmpty = dict.dtEmpty;
+                table.context[0].oLanguage.sZeroRecords = dict.dtZero;
+                table.draw();
+            }
+        }
+
+        // ================= 模擬資料與明細演算 =================
+        const rawMockData = [
+            { id: 1, imo: "9737814", name: "CHINA STEEL SUCCESS 中鋼成功輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1850", eff: 185, eff_trend: -10, fuel: 1850 },
+            { id: 2, imo: "9737826", name: "CHINA STEEL VISION 中鋼遠見輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1200", eff: 120, eff_trend: 3, fuel: 1200 },
+            { id: 3, imo: "9702560", name: "CHINA STEEL EXPLORATION 中鋼探索輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1600", eff: 160, eff_trend: -12, fuel: 1600 },
+            { id: 4, imo: "9702558", name: "CHINA STEEL ENDEAVOR 中鋼奮進輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1305", eff: 135, eff_trend: 8, fuel: 1305 },
+            { id: 5, imo: "9860063", name: "CSC VICTOR 中鋼勝利輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "2000", eff: 200, eff_trend: 5, fuel: 2000 },
+            { id: 6, imo: "9861768", name: "CSC LEADER 中鋼領先輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1805", eff: 185, eff_trend: 4, fuel: 1805 },
+            { id: 7, imo: "9861770", name: "CSC CREATOR 中鋼創造輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "2100", eff: 210, eff_trend: 2, fuel: 2100 },
+            { id: 8, imo: "9861782", name: "CSC PREEMINENCE 中鋼超群輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1205", eff: 125, eff_trend: -8, fuel: 1205 },
+            { id: 9, imo: "9849239", name: "C.S. BRILLIANCE 中鋼光輝輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1208", eff: 128, eff_trend: -5, fuel: 1208 },
+            { id: 10, imo: "9832987", name: "CHINA STEEL HARMONY 中鋼和諧輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1605", eff: 165, eff_trend: -11, fuel: 1605 },
+            { id: 11, imo: "9737814", name: "CHINA STEEL SUCCESS 中鋼成功輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1805", eff: 185, eff_trend: -9, fuel: 1805 },
+            { id: 12, imo: "9737826", name: "CHINA STEEL VISION 中鋼遠見輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1200", eff: 120, eff_trend: -8, fuel: 1200 },
+            { id: 13, imo: "9702560", name: "CHINA STEEL EXPLORATION 中鋼探索輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1600", eff: 160, eff_trend: -8, fuel: 1600 },
+            { id: 14, imo: "9702558", name: "CHINA STEEL ENDEAVOR 中鋼奮進輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1350", eff: 135, eff_trend: -7, fuel: 1350 },
+            { id: 15, imo: "9860063", name: "CSC VICTOR 中鋼勝利輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "2000", eff: 200, eff_trend: -5, fuel: 2000 },
+            { id: 16, imo: "9861768", name: "CSC LEADER 中鋼領先輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1850", eff: 185, eff_trend: -15, fuel: 1850 },
+            { id: 17, imo: "9861770", name: "CSC CREATOR 中鋼創造輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "2100", eff: 210, eff_trend: -6, fuel: 2100 },
+            { id: 18, imo: "9861782", name: "CSC PREEMINENCE 中鋼超群輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1205", eff: 125, eff_trend: -8, fuel: 1205 },
+            { id: 19, imo: "9849239", name: "C.S. BRILLIANCE 中鋼光輝輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1208", eff: 128, eff_trend: -5, fuel: 1208 },
+            { id: 20, imo: "9832987", name: "CHINA STEEL HARMONY 中鋼和諧輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1650", eff: 165, eff_trend: -20, fuel: 1650 }
+        ];
+
+        // 依據截圖比例 (120:24:4:8:4，總和 160) 自動推算各油品假數據
+        const mockData = rawMockData.map(d => {
+            let ratio = d.fuel / 160;
+            return {
+                ...d,
+                hfo: 120.0 * ratio,
+                mgo: 24.0 * ratio,
+                cy_oil: 4.0 * ratio,
+                sys_oil: 8.0 * ratio,
+                lsmgo: 4.0 * ratio
+            };
+        });
+
+        // 格式化子表 HTML (加上 MT 單位)
+        function formatDetails(d) {
+            return `
+                <div class="">
+                    <div class="w-full max-w-[360px]">
+                        <table class="w-full text-base text-gray-300">
+                            <tr class="border-b border-gray-700">
+                                <td class="py-3 px-2 w-1/2 tracking-wide">HFO</td>
+                                <td class="py-3 px-2 w-1/2 text-left tracking-wide">${d.hfo.toFixed(1)} MT</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="py-3 px-2 tracking-wide">MGO</td>
+                                <td class="py-3 px-2 text-left tracking-wide">${d.mgo.toFixed(1)} MT</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="py-3 px-2 tracking-wide">Cylinder Oil</td>
+                                <td class="py-3 px-2 text-left tracking-wide">${d.cy_oil.toFixed(1)} MT</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="py-3 px-2 tracking-wide">System Oil</td>
+                                <td class="py-3 px-2 text-left tracking-wide">${d.sys_oil.toFixed(1)} MT</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="py-3 px-2 tracking-wide">LSMGO</td>
+                                <td class="py-3 px-2 text-left tracking-wide">${d.lsmgo.toFixed(1)} MT</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        $(document).ready(function () {
+            const tbody = document.getElementById('table-body');
+            let html = '';
+
+            mockData.forEach((row, index) => {
+                let trendIcon = row.eff_trend < 0 ? '↘' : '↗';
+                let trendColor = row.eff_trend < 0 ? 'text-green-500' : 'text-red-500';
+                
+                html += `
+                    <tr>
+                        <td class="text-gray-400">${row.id}</td>
+                        <td>${row.imo}</td>
+                        <td>
+                            <a href="#" class="text-blue-400 hover:text-blue-300 underline underline-offset-4 decoration-blue-800 hover:decoration-blue-400 transition">
+                                ${row.name}
+                            </a>
+                        </td>
+                        <td class="text-gray-300 tracking-wide">${row.route}</td>
+                        <td class="text-gray-300 ">${row.dates}</td>
+                        <td>${row.time}</td>
+                        <td>
+                            <span>${row.eff}</span> 
+                            <span class="${trendColor} ml-1 font-bold tracking-tighter">${trendIcon} ${Math.abs(row.eff_trend)}%</span>
+                        </td>
+                        <td>
+                            <div class="flex items-center space-x-3">
+                                <span class="w-12">${row.fuel}</span>
+                                <button data-index="${index}" class="btn-details flex items-center space-x-1 border border-gray-500 text-gray-300 px-2 py-1 rounded hover:bg-gray-700 hover:text-white transition">
+                                    <svg class="w-3 h-3 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    <span class="btn-expand-text text-[14px]">${i18n.zh.btnExpand}</span>
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="flex items-center space-x-2">
+                                <button class="bg-[#facc15] hover:bg-yellow-500 text-black px-2 py-1 rounded font-bold transition shadow text-[14px]"><span class="btn-inv-text">${i18n.zh.btnInventory}</span></button>
+                                <button class="border border-gray-500 text-gray-300 hover:text-white px-2 py-1 rounded hover:bg-gray-700 transition shadow text-[14px]"><span class="btn-alt-text">${i18n.zh.btnAlerts}</span></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+
+            // 初始化 DataTables
+            const table = $('#records-table').DataTable({
+                pageLength: 20,
+                lengthChange: false, 
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                language: {
+                    info: i18n.zh.dtInfo,
+                    infoEmpty: i18n.zh.dtEmpty,
+                    zeroRecords: i18n.zh.dtZero,
+                    paginate: {
+                        previous: i18n.zh.dtPrev,
+                        next: i18n.zh.dtNext
+                    }
+                }
+            });
+
+            // 綁定「展開」按鈕事件
+            $('#records-table tbody').on('click', '.btn-details', function () {
+                const tr = $(this).closest('tr');
+                const row = table.row(tr);
+                const dataIndex = $(this).data('index');
+                const rowData = mockData[dataIndex];
+
+                if (row.child.isShown()) {
+                    // 已開啟則關閉
+                    row.child.hide();
+                    tr.removeClass('shown');
+                    $(this).find('.btn-expand-text').text(i18n[lang].btnExpand);
+                    $(this).find('svg').css('transform', 'rotate(0deg)');
+                } else {
+                    // 關閉則展開
+                    row.child(formatDetails(rowData)).show();
+                    tr.addClass('shown');
+                    $(this).find('.btn-expand-text').text(i18n[lang].btnCollapse);
+                    $(this).find('svg').css('transform', 'rotate(180deg)');
+                }
+            });
+
+            // 綁定自訂的搜尋框
+            $('#custom-search-input').on('keyup', function () {
+                table.search(this.value).draw();
+            });
+            
+            // 執行第一次語系設定
+            changeLanguage('zh');
+        });
+
+        // 取消按鈕功能
+        function clearSearch() {
+            const input = document.getElementById('custom-search-input');
+            input.value = '';
+            $('#records-table').DataTable().search('').draw();
+        }
+    </script>
+</body>
+
+</html>

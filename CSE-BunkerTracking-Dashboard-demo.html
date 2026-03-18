@@ -493,9 +493,9 @@
                     <div class="explanation-wrapper" style="display: none;">
                         <div class="font-mono text-[12px] text-gray-400 bg-gray-900 p-4 rounded border border-gray-700 mt-auto leading-relaxed"
                             data-i18n="mAssetLogic">
-                            <span class="text-blue-400 font-bold text-sm">海事專業指標計算邏輯說明：</span><br><br>
+                            <span class="text-blue-400 font-bold text-sm">海事專業指標計算邏輯說明：</span><br>
                             <span class="text-red-400 font-bold">● ISO 19030 航速阻力損失 (%) ➔【該期末之瞬間狀態值】：</span><br>
-                            代表累積至該時間點的推進阻力增加率。系統濾除風浪等環境干擾因子，得出純粹因「船體附著物/漆面老化」造成的阻力比例。<br><br>
+                            代表累積至該時間點的推進阻力增加率。系統濾除風浪等環境干擾因子，得出純粹因「船體附著物/漆面老化」造成的阻力比例。<br>
                             <span class="text-orange-400 font-bold">● 單區間超耗燃油 (MT) ➔【該單一區間內之累計值】：</span><br>
                             為該區間內額外浪費之燃油總和。公式：<b>實際總耗油量 － 基準理論耗油量</b>。<br>
                             基準理論耗油量需整合出廠Speed-Power曲線、實時吃水/航速與燃油熱值計算得出。
@@ -635,7 +635,8 @@
                 adv_0: "維持現狀，作為操作典範", adv_1: "優化吃水差設定", adv_2: "查明異常點是否為天候因素", adv_3: "優先安排進塢檢修", adv_4: "優先安排進塢檢修",
                 cii_A: "A 級 (狀態極佳)", cii_C: "C 級 (狀態合格)", cii_E: "E 級 (高風險評估)",
                 drTitleAsset: "能效衰退與合規評估報告", drTitleOps: "港外空等浪費觀測明細", currRange: "當前區間：",
-                btnViewAllRecords: '查看所有船舶油耗紀錄'
+                btnViewAllRecords: '查看所有船舶油耗紀錄', sBox: '常態區間', sOutlier: '離群值', sFleet: '船隊分佈',
+                axLoss: '阻力損失 (%)', axExtraMT: '超耗燃油 (MT)', sHours: '時數',
             },
             'en': {
                 mainTitle: 'Fleet Fuel Monitoring',
@@ -679,7 +680,8 @@
                 adv_0: "Maintain as SOP benchmark", adv_1: "Optimize trim settings", adv_2: "Investigate outlier causes", adv_3: "Enforce weather routing", adv_4: "Schedule dry-dock/cleaning",
                 cii_A: "Rating A (Excellent)", cii_C: "Rating C (Moderate)", cii_E: "Rating E (High Risk)",
                 drTitleAsset: "Degradation & Compliance Report", drTitleOps: "Anchorage Waste Details", currRange: "Current Range: ",
-                btnViewAllRecords: 'View All Fuel Records'
+                btnViewAllRecords: 'View All Fuel Records', sBox: 'Normal Range', sOutlier: 'Outlier', sFleet: 'Fleet Distribution',
+                axLoss: 'Loss (%)', axExtraMT: 'Extra (MT)', sHours: 'Hours',
             }
         };
 
@@ -895,11 +897,12 @@
                     formatter: function () {
                         if (this.point.median !== undefined) {
                             return `<div class="custom-tooltip"><b style="font-size: 15px; color: #60a5fa;">${this.key}</b><hr style="border-color: #334155; margin: 4px 0;"/>${dict.thMedian}: <b style="color:#ef4444">${this.point.median}</b><br/>${dict.thVar}: <b>${(this.point.q3 - this.point.q1).toFixed(1)}</b></div>`;
-                        } else { return `<b>${this.key}</b><br/>Outlier: <b style="color:#ef4444">${this.point.y}</b> nm/mt`; }
+                        } else { return `<b>${this.key}</b><br/>${dict.sOutlier}<b style="color:#ef4444">${this.point.y}</b> nm/mt`; }
                     }
                 },
-                series: [{ name: 'Box', data: boxplotSeriesData, fillColor: 'rgba(59, 130, 246, 0.2)', medianColor: '#ef4444', medianWidth: 3, stemColor: '#3b82f6', stemDashStyle: 'solid', whiskerColor: '#3b82f6', whiskerLength: '30%' },
-                { name: 'Outlier', color: '#ef4444', type: 'scatter', data: boxplotOutliers, marker: { fillColor: '#1e293b', lineWidth: 2, lineColor: '#ef4444', radius: 4, symbol: 'circle' } }]
+                series: [
+                    { name: dict.sBox, data: boxplotSeriesData, fillColor: 'rgba(59, 130, 246, 0.2)', medianColor: '#ef4444', medianWidth: 3, stemColor: '#3b82f6', stemDashStyle: 'solid', whiskerColor: '#3b82f6', whiskerLength: '30%' },
+                    { name: dict.sOutlier, color: '#ef4444', type: 'scatter', data: boxplotOutliers, marker: { fillColor: '#1e293b', lineWidth: 2, lineColor: '#ef4444', radius: 4, symbol: 'circle' } }]
             });
 
             // 4. 燃油消耗統計
@@ -933,7 +936,7 @@
                 chart: { type: 'bubble', zoomType: 'xy' }, xAxis: { title: { text: dict.axAge }, plotLines: [{ value: 15, color: '#ef4444', width: 2, dashStyle: 'dot' }] }, yAxis: { title: { text: dict.axEff } },
                 plotOptions: { bubble: { cursor: 'pointer', events: { click: function (e) { openAssetDrilldown(e.point.name, e.point.shipIdx); } } } },
                 tooltip: { useHTML: true, pointFormat: `<b>{point.name}</b><br>${dict.axAge}: {point.x}<br>${dict.axEff}: {point.y}<br>${dict.axFuelTotal}: {point.z}` },
-                series: [{ name: 'Fleet', data: bubbleSeriesData }]
+                series: [{ name: dict.sFleet, data: bubbleSeriesData }]
             });
 
             if ($.fn.DataTable.isDataTable('#boxplot-table')) { $('#boxplot-table').DataTable().destroy(); }
@@ -1144,10 +1147,8 @@
             });
         }
         function openAllRecords() {
-            // 您可以在這裡實作點擊後要執行的動作
-            // 例如：開啟一個新的 DataTables Modal、跳轉到另一個頁面，或觸發 API
-            console.log("查看所有紀錄被點擊了，請在這裡放入您的業務邏輯");
-            alert(lang === 'zh' ? "準備載入所有油耗紀錄..." : "Loading all fuel records...");
+            // 執行頁面跳轉，連至紀錄列表頁
+            window.location.href = 'CSE-BunkerTracking-Records-demo.html';
         }
 
         // 啟動程序
