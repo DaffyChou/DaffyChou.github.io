@@ -96,7 +96,8 @@
 <body class="bg-gray-900 text-gray-100 p-6 md:p-10 font-sans min-h-screen relative">
 
     <div class="max-w-screen-2xl mx-auto">
-        <div class="mb-6 border-b border-gray-700 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end">
+        <div
+            class="mb-6 border-b border-gray-700 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end">
             <div class="mb-4 md:mb-0">
                 <h1 class="text-3xl font-bold text-white border-l-4 border-blue-500 pl-4 mb-2" data-i18n="mainTitle">
                     船隊燃油監控</h1>
@@ -109,37 +110,46 @@
                 </select>
             </div>
         </div>
-
-        <div
-            class="flex flex-wrap items-center space-x-2 md:space-x-3 mb-8 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-lg">
-            <span class="text-gray-300 font-semibold pl-2" data-i18n="filterLabel">數據維度篩選：</span>
-            <select id="time-granularity"
-                class="bg-gray-700 text-white border border-gray-600 rounded px-3 py-1 focus:outline-none focus:border-blue-500"
-                onchange="updateDateDropdowns('global')">
-                <option value="month" data-i18n="optMonth">月 (Month)</option>
-                <option value="quarter" data-i18n="optQuarter">季 (Quarter)</option>
-                <option value="year" data-i18n="optYear">年 (Year)</option>
-            </select>
-            <span class="text-gray-400 pl-2" data-i18n="filterFrom">區間：</span>
-            <select id="start-time"
-                class="bg-gray-700 text-white border border-gray-600 rounded px-3 py-1 focus:outline-none focus:border-blue-500"></select>
-            <span class="text-gray-400" data-i18n="filterTo">至</span>
-            <select id="end-time"
-                class="bg-gray-700 text-white border border-gray-600 rounded px-3 py-1 focus:outline-none focus:border-blue-500"></select>
-            <button onclick="applyDateFilter()"
-                class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-1.5 rounded transition shadow ml-2"
-                data-i18n="btnApply">套用篩選</button>
-            <span id="filter-msg" class="text-green-400 text-sm ml-4 opacity-0 transition-opacity"
-                data-i18n="msgUpdated">數據已動態更新</span>
-            <div class="ml-auto text-xs text-gray-400 hidden xl:block">
-                <span data-i18n="staticWarning">防呆提示：標示</span> <span class="bg-gray-700 text-gray-400 px-1 rounded"
-                    data-i18n="staticTag">靜態基準</span> <span data-i18n="staticWarning2">之圖表不受此區間影響</span>
+        <div class="grid grid-cols-1 lg:grid-cols-6 gap-4 mb-8 ">
+            <div class="col-span-1">
+                <button onclick="openAllRecords()"
+                    class="w-full h-full bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-1.5 rounded transition shadow"
+                    data-i18n="btnViewAllRecords">
+                    查看所有船舶油耗紀錄
+                </button>
             </div>
+            <div
+                class="bg-gray-800 p-3 rounded-md shadow-2xl border border-gray-700 flex flex-wrap items-center space-x-2 md:space-x-3 col-span-5">
+                <span class="text-gray-300 font-semibold pl-2" data-i18n="filterLabel">數據維度篩選：</span>
+                <select id="time-granularity"
+                    class="bg-gray-700 text-white border border-gray-600 rounded px-3 py-1 focus:outline-none focus:border-blue-500"
+                    onchange="updateDateDropdowns('global')">
+                    <option value="month" data-i18n="optMonth">月 (Month)</option>
+                    <option value="quarter" data-i18n="optQuarter">季 (Quarter)</option>
+                    <option value="year" data-i18n="optYear">年 (Year)</option>
+                </select>
+                <span class="text-gray-400 pl-2" data-i18n="filterFrom">區間：</span>
+                <select id="start-time"
+                    class="bg-gray-700 text-white border border-gray-600 rounded px-3 py-1 focus:outline-none focus:border-blue-500"></select>
+                <span class="text-gray-400" data-i18n="filterTo">至</span>
+                <select id="end-time"
+                    class="bg-gray-700 text-white border border-gray-600 rounded px-3 py-1 focus:outline-none focus:border-blue-500"></select>
+                <button onclick="applyDateFilter()"
+                    class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-1.5 rounded transition shadow ml-2"
+                    data-i18n="btnApply">套用篩選</button>
+                <span id="filter-msg" class="text-green-400 text-sm ml-4 opacity-0 transition-opacity"
+                    data-i18n="msgUpdated">數據已動態更新</span>
+                <!-- <div class="ml-auto text-xs text-gray-400 hidden xl:block">
+                    <span data-i18n="staticWarning">防呆提示：標示</span> <span class="bg-gray-700 text-gray-400 px-1 rounded"
+                        data-i18n="staticTag">靜態基準</span> <span data-i18n="staticWarning2">之圖表不受此區間影響</span>
+                </div> -->
+            </div>
+
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8" id="overview-section">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8" id="overview-section">
 
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col">
+            <div class="bg-gray-800 p-6 rounded-md shadow-2xl border border-gray-700 flex flex-col">
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
@@ -176,7 +186,7 @@
                 </div>
             </div>
 
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col">
+            <div class="bg-gray-800 p-6 rounded-md shadow-2xl border border-gray-700 flex flex-col">
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
@@ -214,7 +224,7 @@
                 </div>
             </div>
 
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col lg:col-span-2">
+            <div class="bg-gray-800 p-6 rounded-md shadow-2xl border border-gray-700 flex flex-col lg:col-span-2">
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
@@ -275,7 +285,7 @@
                 </div>
             </div>
 
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col lg:col-span-2">
+            <div class="bg-gray-800 p-6 rounded-md shadow-2xl border border-gray-700 flex flex-col lg:col-span-2">
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
@@ -314,7 +324,7 @@
                 </div>
             </div>
 
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col">
+            <div class="bg-gray-800 p-6 rounded-md shadow-2xl border border-gray-700 flex flex-col">
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
@@ -352,7 +362,7 @@
                 </div>
             </div>
 
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col relative">
+            <div class="bg-gray-800 p-6 rounded-md shadow-2xl border border-gray-700 flex flex-col relative">
                 <div class="absolute top-16 right-6 flex space-x-2 z-10">
                     <button onclick="toggleEfficiency('best')" id="btn-eff-best"
                         class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded shadow transition font-bold"
@@ -398,7 +408,7 @@
             </div>
 
             <div
-                class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col lg:col-span-2 relative">
+                class="bg-gray-800 p-6 rounded-md shadow-2xl border border-gray-700 flex flex-col lg:col-span-2 relative">
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
@@ -624,7 +634,8 @@
                 stGood: "<span class='text-green-400'>優良指標</span>", stStable: "<span class='text-blue-400'>狀態穩定</span>", stWarn: "<span class='text-orange-400'>能效預警</span>", stDanger: "<span class='text-red-400'>硬體異常</span>",
                 adv_0: "維持現狀，作為操作典範", adv_1: "優化吃水差設定", adv_2: "查明異常點是否為天候因素", adv_3: "優先安排進塢檢修", adv_4: "優先安排進塢檢修",
                 cii_A: "A 級 (狀態極佳)", cii_C: "C 級 (狀態合格)", cii_E: "E 級 (高風險評估)",
-                drTitleAsset: "能效衰退與合規評估報告", drTitleOps: "港外空等浪費觀測明細", currRange: "當前區間："
+                drTitleAsset: "能效衰退與合規評估報告", drTitleOps: "港外空等浪費觀測明細", currRange: "當前區間：",
+                btnViewAllRecords: '查看所有船舶油耗紀錄'
             },
             'en': {
                 mainTitle: 'Fleet Fuel Monitoring',
@@ -667,7 +678,8 @@
                 stGood: "<span class='text-green-400'>Excellent</span>", stStable: "<span class='text-blue-400'>Stable</span>", stWarn: "<span class='text-orange-400'>Warning</span>", stDanger: "<span class='text-red-400'>Critical</span>",
                 adv_0: "Maintain as SOP benchmark", adv_1: "Optimize trim settings", adv_2: "Investigate outlier causes", adv_3: "Enforce weather routing", adv_4: "Schedule dry-dock/cleaning",
                 cii_A: "Rating A (Excellent)", cii_C: "Rating C (Moderate)", cii_E: "Rating E (High Risk)",
-                drTitleAsset: "Degradation & Compliance Report", drTitleOps: "Anchorage Waste Details", currRange: "Current Range: "
+                drTitleAsset: "Degradation & Compliance Report", drTitleOps: "Anchorage Waste Details", currRange: "Current Range: ",
+                btnViewAllRecords: 'View All Fuel Records'
             }
         };
 
@@ -1130,6 +1142,12 @@
                     }
                 }
             });
+        }
+        function openAllRecords() {
+            // 您可以在這裡實作點擊後要執行的動作
+            // 例如：開啟一個新的 DataTables Modal、跳轉到另一個頁面，或觸發 API
+            console.log("查看所有紀錄被點擊了，請在這裡放入您的業務邏輯");
+            alert(lang === 'zh' ? "準備載入所有油耗紀錄..." : "Loading all fuel records...");
         }
 
         // 啟動程序
