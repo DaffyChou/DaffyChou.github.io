@@ -308,9 +308,9 @@
     </div>
 
     <div id="asset-drilldown-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
-        <div class="bg-gray-800 w-full max-w-6xl max-h-[95vh] rounded-2xl shadow-2xl border border-blue-500 overflow-y-auto transform scale-95 opacity-0 transition-all duration-300" id="asset-modal-content">
+        <div class="bg-gray-800 w-full max-w-6xl max-h-[95vh] rounded-2xl shadow-2xl border border-gray-800 overflow-y-auto transform scale-95 opacity-0 transition-all duration-300" id="asset-modal-content">
             <div class="sticky top-0 bg-gray-800 z-10 flex justify-between items-center p-6 border-b border-gray-700">
-                <h2 class="text-2xl font-bold text-blue-400" id="asset-drilldown-title">報告</h2>
+                <h2 class="text-2xl font-bold text-white" id="asset-drilldown-title">報告</h2>
                 <div class="flex space-x-2">
                     <button onclick="$(this).closest('.bg-gray-800').find('.explanation-wrapper').slideToggle();" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded shadow text-sm transition" data-i18n="btnToggleExp">說明</button>
                     <button onclick="closeModal('asset-drilldown-modal', 'asset-modal-content')" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded shadow text-sm transition" data-i18n="btnClose">關閉視窗</button>
@@ -346,7 +346,6 @@
                     </div>
                 </div>
                 <div class="bg-gray-900 p-6 rounded-lg flex flex-col justify-start border border-gray-700">
-                    <h3 class="text-gray-400 text-sm mb-4 border-b border-gray-700 pb-2" data-i18n="mAssetEsg">ESG 與能效合規評估模型</h3>
                     <div class="mb-4">
                         <span class="block text-gray-500 text-xs" data-i18n="mAssetFuel">區間內累積超耗燃油</span>
                         <span class="text-3xl font-bold text-red-400" id="asset-extra-fuel">-- MT</span>
@@ -371,9 +370,9 @@
     </div>
 
     <div id="ops-drilldown-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
-        <div class="bg-gray-800 w-full max-w-5xl max-h-[95vh] rounded-2xl shadow-2xl border border-red-500 overflow-y-auto transform scale-95 opacity-0 transition-all duration-300" id="ops-modal-content">
+        <div class="bg-gray-800 w-full max-w-5xl max-h-[95vh] rounded-2xl shadow-2xl border border-gray-800 overflow-y-auto transform scale-95 opacity-0 transition-all duration-300" id="ops-modal-content">
             <div class="sticky top-0 bg-gray-800 z-10 flex justify-between items-center p-6 border-b border-gray-700">
-                <h2 class="text-2xl font-bold text-red-400" id="ops-drilldown-title">明細</h2>
+                <h2 class="text-2xl font-bold text-white" id="ops-drilldown-title">明細</h2>
                 <div class="flex space-x-2">
                     <button onclick="$(this).closest('.bg-gray-800').find('.explanation-wrapper').slideToggle();" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded shadow text-sm transition" data-i18n="btnToggleExp">說明</button>
                     <button onclick="closeModal('ops-drilldown-modal', 'ops-modal-content')" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded shadow text-sm transition" data-i18n="btnClose">關閉視窗</button>
