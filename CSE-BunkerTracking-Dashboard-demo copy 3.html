@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLAB Maritime - 船隊全維度營運與專家診斷看板 (多語系版)</title>
+    <title>SLAB Bunker記錄</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -96,12 +96,10 @@
 <body class="bg-gray-900 text-gray-100 p-6 md:p-10 font-sans min-h-screen relative">
 
     <div class="max-w-screen-2xl mx-auto">
-        <div
-            class="mb-6 border-b border-gray-700 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end">
+        <div class="mb-6 border-b border-gray-700 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end">
             <div class="mb-4 md:mb-0">
                 <h1 class="text-3xl font-bold text-white border-l-4 border-blue-500 pl-4 mb-2" data-i18n="mainTitle">
-                    船隊全維度營運與專家診斷看板</h1>
-                <p class="text-gray-400 pl-5" data-i18n="subTitle">內建圖表判讀指南與自動化診斷，提供客觀的燃油消耗 (MT) 與 ESG 合規數據評估。</p>
+                    船隊燃油監控</h1>
             </div>
             <div class="flex items-center space-x-4">
                 <select id="lang-switcher" onchange="changeLanguage(this.value)"
@@ -586,7 +584,7 @@
         // ================= 字典檔 (i18n Dictionary) =================
         const i18n = {
             'zh': {
-                mainTitle: '船隊全維度營運與專家診斷看板', subTitle: '內建圖表判讀指南與自動化診斷，提供客觀的燃油消耗 (MT) 與 ESG 合規數據評估。',
+                mainTitle: '船隊燃油監控',
                 clickHint: '提示：點擊圖表中的 <span class="text-blue-400 font-bold">氣泡</span> 或 <span class="text-red-400 font-bold">紅色柱狀圖</span> 顯示詳細數據。',
                 filterLabel: '數據維度篩選：', optMonth: '月 (Month)', optQuarter: '季 (Quarter)', optYear: '年 (Year)', filterFrom: '區間：', filterTo: '至', btnApply: '套用篩選', msgUpdated: '數據已動態更新',
                 staticWarning: '防呆提示：標示', staticTag: '靜態基準', staticWarning2: '之圖表不受此區間影響', syncTag: '連動篩選',
@@ -629,7 +627,7 @@
                 drTitleAsset: "能效衰退與合規評估報告", drTitleOps: "港外空等浪費觀測明細", currRange: "當前區間："
             },
             'en': {
-                mainTitle: 'Fleet Operations & Diagnostics Dashboard', subTitle: 'Built-in interpretation guides & automated diagnostics providing objective Fuel (MT) and ESG compliance data.',
+                mainTitle: 'Fleet Fuel Monitoring',
                 clickHint: 'Hint: Click on <span class="text-blue-400 font-bold">Bubbles</span> or <span class="text-red-400 font-bold">Red Bars</span> to view details.',
                 filterLabel: 'Data Filter:', optMonth: 'Month', optQuarter: 'Quarter', optYear: 'Year', filterFrom: 'From:', filterTo: 'To:', btnApply: 'Apply Filter', msgUpdated: 'Data updated',
                 staticWarning: 'Note: Charts marked', staticTag: 'Static Baseline', staticWarning2: 'are independent of this filter.', syncTag: 'Sync Filter',
