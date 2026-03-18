@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>散裝船隊進階營運與風險看板 (Tramp Fleet Dashboard)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script> <script src="https://code.highcharts.com/modules/heatmap.js"></script> <script src="https://code.highcharts.com/maps/modules/map.js"></script> <script src="https://code.highcharts.com/modules/annotations.js"></script> <style>
+        .chart-container { height: 380px; width: 100%; }
+        /* 隱藏 Highcharts 浮水印讓提案畫面更乾淨 */
+        .highcharts-credits { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 p-6 md:p-10 font-sans">
+
+    <div class="max-w-screen-2xl mx-auto">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white border-l-4 border-blue-500 pl-4 mb-2">散裝船隊進階營運與風險看板 (Tramp Fleet Analytics)</h1>
+            <p class="text-gray-400 pl-5">針對不定期航線特性設計，涵蓋合規、財務、資產保養與調度最佳化。</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <div class="bg-gray-800 p-5 rounded-xl shadow-2xl border border-gray-700">
+                <h2 class="text-lg font-semibold mb-1 text-blue-400 flex justify-between">
+                    <span>1. 船型與貿易區能耗熱點圖</span>
+                    <span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">調度風險</span>
+                </h2>
+                <p class="text-xs text-gray-400 mb-4">降維分析：辨識特定船型在特定海域(如冬季北太平洋)的油耗異常，優化派船。</p>
+                <div id="heatmap-zones" class="chart-container"></div>
+            </div>
+
+            <div class="bg-gray-800 p-5 rounded-xl shadow-2xl border border-gray-700">
+                <h2 class="text-lg font-semibold mb-1 text-blue-400 flex justify-between">
+                    <span>2. 船隊營運狀態能耗佔比 (100% 堆疊)</span>
+                    <span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">成本浪費</span>
+                </h2>
+                <p class="text-xs text-gray-400 mb-4">揪出隱形浪費：紅色區塊擴大代表船舶花費過多燃油在「港外下錨空等」。</p>
+                <div id="stacked-ops" class="chart-container"></div>
+            </div>
+
+            <div class="bg-gray-800 p-5 rounded-xl shadow-2xl border border-gray-700">
+                <h2 class="text-lg font-semibold mb-1 text-blue-400 flex justify-between">
+                    <span>3. 同型船操作基準對比 (Sister-Ships)</span>
+                    <span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">人為/保養風險</span>
+                </h2>
+                <p class="text-xs text-gray-400 mb-4">排除硬體設計差異，直接抓出操作不當或保養不確實的「同型落後船隻」。</p>
+                <div id="radar-benchmark" class="chart-container"></div>
+            </div>
+
+            <div class="bg-gray-800 p-5 rounded-xl shadow-2xl border border-gray-700">
+                <h2 class="text-lg font-semibold mb-1 text-blue-400 flex justify-between">
+                    <span>4. EU ETS 碳權財務曝險預測</span>
+                    <span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">法規與財務</span>
+                </h2>
+                <p class="text-xs text-gray-400 mb-4">將油耗轉換為真金白銀：預估年底需購買的碳權缺口，輔助 CFO 財務決策。</p>
+                <div id="carbon-finance" class="chart-container"></div>
+            </div>
+
+            <div class="bg-gray-800 p-5 rounded-xl shadow-2xl border border-gray-700">
+                <h2 class="text-lg font-semibold mb-1 text-blue-400 flex justify-between">
+                    <span>5. 洗船底保養投資回報 (ROI) 追蹤</span>
+                    <span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">資產維護</span>
+                </h2>
+                <p class="text-xs text-gray-400 mb-4">證明保養價值：可見水下清洗後，燃油消耗率呈現斷崖式下降並趨於穩定。</p>
+                <div id="roi-tracker" class="chart-container"></div>
+            </div>
+
+            <div class="bg-gray-800 p-5 rounded-xl shadow-2xl border border-gray-700">
+                <h2 class="text-lg font-semibold mb-1 text-blue-400 flex justify-between">
+                    <span>6. 全球海域油耗地理熱區 (Anomaly Map)</span>
+                    <span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">海象與環境</span>
+                </h2>
+                <p class="text-xs text-gray-400 mb-4">將數據還原至地理空間：紅色泡泡代表該海域頻繁發生高耗油，需氣象導航避讓。</p>
+                <div id="geo-map" class="chart-container"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 共用深色主題與基礎設定
+        Highcharts.theme = {
+            colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'],
+            chart: { backgroundColor: 'transparent', style: { fontFamily: 'sans-serif' } },
+            title: { text: null }, // 將標題交給 HTML 處理，圖表更簡潔
+            legend: { itemStyle: { color: '#cbd5e1', fontWeight: 'normal' }, itemHoverStyle: { color: '#FFF' } },
+            xAxis: { gridLineColor: '#334155', labels: { style: { color: '#94a3b8' } }, lineColor: '#475569', title: { style: { color: '#94a3b8' } } },
+            yAxis: { gridLineColor: '#334155', labels: { style: { color: '#94a3b8' } }, lineColor: '#475569', title: { style: { color: '#94a3b8' } } },
+            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', style: { color: '#f8fafc' }, borderWidth: 1, borderColor: '#334155' }
+        };
+        Highcharts.setOptions(Highcharts.theme);
+
+        // --- 1. 降維版熱點圖 (Trade Zones vs Vessel Classes) ---
+        Highcharts.chart('heatmap-zones', {
+            chart: { type: 'heatmap', marginTop: 20, marginBottom: 40 },
+            xAxis: { categories: ['美灣區 (US Gulf)', '西澳鐵礦區', '歐洲 ARA', '北太平洋(冬季)', '南美東岸'] },
+            yAxis: { categories: ['海岬型 (Capesize)', '巴拿馬型 (Panamax)', '輕便極限型 (Supramax)'] },
+            colorAxis: {
+                min: 0,
+                stops: [
+                    [0, '#10b981'],   // 綠色 (省油)
+                    [0.5, '#f59e0b'], // 黃色 (普通)
+                    [1, '#ef4444']    // 紅色 (耗油風險)
+                ]
+            },
+            tooltip: { format: '<b>{series.yAxis.categories.(point.y)}</b> 在 <b>{series.xAxis.categories.(point.x)}</b><br>耗油風險指數: <b>{point.value}</b>' },
+            series: [{
+                name: '耗油風險指數',
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                data: [
+                    [0,0,20], [1,0,30], [2,0,40], [3,0,95], [4,0,25], // Capesize 在北太平洋極差
+                    [0,1,15], [1,1,20], [2,1,10], [3,1,50], [4,1,30], 
+                    [0,2,10], [1,2,60], [2,2,20], [3,2,30], [4,2,15]
+                ],
+                dataLabels: { enabled: false }
+            }]
+        });
+
+        // --- 2. 營運狀態 100% 堆疊圖 (Sailing vs Anchor vs Port) ---
+        Highcharts.chart('stacked-ops', {
+            chart: { type: 'column' },
+            xAxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'] },
+            yAxis: { min: 0, title: { text: '燃油消耗佔比 (%)' } },
+            plotOptions: { column: { stacking: 'percent' } },
+            tooltip: { pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y} MT)<br/>', shared: true },
+            series: [
+                { name: '港外錨泊空等 (浪費)', data: [150, 300, 450, 600, 800, 750], color: '#ef4444' }, // 紅色代表浪費
+                { name: '港內裝卸作業', data: [400, 420, 380, 410, 390, 400], color: '#3b82f6' },
+                { name: '海上航行 (創造營收)', data: [4500, 4200, 4000, 3800, 3500, 3600], color: '#10b981' }
+            ]
+        });
+
+        // --- 3. 同型船雷達圖 (Radar Chart) ---
+        Highcharts.chart('radar-benchmark', {
+            chart: { polar: true, type: 'line' },
+            pane: { size: '80%' },
+            xAxis: { categories: ['平均日油耗 (越低越好)', '平均航速 (越高越好)', '主機SFOC (越低越好)', 'CII 評分 (越低越好)', '發電機油耗 (越低越好)'], tickmarkPlacement: 'on', lineWidth: 0 },
+            yAxis: { gridLineInterpolation: 'polygon', lineWidth: 0, min: 0 },
+            tooltip: { shared: true },
+            series: [
+                { name: '奮進輪 (模範船)', data: [4, 8, 3, 3, 2], pointPlacement: 'on', color: '#10b981' },
+                { name: '挑戰輪 (同型落後)', data: [9, 6, 8, 8, 7], pointPlacement: 'on', color: '#ef4444' } // 紅色代表表現差
+            ]
+        });
+
+        // --- 4. 碳權財務曝險預測 (Dual Axis Area+Line) ---
+        Highcharts.chart('carbon-finance', {
+            xAxis: [{ categories: ['Q1', 'Q2', 'Q3', 'Q4 (預測)'] }],
+            yAxis: [
+                { title: { text: '預估需購碳權成本 (EUR)', style: { color: '#f59e0b' } }, labels: { format: '€{value}k', style: { color: '#f59e0b' } }, opposite: true },
+                { title: { text: 'CO2 排放總量 (MT)', style: { color: '#64748b' } }, labels: { style: { color: '#64748b' } } }
+            ],
+            tooltip: { shared: true },
+            series: [
+                { name: 'CO2 排放累積', type: 'areaspline', yAxis: 1, data: [12000, 25000, 38000, 52000], color: 'rgba(100, 116, 139, 0.3)', lineColor: '#64748b' },
+                { name: '需購碳權資金缺口', type: 'spline', data: [80, 180, 290, 450], color: '#f59e0b', marker: { lineWidth: 2, lineColor: '#f59e0b', fillColor: 'white' } }
+            ]
+        });
+
+        // --- 5. 保養投資回報 ROI (Step Line with Annotations) ---
+        Highcharts.chart('roi-tracker', {
+            chart: { type: 'spline' },
+            xAxis: { categories: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10'] },
+            yAxis: { title: { text: '標準化燃油消耗率' }, min: 80, max: 120 },
+            annotations: [{
+                labels: [{
+                    point: { xAxis: 0, yAxis: 0, x: 4, y: 112 },
+                    text: '📍 進塢清洗船體 (Hull Cleaning)',
+                    backgroundColor: '#3b82f6',
+                    borderColor: '#60a5fa',
+                    style: { color: 'white', fontWeight: 'bold' }
+                }]
+            }],
+            series: [{
+                name: '燃油消耗率趨勢',
+                data: [95, 98, 102, 108, 112, 85, 86, 85, 87, 86], // W5 到 W6 之間發生清洗，數值驟降
+                color: '#ec4899',
+                marker: { enabled: true }
+            }]
+        });
+
+        // --- 6. 海域油耗異常叢集地圖 (Highmaps Bubble) ---
+        fetch('https://code.highcharts.com/mapdata/custom/world.topo.json')
+            .then(response => response.json())
+            .then(topology => {
+                Highcharts.mapChart('geo-map', {
+                    chart: { map: topology },
+                    mapNavigation: { enabled: true, buttonOptions: { verticalAlign: 'bottom' } },
+                    series: [{
+                        name: 'Basemap',
+                        borderColor: '#334155',
+                        nullColor: '#1e293b',
+                        showInLegend: false
+                    }, {
+                        type: 'mapbubble',
+                        name: '高耗油異常次數',
+                        color: 'rgba(239, 68, 68, 0.6)', // 半透明紅色
+                        minSize: 10,
+                        maxSize: 40,
+                        tooltip: { pointFormat: '<b>{point.name}</b><br>發生異常次數: {point.z}' },
+                        data: [
+                            { lat: 45, lon: -150, z: 85, name: '北太平洋冬季風暴區' }, // 太平洋
+                            { lat: -35, lon: 20, z: 40, name: '好望角周邊' },        // 南非
+                            { lat: 15, lon: 65, z: 25, name: '阿拉伯海季風區' },      // 印度洋
+                            { lat: 25, lon: -90, z: 15, name: '美灣擁擠區' }         // 墨西哥灣
+                        ]
+                    }]
+                });
+            });
+    </script>
+</body>
+</html>
