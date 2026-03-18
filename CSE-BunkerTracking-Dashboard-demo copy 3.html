@@ -40,13 +40,10 @@
                 <p class="text-gray-400 pl-5" data-i18n="subTitle">內建圖表判讀指南與自動化診斷，提供客觀的燃油消耗 (MT) 與 ESG 合規數據評估。</p>
             </div>
             <div class="flex items-center space-x-4">
-                <div class="text-sm bg-gray-800 text-gray-300 px-4 py-2 rounded-lg border border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]" data-i18n="clickHint">
-                    提示：點擊圖表中的 <span class="text-blue-400 font-bold">氣泡</span> 或 <span class="text-red-400 font-bold">紅色區塊</span> 進行 Modal 下鑽。
-                </div>
-                <select id="lang-switcher" onchange="changeLanguage(this.value)" class="bg-gray-700 text-white border border-gray-500 rounded px-3 py-2 focus:outline-none focus:border-blue-400 font-bold cursor-pointer hover:bg-gray-600 transition">
+                <!-- <select id="lang-switcher" onchange="changeLanguage(this.value)" class="bg-gray-700 text-white border border-gray-500 rounded px-3 py-2 focus:outline-none focus:border-blue-400 font-bold cursor-pointer hover:bg-gray-600 transition">
                     <option value="zh">繁體中文</option>
                     <option value="en">English</option>
-                </select>
+                </select> -->
             </div>
         </div>
 
@@ -82,18 +79,18 @@
                     <div class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display"></div>
                 </div>
                 <div id="macro-trend-chart" class="chart-container"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4 border-l-4 border-blue-500" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fEEOI">
                         <span class="text-blue-400 font-bold">EEOI (營運碳強度) 運算邏輯：</span><br>
                         EEOI = Σ 實際總耗油量 (MT) / Σ (貨運量 Ton × 航行距離 Miles)
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h4 class="text-blue-300 font-bold mb-1" data-i18n="guideTitle">圖表判讀指南</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
                             <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c1Guide">藍色為營收動能(貨運量)，橘色為總油耗成本。兩者脫鉤代表營運體質健康。</p>
                         </div>
                         <div>
-                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">專家診斷觀察</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
                             <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c1Expert">貨運周轉量於當前區間內穩定波動，總油耗受控。達成<span class="text-blue-300 font-bold">「碳排持平」</span>之營運目標。</p>
                         </div>
                     </div>
@@ -112,19 +109,19 @@
                     <div class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display"></div>
                 </div>
                 <div id="operational-waste-chart" class="chart-container"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4 border-l-4 border-red-500" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fWaste">
-                        <span class="text-red-400 font-bold">佔比 (%) 計算說明與突波解讀：</span><br>
+                        <span class="text-blue-400 font-bold">佔比 (%) 計算說明與突波解讀：</span><br>
                         Waste % = (區間空等總耗油 / 船隊總耗油) × 100%。<br>
                         <span class="text-gray-400">若逢淡季(總油耗分母小)，或有耗能大船發生塞港(空等分子大)，皆會產生佔比突波。</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h4 class="text-red-400 font-bold mb-1" data-i18n="guideTitle">圖表判讀指南</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
                             <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c2Guide">最上方<span class="text-red-400">紅色區塊</span>代表在港外空等時消耗的浪費。佔比激增代表塞港或排程延宕。</p>
                         </div>
                         <div>
-                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">專家診斷觀察</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
                             <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c2Expert">請注意圖表中 <span class="text-red-400 font-bold">紅色區塊凸起</span> 的區間。建議點擊該柱狀圖紅區調閱明細追查責任。</p>
                         </div>
                     </div>
@@ -140,28 +137,27 @@
                         </h2>
                         <button onclick="$(this).closest('.bg-gray-800').find('.explanation-wrapper').slideToggle();" class="text-gray-400 hover:text-white text-xs px-3 py-1 bg-gray-700 rounded transition" data-i18n="btnToggleExp">說明</button>
                     </div>
-                    <div class="text-xs text-green-400 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display"></div>
+                    <div class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display"></div>
                 </div>
                 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-4">
                     <div><div id="efficiency-boxplot-chart" class="chart-container" style="height: 400px;"></div></div>
                     <div class="bg-gray-900 p-4 rounded-lg overflow-hidden border border-gray-700">
-                        <h3 class="text-gray-300 font-bold mb-3 border-b border-gray-700 pb-2" data-i18n="tblAdviceTitle">各船診斷與行動建議表</h3>
                         <table id="boxplot-table" class="display w-full text-sm text-left text-gray-300 cursor-pointer">
-                            <thead><tr><th class="w-16" data-i18n="thVessel">船舶</th><th class="w-16" data-i18n="thMedian">中位數</th><th class="w-16" data-i18n="thVar">變異度</th><th data-i18n="thAdvice">專家診斷與建議</th></tr></thead>
+                            <thead><tr><th class="w-16" data-i18n="thVessel">船舶</th><th class="w-16" data-i18n="thMedian">中位數</th><th class="w-16" data-i18n="thVar">變異度</th><th data-i18n="thAdvice">建議</th></tr></thead>
                             <tbody id="boxplot-tbody"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="explanation-wrapper mt-2 bg-gray-900 rounded-lg p-4 border-l-4 border-green-500" style="display: none;">
+                <div class="explanation-wrapper mt-2 bg-gray-900 rounded-lg p-4 " style="display: none;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fEff">
-                        <span class="text-green-400 font-bold">航行油耗效率 (Fuel Efficiency)：</span><br>
+                        <span class="text-blue-400 font-bold">航行油耗效率 (Fuel Efficiency)：</span><br>
                         Efficiency (nm/mt) = 實際對水航行距離 (nm) / 主機總耗油量 (MT)
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h4 class="text-green-300 font-bold mb-1" data-i18n="guideTitle">圖表判讀指南</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
                             <ul class="text-gray-400 text-xs leading-relaxed list-disc pl-4" data-i18n="c3Guide">
                                 <li><b>中位數 (紅線):</b> 代表 50% 效率在此值以上，常態體質基準。</li>
                                 <li><b>變異度 IQR (藍箱):</b> 箱體越短代表操作表現越穩定。</li>
@@ -169,7 +165,7 @@
                             </ul>
                         </div>
                         <div>
-                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">專家宏觀診斷</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
                             <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c3Expert">
                                 船隊操船穩定度落差明顯。<span class="text-blue-300">成功輪/創新輪</span>可作標準SOP；而<span class="text-red-400">永續輪/堅韌輪</span>需介入改善。
                             </p>
@@ -190,18 +186,18 @@
                     <div class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display"></div>
                 </div>
                 <div id="fuel-consumption-chart" class="chart-container" style="height: 380px;"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4 border-l-4 border-blue-500" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fFuel">
                         <span class="text-blue-400 font-bold">燃油結構分析：</span><br>
                         區間總耗油量 = 常規重油 VLSFO (主機使用) + 昂貴輕油 LSMGO (發電機使用)
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h4 class="text-blue-300 font-bold mb-1" data-i18n="guideTitle">圖表判讀指南</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
                             <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c4Guide">柱狀圖堆疊顯示船隊在各區間的重油(VLSFO)與輕油(LSMGO)耗量，折線圖對應當期總耗油量。</p>
                         </div>
                         <div>
-                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">專家診斷觀察</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
                             <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c4Expert">
                                 請密切關注紅色的 <span class="text-red-400">輕油(LSMGO)</span> 佔比變化。若輕油總量異常攀升，通常代表船隊港內待命時間拉長，需留意高昂的發電成本。
                             </p>
@@ -222,18 +218,18 @@
                     <div class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display"></div>
                 </div>
                 <div id="bunker-ports-chart" class="chart-container"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4 border-l-4 border-blue-500" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fBunker">
                         <span class="text-blue-400 font-bold">採購集中度評估：</span><br>
                         統計該區間內，各港口之燃油交付單(BDN)總量 (MT)。
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h4 class="text-blue-300 font-bold mb-1" data-i18n="guideTitle">圖表判讀指南</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
                             <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c5Guide">顯示前五大加油港口與加注總噸數，幫助採購單位檢視燃油合約分佈狀態。</p>
                         </div>
                         <div>
-                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">專家診斷觀察</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
                             <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c5Expert">
                                 透過掌握各港口的加注噸數集中度，採購單位即可憑藉大宗採購的規模優勢 (Economies of Scale)，向當地供應商爭取更好的長約折扣。
                             </p>
@@ -258,18 +254,18 @@
                     <div class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display"></div>
                 </div>
                 <div id="efficiency-ranking-chart" class="chart-container"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4 border-l-4 border-blue-500" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fKPI">
                         <span class="text-blue-400 font-bold">綜合平均效率 (nm/mt)：</span><br>
                         將該區間內所有航次的 (航距 / 耗油) 進行加權平均，作為排行依據。
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h4 class="text-blue-300 font-bold mb-1" data-i18n="guideTitle">圖表判讀指南</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
                             <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c6Guide">利用右上角按鈕切換名單。橫條越長代表每噸油能跑越遠(效率越好)。</p>
                         </div>
                         <div>
-                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">專家診斷觀察</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
                             <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c6Expert">建議建立內部標竿。獎勵 Top 榜單船員，並對 Bottom 榜單船隻啟動硬體健檢或操船輔導機制。</p>
                         </div>
                     </div>
@@ -288,18 +284,18 @@
                     <div class="text-xs text-gray-400 font-mono bg-gray-900 inline-block px-2 py-1 rounded" data-i18n="c7Logic">圖表邏輯：基於船舶出廠基準與最新阻力狀態的綜合評估</div>
                 </div>
                 <div id="asset-matrix-chart" class="chart-container" style="height: 400px; cursor: pointer;"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4 border-l-4 border-yellow-500" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono w-full" data-i18n="fCII">
-                        <span class="text-yellow-400 font-bold">CII (碳強度評級) 預測基準：</span><br>
+                        <span class="text-blue-400 font-bold">CII (碳強度評級) 預測基準：</span><br>
                         CII ∝ (年度總耗油量 × 碳轉換因子 C_F) / (船舶載重噸 DWT × 年度總航距)
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h4 class="text-yellow-300 font-bold mb-1" data-i18n="guideTitle">圖表判讀指南</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
                             <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c7Guide">X軸為船齡，Y軸為效率，氣泡大小為「總油耗」。右下角紅線區的巨大氣泡為高耗能觀察重點。</p>
                         </div>
                         <div>
-                            <h4 class="text-red-400 font-bold mb-1" data-i18n="expertTitle">專家診斷觀察</h4>
+                            <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
                             <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c7Expert">
                                 永續輪與探索輪 船齡偏高、效率數據極低且耗油量巨大。存在極高 CII 降級風險，建議優先點擊氣泡檢視。
                             </p>
@@ -450,7 +446,7 @@
                 fFuel: '<span class="text-blue-400 font-bold">燃油結構分析：</span><br>區間總耗油量 = 常規重油 VLSFO (主機使用) + 昂貴輕油 LSMGO (發電機使用)',
                 fBunker: '<span class="text-blue-400 font-bold">採購集中度評估：</span><br>統計該區間內，各港口之燃油交付單(BDN)總量 (MT)。',
                 fKPI: '<span class="text-blue-400 font-bold">綜合平均效率 (nm/mt)：</span><br>將該區間內所有航次的 (航距 / 耗油) 進行加權平均，作為排行依據。',
-                guideTitle: '圖表判讀指南', expertTitle: '專家診斷觀察',
+                guideTitle: '判讀指南', expertTitle: '診斷觀察',
                 c1Guide: '藍色為營收動能(貨運量)，橘色為總油耗成本。兩者脫鉤代表營運體質健康。', c1Expert: '貨運周轉量於當前區間內穩定波動，總油耗受控。達成<span class="text-blue-300 font-bold">「碳排持平」</span>之營運目標。',
                 c2Guide: '最上方<span class="text-red-400">紅色區塊</span>代表在港外空等時消耗的浪費。佔比激增代表塞港或排程延宕。', c2Expert: '請注意圖表中 <span class="text-red-400 font-bold">紅色區塊凸起</span> 的區間。建議點擊該柱狀圖紅區調閱明細追查責任。',
                 c3Guide: '<li><b>中位數 (紅線):</b> 代表 50% 效率在此值以上，常態體質基準。</li><li><b>變異度 IQR (藍箱):</b> 箱體越短代表操作表現越穩定。</li><li><b>離群值 (圓點):</b> 非常規運行或異常數據點，需優先追查。</li>', c3Expert: '船隊操船穩定度落差明顯。<span class="text-blue-300">成功輪/創新輪</span>可作標準SOP；而<span class="text-red-400">永續輪/堅韌輪</span>需介入改善。',
@@ -458,7 +454,7 @@
                 c5Guide: '顯示前五大加油港口與加注總噸數，幫助採購單位檢視燃油合約分佈狀態。', c5Expert: '透過掌握各港口的<span class="text-blue-300">「加注噸數集中度 (Volume Concentration)」</span>，採購單位即可憑藉大宗採購的規模優勢 (Economies of Scale)，向當地供應商爭取更好的長約折扣。',
                 c6Guide: '利用右上角按鈕切換名單。橫條越長代表每噸油能跑越遠(效率越好)。', c6Expert: '建議建立內部標竿。獎勵 Top 榜單船員，並對 Bottom 榜單船隻啟動硬體健檢或操船輔導機制。',
                 c7Logic: '圖表邏輯：基於船舶出廠基準與最新阻力狀態的綜合評估', c7Guide: 'X軸為船齡，Y軸為效率，氣泡大小為「總油耗」。右下角紅線區的巨大氣泡為高耗能觀察重點。', c7Expert: '<span class="text-red-400 font-bold">永續輪與探索輪</span> 船齡偏高、效率數據極低且耗油量巨大。存在極高 CII 降級風險，建議優先點擊氣泡檢視。',
-                tblAdviceTitle: '各船診斷與行動建議表', thVessel: '船舶', thMedian: '中位數', thVar: '變異度', thAdvice: '專家診斷與建議',
+                thVessel: '船舶', thMedian: '中位數', thVar: '變異度', thAdvice: '診斷觀察',
                 btnTop: '最佳 Top 6', btnBottom: '檢討 Bottom 6', btnClose: '關閉視窗',
                 mAssetTrend: '阻力衰退與超耗燃油趨勢 (依據所選區間動態演算)', mAssetEsg: 'ESG 與能效合規評估模型', mAssetFuel: '區間內累積超耗燃油', mAssetCo2: '換算額外碳排放量 (CO2)', mAssetCii: 'CII 碳強度評級狀態評估',
                 mAssetLogic: '<span class="text-blue-400 font-bold text-sm">海事專業指標計算邏輯說明：</span><br><br><span class="text-red-400 font-bold">● ISO 19030 航速阻力損失 (%) ➔【該期末之瞬間狀態值】：</span><br>代表累積至該時間點的推進阻力增加率。系統濾除風浪等環境干擾因子，得出純粹因「船體附著物/漆面老化」造成的阻力比例。<br><br><span class="text-orange-400 font-bold">● 單區間超耗燃油 (MT) ➔【該單一區間內之累計值】：</span><br>為該區間內額外浪費之燃油總和。公式：<b>實際總耗油量 － 基準理論耗油量</b>。<br>基準理論耗油量需整合出廠Speed-Power曲線、實時吃水/航速與燃油熱值計算得出。',
@@ -469,7 +465,7 @@
                 ship_0: '成功輪', ship_1: '創新輪', ship_2: '自由輪', ship_3: '勝利輪', ship_4: '光輝輪', ship_5: '遠見輪', ship_6: '領航輪', ship_7: '卓越輪', ship_8: '奮進輪', ship_9: '堅韌輪', ship_10: '探索輪', ship_11: '永續輪',
                 port_0: '新加坡 (SGSIN)', port_1: '鹿特丹 (NLRTM)', port_2: '舟山 (CNZOS)', port_3: '休士頓 (USHOU)', port_4: '黑德蘭港 (AUPHE)', port_5: '圖巴朗 (BRTUB)', port_6: '高雄 (TWKHH)', port_7: '台中 (TWTXG)',
                 stGood: "<span class='text-green-400'>優良指標</span>", stStable: "<span class='text-blue-400'>狀態穩定</span>", stWarn: "<span class='text-orange-400'>能效預警</span>", stDanger: "<span class='text-red-400'>硬體異常</span>",
-                adv_0: "維持現狀，作為操作典範", adv_1: "優化吃水差設定", adv_2: "查明異常點是否為天候因素", adv_3: "嚴格檢核氣象導航遵從率", adv_4: "優先安排進塢檢修",
+                adv_0: "維持現狀，作為操作典範", adv_1: "優化吃水差設定", adv_2: "查明異常點是否為天候因素", adv_3: "優先安排進塢檢修", adv_4: "優先安排進塢檢修",
                 cii_A: "A 級 (狀態極佳)", cii_C: "C 級 (狀態合格)", cii_E: "E 級 (高風險評估)",
                 drTitleAsset: "能效衰退與合規評估報告", drTitleOps: "港外空等浪費觀測明細", currRange: "當前區間："
             },
@@ -501,7 +497,7 @@
                 c5Guide: 'Displays the top bunkering ports and volumes to help review procurement contract distribution.', c5Expert: 'By mastering <span class="text-blue-300">Volume Concentration</span> at specific ports, procurement can leverage Economies of Scale for better discounts.',
                 c6Guide: 'Use top-right buttons to toggle lists. Longer bars mean better efficiency (nm/mt).', c6Expert: 'Establish internal benchmarks. Reward Top crews and initiate technical health checks for Bottom vessels.',
                 c7Logic: 'Chart Logic: Comprehensive evaluation based on factory baseline vs latest resistance.', c7Guide: 'X-axis: Age, Y-axis: Efficiency, Bubble Size: Total Fuel. Huge bubbles in bottom-right are high-risk.', c7Expert: '<span class="text-red-400 font-bold">Sustainability & Explorer</span> are old, highly inefficient, and consume massive fuel. High risk of CII downgrade.',
-                tblAdviceTitle: 'Diagnosis & Action Plan', thVessel: 'Vessel', thMedian: 'Median', thVar: 'Variance', thAdvice: 'Expert Diagnosis & Advice',
+                thVessel: 'Vessel', thMedian: 'Median', thVar: 'Variance', thAdvice: 'Expert Diagnosis & Advice',
                 btnTop: 'Top 6', btnBottom: 'Bottom 6', btnClose: 'Close',
                 mAssetTrend: 'Resistance Degradation & Excess Fuel (Dynamic Filter)', mAssetEsg: 'ESG & Compliance Model', mAssetFuel: 'Accumulated Excess Fuel', mAssetCo2: 'Extra CO2 Emissions', mAssetCii: 'CII Rating Assessment',
                 mAssetLogic: '<span class="text-blue-400 font-bold text-sm">Technical Indicators Logic:</span><br><br><span class="text-red-400 font-bold">● ISO 19030 Speed Loss (%) ➔ [Snapshot at Period End]:</span><br>Propulsion resistance increase after filtering out environmental factors.<br><br><span class="text-orange-400 font-bold">● Excess Fuel (MT) ➔ [Accumulated in Period]:</span><br>Total wasted fuel. Formula: <b>Actual Fuel - Baseline Theoretical Fuel</b>.',
