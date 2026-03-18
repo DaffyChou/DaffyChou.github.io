@@ -139,7 +139,7 @@
                     data-i18n="btnApply">套用篩選</button>
                 <span id="filter-msg" class="text-green-400 text-sm ml-4 opacity-0 transition-opacity"
                     data-i18n="msgUpdated">數據已動態更新</span>
-                <!-- <div class="ml-auto text-xs text-gray-400 hidden xl:block">
+                <!-- <div class="ml-auto text-sm text-gray-400 hidden xl:block">
                     <span data-i18n="staticWarning">防呆提示：標示</span> <span class="bg-gray-700 text-gray-400 px-1 rounded"
                         data-i18n="staticTag">靜態基準</span> <span data-i18n="staticWarning2">之圖表不受此區間影響</span>
                 </div> -->
@@ -154,32 +154,32 @@
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
                             <span data-i18n="c1Title">1. 總運力與能耗趨勢</span>
-                            <span class="bg-blue-900/50 text-blue-300 text-xs px-2 py-1 rounded ml-2"
+                            <span class="bg-blue-900/50 text-blue-300 text-sm px-2 py-1 rounded ml-2"
                                 data-i18n="syncTag">連動篩選</span>
                         </h2>
                         <button onclick="$(this).closest('.bg-gray-800').find('.explanation-wrapper').slideToggle();"
-                            class="text-gray-400 hover:text-white text-xs px-3 py-1 bg-gray-700 rounded transition"
+                            class="text-gray-400 hover:text-white text-sm px-3 py-1 bg-gray-700 rounded transition"
                             data-i18n="btnToggleExp">說明</button>
                     </div>
                     <div
-                        class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
+                        class="text-sm text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
                     </div>
                 </div>
                 <div id="macro-trend-chart" class="chart-container"></div>
                 <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
-                    <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fEEOI">
+                    <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fEEOI">
                         <span class="text-blue-400 font-bold">EEOI (營運碳強度) 運算邏輯：</span><br>
                         EEOI = Σ 實際總耗油量 (MT) / Σ (貨運量 Ton × 航行距離 Miles)
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c1Guide">
+                            <p class="text-gray-400 text-sm leading-relaxed" data-i18n="c1Guide">
                                 藍色為營收動能(貨運量)，橘色為總油耗成本。兩者脫鉤代表營運體質健康。</p>
                         </div>
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c1Expert">
+                            <p class="text-gray-300 text-sm leading-relaxed" data-i18n="c1Expert">
                                 貨運周轉量於當前區間內穩定波動，總油耗受控。達成<span class="text-blue-300 font-bold">「碳排持平」</span>之營運目標。</p>
                         </div>
                     </div>
@@ -191,20 +191,20 @@
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
                             <span data-i18n="c2Title">2. 船隊營運狀態能耗佔比</span>
-                            <span class="bg-blue-900/50 text-blue-300 text-xs px-2 py-1 rounded ml-2"
+                            <span class="bg-blue-900/50 text-blue-300 text-sm px-2 py-1 rounded ml-2"
                                 data-i18n="syncTag">連動篩選</span>
                         </h2>
                         <button onclick="$(this).closest('.bg-gray-800').find('.explanation-wrapper').slideToggle();"
-                            class="text-gray-400 hover:text-white text-xs px-3 py-1 bg-gray-700 rounded transition"
+                            class="text-gray-400 hover:text-white text-sm px-3 py-1 bg-gray-700 rounded transition"
                             data-i18n="btnToggleExp">說明</button>
                     </div>
                     <div
-                        class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
+                        class="text-sm text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
                     </div>
                 </div>
                 <div id="operational-waste-chart" class="chart-container"></div>
                 <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
-                    <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fWaste">
+                    <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fWaste">
                         <span class="text-blue-400 font-bold">佔比 (%) 計算說明與突波解讀：</span><br>
                         Waste % = (區間空等總耗油 / 船隊總耗油) × 100%。<br>
                         <span class="text-gray-400">若逢淡季(總油耗分母小)，或有耗能大船發生塞港(空等分子大)，皆會產生佔比突波。</span>
@@ -212,12 +212,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c2Guide">最上方<span
+                            <p class="text-gray-400 text-sm leading-relaxed" data-i18n="c2Guide">最上方<span
                                     class="text-red-400">紅色區塊</span>代表在港外空等時消耗的浪費。佔比激增代表塞港或排程延宕。</p>
                         </div>
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c2Expert">請注意圖表中 <span
+                            <p class="text-gray-300 text-sm leading-relaxed" data-i18n="c2Expert">請注意圖表中 <span
                                     class="text-red-400 font-bold">紅色區塊凸起</span> 的區間。建議點擊該柱狀圖紅區調閱明細追查責任。</p>
                         </div>
                     </div>
@@ -229,15 +229,15 @@
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
                             <span data-i18n="c3Title">3. 船舶油耗效率比較與操船稽核清單</span>
-                            <span class="bg-blue-900/50 text-blue-300 text-xs px-2 py-1 rounded ml-2"
+                            <span class="bg-blue-900/50 text-blue-300 text-sm px-2 py-1 rounded ml-2"
                                 data-i18n="syncTag">連動篩選</span>
                         </h2>
                         <button onclick="$(this).closest('.bg-gray-800').find('.explanation-wrapper').slideToggle();"
-                            class="text-gray-400 hover:text-white text-xs px-3 py-1 bg-gray-700 rounded transition"
+                            class="text-gray-400 hover:text-white text-sm px-3 py-1 bg-gray-700 rounded transition"
                             data-i18n="btnToggleExp">說明</button>
                     </div>
                     <div
-                        class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
+                        class="text-sm text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
                     </div>
                 </div>
 
@@ -261,14 +261,14 @@
                 </div>
 
                 <div class="explanation-wrapper mt-2 bg-gray-900 rounded-lg p-4 " style="display: none;">
-                    <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fEff">
+                    <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fEff">
                         <span class="text-blue-400 font-bold">航行油耗效率 (Fuel Efficiency)：</span><br>
                         Efficiency (nm/mt) = 實際對水航行距離 (nm) / 主機總耗油量 (MT)
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
-                            <ul class="text-gray-400 text-xs leading-relaxed list-disc pl-4" data-i18n="c3Guide">
+                            <ul class="text-gray-400 text-sm leading-relaxed list-disc pl-4" data-i18n="c3Guide">
                                 <li><b>中位數 (紅線):</b> 代表 50% 效率在此值以上，常態體質基準。</li>
                                 <li><b>變異度 IQR (藍箱):</b> 箱體越短代表操作表現越穩定。</li>
                                 <li><b>離群值 (圓點):</b> 非常規運行或異常數據點，需優先追查。</li>
@@ -276,7 +276,7 @@
                         </div>
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c3Expert">
+                            <p class="text-gray-300 text-sm leading-relaxed" data-i18n="c3Expert">
                                 船隊操船穩定度落差明顯。<span class="text-blue-300">成功輪/創新輪</span>可作標準SOP；而<span
                                     class="text-red-400">永續輪/堅韌輪</span>需介入改善。
                             </p>
@@ -290,32 +290,32 @@
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
                             <span data-i18n="c4Title">4. 船隊燃油消耗總量與結構統計</span>
-                            <span class="bg-blue-900/50 text-blue-300 text-xs px-2 py-1 rounded ml-2"
+                            <span class="bg-blue-900/50 text-blue-300 text-sm px-2 py-1 rounded ml-2"
                                 data-i18n="syncTag">連動篩選</span>
                         </h2>
                         <button onclick="$(this).closest('.bg-gray-800').find('.explanation-wrapper').slideToggle();"
-                            class="text-gray-400 hover:text-white text-xs px-3 py-1 bg-gray-700 rounded transition"
+                            class="text-gray-400 hover:text-white text-sm px-3 py-1 bg-gray-700 rounded transition"
                             data-i18n="btnToggleExp">說明</button>
                     </div>
                     <div
-                        class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
+                        class="text-sm text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
                     </div>
                 </div>
                 <div id="fuel-consumption-chart" class="chart-container" style="height: 380px;"></div>
                 <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
-                    <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fFuel">
+                    <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fFuel">
                         <span class="text-blue-400 font-bold">燃油結構分析：</span><br>
                         區間總耗油量 = 常規重油 VLSFO (主機使用) + 昂貴輕油 LSMGO (發電機使用)
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c4Guide">
+                            <p class="text-gray-400 text-sm leading-relaxed" data-i18n="c4Guide">
                                 柱狀圖堆疊顯示船隊在各區間的重油(VLSFO)與輕油(LSMGO)耗量，折線圖對應當期總耗油量。</p>
                         </div>
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c4Expert">
+                            <p class="text-gray-300 text-sm leading-relaxed" data-i18n="c4Expert">
                                 請密切關注紅色的 <span class="text-red-400">輕油(LSMGO)</span>
                                 佔比變化。若輕油總量異常攀升，通常代表船隊港內待命時間拉長，需留意高昂的發電成本。
                             </p>
@@ -329,32 +329,32 @@
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
                             <span data-i18n="c5Title">5. 加油港口排行</span>
-                            <span class="bg-blue-900/50 text-blue-300 text-xs px-2 py-1 rounded ml-2"
+                            <span class="bg-blue-900/50 text-blue-300 text-sm px-2 py-1 rounded ml-2"
                                 data-i18n="syncTag">連動篩選</span>
                         </h2>
                         <button onclick="$(this).closest('.bg-gray-800').find('.explanation-wrapper').slideToggle();"
-                            class="text-gray-400 hover:text-white text-xs px-3 py-1 bg-gray-700 rounded transition"
+                            class="text-gray-400 hover:text-white text-sm px-3 py-1 bg-gray-700 rounded transition"
                             data-i18n="btnToggleExp">說明</button>
                     </div>
                     <div
-                        class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
+                        class="text-sm text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
                     </div>
                 </div>
                 <div id="bunker-ports-chart" class="chart-container"></div>
                 <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
-                    <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fBunker">
+                    <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fBunker">
                         <span class="text-blue-400 font-bold">採購集中度評估：</span><br>
                         統計該區間內，各港口之燃油交付單(BDN)總量 (MT)。
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c5Guide">
+                            <p class="text-gray-400 text-sm leading-relaxed" data-i18n="c5Guide">
                                 顯示前五大加油港口與加注總噸數，幫助採購單位檢視燃油合約分佈狀態。</p>
                         </div>
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c5Expert">
+                            <p class="text-gray-300 text-sm leading-relaxed" data-i18n="c5Expert">
                                 透過掌握各港口的加注噸數集中度，採購單位即可憑藉大宗採購的規模優勢 (Economies of Scale)，向當地供應商爭取更好的長約折扣。
                             </p>
                         </div>
@@ -365,42 +365,42 @@
             <div class="bg-gray-800 p-6 rounded-md shadow-2xl border border-gray-700 flex flex-col relative">
                 <div class="absolute top-16 right-6 flex space-x-2 z-10">
                     <button onclick="toggleEfficiency('best')" id="btn-eff-best"
-                        class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded shadow transition font-bold"
+                        class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-3 py-1.5 rounded shadow transition font-bold"
                         data-i18n="btnTop">最佳 Top 6</button>
                     <button onclick="toggleEfficiency('worst')" id="btn-eff-worst"
-                        class="bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs px-3 py-1.5 rounded shadow transition font-bold"
+                        class="bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm px-3 py-1.5 rounded shadow transition font-bold"
                         data-i18n="btnBottom">檢討 Bottom 6</button>
                 </div>
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center w-3/4">
                             <span data-i18n="c6Title">6. 船舶燃油效率排行</span>
-                            <span class="bg-blue-900/50 text-blue-300 text-xs px-2 py-1 rounded ml-2"
+                            <span class="bg-blue-900/50 text-blue-300 text-sm px-2 py-1 rounded ml-2"
                                 data-i18n="syncTag">連動篩選</span>
                         </h2>
                         <button onclick="$(this).closest('.bg-gray-800').find('.explanation-wrapper').slideToggle();"
-                            class="text-gray-400 hover:text-white text-xs px-3 py-1 bg-gray-700 rounded transition"
+                            class="text-gray-400 hover:text-white text-sm px-3 py-1 bg-gray-700 rounded transition"
                             data-i18n="btnToggleExp">說明</button>
                     </div>
                     <div
-                        class="text-xs text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
+                        class="text-sm text-blue-300 font-mono bg-gray-900 inline-block px-2 py-1 rounded date-filter-display">
                     </div>
                 </div>
                 <div id="efficiency-ranking-chart" class="chart-container"></div>
                 <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
-                    <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono" data-i18n="fKPI">
+                    <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fKPI">
                         <span class="text-blue-400 font-bold">綜合平均效率 (nm/mt)：</span><br>
                         將該區間內所有航次的 (航距 / 耗油) 進行加權平均，作為排行依據。
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c6Guide">
+                            <p class="text-gray-400 text-sm leading-relaxed" data-i18n="c6Guide">
                                 利用右上角按鈕切換名單。橫條越長代表每噸油能跑越遠(效率越好)。</p>
                         </div>
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c6Expert">建議建立內部標竿。獎勵 Top
+                            <p class="text-gray-300 text-sm leading-relaxed" data-i18n="c6Expert">建議建立內部標竿。獎勵 Top
                                 榜單船員，並對 Bottom 榜單船隻啟動硬體健檢或操船輔導機制。</p>
                         </div>
                     </div>
@@ -413,19 +413,19 @@
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
                             <span data-i18n="c7Title">7. 船隊資產能效矩陣</span>
-                            <span class="bg-gray-700 text-gray-400 text-xs px-2 py-1 rounded ml-2"
+                            <span class="bg-gray-700 text-gray-400 text-sm px-2 py-1 rounded ml-2"
                                 data-i18n="staticTag">靜態基準</span>
                         </h2>
                         <button onclick="$(this).closest('.bg-gray-800').find('.explanation-wrapper').slideToggle();"
-                            class="text-gray-400 hover:text-white text-xs px-3 py-1 bg-gray-700 rounded transition"
+                            class="text-gray-400 hover:text-white text-sm px-3 py-1 bg-gray-700 rounded transition"
                             data-i18n="btnToggleExp">說明</button>
                     </div>
-                    <div class="text-xs text-gray-400 font-mono bg-gray-900 inline-block px-2 py-1 rounded"
+                    <div class="text-sm text-gray-400 font-mono bg-gray-900 inline-block px-2 py-1 rounded"
                         data-i18n="c7Logic">圖表邏輯：基於船舶出廠基準與最新阻力狀態的綜合評估</div>
                 </div>
                 <div id="asset-matrix-chart" class="chart-container" style="height: 400px; cursor: pointer;"></div>
                 <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
-                    <div class="mb-4 pb-4 border-b border-gray-700 text-xs text-gray-300 font-mono w-full"
+                    <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono w-full"
                         data-i18n="fCII">
                         <span class="text-blue-400 font-bold">CII (碳強度評級) 預測基準：</span><br>
                         CII ∝ (年度總耗油量 × 碳轉換因子 C_F) / (船舶載重噸 DWT × 年度總航距)
@@ -433,12 +433,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed" data-i18n="c7Guide">
+                            <p class="text-gray-400 text-sm leading-relaxed" data-i18n="c7Guide">
                                 X軸為船齡，Y軸為效率，氣泡大小為「總油耗」。右下角紅線區的巨大氣泡為高耗能觀察重點。</p>
                         </div>
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed" data-i18n="c7Expert">
+                            <p class="text-gray-300 text-sm leading-relaxed" data-i18n="c7Expert">
                                 永續輪與探索輪 船齡偏高、效率數據極低且耗油量巨大。存在極高 CII 降級風險，建議優先點擊氣泡檢視。
                             </p>
                         </div>
@@ -469,21 +469,21 @@
             <div class="px-6 pt-4">
                 <div
                     class="flex flex-wrap items-center space-x-2 bg-gray-900 p-2 rounded-lg border border-gray-700 inline-flex">
-                    <span class="text-gray-400 text-xs pl-2" data-i18n="filterFrom">區間：</span>
+                    <span class="text-gray-400 text-sm pl-2" data-i18n="filterFrom">區間：</span>
                     <select id="modal-time-granularity"
-                        class="bg-gray-700 text-white text-xs border border-gray-600 rounded px-2 py-1 focus:outline-none"
+                        class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none"
                         onchange="updateDateDropdowns('modal')">
                         <option value="month" data-i18n="optMonth">月</option>
                         <option value="quarter" data-i18n="optQuarter">季</option>
                         <option value="year" data-i18n="optYear">年</option>
                     </select>
                     <select id="modal-start-time"
-                        class="bg-gray-700 text-white text-xs border border-gray-600 rounded px-2 py-1 focus:outline-none"></select>
-                    <span class="text-gray-500 text-xs" data-i18n="filterTo">至</span>
+                        class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none"></select>
+                    <span class="text-gray-500 text-sm" data-i18n="filterTo">至</span>
                     <select id="modal-end-time"
-                        class="bg-gray-700 text-white text-xs border border-gray-600 rounded px-2 py-1 focus:outline-none"></select>
+                        class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none"></select>
                     <button onclick="applyModalDateFilter()"
-                        class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1 rounded transition"
+                        class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-3 py-1 rounded transition"
                         data-i18n="btnApply">篩選</button>
                 </div>
             </div>
@@ -507,11 +507,11 @@
                 </div>
                 <div class="bg-gray-900 p-6 rounded-lg flex flex-col justify-start border border-gray-700">
                     <div class="mb-4">
-                        <span class="block text-gray-500 text-xs" data-i18n="mAssetFuel">區間內累積超耗燃油</span>
+                        <span class="block text-gray-500 text-sm" data-i18n="mAssetFuel">區間內累積超耗燃油</span>
                         <span class="text-3xl font-bold text-red-400" id="asset-extra-fuel">-- MT</span>
                     </div>
                     <div class="mb-6">
-                        <span class="block text-gray-500 text-xs mb-1" data-i18n="mAssetCo2">換算額外碳排放量 (CO2)</span>
+                        <span class="block text-gray-500 text-sm mb-1" data-i18n="mAssetCo2">換算額外碳排放量 (CO2)</span>
                         <span class="text-3xl font-bold text-orange-400" id="asset-extra-co2">-- MT</span>
                         <div class="explanation-wrapper" style="display: none;">
                             <div class="font-mono text-[11px] text-gray-400 mt-2 bg-gray-800 p-2 rounded border border-gray-700"
@@ -522,7 +522,7 @@
                         </div>
                     </div>
                     <div class="mb-4 mt-auto">
-                        <span class="block text-gray-500 text-xs" data-i18n="mAssetCii">CII 碳強度評級狀態評估</span>
+                        <span class="block text-gray-500 text-sm" data-i18n="mAssetCii">CII 碳強度評級狀態評估</span>
                         <span class="text-4xl font-bold drop-shadow-lg" id="asset-cii">--</span>
                     </div>
                 </div>
@@ -943,7 +943,7 @@
             const tbody = document.querySelector('#boxplot-table tbody');
             tbody.innerHTML = '';
             bpDataList.forEach(data => {
-                tbody.innerHTML += `<tr><td class="font-bold text-blue-300">${data.name}</td><td>${data.med}</td><td>${data.iqr}</td><td><div class="mb-1">${data.status}</div><div class="text-xs text-gray-400">${data.advice}</div></td></tr>`;
+                tbody.innerHTML += `<tr><td class="font-bold text-blue-300">${data.name}</td><td>${data.med}</td><td>${data.iqr}</td><td><div class="mb-1">${data.status}</div><div class="text-sm text-gray-400">${data.advice}</div></td></tr>`;
             });
             $('#boxplot-table').DataTable({
                 "pageLength": 4, "lengthChange": false, "searching": true, "info": false, "ordering": true,
@@ -1017,13 +1017,13 @@
 
             if (view === 'best') {
                 displayData = window.effDataAll.slice(0, 6);
-                if (btnBest) btnBest.className = 'bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded shadow transition font-bold';
-                if (btnWorst) btnWorst.className = 'bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs px-3 py-1.5 rounded shadow transition font-bold';
+                if (btnBest) btnBest.className = 'bg-blue-600 hover:bg-blue-500 text-white text-sm px-3 py-1.5 rounded shadow transition font-bold';
+                if (btnWorst) btnWorst.className = 'bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm px-3 py-1.5 rounded shadow transition font-bold';
                 chart.series[0].update({ color: '#3b82f6' }, false);
             } else {
                 displayData = window.effDataAll.slice(-6);
-                if (btnBest) btnBest.className = 'bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs px-3 py-1.5 rounded shadow transition font-bold';
-                if (btnWorst) btnWorst.className = 'bg-red-600 hover:bg-red-500 text-white text-xs px-3 py-1.5 rounded shadow transition font-bold';
+                if (btnBest) btnBest.className = 'bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm px-3 py-1.5 rounded shadow transition font-bold';
+                if (btnWorst) btnWorst.className = 'bg-red-600 hover:bg-red-500 text-white text-sm px-3 py-1.5 rounded shadow transition font-bold';
                 chart.series[0].update({ color: '#ef4444' }, false);
             }
             chart.xAxis[0].setCategories(displayData.map(d => d.name));
@@ -1123,7 +1123,7 @@
                 let colorClass = i === 0 ? 'text-red-400 font-bold' : (i === 1 ? 'text-orange-400 font-bold' : 'text-blue-300');
                 return `<tr class="hover:bg-gray-700 transition">
         <td class="p-3 border-b border-gray-700 ${colorClass}">${row.ship}</td>
-        <td class="p-3 border-b border-gray-700 text-xs">${row.port}</td>
+        <td class="p-3 border-b border-gray-700 text-sm">${row.port}</td>
         <td class="p-3 border-b border-gray-700" data-order="${row.hours}">${row.hours} hr</td>
         <td class="p-3 border-b border-gray-700" data-order="${row.mgo}">${row.mgo.toFixed(1)} MT</td>
     </tr>`;
