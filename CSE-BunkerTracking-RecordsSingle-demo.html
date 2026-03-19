@@ -15,143 +15,50 @@
     <script src="https://code.highcharts.com/highcharts-more.js"></script>
 
     <style>
-        .chart-container {
-            width: 100%;
-        }
-
-        .highcharts-credits {
-            display: none !important;
-        }
+        .chart-container { width: 100%; }
+        .highcharts-credits { display: none !important; }
 
         /* ================= 滾動條統一 ================= */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
 
-        ::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
+        /* ================= DataTables 黑暗模式與防跑版客製化 ================= */
+        body { font-size: 1rem; }
+        
+        table.dataTable { border-bottom: 1px solid #374151; margin-top: 1rem !important; margin-bottom: 1rem !important; width: 100% !important; }
+        table.dataTable thead th { background-color: #111827; color: #93c5fd; border-bottom: 1px solid #374151; padding: 12px 10px; font-weight: 600; font-size: 13px !important; cursor: pointer; }
+        table.dataTable tbody tr { background-color: #1f2937; color: #e5e7eb; border-bottom: 1px solid #374151; transition: background-color 0.2s; }
+        table.dataTable tbody tr:hover, table.dataTable tbody tr.shown { background-color: #374151; }
+        table.dataTable tbody td { padding: 14px 10px; font-size: 0.9rem !important; vertical-align: middle; border-bottom: 1px solid #374151; }
+        table.dataTable tbody tr.child td.child { padding: 0 !important; }
+        table.dataTable tbody tr.shown+tr.child td { background-color: #111827; padding: 12px 20px !important; }
 
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 4px;
-        }
+        .sub-table { width: 100%; max-width: 400px; color: #9ca3af; font-size: 0.9rem; }
+        .sub-table td { border-bottom: 1px solid #374151; padding: 8px 12px; }
+        .sub-table tr:last-child td { border-bottom: none; }
 
-        /* ================= DataTables 黑暗模式客製化 ================= */
-        body {
-            font-size: 1rem;
-        }
-
-        table.dataTable {
-            border-bottom: 1px solid #374151;
-            margin-top: 1rem !important;
-            margin-bottom: 1rem !important;
-        }
-
-        table.dataTable thead th {
-            background-color: #111827;
-            color: #93c5fd;
-            border-bottom: 1px solid #374151;
-            padding: 12px 10px;
-            font-weight: 600;
-            font-size: 14px !important;
-            white-space: nowrap;
-        }
-
-        table.dataTable tbody tr {
-            background-color: #1f2937;
-            color: #e5e7eb;
-            border-bottom: 1px solid #374151;
-            transition: background-color 0.2s;
-        }
-
-        table.dataTable tbody tr:hover,
-        table.dataTable tbody tr.shown {
-            background-color: #374151;
-        }
-
-        table.dataTable tbody td {
-            padding: 14px 10px;
-            font-size: 0.95rem !important;
-            vertical-align: middle;
-            border-bottom: 1px solid #374151;
-        }
-
-        table.dataTable tbody tr.child td.child {
-            padding: 0 !important;
-        }
-
-        table.dataTable tbody tr.shown+tr.child td {
-            background-color: #111827;
-            padding: 12px 20px !important;
-        }
-
-        .sub-table {
-            width: 100%;
-            max-width: 400px;
-            color: #9ca3af;
-            font-size: 0.9rem;
-        }
-
-        .sub-table td {
-            border-bottom: 1px solid #374151;
-            padding: 8px 12px;
-        }
-
-        .sub-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .dataTables_wrapper .dataTables_info,
-        .dataTables_wrapper .dataTables_paginate {
-            color: #9ca3af !important;
-            margin-top: 1rem;
-            font-size: 0.95rem !important;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            color: #9ca3af !important;
-            border: 1px solid #4b5563 !important;
-            background-color: transparent !important;
-            border-radius: 6px;
-            margin-left: 4px;
-            padding: 6px 14px !important;
-            transition: all 0.2s;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-            background-color: #374151 !important;
-            color: white !important;
-            border-color: #6b7280 !important;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-            background-color: #2563eb !important;
-            color: white !important;
-            border-color: #2563eb !important;
-        }
-
-        .dataTables_filter,
-        .dataTables_length {
-            display: none;
-        }
+        .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: #9ca3af !important; margin-top: 1rem; font-size: 0.95rem !important; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button { color: #9ca3af !important; border: 1px solid #4b5563 !important; background-color: transparent !important; border-radius: 6px; margin-left: 4px; padding: 6px 14px !important; transition: all 0.2s; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover { background-color: #374151 !important; color: white !important; border-color: #6b7280 !important; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover { background-color: #2563eb !important; color: white !important; border-color: #2563eb !important; }
+        .dataTables_filter, .dataTables_length { display: none; }
+        
+        /* 日期選擇器黑暗模式 */
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
     </style>
 </head>
 
 <body class="bg-gray-900 text-gray-100 p-6 md:p-10 font-sans min-h-screen relative text-base">
 
     <div class="max-w-screen-2xl mx-auto">
-        <div
-            class="mb-6 border-b border-gray-700 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end">
+        <div class="mb-6 border-b border-gray-700 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end">
             <div class="mb-4 md:mb-0 flex items-center">
                 <a href="CSE-BunkerTracking-Records-demo.html"
                     class="mr-4 p-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 transition"
                     title="Back to Records">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                     </svg>
                 </a>
                 <h1 class="text-3xl font-bold text-white border-l-4 border-blue-500 pl-4 mb-2" data-i18n="mainTitle">
@@ -167,121 +74,112 @@
             </div>
         </div>
 
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 mb-8">
-            <h2 class="text-xl font-semibold text-white mb-6 flex items-center border-l-2 border-blue-500 pl-3"
-                data-i18n="secFuel">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 mb-8" id="section-fuel">
+            <h2 class="text-xl font-semibold text-white mb-6 flex items-center border-l-2 border-blue-500 pl-3" data-i18n="secFuel">
                 油耗紀錄 Fuel Consumption Records
             </h2>
 
-            <div class="flex flex-wrap items-end gap-4 mb-8 bg-gray-900 p-4 rounded-lg border border-gray-700">
-                <div class="flex flex-col">
-                    <label class="text-xs text-gray-400 mb-1" data-i18n="fDate">日期 Date</label>
-                    <input type="text" placeholder="YYYY/MM/DD"
-                        class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-3 py-1.5 focus:outline-none focus:border-blue-500 w-36">
-                </div>
-                <div class="flex flex-col">
-                    <label class="text-xs text-gray-400 mb-1" data-i18n="fDep">起拖港 Departure</label>
-                    <select
-                        class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-3 py-1.5 focus:outline-none focus:border-blue-500 w-36">
-                        <option>ALL</option>
-                    </select>
-                </div>
-                <div class="flex flex-col">
-                    <label class="text-xs text-gray-400 mb-1" data-i18n="fArr">目的港 Arrival</label>
-                    <select
-                        class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-3 py-1.5 focus:outline-none focus:border-blue-500 w-36">
-                        <option>ALL</option>
-                    </select>
-                </div>
-                <button
-                    class="bg-gray-700 border border-gray-500 text-gray-300 hover:bg-gray-600 hover:text-white px-4 py-1.5 rounded transition text-sm shadow"
-                    data-i18n="btnCancel">Cancel</button>
+            <div class="flex flex-wrap items-center space-x-2 md:space-x-3 bg-gray-900 p-3 rounded-lg border border-gray-700 mb-6">
+                <span class="text-gray-400 text-sm font-semibold pl-2" data-i18n="fRange">區間：</span>
+                <select id="fuel-time-granularity" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500" onchange="updateDateDropdowns('fuel')">
+                    <option value="month" data-i18n="optMonth">月</option>
+                    <option value="quarter" data-i18n="optQuarter">季</option>
+                    <option value="year" data-i18n="optYear">年</option>
+                </select>
+                <select id="fuel-start-time" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500"></select>
+                <span class="text-gray-500 text-sm" data-i18n="fTo">至</span>
+                <select id="fuel-end-time" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500"></select>
+                
+                <button onclick="applyFilter('fuel')" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded transition shadow ml-2" data-i18n="btnApply">套用篩選</button>
+                <button onclick="clearFilter('fuel')" class="bg-yellow-600 hover:bg-yellow-500 text-white text-sm px-4 py-1.5 rounded transition shadow" data-i18n="btnClear">清空</button>
             </div>
 
             <div class="mb-8 relative bg-gray-900 p-4 rounded-lg border border-gray-700">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-300">1. 燃油效率趨勢 Fuel Efficiency Trend (ton/nm)</h3>
-                    <button onclick="$(this).parent().siblings('.explanation-wrapper').slideToggle();"
-                        class="text-xs text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow">診斷說明</button>
+                <div class="flex flex-col mb-2">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="text-sm font-semibold text-gray-300">1. 燃油效率趨勢 Fuel Efficiency Trend (ton/nm)</h3>
+                        <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
+                            class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                    </div>
+                    <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                 </div>
                 <div id="chart-fuel-efficiency" class="chart-container" style="height: 250px;"></div>
-
-                <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600"
-                    style="display: none;">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h4 class="text-blue-400 font-bold mb-1 text-sm">📊 判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed">
-                                顯示該船每消耗一噸燃油能跑的距離 (nm/mt)。圖中的<span class="text-green-400">綠色虛線</span>為該船的「租約保證基準線 (CP
-                                Benchmark)」。
-                            </p>
-                        </div>
-                        <div>
-                            <h4 class="text-blue-400 font-bold mb-1 text-sm">💡 營運分析與風險</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed">
-                                只要藍線高於綠色虛線，代表該船表現優於合約標準，不會面臨租家索賠 (Speed Claim)。若效率突然跌破基準線，需立即檢查是否遭遇惡劣海象或船底嚴重結垢。
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expF1"></div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-300">2. 油品結構與輕油成本佔比 (MT / %)</h3>
-                        <button onclick="$(this).parent().siblings('.explanation-wrapper').slideToggle();"
-                            class="text-xs text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow">診斷說明</button>
+                    <div class="flex flex-col mb-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-sm font-semibold text-gray-300">2. 油品結構與輕油成本佔比 (MT / %)</h3>
+                            <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
+                                class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                        </div>
+                        <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                     </div>
                     <div id="chart-fuel-by-type" class="chart-container flex-grow" style="height: 280px;"></div>
-
-                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600"
-                        style="display: none;">
-                        <div class="mb-2 pb-2 border-b border-gray-600 text-xs text-gray-400">
-                            <span class="text-red-400 font-bold">LSMGO 輕油佔比 = </span> (輕油消耗量 / 總耗油量) × 100%
-                        </div>
-                        <h4 class="text-blue-400 font-bold mb-1 text-sm">💡 營運分析與風險</h4>
-                        <p class="text-gray-300 text-xs leading-relaxed">
-                            昂貴的輕油 (LSMGO) 通常用於港內發電或 ECA 排放控制區。<span class="text-red-400">紅線 (佔比)
-                                飆高</span>代表該船在港口空等時間過長，或頻繁進出嚴格環保水域，將大幅推升該航次的整體燃油成本。
-                        </p>
-                    </div>
+                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expF2"></div>
                 </div>
 
                 <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-300">3. 設備能耗分佈矩陣 (Stacked Area)</h3>
-                        <button onclick="$(this).parent().siblings('.explanation-wrapper').slideToggle();"
-                            class="text-xs text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow">診斷說明</button>
+                    <div class="flex flex-col mb-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-sm font-semibold text-gray-300">3. 設備能耗分佈矩陣 (Stacked Area)</h3>
+                            <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
+                                class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                        </div>
+                        <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                     </div>
                     <div id="chart-fuel-by-equip" class="chart-container flex-grow" style="height: 280px;"></div>
-
-                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600"
-                        style="display: none;">
-                        <h4 class="text-blue-400 font-bold mb-1 text-sm">💡 營運分析與風險</h4>
-                        <p class="text-gray-300 text-xs leading-relaxed">
-                            利用堆疊面積圖可一目了然船舶的「航行狀態」。<br>
-                            ● <b>主機 (藍區) 最大：</b> 正常海上航行。<br>
-                            ● <b>發電機與鍋爐 (橘/紫區) 擴大：</b> 船舶處於靠泊裝卸貨或拋錨待命狀態。若鍋爐耗量異常增加，需注意是否為冬季加熱重油或貨艙保溫所致。
-                        </p>
-                    </div>
+                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expF3"></div>
                 </div>
             </div>
 
-            <div class="overflow-x-auto w-full">
-                <table id="table-fuel-records" class="display w-full whitespace-nowrap">
+            <div class="flex flex-wrap items-center space-x-2 bg-gray-900 p-3 rounded-lg border border-gray-700 mb-4 w-full">
+                <span class="text-gray-400 text-sm font-semibold pl-2" data-i18n="fNavRange">航行區間：</span>
+                <input type="date" id="fuel-table-start" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500" value="2025-01-01">
+                <span class="text-gray-500 text-sm" data-i18n="fTo">至</span>
+                <input type="date" id="fuel-table-end" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500" value="2026-03-19">
+                
+                <div class="w-px h-6 bg-gray-600 mx-2 hidden md:block"></div>
+                
+                <span class="text-gray-400 text-sm" data-i18n="fDep">起拖港：</span>
+                <select id="fuel-table-dep-port" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500 w-28">
+                    <option value="" data-i18n="optAll">全部</option>
+                    <option value="TWKHH">高雄 (TWKHH)</option>
+                    <option value="AUDAM">丹皮爾 (AUDAM)</option>
+                    <option value="SGSIN">新加坡 (SGSIN)</option>
+                    <option value="JPOSA">大阪 (JPOSA)</option>
+                    <option value="NLRTM">鹿特丹 (NLRTM)</option>
+                </select>
+                <span class="text-gray-400 text-sm ml-2" data-i18n="fArr">目的港：</span>
+                <select id="fuel-table-arr-port" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500 w-28">
+                    <option value="" data-i18n="optAll">全部</option>
+                    <option value="TWKHH">高雄 (TWKHH)</option>
+                    <option value="AUDAM">丹皮爾 (AUDAM)</option>
+                    <option value="SGSIN">新加坡 (SGSIN)</option>
+                    <option value="JPOSA">大阪 (JPOSA)</option>
+                    <option value="NLRTM">鹿特丹 (NLRTM)</option>
+                </select>
+                <button onclick="applyFilter('fuel-table')" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded transition shadow ml-2" data-i18n="btnApply">套用篩選</button>
+                <button onclick="clearFilter('fuel-table')" class="bg-yellow-600 hover:bg-yellow-500 text-white text-sm px-4 py-1.5 rounded transition shadow" data-i18n="btnClear">清空</button>
+            </div>
+
+            <div class="overflow-x-auto w-full pb-4">
+                <table id="table-fuel-records" class="display w-full">
                     <thead>
                         <tr>
                             <th class="w-8">#</th>
                             <th data-i18n="thDateRange">航行區間</th>
-                            <th data-i18n="thVoyage">航線</th>
-                            <th data-i18n="thDur">航行時間 (hr)</th>
+                            <th data-i18n="thDep">起拖港</th>
+                            <th data-i18n="thArr">目的港</th>
+                            <th data-i18n="thDur">時間 (hr)</th>
                             <th data-i18n="thDist">距離 (nm)</th>
-                            <th data-i18n="thME">主機耗油</th>
-                            <th data-i18n="thGEN">發電機耗油</th>
-                            <th data-i18n="thBoiler">鍋爐耗油</th>
-                            <th data-i18n="thTotal">總耗油</th>
-                            <th data-i18n="thEffDt">效率 (mt/nm)</th>
+                            <th data-i18n="thME">主機 (MT)</th>
+                            <th data-i18n="thGEN">發電機 (MT)</th>
+                            <th data-i18n="thBoiler">鍋爐 (MT)</th>
+                            <th data-i18n="thTotal">總計 (MT)</th>
+                            <th data-i18n="thEffDt">效率 (nm/MT)</th>
                             <th data-i18n="thAction">明細</th>
                         </tr>
                     </thead>
@@ -290,250 +188,168 @@
             </div>
         </div>
 
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 mb-8">
-            <h2 class="text-xl font-semibold text-white mb-6 flex items-center border-l-2 border-emerald-500 pl-3"
-                data-i18n="secBunker">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 mb-8" id="section-bunker">
+            <h2 class="text-xl font-semibold text-white mb-6 flex items-center border-l-2 border-emerald-500 pl-3" data-i18n="secBunker">
                 加油紀錄 Bunkering Log
             </h2>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-
-                <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-300">1. 港口加油量與抵港庫存 (Volume & ROB)</h3>
-                        <button onclick="$(this).parent().siblings('.explanation-wrapper').slideToggle();"
-                            class="text-xs text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow">診斷說明</button>
-                    </div>
-                    <div id="chart-bunker-inventory" class="chart-container flex-grow" style="height: 280px;"></div>
-
-                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600"
-                        style="display: none;">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h4 class="text-emerald-400 font-bold mb-1 text-sm">📊 判讀指南</h4>
-                                <p class="text-gray-400 text-xs leading-relaxed">
-                                    藍色柱狀為「該港加油量」，橘色折線為「抵達該港時的剩餘油量 (Arrival ROB)」。<span
-                                        class="text-red-400">紅色虛線</span>代表法規或公司規定的最低安全庫存基準 (通常為 3-5 天耗油量)。
-                                </p>
-                            </div>
-                            <div>
-                                <h4 class="text-emerald-400 font-bold mb-1 text-sm">💡 營運分析與風險</h4>
-                                <p class="text-gray-300 text-xs leading-relaxed">
-                                    若橘線低於紅色虛線，代表船長操作過於極限，隨時有在海上「斷油失去動力」的致命風險。必須嚴格糾正排程或採購單位的加油計畫。
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-300">2. 加油策略與航程配置象限 (Bunker Strategy)</h3>
-                        <button onclick="$(this).parent().siblings('.explanation-wrapper').slideToggle();"
-                            class="text-xs text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow">診斷說明</button>
-                    </div>
-                    <div id="chart-voyage-bunker" class="chart-container flex-grow" style="height: 280px;"></div>
-
-                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600"
-                        style="display: none;">
-                        <h4 class="text-emerald-400 font-bold mb-1 text-sm">💡 營運分析與風險：Tankering 採購套利</h4>
-                        <p class="text-gray-300 text-xs leading-relaxed">
-                            ● <b>左上角 (短航距 + 大量加油)：</b> 代表該港口油價極具競爭力 (如新加坡或鹿特丹)，利用艙容優勢加滿油「帶油走」，是極佳的財務操作。<br>
-                            ● <b>右下角 (長航距 + 少量加油)：</b> 極高風險。通常是因為出發港油價太貴，只加了勉強夠跑到下個港口的「保命油」。
-                        </p>
-                    </div>
-                </div>
-
+            <div class="flex flex-wrap items-center space-x-2 md:space-x-3 bg-gray-900 p-3 rounded-lg border border-gray-700 mb-6">
+                <span class="text-gray-400 text-sm font-semibold pl-2" data-i18n="fRange">區間：</span>
+                <select id="bunker-time-granularity" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500" onchange="updateDateDropdowns('bunker')">
+                    <option value="month" data-i18n="optMonth">月</option>
+                    <option value="quarter" data-i18n="optQuarter">季</option>
+                    <option value="year" data-i18n="optYear">年</option>
+                </select>
+                <select id="bunker-start-time" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500"></select>
+                <span class="text-gray-500 text-sm" data-i18n="fTo">至</span>
+                <select id="bunker-end-time" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500"></select>
+                
+                <div class="w-px h-6 bg-gray-600 mx-2 hidden md:block"></div>
+                
+                <span class="text-gray-400 text-sm" data-i18n="fBnkPort">加油港口：</span>
+                <select id="bunker-port" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500 w-32">
+                    <option value="" data-i18n="optAll">全部</option>
+                    <option value="SGSIN">新加坡 (SGSIN)</option>
+                    <option value="CNHKG">香港 (CNHKG)</option>
+                    <option value="AUDAM">丹皮爾 (AUDAM)</option>
+                    <option value="NLRTM">鹿特丹 (NLRTM)</option>
+                    <option value="TWKHH">高雄 (TWKHH)</option>
+                </select>
+                
+                <button onclick="applyFilter('bunker')" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded transition shadow ml-2" data-i18n="btnApply">套用篩選</button>
+                <button onclick="clearFilter('bunker')" class="bg-yellow-600 hover:bg-yellow-500 text-white text-sm px-4 py-1.5 rounded transition shadow" data-i18n="btnClear">清空</button>
             </div>
 
-            <div class="overflow-x-auto w-full">
-                <table id="table-bunkering-log" class="display w-full whitespace-nowrap">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
+                    <div class="flex flex-col mb-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-sm font-semibold text-gray-300">1. 各港口加油量與抵港庫存 (Volume & Arrival ROB)</h3>
+                            <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
+                                class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                        </div>
+                        <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
+                    </div>
+                    <div id="chart-bunker-inventory" class="chart-container flex-grow" style="height: 280px;"></div>
+                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expB1"></div>
+                </div>
+
+                <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
+                    <div class="flex flex-col mb-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-sm font-semibold text-gray-300">2. 加油策略與航程配置象限 (Bunker Strategy)</h3>
+                            <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
+                                class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                        </div>
+                        <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
+                    </div>
+                    <div id="chart-voyage-bunker" class="chart-container flex-grow" style="height: 280px;"></div>
+                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expB2"></div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto w-full pb-4">
+                <table id="table-bunkering-log" class="display w-full">
                     <thead>
                         <tr>
                             <th class="w-8">#</th>
                             <th data-i18n="thBnkDate">加油日期</th>
-                            <th data-i18n="thPort">港口</th>
+                            <th data-i18n="thPrevPort">上一港口</th>
+                            <th data-i18n="thPort">加油港口</th>
                             <th data-i18n="thFuelTypeDt">油品</th>
-                            <th data-i18n="thQty">加油量 (mt)</th>
-                            <th data-i18n="thVoyRef">對應航次</th>
+                            <th data-i18n="thQty">數量 (MT)</th>
                             <th data-i18n="thSupplier">供應商</th>
                             <th data-i18n="thPrice">總金額</th>
                             <th data-i18n="thRemark">備註</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>2025/06/25</td>
-                            <td>AUDAM</td>
-                            <td>HFO</td>
-                            <td>110</td>
-                            <td>TWKHH - JPOSA</td>
-                            <td>Lion Bunkers</td>
-                            <td>69,300</td>
-                            <td><span class="text-gray-400">合約折扣</span></td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>2025/06/20</td>
-                            <td>AUDAM</td>
-                            <td>MGO</td>
-                            <td>50</td>
-                            <td>SGSIN - TWKHH</td>
-                            <td>GlobalBunker</td>
-                            <td>44,000</td>
-                            <td>-</td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>2025/06/15</td>
-                            <td>CNHKG</td>
-                            <td>HFO</td>
-                            <td>120</td>
-                            <td>SGSIN - IDJKT</td>
-                            <td>SinoFuel Co.</td>
-                            <td>76,800</td>
-                            <td>-</td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td>2025/06/10</td>
-                            <td>CNHKG</td>
-                            <td>MGO</td>
-                            <td>20</td>
-                            <td>KRPUS - SGSIN</td>
-                            <td>Pacific Marine</td>
-                            <td>18,000</td>
-                            <td><span class="text-orange-400">進港ECA</span></td>
-                        </tr>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
 
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-semibold text-white flex items-center border-l-2 border-purple-500 pl-3"
-                    data-i18n="secAdvanced">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 mb-8" id="section-adv">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 class="text-xl font-semibold text-white flex items-center border-l-2 border-purple-500 pl-3 mb-4 md:mb-0" data-i18n="secAdvanced">
                     進階風險與營運分析 Advanced Risk & Operations
                 </h2>
+            </div>
+            
+            <div class="flex flex-wrap items-center space-x-2 md:space-x-3 bg-gray-900 p-3 rounded-lg border border-gray-700 mb-6">
+                <span class="text-gray-400 text-sm font-semibold pl-2" data-i18n="fRange">區間：</span>
+                <select id="adv-time-granularity" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500" onchange="updateDateDropdowns('adv')">
+                    <option value="month" data-i18n="optMonth">月</option>
+                    <option value="quarter" data-i18n="optQuarter">季</option>
+                    <option value="year" data-i18n="optYear">年</option>
+                </select>
+                <select id="adv-start-time" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500"></select>
+                <span class="text-gray-500 text-sm" data-i18n="fTo">至</span>
+                <select id="adv-end-time" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500"></select>
+                
+                <div class="w-px h-6 bg-gray-600 mx-2 hidden md:block"></div>
+                
+                <span class="text-gray-400 text-sm" data-i18n="fDraft">吃水狀態：</span>
+                <select id="adv-draft-cond" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500 w-28">
+                    <option value="LADEN">滿載 (Laden)</option>
+                    <option value="BALLAST">壓艙 (Ballast)</option>
+                </select>
+                <span class="text-gray-500 text-sm ml-2" data-i18n="fDraftHint">(僅連動圖表 1 與 2)</span>
+                
+                <button onclick="applyFilter('adv')" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded transition shadow ml-auto md:ml-2" data-i18n="btnApply">套用篩選</button>
+                <button onclick="clearFilter('adv')" class="bg-yellow-600 hover:bg-yellow-500 text-white text-sm px-4 py-1.5 rounded transition shadow" data-i18n="btnClear">清空</button>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-4">
                 <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-300" data-i18n="cSpeedCons">1. 實際 vs 基準油耗散佈圖 (硬體衰退分析)
-                        </h3>
-                        <button onclick="$(this).parent().siblings('.explanation-wrapper').slideToggle();"
-                            class="text-xs text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow">診斷說明</button>
+                    <div class="flex flex-col mb-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-sm font-semibold text-gray-300" data-i18n="cSpeedCons">1. 實際 vs 基準油耗散佈圖 (硬體衰退分析)</h3>
+                            <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
+                                class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                        </div>
+                        <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                     </div>
                     <div id="chart-speed-consumption" class="chart-container" style="height: 320px;"></div>
-
-                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600 space-y-3"
-                        style="display: none;">
-                        <div>
-                            <h4 class="text-purple-400 font-bold text-sm mb-1">📊 判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed">
-                                觀察實際日報點（紅點）相對於出廠基準線（綠虛線）的垂直位移。點位越高，代表阻力增加越嚴重。</p>
-                        </div>
-                        <div>
-                            <h4 class="text-purple-400 font-bold text-sm mb-1">💡 營運分析</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed">當散佈點持續偏離基準線超過 15%
-                                時，通常代表船底結垢嚴重或漆面老化，應考慮安排船底清洗或螺旋槳拋光以節省油耗。</p>
-                        </div>
-                        <div class="bg-gray-900 p-2 rounded border border-gray-700">
-                            <h4 class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">計算公式 Formula</h4>
-                            <code
-                                class="text-blue-300 text-xs">$$\Delta C = \frac{C_{actual} - C_{base}}{C_{base}} \times 100\%$$</code>
-                        </div>
-                    </div>
+                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expA1"></div>
                 </div>
 
                 <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-300" data-i18n="cWeatherSlip">2. 風浪等級與滑失率/油耗
-                            (氣象與操船分析)</h3>
-                        <button onclick="$(this).parent().siblings('.explanation-wrapper').slideToggle();"
-                            class="text-xs text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow">診斷說明</button>
+                    <div class="flex flex-col mb-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-sm font-semibold text-gray-300" data-i18n="cWeatherSlip">2. 風浪等級與滑失率/油耗 (氣象與操船)</h3>
+                            <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
+                                class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                        </div>
+                        <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                     </div>
                     <div id="chart-weather-slip" class="chart-container" style="height: 320px;"></div>
-
-                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600 space-y-3"
-                        style="display: none;">
-                        <div>
-                            <h4 class="text-purple-400 font-bold text-sm mb-1">📊 判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed">比較不同蒲福風級下，油耗（柱狀）與滑失率（橘線）的增長速度。正常情況下，風級 5
-                                以上滑失率會顯著爬升。</p>
-                        </div>
-                        <div>
-                            <h4 class="text-purple-400 font-bold text-sm mb-1">💡 營運分析</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed">
-                                稽核船長在惡劣海象下的操船選擇。若高風級下油耗暴增但車轉速不減，代表船隻正在硬頂風浪，易造成主機負荷過重與船體疲勞。</p>
-                        </div>
-                        <div class="bg-gray-900 p-2 rounded border border-gray-700">
-                            <h4 class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">計算公式 Formula</h4>
-                            <code
-                                class="text-blue-300 text-xs">$$S = \frac{D_{theory} - D_{actual}}{D_{theory}} \times 100\%$$</code>
-                        </div>
-                    </div>
+                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expA2"></div>
                 </div>
 
                 <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-300" data-i18n="cBunkerVar">3. 加油單量與實測/油泥差異 (供油防弊追蹤)
-                        </h3>
-                        <button onclick="$(this).parent().siblings('.explanation-wrapper').slideToggle();"
-                            class="text-xs text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow">診斷說明</button>
+                    <div class="flex flex-col mb-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-sm font-semibold text-gray-300" data-i18n="cBunkerVar">3. 加油單量與實測/廢油差異 (供油防弊)</h3>
+                            <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
+                                class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                        </div>
+                        <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                     </div>
                     <div id="chart-bunker-variance" class="chart-container" style="height: 320px;"></div>
-
-                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600 space-y-3"
-                        style="display: none;">
-                        <div>
-                            <h4 class="text-purple-400 font-bold text-sm mb-1">📊 判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed">對比 BDN
-                                帳面量與實測量的高低差，並觀察紅色折線（油泥率）是否異常波動。油泥率通常應穩定在 1%~2%。</p>
-                        </div>
-                        <div>
-                            <h4 class="text-purple-400 font-bold text-sm mb-1">💡 營運分析</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed">
-                                監控加油誠信與燃油品質。若特定港口頻繁出現實測短少（卡布奇諾效應）或油泥排渣率過高，應考慮將該供應商列入黑名單。</p>
-                        </div>
-                        <div class="bg-gray-900 p-2 rounded border border-gray-700">
-                            <h4 class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">計算公式 Formula</h4>
-                            <code
-                                class="text-blue-300 text-xs">$$R_{sludge} = \frac{\text{Daily Sludge Discharged}}{\text{Daily Total Fuel Consumption}} \times 100\%$$</code>
-                        </div>
-                    </div>
+                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expA3"></div>
                 </div>
 
                 <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-300" data-i18n="cEngineLoad">4. 主機負荷運轉時數分佈 (排程與甜蜜點分析)
-                        </h3>
-                        <button onclick="$(this).parent().siblings('.explanation-wrapper').slideToggle();"
-                            class="text-xs text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow">診斷說明</button>
+                    <div class="flex flex-col mb-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-sm font-semibold text-gray-300" data-i18n="cEngineLoad">4. 主機負荷運轉時數分佈 (排程與損耗)</h3>
+                            <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
+                                class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                        </div>
+                        <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                     </div>
                     <div id="chart-engine-load" class="chart-container" style="height: 320px;"></div>
-
-                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600 space-y-3"
-                        style="display: none;">
-                        <div>
-                            <h4 class="text-purple-400 font-bold text-sm mb-1">📊 判讀指南</h4>
-                            <p class="text-gray-400 text-xs leading-relaxed">觀察長條圖是否集中在綠色背景的「甜蜜點」區間。理想狀態應呈現常態分佈並向右對齊甜蜜點。
-                            </p>
-                        </div>
-                        <div>
-                            <h4 class="text-purple-400 font-bold text-sm mb-1">💡 營運分析</h4>
-                            <p class="text-gray-300 text-xs leading-relaxed">長期處於低負荷（<
-                                    40%）運轉會導致引擎燃燒不完全與積碳，增加維修成本。若分佈過於偏左，應重新評估航線排程是否過於寬鬆。</p>
-                        </div>
-                        <div class="bg-gray-900 p-2 rounded border border-gray-700">
-                            <h4 class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">計算公式 Formula</h4>
-                            <code
-                                class="text-blue-300 text-xs">$$Load\% = \frac{\text{Actual Power (kW)}}{\text{MCR Power (kW)}} \times 100\%$$</code>
-                        </div>
-                    </div>
+                    <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expA4"></div>
                 </div>
             </div>
         </div>
@@ -547,40 +363,78 @@
                 secFuel: '油耗紀錄 Fuel Consumption Records',
                 secBunker: '加油紀錄 Bunkering Log',
                 secAdvanced: '進階風險與營運分析 Advanced Risk & Operations',
-                fDate: '日期 Date', fDep: '起拖港 Departure', fArr: '目的港 Arrival', btnCancel: '清除條件',
+                btnToggleExp: '說明', btnApply: '套用篩選', btnClear: '清空', currRange: '當前區間：',
+                fRange: '區間：', fNavRange: '航行區間：', fTo: '至', fDep: '起拖港：', fArr: '目的港：', fBnkPort: '加油港口：', fDraft: '吃水狀態：', fDraftHint: '(僅連動圖表 1 與 2)',
+                optMonth: '月', optQuarter: '季', optYear: '年', optAll: '全部',
 
-                cEff: '燃油效率趨勢 (ton/nm)', cFuelType: '各油品耗油總量 (MT)', cEquip: '各設備耗油 (MT)',
-                cInventory: '各港口加油量與庫存', cVoyageBunker: '航距與加油時機散佈圖',
+                thDateRange: '航行區間', thDep: '起拖港', thArr: '目的港', thDur: '時間 (hr)', thDist: '距離 (nm)',
+                thME: '主機 (MT)', thGEN: '發電機 (MT)', thBoiler: '鍋爐 (MT)', thTotal: '總計 (MT)', thEffDt: '效率 (nm/MT)', thAction: '明細',
+                thBnkDate: '日期', thPrevPort: '上一港', thPort: '加油港', thFuelTypeDt: '油品', thQty: '數量 (MT)', thSupplier: '供應商', thPrice: '金額', thRemark: '備註',
+
+                dtInfo: '顯示 _START_ 到 _END_ 項，共 _TOTAL_ 項', dtNext: '下一頁', dtPrev: '上一頁', btnExpand: '展開',
+                
                 cSpeedCons: '1. 實際 vs 基準油耗散佈圖 (硬體衰退分析)',
-                cWeatherSlip: '2. 風浪等級與滑失率/油耗 (氣象與操船分析)',
-                cBunkerVar: '3. 加油單量與實測/油泥差異 (供油防弊追蹤)',
-                cEngineLoad: '4. 主機負荷運轉時數分佈 (排程與甜蜜點分析)',
+                cWeatherSlip: '2. 風浪等級與滑失率/油耗 (氣象與操船)',
+                cBunkerVar: '3. 加油單量與實測/廢油差異 (供油防弊)',
+                cEngineLoad: '4. 主機負荷運轉時數分佈 (排程與損耗)',
 
-                thDateRange: '航行區間', thVoyage: '航線', thDur: '航行時間 (hr)', thDist: '距離 (nm)',
-                thME: '主機耗油', thGEN: '發電機耗油', thBoiler: '鍋爐耗油', thTotal: '總耗油', thEffDt: '效率 (mt/nm)', thAction: '明細',
-                thBnkDate: '加油日期', thPort: '港口', thFuelTypeDt: '油品', thQty: '加油量 (mt)', thVoyRef: '對應航次', thSupplier: '供應商', thPrice: '總金額', thRemark: '備註',
-
-                dtInfo: '顯示 _START_ 到 _END_ 項，共 _TOTAL_ 項', dtNext: '下一頁', dtPrev: '上一頁', btnExpand: '展開'
+                // 原版高品質排版說明 (無 Emoji 版)
+                expF1: '<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><h4 class="text-blue-400 font-bold mb-1 ">判讀指南 (動態自我監控)</h4><p class="text-gray-300 text-sm leading-relaxed">顯示該船每消耗一噸燃油能跑的距離 (nm/mt)。捨棄靜態合約基準，改用兩條動態基準線進行衰退評估：<br><span class="text-green-400 font-bold">● 出塢/洗船後最佳基準：</span> 記錄剛完成保養後的最佳狀態，作為衰退防線。<br><span class="text-gray-400 font-bold">● 歷史 6 個月移動平均：</span> 追蹤近期的平均表現趨勢。</p></div><div><h4 class="text-blue-400 font-bold mb-1">營運分析</h4><p class="text-gray-300 text-sm leading-relaxed">透過比對藍線(實際表現)與綠線(最佳狀態)的落差，機務人員能直觀掌握船舶的體質惡化程度。當跌破最佳狀態的特定百分比時，系統將觸發預警，提示需要評估再次洗船。</p></div></div>',
+                
+                expF2: '<div class="mb-2 pb-2 border-b border-gray-600 text-sm text-gray-400"><span class="text-red-400 font-bold">LSMGO 輕油佔比 = </span> (輕油消耗量 / 總耗油量) × 100%</div><h4 class="text-blue-400 font-bold mb-1">營運分析與風險</h4><p class="text-gray-300 text-sm leading-relaxed">昂貴的輕油通常用於港內發電或 ECA 排放控制區。<span class="text-red-400 font-bold">紅線 (佔比) 飆高</span>代表該船在港口空等時間過長，或頻繁進出嚴格環保水域，將大幅推升該航次的整體燃油成本。</p>',
+                
+                expF3: '<h4 class="text-blue-400 font-bold mb-1 ">營運分析與異常洞察</h4><p class="text-gray-300 text-sm leading-relaxed">利用堆疊面積圖可一目了然船舶的「航行狀態」與設備耗油。正常航行時，主機(藍區)面積最大。<br><span class="text-red-400 font-bold">鍋爐耗油突然增加的合理原因：</span><br>1. <b>高緯度寒冷海域：</b> 重油(HFO)遇冷會凝結，鍋爐需全功率產生高壓蒸氣來加熱油艙，維持其流動性。<br>2. <b>特殊貨物保溫：</b> 載運如化學品、棕櫚油等易凝結貨物時，鍋爐需持續運作替貨艙加熱。</p>',
+                
+                expB1: '<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><h4 class="text-blue-400 font-bold mb-1 ">數據定義</h4><p class="text-gray-300 text-sm leading-relaxed">藍色柱狀為「該港加油量」，橘色折線為「抵達該港時的剩餘油量 (Arrival ROB)」。<br><span class="text-red-400 font-bold mt-1 inline-block">最低安全庫存 (紅虛線) 計算方式：</span><br>並非固定常數，而是由系統動態推算：<br><code>近期平均每日耗油量 × 公司安全餘裕天數(如10天) + 底部不可泵送油量</code>。</p></div><div><h4 class="text-blue-400 font-bold mb-1">安全與合規風險</h4><p class="text-gray-300 text-sm leading-relaxed">這是一條絕對的航行安全紅線。若橘線(抵港庫存)低於紅虛線，代表船隻曾處於極高風險的「低油位」航行，若遭遇惡劣海象極易引發斷油失去動力的海難。必須嚴厲稽核相關排程計畫。</p></div></div>',
+                
+                expB2: '<div class="mb-3 pb-3 border-b border-gray-700"><h4 class="text-blue-400 font-bold mb-1 ">象限判讀邏輯 (基於庫存與加油量)</h4><p class="text-gray-300 text-sm leading-relaxed">系統透過交叉比對「抵港剩餘油量(ROB)」與「實際加油量」，即使在無油價數據的情況下，也能逆向推導採購意圖與潛在風險。<br>（圖中的常規基準與安全底線，皆可透過歷史數據的中位數與百分位數動態演算生成）。</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div class="bg-gray-900 p-3 rounded border border-gray-700"><h4 class="text-blue-300 font-bold mb-1">常規補給 (Normal Refill)</h4><div class="text-xs text-gray-400 mb-2 font-mono">條件：正常庫存 + 標準加油</div><p class="text-gray-300 text-sm leading-relaxed">船舶依標準航次計畫消耗燃油並進行對等補充。營運表現穩定，無特殊財務操作或航行風險。</p></div><div class="bg-gray-900 p-3 rounded border border-emerald-900/50"><h4 class="text-emerald-400 font-bold mb-1">趁機加滿 (Tankering)</h4><div class="text-xs text-gray-400 mb-2 font-mono">條件：高庫存 + 大量加油</div><p class="text-gray-300 text-sm leading-relaxed"><span class="font-bold text-gray-200">洞察：</span>顯示採購判斷該港油價具優勢，執行跨航次套利。<br><span class="font-bold text-emerald-400">建議：</span>需稽核多加的油重，是否排擠了可載貨賺錢的「載重噸(Deadweight)」，避免省油錢卻損運費。</p></div><div class="bg-gray-900 p-3 rounded border border-red-900/50"><h4 class="text-red-400 font-bold mb-1">過渡保命 (Bunker Call)</h4><div class="text-xs text-gray-400 mb-2 font-mono">條件：低庫存 + 微量加油</div><p class="text-gray-300 text-sm leading-relaxed"><span class="font-bold text-gray-200">洞察：</span>該港油價昂貴，僅購買足夠撐至下一港的底線油量。<br><span class="font-bold text-red-400">預警：</span>此操作逼近斷油紅線，若遭遇惡劣海象極易引發海難，海務應嚴格審查此類決策。</p></div></div>',
+                
+                expA1: '<h4 class="text-blue-400 font-bold mb-1">雙基準線建置與客戶資料需求</h4><div class="text-gray-300 text-sm leading-relaxed space-y-2"><p><b class="text-green-400">● 理論基準線：</b> 來自造船廠最完美的出廠狀態。<br><i>需要客戶提供：</i> 船舶出廠公試報告 (Sea Trial) 或主機測試報告上的「特定吃水、航速與預期耗油數據座標對」。</p><p><b class="text-blue-400">● 經驗基準曲線：</b> 透過大數據動態擬合的實際防線。<br><i>需要客戶提供：</i> 「船舶進出塢/洗船日期」。系統藉此鎖定保養後前幾個月的「歷史 AIS 航速」與「午報耗油」，過濾極端值後進行迴歸計算生成。</p><p class="text-blue-300 italic">註：本圖表受「吃水狀態」篩選器連動。滿載與壓艙的物理基準線不同，請確保篩選條件一致。</p></div><div class="bg-gray-900 p-2 rounded border border-gray-700 mt-3"><p class="text-gray-400 text-sm"><b>診斷：</b> 實際日報(紅點)遠高於經驗曲線時，代表船底已嚴重結垢，應安排水下清洗。</p></div>',
+                
+                expA2: '<div><h4 class="text-blue-400 font-bold mb-1">滑失率 (Slip Rate) 的定義與計算</h4><p class="text-gray-300 text-sm leading-relaxed">滑失率是指「引擎理論推進距離」與「船舶實際前進距離」的落差(打滑程度)。計算需結合硬體常數與船報：<br>1. <b>理論距離：</b> <code>主機平均轉速(RPM) × 螺旋槳螺距(Pitch, 客戶提供) × 時間</code>。<br>2. <b>實際距離：</b> 來自午報的對水航距或 AIS。<br>正常為 0%~5%，惡劣海象或嚴重結垢時會飆升至 15% 以上。<br><span class="text-blue-300 italic mt-1 inline-block">註：本圖表受「吃水狀態」連動。吃水深淺會影響船舶受風面積與螺旋槳浸水深度。</span></p></div><div class="bg-gray-900 p-2 rounded border border-gray-700 mt-3"><h4 class="text-gray-400 text-xs uppercase tracking-wider mb-1">氣象串接與操船診斷</h4><p class="text-gray-400 text-sm">建議串接第三方氣象API，避免船員謊報風浪等級。若高風級下油耗暴增但車轉速不減，代表船長「硬頂風浪」，易造成船體金屬疲勞。</p></div>',
+                
+                expA3: '<div><h4 class="text-blue-400 font-bold mb-1">判讀指南與防弊追蹤</h4><p class="text-gray-30 text-sm leading-relaxed">交叉比對「供應商提單量(BDN)」與「大副實測量(Sounding)」的高低差。若長期實測量短少，可能是供應商作弊(卡布奇諾效應，打入空氣使體積膨脹)。</p></div><div class="bg-gray-900 p-2 rounded border border-gray-700 mt-3"><h4 class="text-gray-400 text-xs uppercase tracking-wider mb-1">廢油排渣率 (Waste Oil Ratio) 的計算</h4><code class="text-blue-300 text-xs">廢油率 = (每日產出廢油 MT / 每日重油消耗量 MT) × 100%</code><p class="text-gray-400 text-sm mt-1">正常值約為 1%~1.5%。若異常飆高，代表該批油品極其低劣，易損壞引擎部件，應將供應商列入黑名單。</p></div>',
+                
+                expA4: '<div><h4 class="text-blue-400 font-bold mb-1">數據定義</h4><p class="text-gray-300 text-sm leading-relaxed"><b>● 主機負荷(Load%)：</b> 引擎當下實際軸功率 / 最大連續額定功率(MCR)。<br><b>● 時數佔比(Time%)：</b> 特定區間內，引擎處於各負荷狀態的時間比例。<br><b>● 甜蜜點(Sweet Spot)：</b> 引擎熱力轉換效率最高、最省油的區間(通常為65%-80%)。</p></div><div class="bg-gray-900 p-2 rounded border border-gray-700 mt-3"><h4 class="text-gray-400 text-xs font-bold mb-1">傳統午報 vs. 現代 IoT (VDR 串接) 的視覺反差</h4><p class="text-gray-400 text-sm leading-relaxed">傳統午報每天僅提供1筆日平均值，極易掩蓋忽快忽慢的「極端暴衝」操作。<br>透過 SDataPro 等 IoT 設備串接 VDR 高頻擷取功率數據，能真實畫出引擎的歷史分佈。長期處於低負荷(<40%)會導致嚴重積碳與火災風險；長期超高負荷則加速磨損。</p></div>'
             },
             'en': {
                 mainTitle: 'CHINA STEEL SUCCESS',
                 secFuel: 'Fuel Consumption Records',
                 secBunker: 'Bunkering Log',
                 secAdvanced: 'Advanced Risk & Operations',
-                fDate: 'Date Range', fDep: 'Departure Port', fArr: 'Arrival Port', btnCancel: 'Clear Filter',
+                btnToggleExp: 'Details', btnApply: 'Apply Filter', btnClear: 'Clear', currRange: 'Current Range: ',
+                fRange: 'Range:', fNavRange: 'Voyage Dates:', fTo: 'to', fDep: 'Dep:', fArr: 'Arr:', fBnkPort: 'Port:', fDraft: 'Draft:', fDraftHint: '(Syncs Chart 1 & 2)',
+                optMonth: 'Month', optQuarter: 'Quarter', optYear: 'Year', optAll: 'All',
 
-                cEff: 'Fuel Efficiency Trend (ton/nm)', cFuelType: 'Fuel Consumption by Type (MT)', cEquip: 'Fuel by Equipment (MT)',
-                cInventory: 'Bunker Volume & Inventory', cVoyageBunker: 'Voyage Distance vs Bunkering Time',
-                cSpeedCons: '1. Speed vs Consumption Deviation (Hull Degradation)',
-                cWeatherSlip: '2. Weather Impact & Slip Rate (Routing & Ops)',
-                cBunkerVar: '3. Bunker Quantity Variance & Sludge Ratio',
-                cEngineLoad: '4. Engine Load Profile (Sweet Spot Analysis)',
+                thDateRange: 'Date Range', thDep: 'Dep', thArr: 'Arr', thDur: 'Dur (hr)', thDist: 'Dist (nm)',
+                thME: 'ME (MT)', thGEN: 'GEN (MT)', thBoiler: 'Boiler (MT)', thTotal: 'Total (MT)', thEffDt: 'Eff (nm/MT)', thAction: 'Details',
+                thBnkDate: 'Date', thPrevPort: 'Prev Port', thPort: 'Bunker Port', thFuelTypeDt: 'Type', thQty: 'Qty (MT)', thSupplier: 'Supplier', thPrice: 'Price', thRemark: 'Remark',
 
-                thDateRange: 'Date Range', thVoyage: 'Voyage', thDur: 'Duration (hr)', thDist: 'Distance (nm)',
-                thME: 'ME Fuel', thGEN: 'GEN Fuel', thBoiler: 'Boiler Fuel', thTotal: 'Total Fuel', thEffDt: 'Efficiency', thAction: 'Details',
-                thBnkDate: 'Date', thPort: 'Port', thFuelTypeDt: 'Type', thQty: 'Quantity (mt)', thVoyRef: 'Voyage Ref', thSupplier: 'Supplier', thPrice: 'Total Price', thRemark: 'Remark',
+                dtInfo: 'Showing _START_ to _END_ of _TOTAL_ entries', dtNext: 'Next', dtPrev: 'Previous', btnExpand: 'Expand',
+                
+                cSpeedCons: '1. Speed vs Consumption Deviation',
+                cWeatherSlip: '2. Weather Impact & Slip Rate',
+                cBunkerVar: '3. Bunker Quantity Variance & Waste Oil',
+                cEngineLoad: '4. Engine Load Profile',
 
-                dtInfo: 'Showing _START_ to _END_ of _TOTAL_ entries', dtNext: 'Next', dtPrev: 'Previous', btnExpand: 'Expand'
+                // Original Layout Explanations (No Emoji)
+                expF1: '<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><h4 class="text-blue-400 font-bold mb-1 text-sm">Interpretation Guide</h4><p class="text-gray-400 text-sm leading-relaxed">Displays the distance sailed per ton of fuel (nm/mt). Replaces static CP benchmarks with dynamic baselines:<br><span class="text-green-400 font-bold">● Clean Hull Baseline:</span> Records optimal performance post-drydock.<br><span class="text-gray-400 font-bold">● 6-Month Rolling Avg:</span> Tracks recent average trends.</p></div><div><h4 class="text-blue-400 font-bold mb-1 text-sm">Operational Analysis</h4><p class="text-gray-300 text-sm leading-relaxed">Comparing the actual blue line with the optimal green line helps visualize hull degradation. Drops below a certain percentage trigger alerts for hull cleaning evaluation.</p></div></div>',
+                
+                expF2: '<div class="mb-2 pb-2 border-b border-gray-600 text-sm text-gray-400"><span class="text-red-400 font-bold">LSMGO Ratio = </span> (LSMGO Consumed / Total Fuel) × 100%</div><h4 class="text-blue-400 font-bold mb-1 text-sm">Operational Risk</h4><p class="text-gray-300 text-sm leading-relaxed">Expensive LSMGO is used for port operations or ECA zones. A <span class="text-red-400 font-bold">spike in the red line</span> indicates prolonged anchorage waiting or frequent ECA transits, significantly increasing voyage costs.</p>',
+                
+                expF3: '<h4 class="text-blue-400 font-bold mb-1 text-sm">Insights & Anomalies</h4><p class="text-gray-300 text-sm leading-relaxed">Stacked areas reveal the vessel\'s operational status. Main engine (blue) dominates during sea passage.<br><br><span class="text-blue-400 font-bold">Valid reasons for Boiler consumption spikes:</span><br>1. <b>Cold High Latitudes:</b> HFO coagulates in cold water; the boiler runs at full power to heat bunker tanks.<br>2. <b>Cargo Heating:</b> Required for sensitive cargo like chemicals or palm oil.</p>',
+                
+                expB1: '<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><h4 class="text-emerald-400 font-bold mb-1 text-sm">Data Definition</h4><p class="text-gray-400 text-sm leading-relaxed">Blue columns represent bunkered volume; the orange line is Arrival ROB.<br><span class="text-red-400 font-bold mt-1 inline-block">Safety Margin (Red Dashed Line) Calculation:</span><br>Dynamically estimated:<br><code>Recent Daily Cons. × Safety Margin Days (e.g., 10) + Unpumpable Fuel</code>.</p></div><div><h4 class="text-emerald-400 font-bold mb-1 text-sm">Safety Compliance</h4><p class="text-gray-300 text-sm leading-relaxed">This is an absolute safety threshold. Arrival ROB dropping below this line indicates extreme risk of blackout due to fuel exhaustion. Strict audits on scheduling are required.</p></div></div>',
+                
+                expB2: '<div class="mb-3 pb-3 border-b border-gray-700"><h4 class="text-emerald-400 font-bold mb-1 text-sm">Quadrant Logic</h4><p class="text-gray-400 text-sm leading-relaxed">By plotting Arrival ROB against Bunkered Qty, procurement intent is deduced without price data. Baselines are dynamically calculated medians.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div class="bg-gray-900 p-3 rounded border border-gray-700"><h4 class="text-blue-400 font-bold mb-1 text-sm">Normal Refill</h4><div class="text-[11px] text-gray-400 mb-2 font-mono">Normal ROB + Std Bunkering</div><p class="text-gray-300 text-sm leading-relaxed">Standard operations with no specific financial anomalies.</p></div><div class="bg-gray-900 p-3 rounded border border-emerald-900/50"><h4 class="text-emerald-400 font-bold mb-1 text-sm">Tankering</h4><div class="text-[11px] text-gray-400 mb-2 font-mono">High ROB + High Bunkering</div><p class="text-gray-300 text-sm leading-relaxed"><span class="font-bold text-gray-200">Insight:</span> Procurement executing cross-voyage arbitrage.<br><span class="font-bold text-emerald-400">Advice:</span> Audit if excess fuel displaced revenue-generating cargo deadweight.</p></div><div class="bg-gray-900 p-3 rounded border border-red-900/50"><h4 class="text-red-400 font-bold mb-1 text-sm">Bunker Call</h4><div class="text-[11px] text-gray-400 mb-2 font-mono">Low ROB + Low Bunkering</div><p class="text-gray-300 text-sm leading-relaxed"><span class="font-bold text-gray-200">Insight:</span> Expensive port; buying minimum survival fuel.<br><span class="font-bold text-red-400">Alert:</span> Pushes vessel near blackout limits. High risk requiring marine audit.</p></div></div>',
+                
+                expA1: '<h4 class="text-blue-400 font-bold text-sm mb-1">Baseline Construction</h4><div class="text-gray-300 text-sm leading-relaxed space-y-2"><p><b class="text-green-400">● Theoretical Baseline:</b> From Shipyard Sea Trial reports (Requires draft/speed/cons data from client).</p><p><b class="text-blue-400">● Empirical Baseline:</b> Dynamically fitted. The system locks onto dry-dock dates and regresses post-maintenance AIS/Noon data.</p><p class="text-blue-300 italic">Note: This chart is linked to the "Draft" filter. Laden and Ballast baselines differ physically; ensure consistent filters.</p></div><div class="bg-gray-900 p-2 rounded border border-gray-700 mt-3"><p class="text-gray-400 text-sm"><b>Diagnosis:</b> Actual points (red) significantly above the curve indicate severe hull fouling requiring underwater cleaning.</p></div>',
+                
+                expA2: '<div><h4 class="text-blue-400 font-bold text-sm mb-1">Slip Rate Calculation</h4><p class="text-gray-400 text-sm leading-relaxed">Slip represents the difference between theoretical and actual distance.<br>1. <b>Theoretical:</b> <code>RPM × Prop Pitch (Client provided) × Time</code>.<br>2. <b>Actual:</b> Distance STW from Noon reports.<br>Normal is 0-5%. Severe weather spikes it >15%.<br><span class="text-blue-300 italic mt-1 inline-block">Note: Linked to the "Draft" filter. Draft affects windage area and propeller immersion.</span></p></div><div class="bg-gray-900 p-2 rounded border border-gray-700 mt-3"><h4 class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Navigation Audit</h4><p class="text-gray-300 text-sm">Recommend third-party API weather validation. If high slip/consumption occurs without RPM reduction, the master is forcing through bad weather, risking structural fatigue.</p></div>',
+                
+                expA3: '<div><h4 class="text-blue-400 font-bold text-sm mb-1">Fraud Tracking</h4><p class="text-gray-400 text-sm leading-relaxed">Cross-referencing BDN vs Sounding (from client systems). Consistent shortages indicate supplier fraud (e.g., Cappuccino effect).</p></div><div class="bg-gray-900 p-2 rounded border border-gray-700 mt-3"><h4 class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Waste Oil Ratio</h4><code class="text-blue-300 text-[10px]">Ratio = (Daily Waste Oil / Daily HFO) × 100%</code><p class="text-gray-300 text-sm mt-1">Normal is 1-1.5%. Spikes indicate terrible fuel quality damaging engine components.</p></div>',
+                
+                expA4: '<div><h4 class="text-blue-400 font-bold text-sm mb-1">Data Definition</h4><p class="text-gray-400 text-sm leading-relaxed"><b>● Engine Load:</b> Shaft Power / Maximum Continuous Rating (MCR).<br><b>● Time %:</b> Percentage of time spent in each load zone.<br><b>● Sweet Spot:</b> Optimal thermal efficiency zone (typically 65-80%).</p></div><div class="bg-gray-900 p-2 rounded border border-gray-700 mt-3"><h4 class="text-gray-300 text-sm font-bold mb-1">Noon Report vs. IoT (VDR)</h4><p class="text-gray-400 text-sm leading-relaxed">Daily averages hide extreme "stop-and-go" operations. High-frequency VDR sampling reveals the true profile. Prolonged low load (<40%) causes carbon buildup and fire risks.</p></div>'
             }
         };
 
@@ -603,6 +457,188 @@
                     table.draw();
                 }
             });
+
+            // 更新當前區間顯示語言
+            applyFilter('fuel', true);
+            applyFilter('bunker', true);
+            applyFilter('adv', true);
+        }
+
+        // ================= 區間下拉選單與資料連動邏輯 =================
+        const timeLists = {
+            'month': ['2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03'],
+            'quarter': ['2025 Q1', '2025 Q2', '2025 Q3', '2025 Q4', '2026 Q1'],
+            'year': ['2025', '2026']
+        };
+
+        function updateDateDropdowns(section) {
+            const g = document.getElementById(`${section}-time-granularity`).value;
+            const startSel = document.getElementById(`${section}-start-time`);
+            const endSel = document.getElementById(`${section}-end-time`);
+            startSel.innerHTML = ''; endSel.innerHTML = '';
+
+            timeLists[g].forEach(item => {
+                startSel.add(new Option(item, item)); endSel.add(new Option(item, item));
+            });
+            
+            if (g === 'month') { startSel.selectedIndex = 0; endSel.selectedIndex = 14; }
+            else if (g === 'quarter') { startSel.selectedIndex = 0; endSel.selectedIndex = 4; }
+            else { startSel.selectedIndex = 0; endSel.selectedIndex = 1; }
+        }
+
+        function getCategoriesInRange(section) {
+            const g = document.getElementById(`${section}-time-granularity`).value;
+            const start = document.getElementById(`${section}-start-time`).value;
+            const end = document.getElementById(`${section}-end-time`).value;
+            const list = timeLists[g];
+            let sIdx = list.indexOf(start); let eIdx = list.indexOf(end);
+            if (sIdx > eIdx) { let temp = sIdx; sIdx = eIdx; eIdx = temp; }
+            return list.slice(sIdx, eIdx + 1);
+        }
+
+        // ================= 核心：篩選器連動引擎 =================
+
+        // 擴充 DataTables 來自訂日期區間搜尋 (僅針對 fuel-table-records)
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            if (settings.nTable.id !== 'table-fuel-records') {
+                return true; 
+            }
+            let minStr = $('#fuel-table-start').val();
+            let maxStr = $('#fuel-table-end').val();
+            
+            // 解析列表上的航行區間字串，例如 "2026/03/05 - 03/18"，我們只取前面的 "2026/03/05" 作為判斷依據
+            let rowDateStr = data[1].split(' - ')[0].trim(); 
+            let rowDate = new Date(rowDateStr).getTime();
+            
+            let min = minStr ? new Date(minStr).getTime() : NaN;
+            let max = maxStr ? new Date(maxStr).getTime() : NaN;
+
+            if (
+                (isNaN(min) && isNaN(max)) ||
+                (isNaN(min) && rowDate <= max) ||
+                (min <= rowDate && isNaN(max)) ||
+                (min <= rowDate && rowDate <= max)
+            ) {
+                return true;
+            }
+            return false;
+        });
+
+        // 清空篩選器邏輯
+        function clearFilter(section) {
+            if (section === 'fuel-table') {
+                $('#fuel-table-start').val('2025-01-01');
+                $('#fuel-table-end').val('2026-03-19');
+                $('#fuel-table-dep-port').val('');
+                $('#fuel-table-arr-port').val('');
+                applyFilter('fuel-table');
+            } else {
+                $(`#${section}-time-granularity`).val('month');
+                updateDateDropdowns(section);
+                
+                if (section === 'fuel' || section === 'bunker') {
+                    $(`#${section}-port`).val('');
+                    $(`#${section}-dep-port`).val('');
+                    $(`#${section}-arr-port`).val('');
+                }
+                
+                if (section === 'adv') {
+                    $('#adv-draft-cond').val('LADEN'); // 恢復預設吃水為滿載
+                }
+                
+                applyFilter(section);
+            }
+        }
+
+        function applyFilter(section, onlyUpdateLabels = false) {
+            
+            // 處理專屬列表的過濾
+            if (section === 'fuel-table') {
+                const dep = $('#fuel-table-dep-port').val();
+                const arr = $('#fuel-table-arr-port').val();
+                let dt = $('#table-fuel-records').DataTable();
+                dt.column(2).search(dep); 
+                dt.column(3).search(arr); 
+                dt.draw(); // 會自動觸發上面寫好的 $.fn.dataTable.ext.search 日期區間過濾
+                return;
+            }
+
+            const startStr = document.getElementById(`${section}-start-time`).value;
+            const endStr = document.getElementById(`${section}-end-time`).value;
+            
+            // 標示當前篩選區間
+            $(`#section-${section} .date-filter-display`).text(i18n[lang].currRange + startStr + ' - ' + endStr)
+                .addClass('bg-blue-800 text-white');
+            setTimeout(() => $(`#section-${section} .date-filter-display`).removeClass('bg-blue-800 text-white'), 500);
+
+            if (onlyUpdateLabels) return;
+
+            const categories = getCategoriesInRange(section);
+            const len = categories.length;
+            if (len === 0) return;
+
+            if (section === 'fuel') {
+                const effActual = Array.from({length: len}, () => parseFloat((12 + Math.random() * 2.5).toFixed(1)));
+                const effBaseline = Array(len).fill(14.8);
+                const effAvg = Array.from({length: len}, (_, i) => parseFloat((13 + Math.sin(i) * 0.5).toFixed(1)));
+                
+                const typeVLSFO = Array.from({length: len}, () => Math.floor(100 + Math.random() * 60));
+                const typeLSMGO = Array.from({length: len}, () => Math.floor(10 + Math.random() * 20));
+                const typeRatio = typeLSMGO.map((v, i) => parseFloat(((v / (v + typeVLSFO[i])) * 100).toFixed(1)));
+
+                const eqME = Array.from({length: len}, () => Math.floor(80 + Math.random() * 40));
+                const eqGEN = Array.from({length: len}, () => Math.floor(20 + Math.random() * 20));
+                const eqBoil = Array(len).fill(20);
+
+                const cEff = $('#chart-fuel-efficiency').highcharts();
+                if(cEff) { cEff.xAxis[0].setCategories(categories); cEff.series[0].setData(effActual); cEff.series[1].setData(effBaseline); cEff.series[2].setData(effAvg); }
+                
+                const cType = $('#chart-fuel-by-type').highcharts();
+                if(cType) { cType.xAxis[0].setCategories(categories); cType.series[0].setData(typeVLSFO); cType.series[1].setData(typeLSMGO); cType.series[2].setData(typeRatio); }
+                
+                const cEq = $('#chart-fuel-by-equip').highcharts();
+                if(cEq) { cEq.xAxis[0].setCategories(categories); cEq.series[0].setData(eqME); cEq.series[1].setData(eqGEN); cEq.series[2].setData(eqBoil); }
+
+            } else if (section === 'bunker') {
+                const portFilter = $('#bunker-port').val();
+                let dt = $('#table-bunkering-log').DataTable();
+                dt.column(3).search(portFilter); 
+                dt.draw();
+
+                let displayPorts = portFilter ? [portFilter] : ['SGSIN', 'NLRTM', 'CNZOS', 'TWKHH', 'USHOU'];
+                const bnkQty = displayPorts.map(() => Math.floor(300 + Math.random() * 1200));
+                const bnkRob = displayPorts.map(() => Math.floor(150 + Math.random() * 400));
+                
+                const cInv = $('#chart-bunker-inventory').highcharts();
+                if(cInv) { cInv.xAxis[0].setCategories(displayPorts); cInv.series[0].setData(bnkQty); cInv.series[1].setData(bnkRob); }
+                
+                const cStrat = $('#chart-voyage-bunker').highcharts();
+                if(cStrat) {
+                    const scatterData = displayPorts.map(p => ({ x: Math.floor(200+Math.random()*1000), y: Math.floor(400+Math.random()*1500), name: p }));
+                    cStrat.series[0].setData(scatterData);
+                }
+
+            } else if (section === 'adv') {
+                const draft = $('#adv-draft-cond').val();
+                let modifier = (draft === 'BALLAST') ? -5 : (draft === 'LADEN' ? 5 : 0);
+                
+                // 吃水狀態連動 1: 實際 vs 基準散佈圖
+                const cSpeed = $('#chart-speed-consumption').highcharts();
+                if(cSpeed) {
+                    const newTheo = [[10, 17+modifier], [11, 19+modifier], [12, 22+modifier], [13, 26+modifier], [14, 31+modifier], [15, 37+modifier], [16, 45+modifier]];
+                    const newEmp = [[10, 18.5+modifier], [11, 20.8+modifier], [12, 24.5+modifier], [13, 29+modifier], [14, 34.5+modifier], [15, 41+modifier], [16, 49+modifier]];
+                    const newAct = [[11.2, 23.5+modifier], [12.1, 28.5+modifier], [12.8, 33.5+modifier], [13.5, 38.5+modifier], [14.3, 44.5+modifier]];
+                    cSpeed.series[0].setData(newTheo); cSpeed.series[1].setData(newEmp); cSpeed.series[2].setData(newAct);
+                }
+
+                // 吃水狀態連動 2: 風浪滑失率圖
+                const cSlip = $('#chart-weather-slip').highcharts();
+                if(cSlip) {
+                    let slipModifier = (draft === 'BALLAST') ? 3 : (draft === 'LADEN' ? -2 : 0); 
+                    cSlip.series[0].setData(Array.from({length: 7}, (_, i) => 24 + i*2.5 + Math.random()*2));
+                    cSlip.series[1].setData(Array.from({length: 7}, (_, i) => Math.max(0, 2 + i*3 + Math.random()*3 + slipModifier)));
+                }
+            }
         }
 
         // ================= Highcharts 黑暗主題設定 =================
@@ -616,299 +652,180 @@
             tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.95)', style: { color: '#f8fafc' }, borderWidth: 1, borderColor: '#475569' }
         };
         Highcharts.setOptions(Highcharts.theme);
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        // 圖表預設初始化為 2025-01 至 2026-03 的區間
+        const defaultMonths = ['2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03'];
 
-        // 初始化圖表與資料表
         $(document).ready(function () {
-            // 基本油耗與加油圖表
-            // ================= 升級版：單船營運基礎圖表 =================
+            updateDateDropdowns('fuel');
+            updateDateDropdowns('bunker');
+            updateDateDropdowns('adv');
+            
+            // 列表專屬日期預設值
+            document.getElementById('fuel-table-start').value = '2025-01-01';
+            document.getElementById('fuel-table-end').value = '2026-03-19';
 
-            // 1. 燃油效率趨勢 (含 CP Benchmark 基準線)
+            // ================= 繪製圖表 =================
             Highcharts.chart('chart-fuel-efficiency', {
-                chart: { type: 'spline' },
-                xAxis: { categories: months },
-                yAxis: {
-                    title: { text: '效率 (nm/mt)' },
-                    min: 10, max: 16,
-                    plotLines: [{
-                        value: 13.5, // 假設租約保證基準為 13.5
-                        color: '#10b981',
-                        dashStyle: 'Dash',
-                        width: 2,
-                        label: {
-                            text: '租約保證基準 (CP Benchmark)',
-                            align: 'right',
-                            style: { color: '#10b981', fontWeight: 'bold' },
-                            y: -5
-                        },
-                        zIndex: 4
-                    }]
-                },
-                tooltip: { shared: true, valueSuffix: ' nm/mt' },
-                series: [{
-                    name: '實際燃油效率 (Actual)',
-                    data: [12.1, 12.5, 13.0, 14.2, 13.1, 13.2, 14.0, 14.1, 13.5, 13.0, 14.2, 14.5],
-                    color: '#3b82f6',
-                    marker: { enabled: true, symbol: 'circle' },
-                    lineWidth: 3
-                }]
+                chart: { type: 'spline' }, title: { text: null }, xAxis: { categories: defaultMonths }, yAxis: { title: { text: '效率 (nm/mt)' }, min: 10, max: 16 }, tooltip: { shared: true, valueSuffix: ' nm/mt' },
+                series: [
+                    { name: '實際燃油效率 (Actual)', data: [12.1, 12.5, 13.0, 14.2, 13.1, 13.2, 14.0, 14.1, 13.5, 13.0, 12.2, 11.8, 12.0, 12.5, 13.2], color: '#3b82f6', marker: { enabled: true, symbol: 'circle' }, lineWidth: 3, zIndex: 3 },
+                    { name: '出塢/洗船後最佳基準', data: Array(15).fill(14.8), color: '#10b981', dashStyle: 'ShortDash', lineWidth: 2, marker: { enabled: false }, zIndex: 1 },
+                    { name: '歷史 6 個月移動平均', data: [13.2, 13.3, 13.4, 13.5, 13.5, 13.4, 13.6, 13.7, 13.6, 13.4, 13.1, 12.8, 12.9, 13.0, 13.2], color: '#94a3b8', dashStyle: 'Dot', lineWidth: 2, marker: { enabled: false }, zIndex: 2 }
+                ]
             });
 
-            // 2. 油品結構與輕油成本佔比 (雙軸：柱狀堆疊 + 折線佔比)
             Highcharts.chart('chart-fuel-by-type', {
-                chart: { zoomType: 'xy' },
-                xAxis: { categories: months },
-                yAxis: [
-                    { title: { text: '消耗量 (MT)' }, stackLabels: { enabled: true, style: { color: '#cbd5e1' } } },
-                    { title: { text: '輕油佔比 LSMGO Ratio (%)', style: { color: '#ef4444' } }, opposite: true, labels: { format: '{value}%' }, min: 0, max: 30 }
-                ],
-                tooltip: { shared: true },
-                plotOptions: { column: { stacking: 'normal', borderWidth: 0 } },
+                chart: { zoomType: 'xy' }, xAxis: { categories: defaultMonths }, yAxis: [ { title: { text: '消耗量 (MT)' }, stackLabels: { enabled: true, style: { color: '#cbd5e1' } } }, { title: { text: '輕油佔比 LSMGO Ratio (%)', style: { color: '#ef4444' } }, opposite: true, labels: { format: '{value}%' }, min: 0, max: 30 } ], tooltip: { shared: true }, plotOptions: { column: { stacking: 'normal', borderWidth: 0 } },
                 series: [
-                    { name: '重油 VLSFO', type: 'column', data: [120, 130, 125, 140, 135, 150, 145, 130, 120, 140, 135, 150], color: '#3b82f6' },
-                    { name: '輕油 LSMGO', type: 'column', data: [20, 15, 25, 20, 30, 15, 20, 25, 20, 15, 25, 20], color: '#f59e0b' },
-                    {
-                        name: '輕油佔比 (%)', type: 'spline', yAxis: 1,
-                        // 計算 LSMGO / (VLSFO + LSMGO) 的百分比
-                        data: [14.2, 10.3, 16.6, 12.5, 18.1, 9.0, 12.1, 16.1, 14.2, 9.6, 15.6, 11.7],
-                        color: '#ef4444',
-                        marker: { lineWidth: 2, lineColor: '#ef4444', fillColor: '#1e293b' },
-                        tooltip: { valueSuffix: ' %' }
-                    }
+                    { name: '重油 VLSFO', type: 'column', data: [120, 130, 125, 140, 135, 150, 145, 130, 120, 140, 135, 150, 145, 135, 125], color: '#3b82f6' },
+                    { name: '輕油 LSMGO', type: 'column', data: [20, 15, 25, 20, 30, 15, 20, 25, 20, 15, 25, 20, 18, 22, 15], color: '#f59e0b' },
+                    { name: '輕油佔比 (%)', type: 'spline', yAxis: 1, data: [14.2, 10.3, 16.6, 12.5, 18.1, 9.0, 12.1, 16.1, 14.2, 9.6, 15.6, 11.7, 11.0, 14.0, 10.7], color: '#ef4444', marker: { lineWidth: 2, lineColor: '#ef4444', fillColor: '#1e293b' }, tooltip: { valueSuffix: ' %' } }
                 ]
             });
 
-            // 3. 設備能耗分佈矩陣 (堆疊面積圖)
             Highcharts.chart('chart-fuel-by-equip', {
-                chart: { type: 'area' },
-                xAxis: { categories: months, tickmarkPlacement: 'on', title: { enabled: false } },
-                yAxis: { title: { text: '耗油量 (MT)' } },
-                tooltip: { split: true, valueSuffix: ' MT' },
-                plotOptions: {
-                    area: {
-                        stacking: 'normal',
-                        lineColor: '#ffffff',
-                        lineWidth: 1,
-                        marker: { lineWidth: 1, lineColor: '#ffffff' }
-                    }
-                },
+                chart: { type: 'area' }, xAxis: { categories: defaultMonths, tickmarkPlacement: 'on', title: { enabled: false } }, yAxis: { title: { text: '耗油量 (MT)' } }, tooltip: { split: true, valueSuffix: ' MT' }, plotOptions: { area: { stacking: 'normal', lineColor: '#ffffff', lineWidth: 1, marker: { lineWidth: 1, lineColor: '#ffffff' } } },
                 series: [
-                    { name: '主機 Main Engine', data: [90, 100, 95, 110, 105, 120, 115, 100, 90, 110, 105, 120], color: 'rgba(59, 130, 246, 0.8)' },
-                    { name: '發電機 Aux Engine', data: [30, 25, 35, 30, 40, 25, 30, 35, 30, 25, 35, 30], color: 'rgba(245, 158, 11, 0.8)' },
-                    { name: '鍋爐 Boiler', data: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20], color: 'rgba(139, 92, 246, 0.8)' }
+                    { name: '主機 Main Engine', data: [90, 100, 95, 110, 105, 120, 115, 100, 90, 110, 105, 120, 110, 105, 95], color: 'rgba(59, 130, 246, 0.8)' },
+                    { name: '發電機 Aux Engine', data: [30, 25, 35, 30, 40, 25, 30, 35, 30, 25, 35, 30, 35, 30, 30], color: 'rgba(245, 158, 11, 0.8)' },
+                    { name: '鍋爐 Boiler', data: Array(15).fill(20), color: 'rgba(139, 92, 246, 0.8)' }
                 ]
             });
-            // ================= 升級版：加油與庫存分析圖表 =================
 
-            // 1. 各港口加油量與抵港庫存 (雙Y軸 + 警戒線)
             Highcharts.chart('chart-bunker-inventory', {
-                chart: { zoomType: 'xy' },
-                xAxis: {
-                    categories: ['SGSIN (05/12)', 'NLRTM (06/05)', 'CNZOS (06/20)', 'TWKHH (07/02)', 'USHOU (07/15)'],
-                    crosshair: true
-                },
-                yAxis: [
-                    { // Y1: 加油量 (左)
-                        title: { text: '加油量 Bunker Volume (MT)' },
-                        min: 0
-                    },
-                    { // Y2: 抵港庫存 ROB (右)
-                        title: { text: '抵港剩餘油量 Arrival ROB (MT)', style: { color: '#f59e0b' } },
-                        opposite: true,
-                        min: 0, max: 600,
-                        plotLines: [{ // 最低安全庫存紅線
-                            value: 200, // 假設安全底線為 200 MT
-                            color: '#ef4444',
-                            dashStyle: 'Dash',
-                            width: 2,
-                            label: {
-                                text: '最低安全庫存 (Safety Margin)',
-                                align: 'left',
-                                style: { color: '#ef4444', fontWeight: 'bold' },
-                                y: -5
-                            },
-                            zIndex: 5
-                        }]
-                    }
-                ],
-                tooltip: { shared: true },
+                chart: { zoomType: 'xy' }, xAxis: { categories: ['SGSIN', 'NLRTM', 'CNZOS', 'TWKHH', 'USHOU'], crosshair: true },
+                yAxis: [ { title: { text: '加油量 (MT)' }, min: 0 }, { title: { text: '抵港剩餘油量 (MT)', style: { color: '#f59e0b' } }, opposite: true, min: 0, max: 600, plotLines: [{ value: 200, color: '#ef4444', dashStyle: 'Dash', width: 2, label: { text: '動態最低安全庫存', style: { color: '#ef4444' }, y: -5 }, zIndex: 5 }] } ], tooltip: { shared: true },
                 series: [
-                    {
-                        name: '該港加油量 (Bunkered MT)',
-                        type: 'column',
-                        yAxis: 0,
-                        data: [1200, 450, 1500, 300, 950],
-                        color: 'rgba(16, 185, 129, 0.8)' // 翡翠綠
-                    },
-                    {
-                        name: '抵港剩餘油量 (Arrival ROB)',
-                        type: 'spline',
-                        yAxis: 1,
-                        data: [250, 180, 220, 450, 210], // 注意 NLRTM 的 180 低於安全線
-                        color: '#f59e0b', // 橘色警戒
-                        marker: { lineWidth: 2, lineColor: '#f59e0b', fillColor: '#1e293b', symbol: 'circle' }
-                    }
+                    { name: '該港加油量 (MT)', type: 'column', yAxis: 0, data: [1200, 450, 1500, 300, 950], color: 'rgba(16, 185, 129, 0.8)' },
+                    { name: '抵港剩餘油量 (MT)', type: 'spline', yAxis: 1, data: [250, 180, 220, 450, 210], color: '#f59e0b', marker: { lineWidth: 2, lineColor: '#f59e0b', fillColor: '#1e293b', symbol: 'circle' } }
                 ]
             });
 
-            // 2. 加油策略與航程配置散佈圖 (象限分佈)
             Highcharts.chart('chart-voyage-bunker', {
-                chart: { type: 'scatter', zoomType: 'xy' },
-                xAxis: {
-                    title: { text: '預期航行距離 Expected Voyage (nm)' },
-                    min: 0, max: 12000,
-                    plotLines: [{ value: 6000, color: '#475569', width: 1, zIndex: 3 }] // X軸中心線
-                },
-                yAxis: {
-                    title: { text: '決定加油量 Bunkered Qty (MT)' },
-                    min: 0, max: 2500,
-                    plotLines: [{ value: 1250, color: '#475569', width: 1, zIndex: 3 }] // Y軸中心線
-                },
-                plotOptions: {
-                    scatter: {
-                        dataLabels: {
-                            enabled: true,
-                            format: '{point.name}', // 顯示港口代碼
-                            style: { color: '#cbd5e1', textOutline: 'none', fontWeight: 'normal', fontSize: '10px' },
-                            y: -15
-                        }
-                    }
-                },
-                tooltip: {
-                    useHTML: true,
-                    headerFormat: '<b>{point.key}</b><br>',
-                    pointFormat: '航距: {point.x} nm<br>加油: {point.y} MT'
-                },
+                chart: { type: 'scatter', zoomType: 'xy' }, title: { text: null },
+                xAxis: { title: { text: '抵港剩餘油量 Arrival ROB (MT)' }, min: 0, max: 1500, plotLines: [{ value: 600, color: '#475569', width: 2, dashStyle: 'Dash', zIndex: 3, label: { text: '庫存分水嶺', style: {color: '#94a3b8'}, y: -5 } }] },
+                yAxis: { title: { text: '實際加油量 Bunkered Qty (MT)' }, min: 0, max: 2500, plotLines: [{ value: 1000, color: '#475569', width: 2, dashStyle: 'Dash', zIndex: 3, label: { text: '常規加油基準', style: {color: '#94a3b8'}, x: 5 } }] },
+                plotOptions: { scatter: { dataLabels: { enabled: true, format: '{point.name}', style: { color: '#cbd5e1', textOutline: 'none', fontWeight: 'normal', fontSize: '10px' }, y: -15 } } }, tooltip: { useHTML: true, headerFormat: '<b>{point.key}</b><br>', pointFormat: '庫存: {point.x} MT<br>加油: {point.y} MT' },
                 series: [
-                    {
-                        name: '常規加油 (Normal)',
-                        color: '#3b82f6',
-                        data: [
-                            { x: 4500, y: 1000, name: 'CNSHA' },
-                            { x: 5200, y: 1200, name: 'TWKHH' },
-                            { x: 8500, y: 1800, name: 'BRTUB' }
-                        ],
-                        marker: { radius: 5 }
-                    },
-                    {
-                        name: '低價多加套利 (Tankering)',
-                        color: '#10b981', // 綠色代表好的財務操作
-                        data: [
-                            { x: 2000, y: 1900, name: 'SGSIN' }, // 去很近的地方，卻加爆油槽
-                            { x: 3500, y: 2200, name: 'NLRTM' }
-                        ],
-                        marker: { radius: 6, symbol: 'triangle' }
-                    },
-                    {
-                        name: '高價少加保命 (Bunker Call)',
-                        color: '#ef4444', // 紅色代表高風險
-                        data: [
-                            { x: 9500, y: 500, name: 'JPOSA' } // 航線極遠，卻因為油價貴只加一點點
-                        ],
-                        marker: { radius: 6, symbol: 'square' }
-                    }
+                    { name: '常規補給 (Normal)', color: '#3b82f6', data: [{ x: 350, y: 1200, name: 'TWKHH' }, { x: 450, y: 1400, name: 'CNSHA' }, { x: 500, y: 1100, name: 'BRTUB' }], marker: { radius: 5 } },
+                    { name: '趁機加滿 (Tankering)', color: '#10b981', data: [{ x: 950, y: 1900, name: 'SGSIN' }, { x: 1100, y: 1600, name: 'NLRTM' }], marker: { radius: 6, symbol: 'triangle' } },
+                    { name: '過渡保命 (Bunker Call)', color: '#ef4444', data: [{ x: 250, y: 350, name: 'JPOSA' }, { x: 150, y: 400, name: 'USHOU' }], marker: { radius: 6, symbol: 'square' } }
                 ]
             });
 
-            // ================= 進階風險圖表 =================
-
-            // 圖表 1：實際 vs 基準油耗散佈圖
             Highcharts.chart('chart-speed-consumption', {
-                chart: { type: 'scatter', zoomType: 'xy' },
-                xAxis: { title: { text: '對水航速 Speed (Knots)' }, min: 10, max: 16, tickInterval: 1 },
-                yAxis: { title: { text: '日耗油量 Consumption (MT/Day)' }, min: 15, max: 45 },
-                tooltip: { shared: true },
+                chart: { type: 'scatter', zoomType: 'xy' }, title: { text: null }, xAxis: { title: { text: '對水航速 Speed (Knots)' }, min: 10, max: 16, tickInterval: 1 }, yAxis: { title: { text: '日耗油量 (MT/Day)' }, min: 15, max: 50 }, tooltip: { shared: true },
                 series: [
-                    { type: 'spline', name: '出廠基準線 (Baseline)', data: [[10, 18], [11, 20], [12, 23], [13, 27], [14, 32], [15, 38], [16, 46]], color: '#10b981', marker: { enabled: false }, enableMouseTracking: false, dashStyle: 'Dash' },
-                    { name: '實際日報 (Actual)', color: '#ef4444', data: [[11.2, 22.5], [11.5, 23.1], [12.1, 26.5], [12.3, 27.8], [12.8, 30.5], [13.2, 33.0], [13.5, 35.5], [14.1, 40.2], [14.3, 41.5]], marker: { radius: 4, symbol: 'circle' } }
+                    { type: 'spline', name: '理論基準線', data: [[10, 17], [11, 19], [12, 22], [13, 26], [14, 31], [15, 37], [16, 45]], color: '#10b981', marker: { enabled: false }, dashStyle: 'Dash', zIndex: 1 },
+                    { type: 'spline', name: '經驗基準曲線', data: [[10, 18.5], [11, 20.8], [12, 24.5], [13, 29], [14, 34.5], [15, 41], [16, 49]], color: '#8b5cf6', marker: { enabled: false }, lineWidth: 2, zIndex: 2 },
+                    { type: 'scatter', name: '實際日報點', color: '#ef4444', data: [[11.2, 23.5], [11.5, 24.1], [12.1, 28.5], [12.3, 29.8], [12.8, 33.5], [13.2, 36.0], [13.5, 38.5], [14.1, 43.2], [14.3, 44.5]], marker: { radius: 4, symbol: 'circle' }, zIndex: 3 }
                 ]
             });
 
-            // 圖表 2：風浪等級與滑失率/油耗
             Highcharts.chart('chart-weather-slip', {
-                chart: { zoomType: 'xy' },
-                xAxis: { categories: ['BF 2', 'BF 3', 'BF 4', 'BF 5', 'BF 6', 'BF 7', 'BF 8'], title: { text: '蒲福風級 (Beaufort Scale)' } },
-                yAxis: [
-                    { title: { text: '平均日耗油 (MT/Day)', style: { color: '#3b82f6' } }, labels: { style: { color: '#3b82f6' } } },
-                    { title: { text: '螺旋槳滑失率 Slip (%)', style: { color: '#f59e0b' } }, labels: { format: '{value}%', style: { color: '#f59e0b' } }, opposite: true, min: -5, max: 25 }
-                ],
-                tooltip: { shared: true },
+                chart: { zoomType: 'xy' }, xAxis: { categories: ['BF 2', 'BF 3', 'BF 4', 'BF 5', 'BF 6', 'BF 7', 'BF 8'], title: { text: '蒲福風級 (BF)' } },
+                yAxis: [ { title: { text: '日耗油 (MT/Day)' } }, { title: { text: '滑失率 Slip (%)', style: { color: '#f59e0b' } }, opposite: true, min: -5, max: 25 } ], tooltip: { shared: true },
                 series: [
-                    { name: '平均日耗油 (MT/Day)', type: 'column', yAxis: 0, data: [24.5, 24.8, 25.5, 27.2, 31.0, 36.5, 42.0], color: 'rgba(59, 130, 246, 0.7)' },
-                    { name: '滑失率 Slip (%)', type: 'spline', yAxis: 1, data: [2.1, 2.5, 4.0, 8.5, 14.2, 19.5, 23.8], color: '#f59e0b', marker: { lineWidth: 2, lineColor: '#f59e0b', fillColor: '#1e293b' } }
+                    { name: '平均日耗油', type: 'column', yAxis: 0, data: [24.5, 24.8, 25.5, 27.2, 31.0, 36.5, 42.0], color: 'rgba(59, 130, 246, 0.7)' },
+                    { name: '滑失率', type: 'spline', yAxis: 1, data: [2.1, 2.5, 4.0, 8.5, 14.2, 19.5, 23.8], color: '#f59e0b', marker: { lineWidth: 2, lineColor: '#f59e0b', fillColor: '#1e293b' } }
                 ]
             });
 
-            // 圖表 3：加油單量與實測/油泥差異
             Highcharts.chart('chart-bunker-variance', {
-                chart: { zoomType: 'xy' },
-                xAxis: { categories: ['SGSIN', 'NLRTM', 'CNZOS', 'TWKHH', 'USHOU'], crosshair: true },
-                yAxis: [
-                    { title: { text: '油量 Quantity (MT)' }, min: 0 },
-                    { title: { text: '油泥排渣率 Sludge Ratio (%)', style: { color: '#ef4444' } }, labels: { format: '{value}%', style: { color: '#ef4444' } }, opposite: true, max: 5, min: 0 }
-                ],
-                tooltip: { shared: true },
-                plotOptions: { column: { grouping: true, shadow: false, borderWidth: 0 } },
+                chart: { zoomType: 'xy' }, xAxis: { categories: ['SGSIN', 'NLRTM', 'CNZOS', 'TWKHH', 'USHOU'], crosshair: true },
+                yAxis: [ { title: { text: '油量 Quantity (MT)' }, min: 0 }, { title: { text: '廢油率 Waste Oil (%)', style: { color: '#ef4444' } }, opposite: true, max: 5, min: 0 } ], tooltip: { shared: true }, plotOptions: { column: { grouping: true, shadow: false, borderWidth: 0 } },
                 series: [
                     { name: 'BDN 帳面量', type: 'column', yAxis: 0, data: [1200, 850, 1500, 900, 1100], color: '#3b82f6' },
                     { name: 'Sounding 實測量', type: 'column', yAxis: 0, data: [1185, 848, 1470, 898, 1060], color: '#8b5cf6' },
-                    { name: '排渣率 Sludge (%)', type: 'spline', yAxis: 1, data: [1.2, 0.8, 3.5, 1.0, 2.8], color: '#ef4444', marker: { symbol: 'triangle', radius: 5 } }
+                    { name: '廢油率 (%)', type: 'spline', yAxis: 1, data: [1.2, 0.8, 3.5, 1.0, 2.8], color: '#ef4444', marker: { symbol: 'triangle', radius: 5 } }
                 ]
             });
 
-            // 圖表 4：主機負荷分佈直方圖
             Highcharts.chart('chart-engine-load', {
-                chart: { type: 'column' },
-                xAxis: {
-                    categories: ['<30%', '30-40%', '40-50%', '50-60%', '60-70%', '70-80%', '80-90%', '>90%'],
-                    title: { text: '主機負荷區間 Engine Load (%)' },
-                    plotBands: [{ color: 'rgba(16, 185, 129, 0.15)', from: 4.5, to: 6.5, label: { text: 'Sweet Spot', style: { color: '#10b981', fontWeight: 'bold' }, y: 20 } }]
-                },
-                yAxis: { title: { text: '時數佔比 Time (%)' }, labels: { format: '{value}%' } },
-                tooltip: { pointFormat: '佔比: <b>{point.y}%</b>' },
-                legend: { enabled: false },
-                plotOptions: { column: { colorByPoint: true, colors: ['#64748b', '#64748b', '#94a3b8', '#94a3b8', '#3b82f6', '#3b82f6', '#f59e0b', '#ef4444'], borderWidth: 0 } },
-                series: [{ name: '運作時數佔比', data: [2.5, 5.0, 15.2, 25.4, 32.1, 12.8, 5.0, 2.0] }]
+                chart: { type: 'column' }, title: { text: null },
+                xAxis: { categories: ['<30%', '30-40%', '40-50%', '50-60%', '60-70%', '70-80%', '80-90%', '>90%'], title: { text: '主機負荷區間 Engine Load (%)' }, plotBands: [{ color: 'rgba(16, 185, 129, 0.15)', from: 3.5, to: 5.5, label: { text: 'Sweet Spot', style: { color: '#10b981', fontWeight: 'bold' }, y: 20 } }] },
+                yAxis: { title: { text: '時數佔比 Time (%)' }, labels: { format: '{value}%' } }, tooltip: { shared: true, valueSuffix: '%' }, plotOptions: { column: { grouping: true, shadow: false, borderWidth: 0 } },
+                series: [
+                    { name: '傳統午報 (單日平均)', data: [0, 0, 0, 0, 100, 0, 0, 0], color: 'rgba(148, 163, 184, 0.5)', borderWidth: 1, borderColor: '#94a3b8' },
+                    { name: '現代 IoT (真實分佈)', data: [5.5, 12.0, 15.2, 10.4, 20.1, 15.8, 15.0, 6.0], color: '#3b82f6' }
+                ]
             });
 
-            // ================= Table 資料初始化 =================
+            // ================= Table 擴充示意資料 (2025/01 - 2026/03) =================
             const fuelData = [
-                { id: 1, range: '2025/07/02 - 07/08', voyage: 'JPYOK - TWKHH', dur: 147, dist: 2200, me: '120.0', gen: '24.0', boiler: '16.0', total: '160.0', eff: '13.75 <span class="text-red-400 font-bold ml-1">↘</span>' },
-                { id: 2, range: '2025/06/30 - 07/01', voyage: 'JPOSA - JPYOK', dur: 19, dist: 280, me: '15.2', gen: '3.0', boiler: '2.3', total: '20.5', eff: '13.66 <span class="text-green-400 font-bold ml-1">↗</span>' },
-                { id: 3, range: '2025/06/25 - 06/29', voyage: 'TWKHH - JPOSA', dur: 120, dist: 1800, me: '98.6', gen: '12.4', boiler: '13.0', total: '124.0', eff: '14.52 <span class="text-green-400 font-bold ml-1">↗</span>' }
+                { id: 1, range: '2026/03/05 - 03/18', dep: 'TWKHH', arr: 'SGSIN', dur: 147, dist: 2200, me: '120.0', gen: '24.0', boiler: '16.0', total: '160.0', eff: '13.75 <span class="text-red-400 font-bold ml-1">↘</span>' },
+                { id: 2, range: '2026/02/12 - 02/25', dep: 'AUDAM', arr: 'TWKHH', dur: 210, dist: 2850, me: '185.2', gen: '35.0', boiler: '22.3', total: '242.5', eff: '11.75 <span class="text-red-400 font-bold ml-1">↘</span>' },
+                { id: 3, range: '2026/01/20 - 02/05', dep: 'SGSIN', arr: 'AUDAM', dur: 235, dist: 3100, me: '198.6', gen: '42.4', boiler: '25.0', total: '266.0', eff: '11.65 <span class="text-gray-400 font-bold ml-1">-</span>' },
+                { id: 4, range: '2025/12/10 - 12/28', dep: 'JPOSA', arr: 'SGSIN', dur: 260, dist: 3500, me: '230.1', gen: '45.0', boiler: '18.5', total: '293.6', eff: '11.92 <span class="text-green-400 font-bold ml-1">↗</span>' },
+                { id: 5, range: '2025/10/15 - 11/02', dep: 'TWKHH', arr: 'JPOSA', dur: 115, dist: 1650, me: '105.5', gen: '20.5', boiler: '12.0', total: '138.0', eff: '11.95 <span class="text-green-400 font-bold ml-1">↗</span>' },
+                { id: 6, range: '2025/09/01 - 09/20', dep: 'NLRTM', arr: 'TWKHH', dur: 710, dist: 9800, me: '650.0', gen: '120.0', boiler: '85.0', total: '855.0', eff: '11.46 <span class="text-gray-400 font-bold ml-1">-</span>' },
+                { id: 7, range: '2025/07/15 - 08/02', dep: 'TWKHH', arr: 'NLRTM', dur: 500, dist: 9800, me: '680.5', gen: '125.0', boiler: '90.0', total: '895.5', eff: '10.94 <span class="text-red-400 font-bold ml-1">↘</span>' },
+                { id: 8, range: '2025/05/20 - 06/10', dep: 'AUDAM', arr: 'TWKHH', dur: 215, dist: 2850, me: '190.0', gen: '38.0', boiler: '20.0', total: '248.0', eff: '11.49 <span class="text-green-400 font-bold ml-1">↗</span>' },
+                { id: 9, range: '2025/03/10 - 03/25', dep: 'TWKHH', arr: 'AUDAM', dur: 330, dist: 2850, me: '188.5', gen: '36.5', boiler: '19.5', total: '244.5', eff: '11.65 <span class="text-gray-400 font-bold ml-1">-</span>' },
+                { id: 10, range: '2025/01/15 - 02/02', dep: 'JPOSA', arr: 'TWKHH', dur: 120, dist: 1650, me: '108.0', gen: '22.0', boiler: '13.0', total: '143.0', eff: '11.53 <span class="text-green-400 font-bold ml-1">↗</span>' }
             ];
 
             const table1 = $('#table-fuel-records').DataTable({
                 data: fuelData,
                 columns: [
-                    { data: 'id' }, { data: 'range' }, { data: 'voyage' }, { data: 'dur' }, { data: 'dist' },
+                    { data: 'id' }, { data: 'range' }, { data: 'dep' }, { data: 'arr' }, { data: 'dur' }, { data: 'dist' },
                     { data: 'me' }, { data: 'gen' }, { data: 'boiler' }, { data: 'total' }, { data: 'eff' },
-                    {
-                        className: 'details-control', orderable: false, data: null,
-                        defaultContent: `<button class="btn-details flex items-center space-x-1 border border-gray-500 text-gray-300 px-2 py-1 rounded hover:bg-gray-700 hover:text-white transition"><span class="btn-expand-text text-xs">展開</span></button>`
-                    }
+                    { className: 'details-control', orderable: false, data: null, defaultContent: `<button class="btn-details flex items-center space-x-1 border border-gray-500 text-gray-300 px-2 py-1 rounded hover:bg-gray-700 hover:text-white transition"><span class="btn-expand-text text-sm">展開</span></button>` }
                 ],
-                pageLength: 5, info: true, ordering: false, autoWidth: false
+                ordering: true,         // 開啟排序
+                order: [[1, 'desc']],   // 預設以航行區間降冪排列
+                columnDefs: [
+                    { orderable: false, targets: [0, 11] } // 關閉 # 和 明細 的排序
+                ],
+                pageLength: 5, info: true, autoWidth: false
             });
 
             $('#table-fuel-records tbody').on('click', 'td.details-control button', function () {
                 var tr = $(this).closest('tr'); var row = table1.row(tr);
-                if (row.child.isShown()) {
-                    row.child.hide(); tr.removeClass('shown');
-                } else {
+                if (row.child.isShown()) { row.child.hide(); tr.removeClass('shown'); } 
+                else {
                     row.child(`
                         <table class="sub-table bg-gray-900 rounded border border-gray-700">
-                            <tr><td width="50%">HFO</td><td class="font-mono text-gray-200">120.0 MT</td></tr>
-                            <tr><td>MGO</td><td class="font-mono text-gray-200">24.0 MT</td></tr>
+                            <tr><td width="50%">VLSFO</td><td class="font-mono text-gray-200">120.0 MT</td></tr>
+                            <tr><td>LSMGO</td><td class="font-mono text-gray-200">24.0 MT</td></tr>
                             <tr><td>Cylinder Oil</td><td class="font-mono text-gray-200">4.0 MT</td></tr>
-                            <tr><td>LSMGO</td><td class="font-mono text-gray-200">4.0 MT</td></tr>
                         </table>
                     `).show();
                     tr.addClass('shown');
                 }
             });
 
-            $('#table-bunkering-log').DataTable({ pageLength: 5, info: true, ordering: false, autoWidth: false });
+            const bunkerData = [
+                { id: 1, date: '2026/03/18', prevPort: 'JPYOK', port: 'SGSIN', type: 'VLSFO', qty: '1200', supp: 'Lion Bunkers', price: '720,000', remark: '-' },
+                { id: 2, date: '2026/02/25', prevPort: 'TWKHH', port: 'AUDAM', type: 'VLSFO', qty: '850', supp: 'Oceanic Fuel', price: '535,500', remark: '-' },
+                { id: 3, date: '2026/01/18', prevPort: 'JPOSA', port: 'SGSIN', type: 'LSMGO', qty: '150', supp: 'GlobalBunker', price: '120,000', remark: '<span class="text-orange-400">進港ECA</span>' },
+                { id: 4, date: '2025/11/10', prevPort: 'NLRTM', port: 'TWKHH', type: 'VLSFO', qty: '1100', supp: 'SinoFuel Co.', price: '638,000', remark: '-' },
+                { id: 5, date: '2025/09/22', prevPort: 'TWKHH', port: 'NLRTM', type: 'VLSFO', qty: '1600', supp: 'EuroMarine', price: '880,000', remark: '<span class="text-green-400">長約價</span>' },
+                { id: 6, date: '2025/07/10', prevPort: 'AUDAM', port: 'TWKHH', type: 'VLSFO', qty: '900', supp: 'CPC Taiwan', price: '540,000', remark: '-' },
+                { id: 7, date: '2025/05/18', prevPort: 'TWKHH', port: 'AUDAM', type: 'LSMGO', qty: '80', supp: 'Oceanic Fuel', price: '68,000', remark: '-' },
+                { id: 8, date: '2025/03/08', prevPort: 'JPOSA', port: 'TWKHH', type: 'VLSFO', qty: '450', supp: 'CPC Taiwan', price: '279,000', remark: '-' }
+            ];
+
+            $('#table-bunkering-log').DataTable({ 
+                data: bunkerData,
+                columns: [
+                    { data: 'id' }, { data: 'date' }, { data: 'prevPort' }, { data: 'port' }, { data: 'type' },
+                    { data: 'qty' }, { data: 'supp' }, { data: 'price' }, { data: 'remark' }
+                ],
+                ordering: true,         // 開啟排序
+                order: [[1, 'desc']],   // 預設以加油日期降冪排列
+                columnDefs: [
+                    { orderable: false, targets: [0] } // 關閉 # 的排序
+                ],
+                pageLength: 5, info: true, autoWidth: false 
+            });
+
+            // 觸發初始狀態的顯示
+            applyFilter('fuel', true);
+            applyFilter('bunker', true);
+            applyFilter('adv', true);
+
             changeLanguage('zh');
         });
     </script>

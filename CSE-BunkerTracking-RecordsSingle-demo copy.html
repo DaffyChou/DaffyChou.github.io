@@ -1,322 +1,221 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHINA STEEL SUCCESS 中鋼成功輪 - 全方位營運監控</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/highcharts-more.js"></script>
-
+    <title>SDataPro 微觀海域戰情室</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        .chart-container { width: 100%; }
-        .highcharts-credits { display: none !important; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-
-        /* DataTables 樣式 */
-        table.dataTable { border-bottom: 1px solid #374151; margin-top: 1rem !important; }
-        table.dataTable thead th { background-color: #111827; color: #93c5fd; padding: 12px; font-size: 13px; border-bottom: 1px solid #374151; text-align: left; }
-        table.dataTable tbody tr { background-color: #1f2937; color: #e5e7eb; border-bottom: 1px solid #374151; }
-        table.dataTable tbody tr:hover { background-color: #374151; }
-        table.dataTable tbody td { padding: 12px; font-size: 13px; vertical-align: middle; }
-        .dataTables_filter, .dataTables_length { display: none; }
-        .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: #9ca3af !important; margin-top: 10px; font-size: 12px; }
-
-        /* 公式與說明區塊 */
-        .explanation-wrapper { background: #1f2937; border: 1px solid #374151; border-radius: 8px; padding: 15px; margin-top: 10px; display: none; }
-        .formula-box { background: #111827; padding: 8px 12px; border-radius: 4px; font-family: monospace; color: #60a5fa; border: 1px solid #1e293b; margin-top: 8px; }
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --alert-red: #ef4444;
+            --safe-green: #22c55e;
+            --warning-yellow: #eab308;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* 左側資訊面板 */
+        .sidebar {
+            width: 350px;
+            background-color: var(--panel-bg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        h1 {
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+            margin: 0;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 15px;
+        }
+        .status-card {
+            background-color: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-blue);
+        }
+        .status-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+        .status-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        /* 船舶清單 */
+        .ship-list {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .ship-item {
+            background-color: #0f172a;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ship-item.alert {
+            border: 1px solid var(--alert-red);
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+        .ship-info div { margin-bottom: 3px; }
+        .mmsi { font-weight: bold; color: var(--accent-blue); }
+        .danger-badge {
+            background-color: var(--alert-red);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        /* 右側地圖區域 */
+        .map-container {
+            flex-grow: 1;
+            position: relative;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            background-color: #030712;
+        }
+        /* 覆蓋層資訊 */
+        .overlay-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(30, 41, 59, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 1000;
+            border: 1px solid #334155;
+        }
     </style>
 </head>
+<body>
 
-<body class="bg-gray-900 text-gray-100 p-4 md:p-8 font-sans">
-
-    <div class="max-w-screen-2xl mx-auto">
-        <div class="mb-8 border-b border-gray-700 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end">
-            <div class="flex items-center">
-                <a href="CSE-BunkerTracking-Records-demo.html" class="mr-4 p-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 transition">
-                    &larr; 返回
-                </a>
-                <h1 class="text-2xl font-bold text-white border-l-4 border-blue-500 pl-4" data-i18n="mainTitle">
-                    CHINA STEEL SUCCESS 中鋼成功輪
-                </h1>
-            </div>
-            <select id="lang-switcher" onchange="changeLanguage(this.value)" class="mt-4 md:mt-0 bg-gray-700 text-white border border-gray-600 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400 font-bold">
-                <option value="zh">繁體中文</option>
-                <option value="en">English</option>
-            </select>
+    <div class="sidebar">
+        <h1>SDataPro 戰情監控中心</h1>
+        
+        <div class="status-card">
+            <div class="status-title">5海里內偵測船舶總數</div>
+            <div class="status-value" id="total-ships">3 艘</div>
         </div>
 
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 mb-8">
-            <h2 class="text-xl font-semibold text-white mb-6 border-l-2 border-blue-500 pl-3" data-i18n="secFuel">1. 油耗分析與紀錄 Fuel Records</h2>
-            
-            <div class="grid grid-cols-1 gap-6 mb-8">
-                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-gray-300 font-medium text-sm">燃油效率趨勢分析 (nm/mt)</h3>
-                        <button onclick="$(this).parent().nextAll('.explanation-wrapper').slideToggle();" class="text-xs bg-gray-700 px-3 py-1 rounded hover:bg-gray-600 transition">診斷說明</button>
-                    </div>
-                    <div id="chart-efficiency" class="chart-container" style="height: 240px;"></div>
-                    <div class="explanation-wrapper">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-                            <p class="text-gray-400">綠色虛線為合約基準線。藍線高於綠線代表每噸油跑得更遠（效能好）；藍線跌破綠線則面臨租家索賠風險，應檢查船底是否附著過多海生物。</p>
-                            <div>
-                                <p class="text-blue-400 font-bold mb-1">計算公式：</p>
-                                <div class="formula-box">效率 = 對水航行總距離 ÷ 主機燃油總消耗量</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table id="table-fuel" class="display w-full whitespace-nowrap">
-                        <thead>
-                            <tr>
-                                <th class="w-8">#</th>
-                                <th data-i18n="thDate">航行日期</th>
-                                <th data-i18n="thVoy">航線</th>
-                                <th data-i18n="thDist">距離 (nm)</th>
-                                <th data-i18n="thME">主機 (mt)</th>
-                                <th data-i18n="thGen">發電機 (mt)</th>
-                                <th data-i18n="thTotal">總量 (mt)</th>
-                                <th data-i18n="thEff">效率 (nm/mt)</th>
-                                <th data-i18n="thStatus">狀態</th>
-                            </tr>
-                        </thead>
-                        <tbody id="fuel-tbody"></tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="status-card" style="border-left-color: var(--alert-red);">
+            <div class="status-title">高風險目標 (CPA < 0.5 NM)</div>
+            <div class="status-value" style="color: var(--alert-red);">1 艘</div>
         </div>
 
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 mb-8">
-            <h2 class="text-xl font-semibold text-white mb-6 border-l-2 border-emerald-500 pl-3" data-i18n="secBunker">2. 加油與庫存分析 Bunkering Audit</h2>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-gray-300 font-medium text-sm">港口加油量與抵港庫存 (ROB)</h3>
-                        <button onclick="$(this).parent().nextAll('.explanation-wrapper').slideToggle();" class="text-xs bg-gray-700 px-3 py-1 rounded hover:bg-gray-600 transition">診斷說明</button>
-                    </div>
-                    <div id="chart-inventory" class="chart-container" style="height: 260px;"></div>
-                    <div class="explanation-wrapper">
-                        <p class="text-gray-400 text-xs mb-3">監控安全庫存。橘線（抵港存量）若跌破紅色虛線基準，代表航程規劃存在斷油風險。</p>
-                        <div class="formula-box text-xs">抵港存量 (ROB) = 前次加油後總量 - 航行總油耗</div>
-                    </div>
+        <h3 style="margin-bottom: 0;">即時船舶動態 (AIS)</h3>
+        <div class="ship-list">
+            <div class="ship-item alert">
+                <div class="ship-info">
+                    <div class="mmsi">MMSI: 416000123</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">航速: 12.5 kn | 航向: 045°</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">CPA: 0.3 NM | TCPA: 12 min</div>
                 </div>
-
-                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-gray-300 font-medium text-sm">加油策略象限分析 (Tankering)</h3>
-                        <button onclick="$(this).parent().nextAll('.explanation-wrapper').slideToggle();" class="text-xs bg-gray-700 px-3 py-1 rounded hover:bg-gray-600 transition">診斷說明</button>
-                    </div>
-                    <div id="chart-strategy" class="chart-container" style="height: 260px;"></div>
-                    <div class="explanation-wrapper">
-                        <p class="text-gray-400 text-xs">左上角綠點代表低價港口大量補油（套利策略）；右下角紅點代表極遠航程但加油量少，具高安全風險。</p>
-                    </div>
+                <div class="danger-badge">碰撞預警</div>
+            </div>
+            <div class="ship-item">
+                <div class="ship-info">
+                    <div class="mmsi">MMSI: 353000456</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">航速: 8.2 kn | 航向: 180°</div>
+                    <div style="font-size: 0.85rem; color: var(--safe-green);">安全距離</div>
                 </div>
             </div>
-
-            <div class="overflow-x-auto">
-                <table id="table-bunker" class="display w-full whitespace-nowrap">
-                    <thead>
-                        <tr>
-                            <th class="w-8">#</th>
-                            <th data-i18n="thBnkDate">加油日期</th>
-                            <th data-i18n="thPort">加油港</th>
-                            <th data-i18n="thBdn">帳面單量 (BDN)</th>
-                            <th data-i18n="thSound">船上實測 (Sounding)</th>
-                            <th data-i18n="thDiff">落差 (MT)</th>
-                            <th data-i18n="thRemark">稽核註記</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bunker-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 mb-8">
-            <h2 class="text-xl font-semibold text-white mb-6 border-l-2 border-purple-500 pl-3" data-i18n="secRisk">3. 進階營運稽核 Advanced Operations</h2>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-xs font-semibold text-gray-400">航速 vs 日耗油偏離分析</h3>
-                        <button onclick="$(this).parent().nextAll('.explanation-wrapper').slideToggle();" class="text-[10px] bg-gray-700 px-2 py-0.5 rounded">分析說明</button>
-                    </div>
-                    <div id="chart-deviation" class="chart-container" style="height: 260px;"></div>
-                    <div class="explanation-wrapper text-xs text-gray-400">
-                        紅點遠高於綠虛線代表「同樣速度吃更多油」，反映船殼結垢。
-                        <div class="formula-box">偏離率% = ((實際日耗 - 基準日耗) / 基準日耗) * 100</div>
-                    </div>
-                </div>
-
-                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-xs font-semibold text-gray-400">風浪等級與螺旋槳滑失率關聯</h3>
-                        <button onclick="$(this).parent().nextAll('.explanation-wrapper').slideToggle();" class="text-[10px] bg-gray-700 px-2 py-0.5 rounded">分析說明</button>
-                    </div>
-                    <div id="chart-slip" class="chart-container" style="height: 260px;"></div>
-                    <div class="explanation-wrapper text-xs text-gray-400">
-                        檢視螺旋槳做功損失。風級大且滑失飆高，反映船長正在硬頂海況。
-                        <div class="formula-box">滑失率% = ((螺旋槳理論行程 - 實際對水里程) / 理論行程) * 100</div>
-                    </div>
-                </div>
-
-                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-xs font-semibold text-gray-400">油品純度與油泥排渣分析</h3>
-                        <button onclick="$(this).parent().nextAll('.explanation-wrapper').slideToggle();" class="text-[10px] bg-gray-700 px-2 py-0.5 rounded">分析說明</button>
-                    </div>
-                    <div id="chart-sludge" class="chart-container" style="height: 260px;"></div>
-                    <div class="explanation-wrapper text-xs text-gray-400">
-                        紅線（油泥率）若超過 2.5% 代表油品含水量或雜質過高，易造成濾器堵塞。
-                        <div class="formula-box">油泥佔比% = (每日排渣量 / 每日總耗量) * 100</div>
-                    </div>
-                </div>
-
-                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-xs font-semibold text-gray-400">主機負荷與最高效率區間分佈</h3>
-                        <button onclick="$(this).parent().nextAll('.explanation-wrapper').slideToggle();" class="text-[10px] bg-gray-700 px-2 py-0.5 rounded">分析說明</button>
-                    </div>
-                    <div id="chart-load" class="chart-container" style="height: 260px;"></div>
-                    <div class="explanation-wrapper text-xs text-gray-400">
-                        長條若集中在綠區（甜蜜點）代表排程優良；偏左代表低負荷運轉，易積碳。
-                        <div class="formula-box">負荷% = (主機實測功率 / 最大連續馬力 MCR) * 100</div>
-                    </div>
+            <div class="ship-item">
+                <div class="ship-info">
+                    <div class="mmsi">MMSI: 416000789 (錨泊)</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">航速: 0.1 kn | 航向: 000°</div>
+                    <div style="font-size: 0.85rem; color: var(--safe-green);">安全距離</div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="map-container">
+        <div class="overlay-info">
+            <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 5px;">本船狀態 (Host Vessel)</div>
+            <div>座標: 22°36'N, 120°16'E</div>
+            <div>航速: 10.0 kn</div>
+            <div>航向: 320°</div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // ================= i18n 字典 =================
-        const i18n = {
-            'zh': {
-                mainTitle: 'CHINA STEEL SUCCESS 中鋼成功輪',
-                secFuel: '1. 油耗分析與紀錄 Fuel Records',
-                secBunker: '2. 加油與庫存分析 Bunkering Audit',
-                secRisk: '3. 進階營運稽核 Advanced Operations',
-                thDate: '航行日期', thVoy: '航線', thDist: '距離(nm)', thME: '主機(mt)', thGen: '輔機(mt)', thTotal: '總油耗', thEff: '效率', thStatus: '狀態',
-                thBnkDate: '加油日期', thPort: '加油港', thBdn: '單據量', thSound: '實測量', thDiff: '落差', thRemark: '註記'
-            },
-            'en': {
-                mainTitle: 'CHINA STEEL SUCCESS (Fleet Monitor)',
-                secFuel: '1. Fuel Analysis & Table',
-                secBunker: '2. Bunkering & ROB Audit',
-                secRisk: '3. Advanced Operational Risk',
-                thDate: 'Date', thVoy: 'Voyage', thDist: 'Dist', thME: 'ME Cons', thGen: 'Aux Cons', thTotal: 'Total', thEff: 'Efficiency', thStatus: 'Status',
-                thBnkDate: 'Date', thPort: 'Port', thBdn: 'BDN Qty', thSound: 'Sounding', thDiff: 'Diff', thRemark: 'Remark'
-            }
-        };
+        // 初始化地圖 (設定在高雄港外海附近作為範例)
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([22.6, 120.27], 12);
 
-        function changeLanguage(lang) {
-            $('[data-i18n]').each(function() {
-                const key = $(this).data('i18n');
-                if(i18n[lang][key]) $(this).html(i18n[lang][key]);
-            });
-        }
+        // 使用深色風格的地圖底圖 (CartoDB Dark Matter)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
 
-        // ================= Highcharts 設定 =================
-        Highcharts.setOptions({
-            colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-            chart: { backgroundColor: 'transparent', style: { fontFamily: 'sans-serif' } },
-            xAxis: { gridLineColor: '#334155', labels: { style: { color: '#94a3b8' } }, lineColor: '#475569' },
-            yAxis: { gridLineColor: '#334155', labels: { style: { color: '#94a3b8' } }, title: { style: { color: '#94a3b8' } } },
-            legend: { itemStyle: { color: '#cbd5e1' } }
-        });
+        // 本船座標
+        const hostLocation = [22.6, 120.27];
 
-        $(document).ready(function () {
-            // 1. 效率趨勢 (含跌破基準線數據)
-            Highcharts.chart('chart-efficiency', {
-                xAxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] },
-                yAxis: { plotLines: [{ value: 13.5, color: '#10b981', dashStyle: 'Dash', width: 2, label: { text: 'CP Standard', style:{color:'#10b981'} } }] },
-                series: [{ name: '實際效率', data: [13.8, 14.1, 14.5, 13.2, 12.8, 12.5, 14.0, 14.2, 13.9, 14.8, 15.1, 14.5], type: 'spline' }]
-            });
+        // 畫出本船 (藍色圓點)
+        L.circleMarker(hostLocation, {
+            radius: 8,
+            fillColor: "#38bdf8",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 1
+        }).addTo(map).bindPopup("<b>本船 (Host)</b><br>裝載 SDataPro");
 
-            // 2. 加油量與 ROB
-            Highcharts.chart('chart-inventory', {
-                xAxis: { categories: ['SGSIN', 'NLRTM', 'CNZOS', 'TWKHH', 'USHOU'] },
-                yAxis: [{ title:{text:'MT'} }, { title:{text:'Arrival ROB'}, opposite:true, plotLines:[{value:150, color:'#ef4444', dashStyle:'Dash', width:2, label:{text:'Safety Limit'}}] }],
-                series: [
-                    { name: '加油量', type: 'column', data: [1200, 450, 1500, 300, 950], color: 'rgba(16, 185, 129, 0.7)' },
-                    { name: '抵港剩餘量', type: 'spline', yAxis: 1, data: [250, 140, 220, 450, 210], color: '#f59e0b' }
-                ]
-            });
+        // 畫出 5 海里偵測範圍 (5 海里約等於 9260 公尺)
+        L.circle(hostLocation, {
+            color: '#38bdf8',
+            weight: 1,
+            fillColor: '#38bdf8',
+            fillOpacity: 0.05,
+            radius: 9260 
+        }).addTo(map);
 
-            // 3. 加油象限
-            Highcharts.chart('chart-strategy', {
-                chart: { type: 'scatter' },
-                xAxis: { title: { text: '航程距離 (nm)' }, plotLines:[{value:6000, color:'#4b5563', width:1}] },
-                yAxis: { title: { text: '加油量 (MT)' }, plotLines:[{value:1000, color:'#4b5563', width:1}] },
-                series: [
-                    { name: '常規', data: [[5000, 1100], [4500, 900], [7000, 1500]] },
-                    { name: '套利', marker: {symbol:'triangle'}, data: [[2000, 1800], [3000, 2000]] },
-                    { name: '高價避讓', marker: {symbol:'square'}, color: '#ef4444', data: [[9500, 400]] }
-                ]
-            });
+        // 模擬他船數據
+        const targetShips = [
+            { loc: [22.63, 120.22], color: '#ef4444', desc: "MMSI: 416000123<br>狀態: 碰撞預警!" }, // 危險船
+            { loc: [22.56, 120.30], color: '#22c55e', desc: "MMSI: 353000456<br>狀態: 航行中" },  // 安全船
+            { loc: [22.65, 120.28], color: '#eab308', desc: "MMSI: 416000789<br>狀態: 錨泊中" }   // 錨泊船
+        ];
 
-            // 4. 硬體偏離 (多樣化點位)
-            Highcharts.chart('chart-deviation', {
-                chart: { type: 'scatter' },
-                series: [
-                    { name: '基準線', type: 'spline', data: [[10, 15], [12, 22], [14, 32], [16, 48]], dashStyle: 'Dash', color: '#10b981' },
-                    { name: '日報數據', data: [[11.5, 23.5], [12.1, 26.2], [13.8, 38.5], [14.2, 42.1], [15.5, 52.0]], color: '#ef4444' }
-                ]
-            });
-
-            // 5. 滑失率與風浪
-            Highcharts.chart('chart-slip', {
-                xAxis: { categories: ['BF2', 'BF3', 'BF4', 'BF5', 'BF6', 'BF7', 'BF8'] },
-                yAxis: [{ title:{text:'油耗'} }, { title:{text:'Slip%'}, opposite:true }],
-                series: [
-                    { name: '平均耗油', type: 'column', data: [22, 23, 26, 34, 42, 48, 56] },
-                    { name: '滑失率', type: 'spline', yAxis: 1, data: [1.5, 2.1, 4.2, 11.5, 18.2, 24.5, 29.1], color: '#f59e0b' }
-                ]
-            });
-
-            // 6. 品質/油泥 (多樣化品質波動)
-            Highcharts.chart('chart-sludge', {
-                xAxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] },
-                yAxis: { title: { text: 'Ratio %' }, max: 5 },
-                series: [{ name: '排渣率', data: [1.2, 1.1, 3.8, 1.0, 1.3, 0.9, 4.2, 1.1, 1.5, 1.2, 2.8, 1.3], type: 'spline', color: '#ef4444' }]
-            });
-
-            // 7. 負荷分佈
-            Highcharts.chart('chart-load', {
-                chart: { type: 'column' },
-                xAxis: { 
-                    categories: ['<30%', '30-40%', '40-50%', '50-60%', '60-70%', '70-80%', '80-90%', '>90%'],
-                    plotBands: [{ from: 4.5, to: 6.5, color: 'rgba(16, 185, 129, 0.1)', label: { text: 'Efficiency Zone' } }]
-                },
-                series: [{ name: '運作佔比%', data: [5, 12, 18, 25, 20, 12, 5, 3], colorByPoint: true }]
-            });
-
-            // ================= 初始化表格數據 =================
-            const fuelRows = [
-                { date: '2026/03/10', voy: 'SGSIN-TWKHH', dist: 1250, me: 85.2, gen: 12.5, total: 97.7, eff: 14.6, status: '<span class="text-green-400">優良</span>' },
-                { date: '2026/03/05', voy: 'NLRTM-SGSIN', dist: 8500, me: 642.0, gen: 85.2, total: 727.2, eff: 13.2, status: '<span class="text-red-400">油耗超標</span>' }
-            ];
-            $('#fuel-tbody').html(fuelRows.map((r, i) => `<tr><td>${i+1}</td><td>${r.date}</td><td>${r.voy}</td><td>${r.dist}</td><td>${r.me}</td><td>${r.gen}</td><td>${r.total}</td><td>${r.eff}</td><td>${r.status}</td></tr>`).join(''));
-            $('#table-fuel').DataTable({ pageLength: 5 });
-
-            const bunkerRows = [
-                { date: '2026/03/08', port: 'SGSIN', bdn: 1200, sound: 1192, diff: -8, remark: '<span class="text-orange-400">短少 0.6%</span>' },
-                { date: '2026/02/15', port: 'TWKHH', bdn: 500, sound: 501, diff: 1, remark: '正常' }
-            ];
-            $('#bunker-tbody').html(bunkerRows.map((r, i) => `<tr><td>${i+1}</td><td>${r.date}</td><td>${r.port}</td><td>${r.bdn}</td><td>${r.sound}</td><td>${r.diff}</td><td>${r.remark}</td></tr>`).join(''));
-            $('#table-bunker').DataTable({ pageLength: 5 });
-
-            changeLanguage('zh');
+        // 將他船標記加入地圖
+        targetShips.forEach(ship => {
+            L.circleMarker(ship.loc, {
+                radius: 6,
+                fillColor: ship.color,
+                color: "#fff",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map).bindPopup(ship.desc);
         });
     </script>
 </body>
-
 </html>
