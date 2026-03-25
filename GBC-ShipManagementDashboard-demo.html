@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>船隊營運與風險戰情室 (高階營運邏輯版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+
+    <style>
+        .highcharts-credits { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+        
+        .ds-select {
+            background-color: #374151;
+            color: #f3f4f6;
+            border: 1px solid #4b5563;
+            border-radius: 0.25rem;
+            padding: 0.35rem 0.5rem;
+            font-size: 0.8rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .ds-select:focus { border-color: #3b82f6; }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="month"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+        .ds-label { display: block; font-size: 0.75rem; color: #9ca3af; margin-bottom: 0.25rem; }
+
+        .live-indicator { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .desc-box { background-color: rgba(55, 65, 81, 0.4); border-left: 3px solid #3b82f6; padding: 0.75rem; border-radius: 0 0.375rem 0.375rem 0; margin-bottom: 1rem; font-size: 0.75rem; color: #d1d5db; line-height: 1.6; }
+        .badge-source { color: #60a5fa; background-color: rgba(30, 58, 138, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; display: inline-block; margin-bottom: 2px;}
+        .badge-calc { color: #34d399; background-color: rgba(6, 78, 59, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; display: inline-block; margin-bottom: 2px;}
+        .badge-risk { color: #f87171; background-color: rgba(127, 29, 29, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; display: inline-block; margin-bottom: 2px;}
+        .badge-ai { color: #c084fc; background-color: rgba(88, 28, 135, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; border: 1px solid #c084fc; display: inline-block; margin-bottom: 2px;}
+        .badge-warn { color: #facc15; background-color: rgba(133, 77, 14, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; display: inline-block; margin-bottom: 2px;}
+    </style>
+</head>
+
+<body class="bg-[#111827] text-gray-100 p-4 md:p-6 font-sans min-h-screen">
+
+    <div class="max-w-[1800px] mx-auto mb-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-2 h-8 bg-blue-500 rounded"></div>
+            <h1 class="text-2xl font-bold tracking-wide">船隊營運與風險戰情室 (Shore-side Control Room)</h1>
+        </div>
+        <div class="bg-gray-800 px-4 py-2 rounded-md border border-gray-700 text-sm text-gray-300 flex items-center gap-2 shadow-lg">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>數位化船報與 AI 監控分析平台
+        </div>
+    </div>
+
+    <div class="max-w-[1800px] mx-auto mb-6 bg-[#1f2937] p-4 rounded-lg border border-gray-600 shadow-md">
+        <h3 class="text-sm font-bold text-gray-200 mb-2 flex items-center">
+            <span class="badge-calc mr-2 bg-blue-900 text-blue-300">核心架構</span> 系統底層時序勾稽邏輯 (Data Linkage Logic)
+        </h3>
+        <p class="text-xs text-gray-400 leading-relaxed mt-2">
+            為確保統計與時間不重複計算，系統嚴格以 <code class="text-blue-300 bg-gray-800 px-1 rounded">航次號 (Voyage Number)</code> 為運算邊界，並依據報表回傳時序進行串接。<br>
+            國產船隊標準流程：前一航次結束發送 <b class="text-blue-400">格式4-離港報</b> 作為本航次起點 ➜ 航行期間每日發 <b class="text-blue-400">格式1-船位報</b> ➜ 抵港發 <b class="text-blue-400">格式2-抵港報</b> ➜ 在港期間每日發 <b class="text-blue-400">格式3-日電報(裝卸/等泊)</b> ➜ 完工離港發 <b class="text-blue-400">格式4-離港報</b> 作為航次結束。<br>
+            <span class="text-yellow-400">※年度/區間篩選原則：</span>系統會以該航次「第一張船報的填報日期」來判定該航次歸屬的月份。
+        </p>
+    </div>
+
+    <div class="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
+
+        <div class="bg-[#1f2937] p-5 rounded-lg shadow-xl border border-gray-700 flex flex-col h-full">
+            <div class="flex justify-between items-start mb-3">
+                <h2 class="text-lg font-bold text-gray-200 flex items-center">
+                    <span class="w-3 h-3 rounded-full bg-green-500 mr-3 live-indicator"></span>船舶最新動態概況 (Live Snapshot)
+                </h2>
+                <div class="text-right">
+                    <span class="text-xs text-gray-400 block">System Time</span>
+                    <span class="text-sm text-green-400 font-mono">2026-03-25 12:45:28 UTC</span>
+                </div>
+            </div>
+            
+            <div class="bg-gray-800/60 p-3 rounded-md border border-gray-700 text-xs text-gray-300 mb-4 space-y-2">
+                <div><span class="badge-source">資料來源</span>掃描全庫資料，抓取各船「UTC 填報時間」最新的一筆船報，顯示其報表種類與當前狀態。</div>
+                <div><span class="badge-risk">營運監控</span>岸端調度員可藉此即時掌握船隊分佈。若發現船舶長時間停滯於異常狀態(如非預期下錨)，需立即聯絡船長排除異常，避免延誤後續船期。</div>
+            </div>
+            
+            <div class="overflow-y-auto flex-grow pr-2 min-h-[220px]">
+                <table class="w-full text-left text-sm text-gray-300">
+                    <thead class="sticky top-0 bg-[#1f2937] text-gray-400 text-xs border-b border-gray-600">
+                        <tr><th class="py-2">船舶名稱 (Vessel)</th><th>最新船報 (Report)</th><th>當前狀態 (Status)</th><th class="text-blue-300">填報時間 (UTC)</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700/50">
+                        <tr class="hover:bg-gray-800 transition"><td class="py-3 text-blue-400 font-bold">Yuan Shun</td><td>NOON REPORT</td><td class="text-blue-400">Sailing</td><td class="text-gray-300 font-mono text-xs">2026-03-25 04:00Z</td></tr>
+                        <tr class="hover:bg-gray-800 transition"><td class="py-3 text-blue-400 font-bold">Jing Shun</td><td>ARRIVAL REPORT</td><td class="text-gray-400">At Port</td><td class="text-gray-300 font-mono text-xs">2026-03-25 01:30Z</td></tr>
+                        <tr class="hover:bg-gray-800 transition"><td class="py-3 text-blue-400 font-bold">Feng Shun</td><td>ANCHOR REPORT</td><td class="text-orange-400">Anchorage</td><td class="text-gray-300 font-mono text-xs">2026-03-24 18:15Z</td></tr>
+                        <tr class="hover:bg-gray-800 transition"><td class="py-3 text-blue-400 font-bold">Hui Shun No.1</td><td>DAILY REPORT</td><td class="text-green-500">Discharging</td><td class="text-gray-300 font-mono text-xs">2026-03-25 00:00Z</td></tr>
+                        <tr class="hover:bg-gray-800 transition"><td class="py-3 text-blue-400 font-bold">Gimpo Shun</td><td>SHIFTING REPORT</td><td class="text-purple-400">Shifting</td><td class="text-gray-300 font-mono text-xs">2026-03-25 06:20Z</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-[#1f2937] p-5 rounded-lg shadow-xl border border-gray-700 flex flex-col h-full">
+            <h2 class="text-lg font-bold text-gray-200 mb-3 flex items-center border-l-4 border-blue-500 pl-3">各船作業及等泊油耗比較 (Fuel Ops & Waiting)</h2>
+            
+            <div class="bg-gray-800/60 p-3 rounded-md border border-gray-700 text-xs text-gray-300 mb-4 space-y-2">
+                <div><span class="badge-source">資料來源</span>【格式2-抵港報】的「等泊時間總計/等泊重輕油耗」與【格式4-離港報】的「總作業時間/作業總重輕油耗」。</div>
+                <div><span class="badge-calc">計算邏輯</span>同航次同狀態報表加權合併。<br>等泊平均油耗 = (等泊總油耗加總) ÷ (等泊總時數加總) × 24。<br>作業平均油耗 = (作業總油耗加總) ÷ (總作業時數加總) × 24。</div>
+                <div><span class="badge-risk">營運分析</span>若橘色等泊油耗過高，代表船舶面臨港口壅塞，產生了無效的營運成本，需與代理行檢討排程。</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 bg-gray-800 p-2 rounded border border-gray-700">
+                <div><span class="ds-label">時間維度</span><select class="ds-select" onchange="renderTimeInput(this.value, 'ops-time-container')">
+                    <option value="year">年度區間</option><option value="quarter">季度區間</option><option value="month" selected>月份區間</option><option value="day">自訂日區間</option>
+                </select></div>
+                <div id="ops-time-container" class="col-span-2"></div>
+                <div class="flex items-end"><button onclick="applyFilter('chart-fuel-ops', this)" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 rounded transition shadow-md">套用篩選</button></div>
+            </div>
+            <div id="chart-fuel-ops" class="flex-grow w-full min-h-[220px]"></div>
+        </div>
+
+        <div class="bg-[#1f2937] p-5 rounded-lg shadow-xl border border-gray-700 flex flex-col h-full">
+            <h2 class="text-lg font-bold text-gray-200 mb-3 flex items-center border-l-4 border-blue-500 pl-3">各船航速評比 (Comparison of Speeds)</h2>
+            
+            <div class="bg-gray-800/60 p-3 rounded-md border border-gray-700 text-xs text-gray-300 mb-4 space-y-2">
+                <div><span class="badge-source">資料來源</span>【格式2-抵港報】的「定速航行總時間」與「總海浬數」，結合【格式1-船位報】的「蒲式風級/道格拉斯浪級」。</div>
+                <div><span class="badge-calc">計算邏輯</span>同航次先依據「船舶狀況(重/空載)」分類。航段平均航速 = 總海浬數加總 ÷ 定速航行總時間加總。<br>篩選機制會自動對應【抵港報】上一筆最接近的【船位報】海象資料進行過濾。</div>
+                <div><span class="badge-risk">風險診斷</span>驗證船舶是否達成租約保證航速。若在良好海象下長期未達標，將面臨租家索賠，需檢查主機效能或安排清船底。</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3 bg-gray-800 p-2 rounded border border-gray-700">
+                <div><span class="ds-label">時間維度</span><select class="ds-select" onchange="renderTimeInput(this.value, 'speed-time-container')">
+                    <option value="year">年度區間</option><option value="quarter">季度區間</option><option value="month" selected>月份區間</option><option value="day">自訂日區間</option>
+                </select></div>
+                <div id="speed-time-container" class="col-span-2"></div>
+                <div><span class="ds-label">蒲式風級</span><select class="ds-select"><option>全部</option><option>BF 0-3</option><option>BF 7+</option></select></div>
+                <div><span class="ds-label">道格拉斯浪級</span><select class="ds-select"><option>全部</option><option>DS 0-3</option><option>DS 6+</option></select></div>
+                <div class="col-span-2 md:col-span-5 flex justify-end mt-1"><button onclick="applyFilter('chart-speeds', this)" class="w-full md:w-auto px-6 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 rounded transition shadow-md">套用篩選</button></div>
+            </div>
+            <div id="chart-speeds" class="flex-grow w-full min-h-[220px]"></div>
+        </div>
+
+        <div class="bg-[#1f2937] p-5 rounded-lg shadow-xl border border-gray-700 flex flex-col h-full">
+            <h2 class="text-lg font-bold text-gray-200 mb-3 flex items-center border-l-4 border-blue-500 pl-3">各船平均航行用油比較 (Oil Consumption)</h2>
+            
+            <div class="bg-gray-800/60 p-3 rounded-md border border-gray-700 text-xs text-gray-300 mb-4 space-y-2">
+                <div><span class="badge-source">資料來源</span>【格式2-抵港報】的「定速航行期間總重油量/總輕油量」與「定速航行總時間」。</div>
+                <div><span class="badge-calc">計算邏輯</span>同航次先依據「船舶狀況(重/空載)」分類。<br>24小時平均油耗 = (總油耗加總 ÷ 總定速航行時間) × 24。</div>
+                <div><span class="badge-risk">營運分析</span>反映各船航行燃油經濟性。若同型姊妹船在相近載重與海象下耗油異常偏高，可能存在主機燃燒效率低下，或需啟動油料稽核。</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3 bg-gray-800 p-2 rounded border border-gray-700">
+                <div><span class="ds-label">時間維度</span><select class="ds-select" onchange="renderTimeInput(this.value, 'oil-time-container')">
+                    <option value="year">年度區間</option><option value="quarter">季度區間</option><option value="month" selected>月份區間</option><option value="day">自訂日區間</option>
+                </select></div>
+                <div id="oil-time-container" class="col-span-2"></div>
+                <div><span class="ds-label">海氣象條件</span><select class="ds-select"><option>綜合平均</option><option>惡劣海象</option></select></div>
+                <div><span class="ds-label">載重狀態</span><select class="ds-select"><option>綜合平均</option><option>重載(Laden)</option><option>空載(Ballast)</option></select></div>
+                <div class="col-span-2 md:col-span-5 flex justify-end mt-1"><button onclick="applyFilter('chart-oil-consumption', this)" class="w-full md:w-auto px-6 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 rounded transition shadow-md">套用篩選</button></div>
+            </div>
+            <div id="chart-oil-consumption" class="flex-grow w-full min-h-[220px]"></div>
+        </div>
+
+        <div class="bg-[#1f2937] p-5 rounded-lg shadow-xl border border-gray-700 flex flex-col h-full">
+            <h2 class="text-lg font-bold text-gray-200 mb-3 flex items-center border-l-4 border-teal-500 pl-3">航次時間分佈與利用率 (Time Utilization)</h2>
+            
+            <div class="bg-gray-800/60 p-3 rounded-md border border-gray-700 text-xs text-gray-300 mb-4 space-y-2">
+                <div><span class="badge-source">資料來源</span>【格式4-離港報】的「離泊時間/開完工時間」與【格式2-抵港報】的「定速航行時間/下錨時間」。</div>
+                <div><span class="badge-calc">計算邏輯</span>鎖定單一航次號：<br>【總週期】= 本航次離港報(離泊時間) - 前一航次離港報(離泊時間)。<br>【航行時間】= 抵港報(結束定速時間) - 前港離港報(離泊時間)。<br>【等泊與作業時間】依據各時間戳記相減得出佔比。</div>
+                <div><span class="badge-risk">營運分析</span>藍色(航行)與綠色(作業)為有效營運；橘色(等泊)佔比過高會嚴重稀釋航次等價收益(TCE)。</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 bg-gray-800 p-2 rounded border border-gray-700">
+                <div><span class="ds-label">時間維度</span><select class="ds-select" onchange="renderTimeInput(this.value, 'time-util-container')">
+                    <option value="year">年度區間</option><option value="quarter">季度區間</option><option value="month" selected>月份區間</option>
+                </select></div>
+                <div id="time-util-container" class="col-span-2"></div>
+                <div class="flex items-end"><button onclick="applyFilter('chart-time-util', this)" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 rounded transition shadow-md">套用篩選</button></div>
+            </div>
+            <div id="chart-time-util" class="flex-grow w-full min-h-[200px]"></div>
+        </div>
+
+        <div class="bg-[#1f2937] p-5 rounded-lg shadow-xl border border-gray-700 flex flex-col h-full">
+            <h2 class="text-lg font-bold text-gray-200 mb-3 flex items-center border-l-4 border-teal-500 pl-3">貨物裝卸進度與周轉 (Cargo Handling)</h2>
+            
+            <div class="bg-gray-800/60 p-3 rounded-md border border-gray-700 text-xs text-gray-300 mb-4 space-y-2">
+                <div><span class="badge-source">資料來源</span>【格式3-日電報】的「每日裝卸量」與 <span class="badge-warn text-yellow-100">⚠提單(B/L)系統 API</span>。</div>
+                <div><span class="badge-ai">CCTV AI 輔助</span><span class="text-purple-300 font-bold">若為 24 小時內短效作業(無DR報)，系統無法依賴人工報表追蹤進度。此時岸端將啟動 CCTV 影像 AI 進行貨艙體積即時估算，填補資料盲區；待完工後再直接讀取離港報(DEPT)總量。</span></div>
+                <div><span class="badge-calc">計算邏輯</span>剩餘未作業量 = 提單預計總裝卸貨量 - (每日DR報累加裝卸量 + AI即時估算量)。</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 bg-gray-800 p-2 rounded border border-gray-700">
+                <div><span class="ds-label">資料來源</span><select class="ds-select" disabled><option>當前活躍航次 (Live)</option></select></div>
+                <div class="col-span-2"><span class="ds-label">貨物單位切換</span><select class="ds-select"><option>公噸 (MT)</option><option>立方公尺 (M3)</option></select></div>
+                <div class="flex items-end"><button onclick="applyFilter('chart-cargo', this)" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 rounded transition shadow-md">套用篩選</button></div>
+            </div>
+            <div id="chart-cargo" class="flex-grow w-full min-h-[200px]"></div>
+        </div>
+
+        <div class="bg-[#1f2937] p-5 rounded-lg shadow-xl border border-gray-700 flex flex-col h-full">
+            <h2 class="text-lg font-bold text-gray-200 mb-3 flex items-center border-l-4 border-orange-500 pl-3">主機推進效率與轉速監控 (Slip vs RPM)</h2>
+            
+            <div class="bg-gray-800/60 p-3 rounded-md border border-gray-700 text-xs text-gray-300 mb-4 space-y-2">
+                <div><span class="badge-source">資料來源</span>【格式1-船位報】的「主機轉速 (RPM)」與「滑失率 (SLIP)」。</div>
+                <div><span class="badge-calc">計算邏輯</span>依據時間序列繪製。滑失率 = (主機理論推進距離 - 實際船體前進距離) ÷ 主機理論推進距離 × 100%。</div>
+                <div><span class="badge-risk">機務診斷</span>若觀測到轉速(RPM)維持高檔，但滑失率(Slip)飆升超過紅線，代表螺旋槳正在「做虛功」。主因多為遭遇惡劣海象，或船體嚴重結垢。</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 bg-gray-800 p-2 rounded border border-gray-700">
+                <div><span class="ds-label">時間維度</span><select class="ds-select" onchange="renderTimeInput(this.value, 'slip-time-container')">
+                    <option value="year">年度趨勢</option><option value="quarter">季度趨勢</option><option value="month">月份趨勢</option><option value="day" selected>日報表趨勢</option>
+                </select></div>
+                <div id="slip-time-container" class="col-span-2"></div>
+                <div class="flex flex-col justify-end gap-1"><span class="ds-label">分析船舶</span><div class="flex gap-2"><select class="ds-select"><option>Yuan Shun</option></select><button onclick="applyFilter('chart-slip', this)" class="bg-blue-600 px-3 rounded text-white text-sm hover:bg-blue-500 transition">套用</button></div></div>
+            </div>
+            <div id="chart-slip" class="flex-grow w-full min-h-[220px]"></div>
+        </div>
+
+        <div class="bg-[#1f2937] p-5 rounded-lg shadow-xl border border-gray-700 flex flex-col h-full">
+            <h2 class="text-lg font-bold text-gray-200 mb-3 flex items-center border-l-4 border-purple-500 pl-3">各類滑油消耗健康度監控 (Lube Oil)</h2>
+            
+            <div class="bg-gray-800/60 p-3 rounded-md border border-gray-700 text-xs text-gray-300 mb-4 space-y-2">
+                <div><span class="badge-source">資料來源</span>【格式1-船位報】與【格式3-日電報】的各類滑油日耗量。</div>
+                <div><span class="badge-calc">計算邏輯</span><span class="text-blue-400 font-bold">航行期間取用NR報，在港作業期間取用DR報。</span>兩者時間軸緊密結合以涵蓋船舶完整營運週期。各類別日均耗量 = 期間內該滑油總消耗量 ÷ 總天數。</div>
+                <div><span class="badge-risk">機務診斷</span>滑油是引擎的血液，即使在港內等泊，輔機(發電機)也持續運作。若單日消耗量異常暴增，極可能是汽缸嚴重磨損或洩漏警訊。</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 bg-gray-800 p-2 rounded border border-gray-700">
+                <div><span class="ds-label">時間維度</span><select class="ds-select" onchange="renderTimeInput(this.value, 'lube-time-container')">
+                    <option value="year">年度區間</option><option value="quarter">季度區間</option><option value="month" selected>月份區間</option><option value="day">自訂日區間</option>
+                </select></div>
+                <div id="lube-time-container" class="col-span-2"></div>
+                <div class="flex items-end"><button onclick="applyFilter('chart-lube', this)" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 rounded transition shadow-md">套用篩選</button></div>
+            </div>
+            <div id="chart-lube" class="flex-grow w-full min-h-[220px]"></div>
+        </div>
+
+        <div class="bg-[#1f2937] p-5 rounded-lg shadow-xl border border-gray-700 flex flex-col h-full">
+            <h2 class="text-lg font-bold text-gray-200 mb-3 flex items-center border-l-4 border-green-500 pl-3">船隊碳排強度趨勢 (Fleet EEOI Trend)</h2>
+            
+            <div class="bg-gray-800/60 p-3 rounded-md border border-gray-700 text-xs text-gray-300 mb-4 space-y-2">
+                <div><span class="badge-source">資料來源</span>【格式2-抵港報】的「定速航行總海浬數/總油耗」與【格式4-離港報】的「作業總油耗/總貨量」。</div>
+                <div><span class="badge-calc">計算邏輯</span>總體 EEOI = <span class="text-blue-400 font-bold">整個船隊的「總碳排放量」 ÷ 整個船隊的「總貨運周轉量」</span>。<br>(總碳排 = 全船隊油耗×碳係數；總周轉量 = 全船隊各航次「載貨量×航距」之總和)。</div>
+                <div><span class="badge-risk">營運分析</span>若切換「單船視角」發現其 EEOI 長期高於基準線，該船將面臨 CII 降級風險，進而影響公司整體 ESG 評級與綠色融資。</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 bg-gray-800 p-2 rounded border border-gray-700">
+                <div><span class="ds-label">時間維度</span><select class="ds-select" onchange="renderTimeInput(this.value, 'eeoi-time-container')">
+                    <option value="year" selected>年度趨勢</option><option value="quarter">季度趨勢</option><option value="month">月份趨勢</option><option value="day">日報表趨勢</option>
+                </select></div>
+                <div id="eeoi-time-container" class="col-span-2"></div>
+                <div class="flex flex-col justify-end gap-1"><span class="ds-label">分析視角 (總體/單船)</span><div class="flex gap-2">
+                    <select class="ds-select" id="eeoi-vessel-filter"><option value="fleet">全船隊總合 (Fleet)</option><option value="vs1">Yuan Shun</option><option value="vs2">Jing Shun</option></select>
+                    <button onclick="applyFilter('chart-eeoi', this)" class="bg-blue-600 px-3 rounded text-white text-sm hover:bg-blue-500 transition">套用</button>
+                </div></div>
+            </div>
+            <div id="chart-eeoi" class="flex-grow w-full min-h-[220px]"></div>
+        </div>
+
+        <div class="bg-[#1f2937] p-5 rounded-lg shadow-xl border border-gray-700 flex flex-col h-full">
+            <h2 class="text-lg font-bold text-gray-200 mb-3 flex items-center border-l-4 border-red-500 pl-3">燃/滑油存量預警 (Bunker ROB vs Margin)</h2>
+            
+            <div class="bg-gray-800/60 p-3 rounded-md border border-gray-700 text-xs text-gray-300 mb-4 space-y-2">
+                <div><span class="badge-source">資料來源</span>取系統中任一最新報表的「重油/輕油存量(ROB)」。</div>
+                <div><span class="badge-calc">計算邏輯</span><span class="text-blue-400 font-bold">動態安全底線 = 該船當下航次載重狀態的「歷史日均耗油量」 × 岸端設定的「安全天數」。</span>若當前油量低於底線則觸發紅燈。</div>
+                <div><span class="badge-risk">風險預警</span>生死攸關的底線預警。若存量跌破安全邊界，船舶將面臨在汪洋中「失動力 (Blackout)」的海難風險。需立即安排緊急加油。</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 bg-gray-800 p-2 rounded border border-gray-700">
+                <div><span class="ds-label">資料來源</span><select class="ds-select" disabled><option>最新即時狀態 (Live)</option></select></div>
+                <div class="col-span-2"><span class="ds-label">安全天數邊界設定 (Safety Days)</span><select class="ds-select"><option>保留 3 天動態安全耗油量</option><option>保留 5 天動態安全耗油量</option></select></div>
+                <div class="flex items-end"><button onclick="applyFilter('chart-rob', this)" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 rounded transition shadow-md">重新載入</button></div>
+            </div>
+            <div id="chart-rob" class="flex-grow w-full min-h-[220px]"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // UI 互動邏輯：區間選擇產生器
+        function renderTimeInput(dimension, containerId) {
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            let html = '';
+            if (dimension === 'year') {
+                html = `<span class="ds-label">選擇年度區間</span><div class="flex items-center gap-2"><select class="ds-select"><option>2023</option><option>2024</option><option>2025</option><option selected>2026</option></select><span class="text-gray-400">~</span><select class="ds-select"><option>2024</option><option>2025</option><option selected>2026</option></select></div>`;
+            } else if (dimension === 'quarter') {
+                html = `<span class="ds-label">選擇季度區間</span><div class="flex items-center gap-2"><select class="ds-select"><option>2025 Q3</option><option>2025 Q4</option><option selected>2026 Q1</option></select><span class="text-gray-400">~</span><select class="ds-select"><option>2025 Q4</option><option selected>2026 Q1</option></select></div>`;
+            } else if (dimension === 'month') {
+                html = `<span class="ds-label">選擇月份區間</span><div class="flex items-center gap-2"><input type="month" class="ds-select" value="2026-01"><span class="text-gray-400">~</span><input type="month" class="ds-select" value="2026-03"></div>`;
+            } else if (dimension === 'day') {
+                html = `<span class="ds-label">選擇日區間</span><div class="flex items-center gap-2"><input type="date" class="ds-select" value="2026-03-10"><span class="text-gray-400">~</span><input type="date" class="ds-select" value="2026-03-25"></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        // Highcharts 全域設定
+        Highcharts.setOptions({
+            chart: { backgroundColor: 'transparent', style: { fontFamily: 'sans-serif' } },
+            title: { text: null },
+            legend: { itemStyle: { color: '#cbd5e1' }, itemHoverStyle: { color: '#ffffff' } },
+            xAxis: { gridLineColor: '#374151', lineColor: '#4b5563', labels: { style: { color: '#9ca3af' } } },
+            yAxis: { gridLineColor: '#374151', lineColor: '#4b5563', labels: { style: { color: '#9ca3af' } }, title: { text: null } },
+            tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.95)', style: { color: '#f3f4f6' }, borderColor: '#4b5563', shared: true }
+        });
+
+        const ships = ['Yuan Shun', 'Jing Shun', 'Feng Shun', 'Hui Shun No.1', 'Gimpo Shun'];
+
+        function initCharts() {
+            ['ops', 'speed', 'oil', 'time-util', 'slip', 'lube', 'eeoi'].forEach(prefix => {
+                const selectEl = document.querySelector(`select[onchange*="${prefix}-time-container"]`);
+                if(selectEl) renderTimeInput(selectEl.value, `${prefix}-time-container`);
+            });
+
+            Highcharts.chart('chart-fuel-ops', {
+                chart: { type: 'column' }, xAxis: { categories: ships }, yAxis: { title: { text: 'MT/Day' } },
+                series: [
+                    { name: '作業用油(未接岸電)', data: [2.1, 3.5, 2.5, 1.8, 3.2], color: '#3b82f6', borderWidth: 0 },
+                    { name: '等泊/錨泊用油', data: [1.2, 1.7, 0.8, 0.5, 1.5], color: '#f59e0b', borderWidth: 0 },
+                    { name: '作業用油(有接岸電)', data: [0.1, 0.0, 0.3, 0.6, 0.1], color: '#10b981', borderWidth: 0 }
+                ]
+            });
+
+            Highcharts.chart('chart-speeds', {
+                chart: { type: 'column' }, xAxis: { categories: ships }, yAxis: { title: { text: 'Knots' } },
+                series: [
+                    { name: '空載航速 (Ballast)', data: [13.0, 12.8, 12.5, 11.9, 13.0], color: '#3b82f6', borderWidth: 0 },
+                    { name: '重載航速 (Laden)', data: [11.5, 11.8, 11.2, 10.5, 11.1], color: '#f59e0b', borderWidth: 0 }
+                ]
+            });
+
+            Highcharts.chart('chart-oil-consumption', {
+                chart: { type: 'column' }, xAxis: { categories: ships }, yAxis: { title: { text: 'MT/Day' } },
+                series: [
+                    { name: '輕油耗量 (MGO/DO)', data: [13.5, 15.8, 13.5, 14.8, 12.2], color: '#06b6d4', borderWidth: 0 },
+                    { name: '重油耗量 (HFO/FO)', data: [20.2, 21.5, 19.8, 20.2, 22.1], color: '#10b981', borderWidth: 0 }
+                ]
+            });
+
+            Highcharts.chart('chart-time-util', {
+                chart: { type: 'bar' }, xAxis: { categories: ships },
+                yAxis: { min: 0, max: 100, title: { text: '時間佔比 (%)' }, labels: { format: '{value}%' } },
+                plotOptions: { bar: { stacking: 'percent', borderWidth: 0, dataLabels: { enabled: true, format: '{y}%', color: '#fff', style: {textOutline: 'none'} } } },
+                series: [
+                    { name: '定速航行 (Sea Passage)', data: [65, 50, 70, 40, 60], color: '#3b82f6' },
+                    { name: '港內作業 (Port Working)', data: [25, 30, 20, 35, 25], color: '#10b981' },
+                    { name: '等泊與漂航 (Idle/Waiting)', data: [10, 20, 10, 25, 15], color: '#f59e0b' }
+                ]
+            });
+
+            Highcharts.chart('chart-cargo', {
+                chart: { type: 'bar' }, xAxis: { categories: ships }, yAxis: { title: { text: '貨量 (MT)' } },
+                plotOptions: { bar: { stacking: 'normal', borderWidth: 0 } },
+                series: [
+                    { name: '已完成裝卸量', data: [45000, 12000, 60000, 35000, 52000], color: '#14b8a6' },
+                    { name: '剩餘未作業量', data: [15000, 48000, 0, 15000, 8000], color: '#4b5563' }
+                ]
+            });
+
+            const dates = Array.from({length: 15}, (_, i) => `03/${String(i+10).padStart(2,'0')}`);
+            Highcharts.chart('chart-slip', {
+                xAxis: { categories: dates },
+                yAxis: [
+                    { title: { text: 'Slip (%)', style: { color: '#f97316' } }, labels: { format: '{value}%', style: { color: '#f97316' } } },
+                    { title: { text: 'RPM', style: { color: '#3b82f6' } }, labels: { style: { color: '#3b82f6' } }, opposite: true }
+                ],
+                series: [
+                    { name: '滑失率 (Slip %)', type: 'area', yAxis: 0, data: [4.2, 4.5, 5.1, 8.2, 14.5, 16.2, 17.5, 15.1, 12.0, 7.5, 6.8, 6.5, 7.0, 7.2, 7.5], color: '#f97316', fillColor: { linearGradient: {x1:0, y1:0, x2:0, y2:1}, stops: [[0, 'rgba(249, 115, 22, 0.4)'], [1, 'rgba(249, 115, 22, 0.0)']] } },
+                    { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: [102, 103, 102, 104, 105, 105, 106, 104, 102, 101, 102, 102, 103, 102, 101], color: '#3b82f6', lineWidth: 3, marker: { enabled: false } }
+                ]
+            });
+
+            Highcharts.chart('chart-lube', {
+                chart: { type: 'column' }, xAxis: { categories: ships }, yAxis: { title: { text: 'Liters/Day' } },
+                series: [
+                    { name: '汽缸油 (MECYO)', data: [120, 135, 128, 115, 140], color: '#8b5cf6', borderWidth: 0 },
+                    { name: '主機系統油 (MESYLO)', data: [45, 50, 48, 42, 55], color: '#ec4899', borderWidth: 0 },
+                    { name: '輔機系統油 (AESYLO)', data: [15, 18, 16, 14, 20], color: '#f59e0b', borderWidth: 0 }
+                ]
+            });
+
+            const years = ['2022', '2023', '2024', '2025', '2026'];
+            Highcharts.chart('chart-eeoi', {
+                chart: { type: 'spline' }, xAxis: { categories: years }, yAxis: { title: { text: 'gCO2 / ton-nm' } },
+                series: [
+                    { name: '實際平均 EEOI', data: [12.5, 12.2, 11.9, 11.6, 11.2], color: '#22c55e', lineWidth: 3, marker: { radius: 4 } },
+                    { name: '年度 KPI 基準線', data: Array(5).fill(11.5), color: '#ef4444', dashStyle: 'Dash', marker: { enabled: false } }
+                ]
+            });
+
+            Highcharts.chart('chart-rob', {
+                chart: { type: 'bar' }, xAxis: { categories: ships }, yAxis: { title: { text: '剩餘存量 ROB (MT)' } },
+                series: [
+                    { name: '重油存量 (FO ROB)', data: [850, 420, 150, 600, 920], color: '#10b981', borderWidth: 0, zones: [{ value: 200, color: '#ef4444' }, { color: '#10b981' }] },
+                    { name: '輕油存量 (DO ROB)', data: [120, 85, 40, 95, 150], color: '#06b6d4', borderWidth: 0 },
+                    { 
+                        name: '動態安全底線 (Dynamic Margin)', type: 'scatter', data: [200, 200, 200, 200, 200], 
+                        color: '#ef4444', 
+                        marker: { symbol: 'line', radius: 10, lineWidth: 3, lineColor: '#ef4444' } 
+                    }
+                ]
+            });
+        }
+
+        // 真實數據連動邏輯
+        function applyFilter(chartId, btnElement) {
+            const originalText = btnElement.innerText;
+            btnElement.innerText = '載入中...';
+            btnElement.classList.add('opacity-75', 'cursor-wait');
+            btnElement.disabled = true;
+
+            const selectEl = btnElement.closest('.grid').querySelector('select');
+            const dimension = selectEl ? selectEl.value : 'month';
+
+            setTimeout(() => {
+                const chart = Highcharts.charts.find(c => c && c.renderTo.id === chartId);
+                if (chart) {
+                    if (chartId === 'chart-slip' || chartId === 'chart-eeoi') {
+                        let newCategories = [];
+                        let newDataLen = 0;
+                        if (dimension === 'year') {
+                            newCategories = ['2022', '2023', '2024', '2025', '2026'];
+                            newDataLen = 5;
+                        } else if (dimension === 'quarter') {
+                            newCategories = ['25 Q1', '25 Q2', '25 Q3', '25 Q4', '26 Q1'];
+                            newDataLen = 5;
+                        } else if (dimension === 'month') {
+                            newCategories = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+                            newDataLen = 6;
+                        } else if (dimension === 'day') {
+                            newCategories = ['03/20', '03/21', '03/22', '03/23', '03/24'];
+                            newDataLen = 5;
+                        }
+                        chart.xAxis[0].setCategories(newCategories, false);
+                        
+                        const vesselFilter = document.getElementById('eeoi-vessel-filter');
+                        let isSingleVessel = vesselFilter && vesselFilter.value !== 'fleet';
+
+                        chart.series.forEach((s, idx) => {
+                            let newValues = [];
+                            for(let i=0; i<newDataLen; i++) {
+                                if(chartId === 'chart-slip') {
+                                    if(dimension === 'year' || dimension === 'quarter') {
+                                        newValues.push(idx === 0 ? parseFloat((4.5 + Math.random()*2).toFixed(1)) : Math.floor(100 + Math.random()*4));
+                                    } else {
+                                        let slipVal = 4.5 + Math.random()*2;
+                                        if (i === 2) slipVal += 10; 
+                                        newValues.push(idx === 0 ? parseFloat(slipVal.toFixed(1)) : Math.floor(100 + Math.random()*5));
+                                    }
+                                } else if (chartId === 'chart-eeoi') {
+                                    if (idx === 0) {
+                                        let baseEEOI = 11.8 - (i * 0.15);
+                                        if (isSingleVessel) baseEEOI += 1.5; 
+                                        newValues.push(parseFloat((baseEEOI + (Math.random()*0.4 - 0.2)).toFixed(2)));
+                                    } else {
+                                        newValues.push(11.5);
+                                    }
+                                }
+                            }
+                            s.setData(newValues, false);
+                        });
+                    } else {
+                        chart.series.forEach(s => {
+                            const newData = s.yData.map(y => {
+                                let variance = dimension === 'day' ? 0.4 : (dimension === 'year' ? 0.1 : 0.2);
+                                let multiplier = 1 + (Math.random() * variance * 2 - variance);
+                                return parseFloat((y * multiplier).toFixed(1));
+                            });
+                            s.setData(newData, false);
+                        });
+                    }
+                    chart.redraw({ duration: 800 });
+                }
+                btnElement.innerText = originalText;
+                btnElement.classList.remove('opacity-75', 'cursor-wait');
+                btnElement.disabled = false;
+            }, 600);
+        }
+
+        document.addEventListener('DOMContentLoaded', initCharts);
+    </script>
+</body>
+</html>
