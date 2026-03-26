@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>高精度航道與本船鎖定戰情室 - 摯陞數位科技</title>
+    <title>摯陞數位科技 - SDataPro 多層次軌跡監控系統</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -14,7 +14,7 @@
             --text-main: #f8fafc; --text-muted: #94a3b8;
             --accent-blue: #38bdf8; --ship-green: #22c55e; --alert-red: #ef4444; --route-yellow: #eab308;
             --border-color: #334155;
-            --px-per-meter: 1; 
+            --px-per-meter: 1; /* 動態比例尺 */
         }
 
         body { margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; height: 100vh; overflow: hidden; }
@@ -38,10 +38,10 @@
         .data-label { font-size: 0.8em; color: var(--text-muted); margin-bottom: 2px; }
         .data-value { font-size: 1em; font-weight: bold; color: var(--text-main); }
 
+        /* --- 船舶標記樣式 --- */
         .custom-marker { overflow: visible !important; }
         .marker-container { position: absolute; top: 0; left: 0; }
 
-        /* --- 船舶基礎樣式 --- */
         .ship-body {
             position: absolute; transform: translate(-50%, -50%) rotate(var(--cog));
             width: max(8px, calc(var(--ship-width) * var(--px-per-meter) * 1px));
@@ -49,226 +49,227 @@
             background-color: var(--ship-green); border-radius: 50% 50% 2px 2px;
             box-shadow: 0 0 8px rgba(0,0,0,0.8); cursor: pointer; transition: box-shadow 0.3s ease;
         }
-
-        /* --- 🌟 本船專屬視覺強化區 --- */
-        @keyframes radar-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }
-            70% { box-shadow: 0 0 0 calc(20px * var(--px-per-meter) + 10px) rgba(56, 189, 248, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
-        }
-
-        /* 本船自帶白邊與脈衝動畫 */
+        
+        /* 裝有 SDataPro 的母船樣式 */
         .own-ship .ship-body { 
             background-color: var(--accent-blue); 
-            border: 2px solid #fff;
-            z-index: 100; 
-            animation: radar-pulse 2s infinite;
+            border: 2px solid #fff; z-index: 100; 
         }
-        
-        /* 本船標籤高對比顯示 */
-        .own-ship .target-label {
-            background-color: var(--accent-blue) !important;
-            color: #000 !important;
-            font-weight: bold;
-            font-size: 12px !important;
-            border: 1px solid #fff !important;
-            z-index: 201;
-        }
-        /* ------------------------------ */
+        .own-ship .target-label { background-color: var(--accent-blue) !important; color: #000 !important; font-weight: bold; }
 
-        .selected-target .ship-body { box-shadow: 0 0 0 max(4px, calc(4px * var(--px-per-meter))) rgba(56, 189, 248, 0.5), 0 0 15px var(--accent-blue); }
-
-        .vector-line {
-            position: absolute; width: 2px; background-color: rgba(255,255,255,0.6);
-            bottom: 50%; left: 50%; transform: translateX(-50%); transform-origin: bottom center;
-            height: max(20px, calc(var(--vector-length) * var(--px-per-meter) * 1px));
-            z-index: -1; pointer-events: none;
-        }
+        /* 被點選的目標船樣式 */
+        .selected-target .ship-body { box-shadow: 0 0 0 max(4px, calc(4px * var(--px-per-meter))) rgba(234, 179, 8, 0.6), 0 0 15px var(--route-yellow); }
 
         .target-label {
             position: absolute; top: 15px; left: 15px; font-size: 11px; color: #fff; background: rgba(0,0,0,0.7);
             padding: 3px 6px; border-radius: 4px; white-space: nowrap; border: 1px solid var(--border-color); pointer-events: none; z-index: 200;
         }
 
-        .map-controls {
-            position: absolute; top: 20px; left: 60px; z-index: 1000;
-            background: rgba(15, 23, 42, 0.9); border: 1px solid var(--accent-blue);
-            padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-        }
-        .map-controls button {
-            background-color: var(--accent-blue); color: #000; border: none;
-            padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: background 0.2s;
-        }
-        .map-controls button:hover { background-color: #7dd3fc; }
+        .instruction-text { color: var(--text-muted); font-size: 0.9em; text-align: center; padding: 20px; border: 1px dashed var(--border-color); border-radius: 8px; }
     </style>
 </head>
 <body>
 
     <div id="map-container">
-        <div class="map-controls">
-            <button onclick="zoomTo5NM()">看全景 (5海里範圍)</button>
-            <button onclick="zoomToOwnShip()" style="margin-left: 8px; background: #334155; color: #fff;">鎖定本船</button>
-        </div>
         <div id="map"></div>
     </div>
 
     <div id="sidebar">
         <div class="header">
-            <h2>摯陞航道安全監控戰情室</h2>
-            <div class="status">● SDataPro 邊緣節點在線 (精確水域模式)</div>
+            <h2>摯陞數位科技戰情室</h2>
+            <div class="status">● 多層次軌跡連動系統運作中</div>
         </div>
 
         <div class="info-card" style="border-left: 4px solid var(--accent-blue);">
-            <h3>本船狀態 <span style="font-size: 0.7em; background: var(--accent-blue); color: #000; padding: 2px 6px; border-radius: 4px;">OWN SHIP</span></h3>
+            <h3>SDataPro 母船節點</h3>
             <div class="data-grid">
                 <div class="data-item"><span class="data-label">MMSI</span><span class="data-value" id="own-mmsi">--</span></div>
-                <div class="data-item"><span class="data-label">座標 (Lat / Lng)</span><span class="data-value" id="own-coords" style="font-size: 0.85em;">--</span></div>
-                <div class="data-item"><span class="data-label">航速 (SOG)</span><span class="data-value" id="own-sog">--</span></div>
-                <div class="data-item"><span class="data-label">航向 (COG)</span><span class="data-value" id="own-cog">--</span></div>
+                <div class="data-item"><span class="data-label">狀態</span><span class="data-value" id="own-status" style="color: var(--accent-blue);">等待選擇</span></div>
             </div>
         </div>
 
-        <div class="info-card">
-            <h3>目標資訊 <span id="target-type-badge" style="font-size: 0.7em; background: var(--text-muted); color: #fff; padding: 2px 6px; border-radius: 4px;">請點擊地圖</span></h3>
-            <div style="margin-bottom: 15px;">
-                <div class="data-label">船名 (Name)</div>
-                <div class="data-value" id="tar-name" style="font-size: 1.2em; color: var(--accent-blue);">--</div>
+        <div class="info-card" id="target-panel">
+            <h3>周邊目標船舶 <span id="target-type-badge" style="font-size: 0.7em; background: var(--text-muted); color: #fff; padding: 2px 6px; border-radius: 4px;">無</span></h3>
+            
+            <div id="target-instructions" class="instruction-text">
+                請先在地圖上點擊「藍色母船」<br>以展開 5 海里掃描圈。
             </div>
-            <div class="data-grid">
-                <div class="data-item"><span class="data-label">IMO 編號</span><span class="data-value" id="tar-imo">--</span></div>
-                <div class="data-item"><span class="data-label">尺寸 (L x W)</span><span class="data-value" id="tar-dim">--</span></div>
-                <div class="data-item"><span class="data-label">航速 (SOG)</span><span class="data-value" id="tar-sog">--</span></div>
-                <div class="data-item"><span class="data-label">航向 (COG)</span><span class="data-value" id="tar-cog">--</span></div>
-                <div class="data-item" style="grid-column: 1 / -1; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
-                    <span class="data-label">與本船距離 (Distance)</span>
-                    <span class="data-value" id="tar-dist" style="color: var(--alert-red); font-size: 1.2em;">-- NM</span>
+
+            <div id="target-data" style="display: none;">
+                <div style="margin-bottom: 15px;">
+                    <div class="data-label">船名 (Name)</div>
+                    <div class="data-value" id="tar-name" style="font-size: 1.2em; color: var(--route-yellow);">--</div>
+                </div>
+                <div class="data-grid">
+                    <div class="data-item"><span class="data-label">IMO 編號</span><span class="data-value" id="tar-imo">--</span></div>
+                    <div class="data-item"><span class="data-label">航速 (SOG)</span><span class="data-value" id="tar-sog">--</span></div>
+                    <div class="data-item"><span class="data-label">航向 (COG)</span><span class="data-value" id="tar-cog">--</span></div>
+                    <div class="data-item"><span class="data-label">與母船距離</span><span class="data-value" id="tar-dist" style="color: var(--alert-red);">-- NM</span></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // =========================================================================
-        // 🛠️ 嚴格校準的高雄港水域座標
-        // =========================================================================
+        // ==========================================
+        // 🛠️ 1. 資料模型 (Data Models)
+        // ==========================================
+        
+        const RADIUS_5NM = 5 * 1852; // 9260 公尺
 
-        const MAP_CENTER = [22.5485, 120.3140]; // 正對二港口防波堤中心
-        const MAP_ZOOM_LEVEL = 15; 
+        // 裝備 SDataPro 的母船 (可能有多艘)
+        const equippedShips = [
+            { id: 'e1', mmsi: '416000123', name: 'SDataPro-Alpha', lat: 22.5510, lng: 120.3175, cog: 45, width: 12, length: 45 }
+        ];
 
-        // 本船放置於防波堤內側深水區
-        const ownShipData = { 
-            id: 'own', isOwn: true, mmsi: '416000123', imo: 'N/A', name: 'SDataPro (本船)', 
-            length: 45, width: 12, sog: 5.5, cog: 45, lat: 22.5510, lng: 120.3175 
-        };
-
-        const MONITORING_RADIUS = 5 * 1852; 
-
-        const targets = [
-            ownShipData,
-            // 貨櫃船：嚴格校準，正從外海準備穿過防波堤口
+        // 該海域所有未安裝設備的「潛在目標船隻」 (帶有歷史航跡座標)
+        const allOtherShips = [
             { 
-                id: 'v1', isOwn: false, mmsi: '416111222', imo: '9432111', name: 'EVER GIVEN', 
-                length: 399, width: 59, sog: 8.2, cog: 51, lat: 22.5420, lng: 120.3060,
-                // 航道軌跡修正：完全避開陸地，精準穿過防波堤(22.5485, 120.3140)進入內港
-                plannedRoute: [
-                    [22.5380, 120.3010], // 外海起始點
-                    [22.5485, 120.3140], // 防波堤正中間
-                    [22.5520, 120.3180], // 進入主航道
-                    [22.5600, 120.3200]  // 準備轉向碼頭
-                ]
+                id: 't1', mmsi: '416111222', imo: '9432111', name: 'EVER GIVEN', lat: 22.5420, lng: 120.3060, sog: 8.2, cog: 51, width: 59, length: 399,
+                // 模擬航線軌跡 (歷史軌跡或預定航道)
+                trajectory: [[22.5200, 120.2800], [22.5350, 120.2950], [22.5420, 120.3060]]
             },
-            // 引水船：準備出港
             { 
-                id: 'v2', isOwn: false, mmsi: '416333444', imo: 'N/A', name: 'PILOT BOAT 01', 
-                length: 20, width: 6, sog: 18.5, cog: 231, lat: 22.5550, lng: 120.3200,
-                plannedRoute: null
+                id: 't2', mmsi: '416333444', imo: 'N/A', name: 'PILOT BOAT 01', lat: 22.5580, lng: 120.3220, sog: 18.5, cog: 231, width: 6, length: 20,
+                trajectory: [[22.5700, 120.3250], [22.5650, 120.3240], [22.5580, 120.3220]]
+            },
+            { 
+                // 這艘船距離很遠 (> 5NM)，一開始就算點擊母船也不會顯示
+                id: 't3', mmsi: '416999888', imo: '1234567', name: 'FAR AWAY SHIP', lat: 22.4000, lng: 120.1000, sog: 12.0, cog: 180, width: 30, length: 200,
+                trajectory: [[22.4500, 120.1000], [22.4000, 120.1000]]
             }
         ];
 
-        // =========================================================================
-        // 🗺️ 圖層與繪製邏輯
-        // =========================================================================
+        // 記錄目前選中的母船與目標船
+        let currentEquippedShip = null;
+        let currentTargetShip = null;
 
-        const map = L.map('map').setView(MAP_CENTER, MAP_ZOOM_LEVEL);
+        // ==========================================
+        // 🗺️ 2. 地圖與圖層初始化 (Map & Layers)
+        // ==========================================
 
+        const map = L.map('map').setView([22.5485, 120.3140], 14);
         L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { subdomains: '0123', maxZoom: 19 }).addTo(map);
         L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
 
+        // 動態比例尺計算
         function updateSpatialScale() {
             const zoom = map.getZoom();
-            const lat = map.getCenter().lat;
-            const metersPerPx = 156543.03392 * Math.cos(lat * Math.PI / 180) / Math.pow(2, zoom);
+            const metersPerPx = 156543.03392 * Math.cos(map.getCenter().lat * Math.PI / 180) / Math.pow(2, zoom);
             document.documentElement.style.setProperty('--px-per-meter', 1 / metersPerPx);
         }
         map.on('zoom moveend', updateSpatialScale);
         updateSpatialScale();
 
-        // 繪製 5 海里監控邊界
-        const coverageCircle = L.circle([ownShipData.lat, ownShipData.lng], {
-            radius: MONITORING_RADIUS, 
-            color: '#38bdf8', weight: 2, dashArray: '8, 8', fillColor: '#38bdf8', fillOpacity: 0.08
-        }).bindTooltip("SDataPro 5海里覆蓋", { permanent: false, direction: "top" }).addTo(map);
+        // 建立獨立的圖層群組 (方便一鍵清除或重繪)
+        const equippedLayerGroup = L.layerGroup().addTo(map);  // 永遠顯示
+        const radiusLayerGroup = L.layerGroup().addTo(map);    // 5海里圈圖層
+        const targetsLayerGroup = L.layerGroup().addTo(map);   // 5海里內目標圖層
+        const trajectoryLayerGroup = L.layerGroup().addTo(map);// 軌跡線圖層
 
-        function zoomTo5NM() {
-            map.fitBounds(coverageCircle.getBounds(), { padding: [20, 20] });
+        // ==========================================
+        // ⚙️ 3. 核心連動邏輯 (Interaction Logic)
+        // ==========================================
+
+        // 繪製所有的 SDataPro 母船
+        function renderEquippedShips() {
+            equippedShips.forEach(ship => {
+                const html = `
+                    <div class="marker-container own-ship" id="icon-${ship.id}" style="--ship-width: ${ship.width}; --ship-length: ${ship.length}; --cog: ${ship.cog}deg;">
+                        <div class="ship-body"></div>
+                        <div class="target-label">${ship.name}</div>
+                    </div>`;
+                const icon = L.divIcon({ className: 'custom-marker', html: html, iconSize: [0, 0] });
+                const marker = L.marker([ship.lat, ship.lng], { icon: icon });
+                
+                // 綁定第一層互動：點擊母船
+                marker.on('click', () => handleEquippedShipClick(ship));
+                equippedLayerGroup.addLayer(marker);
+            });
         }
 
-        // 🟢 新增：一鍵鎖定本船視角
-        function zoomToOwnShip() {
-            map.setView([ownShipData.lat, ownShipData.lng], 16);
-            selectTarget(ownShipData);
-        }
-
-        document.getElementById('own-mmsi').innerText = ownShipData.mmsi;
-        document.getElementById('own-coords').innerText = `${ownShipData.lat.toFixed(4)}, ${ownShipData.lng.toFixed(4)}`;
-        document.getElementById('own-sog').innerText = `${ownShipData.sog} 節`;
-        document.getElementById('own-cog').innerText = `${ownShipData.cog}°`;
-
-        targets.forEach(t => {
-            if (t.plannedRoute) {
-                L.polyline(t.plannedRoute, { color: 'var(--route-yellow)', weight: 3, dashArray: '10, 10', opacity: 0.8 }).addTo(map);
-            }
-
-            const vectorLengthMeters = t.sog * 0.514444 * 180; 
+        // [互動 1] 點擊母船：畫出 5海里圈，並篩選顯示目標船隻
+        function handleEquippedShipClick(ship) {
+            currentEquippedShip = ship;
             
-            const htmlContent = `
-                <div class="marker-container ${t.isOwn ? 'own-ship' : ''}" id="icon-${t.id}"
-                     style="--ship-width: ${t.width}; --ship-length: ${t.length}; --cog: ${t.cog}deg; --vector-length: ${vectorLengthMeters};">
-                    <div class="ship-body">
-                        ${t.sog > 0 ? `<div class="vector-line"></div>` : ''}
-                    </div>
-                    <div class="target-label">${t.name}</div>
-                </div>`;
+            // 更新側邊欄母船資訊
+            document.getElementById('own-mmsi').innerText = ship.mmsi;
+            document.getElementById('own-status').innerText = "掃描半徑展開中";
 
-            const customIcon = L.divIcon({ className: 'custom-marker', html: htmlContent, iconSize: [0, 0], iconAnchor: [0, 0] });
-            const marker = L.marker([t.lat, t.lng], { icon: customIcon }).addTo(map);
-            marker.on('click', () => selectTarget(t));
-        });
+            // 清除之前的雷達圈、目標船與軌跡
+            radiusLayerGroup.clearLayers();
+            targetsLayerGroup.clearLayers();
+            trajectoryLayerGroup.clearLayers();
+            
+            // 重置側邊欄目標區
+            document.getElementById('target-instructions').style.display = 'block';
+            document.getElementById('target-instructions').innerHTML = "已展開 5 海里掃描。<br>請點選地圖上出現的綠色船舶查看軌跡。";
+            document.getElementById('target-data').style.display = 'none';
 
-        function selectTarget(data) {
+            // 1. 畫出 5海里雷達圈
+            const circle = L.circle([ship.lat, ship.lng], {
+                radius: RADIUS_5NM, color: '#38bdf8', weight: 2, dashArray: '8, 8', fillColor: '#38bdf8', fillOpacity: 0.08
+            });
+            radiusLayerGroup.addLayer(circle);
+            map.fitBounds(circle.getBounds(), { padding: [20, 20] }); // 自動縮放視野
+
+            // 2. 空間運算：篩選並繪製 5海里內的未安裝設備船舶
+            allOtherShips.forEach(target => {
+                const distMeters = map.distance([ship.lat, ship.lng], [target.lat, target.lng]);
+                
+                // 如果距離小於等於 5海里 (9260公尺)
+                if (distMeters <= RADIUS_5NM) {
+                    const html = `
+                        <div class="marker-container" id="icon-${target.id}" style="--ship-width: ${target.width}; --ship-length: ${target.length}; --cog: ${target.cog}deg;">
+                            <div class="ship-body"></div>
+                            <div class="target-label">${target.name}</div>
+                        </div>`;
+                    const icon = L.divIcon({ className: 'custom-marker', html: html, iconSize: [0, 0] });
+                    const marker = L.marker([target.lat, target.lng], { icon: icon });
+                    
+                    // 綁定第二層互動：點擊目標船
+                    marker.on('click', () => handleTargetShipClick(target, distMeters));
+                    targetsLayerGroup.addLayer(marker);
+                }
+            });
+        }
+
+        // [互動 2] 點擊目標船舶：畫出該船的航線軌跡
+        function handleTargetShipClick(target, distMeters) {
+            currentTargetShip = target;
+
+            // 移除其他船的高亮，給當前選中的船加上高亮
             document.querySelectorAll('.marker-container').forEach(el => el.classList.remove('selected-target'));
-            const selectedIcon = document.getElementById(`icon-${data.id}`);
+            const selectedIcon = document.getElementById(`icon-${target.id}`);
             if(selectedIcon) selectedIcon.classList.add('selected-target');
 
-            document.getElementById('target-type-badge').innerText = data.isOwn ? "本船" : "目標船舶";
-            document.getElementById('target-type-badge').style.backgroundColor = data.isOwn ? "var(--accent-blue)" : "var(--ship-green)";
-            
-            document.getElementById('tar-name').innerText = data.name;
-            document.getElementById('tar-imo').innerText = data.imo || "N/A";
-            document.getElementById('tar-dim').innerText = `${data.length}m x ${data.width}m`;
-            document.getElementById('tar-sog').innerText = `${data.sog} 節`;
-            document.getElementById('tar-cog').innerText = `${data.cog}°`;
+            // 更新側邊欄目標資訊
+            document.getElementById('target-instructions').style.display = 'none';
+            document.getElementById('target-data').style.display = 'block';
+            document.getElementById('target-type-badge').innerText = "外部目標";
+            document.getElementById('tar-name').innerText = target.name;
+            document.getElementById('tar-imo').innerText = target.imo;
+            document.getElementById('tar-sog').innerText = `${target.sog} 節`;
+            document.getElementById('tar-cog').innerText = `${target.cog}°`;
+            document.getElementById('tar-dist').innerText = `${(distMeters / 1852).toFixed(2)} NM`;
 
-            if (data.isOwn) {
-                document.getElementById('tar-dist').innerText = "0.00 NM";
-            } else {
-                const distMeters = map.distance([ownShipData.lat, ownShipData.lng], [data.lat, data.lng]);
-                document.getElementById('tar-dist').innerText = `${(distMeters / 1852).toFixed(2)} NM`;
+            // 清除舊的軌跡，畫出新的專屬航線軌跡
+            trajectoryLayerGroup.clearLayers();
+            if (target.trajectory && target.trajectory.length > 0) {
+                // 使用黃色實線代表該船的歷史或預定軌跡
+                const polyline = L.polyline(target.trajectory, {
+                    color: 'var(--route-yellow)', 
+                    weight: 3, 
+                    opacity: 0.8,
+                    lineJoin: 'round'
+                });
+                trajectoryLayerGroup.addLayer(polyline);
             }
         }
 
-        // 預設鎖定本船
-        zoomToOwnShip();
+        // 初始化執行
+        renderEquippedShips();
+
     </script>
 </body>
 </html>
