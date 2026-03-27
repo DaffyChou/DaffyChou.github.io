@@ -10,45 +10,100 @@
     <script src="https://code.highcharts.com/highcharts-more.js"></script>
 
     <style>
-        /* 基礎字體設定為 1rem (預設通常為 16px) */
-        body { background-color: #111827; font-family: sans-serif; font-size: 1rem; }
+        /* ==========================================================================
+           1. 全域變數設定區 (CSS Variables) - 集中管理顏色與字體大小，方便一鍵換膚
+           ========================================================================== */
+        :root {
+            /* --- 顏色設定 --- */
+            --bg-main: #111827;         /* 網頁最底層主背景色 (深灰黑) */
+            --bg-card: #1f2937;         /* 圖表卡片、輸入框背景色 (稍微淺一點的灰) */
+            --border-color: #374151;    /* 邊框、分隔線顏色 */
+            --text-main: #f3f4f6;       /* 主要文字顏色 (近白色) */
+            --text-muted: #9ca3af;      /* 次要說明、備註文字顏色 (淺灰) */
+            
+            --primary: #3b82f6;         /* 系統主色調 (藍色 - 用於重點邊框、按鈕) */
+            --success: #10b981;         /* 成功/正常色調 (綠色) */
+            --warning: #f59e0b;         /* 警告色調 (橘黃色) */
+            --danger: #ef4444;          /* 危險色調 (紅色) */
+
+            /* --- 字體大小設定 (Typography Scale) --- */
+            --font-base: 1rem;          /* 16px - 基礎字體 (body) */
+            --font-sm: 0.875rem;        /* 14px - 次要內文、按鈕、輸入框、說明主文 */
+            --font-xs: 0.75rem;         /* 12px - 標籤、表格內容、Badge標籤 */
+            --font-xxs: 0.625rem;       /* 10px - 極小備註、圖表 Tooltip 提示、座標軸數值 */
+        }
+
+        /* ==========================================================================
+           2. 基礎元素與覆寫 Bootstrap 樣式
+           ========================================================================== */
+        body { 
+            background-color: var(--bg-main); 
+            font-family: sans-serif; 
+            font-size: var(--font-base); 
+            color: var(--text-main);
+        }
+        
+        /* 隱藏 Highcharts 官方版權浮水印 */
         .highcharts-credits { display: none !important; }
+        
+        /* 客製化捲軸樣式 (讓 Windows 系統上的捲軸也符合深色模式) */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-track { background: var(--bg-card); }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
 
-        /* 元件標準化：0.875rem (14px) 與 0.75rem (12px) */
+        /* 卡片與表格樣式覆寫 */
+        .card-custom { background-color: var(--bg-card) !important; border-color: var(--border-color) !important; }
+        .table-custom tr:hover td { background-color: var(--border-color); }
+
+        /* ==========================================================================
+           3. 專案客製化元件 (UI Components)
+           ========================================================================== */
+        
+        /* 篩選器：下拉選單與日期輸入框 */
         .ds-select {
-            background-color: #374151; color: #f3f4f6; border: 1px solid #4b5563;
-            border-radius: 0.25rem; padding: 0 0.5rem; font-size: 0.875rem;
+            background-color: var(--border-color); /* 輸入框背景 */
+            color: var(--text-main); 
+            border: 1px solid #4b5563;
+            border-radius: 0.25rem; 
+            padding: 0 0.5rem; 
+            font-size: var(--font-sm); /* 14px */
             width: 100%; height: 30px; outline: none; transition: border-color 0.2s; box-sizing: border-box;
         }
-        .ds-select:focus { border-color: #3b82f6; }
-        .ds-select:disabled, .ds-select option:disabled { color: #6b7280; background-color: #1f2937; font-style: italic; }
+        .ds-select:focus { border-color: var(--primary); }
+        .ds-select:disabled, .ds-select option:disabled { color: #6b7280; background-color: var(--bg-card); font-style: italic; }
+        /* 將原生日期的日曆小圖示反白，以符合深色模式 */
         input[type="date"]::-webkit-calendar-picker-indicator, input[type="month"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; padding: 0;}
         
-        .ds-btn { height: 30px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; font-size: 0.875rem; }
-        .ds-label { display: block; font-size: 0.75rem; color: #9ca3af; margin-bottom: 0.15rem; }
+        /* 篩選器：標籤文字與按鈕 */
+        .ds-btn { height: 30px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; font-size: var(--font-sm); }
+        .ds-label { display: block; font-size: var(--font-xs); color: var(--text-muted); margin-bottom: 0.15rem; }
 
-        /* 動態指示燈 */
+        /* 最新動態的綠色閃爍指示燈動畫 */
         .live-indicator { animation: pulse-green 2s infinite; }
-        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 
-        /* 說明區塊：主文 0.875rem，標籤 0.75rem */
-        .desc-box { background-color: rgba(55, 65, 81, 0.4); border-left: 3px solid #3b82f6; padding: 0.75rem; border-radius: 0 0.375rem 0.375rem 0; margin-bottom: 0.75rem; font-size: 0.875rem; color: #d1d5db; line-height: 1.6; }
-        .badge-source, .badge-calc, .badge-risk, .badge-ai, .badge-warn { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; display: inline-block; margin-bottom: 4px;}
-        .badge-source { color: #60a5fa; background-color: rgba(30, 58, 138, 0.4); }
-        .badge-calc { color: #34d399; background-color: rgba(6, 78, 59, 0.4); }
-        .badge-risk { color: #f87171; background-color: rgba(127, 29, 29, 0.4); }
-        .badge-ai { color: #c084fc; background-color: rgba(88, 28, 135, 0.4); border: 1px solid #c084fc; }
-        .badge-warn { color: #facc15; background-color: rgba(133, 77, 14, 0.4); }
+        /* 系統說明文字方塊 (左側帶藍條的區塊) */
+        .desc-box { 
+            background-color: rgba(55, 65, 81, 0.4); 
+            border-left: 3px solid var(--primary); 
+            padding: 0.75rem; border-radius: 0 0.375rem 0.375rem 0; margin-bottom: 0.75rem; 
+            font-size: var(--font-sm); color: #d1d5db; line-height: 1.6; 
+        }
 
-        /* 表格與卡片覆寫：表格內容統一 0.75rem */
-        .risk-table { width: 100%; margin-top: 4px; border-collapse: collapse; font-size: 0.75rem; text-align: center; }
-        .risk-table th { background-color: rgba(55, 65, 81, 0.8); border: 1px solid #4b5563; padding: 4px 6px; font-weight: normal; color: #9ca3af; }
+        /* 說明方塊內的彩色標籤 (Badge) - 統一 12px */
+        .badge-source, .badge-calc, .badge-risk, .badge-ai, .badge-warn { 
+            font-size: var(--font-xs); padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; display: inline-block; margin-bottom: 4px;
+        }
+        .badge-source { color: #60a5fa; background-color: rgba(30, 58, 138, 0.4); } /* 資料來源-藍 */
+        .badge-calc { color: #34d399; background-color: rgba(6, 78, 59, 0.4); }     /* 計算邏輯-綠 */
+        .badge-risk { color: #f87171; background-color: rgba(127, 29, 29, 0.4); }   /* 風險提示-紅 */
+        .badge-ai { color: #c084fc; background-color: rgba(88, 28, 135, 0.4); border: 1px solid #c084fc; } /* AI計算-紫 */
+        .badge-warn { color: #facc15; background-color: rgba(133, 77, 14, 0.4); }   /* 警告提醒-黃 */
+
+        /* 機務風險對照表專用樣式 */
+        .risk-table { width: 100%; margin-top: 4px; border-collapse: collapse; font-size: var(--font-xs); text-align: center; }
+        .risk-table th { background-color: rgba(55, 65, 81, 0.8); border: 1px solid #4b5563; padding: 4px 6px; font-weight: normal; color: var(--text-muted); }
         .risk-table td { border: 1px solid #4b5563; padding: 4px 6px; }
-        .card-custom { background-color: #1f2937 !important; border-color: #374151 !important; }
-        .table-custom tr:hover td { background-color: #374151; }
     </style>
 </head>
 
@@ -146,7 +201,7 @@
                                 <button onclick="applyFilter('chart-fuel-ops', this)" class="btn btn-primary btn-sm px-4 w-100 ds-btn">套用</button>
                             </div>
                         </div>
-                        <div id="chart-fuel-ops" class="flex-grow-1 w-100" style="min-height: 350px;"></div>
+                        <div id="chart-fuel-ops" class="flex-grow-1 w-100" style="min-height: 220px;"></div>
                     </div>
                 </div>
             </div>
@@ -276,7 +331,7 @@
                                 <button onclick="applyFilter('chart-slip', this)" class="btn btn-primary btn-sm ds-btn px-3">套用</button>
                             </div>
                         </div>
-                        <div id="chart-slip" class="flex-grow-1 w-100" style="min-height: 350px;"></div>
+                        <div id="chart-slip" class="flex-grow-1 w-100" style="min-height: 250px;"></div>
                     </div>
                 </div>
             </div>
@@ -303,7 +358,7 @@
                                 <button onclick="applyFilter('chart-lube', this)" class="btn btn-primary btn-sm w-100 ds-btn">套用</button>
                             </div>
                         </div>
-                        <div id="chart-lube" class="flex-grow-1 w-100" style="min-height: 350px;"></div>
+                        <div id="chart-lube" class="flex-grow-1 w-100" style="min-height: 300px;"></div>
                     </div>
                 </div>
             </div>
@@ -377,7 +432,24 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // UI 互動邏輯：區間選擇產生器 (加入防呆連動機制)
+        /**
+         * ==========================================================================
+         * 1. 全域變數與模擬資料設定 (Global Variables)
+         * ==========================================================================
+         */
+        const ships = ['Yuan Shun', 'Jing Shun', 'Feng Shun', 'Hui Shun No.1', 'Gimpo Shun']; // 船隊名單
+        const baseDailyFO = [22, 28, 18, 30, 25]; // 各船歷史日均耗重油基準 (MT/Day)
+        const baseDailyDO = [2.5, 3.2, 1.8, 3.5, 2.0]; // 各船歷史日均耗輕油基準 (MT/Day)
+        const cargoUnits = ['MT', 'CBM', 'MT', 'CBM', 'MT']; // 各船散裝貨物預設單位
+        const robSources = ['NOON REPORT', 'ARRIVAL REPORT', 'ANCHOR REPORT', 'DAILY REPORT', 'SHIFTING REPORT']; // 模擬存油量資料來源
+
+        /**
+         * ==========================================================================
+         * 2. UI 互動與防呆邏輯 (UI & Validation)
+         * ==========================================================================
+         */
+
+        // 根據選擇的「時間維度」(年/季/月/日)，動態生成對應的 HTML 輸入框，以保持 UI 簡潔。
         function renderTimeInput(dimension, containerId) {
             const container = document.getElementById(containerId);
             if(!container) return;
@@ -409,12 +481,14 @@
                     </select>
                 </div>`;
             } else if (dimension === 'month') {
+                // 使用原生 input[type="month"] 的 min 屬性進行基礎防呆
                 html = `<span class="ds-label">選擇月份</span><div class="d-flex align-items-center gap-1">
                     <input type="month" id="${startId}" class="form-control ds-select" value="2025-01" onchange="document.getElementById('${endId}').min = this.value;">
                     <span class="text-secondary">~</span>
                     <input type="month" id="${endId}" class="form-control ds-select" value="2026-03" min="2025-01">
                 </div>`;
             } else if (dimension === 'day') {
+                // 使用原生 input[type="date"] 的 min 屬性進行基礎防呆
                 html = `<span class="ds-label">選擇日期</span><div class="d-flex align-items-center gap-1">
                     <input type="date" id="${startId}" class="form-control ds-select" value="2025-01-01" onchange="document.getElementById('${endId}').min = this.value;">
                     <span class="text-secondary">~</span>
@@ -423,13 +497,13 @@
             }
             container.innerHTML = html;
 
-            // 初始化觸發防呆驗證
+            // 初始化時主動觸發一次下拉選單防呆
             if(dimension === 'year' || dimension === 'quarter') {
                 updateEndOptions(startId, endId, dimension);
             }
         }
 
-        // 防呆機制：確保結尾時間不會早於起始時間
+        // 防呆邏輯核心：確保下拉選單的「結束時間」絕對不會早於「起始時間」
         function updateEndOptions(startId, endId, type) {
             const startEl = document.getElementById(startId);
             const endEl = document.getElementById(endId);
@@ -438,25 +512,35 @@
             const startVal = startEl.value;
             let firstValidIndex = -1;
 
+            // 遍歷結束選單的所有選項，把不合法的選項加上 disabled 屬性反灰
             Array.from(endEl.options).forEach((opt, index) => {
                 let isDisabled = false;
                 if (type === 'year') {
                     isDisabled = parseInt(opt.value) < parseInt(startVal);
                 } else if (type === 'quarter') {
-                    isDisabled = opt.value < startVal; 
+                    isDisabled = opt.value < startVal; // 季度格式如 "2025 Q1" 可直接利用字串比對
                 }
                 opt.disabled = isDisabled;
                 
+                // 記錄第一個沒有被禁用的選項位置
                 if (!isDisabled && firstValidIndex === -1) {
                     firstValidIndex = index;
                 }
             });
 
+            // 若使用者原本選中的結束時間已變成不合法，自動幫他選擇下一個合法的時間
             if (endEl.options[endEl.selectedIndex].disabled && firstValidIndex !== -1) {
                 endEl.selectedIndex = firstValidIndex;
             }
         }
 
+        /**
+         * ==========================================================================
+         * 3. Highcharts 圖表初始化設定 (Chart Initialization)
+         * ==========================================================================
+         */
+
+        // 設定全域的 Highcharts 深色主題風格
         Highcharts.setOptions({
             chart: { backgroundColor: 'transparent', style: { fontFamily: 'sans-serif' } },
             title: { text: null },
@@ -466,27 +550,20 @@
             tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.95)', style: { color: '#f3f4f6' }, borderColor: '#4b5563', shared: true }
         });
 
-        const ships = ['Yuan Shun', 'Jing Shun', 'Feng Shun', 'Hui Shun No.1', 'Gimpo Shun'];
-        const baseDailyFO = [22, 28, 18, 30, 25];
-        const baseDailyDO = [2.5, 3.2, 1.8, 3.5, 2.0];
-        const cargoUnits = ['MT', 'CBM', 'MT', 'CBM', 'MT'];
-        const robSources = ['NOON REPORT', 'ARRIVAL REPORT', 'ANCHOR REPORT', 'DAILY REPORT', 'SHIFTING REPORT'];
-
+        // 頁面載入時負責繪製所有初始圖表的主函數
         function initCharts() {
+            // 自動初始化所有圖表上方的時間篩選器
             const timeContainers = [
-                'ops-time-container', 
-                'speed-oil-time-container', 
-                'time-util-container', 
-                'slip-time-container', 
-                'lube-time-container', 
-                'eeoi-time-container'
+                'ops-time-container', 'speed-oil-time-container', 'time-util-container', 
+                'slip-time-container', 'lube-time-container', 'eeoi-time-container'
             ];
-
             timeContainers.forEach(containerId => {
                 const selectEl = document.querySelector(`select[onchange*="${containerId}"]`);
                 if(selectEl) renderTimeInput(selectEl.value, containerId);
             });
 
+            // [圖表] 1. 作業與等泊油耗比較 (長條圖)
+            // 修改顏色提示：在 series 中更改 color 屬性。如作業用油為 '#3b82f6'(藍)
             Highcharts.chart('chart-fuel-ops', {
                 chart: { type: 'column' }, xAxis: { categories: ships }, yAxis: { title: { text: 'MT/Day' } },
                 tooltip: { valueSuffix: ' MT/Day' },
@@ -497,11 +574,12 @@
                 ]
             });
 
+            // [圖表] 2. 航速與航行油耗綜合評比 (雙 Y 軸：長條圖+折線圖)
             Highcharts.chart('chart-speed-oil', {
                 xAxis: { categories: ships }, tooltip: { shared: true },
                 yAxis: [
                     { title: { text: '平均航速 (Knots)', style: { color: '#3b82f6' } }, labels: { style: { color: '#3b82f6' } } },
-                    { title: { text: '平均日油耗 (MT/Day)', style: { color: '#f59e0b' } }, labels: { style: { color: '#f59e0b' } }, opposite: true }
+                    { title: { text: '平均日油耗 (MT/Day)', style: { color: '#f59e0b' } }, labels: { style: { color: '#f59e0b' } }, opposite: true } // opposite: true 代表放置於右側
                 ],
                 series: [
                     { name: '空載航速 (Ballast)', type: 'column', yAxis: 0, data: [13.0, 12.8, 12.5, 11.9, 13.0], color: '#60a5fa', borderWidth: 0, tooltip: { valueSuffix: ' Knots' } },
@@ -511,6 +589,8 @@
                 ]
             });
 
+            // [圖表] 3. 航次時間分佈與利用率 (百分比堆疊長條圖)
+            // 修改提示：plotOptions.bar.stacking 設定為 'percent' 即可自動計算 100% 比例
             Highcharts.chart('chart-time-util', {
                 chart: { type: 'bar' }, xAxis: { categories: ships }, tooltip: { valueSuffix: ' %' },
                 yAxis: { min: 0, max: 100, title: { text: '時間佔比 (%)' }, labels: { format: '{value}%' } },
@@ -522,13 +602,14 @@
                 ]
             });
 
+            // [圖表] 4. 貨物裝卸進度與周轉 (堆疊長條圖 - 支援動態單位)
             Highcharts.chart('chart-cargo', {
                 chart: { type: 'bar' }, xAxis: { categories: ships }, yAxis: { title: { text: '貨量' } },
                 tooltip: { 
                     shared: true,
                     formatter: function() {
                         let s = `<b>${this.x}</b><br/>`;
-                        let unit = cargoUnits[this.points[0].point.index];
+                        let unit = cargoUnits[this.points[0].point.index]; // 讀取全域變數中的各船專屬單位
                         this.points.forEach(p => {
                             s += `<span style="color:${p.color}">\u25CF</span> ${p.series.name}: <b>${p.y}</b> ${unit}<br/>`;
                         });
@@ -554,6 +635,7 @@
                 ]
             });
 
+            // [圖表] 5. 主機推進效率與轉速監控 (雙 Y 軸時間序列：漸層面積圖+折線圖)
             const dates = Array.from({length: 15}, (_, i) => `03/${String(i+10).padStart(2,'0')}`);
             Highcharts.chart('chart-slip', {
                 xAxis: { categories: dates }, tooltip: { shared: true },
@@ -562,11 +644,14 @@
                     { title: { text: 'RPM', style: { color: '#3b82f6' } }, labels: { style: { color: '#3b82f6' } }, opposite: true }
                 ],
                 series: [
+                    // type: 'area' 並搭配 linearGradient 製作出底部淡出的漸層效果
                     { name: '滑失率 (Slip %)', type: 'area', yAxis: 0, data: [4.2, 4.5, 5.1, 8.2, 14.5, 16.2, 17.5, 15.1, 12.0, 7.5, 6.8, 6.5, 7.0, 7.2, 7.5], color: '#f97316', fillColor: { linearGradient: {x1:0, y1:0, x2:0, y2:1}, stops: [[0, 'rgba(249, 115, 22, 0.4)'], [1, 'rgba(249, 115, 22, 0.0)']] }, tooltip: { valueSuffix: ' %' } },
                     { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: [102, 103, 102, 104, 105, 105, 106, 104, 102, 101, 102, 102, 103, 102, 101], color: '#3b82f6', lineWidth: 3, marker: { enabled: false }, tooltip: { valueSuffix: ' RPM' } }
                 ]
             });
 
+            // [圖表] 6. 各類滑油消耗健康度監控 (多重堆疊長條圖)
+            // 修改提示：運用 stack 屬性將不同種類的油料分群堆疊 (例如 'MECYO' 會疊在一起)
             Highcharts.chart('chart-lube', {
                 chart: { type: 'column' }, xAxis: { categories: ships }, yAxis: { title: { text: 'Liters/Day' } }, tooltip: { valueSuffix: ' L/Day' },
                 plotOptions: { column: { stacking: 'normal', borderWidth: 0 } },
@@ -580,27 +665,31 @@
                 ]
             });
 
+            // [圖表] 7. 碳排強度趨勢 (折線圖 + 法規紅線標示)
             const years = ['2022', '2023', '2024', '2025', '2026'];
             Highcharts.chart('chart-eeoi', {
                 chart: { type: 'spline' }, xAxis: { categories: years }, yAxis: { title: { text: 'gCO2 / ton-nm' } }, tooltip: { valueSuffix: ' gCO2/t-nm' },
                 series: [
                     { name: '實際營運碳排 (EEOI)', data: [12.8, 12.5, 12.0, 11.8, 11.4], color: '#f59e0b', lineWidth: 3, marker: { radius: 4 } },
                     { name: '法定評估基準 (CII)', data: [12.5, 12.2, 11.9, 11.6, 11.2], color: '#3b82f6', lineWidth: 3, marker: { radius: 4 } },
+                    // 繪製固定的基準紅線，使用 dashStyle: 'Dash' 產生虛線效果
                     { name: 'CII 法規紅線 (C級底線)', data: Array(5).fill(11.5), color: '#ef4444', dashStyle: 'Dash', marker: { enabled: false } }
                 ]
             });
 
+            // [圖表] 8. 燃油加油預警 (帶有危險底色區塊的動態長條圖)
             const robFO = [150, 110, 80, 240, 60]; 
             const robDO = [15, 12, 20, 10, 8];
 
+            // 將噸數(MT)轉換為天數，並根據天數多寡判定柱狀圖要顯示什麼顏色
             const dataFO = robFO.map((mt, i) => {
                 let days = mt / baseDailyFO[i];
-                let color = days <= 3 ? '#ef4444' : (days <= 5 ? '#f59e0b' : '#10b981');
+                let color = days <= 3 ? '#ef4444' : (days <= 5 ? '#f59e0b' : '#10b981'); // 紅/橘/綠
                 return { y: parseFloat(days.toFixed(1)), mt: mt, daily: baseDailyFO[i], color: color, source: robSources[i] };
             });
             const dataDO = robDO.map((mt, i) => {
                 let days = mt / baseDailyDO[i];
-                let color = days <= 3 ? '#ef4444' : (days <= 5 ? '#f59e0b' : '#0ea5e9');
+                let color = days <= 3 ? '#ef4444' : (days <= 5 ? '#f59e0b' : '#0ea5e9'); // 輕油使用淺藍作為安全色
                 return { y: parseFloat(days.toFixed(1)), mt: mt, daily: baseDailyDO[i], color: color, source: robSources[i] };
             });
 
@@ -608,6 +697,7 @@
                 chart: { type: 'column' }, xAxis: { categories: ships }, 
                 yAxis: { 
                     title: { text: '可用天數 (Days)' }, min: 0,
+                    // plotBands 可用來畫出圖表底層的警戒區色塊
                     plotBands: [
                         { from: 0, to: 3, color: 'rgba(239, 68, 68, 0.15)', label: { text: '3天警戒 (危險)', style: { color: '#ef4444', fontSize: '0.625em', fontWeight: 'bold' } } },
                         { from: 3, to: 5, color: 'rgba(245, 158, 11, 0.15)', label: { text: '5天預警 (安排)', style: { color: '#f59e0b', fontSize: '0.625em', fontWeight: 'bold' } } }
@@ -616,6 +706,7 @@
                 tooltip: { 
                     shared: true, useHTML: true,
                     formatter: function () {
+                        // 客製化 Tooltip，將報表來源印在標題旁
                         let s = `<b>${this.x}</b> <span style="color:#9ca3af; font-size:0.625rem; margin-left: 8px;">(來源: ${this.points[0].point.source})</span><br/>`;
                         this.points.forEach(point => {
                             s += `<span style="color:${point.color}">\u25CF</span> ${point.series.name}: <b style="color:${point.color}">${point.y} 天</b> <br/>`;
@@ -632,20 +723,33 @@
             });
         }
 
+        /**
+         * ==========================================================================
+         * 4. 資料更新與過濾邏輯 (Data Update & Simulated API)
+         * ==========================================================================
+         */
+        
+        // 此函數負責捕捉前端按鈕點擊，呈現載入中狀態，並模擬 API 延遲 (setTimeout) 來更新對應圖表資料
         function applyFilter(chartId, btnElement) {
+            // 1. 保存按鈕原狀態，並設定為「載入中」與鎖定
             const originalText = btnElement.innerText;
             btnElement.innerText = '載入中..';
             btnElement.classList.add('opacity-75');
             btnElement.style.cursor = 'wait';
             btnElement.disabled = true;
 
+            // 尋找此區塊內使用者選擇的時間維度 (day, month, quarter, year)
             const selectEl = btnElement.closest('.row').querySelector('select');
             const dimension = selectEl ? selectEl.value : 'month';
 
+            // 2. 模擬網路請求等待 600ms
             setTimeout(() => {
                 const chart = Highcharts.charts.find(c => c && c.renderTo.id === chartId);
                 if (chart) {
+                    
+                    // [特例處理]：燃油加油預警 (chart-rob) - 需重新換算天數與改變顏色
                     if (chartId === 'chart-rob') {
+                        // 模擬取得新的存油量 (MT)
                         const newROB_FO = chart.series[0].options.data.map(d => Math.max(10, d.mt + (Math.random()*60 - 30)));
                         const newROB_DO = chart.series[1].options.data.map(d => Math.max(2, d.mt + (Math.random()*10 - 5)));
                         
@@ -661,6 +765,8 @@
                             return { y: parseFloat(days.toFixed(1)), mt: Math.round(mt), daily: baseDailyDO[i], color: color, source: robSources[i] };
                         }), false);
                     }
+                    
+                    // [特例處理]：主機轉速監控 (chart-slip) - 依照維度改變 X 軸標籤與亂數邏輯
                     else if (chartId === 'chart-slip') {
                         let newCategories = [];
                         let newDataLen = 0;
@@ -668,7 +774,7 @@
                         else if (dimension === 'quarter') { newCategories = ['25 Q1', '25 Q2', '25 Q3', '25 Q4', '26 Q1']; newDataLen = 5; } 
                         else if (dimension === 'month') { newCategories = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']; newDataLen = 6; } 
                         else if (dimension === 'day') { newCategories = ['03/20', '03/21', '03/22', '03/23', '03/24']; newDataLen = 5; }
-                        chart.xAxis[0].setCategories(newCategories, false);
+                        chart.xAxis[0].setCategories(newCategories, false); // 更新 X 軸
                         
                         const vesselSelect = btnElement.closest('.row').querySelectorAll('select')[1].value;
                         const vIdx = ships.indexOf(vesselSelect) > -1 ? ships.indexOf(vesselSelect) : 0;
@@ -680,13 +786,15 @@
                                     newValues.push(idx === 0 ? parseFloat((4.5 + vIdx + Math.random()*2).toFixed(1)) : Math.floor(100 + Math.random()*4));
                                 } else {
                                     let slipVal = 4.5 + vIdx + Math.random()*2;
-                                    if (i === 2) slipVal += 10;
+                                    if (i === 2) slipVal += 10; // 刻意製造一次數值飆高 (模擬惡劣海象)
                                     newValues.push(idx === 0 ? parseFloat(slipVal.toFixed(1)) : Math.floor(100 + Math.random()*5));
                                 }
                             }
                             s.setData(newValues, false);
                         });
                     }
+                    
+                    // [特例處理]：碳排強度趨勢 (chart-eeoi) - 需要依照下拉選單增減整條線段 (Series)
                     else if (chartId === 'chart-eeoi') {
                         let newCategories = [];
                         let newDataLen = 0;
@@ -697,10 +805,13 @@
                         chart.xAxis[0].setCategories(newCategories, false);
                         
                         const viewFilter = document.getElementById('eeoi-vessel-filter').value;
+                        
+                        // 先將圖表上原有的線條全部清除
                         while(chart.series.length > 0) chart.series[0].remove(false);
 
-                        let baseLine = Array(newDataLen).fill(11.5);
+                        let baseLine = Array(newDataLen).fill(11.5); // 重構法規紅線資料陣列長度
                         
+                        // 單船或船隊平均模式
                         if (viewFilter === 'fleet' || ships.indexOf(viewFilter) > -1) {
                             let eeoiData = [], ciiData = [];
                             let offset = viewFilter === 'fleet' ? 0 : 0.8; 
@@ -711,7 +822,9 @@
                             chart.addSeries({ name: viewFilter === 'fleet' ? '船隊平均 EEOI' : `${viewFilter} EEOI`, data: eeoiData, color: '#f59e0b', lineWidth: 3, tooltip: { valueSuffix: ' gCO2/t-nm' } }, false);
                             chart.addSeries({ name: viewFilter === 'fleet' ? '船隊平均 CII' : `${viewFilter} CII`, data: ciiData, color: '#3b82f6', lineWidth: 3, tooltip: { valueSuffix: ' gCO2/t-nm' } }, false);
                             chart.addSeries({ name: 'CII 法規紅線 (C級底線)', data: baseLine, color: '#ef4444', dashStyle: 'Dash', marker: { enabled: false } }, false);
-                        } else if (viewFilter === 'all') {
+                        } 
+                        // 全船隊對比模式 (畫出多條細線)
+                        else if (viewFilter === 'all') {
                             let fleetEEOI = [];
                             for(let i=0; i<newDataLen; i++) fleetEEOI.push(parseFloat((12.8 - (i * 0.15) + (Math.random()*0.4 - 0.2)).toFixed(2)));
                             chart.addSeries({ name: '船隊總平均 EEOI', data: fleetEEOI, color: '#f59e0b', lineWidth: 4, tooltip: { valueSuffix: ' gCO2/t-nm' } }, false);
@@ -723,9 +836,12 @@
                             });
                             chart.addSeries({ name: 'CII 法規紅線 (C級底線)', data: baseLine, color: '#ef4444', dashStyle: 'Dash', marker: { enabled: false } }, false);
                         }
-                    } else {
+                    } 
+                    // [常規處理]：其他單純只有數值起伏的柱狀體
+                    else {
                         chart.series.forEach(s => {
                             const newData = s.yData.map(y => {
+                                // 依據時間維度決定數值震盪幅度
                                 let variance = dimension === 'day' ? 0.4 : (dimension === 'year' ? 0.1 : 0.2);
                                 let multiplier = 1 + (Math.random() * variance * 2 - variance);
                                 return parseFloat((y * multiplier).toFixed(1));
@@ -733,8 +849,12 @@
                             s.setData(newData, false);
                         });
                     }
+                    
+                    // 3. 所有資料計算完畢後，執行重繪動畫
                     chart.redraw({ duration: 800 });
                 }
+                
+                // 4. 恢復按鈕可點擊狀態
                 btnElement.innerText = originalText;
                 btnElement.classList.remove('opacity-75');
                 btnElement.style.cursor = '';
@@ -742,6 +862,7 @@
             }, 600);
         }
 
+        // 監聽 DOM 載入完畢事件，觸發圖表初始化
         document.addEventListener('DOMContentLoaded', initCharts);
     </script>
 </body>
