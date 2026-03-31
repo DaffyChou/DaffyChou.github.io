@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>摯陞數位科技 - CII 岸端進階圖表庫 (IMO 編號版)</title>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #0b0f19; color: #e2e8f0; margin: 0; padding: 20px; }
+        .header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 15px; margin-bottom: 25px; }
+        .header h1 { color: #38bdf8; margin: 0; font-size: 26px; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; max-width: 1600px; margin: auto; }
+        .full-width { grid-column: 1 / -1; }
+        .panel { background: #111827; border: 1px solid #334155; border-radius: 10px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+        .info-box { background: #1e293b; border-left: 4px solid #38bdf8; padding: 12px 15px; margin-bottom: 15px; border-radius: 4px; font-size: 14px; line-height: 1.6; }
+        .def { color: #38bdf8; font-weight: bold; }
+        .risk { color: #f43f5e; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>CII / EEOI 岸端進階圖表庫 (IMO 實名制追蹤)</h1>
+    <p style="color: #94a3b8;">結合物理極限、宏觀結構與時間分配的多維度風險解析</p>
+</div>
+
+<div class="dashboard-grid">
+
+    <div class="panel">
+        <div class="info-box">
+            <span class="def">【指標定義】Eco-Speed 曲線：</span>展現航速與燃油消耗的指數型（通常是三次方）關係。<br>
+            <span class="risk">【查看風險】超速的高昂代價：</span>超過臨界點後，為了提早幾小時到達港口而增加的 1~2 節航速，會導致單日碳排與油錢呈倍數爆發，且提早到港若只是下錨死等，將對 CII 造成毀滅性打擊。
+        </div>
+        <div id="speed-curve-chart" style="height: 400px;"></div>
+    </div>
+
+    <div class="panel">
+        <div class="info-box">
+            <span class="def">【指標定義】營運時間切片：</span>將船舶單月或單航次的時間，100% 拆解為海上航行、錨泊等待、港口裝卸等狀態。<br>
+            <span class="risk">【查看風險】閒置碳排風險：</span>鎖定圖表中的橘色(錨泊)與紅色(靠泊)區塊。如果一艘散裝船有超過 40% 的時間在錨地燒油發電卻沒產生航行距離，CII 必定不及格，需檢討港口協調流程。
+        </div>
+        <div id="time-profile-chart" style="height: 400px;"></div>
+    </div>
+
+    <div class="panel full-width">
+        <div class="info-box">
+            <span class="def">【指標定義】船隊健康度板塊：</span>將 50 艘船的評級加總，以 100% 堆疊面積圖呈現 1~12 月的結構變化。<br>
+            <span class="risk">【查看風險】系統性惡化趨勢：</span>不看單船，看大局。如果隨著時間推移，紅色(E級)與橘色(D級)的佔比像腫瘤一樣持續擴大吞噬綠色(A/B級)區域，代表目前的派船邏輯完全無法應對法規，需啟動高層級的戰略調整。
+        </div>
+        <div id="fleet-composition-chart" style="height: 450px;"></div>
+    </div>
+
+</div>
+
+<script>
+    const colors = { A: '#10b981', B: '#84cc16', C: '#eab308', D: '#f97316', E: '#ef4444' };
+    const darkTheme = { chartBg: 'transparent', gridLine: '#334155', textMain: '#f8fafc', textSub: '#94a3b8' };
+
+    // =========================================================
+    // 1. 航速與油耗/碳排非線性曲線 (Speed vs Consumption)
+    // =========================================================
+    Highcharts.chart('speed-curve-chart', {
+        chart: { type: 'spline', backgroundColor: darkTheme.chartBg },
+        title: { text: '單船航速與單日碳排關聯曲線 (IMO 9456789 - 貨櫃船)', style: { color: '#fff', fontSize: '15px' } },
+        xAxis: { 
+            title: { text: '對地航速 Speed Over Ground (Knots)', style: { color: darkTheme.textSub } },
+            categories: ['10', '12', '14', '16', '18', '20', '22', '24'],
+            gridLineColor: darkTheme.gridLine,
+            plotLines: [{ value: 3.5, color: '#38bdf8', dashStyle: 'Dash', width: 2, label: { text: '最佳經濟航速 (Eco-Speed)', style: {color: '#38bdf8', rotation: 0, y: -10} }, zIndex: 4 }]
+        },
+        yAxis: { 
+            title: { text: '單日碳排放量 (噸 CO2)', style: { color: darkTheme.textSub } }, 
+            gridLineColor: darkTheme.gridLine 
+        },
+        tooltip: { shared: true, valueSuffix: ' 噸 CO2' },
+        series: [{
+            name: '實際碳排曲線 (呈指數攀升)',
+            data: [45, 60, 85, 125, 180, 260, 365, 500], // 模擬三次方增長
+            color: '#f43f5e',
+            lineWidth: 3,
+            marker: { fillColor: '#111827', lineWidth: 2, lineColor: '#f43f5e' }
+        }]
+    });
+
+    // =========================================================
+    // 2. 船舶營運狀態時間分佈圖 (Operational Time Profile)
+    // =========================================================
+    Highcharts.chart('time-profile-chart', {
+        chart: { type: 'bar', backgroundColor: darkTheme.chartBg },
+        title: { text: '高風險船舶營運時間佔比拆解 (近 30 天)', style: { color: '#fff', fontSize: '15px' } },
+        xAxis: { 
+            // 這裡使用 IMO 編號，並註記船型幫助理解
+            categories: ['IMO 9320473 (散)', 'IMO 9812345 (櫃)', 'IMO 9991102 (軍)', 'IMO 9400123 (散)'],
+            labels: { style: { color: darkTheme.textMain, fontWeight: 'bold' } }
+        },
+        yAxis: { 
+            min: 0, max: 100, title: { text: '時間佔比 (%)', style: { color: darkTheme.textSub } }, 
+            gridLineColor: darkTheme.gridLine 
+        },
+        plotOptions: {
+            bar: { stacking: 'percent', dataLabels: { enabled: true, format: '{y}%', color: '#fff', style: { textOutline: 'none' } } }
+        },
+        series: [{
+            name: '海上航行 (At Sea) - 降 CII', color: colors.A,
+            data: [35, 75, 40, 20]
+        }, {
+            name: '操縱進出港 (Maneuvering)', color: colors.C,
+            data: [5, 5, 10, 5]
+        }, {
+            name: '錨地死等 (Anchored) - 飆升 CII', color: colors.D,
+            data: [45, 5, 10, 60] // 散裝船常有極高的錨泊等待時間
+        }, {
+            name: '靠泊作業 (Berthed) - 升 CII', color: colors.E,
+            data: [15, 15, 40, 15]
+        }]
+    });
+
+    // =========================================================
+    // 3. 船隊評級結構演變面積圖 (Fleet Composition Stacked Area)
+    // =========================================================
+    Highcharts.chart('fleet-composition-chart', {
+        chart: { type: 'area', backgroundColor: darkTheme.chartBg },
+        title: { text: '全船隊 (50艘) 年度評級結構演變趨勢', style: { color: '#fff', fontSize: '15px' } },
+        xAxis: { 
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            tickmarkPlacement: 'on', labels: { style: { color: darkTheme.textSub } }
+        },
+        yAxis: { 
+            title: { text: '船舶數量佔比 (%)', style: { color: darkTheme.textSub } }, 
+            gridLineColor: darkTheme.gridLine, max: 100 
+        },
+        tooltip: { pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y} 艘)<br/>', shared: true },
+        plotOptions: {
+            area: { stacking: 'percent', lineColor: '#111827', lineWidth: 1, marker: { enabled: false } }
+        },
+        series: [{
+            name: 'E 級 (禁航風險)', color: colors.E,
+            data: [1, 2, 2, 3, 4, 5, 6, 8, 10, 11, 12, 14] // 年底紅色區域擴大
+        }, {
+            name: 'D 級 (需提改善計畫)', color: colors.D,
+            data: [4, 5, 6, 8, 8, 10, 12, 12, 14, 15, 16, 16]
+        }, {
+            name: 'C 級 (及格邊緣)', color: colors.C,
+            data: [15, 15, 16, 18, 18, 18, 17, 16, 14, 12, 10, 8]
+        }, {
+            name: 'B 級 (表現良好)', color: colors.B,
+            data: [20, 18, 16, 14, 12, 10, 9, 8, 7, 7, 7, 7]
+        }, {
+            name: 'A 級 (業界頂尖)', color: colors.A,
+            data: [10, 10, 10, 7, 8, 7, 6, 6, 5, 5, 5, 5]
+        }]
+    });
+</script>
+
+</body>
+</html>
