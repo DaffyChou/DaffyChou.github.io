@@ -178,9 +178,15 @@
             <label class="req">你的名字</label>
             <input type="text" id="f-name" placeholder="你叫什麼名字?" />
         </div>
-        <div class="field">
-            <label class="req">聯絡 Email</label>
-            <input type="email" id="f-email" placeholder="確認信會寄到這裡" />
+        <div class="row2">
+            <div class="field">
+                <label>電話</label>
+                <input type="text" id="f-phone" placeholder="0912-345-678（選填）" />
+            </div>
+            <div class="field">
+                <label>LINE ID</label>
+                <input type="text" id="f-line" placeholder="你的 LINE ID（選填）" />
+            </div>
         </div>
         <div class="row2">
             <div class="field">
@@ -210,7 +216,7 @@
         <div class="success-wrap">
             <div class="success-icon">🎉</div>
             <div class="success-title">申請已送出!</div>
-            <div class="success-desc">Daffy 收到通知後會審核<br>確認後會寄 email 給你 📧</div>
+            <div class="success-desc">達菲 收到通知後會審核<br>確認後會透過電話或 LINE 聯絡你 📲</div>
             <div class="booking-card" id="summary"></div>
             <div class="hint">通常 24 小時內回覆，請耐心等候 😊</div>
         </div>
@@ -261,7 +267,8 @@ document.getElementById('passphrase').addEventListener('keydown', e => {
 
 async function doSubmit() {
     const name    = document.getElementById('f-name').value.trim();
-    const email   = document.getElementById('f-email').value.trim();
+    const phone   = document.getElementById('f-phone').value.trim();
+    const line    = document.getElementById('f-line').value.trim();
     const date    = document.getElementById('f-date').value;
     const time    = document.getElementById('f-time').value;
     const purpose = document.getElementById('f-purpose').value.trim();
@@ -270,14 +277,9 @@ async function doSubmit() {
     const btn     = document.getElementById('submit-btn');
 
     // Validation
-    if (!name || !email || !date || !time || !purpose) {
+    if (!name || !date || !time || !purpose) {
         err.style.display = 'block';
         err.textContent = '請填寫所有必填欄位 (*)';
-        return;
-    }
-    if (!email.includes('@') || !email.includes('.')) {
-        err.style.display = 'block';
-        err.textContent = 'Email 格式不正確';
         return;
     }
     err.style.display = 'none';
@@ -285,17 +287,14 @@ async function doSubmit() {
     btn.textContent = '送出中...';
 
     // Submit to Apps Script via no-cors POST
-    // (response is opaque but request goes through; we show success optimistically)
     if (CONFIG.SCRIPT_URL && !CONFIG.SCRIPT_URL.startsWith('YOUR_')) {
         try {
             await fetch(CONFIG.SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: new URLSearchParams({ name, email, date, time, purpose, notes, passphrase: CONFIG.PASSPHRASE })
+                body: new URLSearchParams({ name, phone, line, date, time, purpose, notes, passphrase: CONFIG.PASSPHRASE })
             });
-        } catch (_) { /* no-cors swallows errors; Apps Script still processes the request */ }
-    } else {
-        console.warn('[booking] SCRIPT_URL not configured — booking was NOT sent to backend.');
+        } catch (_) {}
     }
 
     // Show success (optimistic)
@@ -309,9 +308,10 @@ async function doSubmit() {
 
     document.getElementById('summary').innerHTML = `
         <p>👤 <b>姓名:</b> ${esc(name)}</p>
-        <p>📧 <b>Email:</b> ${esc(email)}</p>
+        ${phone ? `<p>📞 <b>電話:</b> ${esc(phone)}</p>` : ''}
+        ${line  ? `<p>💬 <b>LINE:</b> ${esc(line)}</p>`  : ''}
         <p>📅 <b>日期時間:</b> ${displayDate}</p>
-        <p>💬 <b>目的:</b> ${esc(purpose)}</p>
+        <p>🗒 <b>目的:</b> ${esc(purpose)}</p>
         ${notes ? `<p>📝 <b>備註:</b> ${esc(notes)}</p>` : ''}
     `;
     goStep(2);
