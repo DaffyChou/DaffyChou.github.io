@@ -110,8 +110,14 @@ function approveBooking(id, token) {
   if (row[8] !== 'pending') return page('⚠️ 此預約已處理過', '目前狀態: ' + row[8], '#fffbeb');
 
   // 建立行事曆事件（0:ID 1:姓名 2:電話 3:LINE 4:日期 5:時間 6:目的 7:備註）
-  const [yr, mo, dy] = row[4].split('-').map(Number);
-  const [hr, mn]     = row[5].split(':').map(Number);
+  // Sheets 會把日期欄位自動轉成 Date 物件，需先轉回字串
+  const tz      = Session.getScriptTimeZone();
+  const dateStr = (row[4] instanceof Date)
+    ? Utilities.formatDate(row[4], tz, 'yyyy-MM-dd')
+    : String(row[4]);
+  const timeStr = String(row[5]);
+  const [yr, mo, dy] = dateStr.split('-').map(Number);
+  const [hr, mn]     = timeStr.split(':').map(Number);
   const start = new Date(yr, mo - 1, dy, hr, mn);
   const end   = new Date(start.getTime() + CONFIG.DURATION_MIN * 60000);
 
