@@ -244,18 +244,35 @@ let contacts = [];
 
 /* ── Login ── */
 async function doLogin() {
-    const pw = document.getElementById('admin-pw').value.trim();
+    const pw    = document.getElementById('admin-pw').value.trim();
+    const errEl = document.getElementById('login-err');
+    const btn   = document.querySelector('#login-wrap .btn');
     if (!pw) return;
-    const res = await api({ action: 'listContacts', adminpw: pw });
-    if (!res.ok) {
-        document.getElementById('login-err').style.display = 'block';
-        return;
+
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = '驗證中...';
+
+    try {
+        const res = await api({ action: 'listContacts', adminpw: pw });
+        if (!res.ok) {
+            errEl.textContent = res.error || '密碼錯誤';
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = '登入';
+            return;
+        }
+        ADMIN_PW = pw;
+        contacts = res.contacts || [];
+        document.getElementById('login-wrap').style.display = 'none';
+        document.getElementById('main-wrap').style.display  = 'block';
+        renderList();
+    } catch (e) {
+        errEl.textContent = '連線失敗：' + (e.message || '請確認 GAS 已重新部署');
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '登入';
     }
-    ADMIN_PW = pw;
-    contacts = res.contacts || [];
-    document.getElementById('login-wrap').style.display = 'none';
-    document.getElementById('main-wrap').style.display  = 'block';
-    renderList();
 }
 document.getElementById('admin-pw').addEventListener('keydown', e => {
     if (e.key === 'Enter') doLogin();
@@ -390,8 +407,13 @@ async function reload() {
 
 async function api(params) {
     const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
-    const res = await fetch(url);
-    return res.json();
+    const res = await fetch(url, { redirect: 'follow' });
+    const text = await res.text();
+    try {
+        return JSON.parse(text);
+    } catch (_) {
+        throw new Error('回應格式錯誤，請確認 GAS 已重新部署。回應內容：' + text.slice(0, 80));
+    }
 }
 
 function esc(s) {
