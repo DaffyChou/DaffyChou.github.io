@@ -238,22 +238,11 @@
 </div>
 
 <script>
-/* =========================================================
-   設定區
-   ========================================================= */
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcbbKaXNTyKg3lNkA_enC6A9XE-g-ijQoTudsFxxfIJzucx1FpPl_ad796aYndSL1U/exec';
 
-// 每個朋友的通關密語 → 個人資料
-// phone / line 可以空白，name 是必填
-const CONTACTS = {
-    'DaffyXDXDXD': { name: '豐豐',   phone: '0912-000-001', line: 'fengfeng'   },
-    // 新增朋友只要加一行，格式如下：
-    // '密語': { name: '名字', phone: '電話', line: 'LINE ID' },
-};
-/* ========================================================= */
-
 let _step = 0;
-let _contact = null; // 目前登入的聯絡人
+let _contact = null;
+let _passphrase = '';
 
 function goStep(n) {
     document.getElementById('s' + _step).classList.remove('show');
@@ -265,34 +254,52 @@ function goStep(n) {
     document.getElementById('d' + n).classList.add('active');
 }
 
-function checkPass() {
-    const val = document.getElementById('passphrase').value.trim();
-    const err = document.getElementById('err0');
+async function checkPass() {
+    const val  = document.getElementById('passphrase').value.trim();
+    const err  = document.getElementById('err0');
+    const btn  = document.querySelector('#s0 .btn-main');
 
-    _contact = CONTACTS[val] || null;
+    if (!val) return;
+    btn.disabled = true;
+    btn.textContent = '驗證中...';
+    err.style.display = 'none';
 
-    if (_contact) {
-        err.style.display = 'none';
-        // 已知聯絡人：顯示身份卡，隱藏手動輸入
-        const contactInfo = [
-            _contact.phone ? '電話 ' + _contact.phone : '',
-            _contact.line  ? 'LINE ' + _contact.line  : '',
-        ].filter(Boolean).join('　');
+    try {
+        const url = SCRIPT_URL + '?action=getContact&passphrase=' + encodeURIComponent(val);
+        const res = await fetch(url);
+        const data = await res.json();
 
-        document.getElementById('id-name').textContent    = _contact.name;
-        document.getElementById('id-contact').textContent = contactInfo || '（未留聯絡方式）';
-        document.getElementById('identity-card').style.display = 'flex';
-        document.getElementById('manual-fields').style.display = 'none';
-        document.getElementById('s1-sub').textContent = '嗨 ' + _contact.name + '，告訴達菲你想約什麼時間和目的';
+        if (data.ok) {
+            _contact    = data;
+            _passphrase = val;
 
-        goStep(1);
-        document.getElementById('f-date').min = new Date().toISOString().slice(0, 10);
-        document.getElementById('f-purpose').focus();
-    } else {
+            const contactInfo = [
+                data.phone ? '電話 ' + data.phone : '',
+                data.line  ? 'LINE ' + data.line  : '',
+            ].filter(Boolean).join('　');
+
+            document.getElementById('id-name').textContent    = data.name;
+            document.getElementById('id-contact').textContent = contactInfo || '（未留聯絡方式）';
+            document.getElementById('identity-card').style.display = 'flex';
+            document.getElementById('manual-fields').style.display = 'none';
+            document.getElementById('s1-sub').textContent = '嗨 ' + data.name + '，告訴達菲你想約什麼時間和目的';
+
+            goStep(1);
+            document.getElementById('f-date').min = new Date().toISOString().slice(0, 10);
+            document.getElementById('f-purpose').focus();
+        } else {
+            err.style.display = 'block';
+            document.getElementById('passphrase').value = '';
+            document.getElementById('passphrase').focus();
+        }
+    } catch (e) {
+        // 網路錯誤時顯示通用提示
+        err.textContent = '連線失敗，請稍後再試';
         err.style.display = 'block';
-        document.getElementById('passphrase').value = '';
-        document.getElementById('passphrase').focus();
     }
+
+    btn.disabled = false;
+    btn.textContent = '進入 →';
 }
 
 document.getElementById('passphrase').addEventListener('keydown', e => {
@@ -307,8 +314,7 @@ async function doSubmit() {
     const err     = document.getElementById('err1');
     const btn     = document.getElementById('submit-btn');
 
-    // 已知聯絡人用 _contact，否則讀手動欄位
-    const name  = _contact ? _contact.name  : document.getElementById('f-name').value.trim();
+    const name  = _contact ? _contact.name        : document.getElementById('f-name').value.trim();
     const phone = _contact ? (_contact.phone || '') : document.getElementById('f-phone').value.trim();
     const line  = _contact ? (_contact.line  || '') : document.getElementById('f-line').value.trim();
 
@@ -321,18 +327,13 @@ async function doSubmit() {
     btn.disabled = true;
     btn.textContent = '送出中...';
 
-    // 取得目前密語（用來讓 GAS 驗證）
-    const passphrase = document.getElementById('passphrase').value.trim();
-
-    if (!SCRIPT_URL.startsWith('YOUR_')) {
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: new URLSearchParams({ name, phone, line, date, time, purpose, notes, passphrase })
-            });
-        } catch (_) {}
-    }
+    try {
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: new URLSearchParams({ name, phone, line, date, time, purpose, notes, passphrase: _passphrase })
+        });
+    } catch (_) {}
 
     let displayDate = date + ' ' + time;
     try {
@@ -354,7 +355,7 @@ async function doSubmit() {
 }
 
 function esc(s) {
-    return String(s)
+    return String(s || '')
         .replace(/&/g,'&amp;').replace(/</g,'&lt;')
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
