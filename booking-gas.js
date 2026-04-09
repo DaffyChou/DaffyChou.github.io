@@ -33,10 +33,13 @@ const CONFIG = {
 //  HTTP 進入點
 // ══════════════════════════════════════════════════════════
 
+const GUEST_PASSPHRASE = 'DaffyXDXD'; // 通用密語，與 booking.html 相同
+
 function doPost(e) {
   try {
     const d = e.parameter;
-    if (!getContactByPassphrase(d.passphrase)) return respond('Unauthorized');
+    const isGuest = d.passphrase === GUEST_PASSPHRASE;
+    if (!isGuest && !getContactByPassphrase(d.passphrase)) return respond('Unauthorized');
     return createBooking(d);
   } catch (err) {
     console.error('doPost:', err);

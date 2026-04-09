@@ -238,7 +238,8 @@
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcbbKaXNTyKg3lNkA_enC6A9XE-g-ijQoTudsFxxfIJzucx1FpPl_ad796aYndSL1U/exec';
+const SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbwcbbKaXNTyKg3lNkA_enC6A9XE-g-ijQoTudsFxxfIJzucx1FpPl_ad796aYndSL1U/exec';
+const GUEST_PASS    = 'DaffyXDXD';   // 通用密語，需自行填寫資料
 
 let _step = 0;
 let _contact = null;
@@ -265,35 +266,47 @@ async function checkPass() {
     err.style.display = 'none';
 
     try {
-        const url = SCRIPT_URL + '?action=getContact&passphrase=' + encodeURIComponent(val);
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (data.ok) {
-            _contact    = data;
+        // 通用密語：直接進入，顯示手動輸入欄位
+        if (val === GUEST_PASS) {
+            _contact    = null;
             _passphrase = val;
-
-            const contactInfo = [
-                data.phone ? '電話 ' + data.phone : '',
-                data.line  ? 'LINE ' + data.line  : '',
-            ].filter(Boolean).join('　');
-
-            document.getElementById('id-name').textContent    = data.name;
-            document.getElementById('id-contact').textContent = contactInfo || '（未留聯絡方式）';
-            document.getElementById('identity-card').style.display = 'flex';
-            document.getElementById('manual-fields').style.display = 'none';
-            document.getElementById('s1-sub').textContent = '嗨 ' + data.name + '，告訴達菲你想約什麼時間和目的';
-
+            document.getElementById('identity-card').style.display = 'none';
+            document.getElementById('manual-fields').style.display = 'block';
+            document.getElementById('s1-sub').textContent = '請填寫你的資料與預約時間';
             goStep(1);
             document.getElementById('f-date').min = new Date().toISOString().slice(0, 10);
-            document.getElementById('f-purpose').focus();
+            document.getElementById('f-name').focus();
         } else {
-            err.style.display = 'block';
-            document.getElementById('passphrase').value = '';
-            document.getElementById('passphrase').focus();
+            // 個人密語：向 GAS 查詢
+            const url  = SCRIPT_URL + '?action=getContact&passphrase=' + encodeURIComponent(val);
+            const res  = await fetch(url);
+            const data = await res.json();
+
+            if (data.ok) {
+                _contact    = data;
+                _passphrase = val;
+
+                const contactInfo = [
+                    data.phone ? '電話 ' + data.phone : '',
+                    data.line  ? 'LINE ' + data.line  : '',
+                ].filter(Boolean).join('　');
+
+                document.getElementById('id-name').textContent         = data.name;
+                document.getElementById('id-contact').textContent      = contactInfo || '（未留聯絡方式）';
+                document.getElementById('identity-card').style.display = 'flex';
+                document.getElementById('manual-fields').style.display = 'none';
+                document.getElementById('s1-sub').textContent = '嗨 ' + data.name + '，告訴達菲你想約什麼時間和目的';
+
+                goStep(1);
+                document.getElementById('f-date').min = new Date().toISOString().slice(0, 10);
+                document.getElementById('f-purpose').focus();
+            } else {
+                err.style.display = 'block';
+                document.getElementById('passphrase').value = '';
+                document.getElementById('passphrase').focus();
+            }
         }
     } catch (e) {
-        // 網路錯誤時顯示通用提示
         err.textContent = '連線失敗，請稍後再試';
         err.style.display = 'block';
     }
