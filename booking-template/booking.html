@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>預約時間</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif;
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px 16px;
+        }
+        .card { background: #fff; border-radius: 24px; padding: 40px 36px; width: 100%; max-width: 440px; box-shadow: 0 25px 60px rgba(0,0,0,0.25); }
+        .logo { text-align: center; margin-bottom: 28px; }
+        .logo-icon { width: 72px; height: 72px; background: linear-gradient(135deg,#667eea,#764ba2); border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 14px; }
+        .logo h1 { font-size: 20px; font-weight: 700; color: #1a1a2e; }
+        .logo p  { font-size: 13px; color: #999; margin-top: 4px; }
+        .steps { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 32px; }
+        .dot { width: 8px; height: 8px; border-radius: 4px; background: #e2e8f0; transition: all .3s; }
+        .dot.active { background: #667eea; width: 20px; }
+        .dot.done   { background: #68d391; width: 8px; }
+        .step { display: none; }
+        .step.show { display: block; animation: fadeUp .3s ease; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .step-heading { font-size: 17px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+        .step-sub     { font-size: 13px; color: #999; margin-bottom: 24px; }
+        .field { margin-bottom: 14px; }
+        label { display: block; font-size: 11px; font-weight: 700; color: #777; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+        .req::after { content: ' *'; color: #fc8181; }
+        input[type=text], input[type=date], input[type=time], input[type=password], textarea {
+            width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+            font-size: 14px; color: #333; background: #f8fafc; font-family: inherit; transition: border-color .2s, background .2s;
+        }
+        input:focus, textarea:focus { outline: none; border-color: #667eea; background: #fff; }
+        textarea { min-height: 90px; resize: vertical; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 16px; transition: all .2s; font-family: inherit; }
+        .btn-main { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
+        .btn-main:hover  { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(102,126,234,.4); }
+        .btn-main:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+        #passphrase { text-align: center; letter-spacing: 6px; font-size: 22px; }
+        .err { display: none; color: #c53030; font-size: 12px; margin-top: 8px; padding: 8px 12px; background: #fff5f5; border-radius: 8px; border-left: 3px solid #fc8181; }
+        .success-wrap { text-align: center; }
+        .success-icon  { font-size: 56px; margin-bottom: 16px; }
+        .success-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+        .success-desc  { font-size: 14px; color: #666; line-height: 1.6; }
+        .booking-card { background: #f8fafc; border-radius: 12px; padding: 16px; margin: 20px 0; text-align: left; }
+        .booking-card p { font-size: 13px; color: #555; margin-bottom: 6px; }
+        .booking-card p:last-child { margin-bottom: 0; }
+        .booking-card b { color: #333; }
+        .hint { font-size: 12px; color: #bbb; margin-top: 8px; }
+    </style>
+</head>
+<body>
+<div class="card">
+
+    <div class="logo">
+        <div class="logo-icon">📅</div>
+        <h1 id="page-title">預約時間</h1>
+        <p>填寫申請 → 審核確認 → 加入行事曆</p>
+    </div>
+
+    <div class="steps">
+        <div class="dot active" id="d0"></div>
+        <div class="dot"        id="d1"></div>
+        <div class="dot"        id="d2"></div>
+    </div>
+
+    <!-- Step 0: Passphrase -->
+    <div class="step show" id="s0">
+        <div class="step-heading">請輸入通關密語</div>
+        <div class="step-sub">對方給你的那個暗號 🤫</div>
+        <div class="field">
+            <input type="password" id="passphrase" placeholder="••••••" maxlength="30" autocomplete="off" />
+            <div class="err" id="err0">通關密語不對喔，再想想 🤔</div>
+        </div>
+        <button class="btn btn-main" onclick="checkPass()">進入 →</button>
+    </div>
+
+    <!-- Step 1: Booking Form -->
+    <div class="step" id="s1">
+        <div class="step-heading">填寫預約資料</div>
+        <div class="step-sub" id="s1-sub">告訴對方你想約什麼時間和目的</div>
+
+        <div id="identity-card" style="display:none;background:#f0f4ff;border-radius:12px;padding:14px 16px;margin-bottom:16px;align-items:center;gap:12px">
+            <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👤</div>
+            <div>
+                <div style="font-weight:700;color:#1a1a2e;font-size:15px" id="id-name"></div>
+                <div style="font-size:12px;color:#888" id="id-contact"></div>
+            </div>
+        </div>
+
+        <div id="manual-fields">
+            <div class="field">
+                <label class="req">你的名字</label>
+                <input type="text" id="f-name" placeholder="你叫什麼名字?" />
+            </div>
+            <div class="row2">
+                <div class="field"><label>電話</label><input type="text" id="f-phone" placeholder="0912-345-678（選填）" /></div>
+                <div class="field"><label>LINE ID</label><input type="text" id="f-line" placeholder="LINE ID（選填）" /></div>
+            </div>
+        </div>
+
+        <div class="row2">
+            <div class="field"><label class="req">希望日期</label><input type="date" id="f-date" /></div>
+            <div class="field"><label class="req">希望時間</label><input type="time" id="f-time" /></div>
+        </div>
+        <div class="field">
+            <label class="req">預約目的</label>
+            <textarea id="f-purpose" placeholder="簡單說說想聊什麼、想做什麼..."></textarea>
+        </div>
+        <div class="field">
+            <label>其他備註</label>
+            <input type="text" id="f-notes" placeholder="還有什麼補充？（可不填）" />
+        </div>
+
+        <div class="err" id="err1"></div>
+        <button class="btn btn-main" id="submit-btn" onclick="doSubmit()">送出預約申請</button>
+    </div>
+
+    <!-- Step 2: Done -->
+    <div class="step" id="s2">
+        <div class="success-wrap">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">申請已送出!</div>
+            <div class="success-desc" id="success-desc">對方收到通知後會審核<br>確認後會透過電話或 LINE 聯絡你</div>
+            <div class="booking-card" id="summary"></div>
+            <div class="hint">通常 24 小時內回覆，請耐心等候 😊</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 先載入設定 -->
+<script src="config.js"></script>
+<script>
+// 從 config.js 取值
+const SCRIPT_URL  = APP_CONFIG.SCRIPT_URL;
+const GUEST_PASS  = APP_CONFIG.GUEST_PASSPHRASE;
+const OWNER_NAME  = APP_CONFIG.OWNER_NAME;
+
+// 套用名字
+document.getElementById('page-title').textContent = '預約 ' + OWNER_NAME + ' 的時間';
+
+let _step = 0, _contact = null, _passphrase = '';
+
+function goStep(n) {
+    document.getElementById('s' + _step).classList.remove('show');
+    document.getElementById('d' + _step).classList.remove('active');
+    document.getElementById('d' + _step).classList.add('done');
+    _step = n;
+    document.getElementById('s' + n).classList.add('show');
+    document.getElementById('d' + n).classList.remove('done');
+    document.getElementById('d' + n).classList.add('active');
+}
+
+async function checkPass() {
+    const val = document.getElementById('passphrase').value.trim();
+    const err = document.getElementById('err0');
+    const btn = document.querySelector('#s0 .btn-main');
+    if (!val) return;
+    btn.disabled = true; btn.textContent = '驗證中...';
+    err.style.display = 'none';
+    try {
+        if (val === GUEST_PASS) {
+            _contact = null; _passphrase = val;
+            document.getElementById('identity-card').style.display = 'none';
+            document.getElementById('manual-fields').style.display = 'block';
+            document.getElementById('s1-sub').textContent = '請填寫你的資料與預約時間';
+            goStep(1);
+            document.getElementById('f-date').min = new Date().toISOString().slice(0, 10);
+            document.getElementById('f-name').focus();
+        } else {
+            const url  = SCRIPT_URL + '?action=getContact&passphrase=' + encodeURIComponent(val);
+            const data = await (await fetch(url)).json();
+            if (data.ok) {
+                _contact = data; _passphrase = val;
+                const contactInfo = [data.phone ? '電話 ' + data.phone : '', data.line ? 'LINE ' + data.line : ''].filter(Boolean).join('　');
+                document.getElementById('id-name').textContent         = data.name;
+                document.getElementById('id-contact').textContent      = contactInfo || '（未留聯絡方式）';
+                document.getElementById('identity-card').style.display = 'flex';
+                document.getElementById('manual-fields').style.display = 'none';
+                document.getElementById('s1-sub').textContent = '嗨 ' + data.name + '，告訴 ' + OWNER_NAME + ' 你想約什麼時間和目的';
+                goStep(1);
+                document.getElementById('f-date').min = new Date().toISOString().slice(0, 10);
+                document.getElementById('f-purpose').focus();
+            } else {
+                err.style.display = 'block';
+                document.getElementById('passphrase').value = '';
+                document.getElementById('passphrase').focus();
+            }
+        }
+    } catch (e) {
+        err.textContent = '連線失敗，請稍後再試';
+        err.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = '進入 →';
+}
+
+document.getElementById('passphrase').addEventListener('keydown', e => { if (e.key === 'Enter') checkPass(); });
+
+async function doSubmit() {
+    const date    = document.getElementById('f-date').value;
+    const time    = document.getElementById('f-time').value;
+    const purpose = document.getElementById('f-purpose').value.trim();
+    const notes   = document.getElementById('f-notes').value.trim();
+    const err     = document.getElementById('err1');
+    const btn     = document.getElementById('submit-btn');
+    const name    = _contact ? _contact.name         : document.getElementById('f-name').value.trim();
+    const phone   = _contact ? (_contact.phone || '') : document.getElementById('f-phone').value.trim();
+    const line    = _contact ? (_contact.line  || '') : document.getElementById('f-line').value.trim();
+
+    if (!name || !date || !time || !purpose) {
+        err.style.display = 'block'; err.textContent = '請填寫所有必填欄位 (*)'; return;
+    }
+    err.style.display = 'none'; btn.disabled = true; btn.textContent = '送出中...';
+
+    try {
+        await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors',
+            body: new URLSearchParams({ name, phone, line, date, time, purpose, notes, passphrase: _passphrase }) });
+    } catch (_) {}
+
+    let displayDate = date + ' ' + time;
+    try { displayDate = new Date(date + 'T' + time + ':00').toLocaleString('zh-TW', { year:'numeric', month:'long', day:'numeric', weekday:'short', hour:'2-digit', minute:'2-digit' }); } catch (_) {}
+
+    document.getElementById('summary').innerHTML = `
+        <p><b>姓名:</b> ${esc(name)}</p>
+        ${phone ? `<p><b>電話:</b> ${esc(phone)}</p>` : ''}
+        ${line  ? `<p><b>LINE:</b> ${esc(line)}</p>`  : ''}
+        <p><b>日期時間:</b> ${displayDate}</p>
+        <p><b>目的:</b> ${esc(purpose)}</p>
+        ${notes ? `<p><b>備註:</b> ${esc(notes)}</p>` : ''}
+    `;
+    document.getElementById('success-desc').innerHTML = OWNER_NAME + ' 收到通知後會審核<br>確認後會透過電話或 LINE 聯絡你';
+    goStep(2);
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>
