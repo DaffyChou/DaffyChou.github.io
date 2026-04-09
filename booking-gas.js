@@ -56,12 +56,16 @@ function doGet(e) {
     // JSON API — 聯絡人驗證
     if (action === 'getContact')    return jsonRes(apiGetContact(p));
 
-    // JSON API — 管理員操作
-    if (action === 'listContacts')  return jsonRes(apiListContacts(p));
-    if (action === 'addContact')    return jsonRes(apiAddContact(p));
-    if (action === 'updateContact') return jsonRes(apiUpdateContact(p));
-    if (action === 'deleteContact') return jsonRes(apiDeleteContact(p));
-    if (action === 'toggleContact') return jsonRes(apiToggleContact(p));
+    // JSON API — 管理員操作（聯絡人）
+    if (action === 'listContacts')     return jsonRes(apiListContacts(p));
+    if (action === 'addContact')       return jsonRes(apiAddContact(p));
+    if (action === 'updateContact')    return jsonRes(apiUpdateContact(p));
+    if (action === 'deleteContact')    return jsonRes(apiDeleteContact(p));
+    if (action === 'toggleContact')    return jsonRes(apiToggleContact(p));
+    // JSON API — 管理員操作（預約）
+    if (action === 'listBookings')     return jsonRes(apiListBookings(p));
+    if (action === 'approveBookingApi') return jsonRes(apiApproveBooking(p));
+    if (action === 'rejectBookingApi')  return jsonRes(apiRejectBooking(p));
 
     return page('⚠️ 無效的連結', '', '#fffbeb');
   } catch (err) {
@@ -156,6 +160,90 @@ function rejectBooking(id, token) {
                     .filter(Boolean).join('、') || '（對方未留聯絡方式）';
 
   return page('已婉拒此預約', '記得告知對方：' + contact, '#fff5f5');
+}
+
+
+// ══════════════════════════════════════════════════════════
+//  預約 API（管理後台用）
+// ══════════════════════════════════════════════════════════
+
+function apiListBookings(p) {
+  if (!checkAdmin(p)) return { ok: false, error: '密碼錯誤' };
+  const tz   = Session.getScriptTimeZone();
+  const rows = getBookingsSheet().getDataRange().getValues();
+  const list = [];
+  for (let i = 1; i < rows.length; i++) {
+    if (!rows[i][0]) continue;
+    const dateStr = (rows[i][4] instanceof Date)
+      ? Utilities.formatDate(rows[i][4], tz, 'yyyy-MM-dd') : String(rows[i][4]);
+    const timeStr = (rows[i][5] instanceof Date)
+      ? Utilities.formatDate(rows[i][5], tz, 'HH:mm') : String(rows[i][5]);
+    list.push({
+      id:      rows[i][0],
+      name:    rows[i][1],
+      phone:   rows[i][2],
+      line:    rows[i][3],
+      date:    dateStr,
+      time:    timeStr,
+      purpose: rows[i][6],
+      notes:   rows[i][7],
+      status:  rows[i][8],
+      token:   rows[i][9],
+      calId:   rows[i][10],
+      ts:      rows[i][11],
+    });
+  }
+  // 最新的排最前面
+  list.reverse();
+  return { ok: true, bookings: list };
+}
+
+function apiApproveBooking(p) {
+  if (!checkAdmin(p)) return { ok: false, error: '密碼錯誤' };
+  if (!p.id || !p.token) return { ok: false, error: '缺少參數' };
+
+  const { sheet, row, ri } = findBookingRow(p.id, p.token);
+  if (!row)                 return { ok: false, error: '找不到此預約' };
+  if (row[8] !== 'pending') return { ok: false, error: '此預約已處理過（' + row[8] + '）' };
+
+  const tz      = Session.getScriptTimeZone();
+  const dateStr = (row[4] instanceof Date)
+    ? Utilities.formatDate(row[4], tz, 'yyyy-MM-dd') : String(row[4]);
+  const timeStr = (row[5] instanceof Date)
+    ? Utilities.formatDate(row[5], tz, 'HH:mm') : String(row[5]);
+
+  const [yr, mo, dy] = dateStr.split('-').map(Number);
+  const [hr, mn]     = timeStr.split(':').map(Number);
+  const start = new Date(yr, mo - 1, dy, hr, mn);
+  const end   = new Date(start.getTime() + CONFIG.DURATION_MIN * 60000);
+
+  const ev = CalendarApp.getDefaultCalendar().createEvent(
+    '[預約] ' + row[1], start, end,
+    {
+      description:
+        '預約人: ' + row[1] +
+        (row[2] ? '\n電話: '    + row[2] : '') +
+        (row[3] ? '\nLINE ID: ' + row[3] : '') +
+        '\n目的: ' + row[6] +
+        (row[7] ? '\n備註: '    + row[7] : ''),
+    }
+  );
+
+  sheet.getRange(ri + 1, 9).setValue('approved');
+  sheet.getRange(ri + 1, 11).setValue(ev.getId());
+  return { ok: true };
+}
+
+function apiRejectBooking(p) {
+  if (!checkAdmin(p)) return { ok: false, error: '密碼錯誤' };
+  if (!p.id || !p.token) return { ok: false, error: '缺少參數' };
+
+  const { sheet, row, ri } = findBookingRow(p.id, p.token);
+  if (!row)                 return { ok: false, error: '找不到此預約' };
+  if (row[8] !== 'pending') return { ok: false, error: '此預約已處理過（' + row[8] + '）' };
+
+  sheet.getRange(ri + 1, 9).setValue('rejected');
+  return { ok: true };
 }
 
 
