@@ -9,23 +9,19 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif;
-            background: #f0f2f5;
-            min-height: 100vh;
-            padding: 24px 16px;
-            color: #222;
+            background: #f0f2f5; min-height: 100vh; padding: 20px 16px; color: #222;
         }
-
-        .wrap { max-width: 780px; margin: 0 auto; }
+        .wrap { max-width: 960px; margin: 0 auto; }
 
         /* ── Header ── */
         .header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 18px; padding: 22px 28px; color: #fff;
-            margin-bottom: 16px;
-            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            background: linear-gradient(135deg,#667eea,#764ba2);
+            border-radius: 16px; padding: 20px 24px; color: #fff;
+            margin-bottom: 14px;
+            display: flex; align-items: center; justify-content: space-between;
         }
-        .header-left { display: flex; align-items: center; gap: 14px; }
-        .header h1 { font-size: 19px; font-weight: 700; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header h1 { font-size: 18px; font-weight: 700; }
         .header p  { font-size: 12px; opacity: .75; margin-top: 2px; }
         .logout-btn {
             background: rgba(255,255,255,.18); color: #fff; border: none;
@@ -36,16 +32,14 @@
 
         /* ── Tabs ── */
         .tabs {
-            display: flex; gap: 4px;
-            background: #fff; border-radius: 14px;
-            padding: 6px; margin-bottom: 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.07);
+            display: flex; gap: 4px; background: #fff; border-radius: 12px;
+            padding: 5px; margin-bottom: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
         }
         .tab {
-            flex: 1; padding: 10px; border: none; border-radius: 10px;
+            flex: 1; padding: 9px; border: none; border-radius: 9px;
             font-size: 13px; font-weight: 600; cursor: pointer;
-            background: transparent; color: #999; font-family: inherit;
-            transition: all .2s;
+            background: transparent; color: #999; font-family: inherit; transition: all .2s;
         }
         .tab.active { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
         .tab-panel { display: none; }
@@ -53,30 +47,30 @@
 
         /* ── Card ── */
         .card {
-            background: #fff; border-radius: 16px; padding: 22px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.07); margin-bottom: 14px;
+            background: #fff; border-radius: 14px; padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07); margin-bottom: 12px;
         }
         .card-title {
-            font-size: 13px; font-weight: 700; color: #666;
+            font-size: 12px; font-weight: 700; color: #666;
             text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px;
             display: flex; justify-content: space-between; align-items: center;
         }
 
         /* ── Login ── */
-        #login-wrap { max-width: 340px; margin: 80px auto 0; }
-        #login-wrap .card { text-align: center; padding: 36px 28px; }
-        #login-wrap h2 { font-size: 20px; margin-bottom: 6px; }
-        #login-wrap p  { font-size: 13px; color: #999; margin-bottom: 22px; }
+        #login-wrap { max-width: 320px; margin: 80px auto 0; }
+        #login-wrap .card { text-align: center; padding: 32px 24px; }
+        #login-wrap h2 { font-size: 19px; margin-bottom: 5px; }
+        #login-wrap p  { font-size: 13px; color: #999; margin-bottom: 20px; }
 
         /* ── Form ── */
-        .field { margin-bottom: 11px; }
+        .field { margin-bottom: 10px; }
         label {
             display: block; font-size: 11px; font-weight: 700;
-            color: #888; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 5px;
+            color: #888; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px;
         }
-        input[type=text], input[type=password] {
+        input[type=text], input[type=password], input[type=search] {
             width: 100%; padding: 9px 12px;
-            border: 1.5px solid #e2e8f0; border-radius: 9px;
+            border: 1.5px solid #e2e8f0; border-radius: 8px;
             font-size: 14px; color: #333; background: #f8fafc; font-family: inherit;
             transition: border-color .2s;
         }
@@ -85,79 +79,113 @@
 
         /* ── Buttons ── */
         .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 9px 16px; border: none; border-radius: 9px;
-            font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
-            transition: all .15s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+            padding: 8px 14px; border: none; border-radius: 8px;
+            font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .15s;
         }
         .btn-primary { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
-        .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
-        .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-        .btn-full { width: 100%; padding: 12px; font-size: 15px; }
-        .btn-sm   { padding: 5px 11px; font-size: 12px; }
+        .btn-primary:hover { opacity: .88; }
+        .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+        .btn-full { width: 100%; padding: 12px; font-size: 14px; }
+        .btn-sm   { padding: 4px 10px; font-size: 11px; }
         .btn-ghost { background: #f1f5f9; color: #555; }
         .btn-ghost:hover { background: #e2e8f0; }
-        .btn-success { background: #f0fff4; color: #276749; }
+        .btn-success { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
         .btn-success:hover { background: #c6f6d5; }
-        .btn-danger { background: #fff5f5; color: #e53e3e; }
-        .btn-danger:hover { background: #fed7d7; }
-        .btn-warn { background: #fffbeb; color: #d97706; }
-        .btn-warn:hover { background: #fef3c7; }
+        .btn-danger  { background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; }
+        .btn-danger:hover  { background: #fed7d7; }
+        .btn-warn    { background: #fffbeb; color: #d97706; }
+        .btn-warn:hover    { background: #fef3c7; }
+        .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+        /* ── Stats ── */
+        .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
+        .stat { background: #fff; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 5px rgba(0,0,0,.06); }
+        .stat-num { font-size: 26px; font-weight: 800; color: #1a1a2e; }
+        .stat-label { font-size: 11px; color: #aaa; margin-top: 2px; font-weight: 600; text-transform: uppercase; }
+
+        /* ── Search & Filter bar ── */
+        .toolbar {
+            display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;
+        }
+        .search-wrap { position: relative; flex: 1; min-width: 180px; }
+        .search-wrap input { padding-left: 34px; }
+        .search-icon {
+            position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+            color: #aaa; font-size: 14px; pointer-events: none;
+        }
+        .filter-btn {
+            padding: 7px 13px; border: 1.5px solid #e2e8f0; border-radius: 20px;
+            font-size: 12px; font-weight: 600; cursor: pointer; background: #fff;
+            color: #888; font-family: inherit; transition: all .15s; white-space: nowrap;
+        }
+        .filter-btn.active { border-color: #667eea; color: #667eea; background: #eef2ff; }
+
+        /* ── Table ── */
+        .table-wrap { overflow-x: auto; }
+        table {
+            width: 100%; border-collapse: collapse; font-size: 13px;
+        }
+        thead th {
+            padding: 9px 12px; text-align: left;
+            font-size: 11px; font-weight: 700; color: #888;
+            text-transform: uppercase; letter-spacing: .4px;
+            border-bottom: 2px solid #f0f0f0; background: #fafafa;
+            white-space: nowrap;
+        }
+        thead th:first-child { border-radius: 8px 0 0 0; }
+        thead th:last-child  { border-radius: 0 8px 0 0; }
+        tbody tr { border-bottom: 1px solid #f5f5f5; transition: background .12s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #fafbff; }
+        tbody td { padding: 11px 12px; vertical-align: middle; }
+        td.name-cell { font-weight: 700; color: #1a1a2e; }
+        td.purpose-cell {
+            max-width: 200px; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap; color: #555;
+        }
+        td.contact-cell { color: #777; font-size: 12px; white-space: nowrap; }
+        td.action-cell { white-space: nowrap; }
+        td.action-cell .btn + .btn { margin-left: 4px; }
 
         /* ── Badge ── */
         .badge {
-            font-size: 10px; font-weight: 700; padding: 2px 8px;
-            border-radius: 999px; letter-spacing: .3px; white-space: nowrap;
+            display: inline-block; font-size: 10px; font-weight: 700;
+            padding: 3px 8px; border-radius: 999px; white-space: nowrap;
         }
         .badge-pending  { background: #fef3c7; color: #92400e; }
         .badge-approved { background: #c6f6d5; color: #276749; }
         .badge-rejected { background: #e2e8f0; color: #718096; }
-        .badge-on  { background: #c6f6d5; color: #276749; }
-        .badge-off { background: #e2e8f0; color: #718096; }
 
-        /* ── Booking list ── */
-        .booking-item {
-            border: 1.5px solid #f0f0f0; border-radius: 12px;
-            padding: 14px 16px; margin-bottom: 10px;
-            transition: border-color .2s;
-        }
-        .booking-item:last-child { margin-bottom: 0; }
-        .booking-item.pending  { border-color: #fde68a; }
-        .booking-item.approved { border-color: #9ae6b4; }
-        .booking-item.rejected { opacity: .6; }
-
-        .booking-header {
+        /* ── Pagination ── */
+        .pagination {
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 8px;
+            padding-top: 14px; border-top: 1px solid #f0f0f0; margin-top: 4px;
+            flex-wrap: wrap; gap: 8px;
         }
-        .booking-name { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
-        .booking-datetime { font-size: 13px; color: #555; font-weight: 600; }
-        .booking-meta { font-size: 12px; color: #999; margin-bottom: 8px; }
-        .booking-purpose { font-size: 13px; color: #333; line-height: 1.5; }
-        .booking-actions { display: flex; gap: 8px; margin-top: 10px; }
-
-        /* ── Filter bar ── */
-        .filter-bar {
-            display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap;
+        .page-info { font-size: 12px; color: #999; }
+        .page-btns { display: flex; gap: 4px; }
+        .page-btn {
+            width: 30px; height: 30px; border: 1.5px solid #e2e8f0; border-radius: 7px;
+            background: #fff; color: #555; font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: inherit; transition: all .15s;
+            display: flex; align-items: center; justify-content: center;
         }
-        .filter-btn {
-            padding: 5px 12px; border: 1.5px solid #e2e8f0; border-radius: 20px;
-            font-size: 12px; font-weight: 600; cursor: pointer; background: #fff;
-            color: #888; font-family: inherit; transition: all .15s;
-        }
-        .filter-btn.active { border-color: #667eea; color: #667eea; background: #eef2ff; }
+        .page-btn:hover:not(:disabled) { border-color: #667eea; color: #667eea; }
+        .page-btn.active { background: #667eea; border-color: #667eea; color: #fff; }
+        .page-btn:disabled { opacity: .35; cursor: not-allowed; }
 
         /* ── Contact list ── */
         .contact-item {
             display: flex; align-items: center; gap: 12px;
-            padding: 12px 0; border-bottom: 1px solid #f5f5f5;
+            padding: 11px 0; border-bottom: 1px solid #f5f5f5;
         }
         .contact-item:last-child { border-bottom: none; padding-bottom: 0; }
         .avatar {
-            width: 38px; height: 38px; border-radius: 50%;
+            width: 36px; height: 36px; border-radius: 50%;
             background: linear-gradient(135deg,#667eea,#764ba2);
             display: flex; align-items: center; justify-content: center;
-            font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0;
+            font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;
         }
         .avatar.disabled { background: #cbd5e0; }
         .info { flex: 1; min-width: 0; }
@@ -168,7 +196,7 @@
             font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px;
             font-family: monospace; letter-spacing: .5px; margin-right: 4px;
         }
-        .actions { display: flex; gap: 5px; flex-shrink: 0; }
+        .c-actions { display: flex; gap: 5px; flex-shrink: 0; }
         .edit-row {
             display: none; padding: 12px; background: #f8fafc;
             border-radius: 10px; margin-top: 8px;
@@ -178,25 +206,21 @@
         /* ── Alert ── */
         .alert {
             display: none; font-size: 13px; padding: 9px 13px;
-            border-radius: 9px; margin-bottom: 11px;
+            border-radius: 8px; margin-bottom: 10px;
         }
         .alert-err { background: #fff5f5; color: #c53030; border-left: 3px solid #fc8181; }
         .alert-ok  { background: #f0fff4; color: #276749; border-left: 3px solid #68d391; }
 
-        /* ── Empty / Spin ── */
-        .empty { text-align: center; padding: 32px; color: #bbb; font-size: 14px; }
+        /* ── Misc ── */
+        .empty { text-align: center; padding: 32px; color: #ccc; font-size: 14px; }
         .spin {
-            display: inline-block; width: 16px; height: 16px;
+            display: inline-block; width: 15px; height: 15px;
             border: 2px solid #ddd; border-top-color: #667eea;
             border-radius: 50%; animation: spin .6s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── Stats ── */
-        .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
-        .stat { background: #fff; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 6px rgba(0,0,0,.06); }
-        .stat-num { font-size: 24px; font-weight: 800; color: #1a1a2e; }
-        .stat-label { font-size: 11px; color: #aaa; margin-top: 2px; font-weight: 600; text-transform: uppercase; }
+        .badge-on  { background: #c6f6d5; color: #276749; }
+        .badge-off { background: #e2e8f0; color: #718096; }
     </style>
 </head>
 <body>
@@ -210,7 +234,7 @@
             <input type="password" id="admin-pw" placeholder="管理密碼" autocomplete="off" />
         </div>
         <div class="alert alert-err" id="login-err"></div>
-        <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()" style="margin-top:4px">登入</button>
+        <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()" style="margin-top:6px">登入</button>
     </div>
 </div>
 
@@ -219,38 +243,24 @@
 
     <div class="header">
         <div class="header-left">
-            <div style="font-size:28px">🗓</div>
-            <div>
-                <h1>預約管理後台</h1>
-                <p>達菲的預約系統</p>
-            </div>
+            <div style="font-size:26px">🗓</div>
+            <div><h1>預約管理後台</h1><p>達菲的預約系統</p></div>
         </div>
         <button class="logout-btn" onclick="doLogout()">登出</button>
     </div>
 
-    <!-- Tabs -->
     <div class="tabs">
         <button class="tab active" id="tab-bookings" onclick="switchTab('bookings')">預約紀錄</button>
-        <button class="tab" id="tab-contacts" onclick="switchTab('contacts')">朋友管理</button>
+        <button class="tab"        id="tab-contacts" onclick="switchTab('contacts')">朋友管理</button>
     </div>
 
-    <!-- ── Tab: Bookings ── -->
+    <!-- ══ Tab: Bookings ══ -->
     <div class="tab-panel active" id="panel-bookings">
 
-        <!-- Stats -->
         <div class="stats">
-            <div class="stat">
-                <div class="stat-num" id="stat-pending">-</div>
-                <div class="stat-label">待審核</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num" id="stat-approved">-</div>
-                <div class="stat-label">已確認</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num" id="stat-rejected">-</div>
-                <div class="stat-label">已婉拒</div>
-            </div>
+            <div class="stat"><div class="stat-num" id="stat-pending">-</div><div class="stat-label">待審核</div></div>
+            <div class="stat"><div class="stat-num" id="stat-approved">-</div><div class="stat-label">已確認</div></div>
+            <div class="stat"><div class="stat-num" id="stat-rejected">-</div><div class="stat-label">已婉拒</div></div>
         </div>
 
         <div class="card">
@@ -259,19 +269,46 @@
                 <button class="btn btn-sm btn-ghost" onclick="loadBookings()">重新整理</button>
             </div>
 
-            <!-- Filter -->
-            <div class="filter-bar">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="search" id="search-input" placeholder="搜尋姓名、目的、電話、LINE..." oninput="onSearch()" />
+                </div>
                 <button class="filter-btn active" onclick="setFilter('all',this)">全部</button>
                 <button class="filter-btn" onclick="setFilter('pending',this)">待審核</button>
                 <button class="filter-btn" onclick="setFilter('approved',this)">已確認</button>
                 <button class="filter-btn" onclick="setFilter('rejected',this)">已婉拒</button>
             </div>
 
-            <div id="booking-list"><div class="empty"><span class="spin"></span></div></div>
+            <!-- Table -->
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>日期時間</th>
+                            <th>聯絡方式</th>
+                            <th>預約目的</th>
+                            <th>狀態</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booking-tbody">
+                        <tr><td colspan="6" class="empty"><span class="spin"></span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <div class="page-info" id="page-info"></div>
+                <div class="page-btns" id="page-btns"></div>
+            </div>
         </div>
     </div>
 
-    <!-- ── Tab: Contacts ── -->
+    <!-- ══ Tab: Contacts ══ -->
     <div class="tab-panel" id="panel-contacts">
 
         <div class="card">
@@ -306,24 +343,25 @@
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcbbKaXNTyKg3lNkA_enC6A9XE-g-ijQoTudsFxxfIJzucx1FpPl_ad796aYndSL1U/exec';
+const PAGE_SIZE  = 15;
 
-let ADMIN_PW  = '';
-let contacts  = [];
-let bookings  = [];
-let curFilter = 'all';
+let ADMIN_PW   = '';
+let contacts   = [];
+let bookings   = [];
+let curFilter  = 'all';
+let curSearch  = '';
+let curPage    = 1;
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════
    Login / Logout
-══════════════════════════════════════════ */
+══════════════════════════════════════ */
 async function doLogin() {
     const pw    = document.getElementById('admin-pw').value.trim();
     const errEl = document.getElementById('login-err');
     const btn   = document.getElementById('login-btn');
     if (!pw) return;
-
     errEl.style.display = 'none';
     btn.disabled = true; btn.textContent = '驗證中...';
-
     try {
         const res = await api({ action: 'listContacts', adminpw: pw });
         if (!res.ok) {
@@ -344,9 +382,7 @@ async function doLogin() {
         btn.disabled = false; btn.textContent = '登入';
     }
 }
-document.getElementById('admin-pw').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doLogin();
-});
+document.getElementById('admin-pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
 function doLogout() {
     ADMIN_PW = ''; contacts = []; bookings = [];
@@ -355,9 +391,9 @@ function doLogout() {
     document.getElementById('login-wrap').style.display = 'block';
 }
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════
    Tabs
-══════════════════════════════════════════ */
+══════════════════════════════════════ */
 function switchTab(name) {
     ['bookings','contacts'].forEach(t => {
         document.getElementById('tab-' + t).classList.toggle('active', t === name);
@@ -365,25 +401,25 @@ function switchTab(name) {
     });
 }
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════
    Bookings
-══════════════════════════════════════════ */
+══════════════════════════════════════ */
 async function loadBookings() {
-    document.getElementById('booking-list').innerHTML = '<div class="empty"><span class="spin"></span></div>';
+    document.getElementById('booking-tbody').innerHTML =
+        '<tr><td colspan="6" class="empty"><span class="spin"></span></td></tr>';
     try {
         const res = await api({ action: 'listBookings', adminpw: ADMIN_PW });
-        if (!res.ok) { showBookingError(res.error); return; }
+        if (!res.ok) { showTbError(res.error); return; }
         bookings = res.bookings || [];
         updateStats();
-        renderBookings();
-    } catch (e) {
-        showBookingError(e.message);
-    }
+        curPage = 1;
+        renderTable();
+    } catch (e) { showTbError(e.message); }
 }
 
-function showBookingError(msg) {
-    document.getElementById('booking-list').innerHTML =
-        '<div class="empty" style="color:#e53e3e">載入失敗：' + esc(msg || '') + '</div>';
+function showTbError(msg) {
+    document.getElementById('booking-tbody').innerHTML =
+        '<tr><td colspan="6" class="empty" style="color:#e53e3e">載入失敗：' + esc(msg || '') + '</td></tr>';
 }
 
 function updateStats() {
@@ -393,109 +429,151 @@ function updateStats() {
 }
 
 function setFilter(f, el) {
-    curFilter = f;
+    curFilter = f; curPage = 1;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
-    renderBookings();
+    renderTable();
 }
 
-function renderBookings() {
-    const el   = document.getElementById('booking-list');
-    const list = curFilter === 'all' ? bookings : bookings.filter(b => b.status === curFilter);
+function onSearch() {
+    curSearch = document.getElementById('search-input').value.toLowerCase();
+    curPage = 1;
+    renderTable();
+}
 
-    if (!list.length) {
-        el.innerHTML = '<div class="empty">沒有' + (curFilter === 'all' ? '' : statusLabel(curFilter)) + '的預約紀錄</div>';
+function getFiltered() {
+    return bookings.filter(b => {
+        if (curFilter !== 'all' && b.status !== curFilter) return false;
+        if (!curSearch) return true;
+        return [b.name, b.purpose, b.phone, b.line, b.notes, b.date]
+            .some(v => String(v || '').toLowerCase().includes(curSearch));
+    });
+}
+
+function renderTable() {
+    const filtered = getFiltered();
+    const total    = filtered.length;
+    const pages    = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    if (curPage > pages) curPage = pages;
+
+    const slice = filtered.slice((curPage - 1) * PAGE_SIZE, curPage * PAGE_SIZE);
+    const tbody = document.getElementById('booking-tbody');
+
+    if (!slice.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">沒有符合的預約紀錄</td></tr>';
+        document.getElementById('page-info').textContent = '';
+        document.getElementById('page-btns').innerHTML  = '';
         return;
     }
 
-    el.innerHTML = list.map(b => {
+    tbody.innerHTML = slice.map(b => {
         const isPending = b.status === 'pending';
-        const contact = [b.phone ? '📞 ' + b.phone : '', b.line ? 'LINE ' + b.line : '']
-                          .filter(Boolean).join('　') || '未留聯絡方式';
-        return `
-        <div class="booking-item ${b.status}" id="bk-${b.id}">
-            <div class="booking-header">
-                <div class="booking-name">
-                    ${esc(b.name)}
-                    <span class="badge badge-${b.status}">${statusLabel(b.status)}</span>
-                </div>
-                <div class="booking-datetime">${esc(b.date)} ${esc(b.time)}</div>
-            </div>
-            <div class="booking-meta">${contact}</div>
-            <div class="booking-purpose">${esc(b.purpose)}${b.notes ? '<br><span style="color:#aaa">備註：' + esc(b.notes) + '</span>' : ''}</div>
-            ${isPending ? `
-            <div class="booking-actions">
-                <button class="btn btn-sm btn-success" onclick="doApprove('${b.id}','${b.token}')">確認接受 → 加入行事曆</button>
-                <button class="btn btn-sm btn-danger"  onclick="doReject('${b.id}','${b.token}')">婉拒</button>
-            </div>` : `
-            <div style="margin-top:8px;font-size:12px;color:#bbb">
-                ${b.status === 'approved' ? '已加入 Google 行事曆' : '已婉拒'}
-                ${b.ts ? '　' + String(b.ts).slice(0,16) : ''}
-            </div>`}
-        </div>`;
+        const contact   = [b.phone ? b.phone : '', b.line ? 'LINE:' + b.line : '']
+                            .filter(Boolean).join(' / ') || '—';
+        return `<tr>
+            <td class="name-cell">${esc(b.name)}</td>
+            <td style="white-space:nowrap;color:#555">${esc(b.date)}<br><span style="color:#aaa;font-size:11px">${esc(b.time)}</span></td>
+            <td class="contact-cell">${esc(contact)}</td>
+            <td class="purpose-cell" title="${esc(b.purpose)}">${esc(b.purpose)}${b.notes ? '<br><span style="color:#bbb;font-size:11px">' + esc(b.notes) + '</span>' : ''}</td>
+            <td><span class="badge badge-${b.status}">${statusLabel(b.status)}</span></td>
+            <td class="action-cell">
+                ${isPending ? `
+                    <button class="btn btn-sm btn-success" onclick="doApprove('${b.id}','${b.token}',this)">確認</button>
+                    <button class="btn btn-sm btn-warn"    onclick="doReject('${b.id}','${b.token}',this)">婉拒</button>
+                ` : ''}
+                <button class="btn btn-sm btn-danger" onclick="doDeleteBooking('${b.id}',this)">刪除</button>
+            </td>
+        </tr>`;
     }).join('');
+
+    // Pagination info
+    const from = (curPage - 1) * PAGE_SIZE + 1;
+    const to   = Math.min(curPage * PAGE_SIZE, total);
+    document.getElementById('page-info').textContent = `共 ${total} 筆，第 ${from}–${to} 筆`;
+
+    // Page buttons
+    const btnWrap = document.getElementById('page-btns');
+    let html = `<button class="page-btn" onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>‹</button>`;
+    const range = pageRange(curPage, pages);
+    range.forEach(p => {
+        if (p === '…') { html += `<button class="page-btn" disabled>…</button>`; return; }
+        html += `<button class="page-btn ${p===curPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+    });
+    html += `<button class="page-btn" onclick="goPage(${curPage+1})" ${curPage===pages?'disabled':''}>›</button>`;
+    btnWrap.innerHTML = html;
 }
+
+function pageRange(cur, total) {
+    if (total <= 7) return Array.from({length: total}, (_,i) => i+1);
+    const pages = [1];
+    if (cur > 3)       pages.push('…');
+    for (let p = Math.max(2, cur-1); p <= Math.min(total-1, cur+1); p++) pages.push(p);
+    if (cur < total-2) pages.push('…');
+    pages.push(total);
+    return pages;
+}
+
+function goPage(p) { curPage = p; renderTable(); }
 
 function statusLabel(s) {
     return { pending: '待審核', approved: '已確認', rejected: '已婉拒' }[s] || s;
 }
 
-async function doApprove(id, token) {
-    const btn = event.target;
+async function doApprove(id, token, btn) {
     btn.disabled = true; btn.textContent = '處理中...';
     try {
         const res = await api({ action: 'approveBookingApi', adminpw: ADMIN_PW, id, token });
-        if (!res.ok) { alert('失敗：' + (res.error || '未知錯誤')); btn.disabled = false; btn.textContent = '確認接受 → 加入行事曆'; return; }
+        if (!res.ok) { alert('失敗：' + (res.error || '未知錯誤')); btn.disabled = false; btn.textContent = '確認'; return; }
         await loadBookings();
-    } catch (e) {
-        alert('連線失敗：' + e.message);
-        btn.disabled = false; btn.textContent = '確認接受 → 加入行事曆';
-    }
+    } catch (e) { alert('連線失敗：' + e.message); btn.disabled = false; btn.textContent = '確認'; }
 }
 
-async function doReject(id, token) {
+async function doReject(id, token, btn) {
     if (!confirm('確定婉拒此預約？')) return;
-    const btn = event.target;
     btn.disabled = true; btn.textContent = '處理中...';
     try {
         const res = await api({ action: 'rejectBookingApi', adminpw: ADMIN_PW, id, token });
         if (!res.ok) { alert('失敗：' + (res.error || '未知錯誤')); btn.disabled = false; btn.textContent = '婉拒'; return; }
         await loadBookings();
-    } catch (e) {
-        alert('連線失敗：' + e.message);
-        btn.disabled = false; btn.textContent = '婉拒';
-    }
+    } catch (e) { alert('連線失敗：' + e.message); btn.disabled = false; btn.textContent = '婉拒'; }
 }
 
-/* ══════════════════════════════════════════
+async function doDeleteBooking(id, btn) {
+    if (!confirm('確定刪除此筆預約紀錄？此操作無法復原。')) return;
+    btn.disabled = true; btn.textContent = '刪除中...';
+    try {
+        const res = await api({ action: 'deleteBooking', adminpw: ADMIN_PW, id });
+        if (!res.ok) { alert('失敗：' + (res.error || '未知錯誤')); btn.disabled = false; btn.textContent = '刪除'; return; }
+        await loadBookings();
+    } catch (e) { alert('連線失敗：' + e.message); btn.disabled = false; btn.textContent = '刪除'; }
+}
+
+/* ══════════════════════════════════════
    Contacts
-══════════════════════════════════════════ */
+══════════════════════════════════════ */
 function renderContacts() {
     const el = document.getElementById('contact-list');
     document.getElementById('list-count').textContent = contacts.length + ' 人';
-    if (!contacts.length) {
-        el.innerHTML = '<div class="empty">還沒有朋友，從上方新增吧！</div>';
-        return;
-    }
+    if (!contacts.length) { el.innerHTML = '<div class="empty">還沒有朋友，從上方新增吧！</div>'; return; }
     el.innerHTML = contacts.map(c => `
         <div class="contact-item" id="ci-${c.id}">
-            <div class="avatar ${c.enabled ? '' : 'disabled'}">${esc(c.name[0])}</div>
+            <div class="avatar ${c.enabled?'':'disabled'}">${esc(c.name[0])}</div>
             <div class="info">
                 <div class="info-name">
                     ${esc(c.name)}
-                    <span class="badge ${c.enabled ? 'badge-on' : 'badge-off'}">${c.enabled ? '啟用' : '停用'}</span>
+                    <span class="badge ${c.enabled?'badge-on':'badge-off'}">${c.enabled?'啟用':'停用'}</span>
                 </div>
                 <div class="info-sub">
                     <span class="passphrase-tag">${esc(c.passphrase)}</span>
-                    ${c.phone ? '📞 ' + esc(c.phone) : ''}
-                    ${c.line  ? '　LINE ' + esc(c.line) : ''}
-                    ${!c.phone && !c.line ? '（未留聯絡方式）' : ''}
+                    ${c.phone ? '📞 '+esc(c.phone) : ''}
+                    ${c.line  ? '　LINE '+esc(c.line) : ''}
+                    ${!c.phone&&!c.line ? '（未留聯絡方式）' : ''}
                 </div>
             </div>
-            <div class="actions">
-                <button class="btn btn-sm btn-ghost"   onclick="openEdit('${c.id}')">編輯</button>
-                <button class="btn btn-sm btn-warn"    onclick="doToggle('${c.id}')">${c.enabled ? '停用' : '啟用'}</button>
-                <button class="btn btn-sm btn-danger"  onclick="doDelete('${c.id}','${esc(c.name)}')">刪除</button>
+            <div class="c-actions">
+                <button class="btn btn-sm btn-ghost"  onclick="openEdit('${c.id}')">編輯</button>
+                <button class="btn btn-sm btn-warn"   onclick="doToggle('${c.id}')">${c.enabled?'停用':'啟用'}</button>
+                <button class="btn btn-sm btn-danger" onclick="doDelete('${c.id}','${esc(c.name)}')">刪除</button>
             </div>
         </div>
         <div class="edit-row" id="er-${c.id}">
@@ -507,11 +585,11 @@ function renderContacts() {
             </div>
             <div class="row2">
                 <div class="field"><label>電話</label>
-                    <input type="text" id="ephone-${c.id}" value="${esc(c.phone || '')}" /></div>
+                    <input type="text" id="ephone-${c.id}" value="${esc(c.phone||'')}" /></div>
                 <div class="field"><label>LINE ID</label>
-                    <input type="text" id="eline-${c.id}" value="${esc(c.line || '')}" /></div>
+                    <input type="text" id="eline-${c.id}" value="${esc(c.line||'')}" /></div>
             </div>
-            <div style="display:flex;gap:8px;margin-top:4px">
+            <div style="display:flex;gap:8px;margin-top:6px">
                 <button class="btn btn-sm btn-primary" onclick="doUpdate('${c.id}')">儲存</button>
                 <button class="btn btn-sm btn-ghost"   onclick="closeEdit('${c.id}')">取消</button>
             </div>
@@ -534,66 +612,62 @@ async function doAdd() {
     const errEl = document.getElementById('add-err');
     const okEl  = document.getElementById('add-ok');
     errEl.style.display = 'none'; okEl.style.display = 'none';
-
-    if (!name || !pass) { errEl.textContent = '名字和通關密語為必填'; errEl.style.display = 'block'; return; }
-
+    if (!name||!pass) { errEl.textContent='名字和通關密語為必填'; errEl.style.display='block'; return; }
     const btn = document.getElementById('add-btn');
     btn.disabled = true; btn.textContent = '新增中...';
-    const res = await api({ action: 'addContact', adminpw: ADMIN_PW, name, passphrase: pass, phone, line });
+    const res = await api({ action:'addContact', adminpw:ADMIN_PW, name, passphrase:pass, phone, line });
     btn.disabled = false; btn.textContent = '新增';
-
-    if (!res.ok) { errEl.textContent = res.error || '新增失敗'; errEl.style.display = 'block'; return; }
-
-    okEl.textContent = name + ' 已新增！'; okEl.style.display = 'block';
-    ['add-name','add-pass','add-phone','add-line'].forEach(id => document.getElementById(id).value = '');
-    setTimeout(() => okEl.style.display = 'none', 2500);
+    if (!res.ok) { errEl.textContent=res.error||'新增失敗'; errEl.style.display='block'; return; }
+    okEl.textContent = name+' 已新增！'; okEl.style.display='block';
+    ['add-name','add-pass','add-phone','add-line'].forEach(id => document.getElementById(id).value='');
+    setTimeout(() => okEl.style.display='none', 2500);
     await reloadContacts();
 }
 
 async function doUpdate(id) {
-    const name  = document.getElementById('en-' + id).value.trim();
-    const pass  = document.getElementById('ep-' + id).value.trim();
-    const phone = document.getElementById('ephone-' + id).value.trim();
-    const line  = document.getElementById('eline-' + id).value.trim();
-    const errEl = document.getElementById('ee-' + id);
-    errEl.style.display = 'none';
-    if (!name || !pass) { errEl.textContent = '名字和密語不能空白'; errEl.style.display = 'block'; return; }
-    const res = await api({ action: 'updateContact', adminpw: ADMIN_PW, id, name, passphrase: pass, phone, line });
-    if (!res.ok) { errEl.textContent = res.error || '更新失敗'; errEl.style.display = 'block'; return; }
+    const name  = document.getElementById('en-'+id).value.trim();
+    const pass  = document.getElementById('ep-'+id).value.trim();
+    const phone = document.getElementById('ephone-'+id).value.trim();
+    const line  = document.getElementById('eline-'+id).value.trim();
+    const errEl = document.getElementById('ee-'+id);
+    errEl.style.display='none';
+    if (!name||!pass) { errEl.textContent='名字和密語不能空白'; errEl.style.display='block'; return; }
+    const res = await api({ action:'updateContact', adminpw:ADMIN_PW, id, name, passphrase:pass, phone, line });
+    if (!res.ok) { errEl.textContent=res.error||'更新失敗'; errEl.style.display='block'; return; }
     closeEdit(id);
     await reloadContacts();
 }
 
 async function doToggle(id) {
-    await api({ action: 'toggleContact', adminpw: ADMIN_PW, id });
+    await api({ action:'toggleContact', adminpw:ADMIN_PW, id });
     await reloadContacts();
 }
 
 async function doDelete(id, name) {
-    if (!confirm('確定要刪除「' + name + '」？')) return;
-    await api({ action: 'deleteContact', adminpw: ADMIN_PW, id });
+    if (!confirm('確定要刪除「'+name+'」？')) return;
+    await api({ action:'deleteContact', adminpw:ADMIN_PW, id });
     await reloadContacts();
 }
 
 async function reloadContacts() {
-    const res = await api({ action: 'listContacts', adminpw: ADMIN_PW });
+    const res = await api({ action:'listContacts', adminpw:ADMIN_PW });
     contacts = res.contacts || [];
     renderContacts();
 }
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════
    Helpers
-══════════════════════════════════════════ */
+══════════════════════════════════════ */
 async function api(params) {
-    const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
-    const res  = await fetch(url, { redirect: 'follow' });
+    const url  = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+    const res  = await fetch(url, { redirect:'follow' });
     const text = await res.text();
     try { return JSON.parse(text); }
     catch (_) { throw new Error('回應格式錯誤，請確認 GAS 已重新部署。(' + text.slice(0,60) + ')'); }
 }
 
 function esc(s) {
-    return String(s || '')
+    return String(s||'')
         .replace(/&/g,'&amp;').replace(/</g,'&lt;')
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

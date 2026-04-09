@@ -16,7 +16,7 @@ const CONFIG = {
   DURATION_MIN:   60,
   SHEET_NAME:     'Bookings',
   CONTACTS_SHEET: 'Contacts',
-  ADMIN_PASSWORD: 'YOUR_ADMIN_PW',   // ← 改成你的管理員密碼（用於 admin.html 登入）
+  ADMIN_PASSWORD: 'Daffy1113',   // ← 改成你的管理員密碼（用於 admin.html 登入）
 };
 // ─────────────────────────────────────────────────────────
 
@@ -69,6 +69,7 @@ function doGet(e) {
     if (action === 'listBookings')     return jsonRes(apiListBookings(p));
     if (action === 'approveBookingApi') return jsonRes(apiApproveBooking(p));
     if (action === 'rejectBookingApi')  return jsonRes(apiRejectBooking(p));
+    if (action === 'deleteBooking')     return jsonRes(apiDeleteBooking(p));
 
     return page('⚠️ 無效的連結', '', '#fffbeb');
   } catch (err) {
@@ -247,6 +248,21 @@ function apiRejectBooking(p) {
 
   sheet.getRange(ri + 1, 9).setValue('rejected');
   return { ok: true };
+}
+
+function apiDeleteBooking(p) {
+  if (!checkAdmin(p)) return { ok: false, error: '密碼錯誤' };
+  if (!p.id)          return { ok: false, error: '缺少 ID' };
+
+  const sheet = getBookingsSheet();
+  const rows  = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] === p.id) {
+      sheet.deleteRow(i + 1);
+      return { ok: true };
+    }
+  }
+  return { ok: false, error: '找不到此預約' };
 }
 
 
