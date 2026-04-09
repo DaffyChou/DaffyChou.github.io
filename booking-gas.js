@@ -19,11 +19,18 @@
 //  設定區
 // ─────────────────────────────────────────────────────────
 const CONFIG = {
-  PASSPHRASE:   'DaffyXDXDXD',
   OWNER_EMAIL:  'witch22306@gmail.com',
   OWNER_NAME:   '達菲',
-  DURATION_MIN: 60,           // 預設會議時長（分鐘），可自行修改
+  DURATION_MIN: 60,
   SHEET_NAME:   'Bookings',
+};
+
+// 與 booking.html 的 CONTACTS 保持一致
+// key = 通關密語，value 只要存在即為合法
+const VALID_PASSPHRASES = {
+  'DaffyXDXDXD': true,
+  // 新增朋友時在這裡同步加一行：
+  // '新密語': true,
 };
 // ─────────────────────────────────────────────────────────
 
@@ -41,7 +48,7 @@ const CONFIG = {
 function doPost(e) {
   try {
     const d = e.parameter;
-    if (d.passphrase !== CONFIG.PASSPHRASE) return respond('Unauthorized');
+    if (!VALID_PASSPHRASES[d.passphrase]) return respond('Unauthorized');
     return createBooking(d);
   } catch (err) {
     console.error('doPost error:', err);

@@ -172,22 +172,35 @@
     <!-- Step 1: Booking Form -->
     <div class="step" id="s1">
         <div class="step-heading">填寫預約資料</div>
-        <div class="step-sub">告訴 Daffy 你想約什麼時間和目的</div>
+        <div class="step-sub" id="s1-sub">告訴達菲你想約什麼時間和目的</div>
 
-        <div class="field">
-            <label class="req">你的名字</label>
-            <input type="text" id="f-name" placeholder="你叫什麼名字?" />
-        </div>
-        <div class="row2">
-            <div class="field">
-                <label>電話</label>
-                <input type="text" id="f-phone" placeholder="0912-345-678（選填）" />
-            </div>
-            <div class="field">
-                <label>LINE ID</label>
-                <input type="text" id="f-line" placeholder="你的 LINE ID（選填）" />
+        <!-- 已知聯絡人：顯示身份卡，隱藏個人資料輸入 -->
+        <div id="identity-card" style="display:none;background:#f0f4ff;border-radius:12px;padding:14px 16px;margin-bottom:16px;display:none;align-items:center;gap:12px">
+            <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👤</div>
+            <div>
+                <div style="font-weight:700;color:#1a1a2e;font-size:15px" id="id-name"></div>
+                <div style="font-size:12px;color:#888" id="id-contact"></div>
             </div>
         </div>
+
+        <!-- 陌生人：顯示個人資料輸入 -->
+        <div id="manual-fields">
+            <div class="field">
+                <label class="req">你的名字</label>
+                <input type="text" id="f-name" placeholder="你叫什麼名字?" />
+            </div>
+            <div class="row2">
+                <div class="field">
+                    <label>電話</label>
+                    <input type="text" id="f-phone" placeholder="0912-345-678（選填）" />
+                </div>
+                <div class="field">
+                    <label>LINE ID</label>
+                    <input type="text" id="f-line" placeholder="你的 LINE ID（選填）" />
+                </div>
+            </div>
+        </div>
+
         <div class="row2">
             <div class="field">
                 <label class="req">希望日期</label>
@@ -226,16 +239,21 @@
 
 <script>
 /* =========================================================
-   設定區 — 部署前請填入以下兩個值
+   設定區
    ========================================================= */
-const CONFIG = {
-    PASSPHRASE: 'DaffyXDXDXD',
-    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwcbbKaXNTyKg3lNkA_enC6A9XE-g-ijQoTudsFxxfIJzucx1FpPl_ad796aYndSL1U/exec',
-    OWNER_NAME: '達菲',
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcbbKaXNTyKg3lNkA_enC6A9XE-g-ijQoTudsFxxfIJzucx1FpPl_ad796aYndSL1U/exec';
+
+// 每個朋友的通關密語 → 個人資料
+// phone / line 可以空白，name 是必填
+const CONTACTS = {
+    'DaffyXDXDXD': { name: '豐豐',   phone: '0912-000-001', line: 'fengfeng'   },
+    // 新增朋友只要加一行，格式如下：
+    // '密語': { name: '名字', phone: '電話', line: 'LINE ID' },
 };
 /* ========================================================= */
 
 let _step = 0;
+let _contact = null; // 目前登入的聯絡人
 
 function goStep(n) {
     document.getElementById('s' + _step).classList.remove('show');
@@ -248,12 +266,28 @@ function goStep(n) {
 }
 
 function checkPass() {
-    const val = document.getElementById('passphrase').value;
+    const val = document.getElementById('passphrase').value.trim();
     const err = document.getElementById('err0');
-    if (val === CONFIG.PASSPHRASE) {
+
+    _contact = CONTACTS[val] || null;
+
+    if (_contact) {
         err.style.display = 'none';
+        // 已知聯絡人：顯示身份卡，隱藏手動輸入
+        const contactInfo = [
+            _contact.phone ? '電話 ' + _contact.phone : '',
+            _contact.line  ? 'LINE ' + _contact.line  : '',
+        ].filter(Boolean).join('　');
+
+        document.getElementById('id-name').textContent    = _contact.name;
+        document.getElementById('id-contact').textContent = contactInfo || '（未留聯絡方式）';
+        document.getElementById('identity-card').style.display = 'flex';
+        document.getElementById('manual-fields').style.display = 'none';
+        document.getElementById('s1-sub').textContent = '嗨 ' + _contact.name + '，告訴達菲你想約什麼時間和目的';
+
         goStep(1);
         document.getElementById('f-date').min = new Date().toISOString().slice(0, 10);
+        document.getElementById('f-purpose').focus();
     } else {
         err.style.display = 'block';
         document.getElementById('passphrase').value = '';
@@ -266,9 +300,6 @@ document.getElementById('passphrase').addEventListener('keydown', e => {
 });
 
 async function doSubmit() {
-    const name    = document.getElementById('f-name').value.trim();
-    const phone   = document.getElementById('f-phone').value.trim();
-    const line    = document.getElementById('f-line').value.trim();
     const date    = document.getElementById('f-date').value;
     const time    = document.getElementById('f-time').value;
     const purpose = document.getElementById('f-purpose').value.trim();
@@ -276,7 +307,11 @@ async function doSubmit() {
     const err     = document.getElementById('err1');
     const btn     = document.getElementById('submit-btn');
 
-    // Validation
+    // 已知聯絡人用 _contact，否則讀手動欄位
+    const name  = _contact ? _contact.name  : document.getElementById('f-name').value.trim();
+    const phone = _contact ? (_contact.phone || '') : document.getElementById('f-phone').value.trim();
+    const line  = _contact ? (_contact.line  || '') : document.getElementById('f-line').value.trim();
+
     if (!name || !date || !time || !purpose) {
         err.style.display = 'block';
         err.textContent = '請填寫所有必填欄位 (*)';
@@ -286,18 +321,19 @@ async function doSubmit() {
     btn.disabled = true;
     btn.textContent = '送出中...';
 
-    // Submit to Apps Script via no-cors POST
-    if (CONFIG.SCRIPT_URL && !CONFIG.SCRIPT_URL.startsWith('YOUR_')) {
+    // 取得目前密語（用來讓 GAS 驗證）
+    const passphrase = document.getElementById('passphrase').value.trim();
+
+    if (!SCRIPT_URL.startsWith('YOUR_')) {
         try {
-            await fetch(CONFIG.SCRIPT_URL, {
+            await fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: new URLSearchParams({ name, phone, line, date, time, purpose, notes, passphrase: CONFIG.PASSPHRASE })
+                body: new URLSearchParams({ name, phone, line, date, time, purpose, notes, passphrase })
             });
         } catch (_) {}
     }
 
-    // Show success (optimistic)
     let displayDate = date + ' ' + time;
     try {
         displayDate = new Date(date + 'T' + time + ':00').toLocaleString('zh-TW', {
@@ -307,12 +343,12 @@ async function doSubmit() {
     } catch (_) {}
 
     document.getElementById('summary').innerHTML = `
-        <p>👤 <b>姓名:</b> ${esc(name)}</p>
-        ${phone ? `<p>📞 <b>電話:</b> ${esc(phone)}</p>` : ''}
-        ${line  ? `<p>💬 <b>LINE:</b> ${esc(line)}</p>`  : ''}
-        <p>📅 <b>日期時間:</b> ${displayDate}</p>
-        <p>🗒 <b>目的:</b> ${esc(purpose)}</p>
-        ${notes ? `<p>📝 <b>備註:</b> ${esc(notes)}</p>` : ''}
+        <p><b>姓名:</b> ${esc(name)}</p>
+        ${phone ? `<p><b>電話:</b> ${esc(phone)}</p>` : ''}
+        ${line  ? `<p><b>LINE:</b> ${esc(line)}</p>`  : ''}
+        <p><b>日期時間:</b> ${displayDate}</p>
+        <p><b>目的:</b> ${esc(purpose)}</p>
+        ${notes ? `<p><b>備註:</b> ${esc(notes)}</p>` : ''}
     `;
     goStep(2);
 }
