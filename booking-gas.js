@@ -89,7 +89,7 @@ function createBooking(d) {
 
   GmailApp.sendEmail(
     CONFIG.OWNER_EMAIL,
-    '📅 新預約申請 | ' + d.name + '｜' + d.date + ' ' + d.time,
+    '【新預約申請】' + d.name + '｜' + d.date + ' ' + d.time,
     '新預約\n姓名: ' + d.name +
     (d.phone ? '\n電話: ' + d.phone : '') +
     (d.line  ? '\nLINE: ' + d.line  : '') +
@@ -214,7 +214,7 @@ function notifyEmailHtml(d, id, approveLink, rejectLink) {
   return '<!DOCTYPE html><html><body style="margin:0;padding:20px;background:#f0f2f5;font-family:-apple-system,sans-serif">' +
   '<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.12)">' +
     '<div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:28px 32px;text-align:center">' +
-      '<h2 style="margin:0;color:#fff;font-size:20px">📅 新預約申請</h2>' +
+      '<h2 style="margin:0;color:#fff;font-size:20px">新預約申請</h2>' +
     '</div>' +
     '<div style="padding:28px 32px">' +
       '<table style="width:100%;border-collapse:collapse;font-size:14px">' +
