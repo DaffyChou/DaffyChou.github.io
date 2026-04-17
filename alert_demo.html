@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>警報設定 Demo — 摯陞 SRP 系統</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" />
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 24px;
+  font-family: "Microsoft JhengHei", "PingFang TC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #1a1a1a;
+  color: #e8e8e8;
+  min-height: 100vh;
+}
+.header { max-width: 1200px; margin: 0 auto 20px; }
+.header h1 { margin: 0 0 4px; font-size: 20px; font-weight: 500; color: #fff; }
+.header p { margin: 0; font-size: 13px; color: #9aa0a6; }
+
+.tabs {
+  max-width: 1200px; margin: 0 auto 20px;
+  display: flex; gap: 2px;
+  border-bottom: 1px solid #3a3a3a;
+  flex-wrap: wrap;
+}
+.tab {
+  background: transparent; border: none;
+  padding: 12px 20px;
+  font-size: 14px; color: #9aa0a6; cursor: pointer;
+  font-family: inherit;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+}
+.tab:hover { color: #e8e8e8; }
+.tab.active { color: #569cd6; border-bottom-color: #569cd6; }
+
+.layout {
+  max-width: 1200px; margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 20px;
+}
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+.modal {
+  background: #2a2a2a;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #3a3a3a;
+}
+.modal-title {
+  padding: 16px 20px;
+  display: flex; align-items: baseline; gap: 10px;
+  border-bottom: 1px solid #3a3a3a;
+}
+.modal-title .zh { font-size: 18px; font-weight: 600; color: #fff; }
+.modal-title .en { font-size: 14px; color: #c8c8c8; }
+.modal-title .close { margin-left: auto; color: #9aa0a6; cursor: pointer; font-size: 20px; }
+
+.row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  padding: 14px 20px;
+  background: #363636;
+  border-bottom: 1px solid #2a2a2a;
+  align-items: center;
+}
+.row-top { align-items: start; }
+.row-label { font-size: 13px; color: #e8e8e8; }
+.row-label small { display: block; color: #9aa0a6; font-size: 11px; margin-top: 2px; }
+.row-body { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.row input[type="text"],
+.row input[type="number"],
+.row input[type="date"],
+.row input[type="time"],
+.row select {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  background: #f0f0f0;
+  color: #2a2a2a;
+  font-size: 13px;
+  font-family: inherit;
+  min-width: 0;
+}
+.row input[type="number"] { width: 110px; }
+.row input[type="text"] { flex: 1; min-width: 150px; }
+.row input[type="date"] { width: 150px; }
+.row input[type="time"] { width: 110px; }
+.row select { min-width: 80px; padding-right: 24px; }
+.row input:focus, .row select:focus { outline: 2px solid #569cd6; outline-offset: -1px; }
+
+.unit-text { font-size: 13px; color: #e8e8e8; padding: 0 4px; }
+.trigger-hint { width: 100%; font-size: 11px; color: #9aa0a6; margin-top: 2px; }
+
+.check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; margin-right: 16px; cursor: pointer; color: #e8e8e8; }
+.check input { accent-color: #569cd6; }
+
+.btns {
+  padding: 14px 20px;
+  display: flex; justify-content: flex-end; gap: 10px;
+  background: #2a2a2a;
+}
+.btn {
+  height: 34px; padding: 0 18px;
+  background: transparent;
+  border: 1px solid #569cd6;
+  color: #569cd6;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn:hover { background: rgba(86, 156, 214, 0.1); }
+.btn-cancel { color: #9aa0a6; border-color: #9aa0a6; }
+
+/* Right column */
+.right-col { display: flex; flex-direction: column; gap: 16px; }
+.card {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 18px 20px;
+}
+.card h3 {
+  margin: 0 0 14px;
+  font-size: 12px; font-weight: 500;
+  color: #9aa0a6;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.summary-item {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #3a3a3a;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.summary-item:first-of-type { border-top: none; padding-top: 0; }
+.summary-label { color: #9aa0a6; font-size: 12px; }
+.summary-value { color: #e8e8e8; }
+.chip {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(86, 156, 214, 0.15);
+  color: #569cd6;
+  margin-right: 6px;
+  margin-bottom: 2px;
+}
+
+.field-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.field-table th {
+  text-align: left; font-weight: 500; color: #9aa0a6;
+  padding: 8px 10px 8px 0;
+  border-bottom: 1px solid #3a3a3a;
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.field-table td {
+  padding: 10px 10px 10px 0;
+  border-bottom: 1px solid #3a3a3a;
+  color: #e8e8e8; line-height: 1.5;
+  vertical-align: top;
+}
+.field-table tr:last-child td { border-bottom: none; }
+.field-table td:first-child { font-weight: 500; white-space: nowrap; }
+.field-table .active-row td { background: rgba(86, 156, 214, 0.1); color: #569cd6; }
+
+.note {
+  max-width: 1200px; margin: 20px auto 0;
+  padding: 14px 18px;
+  font-size: 12px; color: #9aa0a6;
+  background: #242424; border-radius: 6px;
+  border-left: 3px solid #569cd6;
+  line-height: 1.6;
+}
+
+/* ===== Scope toggle (全船隊 / 單船) ===== */
+.scope-toggle { display: flex; }
+.scope-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 6px 16px; height: 32px;
+  border: 1px solid #4a4a4a;
+  background: #f0f0f0;
+  color: #2a2a2a;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.scope-btn:first-child { border-radius: 4px 0 0 4px; }
+.scope-btn:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+.scope-btn.active { background: #569cd6; border-color: #569cd6; color: #fff; }
+.scope-btn:hover:not(.active) { background: #e0e0e0; }
+
+/* ===== Mode sub-panels (偵測/警報頻率) ===== */
+.mode-sub {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+  width: 100%;
+}
+.mode-sub.show { display: flex; }
+.mode-sub.col { flex-direction: column; align-items: flex-start; }
+.mode-sub input[type="number"] {
+  width: 72px; height: 32px; padding: 0 8px;
+  border: 1px solid #4a4a4a; border-radius: 4px;
+  background: #f0f0f0; color: #2a2a2a;
+  font-size: 13px; font-family: inherit;
+}
+.mode-sub input[type="time"] {
+  width: 110px; height: 32px; padding: 0 8px;
+  border: 1px solid #4a4a4a; border-radius: 4px;
+  background: #f0f0f0; color: #2a2a2a;
+  font-size: 13px; font-family: inherit;
+}
+.mode-sub select {
+  height: 32px; padding: 0 10px;
+  border: 1px solid #4a4a4a; border-radius: 4px;
+  background: #f0f0f0; color: #2a2a2a;
+  font-size: 13px; font-family: inherit;
+  min-width: 80px;
+}
+.mode-sub input:focus, .mode-sub select:focus { outline: 2px solid #569cd6; outline-offset: -1px; }
+
+/* Weekday picker */
+.weekday-picker { display: flex; gap: 4px; flex-wrap: wrap; }
+.weekday-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  border: 1px solid #4a4a4a; border-radius: 4px;
+  background: #f0f0f0; color: #2a2a2a;
+  cursor: pointer; font-size: 12px; font-weight: 500;
+  transition: all 0.15s; user-select: none; font-family: inherit;
+}
+.weekday-btn.active { background: #569cd6; border-color: #569cd6; color: #fff; }
+.weekday-btn:hover:not(.active) { background: #e0e0e0; }
+
+/* ===== Notification blocks ===== */
+.notif-block {
+  display: none;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: #2e2e2e;
+  border: 1px solid #3e3e3e;
+  border-radius: 4px;
+}
+.notif-block.show { display: block; }
+.notif-title {
+  font-size: 11px; color: #9aa0a6;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+/* ===== Email tag input ===== */
+.email-tags {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  padding: 4px 8px;
+  border: 1px solid #4a4a4a; border-radius: 4px;
+  background: #f0f0f0;
+  min-height: 36px;
+  cursor: text;
+}
+.email-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #d8e4f0; border: 1px solid #b8cce0;
+  color: #1a3a5a;
+  padding: 2px 8px; border-radius: 12px; font-size: 12px;
+}
+.email-tag .rm { cursor: pointer; color: #4a6a8a; font-size: 14px; line-height: 1; margin-left: 2px; }
+.email-tag .rm:hover { color: #1a3a5a; }
+.email-input-field {
+  border: none; outline: none;
+  background: transparent; color: #2a2a2a;
+  font-size: 13px; min-width: 200px; flex: 1;
+  padding: 2px 2px; font-family: inherit;
+}
+
+/* ===== Select2 dark theme ===== */
+.select2-container--default .select2-selection--multiple {
+  background-color: #f0f0f0;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  min-height: 36px;
+  padding: 2px 4px;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__rendered { padding: 0; }
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  background-color: #d8e4f0;
+  border: 1px solid #b8cce0;
+  color: #1a3a5a;
+  font-size: 12px;
+  border-radius: 12px;
+  padding: 2px 8px;
+  margin: 2px 2px;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+  color: #4a6a8a; margin-right: 4px;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover { color: #1a3a5a; }
+.select2-container--default .select2-selection--multiple .select2-search__field {
+  color: #2a2a2a; font-size: 13px; margin: 2px 0;
+  font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+}
+.select2-dropdown {
+  background-color: #2e2e2e;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+}
+.select2-results__option {
+  color: #e8e8e8; font-size: 13px; padding: 8px 12px;
+}
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background-color: #569cd6; color: #fff;
+}
+.select2-results__option[aria-selected="true"] {
+  background-color: rgba(86, 156, 214, 0.2); color: #569cd6;
+}
+.select2-search--dropdown .select2-search__field {
+  background-color: #3a3a3a;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  color: #e8e8e8; font-size: 13px;
+  font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+  padding: 6px 10px;
+}
+.select2-search--dropdown .select2-search__field:focus { outline: 2px solid #569cd6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>警報功能 Demo — 船隊戰情室監控系統</h1>
+  <p>切換上方的警報類型，或在「警報欄位」下拉改變選項，可即時觀察「觸發條件」區塊與右側執行摘要的變化。</p>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-type="voyage">航次警報</button>
+  <button class="tab" data-type="cii">CII 評等警報</button>
+  <button class="tab" data-type="bunker">Bunker 管理警報</button>
+  <button class="tab" data-type="crew">船員管理警報</button>
+</div>
+
+<div class="layout">
+  <div class="modal">
+    <div class="modal-title">
+      <span class="zh">警報設定</span>
+      <span class="en">Alerts Setting</span>
+      <span class="close">×</span>
+    </div>
+
+    <!-- 警報類型 -->
+    <div class="row">
+      <div class="row-label">警報類型 <small>Alerts Type</small></div>
+      <div class="row-body">
+        <select id="f-type" style="flex:1;">
+          <option value="voyage">航次警報</option>
+          <option value="cii">CII 評等警報</option>
+          <option value="bunker">Bunker 管理警報</option>
+          <option value="crew">船員管理警報</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 警報欄位 -->
+    <div class="row">
+      <div class="row-label">警報欄位 <small>Alerts Field</small></div>
+      <div class="row-body">
+        <select id="f-field" style="flex:1;"></select>
+      </div>
+    </div>
+
+    <!-- 觸發條件 -->
+    <div class="row row-top">
+      <div class="row-label">觸發條件 <small>Trigger Condition</small></div>
+      <div class="row-body" id="f-trigger"></div>
+    </div>
+
+    <!-- 警報名稱 -->
+    <div class="row">
+      <div class="row-label">警報名稱 <small>Alerts Name</small></div>
+      <div class="row-body">
+        <input type="text" id="f-name" placeholder="自動生成，或自行輸入" />
+      </div>
+    </div>
+
+    <!-- 警報範圍 -->
+    <div class="row row-top">
+      <div class="row-label">警報範圍 <small>Alerts Scope</small></div>
+      <div class="row-body" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <!-- 航次/CII/Bunker：全船隊 or 單船 -->
+        <div id="scope-fleet-ships">
+          <div class="scope-toggle">
+            <button type="button" class="scope-btn active" id="btn-fleet" onclick="setScope('fleet')">全船隊</button>
+            <button type="button" class="scope-btn" id="btn-ships" onclick="setScope('ships')">單船</button>
+          </div>
+          <div id="scope-ships-select" style="display:none;margin-top:8px;width:360px;max-width:100%;">
+            <select id="sel-ships" multiple style="width:100%;"></select>
+          </div>
+        </div>
+        <!-- 船員管理：個人 / 群組 -->
+        <div id="scope-crew" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;" class="row-body">
+          <select id="scope-crew-select" style="width:90px;">
+            <option>個人</option>
+            <option>群組</option>
+          </select>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:#e8e8e8;color:#2a2a2a;padding:4px 8px;border-radius:4px;font-size:12px;">
+            Chen Wei-Han <span style="color:#9aa0a6;cursor:pointer;">×</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 啟用時間 -->
+    <div class="row">
+      <div class="row-label">啟用時間 <small>Effective Date</small></div>
+      <div class="row-body">
+        <input type="date" value="2026-04-16" />
+      </div>
+    </div>
+
+    <!-- 偵測頻率 -->
+    <div class="row row-top">
+      <div class="row-label">偵測頻率 <small>Detection</small></div>
+      <div class="row-body" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <select id="detect-mode">
+          <option value="scheduled">定時</option>
+          <option value="daily">每天</option>
+          <option value="weekly">每周</option>
+          <option value="monthly">每月</option>
+        </select>
+
+        <!-- 定時 -->
+        <div id="detect-scheduled" class="mode-sub show">
+          <span class="unit-text" style="padding-left:0">從</span>
+          <input type="time" id="ds-from" value="00:00">
+          <span class="unit-text">起，每</span>
+          <input type="number" id="ds-interval" value="6" min="1">
+          <select id="ds-unit">
+            <option value="hour">小時</option>
+            <option value="min">分鐘</option>
+            <option value="sec">秒</option>
+          </select>
+          <span class="unit-text">執行一次</span>
+        </div>
+
+        <!-- 每天 -->
+        <div id="detect-daily" class="mode-sub">
+          <span class="unit-text" style="padding-left:0">每天</span>
+          <input type="time" id="dd-time" value="08:00">
+          <span class="unit-text">執行</span>
+        </div>
+
+        <!-- 每周 -->
+        <div id="detect-weekly" class="mode-sub col">
+          <div class="weekday-picker">
+            <button type="button" class="weekday-btn" data-day="0">日</button>
+            <button type="button" class="weekday-btn active" data-day="1">一</button>
+            <button type="button" class="weekday-btn" data-day="2">二</button>
+            <button type="button" class="weekday-btn" data-day="3">三</button>
+            <button type="button" class="weekday-btn" data-day="4">四</button>
+            <button type="button" class="weekday-btn" data-day="5">五</button>
+            <button type="button" class="weekday-btn" data-day="6">六</button>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px;">
+            <span class="unit-text" style="padding-left:0">的</span>
+            <input type="time" id="dw-time" value="08:00">
+            <span class="unit-text">執行</span>
+          </div>
+        </div>
+
+        <!-- 每月 -->
+        <div id="detect-monthly" class="mode-sub">
+          <span class="unit-text" style="padding-left:0">每月第</span>
+          <input type="number" id="dm-day" value="1" min="1" max="28">
+          <span class="unit-text">天</span>
+          <input type="time" id="dm-time" value="08:00">
+          <span class="unit-text">執行</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 警報頻率 -->
+    <div class="row row-top">
+      <div class="row-label">警報頻率 <small>Alert Frequency</small></div>
+      <div class="row-body" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <select id="freq-mode">
+          <option value="once">觸發後僅發送一次</option>
+          <option value="repeat">重複提醒</option>
+          <option value="daily-fixed">每日固定時間</option>
+          <option value="weekly">週報</option>
+          <option value="monthly">月報</option>
+        </select>
+
+        <!-- 重複提醒 -->
+        <div id="freq-repeat" class="mode-sub">
+          <span class="unit-text" style="padding-left:0">每</span>
+          <input type="number" id="fr-interval" value="1" min="1">
+          <select id="fr-unit">
+            <option value="min">分鐘</option>
+            <option value="hour">小時</option>
+            <option value="day">天</option>
+          </select>
+          <span class="unit-text">重複一次，最多</span>
+          <input type="number" id="fr-max" value="3" min="1">
+          <span class="unit-text">次</span>
+        </div>
+
+        <!-- 每日固定 -->
+        <div id="freq-daily-fixed" class="mode-sub">
+          <span class="unit-text" style="padding-left:0">每天</span>
+          <input type="time" id="ff-time" value="08:00">
+          <span class="unit-text">發送</span>
+        </div>
+
+        <!-- 週報 -->
+        <div id="freq-weekly" class="mode-sub">
+          <span class="unit-text" style="padding-left:0">每週</span>
+          <select id="fw-day">
+            <option value="0">週日</option>
+            <option value="1" selected>週一</option>
+            <option value="2">週二</option>
+            <option value="3">週三</option>
+            <option value="4">週四</option>
+            <option value="5">週五</option>
+            <option value="6">週六</option>
+          </select>
+          <input type="time" id="fw-time" value="08:00">
+          <span class="unit-text">發送彙整報告</span>
+        </div>
+
+        <!-- 月報 -->
+        <div id="freq-monthly" class="mode-sub">
+          <span class="unit-text" style="padding-left:0">每月第</span>
+          <input type="number" id="fm-day" value="1" min="1" max="28">
+          <span class="unit-text">天</span>
+          <input type="time" id="fm-time" value="08:00">
+          <span class="unit-text">發送彙整報告</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 通知設定 -->
+    <div class="row row-top">
+      <div class="row-label">通知設定 <small>Notification</small></div>
+      <div class="row-body" style="flex-direction:column;align-items:flex-start;gap:0;">
+        <div style="display:flex;flex-wrap:wrap;gap:0;padding-bottom:4px;">
+          <label class="check"><input type="checkbox" id="notif-internal" checked> 系統內部使用者</label>
+          <label class="check"><input type="checkbox" id="notif-mail"> 自訂 Mail</label>
+        </div>
+
+        <!-- 系統內部使用者 block -->
+        <div id="notif-internal-block" class="notif-block show">
+          <div class="notif-title">系統內部使用者 Internal Users</div>
+          <select id="sel-users" multiple style="width:100%;"></select>
+        </div>
+
+        <!-- 自訂 Mail block -->
+        <div id="notif-mail-block" class="notif-block">
+          <div class="notif-title">自訂 Mail Custom Email</div>
+          <div class="email-tags" id="email-tags">
+            <input type="text" class="email-input-field" id="email-input-field"
+              placeholder="輸入 Email 後按 Enter 新增…" autocomplete="off" />
+          </div>
+          <div style="font-size:11px;color:#9aa0a6;margin-top:6px;">按 Enter 或逗號確認，可輸入多個；Backspace 刪除最後一筆</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btns">
+      <button class="btn btn-cancel">× Cancel</button>
+      <button class="btn">✓ Confirm</button>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="card">
+      <h3>執行摘要 — Execution Summary</h3>
+      <div id="summary"></div>
+    </div>
+    <div class="card">
+      <h3 id="list-title">本警報類型可用欄位</h3>
+      <table class="field-table">
+        <thead>
+          <tr>
+            <th style="width:26%">警報欄位</th>
+            <th style="width:44%">觸發條件</th>
+            <th style="width:30%">警報頻率（預設）</th>
+          </tr>
+        </thead>
+        <tbody id="field-rows"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <strong style="color:#e8e8e8;">Demo 說明：</strong>
+  本介面展示「警報類型 → 警報欄位 → 觸發條件」三層動態連動邏輯。警報範圍支援全船隊或多船複選（航次、CII、Bunker 類型），偵測頻率與警報頻率均可自訂排程（定時／每天／每周／每月）。通知設定勾選後即展開對應設定區塊，系統內部使用者支援複選，自訂 Mail 支援多筆輸入。所有資料為示意用途。
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+// ===== Demo data =====
+const SHIPS = [
+  {id:'s1',text:'慶豐輪'},{id:'s2',text:'台海明德號'},{id:'s3',text:'海洋之星'},
+  {id:'s4',text:'彩虹輪'},{id:'s5',text:'台灣精神號'},{id:'s6',text:'興順輪'},
+  {id:'s7',text:'寶成輪'},{id:'s8',text:'光明輪'},{id:'s9',text:'中海輪'},
+  {id:'s10',text:'東方之星'},{id:'s11',text:'宏達輪'},{id:'s12',text:'永昌輪'}
+];
+const USERS = [
+  {id:'u1',text:'系統管理員'},{id:'u2',text:'Chen Wei-Han'},
+  {id:'u3',text:'Lin Mei-Ling'},{id:'u4',text:'Wang Da-Ming'},
+  {id:'u5',text:'船隊監控中心'},{id:'u6',text:'Operations Team'},{id:'u7',text:'財務部'}
+];
+const WDAY_NAMES = ['週日','週一','週二','週三','週四','週五','週六'];
+const DETECT_UNIT = {hour:'小時',min:'分鐘',sec:'秒'};
+const FREQ_UNIT = {min:'分鐘',hour:'小時',day:'天'};
+
+// ===== Alert config =====
+const CONFIG = {
+  voyage: {
+    label: '航次警報',
+    fields: {
+      gate: {
+        name: '進／出港狀態',
+        parts: [
+          {k:'dir',type:'select',opts:['進入','離開']},
+          {k:'_',type:'label',text:'預設地理圍欄'}
+        ],
+        desc: d => `${d.dir} 預設地理圍欄`,
+        freq: '觸發後執行 1 次',
+        hint: '船舶進入／離開已設定之地理圍欄時觸發。'
+      },
+      eta: {
+        name: '抵港時間 (ETA)',
+        parts: [
+          {k:'_',type:'label',text:'預估抵達'},
+          {k:'ba',type:'select',opts:['前','後']},
+          {k:'n',type:'number',def:30,unit:'小時'}
+        ],
+        desc: d => `預估抵達 ${d.ba} ${d.n} 小時`,
+        freq: '觸發後每隔 1 小時提醒，限制 3 次',
+        hint: '船舶預估抵港時間進入設定區間時觸發。'
+      },
+      off: {
+        name: '航線偏移',
+        parts: [
+          {k:'_',type:'label',text:'偏離預計航線 >'},
+          {k:'n',type:'number',def:5,unit:'海浬'}
+        ],
+        desc: d => `偏離預計航線 > ${d.n} 海浬`,
+        freq: '觸發後每隔 30 分鐘提醒，直到回到航線',
+        hint: 'GPS 位置偏離預計航線達設定距離時觸發。'
+      },
+      sea: {
+        name: '惡劣海況預警',
+        parts: [
+          {k:'_',type:'label',text:'浪高 >'},
+          {k:'wave',type:'number',def:4,unit:'米'},
+          {k:'_2',type:'label',text:'或 風力 >'},
+          {k:'wind',type:'number',def:7,unit:'級'}
+        ],
+        desc: d => `浪高 > ${d.wave} 米 或 風力 > ${d.wind} 級`,
+        freq: '觸發後執行 1 次；條件持續則再次發送',
+        hint: '航線上氣象條件符合門檻時觸發。'
+      },
+      spd: {
+        name: '船速異常下降',
+        parts: [
+          {k:'_',type:'label',text:'SOG < 預期航速達'},
+          {k:'n',type:'number',def:15,unit:'%'}
+        ],
+        desc: d => `SOG < 預期航速達 ${d.n}%（RPM 未大幅變動）`,
+        freq: '觸發後每隔 4 小時提醒，限制 3 次',
+        hint: '主機運轉正常但對地速度異常偏低時觸發。'
+      }
+    }
+  },
+  cii: {
+    label: 'CII 評等警報',
+    fields: {
+      thism: {
+        name: '本月目標降等',
+        parts: [
+          {k:'_',type:'label',text:'目前評等'},
+          {k:'op',type:'select',opts:['≥']},
+          {k:'g',type:'select',opts:['C 級','D 級','E 級']}
+        ],
+        desc: d => `目前評等 ${d.op} ${d.g}`,
+        freq: '定期月報：每月 1 日產出報表',
+        hint: '當月 CII 評等達到或低於設定等級時納入月報。'
+      },
+      nexty: {
+        name: '明年度預測降級',
+        parts: [
+          {k:'_',type:'label',text:'預測明年評等'},
+          {k:'op',type:'select',opts:['≥']},
+          {k:'g',type:'select',opts:['C 級','D 級','E 級']}
+        ],
+        desc: d => `預測明年評等 ${d.op} ${d.g}`,
+        freq: '定期月報：每月 1 日產出報表',
+        hint: '預測明年評等達到設定等級時納入月報。'
+      }
+    }
+  },
+  bunker: {
+    label: 'Bunker 管理警報',
+    fields: {
+      low: {
+        name: '最低庫存警示',
+        parts: [
+          {k:'_',type:'label',text:'ROB < 動態安全庫存（系統依近 3 個月歷史自動推估）'}
+        ],
+        desc: () => `ROB < 動態安全庫存（系統自動計算）`,
+        freq: '每日提醒 1 次，至油量補充高於安全值',
+        hint: '動態安全庫存由近 3 個月歷史消耗資料自動推估。'
+      },
+      high: {
+        name: '油耗異常偏高',
+        parts: [
+          {k:'_',type:'label',text:'單位里程油耗 > 歷史同月平均'},
+          {k:'n',type:'number',def:10,unit:'%'}
+        ],
+        desc: d => `單位里程油耗 > 歷史同月平均 ${d.n}%`,
+        freq: '定期月報：每月 1 日產出報表',
+        hint: '上月單位里程油耗超過歷史平均之設定百分比時納入月報。'
+      },
+      eca: {
+        name: 'ECA 低硫油切換',
+        parts: [
+          {k:'_',type:'label',text:'距 ECA 邊界'},
+          {k:'op',type:'select',opts:['<']},
+          {k:'n',type:'number',def:50,unit:'海浬'}
+        ],
+        desc: d => `距 ECA 邊界 ${d.op} ${d.n} 海浬`,
+        freq: '觸發後每隔 30 分鐘提醒',
+        hint: '船舶接近排放控制區邊界時提醒切換低硫油。'
+      }
+    }
+  },
+  crew: {
+    label: '船員管理警報',
+    fields: {
+      cert: {
+        name: '證書到期',
+        parts: [
+          {k:'_',type:'label',text:'逾期'},
+          {k:'ba',type:'select',opts:['前','後']},
+          {k:'n',type:'number',def:30,unit:'天'}
+        ],
+        desc: d => `證書逾期 ${d.ba} ${d.n} 天`,
+        freq: '定期週報：每週一推播彙整報告 1 次',
+        hint: '證書到期前／後設定天數納入週報。'
+      },
+      age: {
+        name: '船員年齡警示',
+        parts: [
+          {k:'_',type:'label',text:'依生日計算年齡 ≥'},
+          {k:'n',type:'number',def:65,unit:'歲'}
+        ],
+        desc: d => `依生日計算年齡 ≥ ${d.n} 歲`,
+        freq: '定期週報：每週一推播彙整報告 1 次',
+        hint: '年齡達設定歲數之船員納入週報。'
+      },
+      svc: {
+        name: '任職累計時間',
+        parts: [
+          {k:'_',type:'label',text:'累計任職天數 ≥'},
+          {k:'n',type:'number',def:270,unit:'天'}
+        ],
+        desc: d => `累計任職天數 ≥ ${d.n} 天`,
+        freq: '定期週報：每週一推播彙整報告 1 次',
+        hint: '累計在船天數達設定值之船員納入週報。'
+      }
+    }
+  }
+};
+
+// ===== State =====
+const state = { type: 'voyage', fieldKey: null, vals: {}, scope: 'fleet' };
+const emailState = [];
+const el = id => document.getElementById(id);
+
+// ===== Scope =====
+function setScope(scope) {
+  state.scope = scope;
+  el('btn-fleet').classList.toggle('active', scope === 'fleet');
+  el('btn-ships').classList.toggle('active', scope === 'ships');
+  el('scope-ships-select').style.display = scope === 'ships' ? 'block' : 'none';
+  render();
+}
+
+function updateScopeUI(type) {
+  const isFleet = ['voyage','cii','bunker'].includes(type);
+  el('scope-fleet-ships').style.display = isFleet ? '' : 'none';
+  el('scope-crew').style.display = isFleet ? 'none' : 'flex';
+}
+
+// ===== Detect / Freq mode =====
+function setDetectMode(mode) {
+  ['scheduled','daily','weekly','monthly'].forEach(m => {
+    el('detect-' + m).classList.toggle('show', m === mode);
+  });
+  render();
+}
+
+function setFreqMode(mode) {
+  const subIds = ['repeat','daily-fixed','weekly','monthly'];
+  subIds.forEach(m => {
+    el('freq-' + m).classList.toggle('show', m === mode);
+  });
+  render();
+}
+
+// ===== Description helpers =====
+function getDetectDescription() {
+  const mode = el('detect-mode').value;
+  switch (mode) {
+    case 'scheduled': {
+      const from = el('ds-from').value || '00:00';
+      const n = el('ds-interval').value || 6;
+      const u = DETECT_UNIT[el('ds-unit').value] || '小時';
+      return `定時：從 ${from} 起，每 ${n} ${u} 執行一次`;
+    }
+    case 'daily':
+      return `每天 ${el('dd-time').value || '08:00'} 執行`;
+    case 'weekly': {
+      const days = Array.from(document.querySelectorAll('.weekday-btn.active'))
+        .map(b => WDAY_NAMES[parseInt(b.dataset.day)]);
+      const t = el('dw-time').value || '08:00';
+      return `每週 ${days.length ? days.join('、') : '（未選擇）'} ${t} 執行`;
+    }
+    case 'monthly': {
+      const d = el('dm-day').value || 1;
+      const t = el('dm-time').value || '08:00';
+      return `每月第 ${d} 天 ${t} 執行`;
+    }
+  }
+  return '';
+}
+
+function getFreqDescription() {
+  const mode = el('freq-mode').value;
+  switch (mode) {
+    case 'once': return '觸發後僅發送一次';
+    case 'repeat': {
+      const n = el('fr-interval').value || 1;
+      const u = FREQ_UNIT[el('fr-unit').value] || '小時';
+      const max = el('fr-max').value || 3;
+      return `每 ${n} ${u} 重複一次，最多 ${max} 次`;
+    }
+    case 'daily-fixed':
+      return `每天 ${el('ff-time').value || '08:00'} 發送`;
+    case 'weekly': {
+      const d = parseInt(el('fw-day').value);
+      const t = el('fw-time').value || '08:00';
+      return `每週${WDAY_NAMES[d]} ${t} 發送彙整報告`;
+    }
+    case 'monthly': {
+      const d = el('fm-day').value || 1;
+      const t = el('fm-time').value || '08:00';
+      return `每月第 ${d} 天 ${t} 發送彙整報告`;
+    }
+  }
+  return '';
+}
+
+function getScopeDescription() {
+  const isFleet = ['voyage','cii','bunker'].includes(state.type);
+  if (!isFleet) return el('scope-crew-select').value;
+  if (state.scope === 'fleet') return '全船隊';
+  try {
+    const ships = jQuery('#sel-ships').select2('data').map(d => d.text);
+    return ships.length ? ships.join('、') : '（未選擇船舶）';
+  } catch(e) { return '（未選擇船舶）'; }
+}
+
+function getNotifDescription() {
+  const parts = [];
+  if (el('notif-internal').checked) {
+    try {
+      const users = jQuery('#sel-users').select2('data').map(d => d.text);
+      parts.push('系統內部使用者' + (users.length ? `（${users.join('、')}）` : ''));
+    } catch(e) { parts.push('系統內部使用者'); }
+  }
+  if (el('notif-mail').checked) {
+    parts.push('自訂 Mail' + (emailState.length ? `（${emailState.join('、')}）` : '（未填寫）'));
+  }
+  return parts.join('；') || '（未設定）';
+}
+
+// ===== Email tags =====
+function renderEmailTags() {
+  const container = el('email-tags');
+  const input = el('email-input-field');
+  Array.from(container.querySelectorAll('.email-tag')).forEach(t => t.remove());
+  emailState.forEach(email => {
+    const tag = document.createElement('span');
+    tag.className = 'email-tag';
+    tag.innerHTML = `${escapeHtml(email)}<span class="rm">×</span>`;
+    tag.querySelector('.rm').addEventListener('click', () => { removeEmail(email); });
+    container.insertBefore(tag, input);
+  });
+  render();
+}
+
+function addEmail(email) {
+  email = email.trim().replace(/,+$/, '');
+  if (email && !emailState.includes(email)) {
+    emailState.push(email);
+    renderEmailTags();
+  }
+}
+
+function removeEmail(email) {
+  const idx = emailState.indexOf(email);
+  if (idx > -1) { emailState.splice(idx, 1); renderEmailTags(); }
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===== Trigger builder =====
+function buildTrigger(field) {
+  const box = el('f-trigger');
+  box.innerHTML = '';
+  state.vals = {};
+  field.parts.forEach(p => {
+    if (p.type === 'label') {
+      const s = document.createElement('span');
+      s.className = 'unit-text';
+      s.textContent = p.text;
+      box.appendChild(s);
+    } else if (p.type === 'select') {
+      const sel = document.createElement('select');
+      p.opts.forEach(o => {
+        const op = document.createElement('option');
+        op.value = o; op.textContent = o;
+        sel.appendChild(op);
+      });
+      sel.value = p.opts[0];
+      state.vals[p.k] = p.opts[0];
+      sel.addEventListener('change', () => { state.vals[p.k] = sel.value; render(); });
+      box.appendChild(sel);
+    } else if (p.type === 'number') {
+      const inp = document.createElement('input');
+      inp.type = 'number'; inp.value = p.def; inp.placeholder = '請輸入數值';
+      state.vals[p.k] = p.def;
+      inp.addEventListener('input', () => { state.vals[p.k] = inp.value || 0; render(); });
+      box.appendChild(inp);
+      if (p.unit) {
+        const u = document.createElement('span');
+        u.className = 'unit-text'; u.textContent = p.unit;
+        box.appendChild(u);
+      }
+    }
+  });
+  const hint = document.createElement('div');
+  hint.className = 'trigger-hint';
+  hint.textContent = field.hint;
+  box.appendChild(hint);
+}
+
+function buildFieldList() {
+  const sel = el('f-field');
+  sel.innerHTML = '';
+  const fields = CONFIG[state.type].fields;
+  Object.keys(fields).forEach(k => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = fields[k].name;
+    sel.appendChild(o);
+  });
+  state.fieldKey = Object.keys(fields)[0];
+  sel.value = state.fieldKey;
+}
+
+function genericDesc(field) {
+  const dummy = {};
+  field.parts.forEach(p => {
+    if (p.type === 'select') dummy[p.k] = `[${p.opts.join('／')}]`;
+    else if (p.type === 'number') dummy[p.k] = '[數值]';
+  });
+  return field.desc(dummy);
+}
+
+// ===== Render summary =====
+function render() {
+  const field = CONFIG[state.type].fields[state.fieldKey];
+  if (!field) return;
+
+  el('f-name').placeholder = `${field.name}：${field.desc(state.vals)}`;
+
+  el('summary').innerHTML = `
+    <div class="summary-item"><div class="summary-label">監控對象</div><div class="summary-value"><span class="chip">${CONFIG[state.type].label}</span><span class="chip">${field.name}</span></div></div>
+    <div class="summary-item"><div class="summary-label">警報範圍</div><div class="summary-value">${getScopeDescription()}</div></div>
+    <div class="summary-item"><div class="summary-label">何時觸發</div><div class="summary-value">${field.desc(state.vals)}</div></div>
+    <div class="summary-item"><div class="summary-label">偵測頻率</div><div class="summary-value">${getDetectDescription()}</div></div>
+    <div class="summary-item"><div class="summary-label">警報頻率</div><div class="summary-value">${getFreqDescription()}</div></div>
+    <div class="summary-item"><div class="summary-label">通知對象</div><div class="summary-value">${getNotifDescription()}</div></div>
+  `;
+
+  const rows = el('field-rows');
+  rows.innerHTML = '';
+  const fields = CONFIG[state.type].fields;
+  Object.keys(fields).forEach(k => {
+    const f = fields[k];
+    const tr = document.createElement('tr');
+    if (k === state.fieldKey) tr.className = 'active-row';
+    tr.innerHTML = `<td>${f.name}</td><td>${genericDesc(f)}</td><td>${f.freq}</td>`;
+    rows.appendChild(tr);
+  });
+
+  el('list-title').textContent = `${CONFIG[state.type].label} — 共 ${Object.keys(fields).length} 個可用欄位`;
+}
+
+function switchType(type) {
+  state.type = type;
+  el('f-type').value = type;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.type === type));
+  updateScopeUI(type);
+  buildFieldList();
+  buildTrigger(CONFIG[type].fields[state.fieldKey]);
+  render();
+}
+
+// ===== Init =====
+jQuery(document).ready(function($) {
+  // Select2: ships
+  $('#sel-ships').select2({
+    data: SHIPS,
+    placeholder: '選擇船舶（可複選）',
+    allowClear: true,
+    closeOnSelect: false,
+    width: '100%',
+    language: { noResults: () => '查無結果' }
+  });
+
+  // Select2: users
+  $('#sel-users').select2({
+    data: USERS,
+    placeholder: '選擇使用者（可複選）',
+    allowClear: true,
+    closeOnSelect: false,
+    width: '100%',
+    language: { noResults: () => '查無結果' }
+  });
+  $('#sel-users').val(['u1']).trigger('change');
+
+  // Select2 change → update summary
+  $('#sel-ships, #sel-users').on('change', render);
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchType(t.dataset.type)));
+  el('f-type').addEventListener('change', e => switchType(e.target.value));
+  el('f-field').addEventListener('change', e => {
+    state.fieldKey = e.target.value;
+    buildTrigger(CONFIG[state.type].fields[state.fieldKey]);
+    render();
+  });
+
+  // Detect mode
+  el('detect-mode').addEventListener('change', () => setDetectMode(el('detect-mode').value));
+
+  // Freq mode
+  el('freq-mode').addEventListener('change', () => setFreqMode(el('freq-mode').value));
+
+  // Weekday buttons
+  document.querySelectorAll('.weekday-btn').forEach(btn => {
+    btn.addEventListener('click', () => { btn.classList.toggle('active'); render(); });
+  });
+
+  // Detect sub-inputs → update summary
+  ['ds-from','ds-interval','ds-unit','dd-time','dw-time','dm-day','dm-time'].forEach(id => {
+    const node = el(id);
+    if (node) { node.addEventListener('change', render); node.addEventListener('input', render); }
+  });
+
+  // Freq sub-inputs → update summary
+  ['fr-interval','fr-unit','fr-max','ff-time','fw-day','fw-time','fm-day','fm-time'].forEach(id => {
+    const node = el(id);
+    if (node) { node.addEventListener('change', render); node.addEventListener('input', render); }
+  });
+
+  // Crew scope select
+  el('scope-crew-select').addEventListener('change', render);
+
+  // Notification checkboxes
+  el('notif-internal').addEventListener('change', function() {
+    el('notif-internal-block').classList.toggle('show', this.checked);
+    render();
+  });
+  el('notif-mail').addEventListener('change', function() {
+    el('notif-mail-block').classList.toggle('show', this.checked);
+    render();
+  });
+
+  // Email input
+  const emailInput = el('email-input-field');
+  el('email-tags').addEventListener('click', () => emailInput.focus());
+  emailInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = emailInput.value.trim().replace(/,+$/, '');
+      if (val) { addEmail(val); emailInput.value = ''; }
+    } else if (e.key === 'Backspace' && emailInput.value === '' && emailState.length > 0) {
+      removeEmail(emailState[emailState.length - 1]);
+    }
+  });
+  emailInput.addEventListener('blur', () => {
+    const val = emailInput.value.trim();
+    if (val) { addEmail(val); emailInput.value = ''; }
+  });
+
+  // Init view
+  switchType('voyage');
+});
+</script>
+</body>
+</html>
