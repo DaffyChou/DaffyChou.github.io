@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python -m http.server 8899 --directory demos/alert-settings)"
+      "Bash(python -m http.server 8899 --directory demos/alert-settings)",
+      "Bash(python -c ' *)"
     ]
   }
 }

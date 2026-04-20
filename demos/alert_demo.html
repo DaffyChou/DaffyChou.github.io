@@ -34,7 +34,7 @@ body {
   transition: all 0.15s;
 }
 .tab:hover { color: #e8e8e8; }
-.tab.active { color: #569cd6; border-bottom-color: #569cd6; }
+.tab.active { color: #5b9bd5; border-bottom-color: #5b9bd5; }
 
 .layout {
   max-width: 1200px; margin: 0 auto;
@@ -45,31 +45,32 @@ body {
 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
 
 .modal {
-  background: #2a2a2a;
+  background: #1e1e1e;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid #3a3a3a;
+  border: 1px solid #333;
 }
 .modal-title {
   padding: 16px 20px;
-  display: flex; align-items: baseline; gap: 10px;
-  border-bottom: 1px solid #3a3a3a;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid #2d2d2d;
+  background: #1e1e1e;
 }
 .modal-title .zh { font-size: 18px; font-weight: 600; color: #fff; }
-.modal-title .en { font-size: 14px; color: #c8c8c8; }
-.modal-title .close { margin-left: auto; color: #9aa0a6; cursor: pointer; font-size: 20px; }
+.modal-title .en { font-size: 14px; color: #9aa0a6; }
+.modal-title .close { margin-left: auto; color: #9aa0a6; cursor: pointer; font-size: 20px; line-height: 1; }
 
 .row {
   display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
+  grid-template-columns: 160px minmax(0, 1fr);
   padding: 14px 20px;
-  background: #363636;
-  border-bottom: 1px solid #2a2a2a;
+  background: #252525;
+  border-bottom: 1px solid #1a1a1a;
   align-items: center;
 }
 .row-top { align-items: start; }
-.row-label { font-size: 13px; color: #e8e8e8; }
-.row-label small { display: block; color: #9aa0a6; font-size: 11px; margin-top: 2px; }
+.row-label { font-size: 14px; font-weight: 500; color: #d8d8d8; }
+.row-label small { display: block; color: #757575; font-size: 11px; margin-top: 3px; font-weight: 400; }
 .row-body { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
 .row input[type="text"],
@@ -79,10 +80,10 @@ body {
 .row select {
   height: 32px;
   padding: 0 10px;
-  border: 1px solid #4a4a4a;
+  border: 1px solid #444;
   border-radius: 4px;
-  background: #f0f0f0;
-  color: #2a2a2a;
+  background: #ffffff;
+  color: #1a1a1a;
   font-size: 13px;
   font-family: inherit;
   min-width: 0;
@@ -92,21 +93,22 @@ body {
 .row input[type="date"] { width: 150px; }
 .row input[type="time"] { width: 110px; }
 .row select { min-width: 80px; padding-right: 24px; }
-.row input:focus, .row select:focus { outline: 2px solid #569cd6; outline-offset: -1px; }
+.row input:focus, .row select:focus { outline: 2px solid #4078c0; outline-offset: -1px; }
 
-.unit-text { font-size: 13px; color: #e8e8e8; padding: 0 4px; }
-.trigger-hint { width: 100%; font-size: 11px; color: #9aa0a6; margin-top: 2px; }
+.unit-text { font-size: 13px; color: #c8c8c8; padding: 0 4px; }
+.trigger-hint { width: 100%; font-size: 11px; color: #757575; margin-top: 2px; }
 
-.check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; margin-right: 16px; cursor: pointer; color: #e8e8e8; }
-.check input { accent-color: #569cd6; }
+.check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; margin-right: 16px; cursor: pointer; color: #d0d0d0; }
+.check input { accent-color: #4078c0; }
 
 .btns {
   padding: 14px 20px;
   display: flex; justify-content: flex-end; gap: 10px;
-  background: #2a2a2a;
+  background: #1e1e1e;
+  border-top: 1px solid #2d2d2d;
 }
 .btn {
-  height: 34px; padding: 0 18px;
+  height: 36px; padding: 0 20px;
   background: transparent;
   border: 1px solid #569cd6;
   color: #569cd6;
@@ -114,22 +116,26 @@ body {
   font-size: 13px;
   cursor: pointer;
   font-family: inherit;
+  transition: all 0.15s;
 }
-.btn:hover { background: rgba(86, 156, 214, 0.1); }
-.btn-cancel { color: #9aa0a6; border-color: #9aa0a6; }
+.btn:hover { background: rgba(86, 156, 214, 0.12); }
+.btn-cancel { color: #888; border-color: #555; }
+.btn-cancel:hover { background: rgba(255,255,255,0.05); }
+.btn-primary { background: #4078c0; border-color: #4078c0; color: #fff; }
+.btn-primary:hover { background: #3369b0; border-color: #3369b0; }
 
 /* Right column */
 .right-col { display: flex; flex-direction: column; gap: 16px; }
 .card {
-  background: #2a2a2a;
-  border: 1px solid #3a3a3a;
+  background: #252525;
+  border: 1px solid #333;
   border-radius: 6px;
   padding: 18px 20px;
 }
 .card h3 {
   margin: 0 0 14px;
   font-size: 12px; font-weight: 500;
-  color: #9aa0a6;
+  color: #757575;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -177,9 +183,9 @@ body {
 .note {
   max-width: 1200px; margin: 20px auto 0;
   padding: 14px 18px;
-  font-size: 12px; color: #9aa0a6;
-  background: #242424; border-radius: 6px;
-  border-left: 3px solid #569cd6;
+  font-size: 12px; color: #757575;
+  background: #1e1e1e; border-radius: 6px;
+  border-left: 3px solid #4078c0;
   line-height: 1.6;
 }
 
@@ -188,9 +194,9 @@ body {
 .scope-btn {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 6px 16px; height: 32px;
-  border: 1px solid #4a4a4a;
-  background: #f0f0f0;
-  color: #2a2a2a;
+  border: 1px solid #444;
+  background: #ffffff;
+  color: #1a1a1a;
   cursor: pointer;
   font-size: 13px;
   font-family: inherit;
@@ -198,8 +204,8 @@ body {
 }
 .scope-btn:first-child { border-radius: 4px 0 0 4px; }
 .scope-btn:last-child { border-radius: 0 4px 4px 0; border-left: none; }
-.scope-btn.active { background: #569cd6; border-color: #569cd6; color: #fff; }
-.scope-btn:hover:not(.active) { background: #e0e0e0; }
+.scope-btn.active { background: #4078c0; border-color: #4078c0; color: #fff; }
+.scope-btn:hover:not(.active) { background: #f0f0f0; }
 
 /* ===== Mode sub-panels (偵測/警報頻率) ===== */
 .mode-sub {
@@ -207,58 +213,58 @@ body {
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
-  margin-top: 6px;
-  width: 100%;
 }
-.mode-sub.show { display: flex; }
-.mode-sub.col { flex-direction: column; align-items: flex-start; }
+.mode-sub.show { display: inline-flex; }
+/* 每周模式：需要換行，佔滿整行 */
+.mode-sub.col { display: none; width: 100%; flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 4px; }
+.mode-sub.col.show { display: flex; }
 .mode-sub input[type="number"] {
   width: 72px; height: 32px; padding: 0 8px;
-  border: 1px solid #4a4a4a; border-radius: 4px;
-  background: #f0f0f0; color: #2a2a2a;
+  border: 1px solid #444; border-radius: 4px;
+  background: #ffffff; color: #1a1a1a;
   font-size: 13px; font-family: inherit;
 }
 .mode-sub input[type="time"] {
   width: 110px; height: 32px; padding: 0 8px;
-  border: 1px solid #4a4a4a; border-radius: 4px;
-  background: #f0f0f0; color: #2a2a2a;
+  border: 1px solid #444; border-radius: 4px;
+  background: #ffffff; color: #1a1a1a;
   font-size: 13px; font-family: inherit;
 }
 .mode-sub select {
   height: 32px; padding: 0 10px;
-  border: 1px solid #4a4a4a; border-radius: 4px;
-  background: #f0f0f0; color: #2a2a2a;
+  border: 1px solid #444; border-radius: 4px;
+  background: #ffffff; color: #1a1a1a;
   font-size: 13px; font-family: inherit;
   min-width: 80px;
 }
-.mode-sub input:focus, .mode-sub select:focus { outline: 2px solid #569cd6; outline-offset: -1px; }
+.mode-sub input:focus, .mode-sub select:focus { outline: 2px solid #4078c0; outline-offset: -1px; }
 
 /* Weekday picker */
 .weekday-picker { display: flex; gap: 4px; flex-wrap: wrap; }
 .weekday-btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 32px; height: 32px;
-  border: 1px solid #4a4a4a; border-radius: 4px;
-  background: #f0f0f0; color: #2a2a2a;
+  border: 1px solid #444; border-radius: 4px;
+  background: #ffffff; color: #1a1a1a;
   cursor: pointer; font-size: 12px; font-weight: 500;
   transition: all 0.15s; user-select: none; font-family: inherit;
 }
-.weekday-btn.active { background: #569cd6; border-color: #569cd6; color: #fff; }
-.weekday-btn:hover:not(.active) { background: #e0e0e0; }
+.weekday-btn.active { background: #4078c0; border-color: #4078c0; color: #fff; }
+.weekday-btn:hover:not(.active) { background: #f0f0f0; }
 
 /* ===== Notification blocks ===== */
 .notif-block {
   display: none;
   width: 100%;
   margin-top: 8px;
-  padding: 12px 14px;
-  background: #2e2e2e;
-  border: 1px solid #3e3e3e;
+  padding: 10px 12px;
+  background: #1a1a1a;
+  border: 1px solid #333;
   border-radius: 4px;
 }
 .notif-block.show { display: block; }
 .notif-title {
-  font-size: 11px; color: #9aa0a6;
+  font-size: 11px; color: #757575;
   text-transform: uppercase; letter-spacing: 0.05em;
   margin-bottom: 8px;
 }
@@ -267,8 +273,8 @@ body {
 .email-tags {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
   padding: 4px 8px;
-  border: 1px solid #4a4a4a; border-radius: 4px;
-  background: #f0f0f0;
+  border: 1px solid #444; border-radius: 4px;
+  background: #ffffff;
   min-height: 36px;
   cursor: text;
 }
@@ -289,8 +295,8 @@ body {
 
 /* ===== Select2 dark theme ===== */
 .select2-container--default .select2-selection--multiple {
-  background-color: #f0f0f0;
-  border: 1px solid #4a4a4a;
+  background-color: #ffffff;
+  border: 1px solid #444;
   border-radius: 4px;
   min-height: 36px;
   padding: 2px 4px;
@@ -314,28 +320,28 @@ body {
   font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
 }
 .select2-dropdown {
-  background-color: #2e2e2e;
-  border: 1px solid #4a4a4a;
+  background-color: #252525;
+  border: 1px solid #333;
   border-radius: 4px;
 }
 .select2-results__option {
   color: #e8e8e8; font-size: 13px; padding: 8px 12px;
 }
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
-  background-color: #569cd6; color: #fff;
+  background-color: #4078c0; color: #fff;
 }
 .select2-results__option[aria-selected="true"] {
-  background-color: rgba(86, 156, 214, 0.2); color: #569cd6;
+  background-color: rgba(64, 120, 192, 0.2); color: #5b9bd5;
 }
 .select2-search--dropdown .select2-search__field {
-  background-color: #3a3a3a;
-  border: 1px solid #4a4a4a;
+  background-color: #1e1e1e;
+  border: 1px solid #333;
   border-radius: 4px;
   color: #e8e8e8; font-size: 13px;
   font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
   padding: 6px 10px;
 }
-.select2-search--dropdown .select2-search__field:focus { outline: 2px solid #569cd6; }
+.select2-search--dropdown .select2-search__field:focus { outline: 2px solid #4078c0; }
 </style>
 </head>
 <body>
@@ -432,8 +438,8 @@ body {
 
     <!-- 偵測頻率 -->
     <div class="row row-top">
-      <div class="row-label">偵測頻率 <small>Detection</small></div>
-      <div class="row-body" style="flex-direction:column;align-items:flex-start;gap:4px;">
+      <div class="row-label">偵測頻率 <small>Detection Frequency</small></div>
+      <div class="row-body" style="gap:8px;align-items:center;flex-wrap:wrap;">
         <select id="detect-mode">
           <option value="scheduled">定時</option>
           <option value="daily">每天</option>
@@ -494,7 +500,7 @@ body {
     <!-- 警報頻率 -->
     <div class="row row-top">
       <div class="row-label">警報頻率 <small>Alert Frequency</small></div>
-      <div class="row-body" style="flex-direction:column;align-items:flex-start;gap:4px;">
+      <div class="row-body" style="gap:8px;align-items:center;flex-wrap:wrap;">
         <select id="freq-mode">
           <option value="once">觸發後僅發送一次</option>
           <option value="repeat">重複提醒</option>
@@ -580,7 +586,7 @@ body {
 
     <div class="btns">
       <button class="btn btn-cancel">× Cancel</button>
-      <button class="btn">✓ Confirm</button>
+      <button class="btn btn-primary">✓ Confirm</button>
     </div>
   </div>
 

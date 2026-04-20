@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>報表 Demo — 摯陞 SRP 系統</title>
+<style>
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", Arial, sans-serif;
+  font-size: 13px;
+  background: #f0f2f5;
+  color: #1a1a1a;
+}
+
+/* ── Screen toolbar ── */
+.screen-toolbar {
+  background: #fff;
+  border-bottom: 1px solid #d9d9d9;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.screen-toolbar h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  flex: 1;
+}
+.toolbar-btn {
+  padding: 6px 16px;
+  border-radius: 4px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  color: #333;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.12s;
+}
+.toolbar-btn:hover { background: #f5f5f5; }
+.toolbar-btn.primary {
+  background: #4078c0;
+  border-color: #3568b0;
+  color: #fff;
+}
+.toolbar-btn.primary:hover { background: #3568b0; }
+
+/* ── Report shell ── */
+.report-wrapper {
+  max-width: 1050px;
+  margin: 24px auto;
+  padding: 0 20px 60px;
+}
+
+/* ── Report page (printable unit) ── */
+.report-page {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  padding: 32px 36px;
+  margin-bottom: 32px;
+}
+
+/* ── Report header ── */
+.report-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding-bottom: 18px;
+  border-bottom: 2px solid #1a3a6b;
+  margin-bottom: 20px;
+}
+.report-header .logo {
+  width: 54px;
+  height: 54px;
+  background: #1a3a6b;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.report-header .titles { flex: 1; }
+.report-header .company {
+  font-size: 11px;
+  color: #666;
+  margin: 0 0 2px;
+}
+.report-header h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a3a6b;
+  letter-spacing: .5px;
+}
+.report-header .subtitle {
+  font-size: 12px;
+  color: #888;
+}
+.report-header .meta {
+  text-align: right;
+  font-size: 11px;
+  color: #666;
+  line-height: 1.7;
+}
+
+/* ── Filter summary bar ── */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.filter-tag {
+  background: #f0f5ff;
+  border: 1px solid #c8d8f8;
+  border-radius: 3px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #1a3a6b;
+}
+.filter-tag strong { font-weight: 600; }
+
+/* ── KPI summary cards ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 5px;
+  padding: 14px 16px;
+  text-align: center;
+}
+.kpi-card .kpi-label {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 6px;
+}
+.kpi-card .kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.kpi-card .kpi-unit { font-size: 12px; color: #999; }
+.kpi-card.danger .kpi-value { color: #d93025; }
+.kpi-card.warn .kpi-value { color: #e67e22; }
+.kpi-card.ok .kpi-value { color: #27ae60; }
+
+/* ── Section heading ── */
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a3a6b;
+  border-left: 3px solid #4078c0;
+  padding-left: 8px;
+  margin: 0 0 10px;
+}
+
+/* ── Table ── */
+.rpt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 24px;
+}
+.rpt-table thead tr {
+  background: #1a3a6b;
+  color: #fff;
+}
+.rpt-table thead th {
+  padding: 9px 10px;
+  text-align: left;
+  font-weight: 600;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.rpt-table thead th.num { text-align: right; }
+.rpt-table tbody tr { border-bottom: 1px solid #e8e8e8; }
+.rpt-table tbody tr:nth-child(even) { background: #f8f9fc; }
+.rpt-table tbody tr:hover { background: #eef3fb; }
+.rpt-table tbody td {
+  padding: 8px 10px;
+  vertical-align: middle;
+  color: #333;
+}
+.rpt-table tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.rpt-table tfoot tr { border-top: 2px solid #1a3a6b; }
+.rpt-table tfoot td {
+  padding: 8px 10px;
+  font-weight: 700;
+  font-size: 12px;
+  color: #1a3a6b;
+  background: #f0f5ff;
+}
+.rpt-table tfoot td.num { text-align: right; }
+
+/* ── Status badges ── */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-danger { background: #fde8e7; color: #c0392b; }
+.badge-warn   { background: #fef3e2; color: #d35400; }
+.badge-info   { background: #e8f0fe; color: #1a3a6b; }
+.badge-ok     { background: #e8f5e9; color: #1e7e34; }
+.badge-gray   { background: #f0f0f0; color: #666; }
+
+/* ── Trend mini-chart placeholder ── */
+.trend-chart-wrap {
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  padding: 16px;
+  margin-bottom: 24px;
+  background: #fafafa;
+}
+.trend-chart {
+  height: 120px;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 0 4px;
+}
+.bar-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.bar-wrap {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  height: 90px;
+  gap: 2px;
+}
+.bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+  transition: opacity .15s;
+}
+.bar:hover { opacity: .8; }
+.bar-label { font-size: 10px; color: #999; margin-top: 2px; }
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #666;
+}
+.chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* ── Page footer ── */
+.report-footer {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #aaa;
+}
+
+/* ── Section separator ── */
+.section-sep { border: none; border-top: 1px dashed #e0e0e0; margin: 20px 0; }
+
+/* ── Report type tabs (screen) ── */
+.rpt-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #d9d9d9;
+}
+.rpt-tab {
+  padding: 8px 18px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  color: #888;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.rpt-tab.active { color: #4078c0; border-bottom-color: #4078c0; font-weight: 600; }
+.rpt-tab:hover:not(.active) { color: #333; }
+
+/* ── Section visibility ── */
+.rpt-section { display: none; }
+.rpt-section.active { display: block; }
+
+/* ═══════════════════════════════════════
+   PRINT STYLES
+═══════════════════════════════════════ */
+@media print {
+  body { background: #fff; font-size: 11px; }
+  .screen-toolbar, .rpt-tabs { display: none !important; }
+  .report-wrapper { margin: 0; padding: 0; max-width: 100%; }
+  .report-page {
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 20px 28px;
+    page-break-after: always;
+  }
+  .report-page:last-child { page-break-after: auto; }
+  .rpt-section { display: block !important; }
+  .kpi-card:hover, .rpt-table tbody tr:hover { background: inherit !important; }
+
+  @page {
+    size: A4;
+    margin: 15mm 12mm;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Screen toolbar ── -->
+<div class="screen-toolbar">
+  <h1>報表 Demo — 摯陞 SRP 系統</h1>
+  <div class="rpt-tabs" style="margin:0;border:none;">
+    <button class="rpt-tab active" onclick="switchTab('weekly')">週報</button>
+    <button class="rpt-tab" onclick="switchTab('monthly')">月報</button>
+    <button class="rpt-tab" onclick="switchTab('voyage')">航次警報報表</button>
+    <button class="rpt-tab" onclick="switchTab('cii')">CII 報表</button>
+    <button class="rpt-tab" onclick="switchTab('bunker')">Bunker 報表</button>
+  </div>
+  <button class="toolbar-btn" onclick="window.print()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    列印
+  </button>
+</div>
+
+<div class="report-wrapper">
+
+  <!-- ════════════════════════════════════════
+       週報
+  ════════════════════════════════════════ -->
+  <div id="sec-weekly" class="rpt-section active">
+    <div class="report-page" id="page-weekly-1">
+
+      <!-- Header -->
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>船隊週報</h2>
+          <div class="subtitle">Fleet Weekly Summary Report</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-14<br>
+          報告週期：2026-04-07 ~ 2026-04-13<br>
+          第 15 週 (W15)<br>
+          製表人：系統自動產生
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <span class="filter-tag"><strong>船隊：</strong>全船隊</span>
+        <span class="filter-tag"><strong>船隻數：</strong>12 艘</span>
+        <span class="filter-tag"><strong>警報類型：</strong>全部</span>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-row">
+        <div class="kpi-card danger">
+          <div class="kpi-label">本週警報總數</div>
+          <div class="kpi-value">47</div>
+          <div class="kpi-unit">件　▲ 12% vs 上週</div>
+        </div>
+        <div class="kpi-card warn">
+          <div class="kpi-label">未處理警報</div>
+          <div class="kpi-value">9</div>
+          <div class="kpi-unit">件　待處理</div>
+        </div>
+        <div class="kpi-card ok">
+          <div class="kpi-label">已處理警報</div>
+          <div class="kpi-value">38</div>
+          <div class="kpi-unit">件　▲ 處理率 81%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">平均回應時間</div>
+          <div class="kpi-value">2.4</div>
+          <div class="kpi-unit">小時</div>
+        </div>
+      </div>
+
+      <!-- Bar chart: 每日警報趨勢 -->
+      <p class="section-title">本週每日警報數量趨勢</p>
+      <div class="trend-chart-wrap">
+        <div class="trend-chart" id="weekly-chart"></div>
+        <div class="chart-legend">
+          <span><span class="legend-dot" style="background:#d93025;"></span>嚴重</span>
+          <span><span class="legend-dot" style="background:#e67e22;"></span>警告</span>
+          <span><span class="legend-dot" style="background:#4078c0;"></span>一般</span>
+        </div>
+      </div>
+
+      <!-- 各船警報彙總 -->
+      <p class="section-title">各船隻警報彙總</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>船名</th>
+            <th>船旗</th>
+            <th class="num">嚴重</th>
+            <th class="num">警告</th>
+            <th class="num">一般</th>
+            <th class="num">合計</th>
+            <th>處理狀態</th>
+            <th>最近一筆</th>
+          </tr>
+        </thead>
+        <tbody id="weekly-ship-tbody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">合計</td>
+            <td class="num">12</td>
+            <td class="num">21</td>
+            <td class="num">14</td>
+            <td class="num">47</td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <hr class="section-sep">
+
+      <!-- 警報分類彙總 -->
+      <p class="section-title">警報類型分佈</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>警報類型</th>
+            <th class="num">本週件數</th>
+            <th class="num">上週件數</th>
+            <th class="num">增減</th>
+            <th class="num">佔比</th>
+            <th>主要船隻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>航次警報</td><td class="num">18</td><td class="num">14</td><td class="num" style="color:#d93025">▲ +4</td><td class="num">38%</td><td>慶豐輪、大洋號</td></tr>
+          <tr><td>CII 超標警報</td><td class="num">11</td><td class="num">13</td><td class="num" style="color:#27ae60">▼ -2</td><td class="num">23%</td><td>福星輪、海洋之星</td></tr>
+          <tr><td>Bunker 油耗異常</td><td class="num">9</td><td class="num">7</td><td class="num" style="color:#d93025">▲ +2</td><td class="num">19%</td><td>太平洋號</td></tr>
+          <tr><td>船員管理警報</td><td class="num">6</td><td class="num">6</td><td class="num">—</td><td class="num">13%</td><td>—</td></tr>
+          <tr><td>其他</td><td class="num">3</td><td class="num">2</td><td class="num" style="color:#d93025">▲ +1</td><td class="num">6%</td><td>—</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>合計</td><td class="num">47</td><td class="num">42</td><td class="num" style="color:#d93025">▲ +5</td><td class="num">100%</td><td></td></tr>
+        </tfoot>
+      </table>
+
+      <!-- Footer -->
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 1 頁，共 1 頁</span>
+        <span>列印時間：2026-04-14 09:30</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       月報
+  ════════════════════════════════════════ -->
+  <div id="sec-monthly" class="rpt-section">
+    <div class="report-page" id="page-monthly-1">
+
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>船隊月報</h2>
+          <div class="subtitle">Fleet Monthly Summary Report — 2026 年 3 月</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-01<br>
+          報告週期：2026-03-01 ~ 2026-03-31<br>
+          製表人：系統自動產生
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="filter-tag"><strong>報告月份：</strong>2026-03</span>
+        <span class="filter-tag"><strong>船隻數：</strong>12 艘</span>
+        <span class="filter-tag"><strong>警報類型：</strong>全部</span>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-card danger">
+          <div class="kpi-label">月警報總數</div>
+          <div class="kpi-value">183</div>
+          <div class="kpi-unit">件　▲ 8% vs 上月</div>
+        </div>
+        <div class="kpi-card warn">
+          <div class="kpi-label">未結案警報</div>
+          <div class="kpi-value">21</div>
+          <div class="kpi-unit">件　待追蹤</div>
+        </div>
+        <div class="kpi-card ok">
+          <div class="kpi-label">平均處理率</div>
+          <div class="kpi-value">88%</div>
+          <div class="kpi-unit">▲ +3% vs 上月</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">警報最多船</div>
+          <div class="kpi-value" style="font-size:16px;">慶豐輪</div>
+          <div class="kpi-unit">24 件</div>
+        </div>
+      </div>
+
+      <!-- 每週趨勢 -->
+      <p class="section-title">每週警報數量趨勢</p>
+      <div class="trend-chart-wrap">
+        <div class="trend-chart" id="monthly-chart"></div>
+        <div class="chart-legend">
+          <span><span class="legend-dot" style="background:#d93025;"></span>嚴重</span>
+          <span><span class="legend-dot" style="background:#e67e22;"></span>警告</span>
+          <span><span class="legend-dot" style="background:#4078c0;"></span>一般</span>
+        </div>
+      </div>
+
+      <!-- 月度各船統計 -->
+      <p class="section-title">各船月度警報統計</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>船名</th>
+            <th class="num">W1</th>
+            <th class="num">W2</th>
+            <th class="num">W3</th>
+            <th class="num">W4</th>
+            <th class="num">月合計</th>
+            <th class="num">嚴重件數</th>
+            <th>狀態</th>
+          </tr>
+        </thead>
+        <tbody id="monthly-ship-tbody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">合計</td>
+            <td class="num">44</td>
+            <td class="num">47</td>
+            <td class="num">51</td>
+            <td class="num">41</td>
+            <td class="num">183</td>
+            <td class="num">38</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <hr class="section-sep">
+
+      <!-- CII 月度概況 -->
+      <p class="section-title">CII 月度合規概況</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>船名</th>
+            <th class="num">本月 CII 值</th>
+            <th class="num">CII 評級</th>
+            <th class="num">警報次數</th>
+            <th>趨勢</th>
+            <th>備註</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>慶豐輪</td><td class="num">0.82</td><td class="num"><span class="badge badge-ok">A</span></td><td class="num">1</td><td>→ 持平</td><td>—</td></tr>
+          <tr><td>大洋號</td><td class="num">0.91</td><td class="num"><span class="badge badge-ok">B</span></td><td class="num">2</td><td>↗ 改善</td><td>—</td></tr>
+          <tr><td>福星輪</td><td class="num">1.15</td><td class="num"><span class="badge badge-warn">D</span></td><td class="num">5</td><td>↘ 惡化</td><td>需關注燃油效率</td></tr>
+          <tr><td>海洋之星</td><td class="num">1.22</td><td class="num"><span class="badge badge-danger">E</span></td><td class="num">8</td><td>↘ 持續惡化</td><td>已通知船管</td></tr>
+          <tr><td>太平洋號</td><td class="num">0.95</td><td class="num"><span class="badge badge-ok">B</span></td><td class="num">3</td><td>→ 持平</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 1 頁，共 2 頁</span>
+        <span>列印時間：2026-04-01 08:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       航次警報報表
+  ════════════════════════════════════════ -->
+  <div id="sec-voyage" class="rpt-section">
+    <div class="report-page">
+
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>航次警報報表</h2>
+          <div class="subtitle">Voyage Alert Report</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-14<br>
+          查詢區間：2026-03-01 ~ 2026-04-13<br>
+          製表人：系統自動產生
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="filter-tag"><strong>船名：</strong>全船隊</span>
+        <span class="filter-tag"><strong>警報等級：</strong>全部</span>
+        <span class="filter-tag"><strong>狀態：</strong>全部</span>
+        <span class="filter-tag"><strong>共 38 筆</strong></span>
+      </div>
+
+      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
+        <div class="kpi-card danger"><div class="kpi-label">嚴重</div><div class="kpi-value">9</div><div class="kpi-unit">件</div></div>
+        <div class="kpi-card warn"><div class="kpi-label">警告</div><div class="kpi-value">16</div><div class="kpi-unit">件</div></div>
+        <div class="kpi-card info" style=""><div class="kpi-label">一般</div><div class="kpi-value">13</div><div class="kpi-unit">件</div></div>
+        <div class="kpi-card ok"><div class="kpi-label">已處理</div><div class="kpi-value">29</div><div class="kpi-unit">件</div></div>
+        <div class="kpi-card"><div class="kpi-label">未處理</div><div class="kpi-value">9</div><div class="kpi-unit">件</div></div>
+      </div>
+
+      <p class="section-title">警報明細</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>警報時間</th>
+            <th>船名</th>
+            <th>航次</th>
+            <th>警報項目</th>
+            <th>等級</th>
+            <th class="num">數值</th>
+            <th class="num">閾值</th>
+            <th>狀態</th>
+            <th>處理人</th>
+          </tr>
+        </thead>
+        <tbody id="voyage-tbody"></tbody>
+      </table>
+
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 1 頁，共 2 頁</span>
+        <span>列印時間：2026-04-14 09:30</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       CII 報表
+  ════════════════════════════════════════ -->
+  <div id="sec-cii" class="rpt-section">
+    <div class="report-page">
+
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>CII 碳排效率報表</h2>
+          <div class="subtitle">Carbon Intensity Indicator (CII) Report</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-14<br>
+          查詢區間：2026-01-01 ~ 2026-03-31<br>
+          製表人：系統自動產生
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="filter-tag"><strong>年度：</strong>2026</span>
+        <span class="filter-tag"><strong>季度：</strong>Q1</span>
+        <span class="filter-tag"><strong>評級標準：</strong>IMO CII 2024</span>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-card ok"><div class="kpi-label">評級 A/B 船隻</div><div class="kpi-value">7</div><div class="kpi-unit">艘 (58%)</div></div>
+        <div class="kpi-card warn"><div class="kpi-label">評級 C/D 船隻</div><div class="kpi-value">3</div><div class="kpi-unit">艘 (25%)</div></div>
+        <div class="kpi-card danger"><div class="kpi-label">評級 E 船隻</div><div class="kpi-value">2</div><div class="kpi-unit">艘 (17%)</div></div>
+        <div class="kpi-card"><div class="kpi-label">艦隊平均 CII</div><div class="kpi-value">0.97</div><div class="kpi-unit">gCO₂/dwt·nm</div></div>
+      </div>
+
+      <p class="section-title">各船 CII 評級詳情</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>船名</th>
+            <th>船型</th>
+            <th class="num">DWT</th>
+            <th class="num">Q1 CII 值</th>
+            <th class="num">基準值</th>
+            <th>評級</th>
+            <th class="num">警報次數</th>
+            <th>年度預測</th>
+            <th>備註</th>
+          </tr>
+        </thead>
+        <tbody id="cii-tbody"></tbody>
+      </table>
+
+      <hr class="section-sep">
+
+      <p class="section-title">月度 CII 趨勢 (2026 Q1)</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>船名</th>
+            <th class="num">1月</th>
+            <th class="num">2月</th>
+            <th class="num">3月</th>
+            <th class="num">Q1 均值</th>
+            <th>走勢</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>慶豐輪</td><td class="num">0.84</td><td class="num">0.80</td><td class="num">0.82</td><td class="num">0.82</td><td>↗ 改善中</td></tr>
+          <tr><td>大洋號</td><td class="num">0.95</td><td class="num">0.93</td><td class="num">0.91</td><td class="num">0.93</td><td>↗ 改善中</td></tr>
+          <tr><td>福星輪</td><td class="num">1.08</td><td class="num">1.12</td><td class="num">1.15</td><td class="num">1.12</td><td>↘ 惡化中</td></tr>
+          <tr><td>海洋之星</td><td class="num">1.18</td><td class="num">1.20</td><td class="num">1.22</td><td class="num">1.20</td><td>↘ 持續惡化</td></tr>
+          <tr><td>太平洋號</td><td class="num">0.97</td><td class="num">0.94</td><td class="num">0.95</td><td class="num">0.95</td><td>→ 持平</td></tr>
+        </tbody>
+      </table>
+
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 1 頁，共 1 頁</span>
+        <span>列印時間：2026-04-14 09:30</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       Bunker 報表
+  ════════════════════════════════════════ -->
+  <div id="sec-bunker" class="rpt-section">
+    <div class="report-page">
+
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>Bunker 燃油異常報表</h2>
+          <div class="subtitle">Bunker Consumption Alert Report</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-14<br>
+          查詢區間：2026-03-01 ~ 2026-03-31<br>
+          製表人：系統自動產生
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="filter-tag"><strong>船名：</strong>全船隊</span>
+        <span class="filter-tag"><strong>燃油種類：</strong>全部</span>
+        <span class="filter-tag"><strong>異常類型：</strong>全部</span>
+        <span class="filter-tag"><strong>共 26 筆</strong></span>
+      </div>
+
+      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
+        <div class="kpi-card danger"><div class="kpi-label">高耗量異常</div><div class="kpi-value">11</div><div class="kpi-unit">件</div></div>
+        <div class="kpi-card warn"><div class="kpi-label">低耗量異常</div><div class="kpi-value">6</div><div class="kpi-unit">件 (可能洩漏)</div></div>
+        <div class="kpi-card info" style=""><div class="kpi-label">補給量偏差</div><div class="kpi-value">5</div><div class="kpi-unit">件</div></div>
+        <div class="kpi-card"><div class="kpi-label">月總消耗</div><div class="kpi-value">4,823</div><div class="kpi-unit">MT</div></div>
+        <div class="kpi-card"><div class="kpi-label">異常佔比</div><div class="kpi-value">18%</div><div class="kpi-unit">航段</div></div>
+      </div>
+
+      <p class="section-title">Bunker 異常明細</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>日期</th>
+            <th>船名</th>
+            <th>航段</th>
+            <th>燃油種類</th>
+            <th>異常類型</th>
+            <th class="num">實際耗量 (MT)</th>
+            <th class="num">預計耗量 (MT)</th>
+            <th class="num">偏差 (%)</th>
+            <th>狀態</th>
+          </tr>
+        </thead>
+        <tbody id="bunker-tbody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="6">合計</td>
+            <td class="num">1,247</td>
+            <td class="num">1,062</td>
+            <td class="num">+17.4%</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 1 頁，共 2 頁</span>
+        <span>列印時間：2026-04-14 09:30</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .report-wrapper -->
+
+<script>
+/* ── Tab switching ── */
+function switchTab(name) {
+  document.querySelectorAll('.rpt-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.rpt-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+/* ── Data ── */
+const SHIPS = [
+  { name:'慶豐輪', flag:'台灣', crit:3, warn:5, info:2, done:true, last:'04-13 14:22' },
+  { name:'大洋號', flag:'台灣', crit:1, warn:3, info:3, done:true, last:'04-12 09:10' },
+  { name:'福星輪', flag:'巴拿馬', crit:2, warn:4, info:1, done:false, last:'04-13 22:05' },
+  { name:'海洋之星', flag:'賴比瑞亞', crit:3, warn:3, info:2, done:false, last:'04-13 18:30' },
+  { name:'太平洋號', flag:'馬紹爾群島', crit:1, warn:2, info:3, done:true, last:'04-11 07:45' },
+  { name:'北極星', flag:'台灣', crit:0, warn:1, info:1, done:true, last:'04-10 15:00' },
+  { name:'南方之鷹', flag:'巴拿馬', crit:1, warn:2, info:1, done:true, last:'04-12 11:20' },
+  { name:'亞洲橋', flag:'賴比瑞亞', crit:0, warn:1, info:0, done:true, last:'04-09 08:00' },
+  { name:'寶島輪', flag:'台灣', crit:1, warn:0, info:1, done:false, last:'04-13 20:15' },
+  { name:'明日之星', flag:'馬紹爾群島', crit:0, warn:0, info:0, done:true, last:'—' },
+  { name:'遠航者', flag:'巴拿馬', crit:0, warn:0, info:0, done:true, last:'—' },
+  { name:'海上明珠', flag:'賴比瑞亞', crit:0, warn:0, info:0, done:true, last:'—' },
+];
+
+/* ── Weekly ship table ── */
+const weeklyTbody = document.getElementById('weekly-ship-tbody');
+SHIPS.forEach((s, i) => {
+  const total = s.crit + s.warn + s.info;
+  const pct = s.done
+    ? `<span class="badge badge-ok">已結案</span>`
+    : `<span class="badge badge-warn">待處理</span>`;
+  weeklyTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${s.name}</td><td>${s.flag}</td>
+      <td class="num">${s.crit > 0 ? `<span style="color:#d93025;font-weight:600">${s.crit}</span>` : s.crit}</td>
+      <td class="num">${s.warn}</td><td class="num">${s.info}</td>
+      <td class="num"><strong>${total}</strong></td>
+      <td>${pct}</td><td>${s.last}</td>
+    </tr>`;
+});
+
+/* ── Monthly ship table ── */
+const MONTHLY = [
+  { name:'慶豐輪',  w:[6,7,7,4], crit:5 },
+  { name:'大洋號',  w:[4,5,4,3], crit:2 },
+  { name:'福星輪',  w:[5,6,8,5], crit:7 },
+  { name:'海洋之星',w:[7,8,9,7], crit:11},
+  { name:'太平洋號',w:[5,6,8,5], crit:4 },
+  { name:'北極星',  w:[3,3,4,3], crit:2 },
+  { name:'南方之鷹',w:[4,4,4,4], crit:3 },
+  { name:'亞洲橋',  w:[3,3,3,3], crit:1 },
+  { name:'寶島輪',  w:[3,3,4,3], crit:2 },
+  { name:'明日之星',w:[2,2,3,2], crit:0 },
+  { name:'遠航者',  w:[1,3,4,3], crit:1 },
+  { name:'海上明珠',w:[1,3,3,4], crit:0 },
+];
+const mTbody = document.getElementById('monthly-ship-tbody');
+MONTHLY.forEach((s, i) => {
+  const total = s.w.reduce((a, b) => a + b, 0);
+  const status = s.crit >= 5
+    ? `<span class="badge badge-danger">需關注</span>`
+    : s.crit >= 2
+      ? `<span class="badge badge-warn">一般</span>`
+      : `<span class="badge badge-ok">正常</span>`;
+  mTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${s.name}</td>
+      <td class="num">${s.w[0]}</td><td class="num">${s.w[1]}</td>
+      <td class="num">${s.w[2]}</td><td class="num">${s.w[3]}</td>
+      <td class="num"><strong>${total}</strong></td>
+      <td class="num">${s.crit > 4 ? `<span style="color:#d93025;font-weight:600">${s.crit}</span>` : s.crit}</td>
+      <td>${status}</td>
+    </tr>`;
+});
+
+/* ── Voyage alert table ── */
+const VOYAGE_DATA = [
+  { time:'04-13 14:22', ship:'慶豐輪', voyage:'V2604-01', item:'到港時間超差', lvl:'danger', val:'14h', thr:'±6h', status:'已處理', owner:'王小明' },
+  { time:'04-13 18:30', ship:'海洋之星', voyage:'V2604-03', item:'航速過低', lvl:'warn', val:'9.2kn', thr:'11kn', status:'處理中', owner:'陳大偉' },
+  { time:'04-13 20:15', ship:'寶島輪', voyage:'V2604-07', item:'偏航距離', lvl:'danger', val:'32nm', thr:'15nm', status:'待確認', owner:'—' },
+  { time:'04-12 09:10', ship:'大洋號', voyage:'V2604-02', item:'ETA 變更', lvl:'info', val:'+2.5h', thr:'±2h', status:'已處理', owner:'林怡君' },
+  { time:'04-12 11:20', ship:'南方之鷹', voyage:'V2604-05', item:'航速過低', lvl:'warn', val:'10.1kn', thr:'11kn', status:'已處理', owner:'王小明' },
+  { time:'04-12 22:05', ship:'福星輪', voyage:'V2604-04', item:'燃油消耗率偏高', lvl:'warn', val:'+23%', thr:'±15%', status:'待確認', owner:'—' },
+  { time:'04-11 07:45', ship:'太平洋號', voyage:'V2604-06', item:'到港時間超差', lvl:'warn', val:'+4.1h', thr:'±3h', status:'已處理', owner:'陳大偉' },
+  { time:'04-10 15:00', ship:'北極星', voyage:'V2604-08', item:'ETA 變更', lvl:'info', val:'+1.8h', thr:'±2h', status:'已處理', owner:'林怡君' },
+  { time:'04-09 08:00', ship:'亞洲橋', voyage:'V2604-09', item:'航速輕微偏低', lvl:'info', val:'10.8kn', thr:'11kn', status:'已處理', owner:'王小明' },
+  { time:'04-08 16:30', ship:'慶豐輪', voyage:'V2603-12', item:'偏航距離', lvl:'danger', val:'19nm', thr:'15nm', status:'已處理', owner:'陳大偉' },
+];
+const lvlMap = {
+  danger: '<span class="badge badge-danger">嚴重</span>',
+  warn:   '<span class="badge badge-warn">警告</span>',
+  info:   '<span class="badge badge-info">一般</span>',
+};
+const stMap = {
+  '已處理': '<span class="badge badge-ok">已處理</span>',
+  '處理中': '<span class="badge badge-warn">處理中</span>',
+  '待確認': '<span class="badge badge-gray">待確認</span>',
+};
+const vTbody = document.getElementById('voyage-tbody');
+VOYAGE_DATA.forEach((r, i) => {
+  vTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${r.time}</td><td>${r.ship}</td>
+      <td>${r.voyage}</td><td>${r.item}</td><td>${lvlMap[r.lvl]}</td>
+      <td class="num">${r.val}</td><td class="num">${r.thr}</td>
+      <td>${stMap[r.status]}</td><td>${r.owner}</td>
+    </tr>`;
+});
+
+/* ── CII table ── */
+const CII_DATA = [
+  { name:'慶豐輪',    type:'散貨船', dwt:35000, cii:0.82, base:0.95, grade:'A', alerts:1, forecast:'A' },
+  { name:'大洋號',    type:'散貨船', dwt:28000, cii:0.91, base:0.97, grade:'B', alerts:2, forecast:'B' },
+  { name:'福星輪',    type:'油輪',   dwt:52000, cii:1.15, base:1.02, grade:'D', alerts:5, forecast:'D' },
+  { name:'海洋之星',  type:'油輪',   dwt:48000, cii:1.22, base:1.00, grade:'E', alerts:8, forecast:'E' },
+  { name:'太平洋號',  type:'貨櫃船', dwt:40000, cii:0.95, base:0.98, grade:'B', alerts:3, forecast:'C' },
+  { name:'北極星',    type:'散貨船', dwt:30000, cii:0.89, base:0.96, grade:'B', alerts:1, forecast:'B' },
+  { name:'南方之鷹',  type:'貨櫃船', dwt:45000, cii:1.01, base:0.99, grade:'C', alerts:3, forecast:'C' },
+  { name:'亞洲橋',    type:'散貨船', dwt:32000, cii:0.87, base:0.95, grade:'A', alerts:0, forecast:'A' },
+  { name:'寶島輪',    type:'油輪',   dwt:44000, cii:1.05, base:1.01, grade:'C', alerts:2, forecast:'C' },
+  { name:'明日之星',  type:'貨櫃船', dwt:38000, cii:0.92, base:0.98, grade:'B', alerts:0, forecast:'B' },
+  { name:'遠航者',    type:'散貨船', dwt:27000, cii:0.96, base:0.97, grade:'B', alerts:1, forecast:'B' },
+  { name:'海上明珠',  type:'油輪',   dwt:50000, cii:1.08, base:1.02, grade:'C', alerts:1, forecast:'C' },
+];
+const gradeClass = { A:'badge-ok', B:'badge-ok', C:'badge-info', D:'badge-warn', E:'badge-danger' };
+const ciiTbody = document.getElementById('cii-tbody');
+CII_DATA.forEach((r, i) => {
+  ciiTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${r.name}</td><td>${r.type}</td>
+      <td class="num">${r.dwt.toLocaleString()}</td>
+      <td class="num">${r.cii}</td>
+      <td class="num">${r.base}</td>
+      <td><span class="badge ${gradeClass[r.grade]}">${r.grade}</span></td>
+      <td class="num">${r.alerts > 4 ? `<span style="color:#d93025;font-weight:600">${r.alerts}</span>` : r.alerts}</td>
+      <td><span class="badge ${gradeClass[r.forecast]}">${r.forecast}</span></td>
+      <td>${r.grade === 'E' ? '已通知船管' : r.grade === 'D' ? '需關注' : '—'}</td>
+    </tr>`;
+});
+
+/* ── Bunker table ── */
+const BUNKER_DATA = [
+  { date:'04-13', ship:'太平洋號', seg:'基隆→高雄', fuel:'VLSFO', type:'高耗量', actual:187, plan:145, status:'待確認' },
+  { date:'04-13', ship:'福星輪',   seg:'高雄→廈門', fuel:'LSMGO', type:'高耗量', actual:94,  plan:72,  status:'處理中' },
+  { date:'04-12', ship:'慶豐輪',   seg:'基隆→東京', fuel:'VLSFO', type:'補給偏差', actual:320, plan:290, status:'已處理' },
+  { date:'04-12', ship:'海洋之星', seg:'上海→釜山', fuel:'VLSFO', type:'高耗量', actual:210, plan:168, status:'處理中' },
+  { date:'04-11', ship:'大洋號',   seg:'釜山→東京', fuel:'LSMGO', type:'高耗量', actual:78,  plan:61,  status:'已處理' },
+  { date:'04-11', ship:'寶島輪',   seg:'廈門→香港', fuel:'VLSFO', type:'低耗量', actual:52,  plan:85,  status:'已處理' },
+  { date:'04-10', ship:'南方之鷹', seg:'新加坡→馬尼拉', fuel:'VLSFO', type:'高耗量', actual:144, plan:115, status:'已處理' },
+  { date:'04-09', ship:'福星輪',   seg:'馬尼拉→基隆', fuel:'LSMGO', type:'低耗量', actual:38,  plan:65,  status:'待確認' },
+  { date:'04-09', ship:'北極星',   seg:'基隆→廈門', fuel:'VLSFO', type:'補給偏差', actual:95,  plan:82,  status:'已處理' },
+  { date:'04-08', ship:'慶豐輪',   seg:'東京→釜山', fuel:'VLSFO', type:'高耗量', actual:129, plan:99,  status:'已處理' },
+];
+const typeClass = { '高耗量':'badge-danger', '低耗量':'badge-warn', '補給偏差':'badge-info' };
+const bTbody = document.getElementById('bunker-tbody');
+BUNKER_DATA.forEach((r, i) => {
+  const diff = (((r.actual - r.plan) / r.plan) * 100).toFixed(1);
+  const diffStr = diff > 0 ? `+${diff}%` : `${diff}%`;
+  const diffColor = Math.abs(diff) > 15 ? 'color:#d93025;font-weight:600' : 'color:#e67e22';
+  bTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${r.date}</td><td>${r.ship}</td>
+      <td>${r.seg}</td><td>${r.fuel}</td>
+      <td><span class="badge ${typeClass[r.type]}">${r.type}</span></td>
+      <td class="num">${r.actual}</td><td class="num">${r.plan}</td>
+      <td class="num" style="${diffColor}">${diffStr}</td>
+      <td>${stMap[r.status]}</td>
+    </tr>`;
+});
+
+/* ── Mini bar charts ── */
+function buildChart(containerId, data, maxVal) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  data.forEach(d => {
+    const h = maxVal;
+    const g = document.createElement('div');
+    g.className = 'bar-group';
+    g.innerHTML = `
+      <div class="bar-wrap">
+        <div class="bar" style="background:#d93025;height:${Math.round(d.c/h*80)}px;" title="嚴重 ${d.c}"></div>
+        <div class="bar" style="background:#e67e22;height:${Math.round(d.w/h*80)}px;" title="警告 ${d.w}"></div>
+        <div class="bar" style="background:#4078c0;height:${Math.round(d.i/h*80)}px;" title="一般 ${d.i}"></div>
+      </div>
+      <div class="bar-label">${d.label}</div>`;
+    c.appendChild(g);
+  });
+}
+
+buildChart('weekly-chart', [
+  { label:'04/07(一)', c:2, w:3, i:2 },
+  { label:'04/08(二)', c:1, w:4, i:1 },
+  { label:'04/09(三)', c:2, w:2, i:3 },
+  { label:'04/10(四)', c:1, w:3, i:2 },
+  { label:'04/11(五)', c:3, w:4, i:2 },
+  { label:'04/12(六)', c:2, w:3, i:3 },
+  { label:'04/13(日)', c:1, w:2, i:1 },
+], 12);
+
+buildChart('monthly-chart', [
+  { label:'W1 (3/1)', c:8, w:16, i:20 },
+  { label:'W2 (3/8)', c:10, w:19, i:18 },
+  { label:'W3 (3/15)', c:12, w:22, i:17 },
+  { label:'W4 (3/22)', c:8, w:15, i:18 },
+], 20);
+</script>
+</body>
+</html>
