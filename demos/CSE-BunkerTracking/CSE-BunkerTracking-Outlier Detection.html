@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>單船異常排查儀表板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/annotations.js"></script>
+    <style>
+        .highcharts-credits { display: none !important; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .highcharts-crosshair { stroke-width: 1px; stroke: rgba(255,255,255,0.4); }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 p-6 md:p-10 font-sans min-h-screen relative text-base">
+<div class="max-w-screen-2xl mx-auto">
+
+    <!-- ===== 頁首 ===== -->
+    <div class="mb-6 border-b border-gray-700 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end">
+        <div class="mb-4 md:mb-0 flex items-center">
+            <a id="back-btn" href="CSE-BunkerTracking-Dashboard-demo.html"
+               class="mr-4 p-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 transition"
+               title="返回">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+            </a>
+            <div>
+                <h1 id="outlier-title" class="text-3xl font-bold text-white border-l-4 border-red-500 pl-4">
+                    離群值排查
+                </h1>
+                <p class="text-sm text-gray-400 pl-4 mt-1">Outlier Detection — 單船異常事件追蹤</p>
+            </div>
+        </div>
+        <div id="od-date-range" class="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-sm text-gray-300 font-mono">
+            —
+        </div>
+    </div>
+
+    <!-- ===== URL 參數解析 + 資料生成 ===== -->
+    <script>
+    (function () {
+        function hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            return Math.abs(hash);
+        }
+
+        const params        = new URLSearchParams(location.search);
+        const vesselId      = params.get('vesselId') || 'ship_0';
+        const from          = params.get('from');
+        const outlierVal    = parseFloat(params.get('outlierValue')) || 66.6;
+        const anomalyPeriod = params.get('anomalyPeriod') || '2026-01';
+        const isHigh        = params.get('isHigh') === '1';
+
+        // 返回按鈕
+        const backEl = document.getElementById('back-btn');
+        if (from === 'records') backEl.href = 'CSE-BunkerTracking-Records-demo.html';
+        else if (from === 'single') backEl.href = 'CSE-BunkerTracking-RecordsSingle-demo.html' + (vesselId ? '?vesselId=' + vesselId : '');
+
+        // 船名 / DWT 對照
+        const imoInfo = {
+            '9737814': { name: 'CHINA STEEL SUCCESS 中鋼成功輪',    dwt: '210,000', dwtNum: 210000 },
+            '9737826': { name: 'CHINA STEEL VISION 中鋼遠見輪',      dwt: '180,000', dwtNum: 180000 },
+            '9702560': { name: 'CHINA STEEL EXPLORATION 中鋼探索輪', dwt: '180,000', dwtNum: 180000 },
+            '9702558': { name: 'CHINA STEEL ENDEAVOR 中鋼奮進輪',    dwt: '82,000',  dwtNum: 82000  },
+            '9860063': { name: 'CSC VICTOR 中鋼勝利輪',              dwt: '63,000',  dwtNum: 63000  },
+            '9861768': { name: 'CSC LEADER 中鋼領先輪',              dwt: '63,000',  dwtNum: 63000  },
+            '9861770': { name: 'CSC CREATOR 中鋼創造輪',             dwt: '82,000',  dwtNum: 82000  },
+            '9861782': { name: 'CSC PREEMINENCE 中鋼超群輪',         dwt: '38,000',  dwtNum: 38000  },
+            '9849239': { name: 'C.S. BRILLIANCE 中鋼光輝輪',         dwt: '180,000', dwtNum: 180000 },
+            '9832987': { name: 'CHINA STEEL HARMONY 中鋼和諧輪',     dwt: '82,000',  dwtNum: 82000  },
+        };
+        const dashInfo = [
+            { name: 'CHINA STEEL SUCCESS 中鋼成功輪',    dwt: '210,000', dwtNum: 210000 },
+            { name: 'CHINA STEEL VISION 中鋼遠見輪',      dwt: '180,000', dwtNum: 180000 },
+            { name: 'CHINA STEEL EXPLORATION 中鋼探索輪', dwt: '180,000', dwtNum: 180000 },
+            { name: 'CHINA STEEL ENDEAVOR 中鋼奮進輪',    dwt: '63,000',  dwtNum: 63000  },
+            { name: 'CSC VICTOR 中鋼勝利輪',              dwt: '82,000',  dwtNum: 82000  },
+            { name: 'CSC LEADER 中鋼領先輪',              dwt: '63,000',  dwtNum: 63000  },
+            { name: 'CSC CREATOR 中鋼創造輪',             dwt: '210,000', dwtNum: 210000 },
+            { name: 'CSC PREEMINENCE 中鋼超群輪',          dwt: '180,000', dwtNum: 180000 },
+            { name: 'C.S. BRILLIANCE 中鋼光輝輪',          dwt: '82,000',  dwtNum: 82000  },
+            { name: 'CHINA STEEL HARMONY 中鋼和諧輪',      dwt: '63,000',  dwtNum: 63000  },
+            { name: 'CHINA STEEL POWER 中鋼動力輪',        dwt: '180,000', dwtNum: 180000 },
+            { name: 'CSC TRIUMPH 中鋼凱旋輪',              dwt: '210,000', dwtNum: 210000 },
+            { name: 'CHINA STEEL UNITY 中鋼團結輪',        dwt: '82,000',  dwtNum: 82000  },
+            { name: 'CSC PIONEER 中鋼先鋒輪',              dwt: '63,000',  dwtNum: 63000  },
+            { name: 'CHINA STEEL PRIDE 中鋼驕傲輪',        dwt: '38,000',  dwtNum: 38000  },
+            { name: 'CSC FORTUNE 中鋼福氣輪',              dwt: '82,000',  dwtNum: 82000  },
+            { name: 'CHINA STEEL GLORY 中鋼光榮輪',        dwt: '180,000', dwtNum: 180000 },
+            { name: 'CSC HORIZON 中鋼視野輪',              dwt: '63,000',  dwtNum: 63000  },
+            { name: 'CHINA STEEL ENTERPRISE 中鋼企業輪',   dwt: '210,000', dwtNum: 210000 },
+            { name: 'CSC LEGACY 中鋼傳承輪',               dwt: '63,000',  dwtNum: 63000  },
+        ];
+
+        let info = null;
+        if (vesselId.startsWith('ship_')) {
+            info = dashInfo[parseInt(vesselId.replace('ship_', '')) || 0] || dashInfo[0];
+        } else {
+            info = imoInfo[vesselId] || null;
+        }
+        if (info) {
+            document.getElementById('outlier-title').textContent = info.name + ' (DWT ' + info.dwt + ' MT) | 離群值排查';
+        }
+
+        // 解析 anomalyPeriod → 起始年月
+        let baseYear = 2026, baseMon = 1;
+        const mM = anomalyPeriod.match(/^(\d{4})-(\d{2})$/);
+        const qM = anomalyPeriod.match(/^Q([1-4])\s+(\d{4})$/);
+        const yM = anomalyPeriod.match(/^(\d{4})$/);
+        if (mM) { baseYear = +mM[1]; baseMon = +mM[2]; }
+        else if (qM) { baseYear = +qM[2]; baseMon = (+qM[1] - 1) * 3 + 1; }
+        else if (yM) { baseYear = +yM[1]; baseMon = 1; }
+
+        const START_DAY   = 10;
+        const OUTLIER_IDX = 5;
+        const categories  = Array.from({ length: 11 }, (_, i) => `${baseMon}/${START_DAY + i}`);
+        const pad         = n => String(n).padStart(2, '0');
+        const outlierDate = `${baseYear}-${pad(baseMon)}-${pad(START_DAY + OUTLIER_IDX)}`;
+        const rangeStart  = `${baseYear}-${pad(baseMon)}-${pad(START_DAY)}`;
+        const rangeEnd    = `${baseYear}-${pad(baseMon)}-${pad(START_DAY + 10)}`;
+        document.getElementById('od-date-range').textContent = rangeStart + ' ~ ' + rangeEnd;
+
+        // 船舶基準效率
+        const dwtNum  = info ? info.dwtNum : 180000;
+        const baseEff = dwtNum >= 180000 ? 77 : dwtNum >= 80000 ? 73 : dwtNum >= 60000 ? 70 : 65;
+
+        // 日效率資料
+        const effData = categories.map((_, i) => {
+            if (i === OUTLIER_IDX) return outlierVal;
+            const h = hashString(vesselId + anomalyPeriod + 'eff' + i);
+            return parseFloat((baseEff - 5 + (h % 13)).toFixed(1));
+        });
+
+        // 浪高資料
+        const peakWave = isHigh ? 0.8 : 6.5;
+        const waveData = categories.map((_, i) => {
+            if (i === OUTLIER_IDX) return peakWave;
+            const h    = hashString(vesselId + anomalyPeriod + 'wave' + i);
+            const base = 1.2 + (h % 25) / 10;
+            const rise = isHigh ? 0 : Math.max(0, (3 - Math.abs(i - OUTLIER_IDX)) * 0.7);
+            return parseFloat(Math.min(base + rise, 4.5).toFixed(1));
+        });
+
+        // RPM
+        const rpmBase = dwtNum >= 180000 ? 65 : dwtNum >= 80000 ? 68 : 72;
+        const rpmData = categories.map((_, i) => {
+            const h = hashString(vesselId + anomalyPeriod + 'rpm' + i);
+            return parseFloat((rpmBase - 0.3 + (h % 7) / 10).toFixed(1));
+        });
+
+        // SOG
+        const peakSOG = isHigh ? 14.8 : 7.8;
+        const sogData = categories.map((_, i) => {
+            if (i === OUTLIER_IDX) return peakSOG;
+            const h    = hashString(vesselId + anomalyPeriod + 'sog' + i);
+            const base = 11.0 + (h % 25) / 10;
+            const drop = isHigh ? 0 : Math.max(0, (3 - Math.abs(i - OUTLIER_IDX)) * 0.4);
+            return parseFloat((base - drop).toFixed(1));
+        });
+
+        // AI 診斷
+        const diagItems = isHigh ? [
+            { checked: true,  borderCls: 'border-yellow-500/30', bgCls: 'bg-yellow-900/20', labelCls: 'text-yellow-300', label: '順風輕載 / 資料記錄異常 (高度吻合)', desc: `當日浪高僅 ${peakWave}m，疑為順風輕載或感測器量測偏差，效率偏高屬環境加成。` },
+            { checked: false, borderCls: 'border-green-500/20',  bgCls: 'bg-green-900/10',  labelCls: 'text-green-400',  label: '主機超載操作 (已排除)',              desc: 'RPM 輸出落在正常區間，無超速操作紀錄，可排除主機因素。' }
+        ] : [
+            { checked: true,  borderCls: 'border-red-500/30',   bgCls: 'bg-red-900/20',    labelCls: 'text-red-300',    label: '逆風重海 (高度吻合)',               desc: `當日浪高突增至 ${peakWave}m，與油耗效率下降趨勢高度一致。` },
+            { checked: false, borderCls: 'border-green-500/20', bgCls: 'bg-green-900/10',   labelCls: 'text-green-400',  label: '主機效能下滑 (已排除)',             desc: '圖表顯示 RPM 輸出平穩，航速下降純屬環境阻力，非機械問題。' }
+        ];
+
+        window._op = { categories, outlierIdx: OUTLIER_IDX, effData, waveData, rpmData, sogData, outlierVal, outlierDate, isHigh, baseEff, diagItems };
+    })();
+    </script>
+
+    <!-- ===== 主要內容 ===== -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- 側欄：異常摘要卡片 -->
+        <div class="lg:col-span-1">
+            <div class="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 p-6 sticky top-6">
+                <h2 class="text-xl font-semibold text-white mb-5 flex items-center border-l-2 border-red-500 pl-3">
+                    ⚠ 離群異常事件
+                </h2>
+
+                <div class="space-y-4 mb-6">
+                    <div class="bg-gray-900 rounded-lg border border-gray-700 px-4 py-3">
+                        <div class="text-xs text-gray-400 mb-1">發生日期</div>
+                        <div id="od-date" class="text-lg text-white font-mono">—</div>
+                    </div>
+                    <div class="bg-gray-900 rounded-lg border border-gray-700 px-4 py-3">
+                        <div class="text-xs text-gray-400 mb-1">離群效率值</div>
+                        <div id="od-eff-val" class="text-2xl font-mono text-blue-300">—</div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-700 mb-5">
+
+                <h3 class="text-sm font-semibold text-gray-300 mb-3 flex items-center border-l-2 border-blue-500 pl-3">
+                    AI 系統初步診斷
+                </h3>
+                <ul id="od-diag-list" class="space-y-3"></ul>
+            </div>
+        </div>
+
+        <!-- 圖表區 -->
+        <div id="sync-charts-container" class="lg:col-span-3 space-y-6">
+
+            <!-- 圖表 1：效率 + 浪高 -->
+            <div class="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 p-6">
+                <h2 class="text-xl font-semibold text-white mb-4 flex items-center border-l-2 border-blue-500 pl-3">
+                    效率表現與海象疊加對比
+                </h2>
+                <div class="bg-gray-900 rounded-lg border border-gray-700 p-4">
+                    <div id="chart-efficiency" style="height: 300px; width: 100%;"></div>
+                </div>
+                <p class="mt-3 text-xs text-gray-500 leading-relaxed">
+                    <span class="text-blue-400 font-semibold">藍線</span>：油耗效率 (nm/mt)，越高代表每噸燃油航行距離越遠。
+                    <span class="text-yellow-400 font-semibold ml-2">黃柱</span>：浪高 (m)，高浪通常造成效率下降。
+                    <span class="text-red-400 font-semibold ml-2">紅色虛線</span>：標記異常發生日。
+                </p>
+            </div>
+
+            <!-- 圖表 2：RPM + SOG -->
+            <div class="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 p-6">
+                <h2 class="text-xl font-semibold text-white mb-4 flex items-center border-l-2 border-purple-500 pl-3">
+                    主機轉速 (RPM) vs 對地航速 (SOG)
+                </h2>
+                <div class="bg-gray-900 rounded-lg border border-gray-700 p-4">
+                    <div id="chart-engine" style="height: 300px; width: 100%;"></div>
+                </div>
+                <p class="mt-3 text-xs text-gray-500 leading-relaxed">
+                    <span class="text-purple-400 font-semibold">紫線</span>：主機轉速 (RPM)，若異常日轉速平穩，可排除機械故障。
+                    <span class="text-emerald-400 font-semibold ml-2">綠線</span>：對地航速 (SOG, knots)，低效率日若 RPM 正常但 SOG 下降，通常為環境阻力所致。
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- /max-w -->
+
+<script>
+    // ── 側欄 DOM 更新（HTML 已渲染，getElementById 必定有效）──
+    (function () {
+        const op = window._op;
+        if (!op) return;
+        document.getElementById('od-date').textContent    = op.outlierDate;
+        document.getElementById('od-eff-val').textContent = op.outlierVal + ' nm/mt';
+        document.getElementById('od-diag-list').innerHTML = op.diagItems.map(d => `
+            <li class="flex items-start gap-3 p-3 ${d.bgCls} border ${d.borderCls} rounded-lg">
+                <input type="checkbox" ${d.checked ? 'checked' : ''} class="mt-1 shrink-0" disabled>
+                <div>
+                    <div class="${d.labelCls} font-medium text-sm">${d.label}</div>
+                    <div class="text-xs text-gray-400 mt-1">${d.desc}</div>
+                </div>
+            </li>`).join('');
+    })();
+
+    const op    = window._op || {};
+    const cats  = op.categories  || ['1/10','1/11','1/12','1/13','1/14','1/15','1/16','1/17','1/18','1/19','1/20'];
+    const oidx  = op.outlierIdx  !== undefined ? op.outlierIdx : 5;
+    const effD  = op.effData  || [82,83,81,79,75,66.6,72,78,80,81,82];
+    const wavD  = op.waveData || [1.2,1.5,1.8,2.5,3.8,6.5,4.0,2.5,1.8,1.5,1.2];
+    const rpmD  = op.rpmData  || [65.2,65.5,65.1,65.3,65.6,65.8,65.4,65.2,65.1,65.5,65.3];
+    const sogD  = op.sogData  || [12.5,12.8,12.2,11.5,10.2,7.8,9.5,11.2,12.0,12.4,12.6];
+
+    Highcharts.setOptions({
+        chart: { backgroundColor: 'transparent', style: { fontFamily: 'inherit' } },
+        title: { text: null },
+        credits: { enabled: false },
+        legend: { itemStyle: { color: '#9ca3af', fontWeight: 'normal' }, itemHoverStyle: { color: '#fff' } },
+        xAxis: {
+            categories: cats,
+            crosshair: { color: 'rgba(148,163,184,0.25)', width: 1 },
+            labels: { style: { color: '#9ca3af', fontSize: '12px' } },
+            lineColor: '#374151', tickColor: '#374151',
+            plotLines: [{
+                color: '#ef4444', width: 2, value: oidx, dashStyle: 'ShortDash', zIndex: 5,
+                label: { text: '異常', style: { color: '#ef4444', fontSize: '11px' }, y: 16 }
+            }]
+        },
+        yAxis: {
+            gridLineColor: '#1f2937',
+            labels: { style: { color: '#9ca3af', fontSize: '11px' } },
+            title: { style: { color: '#9ca3af', fontSize: '11px' } }
+        },
+        tooltip: {
+            shared: true, useHTML: true,
+            backgroundColor: 'rgba(15,23,42,0.95)',
+            borderColor: '#3b82f6', borderWidth: 1,
+            style: { color: '#f3f4f6', fontSize: '12px' }
+        }
+    });
+
+    // 圖表 1：效率 + 浪高
+    Highcharts.chart('chart-efficiency', {
+        chart: { type: 'line' },
+        yAxis: [
+            { title: { text: '效率 (nm/mt)' }, labels: { style: { color: '#60a5fa' } }, title: { text: '效率 (nm/mt)', style: { color: '#60a5fa' } } },
+            { title: { text: '浪高 (m)', style: { color: '#fbbf24' } }, labels: { format: '{value}m', style: { color: '#fbbf24' } }, opposite: true, min: 0, gridLineWidth: 0 }
+        ],
+        series: [{
+            name: '浪高 (m)', type: 'column', yAxis: 1,
+            data: wavD,
+            color: 'rgba(251,191,36,0.25)', borderColor: '#fbbf24', borderWidth: 1
+        }, {
+            name: '油耗效率 (nm/mt)', type: 'line',
+            data: effD.map((v, i) => ({
+                y: v,
+                color: i === oidx ? '#ef4444' : undefined,
+                marker: i === oidx
+                    ? { radius: 8, lineWidth: 2, lineColor: '#ef4444', fillColor: '#111827', symbol: 'circle' }
+                    : { radius: 4, symbol: 'circle' }
+            })),
+            color: '#60a5fa', lineWidth: 2.5,
+            marker: { radius: 4, symbol: 'circle' }
+        }]
+    });
+
+    // 圖表 2：RPM + SOG
+    Highcharts.chart('chart-engine', {
+        chart: { type: 'line' },
+        yAxis: [
+            { title: { text: '轉速 (RPM)', style: { color: '#a78bfa' } }, labels: { style: { color: '#a78bfa' } }, gridLineWidth: 0 },
+            { title: { text: 'SOG (knots)', style: { color: '#34d399' } }, labels: { format: '{value} kt', style: { color: '#34d399' } }, opposite: true, min: 0 }
+        ],
+        series: [{
+            name: '轉速 (RPM)', type: 'line',
+            data: rpmD,
+            color: '#a78bfa', lineWidth: 2, dashStyle: 'ShortDot',
+            marker: { radius: 3, symbol: 'circle' }
+        }, {
+            name: '對地航速 SOG (kt)', type: 'line', yAxis: 1,
+            data: sogD.map((v, i) => ({
+                y: v,
+                color: i === oidx ? '#ef4444' : undefined,
+                marker: i === oidx
+                    ? { radius: 8, lineWidth: 2, lineColor: '#ef4444', fillColor: '#111827', symbol: 'square' }
+                    : { radius: 4, symbol: 'square' }
+            })),
+            color: '#34d399', lineWidth: 2.5,
+            marker: { radius: 4, symbol: 'square' }
+        }]
+    });
+
+    // 聯動游標
+    ['mousemove', 'touchmove', 'touchstart'].forEach(function (eventType) {
+        document.getElementById('sync-charts-container').addEventListener(eventType, function (e) {
+            Highcharts.charts.forEach(function (chart) {
+                if (!chart) return;
+                const event = chart.pointer.normalize(e);
+                const point = chart.series[0].searchPoint(event, true);
+                if (point) point.highlight(e);
+            });
+        });
+    });
+
+    Highcharts.Point.prototype.highlight = function (event) {
+        event = this.series.chart.pointer.normalize(event);
+        this.onMouseOver();
+        this.series.chart.tooltip.refresh(this);
+        this.series.chart.xAxis[0].drawCrosshair(event, this);
+    };
+
+    Highcharts.Pointer.prototype.reset = function () { return undefined; };
+</script>
+</body>
+</html>

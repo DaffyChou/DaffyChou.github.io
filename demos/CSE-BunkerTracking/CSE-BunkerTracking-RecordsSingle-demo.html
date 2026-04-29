@@ -54,7 +54,7 @@
     <div class="max-w-screen-2xl mx-auto">
         <div class="mb-6 border-b border-gray-700 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end">
             <div class="mb-4 md:mb-0 flex items-center">
-                <a href="CSE-BunkerTracking-Records-demo.html"
+                <a id="back-btn" href="CSE-BunkerTracking-Records-demo.html"
                     class="mr-4 p-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 transition"
                     title="Back to Records">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,9 +75,17 @@
         </div>
 
         <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 mb-8" id="section-fuel">
-            <h2 class="text-xl font-semibold text-white mb-6 flex items-center border-l-2 border-blue-500 pl-3" data-i18n="secFuel">
+            <h2 class="text-xl font-semibold text-white mb-4 flex items-center border-l-2 border-blue-500 pl-3" data-i18n="secFuel">
                 油耗紀錄 Fuel Consumption Records
             </h2>
+            <div id="outlier-source-banner" class="hidden mb-4 flex items-start gap-3 bg-red-900/20 border border-red-700/50 rounded-lg px-4 py-3 text-sm">
+                <span class="text-red-400 text-base shrink-0 mt-0.5">⚠</span>
+                <div>
+                    <span class="text-red-300 font-semibold">離群值來源提示</span>
+                    <span class="text-gray-300 ml-2">此頁面由「船舶油耗效率比較」中標記為離群值的船舶導入。下方油耗紀錄可協助追查異常航次。</span>
+                </div>
+                <button onclick="document.getElementById('outlier-source-banner').classList.add('hidden')" class="text-gray-500 hover:text-white shrink-0 leading-none ml-auto">✕</button>
+            </div>
 
             <div class="flex flex-wrap items-center space-x-2 md:space-x-3 bg-gray-900 p-3 rounded-lg border border-gray-700 mb-6">
                 <span class="text-gray-400 text-sm font-semibold pl-2" data-i18n="fRange">區間：</span>
@@ -92,6 +100,18 @@
                 
                 <button onclick="applyFilter('fuel')" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded transition shadow ml-2" data-i18n="btnApply">套用篩選</button>
                 <button onclick="clearFilter('fuel')" class="bg-yellow-600 hover:bg-yellow-500 text-white text-sm px-4 py-1.5 rounded transition shadow" data-i18n="btnClear">清空</button>
+            </div>
+
+            <div class="mb-8 relative bg-gray-900 p-4 rounded-lg border border-gray-700">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-sm font-semibold text-gray-300" data-i18n="secCapacityTrend">總運力與能耗趨勢 Capacity &amp; Energy Trend</h3>
+                    <div id="ct-period-label" class="text-sm text-green-400 font-mono bg-gray-800 border border-green-700/40 px-2 py-1 rounded hidden"></div>
+                </div>
+                <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start mb-2"></div>
+                <div id="chart-capacity-trend" class="chart-container" style="height: 320px;"></div>
+                <div class="mt-3 text-xs text-gray-500 leading-relaxed">
+                    <span class="text-green-400 font-semibold">EEOI</span> = Σ 燃油消耗(MT) × CF / Σ(貨載噸 × 距離 nm)。
+                </div>
             </div>
 
             <div class="mb-8 relative bg-gray-900 p-4 rounded-lg border border-gray-700">
@@ -207,13 +227,17 @@
                 <div class="w-px h-6 bg-gray-600 mx-2 hidden md:block"></div>
                 
                 <span class="text-gray-400 text-sm" data-i18n="fBnkPort">加油港口：</span>
-                <select id="bunker-port" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500 w-32">
+                <select id="bunker-port" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500 w-36">
                     <option value="" data-i18n="optAll">全部</option>
                     <option value="SGSIN">新加坡 (SGSIN)</option>
-                    <option value="CNHKG">香港 (CNHKG)</option>
-                    <option value="AUDAM">丹皮爾 (AUDAM)</option>
                     <option value="NLRTM">鹿特丹 (NLRTM)</option>
+                    <option value="CNZOS">舟山 (CNZOS)</option>
+                    <option value="USHOU">休士頓 (USHOU)</option>
+                    <option value="AUDAM">丹皮爾 (AUDAM)</option>
                     <option value="TWKHH">高雄 (TWKHH)</option>
+                    <option value="CNHKG">香港 (CNHKG)</option>
+                    <option value="AUPHE">黑德蘭港 (AUPHE)</option>
+                    <option value="BRTUB">圖巴朗 (BRTUB)</option>
                 </select>
                 
                 <button onclick="applyFilter('bunker')" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded transition shadow ml-2" data-i18n="btnApply">套用篩選</button>
@@ -224,7 +248,7 @@
                 <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
                     <div class="flex flex-col mb-2">
                         <div class="flex justify-between items-center mb-1">
-                            <h3 class="text-sm font-semibold text-gray-300">1. 各港口加油量與抵港庫存 (Volume & Arrival ROB)</h3>
+                            <h3 id="bunker-inv-title" class="text-sm font-semibold text-gray-300">各港口加油量與抵港庫存 (Volume & Arrival ROB)</h3>
                             <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
                                 class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
                         </div>
@@ -252,14 +276,13 @@
                 <table id="table-bunkering-log" class="display w-full">
                     <thead>
                         <tr>
-                            <th class="w-8">#</th>
                             <th data-i18n="thBnkDate">加油日期</th>
-                            <th data-i18n="thPrevPort">上一港口</th>
+                            <th data-i18n="thVoyage">航次</th>
                             <th data-i18n="thPort">加油港口</th>
                             <th data-i18n="thFuelTypeDt">油品</th>
-                            <th data-i18n="thQty">數量 (MT)</th>
-                            <th data-i18n="thSupplier">供應商</th>
-                            <th data-i18n="thPrice">總金額</th>
+                            <th data-i18n="thQty">加油量 (MT)</th>
+                            <th data-i18n="thArrRob">抵港庫存 (MT)</th>
+                            <th data-i18n="thDepRob">離港庫存 (MT)</th>
                             <th data-i18n="thRemark">備註</th>
                         </tr>
                     </thead>
@@ -360,6 +383,8 @@
         const i18n = {
             'zh': {
                 mainTitle: 'CHINA STEEL SUCCESS 中鋼成功輪',
+                secCapacityTrend: '總運力與能耗趨勢 Capacity & Energy Trend',
+                ctCaption: '單船總運力 × 燃油消耗 × EEOI 趨勢',
                 secFuel: '油耗紀錄 Fuel Consumption Records',
                 secBunker: '加油紀錄 Bunkering Log',
                 secAdvanced: '進階風險與營運分析 Advanced Risk & Operations',
@@ -369,7 +394,7 @@
 
                 thDateRange: '航行區間', thDep: '起拖港', thArr: '目的港', thDur: '時間 (hr)', thDist: '距離 (nm)',
                 thME: '主機 (MT)', thGEN: '發電機 (MT)', thBoiler: '鍋爐 (MT)', thTotal: '總計 (MT)', thEffDt: '效率 (nm/MT)', thAction: '明細',
-                thBnkDate: '日期', thPrevPort: '上一港', thPort: '加油港', thFuelTypeDt: '油品', thQty: '數量 (MT)', thSupplier: '供應商', thPrice: '金額', thRemark: '備註',
+                thBnkDate: '加油日期', thVoyage: '航次', thPort: '加油港口', thFuelTypeDt: '油品', thQty: '加油量 (MT)', thArrRob: '抵港庫存 (MT)', thDepRob: '離港庫存 (MT)', thRemark: '備註',
 
                 dtInfo: '顯示 _START_ 到 _END_ 項，共 _TOTAL_ 項', dtNext: '下一頁', dtPrev: '上一頁', btnExpand: '展開',
                 
@@ -399,6 +424,8 @@
             },
             'en': {
                 mainTitle: 'CHINA STEEL SUCCESS',
+                secCapacityTrend: 'Capacity & Energy Trend',
+                ctCaption: 'Vessel Capacity × Fuel Consumption × EEOI Trend',
                 secFuel: 'Fuel Consumption Records',
                 secBunker: 'Bunkering Log',
                 secAdvanced: 'Advanced Risk & Operations',
@@ -408,7 +435,7 @@
 
                 thDateRange: 'Date Range', thDep: 'Dep', thArr: 'Arr', thDur: 'Dur (hr)', thDist: 'Dist (nm)',
                 thME: 'ME (MT)', thGEN: 'GEN (MT)', thBoiler: 'Boiler (MT)', thTotal: 'Total (MT)', thEffDt: 'Eff (nm/MT)', thAction: 'Details',
-                thBnkDate: 'Date', thPrevPort: 'Prev Port', thPort: 'Bunker Port', thFuelTypeDt: 'Type', thQty: 'Qty (MT)', thSupplier: 'Supplier', thPrice: 'Price', thRemark: 'Remark',
+                thBnkDate: 'Date', thVoyage: 'Voyage', thPort: 'Bunker Port', thFuelTypeDt: 'Type', thQty: 'Qty (MT)', thArrRob: 'Arr ROB (MT)', thDepRob: 'Dep ROB (MT)', thRemark: 'Remark',
 
                 dtInfo: 'Showing _START_ to _END_ of _TOTAL_ entries', dtNext: 'Next', dtPrev: 'Previous', btnExpand: 'Expand',
                 
@@ -438,6 +465,90 @@
             }
         };
 
+        // ================= 單船靜態資料（與 Dashboard shipConfigs 對應）=================
+        const SINGLE_SHIP_PROFILES = [
+            { dwt: 210000, year: 2020, benchmark: 2.6 }, { dwt: 180000, year: 2020, benchmark: 2.6 },
+            { dwt: 82000,  year: 2020, benchmark: 3.6 }, { dwt: 63000,  year: 2020, benchmark: 4.0 },
+            { dwt: 180000, year: 2019, benchmark: 2.6 }, { dwt: 82000,  year: 2019, benchmark: 3.6 },
+            { dwt: 63000,  year: 2019, benchmark: 4.0 }, { dwt: 38000,  year: 2019, benchmark: 4.8 },
+            { dwt: 210000, year: 2016, benchmark: 2.6 }, { dwt: 180000, year: 2015, benchmark: 2.6 },
+            { dwt: 82000,  year: 2015, benchmark: 3.6 }, { dwt: 210000, year: 2014, benchmark: 2.6 },
+            { dwt: 180000, year: 2014, benchmark: 2.6 }, { dwt: 82000,  year: 2014, benchmark: 3.6 },
+            { dwt: 63000,  year: 2014, benchmark: 4.0 }, { dwt: 38000,  year: 2014, benchmark: 4.8 },
+            { dwt: 180000, year: 2013, benchmark: 2.6 }, { dwt: 82000,  year: 2013, benchmark: 3.6 },
+            { dwt: 210000, year: 2012, benchmark: 2.6 }, { dwt: 63000,  year: 2006, benchmark: 4.0 }
+        ];
+
+        // ================= URL 參數導航 =================
+        (function () {
+            const params = new URLSearchParams(location.search);
+            const vesselId = params.get('vesselId');
+            const from = params.get('from');
+            // IMO → SINGLE_SHIP_PROFILES 索引對照（與 Dashboard shipConfigs 對應的船型）
+            const imoShipIdxMap = {
+                '9737814': 0,  // SUCCESS  - Capesize 210k 2020
+                '9737826': 1,  // VISION   - Capesize 180k 2020
+                '9702560': 4,  // EXPLORATION - Capesize 180k 2019
+                '9702558': 2,  // ENDEAVOR - Panamax 82k 2020
+                '9860063': 3,  // VICTOR   - Supramax 63k 2020
+                '9861768': 6,  // LEADER   - Supramax 63k 2019
+                '9861770': 5,  // CREATOR  - Panamax 82k 2019
+                '9861782': 7,  // PREEMINENCE - Handymax 38k 2019
+                '9849239': 9,  // BRILLIANCE  - Capesize 180k 2015
+                '9832987': 10, // HARMONY  - Panamax 82k 2015
+            };
+            // 設定當前船隻索引，供圖表資料生成使用
+            window._shipIdx = vesselId && vesselId.startsWith('ship_')
+                ? (parseInt(vesselId.replace('ship_', '')) || 0)
+                : (vesselId && imoShipIdxMap[vesselId] !== undefined ? imoShipIdxMap[vesselId] : 0);
+
+            const imoVesselMap = {
+                '9737814': { zh: 'CHINA STEEL SUCCESS 中鋼成功輪', en: 'CHINA STEEL SUCCESS' },
+                '9737826': { zh: 'CHINA STEEL VISION 中鋼遠見輪', en: 'CHINA STEEL VISION' },
+                '9702560': { zh: 'CHINA STEEL EXPLORATION 中鋼探索輪', en: 'CHINA STEEL EXPLORATION' },
+                '9702558': { zh: 'CHINA STEEL ENDEAVOR 中鋼奮進輪', en: 'CHINA STEEL ENDEAVOR' },
+                '9860063': { zh: 'CSC VICTOR 中鋼勝利輪', en: 'CSC VICTOR' },
+                '9861768': { zh: 'CSC LEADER 中鋼領先輪', en: 'CSC LEADER' },
+                '9861770': { zh: 'CSC CREATOR 中鋼創造輪', en: 'CSC CREATOR' },
+                '9861782': { zh: 'CSC PREEMINENCE 中鋼超群輪', en: 'CSC PREEMINENCE' },
+                '9849239': { zh: 'C.S. BRILLIANCE 中鋼光輝輪', en: 'C.S. BRILLIANCE' },
+                '9832987': { zh: 'CHINA STEEL HARMONY 中鋼和諧輪', en: 'CHINA STEEL HARMONY' }
+            };
+            const dashShipMap = {
+                'ship_0': { zh: '成功輪', en: 'Success' }, 'ship_1': { zh: '創新輪', en: 'Innovation' },
+                'ship_2': { zh: '自由輪', en: 'Liberty' }, 'ship_3': { zh: '勝利輪', en: 'Victory' },
+                'ship_4': { zh: '光輝輪', en: 'Glory' }, 'ship_5': { zh: '遠見輪', en: 'Vision' },
+                'ship_6': { zh: '領航輪', en: 'Pioneer' }, 'ship_7': { zh: '卓越輪', en: 'Excellence' },
+                'ship_8': { zh: '奮進輪', en: 'Endeavor' }, 'ship_9': { zh: '堅韌輪', en: 'Resilience' },
+                'ship_10': { zh: '探索輪', en: 'Explorer' }, 'ship_11': { zh: '永續輪', en: 'Sustainability' },
+                'ship_12': { zh: '奮發輪', en: 'Strive' }, 'ship_13': { zh: '誠信輪', en: 'Integrity' },
+                'ship_14': { zh: '和平輪', en: 'Peace' }, 'ship_15': { zh: '勇氣輪', en: 'Courage' },
+                'ship_16': { zh: '智慧輪', en: 'Wisdom' }, 'ship_17': { zh: '傳奇輪', en: 'Legend' },
+                'ship_18': { zh: '宏偉輪', en: 'Grand' }, 'ship_19': { zh: '榮耀輪', en: 'Glory' }
+            };
+
+            if (vesselId) {
+                const names = imoVesselMap[vesselId] || dashShipMap[vesselId];
+                if (names) {
+                    i18n.zh.mainTitle = names.zh;
+                    i18n.en.mainTitle = names.en;
+                    document.title = names.zh + ' - 單船儀表板';
+                    const h1 = document.querySelector('h1[data-i18n="mainTitle"]');
+                    if (h1) h1.innerHTML = names.zh;
+                }
+            }
+
+            const backBtn = document.getElementById('back-btn');
+            if (backBtn) {
+                if (from === 'dashboard') {
+                    backBtn.href = 'CSE-BunkerTracking-Dashboard-demo.html';
+                    backBtn.title = 'Back to Dashboard';
+                } else {
+                    backBtn.href = 'CSE-BunkerTracking-Records-demo.html';
+                }
+            }
+        })();
+
         let lang = 'zh';
         function changeLanguage(selectedLang) {
             lang = selectedLang;
@@ -462,6 +573,13 @@
             applyFilter('fuel', true);
             applyFilter('bunker', true);
             applyFilter('adv', true);
+        }
+
+        // 簡單字串雜湊，同一輸入永遠產生同一輸出（確定性假資料用）
+        function hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            return Math.abs(hash);
         }
 
         // ================= 區間下拉選單與資料連動邏輯 =================
@@ -533,6 +651,10 @@
                 $('#fuel-table-arr-port').val('');
                 applyFilter('fuel-table');
             } else {
+                if (section === 'fuel') {
+                    const ctLabel = document.getElementById('ct-period-label');
+                    if (ctLabel) { ctLabel.textContent = ''; ctLabel.classList.add('hidden'); }
+                }
                 $(`#${section}-time-granularity`).val('month');
                 updateDateDropdowns(section);
                 
@@ -578,44 +700,128 @@
             if (len === 0) return;
 
             if (section === 'fuel') {
-                const effActual = Array.from({length: len}, () => parseFloat((12 + Math.random() * 2.5).toFixed(1)));
-                const effBaseline = Array(len).fill(14.8);
-                const effAvg = Array.from({length: len}, (_, i) => parseFloat((13 + Math.sin(i) * 0.5).toFixed(1)));
-                
-                const typeVLSFO = Array.from({length: len}, () => Math.floor(100 + Math.random() * 60));
-                const typeLSMGO = Array.from({length: len}, () => Math.floor(10 + Math.random() * 20));
-                const typeRatio = typeLSMGO.map((v, i) => parseFloat(((v / (v + typeVLSFO[i])) * 100).toFixed(1)));
+                // 依 vesselId 取得船型特性，使不同船隻顯示不同數值
+                const _sidx    = window._shipIdx || 0;
+                const _prof    = (typeof SINGLE_SHIP_PROFILES !== 'undefined') ? SINGLE_SHIP_PROFILES[_sidx] || SINGLE_SHIP_PROFILES[0] : { dwt: 210000, year: 2020, benchmark: 2.6 };
+                const _dwtScale = Math.sqrt(_prof.dwt / 63000);   // Capesize≈1.83, Handymax≈0.78
+                const _age      = 2026 - _prof.year;
+                const _bench    = _prof.benchmark;
 
-                const eqME = Array.from({length: len}, () => Math.floor(80 + Math.random() * 40));
-                const eqGEN = Array.from({length: len}, () => Math.floor(20 + Math.random() * 20));
-                const eqBoil = Array(len).fill(20);
+                // === 確定性資料（hash-based）===
+
+                // 總運力趨勢：貨運周轉量按 DWT 比例，燃油由 EEOI 反推，EEOI ≈ benchmark 附近緩降
+                const capCargo = categories.map(cat => {
+                    const h = hashString(cat + 'cap_cargo' + _sidx);
+                    return parseFloat((450 * _dwtScale + (h % Math.ceil(300 * _dwtScale))).toFixed(1));
+                });
+                const capEeoiArr = categories.map((cat, i) => {
+                    const h = hashString(cat + 'cap_eeoi' + _sidx);
+                    const trend = (_bench * (1 + _age * 0.012)) - i * 0.025;
+                    return parseFloat((trend - 0.1 + (h % 40) / 200).toFixed(2));
+                });
+                // 燃油 = EEOI × cargo / CF，確保三者完全一致
+                const capFuel = capCargo.map((c, i) => Math.round(capEeoiArr[i] * c / 3.151));
+
+                const cCap = $('#chart-capacity-trend').highcharts();
+                if (cCap) {
+                    cCap.xAxis[0].setCategories(categories);
+                    cCap.series[0].setData(capCargo);
+                    cCap.series[1].setData(capFuel);
+                    cCap.series[2].setData(capEeoiArr);
+                }
+
+                // 燃油效率（nm/mt）：較新、較大船效率較高
+                const effBase = 11 + _dwtScale * 0.8 - _age * 0.08;
+                const effActual   = categories.map(cat => {
+                    const h = hashString(cat + 'eff' + _sidx);
+                    return parseFloat((effBase + (h % 30) / 15 - 1).toFixed(1));
+                });
+                const effBaseline = Array(len).fill(parseFloat((effBase + 2.5).toFixed(1)));
+                const effAvg      = categories.map((_, i) => parseFloat((effBase + 1.2 - i * 0.03).toFixed(1)));
 
                 const cEff = $('#chart-fuel-efficiency').highcharts();
                 if(cEff) { cEff.xAxis[0].setCategories(categories); cEff.series[0].setData(effActual); cEff.series[1].setData(effBaseline); cEff.series[2].setData(effAvg); }
-                
+
+                // 燃油結構：LSMGO 約 15-22%，VLSFO 其餘，加總 = capFuel（與容量趨勢圖一致）
+                const typeLSMGO = capFuel.map((total, i) => {
+                    const h = hashString(categories[i] + 'lsmgo' + _sidx);
+                    return Math.round(total * (0.15 + (h % 8) / 100));
+                });
+                const typeVLSFO = capFuel.map((total, i) => total - typeLSMGO[i]);
+                const typeRatio = typeLSMGO.map((v, i) => parseFloat(((v / capFuel[i]) * 100).toFixed(1)));
+
                 const cType = $('#chart-fuel-by-type').highcharts();
                 if(cType) { cType.xAxis[0].setCategories(categories); cType.series[0].setData(typeVLSFO); cType.series[1].setData(typeLSMGO); cType.series[2].setData(typeRatio); }
-                
+
+                // 設備耗油：ME≈65% + GEN≈25% + Boiler≈10%，加總 = capFuel
+                const eqBoil = capFuel.map(total => Math.round(total * 0.10));
+                const eqGEN  = capFuel.map(total => Math.round(total * 0.25));
+                const eqME   = capFuel.map((total, i) => total - eqGEN[i] - eqBoil[i]);
+
                 const cEq = $('#chart-fuel-by-equip').highcharts();
                 if(cEq) { cEq.xAxis[0].setCategories(categories); cEq.series[0].setData(eqME); cEq.series[1].setData(eqGEN); cEq.series[2].setData(eqBoil); }
 
             } else if (section === 'bunker') {
                 const portFilter = $('#bunker-port').val();
                 let dt = $('#table-bunkering-log').DataTable();
-                dt.column(3).search(portFilter); 
+                dt.column(2).search(portFilter);
                 dt.draw();
 
-                let displayPorts = portFilter ? [portFilter] : ['SGSIN', 'NLRTM', 'CNZOS', 'TWKHH', 'USHOU'];
-                const bnkQty = displayPorts.map(() => Math.floor(300 + Math.random() * 1200));
-                const bnkRob = displayPorts.map(() => Math.floor(150 + Math.random() * 400));
-                
+                const allData = window._bunkerData || [];
+                const filtered = portFilter ? allData.filter(r => r.port === portFilter) : allData;
+
                 const cInv = $('#chart-bunker-inventory').highcharts();
-                if(cInv) { cInv.xAxis[0].setCategories(displayPorts); cInv.series[0].setData(bnkQty); cInv.series[1].setData(bnkRob); }
+                if (cInv) {
+                    const titleEl = document.getElementById('bunker-inv-title');
+                    if (portFilter && filtered.length > 0) {
+                        // Single port: show time-series for that port
+                        const cats = filtered.map(r => r.date);
+                        const qtyVals = filtered.map(r => parseFloat(r.qty));
+                        const robVals = filtered.map(r => parseFloat(r.arrRob));
+                        cInv.xAxis[0].setCategories(cats);
+                        cInv.series[0].setData(qtyVals);
+                        cInv.series[1].setData(robVals);
+                        if (titleEl) titleEl.textContent = `${portFilter} — 各次加油時間序列`;
+                    } else if (portFilter && filtered.length === 0) {
+                        // Filtered port has no records — clear the chart
+                        cInv.xAxis[0].setCategories([]);
+                        cInv.series[0].setData([]);
+                        cInv.series[1].setData([]);
+                        if (titleEl) titleEl.textContent = '各港口加油量與抵港庫存 (無資料)';
+                    } else {
+                        // No filter: aggregate by port from actual data
+                        const portAgg = {};
+                        allData.forEach(r => {
+                            if (!portAgg[r.port]) portAgg[r.port] = { qty: 0, rob: [], count: 0 };
+                            portAgg[r.port].qty += parseFloat(r.qty);
+                            portAgg[r.port].rob.push(parseFloat(r.arrRob));
+                            portAgg[r.port].count++;
+                        });
+                        const ports = Object.keys(portAgg);
+                        const qtyVals = ports.map(p => portAgg[p].qty);
+                        const robVals = ports.map(p => Math.round(portAgg[p].rob.reduce((a, b) => a + b, 0) / portAgg[p].rob.length));
+                        cInv.xAxis[0].setCategories(ports);
+                        cInv.series[0].setData(qtyVals);
+                        cInv.series[1].setData(robVals);
+                        if (titleEl) titleEl.textContent = '各港口加油量與抵港庫存 (Volume & Arrival ROB)';
+                    }
+                }
                 
                 const cStrat = $('#chart-voyage-bunker').highcharts();
                 if(cStrat) {
-                    const scatterData = displayPorts.map(p => ({ x: Math.floor(200+Math.random()*1000), y: Math.floor(400+Math.random()*1500), name: p }));
-                    cStrat.series[0].setData(scatterData);
+                    // Classify each record by its own arrRob/qty values — series 0=Normal, 1=Tankering, 2=BunkerCall
+                    const normalPts = [], tankeringPts = [], bunkerCallPts = [];
+                    filtered.forEach(r => {
+                        const x = parseFloat(r.arrRob), y = parseFloat(r.qty);
+                        const label = `${r.port} ${r.voyage}`;
+                        const pt = { x, y, name: label };
+                        if (x > 600 && y > 1000) tankeringPts.push(pt);
+                        else if (x < 300 && y < 500) bunkerCallPts.push(pt);
+                        else normalPts.push(pt);
+                    });
+                    cStrat.series[0].setData(normalPts);
+                    cStrat.series[1].setData(tankeringPts);
+                    cStrat.series[2].setData(bunkerCallPts);
                 }
 
             } else if (section === 'adv') {
@@ -656,6 +862,35 @@
         // 圖表預設初始化為 2025-01 至 2026-03 的區間
         const defaultMonths = ['2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03'];
 
+        // 依 vesselId 動態生成初始圖表資料（確保與 applyFilter 邏輯一致）
+        (function () {
+            const _si   = window._shipIdx || 0;
+            const _p    = (typeof SINGLE_SHIP_PROFILES !== 'undefined') ? SINGLE_SHIP_PROFILES[_si] || SINGLE_SHIP_PROFILES[0] : { dwt: 210000, year: 2020, benchmark: 2.6 };
+            const _ds   = Math.sqrt(_p.dwt / 63000);
+            const _age  = 2026 - _p.year;
+            const _bm   = _p.benchmark;
+            window._initCargo = defaultMonths.map((cat, i) => {
+                const h = hashString(cat + 'cap_cargo' + _si);
+                return parseFloat((450 * _ds + (h % Math.ceil(300 * _ds))).toFixed(1));
+            });
+            window._initEeoi = defaultMonths.map((cat, i) => {
+                const h = hashString(cat + 'cap_eeoi' + _si);
+                const trend = (_bm * (1 + _age * 0.012)) - i * 0.025;
+                return parseFloat((trend - 0.1 + (h % 40) / 200).toFixed(2));
+            });
+            window._initFuel   = window._initCargo.map((c, i) => Math.round(window._initEeoi[i] * c / 3.151));
+            window._initLSMGO  = window._initFuel.map((t, i)  => { const h = hashString(defaultMonths[i] + 'lsmgo' + _si); return Math.round(t * (0.15 + (h % 8) / 100)); });
+            window._initVLSFO  = window._initFuel.map((t, i)  => t - window._initLSMGO[i]);
+            window._initRatio  = window._initLSMGO.map((v, i) => parseFloat(((v / window._initFuel[i]) * 100).toFixed(1)));
+            window._initBoil   = window._initFuel.map(t => Math.round(t * 0.10));
+            window._initGEN    = window._initFuel.map(t => Math.round(t * 0.25));
+            window._initME     = window._initFuel.map((t, i) => t - window._initGEN[i] - window._initBoil[i]);
+            const _effBase = 11 + _ds * 0.8 - _age * 0.08;
+            window._initEffAct  = defaultMonths.map(cat => { const h = hashString(cat + 'eff' + _si); return parseFloat((_effBase + (h % 30) / 15 - 1).toFixed(1)); });
+            window._initEffBase = Array(defaultMonths.length).fill(parseFloat((_effBase + 2.5).toFixed(1)));
+            window._initEffAvg  = defaultMonths.map((_, i) => parseFloat((_effBase + 1.2 - i * 0.03).toFixed(1)));
+        })();
+
         $(document).ready(function () {
             updateDateDropdowns('fuel');
             updateDateDropdowns('bunker');
@@ -666,36 +901,71 @@
             document.getElementById('fuel-table-end').value = '2026-03-19';
 
             // ================= 繪製圖表 =================
-            Highcharts.chart('chart-fuel-efficiency', {
-                chart: { type: 'spline' }, title: { text: null }, xAxis: { categories: defaultMonths }, yAxis: { title: { text: '效率 (nm/mt)' }, min: 10, max: 16 }, tooltip: { shared: true, valueSuffix: ' nm/mt' },
+            // Chart 0: 總運力與能耗趨勢 (單船) — 使用依 vesselId 動態生成的資料
+            Highcharts.chart('chart-capacity-trend', {
+                chart: { zoomType: 'xy' },
+                title: { text: null },
+                xAxis: { categories: defaultMonths },
+                yAxis: [
+                    { title: { text: '燃油消耗 (MT)', style: { color: '#f59e0b' } }, labels: { style: { color: '#f59e0b' } }, min: 0, opposite: true },
+                    { title: { text: '貨運周轉量 (M Ton-miles)' }, min: 0 },
+                    { title: { text: 'EEOI (g CO₂/t-nm)', style: { color: '#10b981' } }, labels: { format: '{value}', style: { color: '#10b981' } }, opposite: true, min: 0 }
+                ],
+                tooltip: { shared: true },
+                legend: { enabled: true, itemStyle: { color: '#cbd5e1' } },
                 series: [
-                    { name: '實際燃油效率 (Actual)', data: [12.1, 12.5, 13.0, 14.2, 13.1, 13.2, 14.0, 14.1, 13.5, 13.0, 12.2, 11.8, 12.0, 12.5, 13.2], color: '#3b82f6', marker: { enabled: true, symbol: 'circle' }, lineWidth: 3, zIndex: 3 },
-                    { name: '出塢/洗船後最佳基準', data: Array(15).fill(14.8), color: '#10b981', dashStyle: 'ShortDash', lineWidth: 2, marker: { enabled: false }, zIndex: 1 },
-                    { name: '歷史 6 個月移動平均', data: [13.2, 13.3, 13.4, 13.5, 13.5, 13.4, 13.6, 13.7, 13.6, 13.4, 13.1, 12.8, 12.9, 13.0, 13.2], color: '#94a3b8', dashStyle: 'Dot', lineWidth: 2, marker: { enabled: false }, zIndex: 2 }
+                    { name: '貨運周轉量 (M Ton-miles)', type: 'column', yAxis: 1,
+                      data: window._initCargo,
+                      color: 'rgba(59, 130, 246, 0.7)', borderWidth: 0 },
+                    { name: '燃油消耗 (MT)', type: 'spline', yAxis: 0,
+                      data: window._initFuel,
+                      color: '#f59e0b', lineWidth: 2,
+                      marker: { lineWidth: 1, lineColor: '#f59e0b', fillColor: '#1e293b', radius: 3 } },
+                    { name: 'EEOI (g CO₂/t-nm)', type: 'spline', yAxis: 2,
+                      data: window._initEeoi,
+                      color: '#10b981', dashStyle: 'ShortDash', lineWidth: 2,
+                      marker: { lineWidth: 2, lineColor: '#10b981', fillColor: 'white', radius: 3 },
+                      tooltip: { valueSuffix: ' g CO₂/t-nm' } }
+                ]
+            });
+
+            Highcharts.chart('chart-fuel-efficiency', {
+                chart: { type: 'spline' }, title: { text: null }, xAxis: { categories: defaultMonths },
+                yAxis: { title: { text: '效率 (nm/mt)' } }, tooltip: { shared: true, valueSuffix: ' nm/mt' },
+                series: [
+                    { name: '實際燃油效率 (Actual)', data: window._initEffAct, color: '#3b82f6', marker: { enabled: true, symbol: 'circle' }, lineWidth: 3, zIndex: 3 },
+                    { name: '出塢/洗船後最佳基準', data: window._initEffBase, color: '#10b981', dashStyle: 'ShortDash', lineWidth: 2, marker: { enabled: false }, zIndex: 1 },
+                    { name: '歷史 6 個月移動平均', data: window._initEffAvg,  color: '#94a3b8', dashStyle: 'Dot', lineWidth: 2, marker: { enabled: false }, zIndex: 2 }
                 ]
             });
 
             Highcharts.chart('chart-fuel-by-type', {
-                chart: { zoomType: 'xy' }, xAxis: { categories: defaultMonths }, yAxis: [ { title: { text: '消耗量 (MT)' }, stackLabels: { enabled: true, style: { color: '#cbd5e1' } } }, { title: { text: '輕油佔比 LSMGO Ratio (%)', style: { color: '#ef4444' } }, opposite: true, labels: { format: '{value}%' }, min: 0, max: 30 } ], tooltip: { shared: true }, plotOptions: { column: { stacking: 'normal', borderWidth: 0 } },
+                chart: { zoomType: 'xy' }, xAxis: { categories: defaultMonths },
+                yAxis: [ { title: { text: '消耗量 (MT)' }, stackLabels: { enabled: true, style: { color: '#cbd5e1' } } },
+                         { title: { text: '輕油佔比 LSMGO Ratio (%)', style: { color: '#ef4444' } }, opposite: true, labels: { format: '{value}%' }, min: 0, max: 30 } ],
+                tooltip: { shared: true }, plotOptions: { column: { stacking: 'normal', borderWidth: 0 } },
                 series: [
-                    { name: '重油 VLSFO', type: 'column', data: [120, 130, 125, 140, 135, 150, 145, 130, 120, 140, 135, 150, 145, 135, 125], color: '#3b82f6' },
-                    { name: '輕油 LSMGO', type: 'column', data: [20, 15, 25, 20, 30, 15, 20, 25, 20, 15, 25, 20, 18, 22, 15], color: '#f59e0b' },
-                    { name: '輕油佔比 (%)', type: 'spline', yAxis: 1, data: [14.2, 10.3, 16.6, 12.5, 18.1, 9.0, 12.1, 16.1, 14.2, 9.6, 15.6, 11.7, 11.0, 14.0, 10.7], color: '#ef4444', marker: { lineWidth: 2, lineColor: '#ef4444', fillColor: '#1e293b' }, tooltip: { valueSuffix: ' %' } }
+                    { name: '重油 VLSFO', type: 'column', data: window._initVLSFO, color: '#3b82f6' },
+                    { name: '輕油 LSMGO', type: 'column', data: window._initLSMGO, color: '#f59e0b' },
+                    { name: '輕油佔比 (%)', type: 'spline', yAxis: 1, data: window._initRatio,
+                      color: '#ef4444', marker: { lineWidth: 2, lineColor: '#ef4444', fillColor: '#1e293b' }, tooltip: { valueSuffix: ' %' } }
                 ]
             });
 
             Highcharts.chart('chart-fuel-by-equip', {
-                chart: { type: 'area' }, xAxis: { categories: defaultMonths, tickmarkPlacement: 'on', title: { enabled: false } }, yAxis: { title: { text: '耗油量 (MT)' } }, tooltip: { split: true, valueSuffix: ' MT' }, plotOptions: { area: { stacking: 'normal', lineColor: '#ffffff', lineWidth: 1, marker: { lineWidth: 1, lineColor: '#ffffff' } } },
+                chart: { type: 'area' }, xAxis: { categories: defaultMonths, tickmarkPlacement: 'on', title: { enabled: false } },
+                yAxis: { title: { text: '耗油量 (MT)' } }, tooltip: { split: true, valueSuffix: ' MT' },
+                plotOptions: { area: { stacking: 'normal', lineColor: '#ffffff', lineWidth: 1, marker: { lineWidth: 1, lineColor: '#ffffff' } } },
                 series: [
-                    { name: '主機 Main Engine', data: [90, 100, 95, 110, 105, 120, 115, 100, 90, 110, 105, 120, 110, 105, 95], color: 'rgba(59, 130, 246, 0.8)' },
-                    { name: '發電機 Aux Engine', data: [30, 25, 35, 30, 40, 25, 30, 35, 30, 25, 35, 30, 35, 30, 30], color: 'rgba(245, 158, 11, 0.8)' },
-                    { name: '鍋爐 Boiler', data: Array(15).fill(20), color: 'rgba(139, 92, 246, 0.8)' }
+                    { name: '主機 Main Engine',   data: window._initME,   color: 'rgba(59, 130, 246, 0.8)' },
+                    { name: '發電機 Aux Engine',  data: window._initGEN,  color: 'rgba(245, 158, 11, 0.8)' },
+                    { name: '鍋爐 Boiler',        data: window._initBoil, color: 'rgba(139, 92, 246, 0.8)' }
                 ]
             });
 
             Highcharts.chart('chart-bunker-inventory', {
                 chart: { zoomType: 'xy' }, xAxis: { categories: ['SGSIN', 'NLRTM', 'CNZOS', 'TWKHH', 'USHOU'], crosshair: true },
-                yAxis: [ { title: { text: '加油量 (MT)' }, min: 0 }, { title: { text: '抵港剩餘油量 (MT)', style: { color: '#f59e0b' } }, opposite: true, min: 0, max: 600, plotLines: [{ value: 200, color: '#ef4444', dashStyle: 'Dash', width: 2, label: { text: '動態最低安全庫存', style: { color: '#ef4444' }, y: -5 }, zIndex: 5 }] } ], tooltip: { shared: true },
+                yAxis: [ { title: { text: '加油量 (MT)' }, min: 0 }, { title: { text: '抵港剩餘油量 (MT)', style: { color: '#f59e0b' } }, opposite: true, min: 0, plotLines: [{ value: 200, color: '#ef4444', dashStyle: 'Dash', width: 2, label: { text: '動態最低安全庫存', style: { color: '#ef4444' }, y: -5 }, zIndex: 5 }] } ], tooltip: { shared: true },
                 series: [
                     { name: '該港加油量 (MT)', type: 'column', yAxis: 0, data: [1200, 450, 1500, 300, 950], color: 'rgba(16, 185, 129, 0.8)' },
                     { name: '抵港剩餘油量 (MT)', type: 'spline', yAxis: 1, data: [250, 180, 220, 450, 210], color: '#f59e0b', marker: { lineWidth: 2, lineColor: '#f59e0b', fillColor: '#1e293b', symbol: 'circle' } }
@@ -796,29 +1066,28 @@
                 }
             });
 
-            const bunkerData = [
-                { id: 1, date: '2026/03/18', prevPort: 'JPYOK', port: 'SGSIN', type: 'VLSFO', qty: '1200', supp: 'Lion Bunkers', price: '720,000', remark: '-' },
-                { id: 2, date: '2026/02/25', prevPort: 'TWKHH', port: 'AUDAM', type: 'VLSFO', qty: '850', supp: 'Oceanic Fuel', price: '535,500', remark: '-' },
-                { id: 3, date: '2026/01/18', prevPort: 'JPOSA', port: 'SGSIN', type: 'LSMGO', qty: '150', supp: 'GlobalBunker', price: '120,000', remark: '<span class="text-orange-400">進港ECA</span>' },
-                { id: 4, date: '2025/11/10', prevPort: 'NLRTM', port: 'TWKHH', type: 'VLSFO', qty: '1100', supp: 'SinoFuel Co.', price: '638,000', remark: '-' },
-                { id: 5, date: '2025/09/22', prevPort: 'TWKHH', port: 'NLRTM', type: 'VLSFO', qty: '1600', supp: 'EuroMarine', price: '880,000', remark: '<span class="text-green-400">長約價</span>' },
-                { id: 6, date: '2025/07/10', prevPort: 'AUDAM', port: 'TWKHH', type: 'VLSFO', qty: '900', supp: 'CPC Taiwan', price: '540,000', remark: '-' },
-                { id: 7, date: '2025/05/18', prevPort: 'TWKHH', port: 'AUDAM', type: 'LSMGO', qty: '80', supp: 'Oceanic Fuel', price: '68,000', remark: '-' },
-                { id: 8, date: '2025/03/08', prevPort: 'JPOSA', port: 'TWKHH', type: 'VLSFO', qty: '450', supp: 'CPC Taiwan', price: '279,000', remark: '-' }
+            window._bunkerData = [
+                { date: '2026/03/18', voyage: 'V.026', port: 'SGSIN', type: 'VLSFO', qty: '1200', arrRob: '280',  depRob: '1480', remark: '-' },
+                { date: '2026/02/25', voyage: 'V.025', port: 'AUDAM', type: 'VLSFO', qty: '850',  arrRob: '320',  depRob: '1170', remark: '-' },
+                { date: '2026/01/18', voyage: 'V.024', port: 'SGSIN', type: 'LSMGO', qty: '150',  arrRob: '180',  depRob: '330',  remark: '進港ECA' },
+                { date: '2025/11/10', voyage: 'V.023', port: 'TWKHH', type: 'VLSFO', qty: '1100', arrRob: '210',  depRob: '1310', remark: '-' },
+                { date: '2025/09/22', voyage: 'V.022', port: 'NLRTM', type: 'VLSFO', qty: '1600', arrRob: '820',  depRob: '2420', remark: '長約價' },
+                { date: '2025/07/10', voyage: 'V.020', port: 'TWKHH', type: 'VLSFO', qty: '900',  arrRob: '350',  depRob: '1250', remark: '-' },
+                { date: '2025/05/18', voyage: 'V.019', port: 'AUDAM', type: 'LSMGO', qty: '80',   arrRob: '90',   depRob: '170',  remark: '-' },
+                { date: '2025/03/08', voyage: 'V.017', port: 'TWKHH', type: 'VLSFO', qty: '450',  arrRob: '480',  depRob: '930',  remark: '-' },
+                { date: '2025/01/15', voyage: 'V.015', port: 'CNZOS', type: 'VLSFO', qty: '1300', arrRob: '390',  depRob: '1690', remark: '-' },
+                { date: '2024/11/20', voyage: 'V.013', port: 'USHOU', type: 'VLSFO', qty: '720',  arrRob: '260',  depRob: '980',  remark: '-' },
             ];
 
-            $('#table-bunkering-log').DataTable({ 
-                data: bunkerData,
+            $('#table-bunkering-log').DataTable({
+                data: window._bunkerData,
                 columns: [
-                    { data: 'id' }, { data: 'date' }, { data: 'prevPort' }, { data: 'port' }, { data: 'type' },
-                    { data: 'qty' }, { data: 'supp' }, { data: 'price' }, { data: 'remark' }
+                    { data: 'date' }, { data: 'voyage' }, { data: 'port' },
+                    { data: 'type' }, { data: 'qty' }, { data: 'arrRob' }, { data: 'depRob' }, { data: 'remark' }
                 ],
-                ordering: true,         // 開啟排序
-                order: [[1, 'desc']],   // 預設以加油日期降冪排列
-                columnDefs: [
-                    { orderable: false, targets: [0] } // 關閉 # 的排序
-                ],
-                pageLength: 5, info: true, autoWidth: false 
+                ordering: true,
+                order: [[0, 'desc']],
+                pageLength: 5, info: true, autoWidth: false
             });
 
             // 觸發初始狀態的顯示
@@ -827,6 +1096,99 @@
             applyFilter('adv', true);
 
             changeLanguage('zh');
+
+            // ================= URL 參數連動 (初始化後執行) =================
+            (function () {
+                const params = new URLSearchParams(location.search);
+                const section    = params.get('section');
+                const tab        = params.get('tab');
+                const port       = params.get('port');
+                const periodType = params.get('periodType');   // year | quarter | month
+                const period     = params.get('period');       // e.g. 2025-06 / 2025 Q2 / 2025
+                const startDate  = params.get('startDate');    // YYYY-MM-DD
+                const endDate    = params.get('endDate');      // YYYY-MM-DD
+                const outlier    = params.get('outlier');
+
+                // 1. 離群值來源提示橫幅
+                if (outlier === 'true') {
+                    const banner = document.getElementById('outlier-source-banner');
+                    if (banner) banner.classList.remove('hidden');
+                }
+
+                // 2. 套用加油港口篩選 (Bunkering Log DataTable)
+                if (port) {
+                    const portSel = document.getElementById('bunker-port');
+                    if (portSel) {
+                        let matched = false;
+                        for (const opt of portSel.options) {
+                            if (opt.value === port || opt.text.includes(port)) {
+                                portSel.value = opt.value;
+                                matched = true;
+                                break;
+                            }
+                        }
+                        if (!matched) {
+                            // Port not in dropdown — add it dynamically so the filter can show it
+                            const newOpt = new Option(port, port, true, true);
+                            portSel.appendChild(newOpt);
+                        }
+                        applyFilter('bunker');
+                        setTimeout(() => {
+                            const el = document.getElementById('section-bunker');
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 300);
+                    }
+                }
+
+                // 3. 帶入 fuel-table 時間範圍 (來自離群值導頁的 startDate / endDate)
+                if (startDate || endDate) {
+                    if (startDate) $('#fuel-table-start').val(startDate);
+                    if (endDate)   $('#fuel-table-end').val(endDate);
+                    applyFilter('fuel-table');
+                }
+
+                // 4. 設定 capacity trend 篩選條件 (同步至 fuel 篩選器)
+                if (periodType || period) {
+                    const granSel  = document.getElementById('fuel-time-granularity');
+                    const startSel = document.getElementById('fuel-start-time');
+                    const endSel   = document.getElementById('fuel-end-time');
+                    if (granSel) {
+                        if (periodType) granSel.value = periodType;
+                        updateDateDropdowns('fuel');
+                        if (period && startSel) {
+                            // 往前補足一個時間單位，避免圖表只剩單一資料點
+                            const gran = granSel.value;
+                            const list = timeLists[gran] || timeLists['month'];
+                            const endIdx = list.indexOf(period);
+                            const startIdx = endIdx > 0 ? endIdx - 1 : 0;
+                            const startPeriod = list[startIdx] || period;
+                            const endPeriod   = endIdx >= 0 ? period : list[list.length - 1];
+                            for (const opt of startSel.options) {
+                                if (opt.value === startPeriod) { startSel.value = startPeriod; break; }
+                            }
+                            for (const opt of endSel.options) {
+                                if (opt.value === endPeriod) { endSel.value = endPeriod; break; }
+                            }
+                        }
+                        applyFilter('fuel');
+                    }
+                    // 顯示期間標籤
+                    const labelEl = document.getElementById('ct-period-label');
+                    if (labelEl && period) { labelEl.textContent = period; labelEl.classList.remove('hidden'); }
+                }
+
+                // 5. 定位與捲動
+                const targetId = section === 'capacityEnergyTrend' ? 'section-fuel'
+                    : section === 'fuelConsumption' ? 'section-fuel'
+                    : tab === 'bunkeringLog' ? 'section-bunker'
+                    : null;
+                if (targetId) {
+                    setTimeout(() => {
+                        const el = document.getElementById(targetId);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 400);
+                }
+            })();
         });
     </script>
 </body>
