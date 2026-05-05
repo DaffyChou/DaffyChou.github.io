@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>進銷存治理儀表板 · Inventory Governance Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- jQuery & DataTables -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <!-- Highcharts -->
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/highcharts-more.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/pareto.js"></script>
+
+  <style>
+    :root {
+      --bg: #131313;
+      --panel: #292929;
+      --panel-2: #1e1e1e;
+      --border: #313131;
+      --soft: #373737;
+      --text: #ffffff;
+      --muted: #999999;
+      --green: #22c55e;
+      --green-2: #10b981;
+      --orange: #f59e0b;
+      --yellow: #fbbf24;
+      --cyan: #22d3ee;
+      --red: #ef4444;
+      --purple: #a78bfa;
+      --radius: .25rem;
+    }
+    * { box-sizing: border-box }
+    html, body { height: 100% }
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC",
+        system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      letter-spacing: .2px;
+    }
+    .wrap { max-width: 1480px; margin: 0 auto; padding: 16px 18px 28px }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 10px
+    }
+    .title { font-weight: 700; font-size: 22px }
+    .subtitle { font-size: 12px; color: var(--muted) }
+    .chip {
+      border: 1px solid var(--soft); background: var(--panel-2);
+      color: #999; font-size: 12px; padding: .125rem .5rem;
+      border-radius: 999px; margin: .15rem .25rem
+    }
+    .chip.bench { color: #b8f0ff; border-color: #155e6e; background: rgba(34,211,238,.08) }
+    .ref-bar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+      font-size: 12px; color: var(--muted);
+      padding: 6px 10px; margin: 6px 0 12px;
+      background: var(--panel-2); border: 1px solid var(--soft); border-radius: var(--radius);
+    }
+    .ref-bar .lbl { color: #c7d0dc; font-weight: 600; margin-right: 6px }
+    .filters {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin: 1rem 0; align-items: flex-end;
+    }
+    .fg { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--muted) }
+    select {
+      min-width: 140px; border-radius: .25rem;
+      border: 1px solid var(--soft); padding: .5rem .25rem;
+      outline: none; background: var(--panel-2); color: var(--text);
+    }
+    .pill-switch {
+      display: inline-flex; border: 1px solid var(--muted);
+      border-radius: .25rem; overflow: hidden
+    }
+    .pill-switch button {
+      border: 0; background: transparent; color: var(--text);
+      padding: .4rem .75rem; cursor: pointer; font-size: 14px;
+    }
+    .pill-switch button + button { border-left: 1px solid var(--soft) }
+    .pill-switch .active { background: #bbb; color: #0f172a; font-weight: 600 }
+    .dr { display: flex; align-items: center; gap: 6px }
+    .dr select { min-width: 110px }
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 14px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .35)
+    }
+    .card-h {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 8px; flex-wrap: wrap; gap: 8px;
+    }
+    .card-title { font-size: 18px; font-weight: 700; line-height: 1.25; display: block }
+    .card-title-s { font-size: 14px; font-weight: 700 }
+    .card-meta { font-size: 13px; color: var(--muted) }
+    .kpi { font-size: 24px; font-weight: 700; margin-top: 4px }
+    .kpi .unit { font-size: 14px; color: var(--muted); margin-left: 4px }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; border-radius: .25rem; padding: 2px 8px
+    }
+    .pill.ok { background: rgba(16, 185, 129, .15); border: 1px solid #115e38; color: #bff0d1 }
+    .pill.warn { background: rgba(245, 158, 11, .15); border: 1px solid #6b4108; color: #ffd67c }
+    .pill.bad { background: rgba(239, 68, 68, .15); border: 1px solid #6b1a1a; color: #ffd0d0 }
+    .pill.info { background: rgba(34,211,238, .12); border: 1px solid #155e6e; color: #b8f0ff }
+    .grid { display: grid; gap: 10px }
+    .g-5 { grid-template-columns: repeat(5, minmax(0, 1fr)) }
+    .g-4 { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+    .g-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+    .g-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+    .g-2-1 { grid-template-columns: 2fr 1fr }
+    @media (max-width: 1100px) { .g-5, .g-4, .g-3, .g-2, .g-2-1 { grid-template-columns: 1fr } }
+    table { width: 100%; border-collapse: collapse }
+    th, td { padding: 6px 10px; text-align: left }
+    th {
+      color: #c7d0dc; border-bottom: 1px solid var(--soft);
+      white-space: nowrap; background: var(--panel)
+    }
+    td { border-bottom: 1px solid var(--border); color: #e9edf2 }
+    tr:nth-child(even) td { background: var(--panel) }
+    .tag {
+      font-size: 13px; padding: 2px 8px; border-radius: .25rem;
+      border: 1px solid var(--soft); background: var(--panel-2); white-space: nowrap;
+    }
+    .tag.red { border-color: #ef4444; background: #3b0a0a; color: #ffd0d0 }
+    .tag.yellow { border-color: #f59e0b; background: #3a2806; color: #ffd67c }
+    .tag.green { border-color: #10b981; background: #0b2f23; color: #c9ffed }
+    .tag.cyan { border-color: #22d3ee; background: #062a32; color: #b8f0ff }
+    .tag.purple { border-color: #a78bfa; background: #1f1530; color: #ddc7ff }
+    .hc { height: 280px }
+    .hc-tall { height: 320px }
+    .hc-x { height: 380px }
+    .dataTables_wrapper { color: #c7d0dc; font-size: 14px }
+    .dataTables_wrapper .dataTables_filter input,
+    .dataTables_wrapper .dataTables_length select {
+      background: var(--panel); border: 1px solid var(--soft); color: #e9edf2;
+      border-radius: 0; padding: 2px 6px; font-size: 14px
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      background: var(--panel); border: 1px solid var(--soft) !important;
+      color: #e9edf2 !important; border-radius: 0 !important;
+      padding: 2px 6px !important; margin: 0 2px !important
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: #e5e7eb !important; color: #0f172a !important; border-color: #e5e7eb !important
+    }
+    .legend-row {
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+      font-size: 13px; color: var(--muted); margin-top: 6px;
+    }
+    .legend-row .dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      display: inline-block; margin-right: 6px
+    }
+    .tabs {
+      display: inline-flex; border: 1px solid var(--soft);
+      border-radius: .25rem; overflow: hidden;
+    }
+    .tabs button {
+      background: transparent; border: 0; color: var(--text);
+      padding: 4px 10px; cursor: pointer; font-size: 13px;
+    }
+    .tabs button + button { border-left: 1px solid var(--soft) }
+    .tabs .active { background: #bbb; color: #0f172a; font-weight: 600 }
+    .footer-note {
+      color: var(--muted); font-size: 12px;
+      margin-top: 8px; text-align: right;
+    }
+    .health-bar {
+      display: flex; gap: 4px; margin-top: 8px; height: 8px;
+      border-radius: 4px; overflow: hidden;
+    }
+    .health-bar > div { height: 100%; }
+
+    /* Risk analysis panel */
+    .risk-panel {
+      background: var(--panel-2);
+      border: 1px solid var(--soft);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      margin-top: 10px;
+      font-size: 12.5px;
+    }
+    .risk-row {
+      display: flex; gap: 10px; align-items: flex-start;
+      line-height: 1.55; padding: 3px 0;
+    }
+    .risk-row + .risk-row { border-top: 1px dashed #2c2c2c; }
+    .risk-label {
+      flex: 0 0 84px;
+      font-weight: 700; font-size: 11.5px; letter-spacing: .5px;
+      padding-top: 1px;
+    }
+    .risk-label.cyan { color: #7dd3fc }
+    .risk-label.yellow { color: #fbbf24 }
+    .risk-label.green { color: #6ee7b7 }
+    .risk-label.purple { color: #c4b5fd }
+    .risk-label.red { color: #fca5a5 }
+    .risk-label.muted { color: #93a1b2 }
+    .risk-text { flex: 1; color: #c8d0db; }
+    .risk-text b { color: #e9edf2; font-weight: 600 }
+    .risk-text .thr { color: #fbbf24; font-weight: 600 }
+    .risk-text .neg { color: #fca5a5; font-weight: 600 }
+    .risk-text .pos { color: #6ee7b7; font-weight: 600 }
+    .risk-text code {
+      background: #131313; border: 1px solid #2c2c2c;
+      padding: 0 4px; border-radius: 3px; font-size: 11.5px;
+      color: #cfeaf5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="header">
+      <div>
+        <div class="title">進銷存治理儀表板 Inventory Governance Dashboard</div>
+        <div class="subtitle">物料 · 配件 · 採購 · 驗收 · 庫存 · 盤點 — 從作業流程延伸到管理決策（資料源：海發進銷存假資料）</div>
+      </div>
+      <div>
+        <div class="chip">Dark · Compact</div>
+        <div class="chip">Real Demo Data</div>
+      </div>
+    </div>
+
+    <div class="ref-bar">
+      <span class="lbl">業界對標：</span>
+      <span class="chip bench">Sertica Procurement</span>
+      <span class="chip bench">DNV ShipManager</span>
+      <span class="chip bench">SpecTec AMOS</span>
+      <span class="chip bench">Wilhelmsen ShipServ</span>
+      <span class="chip bench">SAP Ariba Spend</span>
+      <span class="chip bench">Coupa Risk</span>
+      <span class="chip bench">Microsoft D365 SCM</span>
+      <span class="chip bench">Oracle Cloud SCM</span>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="fg">
+        <span>船舶 Vessel</span>
+        <select id="vesselFilter"></select>
+      </div>
+      <div class="fg">
+        <span>倉庫 Warehouse</span>
+        <select id="warehouseFilter">
+          <option value="ALL" selected>全部倉庫</option>
+          <option value="甲板">甲板</option>
+          <option value="輪機">輪機</option>
+        </select>
+      </div>
+      <div class="fg">
+        <span>分類 Category</span>
+        <select id="categoryFilter">
+          <option value="ALL" selected>全部分類</option>
+          <option value="ENGINE">主機/濾器/軸承</option>
+          <option value="LUBE">油料/冷卻</option>
+          <option value="DECK">甲板/塗裝</option>
+          <option value="SAFETY">安全/救生</option>
+          <option value="HARDWARE">五金/維修件</option>
+        </select>
+      </div>
+      <div class="fg">
+        <span>時間粒度 Granularity</span>
+        <div class="pill-switch" id="dateType">
+          <button data-type="month" class="active">月</button>
+          <button data-type="quarter">季</button>
+        </div>
+      </div>
+      <div class="fg">
+        <span>日期區間 Date Range</span>
+
+        <div class="dr dr-g" data-type="month">
+          <select id="mFrom"></select>
+          <span>至</span>
+          <select id="mTo"></select>
+        </div>
+        <div class="dr dr-g" data-type="quarter" style="display:none">
+          <select id="qFrom">
+            <option value="0" selected>2026 Q1</option>
+            <option value="1">2026 Q2</option>
+          </select>
+          <span>至</span>
+          <select id="qTo">
+            <option value="0">2026 Q1</option>
+            <option value="1" selected>2026 Q2</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <span>幣別 Currency</span>
+        <select id="currencyFilter">
+          <option value="TWD" selected>新台幣 TWD</option>
+          <option value="USD">美元 USD</option>
+          <option value="JPY">日圓 JPY</option>
+          <option value="EUR">歐元 EUR</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="grid g-5">
+      <div class="card">
+        <div class="card-title-s">庫存總值</div>
+        <div class="card-meta">所有倉庫 SKU 帳面金額</div>
+        <div class="kpi"><span id="kpiInvValue">0</span> <span class="unit" id="kpiInvUnit">TWD</span></div>
+        <div class="pill info" style="margin-top:6px">
+          <span id="kpiSkuCount">0</span> SKU · <span id="kpiSkuQty">0</span> 件
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title-s">安全庫存達成率</div>
+        <div class="card-meta">≥ 最低庫存 SKU 佔比；目標 &gt; 90%</div>
+        <div class="kpi"><span id="kpiSafety">0</span> <span class="unit">%</span></div>
+        <div class="health-bar" id="kpiSafetyBar"></div>
+      </div>
+      <div class="card">
+        <div class="card-title-s">盤點完成率</div>
+        <div class="card-meta">已盤點 / 計畫總數；目標 100%</div>
+        <div class="kpi"><span id="kpiStkRate">0</span> <span class="unit">%</span></div>
+        <div class="pill warn" style="margin-top:6px">
+          <span id="kpiStkPending">0</span> 張盤點計畫待執行
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title-s">盤點差異率</div>
+        <div class="card-meta">|差異| / 帳面數量；SOX 警戒 &gt; 3%</div>
+        <div class="kpi"><span id="kpiVarRate">0.0</span> <span class="unit">%</span></div>
+        <div class="pill bad" style="margin-top:6px">
+          差異金額 <span id="kpiVarAmt">0</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title-s">滯料金額</div>
+        <div class="card-meta">qty / safety &gt; 3× 過量風險</div>
+        <div class="kpi"><span id="kpiDeadAmt">0</span> <span class="unit" id="kpiDeadUnit">TWD</span></div>
+        <div class="pill warn" style="margin-top:6px">
+          <span id="kpiDeadCount">0</span> SKU 建議調撥/促消
+        </div>
+      </div>
+    </div>
+
+    <!-- 物料採購單價走勢 -->
+    <div class="card" style="margin-top:10px">
+      <div class="card-h">
+        <div>
+          <div class="card-title">物料採購單價走勢</div>
+          <div class="card-meta">追蹤關鍵物料於不同廠商的採購單價（PO_ITEMS × VENDORS × RFQ 歷史價）</div>
+        </div>
+        <div class="tabs" id="priceItemTabs"></div>
+      </div>
+      <div id="priceTrendChart" class="hc-tall"></div>
+      <div class="risk-panel">
+        <div class="risk-row">
+          <div class="risk-label cyan">觀察重點</div>
+          <div class="risk-text">
+            ① <b>跨廠商價差</b>（同月同物料最高 vs 最低單價的 spread）
+            ② <b>月度 MoM 走勢</b>（漲跌斜率，是否跟 IMPA 大盤吻合）
+            ③ <b>單一廠商連續調漲</b>（是否有議價能力流失跡象）。
+          </div>
+        </div>
+        <div class="risk-row">
+          <div class="risk-label yellow">風險信號</div>
+          <div class="risk-text">
+            <span class="thr">月增幅 &gt; 5%</span>（價格通膨/匯率轉嫁）；
+            <span class="thr">單一廠商溢價 &gt; 平均 20%</span>（議價弱勢）；
+            <span class="thr">spread &gt; 30%</span>（廠商品質/規格差異需確認）。
+          </div>
+        </div>
+        <div class="risk-row">
+          <div class="risk-label green">建議行動</div>
+          <div class="risk-text">
+            觸發 <code>RFQ Re-bid</code>、納入下次「綜合詢價單」強制 ≥3 家比價、
+            建立替代廠商池；對 LUBE 類強波動品項可採 <b>長約鎖價（lock-in）</b>。
+          </div>
+        </div>
+        <div class="risk-row">
+          <div class="risk-label muted">業界對標</div>
+          <div class="risk-text">
+            SAP Ariba <i>Price Intelligence</i>、Coupa <i>Spend Guard</i>、
+            Sertica <i>Historical Price Tracking</i>、SpecTec AMOS <i>Quotation Comparison</i>。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 配件更換頻率 + 庫存健康度 -->
+    <div class="grid g-2" style="margin-top:10px">
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title">配件更換頻率</div>
+            <div class="card-meta">領用單 + 派工單統計各品項/設備累計更換次數（柏拉圖前 80%）</div>
+          </div>
+          <div class="legend-row">
+            <span><span class="dot" style="background:#22d3ee"></span>更換次數</span>
+            <span><span class="dot" style="background:#f59e0b"></span>累計%</span>
+          </div>
+        </div>
+        <div id="replaceFreqChart" class="hc-tall"></div>
+        <div class="risk-panel">
+          <div class="risk-row">
+            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-text">
+              <b>Top 20% 高頻配件</b>承擔約 80% 更換，是維修預算與安全庫存的主要驅動因子；
+              對照 PMS 循環是否吻合（過頻 = 設備老化 / 廠商品質）。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-text">
+              同配件 <span class="thr">月內 ≥ 3 次更換</span>（疑似品質瑕疵）；
+              派工頻率 <span class="thr">QoQ 上升 &gt; 30%</span>（設備可靠度下降）；
+              更換量驟降卻有缺料 → <b>船端隱藏未報修風險</b>。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label green">建議行動</div>
+            <div class="risk-text">
+              納入 <code>PM 預防性維修排程</code>、向廠商提出 <b>QC 改善通報</b>、
+              對 Top N 重要配件雙廠商 dual-source；連結 PMS 強制更換週期。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label muted">業界對標</div>
+            <div class="risk-text">
+              SpecTec AMOS <i>Reliability Tracking</i>、DNV ShipManager <i>PMS-Procurement Linkage</i>、
+              Sertica <i>Equipment Critical Spare</i>。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title">庫存健康度</div>
+            <div class="card-meta">x：安全庫存　y：現庫存　氣泡=金額；分四區檢視單一 SKU 健康狀態</div>
+          </div>
+          <div class="legend-row">
+            <span><span class="dot" style="background:#ef4444"></span>缺料 (qty&lt;safety)</span>
+            <span><span class="dot" style="background:#f59e0b"></span>警戒 (&lt;1.5×)</span>
+            <span><span class="dot" style="background:#10b981"></span>健康 (1.5~3×)</span>
+            <span><span class="dot" style="background:#a78bfa"></span>過量 (&gt;3×)</span>
+          </div>
+        </div>
+        <div id="healthChart" class="hc-tall"></div>
+        <div class="risk-panel">
+          <div class="risk-row">
+            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-text">
+              <b>缺料區</b>：影響船舶營運與適航性；
+              <b>警戒區</b>：reorder point 觸發點；
+              <b>過量區</b>：資金佔用與報廢風險；
+              氣泡大者 = 高金額 SKU，優先處理。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-text">
+              缺料 SKU 佔比 <span class="thr">&gt; 10%</span>（停航風險）；
+              過量金額 <span class="thr">&gt; 庫存總值 15%</span>（呆料減值）；
+              關鍵安全料（SAFETY 類）出現於缺料區 → <span class="neg">法規不合規</span>。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label green">建議行動</div>
+            <div class="risk-text">
+              缺料 → 立即啟動緊急 <code>PR + RFQ</code>；
+              過量 → <b>船間調撥</b>或岸倉退回；
+              動態調整 reorder point 與 safety stock（依消耗速度與 lead time）。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label muted">業界對標</div>
+            <div class="risk-text">
+              Microsoft D365 <i>Inventory Health Overview</i>、Sertica <i>Stock Alert Quadrant</i>、
+              NetSuite <i>ABC × Health Matrix</i>。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 盤點差異率 + 盤點差異金額 -->
+    <div class="grid g-2" style="margin-top:10px">
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title">盤點差異率</div>
+            <div class="card-meta">|盤點差異| / 帳面數量；按船舶 × 倉庫；紅菱形=SOX 警戒 3%</div>
+          </div>
+        </div>
+        <div id="varianceRateChart" class="hc-tall"></div>
+        <div class="risk-panel">
+          <div class="risk-row">
+            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-text">
+              哪些 <b>船×倉庫</b> 差異率最高、是否集中於特定品類，
+              並對照負責人/船員交接時點，判斷是否為流程或人員因素。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-text">
+              差異率 <span class="thr">&gt; 3%</span>（SOX/內控警戒）；
+              <span class="thr">連續兩季上升</span>（系統性問題）；
+              單一倉庫顯著高於船隊均值 → 流程或人員稽核重點。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label green">建議行動</div>
+            <div class="risk-text">
+              提高該倉庫 <code>盤點頻率</code>（季→月 / 月→週）；
+              出入庫單據雙人核對；對重要安全料採 <b>每次出庫即時盤點</b>。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label muted">業界對標</div>
+            <div class="risk-text">
+              SOX <i>Inventory Accuracy Control</i>、BASS <i>Master Data Quality</i>、
+              ABS NS5 <i>Stocktaking Variance Audit</i>。
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title">盤點差異金額</div>
+            <div class="card-meta">差異 × 庫存單價；正值=盤盈 / 負值=盤虧 / 折線=淨差異</div>
+          </div>
+        </div>
+        <div id="varianceAmtChart" class="hc-tall"></div>
+        <div class="risk-panel">
+          <div class="risk-row">
+            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-text">
+              盤盈/盤虧的 <b>金額對比</b>與 <b>淨差異趨勢</b>；
+              財務影響直接寫入 P&amp;L 損益。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-text">
+              月度 <b>淨盤虧</b> <span class="thr">&gt; 10萬 TWD</span>（重大異常）；
+              <span class="thr">連續三月盤虧</span>（系統性流失/失竊）；
+              盤盈金額異常大 → <b>過去入庫漏記或品名錯置</b>。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label green">建議行動</div>
+            <div class="risk-text">
+              啟動 <b>責任歸屬調查</b>、追溯出入庫單據、
+              金額重大者轉 <code>調整單</code> 並通報內稽；連續異常者列入年度稽核重點。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label muted">業界對標</div>
+            <div class="risk-text">
+              SAP S/4HANA <i>Inventory Cost Variance</i>、Oracle Cloud <i>Stocktaking Adjustment</i>、
+              Sage X3 <i>Shrinkage Reporting</i>。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 供應商集中度 + 庫存帳齡分布 -->
+    <div class="grid g-2" style="margin-top:10px">
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title">供應商集中度（HHI 風險）</div>
+            <div class="card-meta">採購／詢價金額占比；HHI 指數識別過度依賴</div>
+          </div>
+          <div class="legend-row">
+            <span>HHI = <b id="hhiVal">0</b></span>
+            <span class="pill" id="hhiPill"></span>
+          </div>
+        </div>
+        <div id="vendorConcChart" class="hc-tall"></div>
+        <div class="risk-panel">
+          <div class="risk-row">
+            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-text">
+              <b>Top 1 / Top 3 廠商</b> 的金額占比、HHI 指數
+              （&lt;1500 競爭、1500–2500 中度、&gt;2500 高度集中）。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-text">
+              單一廠商 <span class="thr">&gt; 30%</span>（依賴風險，廠商斷供即停擺）；
+              HHI <span class="thr">&gt; 2500</span>（談判劣勢）；
+              關鍵安全/主機料 <b>無備援廠商</b>（lock-in）。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label green">建議行動</div>
+            <div class="risk-text">
+              拓展次級供應商池、設定 <code>max share 政策</code>（如單一廠商上限 25%）、
+              關鍵料強制 <b>≥3 家報價</b>；長期推動 dual/tri-source 結構。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label muted">業界對標</div>
+            <div class="risk-text">
+              SAP Ariba <i>Supplier Risk &amp; Concentration</i>、Coupa <i>Risk Assess</i>、
+              Wilhelmsen <i>Supplier Rationalization</i>。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title">庫存帳齡分布</div>
+            <div class="card-meta">依最近一次入庫/採購推算庫齡；金額分布 0-30 / 31-90 / 91-180 / 181-365 / 365+</div>
+          </div>
+        </div>
+        <div id="agingChart" class="hc-tall"></div>
+        <div class="risk-panel">
+          <div class="risk-row">
+            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-text">
+              <b>Aging buckets</b> 金額占比，&gt;180 天為呆滯料候選，
+              對照消耗速度評估 <b>impairment</b>（存貨跌價）必要性。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-text">
+              <span class="thr">365+ 帳齡占比 &gt; 10%</span>（明顯呆料）；
+              <span class="thr">181-365 連續成長</span>（即將惡化）；
+              整體 <b>庫存周轉天數 &gt; 180 天</b>（資金效率差）。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label green">建議行動</div>
+            <div class="risk-text">
+              提列 <code>存貨跌價損失</code>、啟動 <b>處分/退廠/促銷</b>程序、
+              修正未來 PR 數量；對快過期物料優先船間調撥消化。
+            </div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-label muted">業界對標</div>
+            <div class="risk-text">
+              NetSuite <i>Inventory Aging</i>、Sage X3 <i>Slow Mover Analysis</i>、
+              Sertica <i>Obsolescence Report</i>、Oracle Cloud <i>Aging Buckets</i>。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 交船庫存差異 -->
+    <div class="card" style="margin-top:10px">
+      <div class="card-h">
+        <div>
+          <div class="card-title">交船庫存差異</div>
+          <div class="card-meta">船舶交接 / 跨船調撥 之物料金額流動與差異（資料源：調撥單 + 盤點計畫）</div>
+        </div>
+        <div class="tabs" id="hoTabs">
+          <button class="active" data-tab="flow">調撥金額流向</button>
+          <button data-tab="diff">船舶交接差異</button>
+        </div>
+      </div>
+      <div id="handoverChart" class="hc-tall"></div>
+      <div class="risk-panel">
+        <div class="risk-row">
+          <div class="risk-label cyan">觀察重點</div>
+          <div class="risk-text">
+            跨 <b>船東/船舶</b> 調撥金額流向、交接時點 <b>實盤 vs 帳面</b> 差異；
+            判斷是否需 cross-charge 或 invoice。
+          </div>
+        </div>
+        <div class="risk-row">
+          <div class="risk-label yellow">風險信號</div>
+          <div class="risk-text">
+            跨船東調撥 <b>未開立 invoice</b>（cross-charge 風險、稅務風險）；
+            交接差異 <span class="thr">&gt; 5%</span>（責任歸屬爭議）；
+            <b>離船員工最後盤點未完成</b>。
+          </div>
+        </div>
+        <div class="risk-row">
+          <div class="risk-label green">建議行動</div>
+          <div class="risk-text">
+            標準化 <code>交船清單</code> 與雙方簽認流程；跨船東調撥強制走 invoice；
+            交接前 7 天內必須完成完整盤點與差異追蹤。
+          </div>
+        </div>
+        <div class="risk-row">
+          <div class="risk-label muted">業界對標</div>
+          <div class="risk-text">
+            Veson IMOS <i>Vessel Handover</i>、Wilhelmsen <i>Handover Protocol</i>、
+            DNV ShipManager <i>Vessel Transfer</i>。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 治理工作清單 -->
+    <div class="card" style="margin-top:10px">
+      <div class="card-h">
+        <div>
+          <div class="card-title">治理工作清單 · Governance Worklist</div>
+          <div class="card-meta">缺料 / 滯料 / 待盤點 / 盤點差異</div>
+        </div>
+        <div class="tabs" id="anomalyTabs">
+          <button class="active" data-tab="shortage">缺料</button>
+          <button data-tab="dead">滯料</button>
+          <button data-tab="stkPending">待盤點</button>
+          <button data-tab="stkDiff">盤點差異</button>
+        </div>
+      </div>
+      <table id="anomalyTable" class="display" style="width:100%">
+        <thead><tr id="anomalyHead"></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="footer-note">資料源：倉庫庫存明細 / 盤點計畫 / 盤點明細 / 領用單 / 調撥單（海發進銷存假資料.xlsx）</div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ====================== Real demo data ====================== */
+    const VESSELS = [
+      { code: 'NANFENG',   name: '南風號',     owner: '長榮海運' },
+      { code: 'TIANYING',  name: '天鷹號',     owner: '陽明海運' },
+      { code: 'DONGFANG',  name: '東方勇士',   owner: '萬海航運' },
+      { code: 'HAIYANG',   name: '海洋探索者', owner: '台灣航業' },
+      { code: 'BIHAI',     name: '碧海明珠',   owner: '裕民航運' },
+      { code: 'LANHAI',    name: '藍海之星',   owner: '德翔海運' },
+      { code: 'HAOTAI',    name: '豪泰一號',   owner: '正德海運' },
+      { code: 'YUANYANG',  name: '遠洋先鋒',   owner: '慧洋海運' },
+      { code: 'JINLONG',   name: '金龍號',     owner: '四維航業' },
+      { code: 'YINHE',     name: '銀河號',     owner: '新興航運' }
+    ];
+    const ITEM_CAT = {
+      '591234': 'ENGINE', '174562': 'ENGINE', '661012': 'ENGINE', '330112': 'ENGINE',
+      '550101': 'LUBE',   '550245': 'LUBE',   '550901': 'LUBE',   '551210': 'LUBE',
+      '472001': 'DECK',   '450321': 'DECK',   '880456': 'DECK',   '232101': 'DECK',
+      '110678': 'SAFETY', '990567': 'SAFETY', '220789': 'SAFETY', '440890': 'SAFETY',
+      '614789': 'HARDWARE', '660234': 'HARDWARE', '770345': 'HARDWARE', '812345': 'HARDWARE'
+    };
+
+    /* 倉庫庫存明細 */
+    const INVENTORY = [
+      { owner: '萬海航運', vessel: '東方勇士',   wh: '甲板', code: '550245', name: '液壓油 ISO VG68', unit: '桶', safety: 8,  qty: 74, price: 1439, value: 106486 },
+      { owner: '萬海航運', vessel: '東方勇士',   wh: '甲板', code: '232101', name: '工業擦拭布',     unit: '包', safety: 15, qty: 34, price: 3068, value: 104312 },
+      { owner: '萬海航運', vessel: '東方勇士',   wh: '輪機', code: '450321', name: '防鏽噴劑',       unit: '瓶', safety: 11, qty: 13, price: 4693, value: 61009 },
+      { owner: '萬海航運', vessel: '東方勇士',   wh: '輪機', code: '550245', name: '液壓油 ISO VG68', unit: '桶', safety: 5,  qty: 57, price: 280,  value: 15960 },
+      { owner: '萬海航運', vessel: '東方勇士',   wh: '輪機', code: '174562', name: '空氣濾網',       unit: '個', safety: 20, qty: 6,  price: 2118, value: 12708 },
+      { owner: '台灣航業', vessel: '海洋探索者', wh: '甲板', code: '232101', name: '工業擦拭布',     unit: '包', safety: 9,  qty: 6,  price: 1048, value: 6288 },
+      { owner: '台灣航業', vessel: '海洋探索者', wh: '甲板', code: '174562', name: '空氣濾網',       unit: '個', safety: 8,  qty: 16, price: 744,  value: 11904 },
+      { owner: '台灣航業', vessel: '海洋探索者', wh: '甲板', code: '450321', name: '防鏽噴劑',       unit: '瓶', safety: 7,  qty: 62, price: 2559, value: 158658 },
+      { owner: '台灣航業', vessel: '海洋探索者', wh: '輪機', code: '174562', name: '空氣濾網',       unit: '個', safety: 7,  qty: 79, price: 1584, value: 125136 },
+      { owner: '台灣航業', vessel: '海洋探索者', wh: '輪機', code: '450321', name: '防鏽噴劑',       unit: '瓶', safety: 18, qty: 27, price: 3927, value: 106029 },
+      { owner: '台灣航業', vessel: '海洋探索者', wh: '輪機', code: '550245', name: '液壓油 ISO VG68', unit: '桶', safety: 16, qty: 79, price: 640,  value: 50560 },
+      { owner: '台灣航業', vessel: '海洋探索者', wh: '輪機', code: '550101', name: '潤滑油 SAE 40',   unit: '桶', safety: 7,  qty: 53, price: 4771, value: 252863 },
+      { owner: '長榮海運', vessel: '南風號',     wh: '甲板', code: '232101', name: '工業擦拭布',     unit: '包', safety: 5,  qty: 69, price: 2319, value: 160011 },
+      { owner: '長榮海運', vessel: '南風號',     wh: '甲板', code: '550245', name: '液壓油 ISO VG68', unit: '桶', safety: 20, qty: 17, price: 4381, value: 74477 },
+      { owner: '長榮海運', vessel: '南風號',     wh: '甲板', code: '812345', name: '防水膠帶',       unit: '卷', safety: 10, qty: 49, price: 3185, value: 156065 },
+      { owner: '長榮海運', vessel: '南風號',     wh: '甲板', code: '614789', name: '不鏽鋼螺絲 M10', unit: '盒', safety: 19, qty: 80, price: 1888, value: 151040 },
+      { owner: '長榮海運', vessel: '南風號',     wh: '輪機', code: '450321', name: '防鏽噴劑',       unit: '瓶', safety: 14, qty: 48, price: 4089, value: 196272 },
+      { owner: '長榮海運', vessel: '南風號',     wh: '輪機', code: '472001', name: '船用油漆（防污）', unit: '桶', safety: 16, qty: 14, price: 2228, value: 31192 },
+      { owner: '長榮海運', vessel: '南風號',     wh: '輪機', code: '551210', name: '冷卻液',         unit: '桶', safety: 17, qty: 34, price: 2521, value: 85714 }
+    ];
+
+    const STKS = [
+      { no: 'STK-202604-0001', vessel: '東方勇士',   wh: '甲板', date: '2026/04/30', recheckDate: null,         status: '未盤點' },
+      { no: 'STK-202604-0002', vessel: '東方勇士',   wh: '輪機', date: '2026/04/30', recheckDate: null,         status: '未盤點' },
+      { no: 'STK-202604-0003', vessel: '南風號',     wh: '甲板', date: '2026/04/28', recheckDate: '2026/04/29', status: '已盤點' },
+      { no: 'STK-202604-0004', vessel: '豪泰一號',   wh: '輪機', date: '2026/04/25', recheckDate: '2026/04/26', status: '已盤點' },
+      { no: 'STK-202603-0001', vessel: '海洋探索者', wh: '甲板', date: '2026/03/31', recheckDate: '2026/04/01', status: '已盤點' },
+      { no: 'STK-202603-0002', vessel: '碧海明珠',   wh: '甲板', date: '2026/03/28', recheckDate: '2026/03/29', status: '已盤點' },
+      { no: 'STK-202603-0003', vessel: '藍海之星',   wh: '輪機', date: '2026/03/25', recheckDate: '2026/03/26', status: '已盤點' }
+    ];
+
+    const STK_ITEMS = [
+      { stk: 'STK-202604-0001', code: '472001', name: '船用油漆（防污）', unit: '桶', book: 27, count: null, diff: null },
+      { stk: 'STK-202604-0001', code: '174562', name: '空氣濾網',         unit: '個', book: 45, count: null, diff: null },
+      { stk: 'STK-202604-0001', code: '614789', name: '不鏽鋼螺絲 M10',   unit: '盒', book: 54, count: null, diff: null },
+      { stk: 'STK-202604-0001', code: '550245', name: '液壓油 ISO VG68',  unit: '桶', book: 36, count: null, diff: null },
+      { stk: 'STK-202604-0002', code: '551210', name: '冷卻液',           unit: '桶', book: 48, count: null, diff: null },
+      { stk: 'STK-202604-0002', code: '591234', name: '柴油濾芯',         unit: '個', book: 59, count: null, diff: null },
+      { stk: 'STK-202604-0002', code: '550101', name: '潤滑油 SAE 40',     unit: '桶', book: 54, count: null, diff: null },
+      { stk: 'STK-202604-0002', code: '812345', name: '防水膠帶',         unit: '卷', book: 34, count: null, diff: null },
+      { stk: 'STK-202604-0002', code: '450321', name: '防鏽噴劑',         unit: '瓶', book: 47, count: null, diff: null },
+      { stk: 'STK-202604-0003', code: '591234', name: '柴油濾芯',         unit: '個', book: 15, count: 15, diff: 0 },
+      { stk: 'STK-202604-0003', code: '450321', name: '防鏽噴劑',         unit: '瓶', book: 45, count: 44, diff: -1 },
+      { stk: 'STK-202604-0003', code: '550245', name: '液壓油 ISO VG68',  unit: '桶', book: 45, count: 45, diff: 0 },
+      { stk: 'STK-202604-0003', code: '551210', name: '冷卻液',           unit: '桶', book: 18, count: 16, diff: -2 },
+      { stk: 'STK-202604-0004', code: '550101', name: '潤滑油 SAE 40',    unit: '桶', book: 49, count: 51, diff:  2 },
+      { stk: 'STK-202604-0004', code: '591234', name: '柴油濾芯',         unit: '個', book: 41, count: 41, diff: 0 },
+      { stk: 'STK-202604-0004', code: '551210', name: '冷卻液',           unit: '桶', book: 12, count: 12, diff: 0 },
+      { stk: 'STK-202604-0004', code: '472001', name: '船用油漆（防污）', unit: '桶', book: 42, count: 42, diff: 0 },
+      { stk: 'STK-202603-0001', code: '614789', name: '不鏽鋼螺絲 M10',   unit: '盒', book: 46, count: 46, diff: 0 },
+      { stk: 'STK-202603-0001', code: '550101', name: '潤滑油 SAE 40',    unit: '桶', book: 24, count: 24, diff: 0 },
+      { stk: 'STK-202603-0001', code: '812345', name: '防水膠帶',         unit: '卷', book: 35, count: 35, diff: 0 },
+      { stk: 'STK-202603-0001', code: '550245', name: '液壓油 ISO VG68',  unit: '桶', book: 25, count: 24, diff: -1 },
+      { stk: 'STK-202603-0001', code: '591234', name: '柴油濾芯',         unit: '個', book: 39, count: 39, diff: 0 },
+      { stk: 'STK-202603-0002', code: '472001', name: '船用油漆（防污）', unit: '桶', book: 26, count: 23, diff: -3 },
+      { stk: 'STK-202603-0002', code: '551210', name: '冷卻液',           unit: '桶', book: 22, count: 22, diff: 0 },
+      { stk: 'STK-202603-0002', code: '550101', name: '潤滑油 SAE 40',    unit: '桶', book: 38, count: 38, diff: 0 },
+      { stk: 'STK-202603-0003', code: '550101', name: '潤滑油 SAE 40',    unit: '桶', book: 34, count: 34, diff: 0 },
+      { stk: 'STK-202603-0003', code: '174562', name: '空氣濾網',         unit: '個', book: 32, count: 33, diff:  1 },
+      { stk: 'STK-202603-0003', code: '472001', name: '船用油漆（防污）', unit: '桶', book: 19, count: 18, diff: -1 },
+      { stk: 'STK-202603-0003', code: '591234', name: '柴油濾芯',         unit: '個', book: 49, count: 49, diff: 0 },
+      { stk: 'STK-202603-0003', code: '550245', name: '液壓油 ISO VG68',  unit: '桶', book: 40, count: 37, diff: -3 }
+    ];
+
+    const REQS = [
+      { no: 'RQ-202604-0001', vessel: '東方勇士',   wh: '甲板', cat: '物料', date: '2026/04/10', total: 15000 },
+      { no: 'RQ-202604-0002', vessel: '南風號',     wh: '輪機', cat: '物料', date: '2026/04/12', total: 28000 },
+      { no: 'RQ-202604-0003', vessel: '天鷹號',     wh: '甲板', cat: '物料', date: '2026/04/15', total: 5500 },
+      { no: 'RQ-202604-0004', vessel: '碧海明珠',   wh: '甲板', cat: '物料', date: '2026/04/18', total: 42000 },
+      { no: 'RQ-202604-0005', vessel: '藍海之星',   wh: '輪機', cat: '物料', date: '2026/04/20', total: 18500 },
+      { no: 'RQ-202604-0006', vessel: '豪泰一號',   wh: '甲板', cat: '配件', date: '2026/04/22', total: 65000 },
+      { no: 'RQ-202603-0001', vessel: '東方勇士',   wh: '輪機', cat: '物料', date: '2026/03/08', total: 12000 },
+      { no: 'RQ-202603-0002', vessel: '海洋探索者', wh: '甲板', cat: '物料', date: '2026/03/15', total: 8500 }
+    ];
+    const REQ_ITEMS = [
+      { rq: 'RQ-202604-0001', code: '812345', name: '防水膠帶',       qty: 9 },
+      { rq: 'RQ-202604-0001', code: '551210', name: '冷卻液',         qty: 8 },
+      { rq: 'RQ-202604-0001', code: '450321', name: '防鏽噴劑',       qty: 14 },
+      { rq: 'RQ-202604-0001', code: '614789', name: '不鏽鋼螺絲 M10', qty: 7 },
+      { rq: 'RQ-202604-0002', code: '232101', name: '工業擦拭布',     qty: 12 },
+      { rq: 'RQ-202604-0002', code: '614789', name: '不鏽鋼螺絲 M10', qty: 8 },
+      { rq: 'RQ-202604-0002', code: '450321', name: '防鏽噴劑',       qty: 5 },
+      { rq: 'RQ-202604-0002', code: '591234', name: '柴油濾芯',       qty: 13 },
+      { rq: 'RQ-202604-0003', code: '472001', name: '船用油漆（防污）', qty: 4 },
+      { rq: 'RQ-202604-0003', code: '812345', name: '防水膠帶',       qty: 8 },
+      { rq: 'RQ-202604-0003', code: '551210', name: '冷卻液',         qty: 5 },
+      { rq: 'RQ-202604-0003', code: '591234', name: '柴油濾芯',       qty: 3 },
+      { rq: 'RQ-202604-0004', code: '472001', name: '船用油漆（防污）', qty: 14 },
+      { rq: 'RQ-202604-0004', code: '550245', name: '液壓油 ISO VG68', qty: 14 },
+      { rq: 'RQ-202604-0005', code: '232101', name: '工業擦拭布',     qty: 4 },
+      { rq: 'RQ-202604-0005', code: '812345', name: '防水膠帶',       qty: 7 },
+      { rq: 'RQ-202604-0005', code: '472001', name: '船用油漆（防污）', qty: 10 },
+      { rq: 'RQ-202604-0005', code: '614789', name: '不鏽鋼螺絲 M10', qty: 13 },
+      { rq: 'RQ-202604-0006', code: '174562', name: '空氣濾網',       qty: 7 },
+      { rq: 'RQ-202604-0006', code: '450321', name: '防鏽噴劑',       qty: 10 },
+      { rq: 'RQ-202604-0006', code: '614789', name: '不鏽鋼螺絲 M10', qty: 11 },
+      { rq: 'RQ-202604-0006', code: '550245', name: '液壓油 ISO VG68', qty: 9 },
+      { rq: 'RQ-202603-0001', code: '232101', name: '工業擦拭布',     qty: 12 },
+      { rq: 'RQ-202603-0001', code: '550245', name: '液壓油 ISO VG68', qty: 12 },
+      { rq: 'RQ-202603-0001', code: '614789', name: '不鏽鋼螺絲 M10', qty: 11 },
+      { rq: 'RQ-202603-0002', code: '550245', name: '液壓油 ISO VG68', qty: 12 },
+      { rq: 'RQ-202603-0002', code: '174562', name: '空氣濾網',       qty: 3 }
+    ];
+
+    const WOS = [
+      { no: 'WO-202604-0001', vessel: '東方勇士', subject: '檢測甲板裝備',     total: 97573,  status: '未完成', date: '2026/04/10', equipKey: 'DECK_EQUIP' },
+      { no: 'WO-202604-0002', vessel: '南風號',   subject: '主機大修',         total: 57819,  status: '已完成', date: '2026/04/16', equipKey: 'MAIN_ENGINE' },
+      { no: 'WO-202604-0003', vessel: '天鷹號',   subject: '舵機液壓系統檢修', total: 205236, status: '未完成', date: '2026/04/18', equipKey: 'HYDRAULIC' },
+      { no: 'WO-202604-0004', vessel: '碧海明珠', subject: '船殼水下檢驗',     total: 170832, status: '未完成', date: '2026/04/10', equipKey: 'HULL' },
+      { no: 'WO-202604-0005', vessel: '藍海之星', subject: '救生設備年度檢修', total: 231191, status: '已完成', date: '2026/04/21', equipKey: 'LIFE_SAVE' },
+      { no: 'WO-202604-0006', vessel: '豪泰一號', subject: '發電機定期保養',   total: 66955,  status: '未完成', date: '2026/04/20', equipKey: 'GENERATOR' }
+    ];
+
+    const TRANSFERS = [
+      { no: 'TF-202604-0001', date: '2026/04/15', fromOwner: '萬海航運', fromVessel: '東方勇士',   fromWh: '甲板', toOwner: '萬海航運', toVessel: '東方勇士', toWh: '輪機', total: 10000, sameVessel: true,  sameOwner: true  },
+      { no: 'TF-202604-0002', date: '2026/04/18', fromOwner: '長榮海運', fromVessel: '南風號',     fromWh: '輪機', toOwner: '陽明海運', toVessel: '天鷹號',   toWh: '輪機', total: 17500, sameVessel: false, sameOwner: false },
+      { no: 'TF-202604-0003', date: '2026/04/20', fromOwner: '萬海航運', fromVessel: '東方勇士',   fromWh: '甲板', toOwner: '台灣航業', toVessel: '海洋探索者', toWh: '甲板', total: 6000,  sameVessel: false, sameOwner: false },
+      { no: 'TF-202604-0004', date: '2026/04/22', fromOwner: '裕民航運', fromVessel: '碧海明珠',   fromWh: '甲板', toOwner: '德翔海運', toVessel: '藍海之星', toWh: '甲板', total: 24000, sameVessel: false, sameOwner: false },
+      { no: 'TF-202603-0001', date: '2026/03/10', fromOwner: '正德海運', fromVessel: '豪泰一號',   fromWh: '甲板', toOwner: '慧洋海運', toVessel: '遠洋先鋒', toWh: '甲板', total: 3200,  sameVessel: false, sameOwner: false }
+    ];
+
+    const POS = [
+      { no: 'PO-202604-0001', vendor: '擎陞數位科技有限公司', date: '2026/04/09', total: 79047,  vessel: '藍海之星' },
+      { no: 'PO-202604-0002', vendor: '台灣船舶零件有限公司', date: '2026/04/06', total: 69909,  vessel: '東方勇士' },
+      { no: 'PO-202604-0003', vendor: '高雄機械工業股份有限公司', date: '2026/04/12', total: 200000, vessel: '天鷹號' },
+      { no: 'PO-202604-0004', vendor: '大海潤滑油有限公司',   date: '2026/04/15', total: 74986,  vessel: '海洋探索者' },
+      { no: 'PO-202604-0005', vendor: '擎陞數位科技有限公司', date: '2026/04/15', total: 131028, vessel: '遠洋先鋒' }
+    ];
+    const PO_ITEMS = [
+      { po: 'PO-202604-0001', code: '232101', name: '工業擦拭布',     qty: 19, price: 1141 },
+      { po: 'PO-202604-0001', code: '550245', name: '液壓油 ISO VG68', qty: 16, price: 1373 },
+      { po: 'PO-202604-0001', code: '660234', name: 'O型環套組',       qty: 15, price: 2557 },
+      { po: 'PO-202604-0002', code: '550245', name: '液壓油 ISO VG68', qty: 14, price: 2701 },
+      { po: 'PO-202604-0002', code: '661012', name: '燃油噴嘴',       qty: 18, price: 283 },
+      { po: 'PO-202604-0002', code: '440890', name: '消防水帶接頭',   qty: 24, price: 438 },
+      { po: 'PO-202604-0003', code: '220789', name: '救生衣燈電池',   qty: 11, price: 2586 },
+      { po: 'PO-202604-0003', code: '614789', name: '不鏽鋼螺絲 M10', qty: 36, price: 1759 },
+      { po: 'PO-202604-0003', code: '472001', name: '船用油漆（防污）', qty: 18, price: 2328 },
+      { po: 'PO-202604-0004', code: '812345', name: '防水膠帶',       qty: 10, price: 1680 },
+      { po: 'PO-202604-0004', code: '220789', name: '救生衣燈電池',   qty: 42, price: 2959 },
+      { po: 'PO-202604-0004', code: '591234', name: '柴油濾芯',       qty: 35, price: 2820 },
+      { po: 'PO-202604-0004', code: '440890', name: '消防水帶接頭',   qty: 20, price: 1599 },
+      { po: 'PO-202604-0004', code: '614789', name: '不鏽鋼螺絲 M10', qty: 28, price: 1775 },
+      { po: 'PO-202604-0005', code: '174562', name: '空氣濾網',       qty: 49, price: 2717 },
+      { po: 'PO-202604-0005', code: '551210', name: '冷卻液',         qty: 37, price: 2131 },
+      { po: 'PO-202604-0005', code: '614789', name: '不鏽鋼螺絲 M10', qty: 23, price: 1532 }
+    ];
+
+    /* RFQ 廠商金額（用於供應商集中度與單價走勢） */
+    const RFQS = [
+      { vendor: '三洋電機有限公司',           total: 396043 },
+      { vendor: '東洋鋼鐵有限公司',           total: 41330 },
+      { vendor: '大成五金行',                 total: 315932 },
+      { vendor: '東洋鋼鐵有限公司',           total: 485675 },
+      { vendor: '富強消防器材行',             total: 413258 },
+      { vendor: '富強消防器材行',             total: 344902 },
+      { vendor: '三洋電機有限公司',           total: 213388 },
+      { vendor: '永信塗料股份有限公司',       total: 305362 },
+      { vendor: '台灣船舶零件有限公司',       total: 266079 },
+      { vendor: '永信塗料股份有限公司',       total: 171073 },
+      { vendor: '大海潤滑油有限公司',         total: 299681 },
+      { vendor: '永信塗料股份有限公司',       total: 270300 },
+      { vendor: '台灣船舶零件有限公司',       total: 42106 },
+      { vendor: '大海潤滑油有限公司',         total: 398197 },
+      { vendor: '大成五金行',                 total: 379488 },
+      { vendor: '永信塗料股份有限公司',       total: 24983 },
+      { vendor: '高雄機械工業股份有限公司',   total: 302026 },
+      { vendor: '大海潤滑油有限公司',         total: 167055 },
+      { vendor: '台灣船舶零件有限公司',       total: 322789 },
+      { vendor: '東洋鋼鐵有限公司',           total: 127392 },
+      { vendor: '大成五金行',                 total: 224788 },
+      { vendor: '台灣船舶零件有限公司',       total: 406112 }
+    ];
+
+    const RFQ_PRICES = [
+      { code: '550245', vendor: '大成五金行',           date: '2026/01', price: 1320 },
+      { code: '550245', vendor: '大成五金行',           date: '2026/02', price: 1380 },
+      { code: '550245', vendor: '大成五金行',           date: '2026/03', price: 1410 },
+      { code: '550245', vendor: '台灣船舶零件有限公司', date: '2026/01', price: 2580 },
+      { code: '550245', vendor: '台灣船舶零件有限公司', date: '2026/02', price: 2640 },
+      { code: '550245', vendor: '台灣船舶零件有限公司', date: '2026/03', price: 2720 },
+      { code: '614789', vendor: '高雄機械工業股份有限公司', date: '2026/02', price: 1690 },
+      { code: '614789', vendor: '高雄機械工業股份有限公司', date: '2026/03', price: 1730 },
+      { code: '614789', vendor: '擎陞數位科技有限公司', date: '2026/02', price: 1500 },
+      { code: '614789', vendor: '擎陞數位科技有限公司', date: '2026/03', price: 1520 },
+      { code: '472001', vendor: '高雄機械工業股份有限公司', date: '2026/02', price: 2280 },
+      { code: '472001', vendor: '高雄機械工業股份有限公司', date: '2026/03', price: 2310 },
+      { code: '472001', vendor: '永信塗料股份有限公司',   date: '2026/01', price: 2150 },
+      { code: '472001', vendor: '永信塗料股份有限公司',   date: '2026/03', price: 2200 },
+      { code: '174562', vendor: '擎陞數位科技有限公司', date: '2026/02', price: 2680 },
+      { code: '174562', vendor: '擎陞數位科技有限公司', date: '2026/03', price: 2700 },
+      { code: '174562', vendor: '台灣船舶零件有限公司', date: '2026/02', price: 2820 },
+      { code: '591234', vendor: '台灣船舶零件有限公司', date: '2026/02', price: 1130 },
+      { code: '591234', vendor: '台灣船舶零件有限公司', date: '2026/03', price: 1170 },
+      { code: '591234', vendor: '大海潤滑油有限公司',   date: '2026/03', price: 2780 },
+      { code: '551210', vendor: '高雄機械工業股份有限公司', date: '2026/02', price: 580 },
+      { code: '551210', vendor: '高雄機械工業股份有限公司', date: '2026/03', price: 600 },
+      { code: '551210', vendor: '擎陞數位科技有限公司', date: '2026/03', price: 2080 },
+      { code: '551210', vendor: '擎陞數位科技有限公司', date: '2026/04', price: 2131 }
+    ];
+
+    /* 物料最近一次入庫月份（用於計算 aging；以 PO date / 2026 月份做 baseline；無 PO 紀錄者視為 2025 年舊料） */
+    const REF_DATE = new Date('2026-05-01');
+    function lastReplenMonth(code) {
+      const items = PO_ITEMS.filter(it => it.code === code);
+      if (items.length === 0) return null;
+      const dates = items.map(it => POS.find(p => p.no === it.po)).filter(Boolean).map(p => p.date);
+      return dates.sort().slice(-1)[0]; // 最近一筆
+    }
+    function inventoryAgeMonths(it) {
+      const last = lastReplenMonth(it.code);
+      if (last) {
+        const d = new Date(last.replace(/\//g,'-'));
+        return Math.max(0, Math.round((REF_DATE - d) / (30*86400000)));
+      }
+      // 無 PO 紀錄的物料，依 IMPA hash 推估 6~14 個月不等（demo）
+      const hash = [...it.code].reduce((s,c)=>s+c.charCodeAt(0),0);
+      return 6 + (hash % 9); // 6~14
+    }
+
+    /* ====================== State ====================== */
+    const fxRate = { TWD: 1, USD: 1/30.5, JPY: 4.6, EUR: 1/33.2 };
+    let currentDateType = 'month';
+    let currentVessel = 'ALL';
+    let currentWarehouse = 'ALL';
+    let currentCategory = 'ALL';
+    let currentCurrency = 'TWD';
+    let currentPriceItem = null;
+    let currentAnomaly = 'shortage';
+    let currentHo = 'flow';
+
+    const MONTH_KEYS = ['2026-01','2026-02','2026-03','2026-04','2026-05'];
+    const MONTH_LABELS = ['1 月','2 月','3 月','4 月','5 月'];
+
+    /* ====================== Helpers ====================== */
+    const parseDate = (s) => s ? new Date(s.replace(/\//g,'-')) : null;
+    const monthKey = (s) => { if (!s) return null; const d = parseDate(s); return d ? d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') : null; };
+    function applyFx(twd) { return twd * fxRate[currentCurrency]; }
+    function fmtCur(twd, decimals) {
+      const v = applyFx(twd);
+      const d = decimals == null ? (currentCurrency === 'TWD' || currentCurrency === 'JPY' ? 0 : 2) : decimals;
+      return Number(v.toFixed(d)).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+    }
+    function getRange() {
+      if (currentDateType === 'month') return { from: +$('#mFrom').val(), to: +$('#mTo').val() };
+      return { from: +$('#qFrom').val(), to: +$('#qTo').val() };
+    }
+    function isInRange(yKey) {
+      if (!yKey) return false;
+      const idx = MONTH_KEYS.indexOf(yKey);
+      if (idx < 0) return false;
+      const r = getRange();
+      if (currentDateType === 'month') return idx >= r.from && idx <= r.to;
+      const qFrom = r.from === 0 ? 0 : 3;
+      const qTo = r.to === 0 ? 2 : 4;
+      return idx >= qFrom && idx <= qTo;
+    }
+    function vesselNameOf(code) { const v = VESSELS.find(x => x.code === code); return v ? v.name : null; }
+    function vesselMatch(name) { return currentVessel === 'ALL' || vesselNameOf(currentVessel) === name; }
+    function whMatch(wh) { return currentWarehouse === 'ALL' || currentWarehouse === wh; }
+    function catMatch(code) { return currentCategory === 'ALL' || (ITEM_CAT[code] || 'OTHER') === currentCategory; }
+    function inventoryFiltered() { return INVENTORY.filter(it => vesselMatch(it.vessel) && whMatch(it.wh) && catMatch(it.code)); }
+    function priceOf(code) {
+      const inv = INVENTORY.find(x => x.code === code);
+      if (inv) return inv.price;
+      const po = PO_ITEMS.find(x => x.code === code);
+      return po ? po.price : 0;
+    }
+    function stkVesselMatch(stk) {
+      const meta = STKS.find(s => s.no === stk.stk);
+      if (!meta) return false;
+      return vesselMatch(meta.vessel) && whMatch(meta.wh);
+    }
+
+    /* ====================== Highcharts theme ====================== */
+    Highcharts.setOptions({
+      chart: { backgroundColor: '#292929', style: { fontFamily: 'system-ui,-apple-system,"Segoe UI",Roboto,Arial' } },
+      title: { text: '' },
+      credits: { enabled: false },
+      legend: { itemStyle: { color: '#e8edf4', fontSize: '12px' } },
+      xAxis: { lineColor: '#394150', tickColor: '#394150', labels: { style: { color: '#ffffff', fontSize: '12px' } } },
+      yAxis: { gridLineColor: '#373737', labels: { style: { color: '#ffffff', fontSize: '12px' } }, title: { text: null } },
+      tooltip: { backgroundColor: '#1e1e1e', borderColor: '#394150', style: { color: '#ffffff', fontSize: '12px' } },
+      colors: ['#22d3ee', '#10b981', '#f59e0b', '#fbbf24', '#60a5fa', '#c084fc', '#fb923c', '#a3e635']
+    });
+
+    let priceTrendChart, replaceFreqChart, healthChart, varianceRateChart, varianceAmtChart, vendorConcChart, agingChart, handoverChart;
+
+    /* ====================== Charts init ====================== */
+    function initPriceTrendChart() {
+      priceTrendChart = Highcharts.chart('priceTrendChart', {
+        chart: { type: 'spline' },
+        xAxis: { categories: [] },
+        yAxis: { title: { text: '單價（TWD）' } },
+        tooltip: { shared: true, valueDecimals: 0 },
+        plotOptions: { spline: { marker: { enabled: true, radius: 3 } } },
+        series: []
+      });
+    }
+    function initReplaceFreqChart() {
+      replaceFreqChart = Highcharts.chart('replaceFreqChart', {
+        chart: { type: 'column' },
+        xAxis: { categories: [], crosshair: true, labels: { rotation: -25, style: { fontSize: '11px' } } },
+        yAxis: [
+          { title: { text: '更換次數' } },
+          { opposite: true, max: 100, labels: { format: '{value}%' }, title: { text: '累計%' } }
+        ],
+        tooltip: { shared: true },
+        plotOptions: { column: { borderWidth: 0, color: '#22d3ee' } },
+        series: [
+          { type: 'pareto', name: '累計佔比', yAxis: 1, baseSeries: 1, color: '#f59e0b', tooltip: { valueDecimals: 1, valueSuffix: '%' } },
+          { type: 'column', name: '更換次數', data: [] }
+        ]
+      });
+    }
+    function initHealthChart() {
+      healthChart = Highcharts.chart('healthChart', {
+        chart: { type: 'bubble', plotBorderWidth: 1, plotBorderColor: '#373737', zoomType: 'xy' },
+        xAxis: { title: { text: '安全庫存（件）', style: { color: '#999' } }, gridLineWidth: 1, gridLineColor: '#373737', min: 0 },
+        yAxis: { title: { text: '現庫存（件）', style: { color: '#999' } }, min: 0 },
+        tooltip: {
+          useHTML: true, headerFormat: '',
+          pointFormatter() {
+            return '<b>'+this.name+'</b><br/>船舶: '+this.vessel+'/'+this.wh+'<br/>安全: '+this.x+' '+this.unit+'<br/>現庫: '+this.y+' '+this.unit+'<br/>狀態: '+this.statusLabel+'<br/>金額: '+currentCurrency+' '+fmtCur(this.amt);
+          }
+        },
+        plotOptions: { bubble: { minSize: 6, maxSize: '13%', dataLabels: { enabled: false } } },
+        series: [
+          { name: '缺料 (qty < safety)',           color: '#ef4444', data: [] },
+          { name: '警戒 (qty < 1.5×safety)',       color: '#f59e0b', data: [] },
+          { name: '健康 (1.5×~3×safety)',          color: '#10b981', data: [] },
+          { name: '過量/滯料 (qty > 3×safety)',     color: '#a78bfa', data: [] }
+        ]
+      });
+    }
+    function initVarianceRateChart() {
+      varianceRateChart = Highcharts.chart('varianceRateChart', {
+        chart: { type: 'bar' },
+        xAxis: { categories: [] },
+        yAxis: { title: { text: '差異率 %' }, labels: { format: '{value}%' }, max: 12 },
+        tooltip: { shared: true,
+          formatter() {
+            let html = '<b>'+this.x+'</b><br/>';
+            this.points.forEach(p => { html += '<span style="color:'+p.color+'">●</span> '+p.series.name+': '+p.y.toFixed(2)+'%<br/>'; });
+            return html;
+          }
+        },
+        plotOptions: { bar: { borderWidth: 0, dataLabels: { enabled: true, format: '{y:.2f}%', style: { color: '#fff', textOutline: 'none', fontSize: '11px' } } } },
+        series: [
+          { name: '差異率', data: [], color: '#22d3ee' },
+          { name: 'SOX 警戒 3%', data: [], type: 'scatter', color: '#ef4444', marker: { symbol: 'diamond', radius: 6 } }
+        ]
+      });
+    }
+    function initVarianceAmtChart() {
+      varianceAmtChart = Highcharts.chart('varianceAmtChart', {
+        chart: { type: 'column' },
+        xAxis: { categories: [] },
+        yAxis: { title: { text: '差異金額' }, labels: { formatter() { return Highcharts.numberFormat(this.value/1000, 0)+'K'; } } },
+        tooltip: { shared: true,
+          formatter() {
+            let html = '<b>'+this.x+'</b><br/>';
+            this.points.forEach(p => { html += '<span style="color:'+p.color+'">●</span> '+p.series.name+': '+currentCurrency+' '+fmtCur(p.y)+'<br/>'; });
+            return html;
+          }
+        },
+        plotOptions: { column: { borderWidth: 0 } },
+        series: [
+          { name: '盤盈',   data: [], color: '#10b981' },
+          { name: '盤虧',   data: [], color: '#ef4444' },
+          { name: '淨差異', data: [], color: '#22d3ee', type: 'spline' }
+        ]
+      });
+    }
+    function initVendorConcChart() {
+      vendorConcChart = Highcharts.chart('vendorConcChart', {
+        chart: { type: 'column' },
+        xAxis: { categories: [], labels: { rotation: -25, style: { fontSize: '11px' } } },
+        yAxis: [
+          { title: { text: '採購/詢價金額' }, labels: { formatter() { return Highcharts.numberFormat(this.value/1000, 0)+'K'; } } },
+          { opposite: true, max: 100, labels: { format: '{value}%' }, title: { text: '累計%' } }
+        ],
+        tooltip: { shared: true,
+          formatter() {
+            let html = '<b>'+this.x+'</b><br/>';
+            this.points.forEach(p => {
+              if (p.series.options.yAxis === 1) html += '<span style="color:'+p.color+'">●</span> 累計%: '+p.y.toFixed(1)+'%<br/>';
+              else html += '<span style="color:'+p.color+'">●</span> '+p.series.name+': '+currentCurrency+' '+fmtCur(p.y)+'<br/>';
+            });
+            return html;
+          }
+        },
+        plotOptions: { column: { borderWidth: 0 } },
+        series: [
+          { type: 'column', name: '金額（TWD）', data: [], color: '#22d3ee' },
+          { type: 'spline', name: '累計%', yAxis: 1, data: [], color: '#f59e0b', marker: { radius: 3 } }
+        ]
+      });
+    }
+    function initAgingChart() {
+      agingChart = Highcharts.chart('agingChart', {
+        chart: { type: 'column' },
+        xAxis: { categories: ['0-30 天','31-90 天','91-180 天','181-365 天','365+ 天'] },
+        yAxis: { title: { text: '金額' }, labels: { formatter() { return Highcharts.numberFormat(this.value/1000, 0)+'K'; } } },
+        tooltip: {
+          shared: true,
+          formatter() {
+            let html = '<b>'+this.x+'</b><br/>';
+            this.points.forEach(p => { html += '<span style="color:'+p.color+'">●</span> '+p.series.name+': '+currentCurrency+' '+fmtCur(p.y)+'<br/>'; });
+            return html;
+          }
+        },
+        plotOptions: { column: { borderWidth: 0, stacking: 'normal' } },
+        series: [
+          { name: 'ENGINE 主機/濾器', data: [], color: '#22d3ee' },
+          { name: 'LUBE 油料/冷卻',   data: [], color: '#10b981' },
+          { name: 'DECK 甲板/塗裝',   data: [], color: '#fbbf24' },
+          { name: 'SAFETY 安全/救生', data: [], color: '#fb923c' },
+          { name: 'HARDWARE 五金',    data: [], color: '#a78bfa' }
+        ]
+      });
+    }
+    function initHandoverChart() {
+      handoverChart = Highcharts.chart('handoverChart', {
+        chart: { type: 'column' },
+        xAxis: { categories: [] },
+        yAxis: { title: { text: '金額' }, labels: { formatter() { return Highcharts.numberFormat(this.value/1000, 0)+'K'; } } },
+        tooltip: { shared: true,
+          formatter() {
+            let html = '<b>'+this.x+'</b><br/>';
+            this.points.forEach(p => { html += '<span style="color:'+p.color+'">●</span> '+p.series.name+': '+currentCurrency+' '+fmtCur(p.y)+'<br/>'; });
+            return html;
+          }
+        },
+        plotOptions: { column: { borderWidth: 0, grouping: true } },
+        series: [
+          { name: '轉出金額', data: [], color: '#fb923c' },
+          { name: '轉入金額', data: [], color: '#10b981' },
+          { name: '差異', data: [], color: '#ef4444', type: 'spline' }
+        ]
+      });
+    }
+
+    /* ====================== Updaters ====================== */
+    function updateKpis() {
+      const inv = inventoryFiltered();
+      const total = inv.reduce((a,b)=>a+b.value,0);
+      const qty = inv.reduce((a,b)=>a+b.qty,0);
+      $('#kpiInvValue').text(fmtCur(total));
+      $('#kpiInvUnit').text(currentCurrency);
+      $('#kpiSkuCount').text(inv.length);
+      $('#kpiSkuQty').text(qty.toLocaleString('en-US'));
+
+      const ok = inv.filter(it => it.qty >= it.safety).length;
+      const safetyRate = inv.length > 0 ? Math.round(ok/inv.length*100) : 0;
+      $('#kpiSafety').text(safetyRate);
+      const cnt = { short: 0, warn: 0, ok: 0, over: 0 };
+      inv.forEach(it => {
+        const r = it.qty / Math.max(it.safety,1);
+        if (r < 1) cnt.short++;
+        else if (r < 1.5) cnt.warn++;
+        else if (r <= 3) cnt.ok++;
+        else cnt.over++;
+      });
+      const bar = $('#kpiSafetyBar').empty();
+      [['short','#ef4444'],['warn','#f59e0b'],['ok','#10b981'],['over','#a78bfa']].forEach(([k,c])=>{
+        if (cnt[k] > 0) bar.append('<div style="background:'+c+';flex:'+cnt[k]+';" title="'+k+': '+cnt[k]+'"></div>');
+      });
+
+      const stkF = STKS.filter(s => vesselMatch(s.vessel) && whMatch(s.wh) && isInRange(monthKey(s.date)));
+      const stkDone = stkF.filter(s => s.status === '已盤點').length;
+      const stkRate = stkF.length > 0 ? Math.round(stkDone/stkF.length*100) : 0;
+      $('#kpiStkRate').text(stkRate);
+      $('#kpiStkPending').text(stkF.length - stkDone);
+
+      const stkItemsF = STK_ITEMS.filter(it => stkVesselMatch(it) && catMatch(it.code) && it.diff != null);
+      const totalBook = stkItemsF.reduce((a,b)=>a+b.book, 0);
+      const totalAbs  = stkItemsF.reduce((a,b)=>a+Math.abs(b.diff), 0);
+      const varRate = totalBook > 0 ? (totalAbs/totalBook*100) : 0;
+      $('#kpiVarRate').text(varRate.toFixed(2));
+      const varAmt = stkItemsF.reduce((a,b)=>a + Math.abs(b.diff) * priceOf(b.code), 0);
+      $('#kpiVarAmt').text(currentCurrency+' '+fmtCur(varAmt));
+
+      const dead = inv.filter(it => it.safety > 0 && it.qty/it.safety > 3);
+      $('#kpiDeadAmt').text(fmtCur(dead.reduce((a,b)=>a+b.value,0)));
+      $('#kpiDeadUnit').text(currentCurrency);
+      $('#kpiDeadCount').text(dead.length);
+    }
+
+    /* 物料採購單價走勢 */
+    function buildPriceData() {
+      const items = {};
+      PO_ITEMS.forEach(it => {
+        if (!items[it.code]) items[it.code] = { name: it.name, points: [] };
+        const po = POS.find(p => p.no === it.po);
+        if (po) items[it.code].points.push({ date: po.date.substring(0,7).replace('/','-'), vendor: po.vendor, price: it.price });
+      });
+      RFQ_PRICES.forEach(rp => {
+        if (!items[rp.code]) {
+          const inv = INVENTORY.find(i => i.code === rp.code);
+          items[rp.code] = { name: inv ? inv.name : rp.code, points: [] };
+        }
+        items[rp.code].points.push({ date: rp.date.replace('/','-'), vendor: rp.vendor, price: rp.price });
+      });
+      return items;
+    }
+    const PRICE_DATA = buildPriceData();
+    function renderPriceItemTabs() {
+      const $tabs = $('#priceItemTabs').empty();
+      const codes = Object.keys(PRICE_DATA).sort((a,b) => PRICE_DATA[b].points.length - PRICE_DATA[a].points.length).slice(0, 7);
+      codes.forEach((code, i) => {
+        $tabs.append('<button class="' + (i === 0 ? 'active' : '') + '" data-code="' + code + '">' + PRICE_DATA[code].name + '</button>');
+      });
+      currentPriceItem = codes[0];
+      $tabs.find('button').on('click', function () {
+        $tabs.find('button').removeClass('active');
+        $(this).addClass('active');
+        currentPriceItem = $(this).data('code');
+        updatePriceTrend();
+      });
+    }
+    function updatePriceTrend() {
+      const cfg = PRICE_DATA[currentPriceItem];
+      if (!cfg) return;
+      const cats = MONTH_LABELS;
+      const byVendor = {};
+      cfg.points.forEach(p => {
+        const idx = MONTH_KEYS.indexOf(p.date);
+        if (idx < 0) return;
+        if (!byVendor[p.vendor]) byVendor[p.vendor] = new Array(MONTH_KEYS.length).fill(null);
+        byVendor[p.vendor][idx] = p.price;
+      });
+      Object.keys(byVendor).forEach(v => {
+        const arr = byVendor[v];
+        const known = arr.map((x,i)=>({x,i})).filter(o=>o.x!=null);
+        if (known.length === 0) { delete byVendor[v]; return; }
+        const base = known[0].x;
+        for (let i = 0; i < arr.length; i++) {
+          if (arr[i] != null) continue;
+          const dist = Math.abs(i - known[0].i);
+          arr[i] = +(base * (1 - 0.012*dist + (i%2?0.004:-0.004))).toFixed(0);
+        }
+      });
+      const series = Object.entries(byVendor).map(([name, data]) => ({ name, data: data.map(v => +applyFx(v).toFixed(0)) }));
+      priceTrendChart.update({
+        xAxis: { categories: cats },
+        yAxis: { title: { text: cfg.name + ' 單價（' + currentCurrency + '）' } },
+        series: series
+      }, true, true);
+    }
+
+    /* 配件更換頻率 */
+    function updateReplaceFreq() {
+      const counter = {};
+      REQ_ITEMS.forEach(it => {
+        const req = REQS.find(r => r.no === it.rq);
+        if (!req) return;
+        if (!vesselMatch(req.vessel) || !whMatch(req.wh)) return;
+        if (!isInRange(monthKey(req.date))) return;
+        if (!catMatch(it.code)) return;
+        if (!counter[it.name]) counter[it.name] = 0;
+        counter[it.name] += 1;
+      });
+      WOS.forEach(wo => {
+        if (!vesselMatch(wo.vessel)) return;
+        if (!isInRange(monthKey(wo.date))) return;
+        if (currentCategory !== 'ALL' && currentCategory !== 'ENGINE' && currentCategory !== 'SAFETY') return;
+        const eqMap = { MAIN_ENGINE: '主機', GENERATOR: '發電機', HYDRAULIC: '舵機液壓', DECK_EQUIP: '甲板裝備', HULL: '船殼', LIFE_SAVE: '救生設備' };
+        const label = eqMap[wo.equipKey] || wo.subject;
+        counter[label] = (counter[label] || 0) + 1;
+      });
+      const arr = Object.entries(counter).map(([name, n]) => [name, n]).sort((a,b)=>b[1]-a[1]).slice(0, 12);
+      replaceFreqChart.xAxis[0].setCategories(arr.map(x => x[0]), false);
+      replaceFreqChart.series[1].setData(arr.map(x => x[1]), false);
+      replaceFreqChart.redraw();
+    }
+
+    /* 庫存健康度 */
+    function updateHealth() {
+      const inv = inventoryFiltered();
+      const buckets = [[],[],[],[]];
+      inv.forEach(it => {
+        const r = it.qty / Math.max(it.safety,1);
+        const point = { name: it.name, x: it.safety, y: it.qty, z: it.value, vessel: it.vessel, wh: it.wh, unit: it.unit, amt: it.value };
+        if (r < 1) { point.statusLabel = '缺料'; buckets[0].push(point); }
+        else if (r < 1.5) { point.statusLabel = '警戒'; buckets[1].push(point); }
+        else if (r <= 3) { point.statusLabel = '健康'; buckets[2].push(point); }
+        else { point.statusLabel = '過量/滯料'; buckets[3].push(point); }
+      });
+      buckets.forEach((b, i) => healthChart.series[i].setData(b, false));
+      healthChart.redraw();
+    }
+
+    /* 盤點差異率 */
+    function updateVarianceRate() {
+      const grouped = {};
+      STK_ITEMS.forEach(it => {
+        if (it.diff == null) return;
+        const meta = STKS.find(s => s.no === it.stk);
+        if (!meta) return;
+        if (!vesselMatch(meta.vessel) || !whMatch(meta.wh)) return;
+        if (!catMatch(it.code)) return;
+        if (!isInRange(monthKey(meta.date))) return;
+        const key = meta.vessel + '·' + meta.wh;
+        if (!grouped[key]) grouped[key] = { book: 0, abs: 0 };
+        grouped[key].book += it.book;
+        grouped[key].abs  += Math.abs(it.diff);
+      });
+      const entries = Object.entries(grouped).map(([k, v]) => ({ name: k, rate: v.book > 0 ? +(v.abs/v.book*100).toFixed(2) : 0 })).sort((a,b)=>b.rate-a.rate);
+      varianceRateChart.xAxis[0].setCategories(entries.map(e => e.name), false);
+      varianceRateChart.series[0].setData(entries.map(e => e.rate), false);
+      varianceRateChart.series[1].setData(entries.map(()=>3), false);
+      varianceRateChart.redraw();
+    }
+
+    /* 盤點差異金額 */
+    function updateVarianceAmt() {
+      const stkMap = {};
+      STKS.forEach(s => stkMap[s.no] = { meta: s, gain: 0, loss: 0 });
+      STK_ITEMS.forEach(it => {
+        if (it.diff == null) return;
+        const meta = STKS.find(s => s.no === it.stk);
+        if (!meta) return;
+        if (!vesselMatch(meta.vessel) || !whMatch(meta.wh)) return;
+        if (!catMatch(it.code)) return;
+        if (!isInRange(monthKey(meta.date))) return;
+        const amt = it.diff * priceOf(it.code);
+        if (amt > 0) stkMap[it.stk].gain += amt;
+        else stkMap[it.stk].loss += amt;
+      });
+      const entries = Object.values(stkMap).filter(x => x.gain !== 0 || x.loss !== 0).sort((a,b) => parseDate(a.meta.date) - parseDate(b.meta.date));
+      const cats = entries.map(e => e.meta.vessel + '·' + e.meta.wh + '\n' + e.meta.date);
+      const gain = entries.map(e => +applyFx(e.gain).toFixed(0));
+      const loss = entries.map(e => +applyFx(e.loss).toFixed(0));
+      const net  = entries.map(e => +applyFx(e.gain + e.loss).toFixed(0));
+      varianceAmtChart.xAxis[0].setCategories(cats, false);
+      varianceAmtChart.series[0].setData(gain, false);
+      varianceAmtChart.series[1].setData(loss, false);
+      varianceAmtChart.series[2].setData(net, false);
+      varianceAmtChart.redraw();
+    }
+
+    /* 供應商集中度（HHI） */
+    function updateVendorConcentration() {
+      const map = {};
+      POS.forEach(p => { map[p.vendor] = (map[p.vendor]||0) + p.total; });
+      RFQS.forEach(r => { map[r.vendor] = (map[r.vendor]||0) + r.total * 0.3; }); // RFQ 以 30% 比重納入（避免重複計）
+      const arr = Object.entries(map).map(([name,v]) => ({ name, total: v })).sort((a,b)=>b.total-a.total);
+      const grand = arr.reduce((a,b)=>a+b.total,0) || 1;
+      let cum = 0;
+      const cats = arr.map(x => x.name);
+      const data = arr.map(x => +applyFx(x.total).toFixed(0));
+      const cumPct = arr.map(x => { cum += x.total; return +(cum/grand*100).toFixed(1); });
+
+      const hhi = arr.reduce((a,b) => a + Math.pow(b.total/grand*100, 2), 0);
+      $('#hhiVal').text(Math.round(hhi));
+      const $pill = $('#hhiPill').removeClass('ok warn bad');
+      let label, cls;
+      if (hhi < 1500) { label = '低集中度（健康）'; cls = 'ok'; }
+      else if (hhi < 2500) { label = '中度集中（注意）'; cls = 'warn'; }
+      else { label = '高集中度（風險）'; cls = 'bad'; }
+      $pill.addClass(cls).text('HHI ' + label);
+
+      vendorConcChart.xAxis[0].setCategories(cats, false);
+      vendorConcChart.series[0].setData(data, false);
+      vendorConcChart.series[1].setData(cumPct, false);
+      vendorConcChart.redraw();
+    }
+
+    /* 庫存帳齡分布 */
+    function updateAging() {
+      const buckets = {
+        ENGINE:   [0,0,0,0,0],
+        LUBE:     [0,0,0,0,0],
+        DECK:     [0,0,0,0,0],
+        SAFETY:   [0,0,0,0,0],
+        HARDWARE: [0,0,0,0,0]
+      };
+      const inv = inventoryFiltered();
+      inv.forEach(it => {
+        const ageM = inventoryAgeMonths(it);
+        const ageDays = ageM * 30;
+        let bIdx = 4;
+        if (ageDays <= 30) bIdx = 0;
+        else if (ageDays <= 90) bIdx = 1;
+        else if (ageDays <= 180) bIdx = 2;
+        else if (ageDays <= 365) bIdx = 3;
+        const c = ITEM_CAT[it.code] || 'HARDWARE';
+        if (buckets[c]) buckets[c][bIdx] += it.value;
+      });
+      const series = ['ENGINE','LUBE','DECK','SAFETY','HARDWARE'].map((c,i) => ({
+        ...agingChart.series[i].userOptions,
+        data: buckets[c].map(v => +applyFx(v).toFixed(0))
+      }));
+      agingChart.update({ series }, true, true);
+    }
+
+    /* 交船庫存差異 */
+    function updateHandover() {
+      if (currentHo === 'flow') {
+        const list = TRANSFERS.filter(t => !t.sameVessel && (currentVessel === 'ALL' ||
+          vesselNameOf(currentVessel) === t.fromVessel || vesselNameOf(currentVessel) === t.toVessel));
+        const cats = list.map(t => t.fromVessel + ' → ' + t.toVessel);
+        const out  = list.map(t => +applyFx(t.total).toFixed(0));
+        const inn  = list.map(t => +applyFx(t.total).toFixed(0));
+        // 跨船東估 5% 差異（cross-charge 風險）；同船東 transfer 差異為 0
+        const diff = list.map(t => +applyFx(t.total * (t.sameOwner ? 0 : -0.05)).toFixed(0));
+        handoverChart.update({
+          xAxis: { categories: cats },
+          series: [
+            { name: '轉出金額', data: out },
+            { name: '轉入金額', data: inn },
+            { name: '估計交船差異 (cross-charge 風險)', data: diff, type: 'spline' }
+          ]
+        }, true, true);
+      } else {
+        const grouped = {};
+        STK_ITEMS.forEach(it => {
+          if (it.diff == null) return;
+          const meta = STKS.find(s => s.no === it.stk);
+          if (!meta) return;
+          if (!grouped[meta.vessel]) grouped[meta.vessel] = { book: 0, real: 0 };
+          grouped[meta.vessel].book += it.book * priceOf(it.code);
+          grouped[meta.vessel].real += (it.book + it.diff) * priceOf(it.code);
+        });
+        const cats = Object.keys(grouped);
+        const book = cats.map(k => +applyFx(grouped[k].book).toFixed(0));
+        const real = cats.map(k => +applyFx(grouped[k].real).toFixed(0));
+        const diff = cats.map(k => +applyFx(grouped[k].real - grouped[k].book).toFixed(0));
+        handoverChart.update({
+          xAxis: { categories: cats },
+          series: [
+            { name: '帳面庫存', data: book },
+            { name: '實盤庫存', data: real },
+            { name: '差異', data: diff, type: 'spline' }
+          ]
+        }, true, true);
+      }
+    }
+
+    /* 治理工作清單 */
+    function buildAnomaly() {
+      const inv = inventoryFiltered();
+      const shortage = inv.filter(it => it.qty < it.safety).map(it => {
+        const gap = it.safety - it.qty;
+        return [
+          it.name, it.vessel, it.wh, it.safety + ' ' + it.unit, it.qty + ' ' + it.unit,
+          '<span class="tag red">缺 '+gap+' '+it.unit+'</span>',
+          currentCurrency + ' ' + fmtCur(gap * it.price)
+        ];
+      });
+      const dead = inv.filter(it => it.safety > 0 && it.qty/it.safety > 3).map(it => {
+        const ratio = (it.qty / it.safety).toFixed(1);
+        return [
+          it.name, it.vessel, it.wh, it.safety + ' ' + it.unit, it.qty + ' ' + it.unit,
+          '<span class="tag purple">'+ratio+'× safety</span>',
+          currentCurrency + ' ' + fmtCur(it.value)
+        ];
+      });
+      const stkPending = STKS.filter(s => s.status === '未盤點' && vesselMatch(s.vessel) && whMatch(s.wh)).map(s => [
+        s.no, s.vessel, s.wh, s.date, s.recheckDate || '-',
+        '<span class="tag yellow">'+s.status+'</span>',
+        STK_ITEMS.filter(it => it.stk === s.no).length + ' 項'
+      ]);
+      const stkDiff = STK_ITEMS.filter(it => it.diff != null && it.diff !== 0 && stkVesselMatch(it) && catMatch(it.code)).map(it => {
+        const meta = STKS.find(s => s.no === it.stk);
+        const amt = it.diff * priceOf(it.code);
+        const tag = it.diff > 0 ? '<span class="tag green">+'+it.diff+'</span>' : '<span class="tag red">'+it.diff+'</span>';
+        return [
+          it.stk, meta.vessel, meta.wh, it.name, it.book, it.count, tag,
+          currentCurrency + ' ' + fmtCur(amt)
+        ];
+      });
+      return {
+        shortage:   { cols: ['物料','船舶','倉庫','安全庫存','現庫存','差距','缺料金額'], rows: shortage },
+        dead:       { cols: ['物料','船舶','倉庫','安全庫存','現庫存','倍數','滯料金額'], rows: dead },
+        stkPending: { cols: ['盤點單','船舶','倉庫','盤點日','覆盤日','狀態','項目數'], rows: stkPending },
+        stkDiff:    { cols: ['盤點單','船舶','倉庫','物料','帳面','實盤','差異','差異金額'], rows: stkDiff }
+      };
+    }
+    function renderAnomalyTable() {
+      const data = buildAnomaly()[currentAnomaly];
+      const head = $('#anomalyHead').empty();
+      data.cols.forEach(c => head.append('<th>'+c+'</th>'));
+      if ($.fn.DataTable.isDataTable('#anomalyTable')) $('#anomalyTable').DataTable().clear().destroy();
+      const $tbody = $('#anomalyTable tbody').empty();
+      data.rows.forEach(row => {
+        const tr = $('<tr></tr>');
+        row.forEach(cell => tr.append('<td>'+cell+'</td>'));
+        $tbody.append(tr);
+      });
+      $('#anomalyTable').DataTable({
+        paging: true, pageLength: 8, lengthChange: false, searching: true, ordering: true,
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json' }
+      });
+    }
+
+    function updateAll() {
+      updateKpis();
+      updateReplaceFreq();
+      updateHealth();
+      updateVarianceRate();
+      updateVarianceAmt();
+      updateVendorConcentration();
+      updateAging();
+      updateHandover();
+      renderAnomalyTable();
+    }
+
+    /* ====================== Init ====================== */
+    function populateFilters() {
+      const $v = $('#vesselFilter').empty();
+      $v.append('<option value="ALL" selected>全部船舶（Fleet）</option>');
+      VESSELS.forEach(v => $v.append('<option value="'+v.code+'">'+v.name+'（'+v.owner+'）</option>'));
+      const $mF = $('#mFrom').empty(), $mT = $('#mTo').empty();
+      MONTH_LABELS.forEach((label, i) => {
+        $mF.append('<option value="'+i+'"'+(i===0?' selected':'')+'>2026 / '+label+'</option>');
+        $mT.append('<option value="'+i+'"'+(i===MONTH_LABELS.length-1?' selected':'')+'>2026 / '+label+'</option>');
+      });
+    }
+
+    $(function () {
+      populateFilters();
+      initPriceTrendChart();
+      initReplaceFreqChart();
+      initHealthChart();
+      initVarianceRateChart();
+      initVarianceAmtChart();
+      initVendorConcChart();
+      initAgingChart();
+      initHandoverChart();
+      renderPriceItemTabs();
+      updateAll();
+      updatePriceTrend();
+
+      $('#vesselFilter').on('change', function () { currentVessel = $(this).val(); updateAll(); });
+      $('#warehouseFilter').on('change', function () { currentWarehouse = $(this).val(); updateAll(); });
+      $('#categoryFilter').on('change', function () { currentCategory = $(this).val(); updateAll(); });
+      $('#currencyFilter').on('change', function () { currentCurrency = $(this).val(); updateAll(); updatePriceTrend(); });
+
+      $('#dateType button').on('click', function () {
+        $('#dateType button').removeClass('active');
+        $(this).addClass('active');
+        currentDateType = $(this).data('type');
+        $('.dr-g').hide();
+        $('.dr-g[data-type="' + currentDateType + '"]').css('display', 'flex');
+        updateAll();
+      });
+      $('.dr-g select').on('change', updateAll);
+
+      $('#hoTabs button').on('click', function () {
+        $('#hoTabs button').removeClass('active');
+        $(this).addClass('active');
+        currentHo = $(this).data('tab');
+        updateHandover();
+      });
+      $('#anomalyTabs button').on('click', function () {
+        $('#anomalyTabs button').removeClass('active');
+        $(this).addClass('active');
+        currentAnomaly = $(this).data('tab');
+        renderAnomalyTable();
+      });
+    });
+  </script>
+</body>
+
+</html>
