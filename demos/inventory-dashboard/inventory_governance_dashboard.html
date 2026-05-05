@@ -180,6 +180,41 @@
     }
     .health-bar > div { height: 100%; }
 
+    /* Scope bar — 目前查看範圍 */
+    .scope-bar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+      font-size: 12.5px; padding: 8px 10px; margin-bottom: 12px;
+      background: linear-gradient(90deg, rgba(34,211,238,.05), rgba(34,211,238,0));
+      border: 1px solid var(--soft); border-left: 3px solid var(--cyan);
+      border-radius: var(--radius); color: #c8d0db;
+    }
+    .scope-bar .scope-label { color: #93a1b2; margin-right: 4px }
+    .scope-bar .scope-pill {
+      display: inline-flex; align-items: center; padding: 2px 8px;
+      background: var(--panel); border: 1px solid var(--soft);
+      border-radius: 999px; color: #e9edf2; font-weight: 600;
+    }
+    .scope-bar .scope-pill.active { color: #7dd3fc; border-color: #155e6e; background: rgba(34,211,238,.1) }
+    .scope-bar .scope-spacer { flex: 1 }
+    .risk-global-btn {
+      background: var(--panel-2); border: 1px solid var(--soft);
+      color: #c7d0dc; padding: 4px 10px; border-radius: var(--radius);
+      font-size: 12px; cursor: pointer;
+    }
+    .risk-global-btn:hover { color: #fff; border-color: var(--cyan) }
+
+    /* Vessel-aware text — only one of these shows depending on filter */
+    .scope-fleet .if-vessel { display: none }
+    .scope-vessel .if-fleet { display: none }
+    .vessel-name { color: #7dd3fc; font-weight: 700 }
+    .vessel-name-chip {
+      display: none; font-size: 11px; font-weight: 500;
+      color: #7dd3fc; margin-left: 8px; padding: 1px 8px;
+      border: 1px solid #155e6e; background: rgba(34,211,238,.08);
+      border-radius: 999px; vertical-align: middle;
+    }
+    .scope-vessel .vessel-name-chip { display: inline-block }
+
     /* Risk analysis panel */
     .risk-panel {
       background: var(--panel-2);
@@ -189,6 +224,16 @@
       margin-top: 10px;
       font-size: 12.5px;
     }
+    .risk-head {
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; user-select: none;
+      padding: 2px 0 6px; border-bottom: 1px dashed #2c2c2c;
+      margin-bottom: 4px;
+    }
+    .risk-head .risk-title { color: #c7d0dc; font-weight: 600; font-size: 12px }
+    .risk-head .risk-toggle { color: #7dd3fc; font-size: 12px }
+    .risk-panel.collapsed .risk-body { display: none }
+    .risk-panel.collapsed .risk-head { border-bottom: 0; padding-bottom: 0; margin-bottom: 0 }
     .risk-row {
       display: flex; gap: 10px; align-items: flex-start;
       line-height: 1.55; padding: 3px 0;
@@ -232,17 +277,20 @@
       </div>
     </div>
 
-    <div class="ref-bar">
-      <span class="lbl">參考的國際同類產品：</span>
-      <span class="chip bench">Sertica（船舶採購）</span>
-      <span class="chip bench">DNV ShipManager（船管系統）</span>
-      <span class="chip bench">SpecTec AMOS（船隊管理）</span>
-      <span class="chip bench">Wilhelmsen ShipServ（船用採購平台）</span>
-      <span class="chip bench">SAP Ariba（採購分析）</span>
-      <span class="chip bench">Coupa（風險管理）</span>
-      <span class="chip bench">Microsoft Dynamics 365（供應鏈）</span>
-      <span class="chip bench">Oracle Cloud（供應鏈）</span>
-    </div>
+    <!--
+      參考的國際同類產品（暫時隱藏，未來可重新開啟）
+      <div class="ref-bar">
+        <span class="lbl">參考的國際同類產品：</span>
+        <span class="chip bench">Sertica（船舶採購）</span>
+        <span class="chip bench">DNV ShipManager（船管系統）</span>
+        <span class="chip bench">SpecTec AMOS（船隊管理）</span>
+        <span class="chip bench">Wilhelmsen ShipServ（船用採購平台）</span>
+        <span class="chip bench">SAP Ariba（採購分析）</span>
+        <span class="chip bench">Coupa（風險管理）</span>
+        <span class="chip bench">Microsoft Dynamics 365（供應鏈）</span>
+        <span class="chip bench">Oracle Cloud（供應鏈）</span>
+      </div>
+    -->
 
     <!-- Filters -->
     <div class="filters">
@@ -307,11 +355,25 @@
       </div>
     </div>
 
+    <!-- Scope bar — 顯示目前查看範圍 -->
+    <div class="scope-bar">
+      <span class="scope-label">目前查看：</span>
+      <span class="scope-pill" id="scopeVessel">全部船舶</span>
+      <span class="scope-pill" id="scopeWh">全部倉庫</span>
+      <span class="scope-pill" id="scopeCat">全部分類</span>
+      <span class="scope-pill" id="scopePeriod">2026 年 1～5 月</span>
+      <span class="scope-pill" id="scopeCurrency">新台幣</span>
+      <span class="scope-spacer"></span>
+      <button class="risk-global-btn" id="riskGlobalToggle">收合所有說明</button>
+    </div>
+
     <!-- KPI -->
     <div class="grid g-5">
       <div class="card">
         <div class="card-title-s">庫存總值</div>
-        <div class="card-meta">全部倉庫品項的帳面金額加總</div>
+        <div class="card-meta">
+          <span class="if-fleet">全船隊倉庫品項的帳面金額加總</span><span class="if-vessel"><span class="vessel-name"></span> 倉庫品項的帳面金額加總</span>
+        </div>
         <div class="kpi"><span id="kpiInvValue">0</span> <span class="unit" id="kpiInvUnit">TWD</span></div>
         <div class="pill info" style="margin-top:6px">
           共 <span id="kpiSkuCount">0</span> 種品項 · <span id="kpiSkuQty">0</span> 件
@@ -399,7 +461,9 @@
         <div class="card-h">
           <div>
             <div class="card-title">配件更換頻率</div>
-            <div class="card-meta">統計各品項/設備累計更換次數（資料來自領用單＋派工單），找出最常更換的關鍵配件</div>
+            <div class="card-meta">
+              <span class="if-fleet">全船隊</span><span class="if-vessel"><span class="vessel-name"></span></span> 各品項/設備累計更換次數（資料來自領用單＋派工單），找出最常更換的關鍵配件
+            </div>
           </div>
           <div class="legend-row">
             <span><span class="dot" style="background:#22d3ee"></span>更換次數</span>
@@ -444,7 +508,9 @@
         <div class="card-h">
           <div>
             <div class="card-title">庫存健康度</div>
-            <div class="card-meta">橫軸：安全庫存量　縱軸：現有庫存量　氣泡大小代表金額；分成四種狀態看每個品項</div>
+            <div class="card-meta">
+              <span class="if-fleet">全船隊各品項的健康狀態</span><span class="if-vessel"><span class="vessel-name"></span> 各品項的健康狀態</span> — 橫軸：安全庫存量　縱軸：現有庫存量　氣泡大小代表金額
+            </div>
           </div>
           <div class="legend-row">
             <span><span class="dot" style="background:#ef4444"></span>缺料（庫存少於安全量）</span>
@@ -497,7 +563,10 @@
         <div class="card-h">
           <div>
             <div class="card-title">盤點差異率</div>
-            <div class="card-meta">盤點差異絕對值 / 帳面數量，按船舶與倉庫拆解；紅色菱形是 3% 內控警戒線</div>
+            <div class="card-meta">
+              盤點差異絕對值 / 帳面數量，
+              <span class="if-fleet">按船舶與倉庫拆解</span><span class="if-vessel">按 <span class="vessel-name"></span> 的各倉庫拆解</span>；紅色菱形是 3% 內控警戒線
+            </div>
           </div>
         </div>
         <div id="varianceRateChart" class="hc-tall"></div>
@@ -505,7 +574,7 @@
           <div class="risk-row">
             <div class="risk-label cyan">要看什麼</div>
             <div class="risk-text">
-              哪艘<b>船的哪個倉庫</b>差異率最高、是否集中在某些品類；
+              <span class="if-fleet">哪艘<b>船的哪個倉庫</b>差異率最高</span><span class="if-vessel"><b><span class="vessel-name"></span> 的哪個倉庫</b>差異率最高</span>、是否集中在某些品類；
               對照負責人或船員交接時點，判斷是流程問題還是人為因素。
             </div>
           </div>
@@ -626,7 +695,9 @@
         <div class="card-h">
           <div>
             <div class="card-title">庫存帳齡分布</div>
-            <div class="card-meta">依最近一次入庫或採購日期推算庫齡；金額分為 0-30 / 31-90 / 91-180 / 181-365 / 365 天以上 五段</div>
+            <div class="card-meta">
+              <span class="if-fleet">全船隊</span><span class="if-vessel"><span class="vessel-name"></span></span> 依最近一次入庫或採購日期推算庫齡；金額分為 0-30 / 31-90 / 91-180 / 181-365 / 365 天以上 五段
+            </div>
           </div>
         </div>
         <div id="agingChart" class="hc-tall"></div>
@@ -669,7 +740,9 @@
       <div class="card-h">
         <div>
           <div class="card-title">交船庫存差異</div>
-          <div class="card-meta">船舶交接或跨船調撥時的物料金額流動與差異（資料來自調撥單與盤點計畫）</div>
+          <div class="card-meta">
+            <span class="if-fleet">全船隊</span><span class="if-vessel"><span class="vessel-name"></span> 相關的</span>船舶交接或跨船調撥時的物料金額流動與差異（資料來自調撥單與盤點計畫）
+          </div>
         </div>
         <div class="tabs" id="hoTabs">
           <button class="active" data-tab="flow">調撥金額流向</button>
@@ -1555,6 +1628,7 @@
     }
 
     function updateAll() {
+      updateScope();
       updateKpis();
       updateReplaceFreq();
       updateHealth();
@@ -1566,10 +1640,41 @@
       renderAnomalyTable();
     }
 
+    /* 更新「目前查看」scope-bar 與依船舶切換的文字 */
+    function updateScope() {
+      const isFleet = currentVessel === 'ALL';
+      let vName = '全部船舶';
+      if (!isFleet) {
+        const v = VESSELS.find(x => x.code === currentVessel);
+        vName = v ? v.name + '（' + v.owner + '）' : currentVessel;
+      }
+      $('#scopeVessel').text(vName).toggleClass('active', !isFleet);
+      $('#scopeWh').text(currentWarehouse === 'ALL' ? '全部倉庫' : currentWarehouse).toggleClass('active', currentWarehouse !== 'ALL');
+      const catNameMap = { ALL: '全部分類', ENGINE: '主機/濾器/軸承', LUBE: '油料/冷卻', DECK: '甲板/塗裝', SAFETY: '安全/救生', HARDWARE: '五金/維修件' };
+      $('#scopeCat').text(catNameMap[currentCategory] || '全部分類').toggleClass('active', currentCategory !== 'ALL');
+      const r = getRange();
+      let period = '';
+      if (currentDateType === 'month') {
+        period = '2026 年 ' + (r.from + 1) + '～' + (r.to + 1) + ' 月';
+      } else {
+        period = r.from === r.to ? '2026 年 Q' + (r.from + 1) : '2026 年 Q' + (r.from + 1) + '～Q' + (r.to + 1);
+      }
+      $('#scopePeriod').text(period);
+      const curMap = { TWD: '新台幣', USD: '美元', JPY: '日圓', EUR: '歐元' };
+      $('#scopeCurrency').text(curMap[currentCurrency] || currentCurrency).toggleClass('active', currentCurrency !== 'TWD');
+
+      const $wrap = $('.wrap');
+      $wrap.toggleClass('scope-fleet', isFleet);
+      $wrap.toggleClass('scope-vessel', !isFleet);
+      const onlyVesselName = isFleet ? '' : (VESSELS.find(x => x.code === currentVessel) || {}).name || '';
+      $('.vessel-name').text(onlyVesselName);
+      $('.vessel-name-chip').text(onlyVesselName);
+    }
+
     /* ====================== Init ====================== */
     function populateFilters() {
       const $v = $('#vesselFilter').empty();
-      $v.append('<option value="ALL" selected>全部船舶（Fleet）</option>');
+      $v.append('<option value="ALL" selected>全部船舶</option>');
       VESSELS.forEach(v => $v.append('<option value="'+v.code+'">'+v.name+'（'+v.owner+'）</option>'));
       const $mF = $('#mFrom').empty(), $mT = $('#mTo').empty();
       MONTH_LABELS.forEach((label, i) => {
@@ -1580,6 +1685,21 @@
 
     $(function () {
       populateFilters();
+
+      /* 把每個 .risk-panel 包成「可摺疊頭 + 主體」結構 */
+      $('.risk-panel').each(function () {
+        const $rows = $(this).children('.risk-row').detach();
+        $(this).prepend('<div class="risk-head"><span class="risk-title">風險說明</span><span class="risk-toggle">▾ 收合</span></div>');
+        $(this).append($('<div class="risk-body"></div>').append($rows));
+      });
+
+      /* 在每個圖表卡標題後面加上船名小標籤（單船時才顯示） */
+      $('.card-title').each(function () {
+        if ($(this).find('.vessel-name-chip').length === 0) {
+          $(this).append(' <span class="vessel-name-chip"></span>');
+        }
+      });
+
       initPriceTrendChart();
       initReplaceFreqChart();
       initHealthChart();
@@ -1618,6 +1738,29 @@
         $(this).addClass('active');
         currentAnomaly = $(this).data('tab');
         renderAnomalyTable();
+      });
+
+      /* 風險說明：單張收合切換 */
+      $(document).on('click', '.risk-head', function () {
+        const $panel = $(this).closest('.risk-panel');
+        $panel.toggleClass('collapsed');
+        const collapsed = $panel.hasClass('collapsed');
+        $(this).find('.risk-toggle').text(collapsed ? '▸ 展開' : '▾ 收合');
+      });
+
+      /* 風險說明：全部收合 / 全部展開 */
+      $('#riskGlobalToggle').on('click', function () {
+        const $panels = $('.risk-panel');
+        const allCollapsed = $panels.length > 0 && $panels.length === $('.risk-panel.collapsed').length;
+        if (allCollapsed) {
+          $panels.removeClass('collapsed');
+          $('.risk-toggle').text('▾ 收合');
+          $(this).text('收合所有說明');
+        } else {
+          $panels.addClass('collapsed');
+          $('.risk-toggle').text('▸ 展開');
+          $(this).text('展開所有說明');
+        }
       });
     });
   </script>
