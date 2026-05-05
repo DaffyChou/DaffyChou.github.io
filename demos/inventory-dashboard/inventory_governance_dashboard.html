@@ -223,8 +223,8 @@
 
     <div class="header">
       <div>
-        <div class="title">進銷存治理儀表板 Inventory Governance Dashboard</div>
-        <div class="subtitle">物料 · 配件 · 採購 · 驗收 · 庫存 · 盤點 — 從作業流程延伸到管理決策（資料源：海發進銷存假資料）</div>
+        <div class="title">進銷存治理儀表板</div>
+        <div class="subtitle">物料 · 配件 · 採購 · 驗收 · 庫存 · 盤點 — 從作業流程延伸到管理決策（資料來源：海發進銷存假資料）</div>
       </div>
       <div>
         <div class="chip">Dark · Compact</div>
@@ -233,25 +233,25 @@
     </div>
 
     <div class="ref-bar">
-      <span class="lbl">業界對標：</span>
-      <span class="chip bench">Sertica Procurement</span>
-      <span class="chip bench">DNV ShipManager</span>
-      <span class="chip bench">SpecTec AMOS</span>
-      <span class="chip bench">Wilhelmsen ShipServ</span>
-      <span class="chip bench">SAP Ariba Spend</span>
-      <span class="chip bench">Coupa Risk</span>
-      <span class="chip bench">Microsoft D365 SCM</span>
-      <span class="chip bench">Oracle Cloud SCM</span>
+      <span class="lbl">參考的國際同類產品：</span>
+      <span class="chip bench">Sertica（船舶採購）</span>
+      <span class="chip bench">DNV ShipManager（船管系統）</span>
+      <span class="chip bench">SpecTec AMOS（船隊管理）</span>
+      <span class="chip bench">Wilhelmsen ShipServ（船用採購平台）</span>
+      <span class="chip bench">SAP Ariba（採購分析）</span>
+      <span class="chip bench">Coupa（風險管理）</span>
+      <span class="chip bench">Microsoft Dynamics 365（供應鏈）</span>
+      <span class="chip bench">Oracle Cloud（供應鏈）</span>
     </div>
 
     <!-- Filters -->
     <div class="filters">
       <div class="fg">
-        <span>船舶 Vessel</span>
+        <span>船舶</span>
         <select id="vesselFilter"></select>
       </div>
       <div class="fg">
-        <span>倉庫 Warehouse</span>
+        <span>倉庫</span>
         <select id="warehouseFilter">
           <option value="ALL" selected>全部倉庫</option>
           <option value="甲板">甲板</option>
@@ -259,7 +259,7 @@
         </select>
       </div>
       <div class="fg">
-        <span>分類 Category</span>
+        <span>物料分類</span>
         <select id="categoryFilter">
           <option value="ALL" selected>全部分類</option>
           <option value="ENGINE">主機/濾器/軸承</option>
@@ -270,14 +270,14 @@
         </select>
       </div>
       <div class="fg">
-        <span>時間粒度 Granularity</span>
+        <span>時間粒度</span>
         <div class="pill-switch" id="dateType">
           <button data-type="month" class="active">月</button>
           <button data-type="quarter">季</button>
         </div>
       </div>
       <div class="fg">
-        <span>日期區間 Date Range</span>
+        <span>查詢期間</span>
 
         <div class="dr dr-g" data-type="month">
           <select id="mFrom"></select>
@@ -297,12 +297,12 @@
         </div>
       </div>
       <div class="fg">
-        <span>幣別 Currency</span>
+        <span>幣別</span>
         <select id="currencyFilter">
-          <option value="TWD" selected>新台幣 TWD</option>
-          <option value="USD">美元 USD</option>
-          <option value="JPY">日圓 JPY</option>
-          <option value="EUR">歐元 EUR</option>
+          <option value="TWD" selected>新台幣</option>
+          <option value="USD">美元</option>
+          <option value="JPY">日圓</option>
+          <option value="EUR">歐元</option>
         </select>
       </div>
     </div>
@@ -311,29 +311,29 @@
     <div class="grid g-5">
       <div class="card">
         <div class="card-title-s">庫存總值</div>
-        <div class="card-meta">所有倉庫 SKU 帳面金額</div>
+        <div class="card-meta">全部倉庫品項的帳面金額加總</div>
         <div class="kpi"><span id="kpiInvValue">0</span> <span class="unit" id="kpiInvUnit">TWD</span></div>
         <div class="pill info" style="margin-top:6px">
-          <span id="kpiSkuCount">0</span> SKU · <span id="kpiSkuQty">0</span> 件
+          共 <span id="kpiSkuCount">0</span> 種品項 · <span id="kpiSkuQty">0</span> 件
         </div>
       </div>
       <div class="card">
         <div class="card-title-s">安全庫存達成率</div>
-        <div class="card-meta">≥ 最低庫存 SKU 佔比；目標 &gt; 90%</div>
+        <div class="card-meta">庫存達到最低標準的品項比例；目標 90% 以上</div>
         <div class="kpi"><span id="kpiSafety">0</span> <span class="unit">%</span></div>
         <div class="health-bar" id="kpiSafetyBar"></div>
       </div>
       <div class="card">
         <div class="card-title-s">盤點完成率</div>
-        <div class="card-meta">已盤點 / 計畫總數；目標 100%</div>
+        <div class="card-meta">已完成盤點 / 計畫總數；目標全數完成</div>
         <div class="kpi"><span id="kpiStkRate">0</span> <span class="unit">%</span></div>
         <div class="pill warn" style="margin-top:6px">
-          <span id="kpiStkPending">0</span> 張盤點計畫待執行
+          還有 <span id="kpiStkPending">0</span> 張盤點計畫沒做
         </div>
       </div>
       <div class="card">
         <div class="card-title-s">盤點差異率</div>
-        <div class="card-meta">|差異| / 帳面數量；SOX 警戒 &gt; 3%</div>
+        <div class="card-meta">差異絕對值 / 帳面數量；超過 3% 屬內控警戒</div>
         <div class="kpi"><span id="kpiVarRate">0.0</span> <span class="unit">%</span></div>
         <div class="pill bad" style="margin-top:6px">
           差異金額 <span id="kpiVarAmt">0</span>
@@ -341,10 +341,10 @@
       </div>
       <div class="card">
         <div class="card-title-s">滯料金額</div>
-        <div class="card-meta">qty / safety &gt; 3× 過量風險</div>
+        <div class="card-meta">庫存量超過安全庫存 3 倍以上的過量風險</div>
         <div class="kpi"><span id="kpiDeadAmt">0</span> <span class="unit" id="kpiDeadUnit">TWD</span></div>
         <div class="pill warn" style="margin-top:6px">
-          <span id="kpiDeadCount">0</span> SKU 建議調撥/促消
+          有 <span id="kpiDeadCount">0</span> 個品項建議調撥/消化
         </div>
       </div>
     </div>
@@ -354,40 +354,40 @@
       <div class="card-h">
         <div>
           <div class="card-title">物料採購單價走勢</div>
-          <div class="card-meta">追蹤關鍵物料於不同廠商的採購單價（PO_ITEMS × VENDORS × RFQ 歷史價）</div>
+          <div class="card-meta">同一物料在不同廠商的採購單價變化（資料來自採購單與詢價單歷史）</div>
         </div>
         <div class="tabs" id="priceItemTabs"></div>
       </div>
       <div id="priceTrendChart" class="hc-tall"></div>
       <div class="risk-panel">
         <div class="risk-row">
-          <div class="risk-label cyan">觀察重點</div>
+          <div class="risk-label cyan">要看什麼</div>
           <div class="risk-text">
-            ① <b>跨廠商價差</b>（同月同物料最高 vs 最低單價的 spread）
-            ② <b>月度 MoM 走勢</b>（漲跌斜率，是否跟 IMPA 大盤吻合）
-            ③ <b>單一廠商連續調漲</b>（是否有議價能力流失跡象）。
+            ① <b>不同廠商的價差</b>：同一個月同樣物料，最高與最低報價差多少。
+            ② <b>每個月的漲跌走勢</b>：價格穩定、上升還是下降。
+            ③ <b>單一廠商連續調漲</b>：判斷是不是議價能力在流失。
           </div>
         </div>
         <div class="risk-row">
-          <div class="risk-label yellow">風險信號</div>
+          <div class="risk-label yellow">什麼情況要警覺</div>
           <div class="risk-text">
-            <span class="thr">月增幅 &gt; 5%</span>（價格通膨/匯率轉嫁）；
-            <span class="thr">單一廠商溢價 &gt; 平均 20%</span>（議價弱勢）；
-            <span class="thr">spread &gt; 30%</span>（廠商品質/規格差異需確認）。
+            <span class="thr">單月漲幅超過 5%</span>（可能是物價或匯率上漲被廠商轉嫁）；
+            <span class="thr">某廠商比平均貴 20% 以上</span>（議價力不足）；
+            <span class="thr">廠商間價差超過 30%</span>（規格或品質可能不同，要確認）。
           </div>
         </div>
         <div class="risk-row">
-          <div class="risk-label green">建議行動</div>
+          <div class="risk-label green">建議怎麼做</div>
           <div class="risk-text">
-            觸發 <code>RFQ Re-bid</code>、納入下次「綜合詢價單」強制 ≥3 家比價、
-            建立替代廠商池；對 LUBE 類強波動品項可採 <b>長約鎖價（lock-in）</b>。
+            啟動<b>重新詢價</b>、下次「綜合詢價單」強制找<b>至少 3 家比價</b>、
+            建立替代廠商名單；油料類波動大的品項可考慮<b>長約鎖價</b>。
           </div>
         </div>
         <div class="risk-row">
-          <div class="risk-label muted">業界對標</div>
+          <div class="risk-label muted">同類產品做法</div>
           <div class="risk-text">
-            SAP Ariba <i>Price Intelligence</i>、Coupa <i>Spend Guard</i>、
-            Sertica <i>Historical Price Tracking</i>、SpecTec AMOS <i>Quotation Comparison</i>。
+            SAP Ariba 的「價格智能分析」、Coupa 的「支出守門」、
+            Sertica 的「歷史價格追蹤」、SpecTec AMOS 的「報價比對」。
           </div>
         </div>
       </div>
@@ -399,42 +399,42 @@
         <div class="card-h">
           <div>
             <div class="card-title">配件更換頻率</div>
-            <div class="card-meta">領用單 + 派工單統計各品項/設備累計更換次數（柏拉圖前 80%）</div>
+            <div class="card-meta">統計各品項/設備累計更換次數（資料來自領用單＋派工單），找出最常更換的關鍵配件</div>
           </div>
           <div class="legend-row">
             <span><span class="dot" style="background:#22d3ee"></span>更換次數</span>
-            <span><span class="dot" style="background:#f59e0b"></span>累計%</span>
+            <span><span class="dot" style="background:#f59e0b"></span>累計佔比</span>
           </div>
         </div>
         <div id="replaceFreqChart" class="hc-tall"></div>
         <div class="risk-panel">
           <div class="risk-row">
-            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-label cyan">要看什麼</div>
             <div class="risk-text">
-              <b>Top 20% 高頻配件</b>承擔約 80% 更換，是維修預算與安全庫存的主要驅動因子；
-              對照 PMS 循環是否吻合（過頻 = 設備老化 / 廠商品質）。
+              排在前面的<b>少數品項通常吃掉大部分的更換量</b>，這些是維修預算和安全庫存的主要來源；
+              比對保養計畫的週期是否吻合（換得太頻繁 = 設備老化或廠商品質有問題）。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-label yellow">什麼情況要警覺</div>
             <div class="risk-text">
-              同配件 <span class="thr">月內 ≥ 3 次更換</span>（疑似品質瑕疵）；
-              派工頻率 <span class="thr">QoQ 上升 &gt; 30%</span>（設備可靠度下降）；
-              更換量驟降卻有缺料 → <b>船端隱藏未報修風險</b>。
+              同一個配件 <span class="thr">一個月換 3 次以上</span>（懷疑品質瑕疵）；
+              派工次數 <span class="thr">本季比上季多 30%</span>（設備可靠度下降）；
+              更換量突然驟降但又出現缺料 → <b>可能是船端有故障沒報修</b>。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label green">建議行動</div>
+            <div class="risk-label green">建議怎麼做</div>
             <div class="risk-text">
-              納入 <code>PM 預防性維修排程</code>、向廠商提出 <b>QC 改善通報</b>、
-              對 Top N 重要配件雙廠商 dual-source；連結 PMS 強制更換週期。
+              納入<b>預防性維修排程</b>、向廠商提出<b>品質改善通報</b>、
+              重要配件改用<b>雙廠商備援</b>；與保養計畫連動強制更換週期。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label muted">業界對標</div>
+            <div class="risk-label muted">同類產品做法</div>
             <div class="risk-text">
-              SpecTec AMOS <i>Reliability Tracking</i>、DNV ShipManager <i>PMS-Procurement Linkage</i>、
-              Sertica <i>Equipment Critical Spare</i>。
+              SpecTec AMOS 的「設備可靠度追蹤」、DNV ShipManager 的「保養計畫＋採購整合」、
+              Sertica 的「重要設備備品管理」。
             </div>
           </div>
         </div>
@@ -444,47 +444,47 @@
         <div class="card-h">
           <div>
             <div class="card-title">庫存健康度</div>
-            <div class="card-meta">x：安全庫存　y：現庫存　氣泡=金額；分四區檢視單一 SKU 健康狀態</div>
+            <div class="card-meta">橫軸：安全庫存量　縱軸：現有庫存量　氣泡大小代表金額；分成四種狀態看每個品項</div>
           </div>
           <div class="legend-row">
-            <span><span class="dot" style="background:#ef4444"></span>缺料 (qty&lt;safety)</span>
-            <span><span class="dot" style="background:#f59e0b"></span>警戒 (&lt;1.5×)</span>
-            <span><span class="dot" style="background:#10b981"></span>健康 (1.5~3×)</span>
-            <span><span class="dot" style="background:#a78bfa"></span>過量 (&gt;3×)</span>
+            <span><span class="dot" style="background:#ef4444"></span>缺料（庫存少於安全量）</span>
+            <span><span class="dot" style="background:#f59e0b"></span>警戒（不到安全量的 1.5 倍）</span>
+            <span><span class="dot" style="background:#10b981"></span>健康（安全量 1.5～3 倍）</span>
+            <span><span class="dot" style="background:#a78bfa"></span>過量（超過安全量 3 倍）</span>
           </div>
         </div>
         <div id="healthChart" class="hc-tall"></div>
         <div class="risk-panel">
           <div class="risk-row">
-            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-label cyan">要看什麼</div>
             <div class="risk-text">
-              <b>缺料區</b>：影響船舶營運與適航性；
-              <b>警戒區</b>：reorder point 觸發點；
-              <b>過量區</b>：資金佔用與報廢風險；
-              氣泡大者 = 高金額 SKU，優先處理。
+              <b>缺料區</b>：影響船舶營運與適航；
+              <b>警戒區</b>：該補貨的觸發點；
+              <b>過量區</b>：資金被佔用、未來可能報廢；
+              氣泡愈大代表金額愈高，要優先處理。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-label yellow">什麼情況要警覺</div>
             <div class="risk-text">
-              缺料 SKU 佔比 <span class="thr">&gt; 10%</span>（停航風險）；
-              過量金額 <span class="thr">&gt; 庫存總值 15%</span>（呆料減值）；
-              關鍵安全料（SAFETY 類）出現於缺料區 → <span class="neg">法規不合規</span>。
+              缺料品項超過 <span class="thr">10%</span>（停航風險）；
+              過量金額超過<span class="thr">庫存總值的 15%</span>（呆料貶值）；
+              關鍵安全救生類物料出現在缺料區 → <span class="neg">法規不合規</span>。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label green">建議行動</div>
+            <div class="risk-label green">建議怎麼做</div>
             <div class="risk-text">
-              缺料 → 立即啟動緊急 <code>PR + RFQ</code>；
-              過量 → <b>船間調撥</b>或岸倉退回；
-              動態調整 reorder point 與 safety stock（依消耗速度與 lead time）。
+              缺料 → 立即發出<b>緊急請購＋詢價</b>；
+              過量 → <b>船間調撥</b>或退回岸上倉庫；
+              依消耗速度和廠商備貨天數，動態調整<b>補貨警戒線</b>與<b>安全庫存量</b>。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label muted">業界對標</div>
+            <div class="risk-label muted">同類產品做法</div>
             <div class="risk-text">
-              Microsoft D365 <i>Inventory Health Overview</i>、Sertica <i>Stock Alert Quadrant</i>、
-              NetSuite <i>ABC × Health Matrix</i>。
+              Microsoft Dynamics 365 的「庫存健康總覽」、Sertica 的「庫存警示四象限」、
+              NetSuite 的「ABC 重要度＋健康度矩陣」。
             </div>
           </div>
         </div>
@@ -497,38 +497,38 @@
         <div class="card-h">
           <div>
             <div class="card-title">盤點差異率</div>
-            <div class="card-meta">|盤點差異| / 帳面數量；按船舶 × 倉庫；紅菱形=SOX 警戒 3%</div>
+            <div class="card-meta">盤點差異絕對值 / 帳面數量，按船舶與倉庫拆解；紅色菱形是 3% 內控警戒線</div>
           </div>
         </div>
         <div id="varianceRateChart" class="hc-tall"></div>
         <div class="risk-panel">
           <div class="risk-row">
-            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-label cyan">要看什麼</div>
             <div class="risk-text">
-              哪些 <b>船×倉庫</b> 差異率最高、是否集中於特定品類，
-              並對照負責人/船員交接時點，判斷是否為流程或人員因素。
+              哪艘<b>船的哪個倉庫</b>差異率最高、是否集中在某些品類；
+              對照負責人或船員交接時點，判斷是流程問題還是人為因素。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-label yellow">什麼情況要警覺</div>
             <div class="risk-text">
-              差異率 <span class="thr">&gt; 3%</span>（SOX/內控警戒）；
+              差異率 <span class="thr">超過 3%</span>（內控警戒線）；
               <span class="thr">連續兩季上升</span>（系統性問題）；
-              單一倉庫顯著高於船隊均值 → 流程或人員稽核重點。
+              某個倉庫明顯比船隊平均高 → 是流程或人員稽核重點。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label green">建議行動</div>
+            <div class="risk-label green">建議怎麼做</div>
             <div class="risk-text">
-              提高該倉庫 <code>盤點頻率</code>（季→月 / 月→週）；
-              出入庫單據雙人核對；對重要安全料採 <b>每次出庫即時盤點</b>。
+              提高該倉庫的<b>盤點頻率</b>（從季→月，或月→週）；
+              出入庫單據改成雙人核對；重要安全物料改成<b>每次出庫即時盤點</b>。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label muted">業界對標</div>
+            <div class="risk-label muted">同類產品做法</div>
             <div class="risk-text">
-              SOX <i>Inventory Accuracy Control</i>、BASS <i>Master Data Quality</i>、
-              ABS NS5 <i>Stocktaking Variance Audit</i>。
+              美國 SOX 法規的「庫存準確性控制」、BASS 的「主資料品質」、
+              ABS NS5 的「盤點差異稽核」。
             </div>
           </div>
         </div>
@@ -537,38 +537,38 @@
         <div class="card-h">
           <div>
             <div class="card-title">盤點差異金額</div>
-            <div class="card-meta">差異 × 庫存單價；正值=盤盈 / 負值=盤虧 / 折線=淨差異</div>
+            <div class="card-meta">差異 × 庫存單價；正值代表盤盈、負值代表盤虧、折線是淨差異</div>
           </div>
         </div>
         <div id="varianceAmtChart" class="hc-tall"></div>
         <div class="risk-panel">
           <div class="risk-row">
-            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-label cyan">要看什麼</div>
             <div class="risk-text">
-              盤盈/盤虧的 <b>金額對比</b>與 <b>淨差異趨勢</b>；
-              財務影響直接寫入 P&amp;L 損益。
+              <b>盤盈與盤虧的金額對比</b>，以及<b>淨差異的走勢</b>；
+              這些金額會直接影響損益表。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-label yellow">什麼情況要警覺</div>
             <div class="risk-text">
-              月度 <b>淨盤虧</b> <span class="thr">&gt; 10萬 TWD</span>（重大異常）；
-              <span class="thr">連續三月盤虧</span>（系統性流失/失竊）；
-              盤盈金額異常大 → <b>過去入庫漏記或品名錯置</b>。
+              當月<b>淨盤虧</b>超過 <span class="thr">10 萬新台幣</span>（重大異常）；
+              <span class="thr">連續三個月都盤虧</span>（可能系統性流失或失竊）；
+              盤盈金額異常大 → <b>過去可能有入庫漏記或品名錯置</b>。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label green">建議行動</div>
+            <div class="risk-label green">建議怎麼做</div>
             <div class="risk-text">
-              啟動 <b>責任歸屬調查</b>、追溯出入庫單據、
-              金額重大者轉 <code>調整單</code> 並通報內稽；連續異常者列入年度稽核重點。
+              啟動<b>責任歸屬調查</b>、追溯出入庫單據；
+              金額重大時開立<b>調整單</b>並通報內稽；連續異常的列入年度稽核重點。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label muted">業界對標</div>
+            <div class="risk-label muted">同類產品做法</div>
             <div class="risk-text">
-              SAP S/4HANA <i>Inventory Cost Variance</i>、Oracle Cloud <i>Stocktaking Adjustment</i>、
-              Sage X3 <i>Shrinkage Reporting</i>。
+              SAP S/4HANA 的「庫存成本差異」、Oracle Cloud 的「盤點調整」、
+              Sage X3 的「短缺報表」。
             </div>
           </div>
         </div>
@@ -580,43 +580,43 @@
       <div class="card">
         <div class="card-h">
           <div>
-            <div class="card-title">供應商集中度（HHI 風險）</div>
-            <div class="card-meta">採購／詢價金額占比；HHI 指數識別過度依賴</div>
+            <div class="card-title">供應商集中度</div>
+            <div class="card-meta">廠商各自的採購／詢價金額佔比；用集中度指數判斷是否過度依賴單一廠商</div>
           </div>
           <div class="legend-row">
-            <span>HHI = <b id="hhiVal">0</b></span>
+            <span>集中度指數 = <b id="hhiVal">0</b></span>
             <span class="pill" id="hhiPill"></span>
           </div>
         </div>
         <div id="vendorConcChart" class="hc-tall"></div>
         <div class="risk-panel">
           <div class="risk-row">
-            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-label cyan">要看什麼</div>
             <div class="risk-text">
-              <b>Top 1 / Top 3 廠商</b> 的金額占比、HHI 指數
-              （&lt;1500 競爭、1500–2500 中度、&gt;2500 高度集中）。
+              <b>第 1 名與前 3 大廠商</b>各自的金額佔比、整體集中度指數
+              （低於 1500 屬市場競爭、1500～2500 中度集中、超過 2500 高度集中）。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-label yellow">什麼情況要警覺</div>
             <div class="risk-text">
-              單一廠商 <span class="thr">&gt; 30%</span>（依賴風險，廠商斷供即停擺）；
-              HHI <span class="thr">&gt; 2500</span>（談判劣勢）；
-              關鍵安全/主機料 <b>無備援廠商</b>（lock-in）。
+              單一廠商占比 <span class="thr">超過 30%</span>（依賴風險，廠商一斷供就停擺）；
+              集中度指數 <span class="thr">超過 2500</span>（談判時居劣勢）；
+              關鍵安全或主機物料<b>沒有備援廠商</b>（被綁住）。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label green">建議行動</div>
+            <div class="risk-label green">建議怎麼做</div>
             <div class="risk-text">
-              拓展次級供應商池、設定 <code>max share 政策</code>（如單一廠商上限 25%）、
-              關鍵料強制 <b>≥3 家報價</b>；長期推動 dual/tri-source 結構。
+              拓展次要供應商名單、設定<b>單一廠商占比上限</b>（例如不超過 25%）、
+              重要物料強制<b>至少找 3 家報價</b>；長期建立<b>雙廠商或三廠商備援結構</b>。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label muted">業界對標</div>
+            <div class="risk-label muted">同類產品做法</div>
             <div class="risk-text">
-              SAP Ariba <i>Supplier Risk &amp; Concentration</i>、Coupa <i>Risk Assess</i>、
-              Wilhelmsen <i>Supplier Rationalization</i>。
+              SAP Ariba 的「供應商風險與集中度」、Coupa 的「風險評估」、
+              Wilhelmsen 的「供應商整合管理」。
             </div>
           </div>
         </div>
@@ -626,38 +626,38 @@
         <div class="card-h">
           <div>
             <div class="card-title">庫存帳齡分布</div>
-            <div class="card-meta">依最近一次入庫/採購推算庫齡；金額分布 0-30 / 31-90 / 91-180 / 181-365 / 365+</div>
+            <div class="card-meta">依最近一次入庫或採購日期推算庫齡；金額分為 0-30 / 31-90 / 91-180 / 181-365 / 365 天以上 五段</div>
           </div>
         </div>
         <div id="agingChart" class="hc-tall"></div>
         <div class="risk-panel">
           <div class="risk-row">
-            <div class="risk-label cyan">觀察重點</div>
+            <div class="risk-label cyan">要看什麼</div>
             <div class="risk-text">
-              <b>Aging buckets</b> 金額占比，&gt;180 天為呆滯料候選，
-              對照消耗速度評估 <b>impairment</b>（存貨跌價）必要性。
+              <b>各帳齡區段的金額佔比</b>，超過 180 天的就是呆滯料候選；
+              對照消耗速度，評估是否要提列<b>存貨跌價損失</b>。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label yellow">風險信號</div>
+            <div class="risk-label yellow">什麼情況要警覺</div>
             <div class="risk-text">
-              <span class="thr">365+ 帳齡占比 &gt; 10%</span>（明顯呆料）；
-              <span class="thr">181-365 連續成長</span>（即將惡化）；
-              整體 <b>庫存周轉天數 &gt; 180 天</b>（資金效率差）。
+              <span class="thr">365 天以上的庫齡佔比超過 10%</span>（明顯呆料）；
+              <span class="thr">181～365 天區段連續成長</span>（即將惡化）；
+              整體<b>庫存周轉天數超過 180 天</b>（資金使用效率太差）。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label green">建議行動</div>
+            <div class="risk-label green">建議怎麼做</div>
             <div class="risk-text">
-              提列 <code>存貨跌價損失</code>、啟動 <b>處分/退廠/促銷</b>程序、
-              修正未來 PR 數量；對快過期物料優先船間調撥消化。
+              提列<b>存貨跌價損失</b>、啟動<b>處分／退廠／促銷</b>程序、
+              修正下次請購數量；快過期的物料優先<b>船間調撥消化</b>。
             </div>
           </div>
           <div class="risk-row">
-            <div class="risk-label muted">業界對標</div>
+            <div class="risk-label muted">同類產品做法</div>
             <div class="risk-text">
-              NetSuite <i>Inventory Aging</i>、Sage X3 <i>Slow Mover Analysis</i>、
-              Sertica <i>Obsolescence Report</i>、Oracle Cloud <i>Aging Buckets</i>。
+              NetSuite 的「庫存帳齡」、Sage X3 的「滯銷分析」、
+              Sertica 的「呆滯料報表」、Oracle Cloud 的「帳齡區間分析」。
             </div>
           </div>
         </div>
@@ -669,7 +669,7 @@
       <div class="card-h">
         <div>
           <div class="card-title">交船庫存差異</div>
-          <div class="card-meta">船舶交接 / 跨船調撥 之物料金額流動與差異（資料源：調撥單 + 盤點計畫）</div>
+          <div class="card-meta">船舶交接或跨船調撥時的物料金額流動與差異（資料來自調撥單與盤點計畫）</div>
         </div>
         <div class="tabs" id="hoTabs">
           <button class="active" data-tab="flow">調撥金額流向</button>
@@ -679,32 +679,32 @@
       <div id="handoverChart" class="hc-tall"></div>
       <div class="risk-panel">
         <div class="risk-row">
-          <div class="risk-label cyan">觀察重點</div>
+          <div class="risk-label cyan">要看什麼</div>
           <div class="risk-text">
-            跨 <b>船東/船舶</b> 調撥金額流向、交接時點 <b>實盤 vs 帳面</b> 差異；
-            判斷是否需 cross-charge 或 invoice。
+            跨<b>船東或船舶</b>的調撥金額流向、交接當時的<b>實盤與帳面差異</b>；
+            判斷是否需要跨公司計費或開立請款單。
           </div>
         </div>
         <div class="risk-row">
-          <div class="risk-label yellow">風險信號</div>
+          <div class="risk-label yellow">什麼情況要警覺</div>
           <div class="risk-text">
-            跨船東調撥 <b>未開立 invoice</b>（cross-charge 風險、稅務風險）；
-            交接差異 <span class="thr">&gt; 5%</span>（責任歸屬爭議）；
-            <b>離船員工最後盤點未完成</b>。
+            跨船東調撥<b>沒有開立請款單</b>（跨主體計費風險、稅務風險）；
+            交接差異 <span class="thr">超過 5%</span>（責任歸屬可能有爭議）；
+            <b>離船員工最後盤點沒完成</b>就交接。
           </div>
         </div>
         <div class="risk-row">
-          <div class="risk-label green">建議行動</div>
+          <div class="risk-label green">建議怎麼做</div>
           <div class="risk-text">
-            標準化 <code>交船清單</code> 與雙方簽認流程；跨船東調撥強制走 invoice；
-            交接前 7 天內必須完成完整盤點與差異追蹤。
+            標準化<b>交船清單</b>與雙方簽認流程；跨船東調撥<b>一律開立請款單</b>；
+            交接前 7 天內必須完成完整盤點並追蹤差異。
           </div>
         </div>
         <div class="risk-row">
-          <div class="risk-label muted">業界對標</div>
+          <div class="risk-label muted">同類產品做法</div>
           <div class="risk-text">
-            Veson IMOS <i>Vessel Handover</i>、Wilhelmsen <i>Handover Protocol</i>、
-            DNV ShipManager <i>Vessel Transfer</i>。
+            Veson IMOS 的「船舶交接」、Wilhelmsen 的「交接流程規範」、
+            DNV ShipManager 的「船舶異動管理」。
           </div>
         </div>
       </div>
@@ -714,7 +714,7 @@
     <div class="card" style="margin-top:10px">
       <div class="card-h">
         <div>
-          <div class="card-title">治理工作清單 · Governance Worklist</div>
+          <div class="card-title">治理工作清單</div>
           <div class="card-meta">缺料 / 滯料 / 待盤點 / 盤點差異</div>
         </div>
         <div class="tabs" id="anomalyTabs">
@@ -1085,10 +1085,10 @@
         },
         plotOptions: { bubble: { minSize: 6, maxSize: '13%', dataLabels: { enabled: false } } },
         series: [
-          { name: '缺料 (qty < safety)',           color: '#ef4444', data: [] },
-          { name: '警戒 (qty < 1.5×safety)',       color: '#f59e0b', data: [] },
-          { name: '健康 (1.5×~3×safety)',          color: '#10b981', data: [] },
-          { name: '過量/滯料 (qty > 3×safety)',     color: '#a78bfa', data: [] }
+          { name: '缺料（庫存少於安全量）',          color: '#ef4444', data: [] },
+          { name: '警戒（不到安全量的 1.5 倍）',     color: '#f59e0b', data: [] },
+          { name: '健康（安全量 1.5～3 倍）',        color: '#10b981', data: [] },
+          { name: '過量／滯料（超過安全量 3 倍）',    color: '#a78bfa', data: [] }
         ]
       });
     }
@@ -1107,7 +1107,7 @@
         plotOptions: { bar: { borderWidth: 0, dataLabels: { enabled: true, format: '{y:.2f}%', style: { color: '#fff', textOutline: 'none', fontSize: '11px' } } } },
         series: [
           { name: '差異率', data: [], color: '#22d3ee' },
-          { name: 'SOX 警戒 3%', data: [], type: 'scatter', color: '#ef4444', marker: { symbol: 'diamond', radius: 6 } }
+          { name: '警戒線 3%', data: [], type: 'scatter', color: '#ef4444', marker: { symbol: 'diamond', radius: 6 } }
         ]
       });
     }
@@ -1136,8 +1136,8 @@
         chart: { type: 'column' },
         xAxis: { categories: [], labels: { rotation: -25, style: { fontSize: '11px' } } },
         yAxis: [
-          { title: { text: '採購/詢價金額' }, labels: { formatter() { return Highcharts.numberFormat(this.value/1000, 0)+'K'; } } },
-          { opposite: true, max: 100, labels: { format: '{value}%' }, title: { text: '累計%' } }
+          { title: { text: '採購／詢價金額' }, labels: { formatter() { return Highcharts.numberFormat(this.value/1000, 0)+'K'; } } },
+          { opposite: true, max: 100, labels: { format: '{value}%' }, title: { text: '累計佔比' } }
         ],
         tooltip: { shared: true,
           formatter() {
@@ -1151,8 +1151,8 @@
         },
         plotOptions: { column: { borderWidth: 0 } },
         series: [
-          { type: 'column', name: '金額（TWD）', data: [], color: '#22d3ee' },
-          { type: 'spline', name: '累計%', yAxis: 1, data: [], color: '#f59e0b', marker: { radius: 3 } }
+          { type: 'column', name: '採購／詢價金額', data: [], color: '#22d3ee' },
+          { type: 'spline', name: '累計佔比', yAxis: 1, data: [], color: '#f59e0b', marker: { radius: 3 } }
         ]
       });
     }
@@ -1171,11 +1171,11 @@
         },
         plotOptions: { column: { borderWidth: 0, stacking: 'normal' } },
         series: [
-          { name: 'ENGINE 主機/濾器', data: [], color: '#22d3ee' },
-          { name: 'LUBE 油料/冷卻',   data: [], color: '#10b981' },
-          { name: 'DECK 甲板/塗裝',   data: [], color: '#fbbf24' },
-          { name: 'SAFETY 安全/救生', data: [], color: '#fb923c' },
-          { name: 'HARDWARE 五金',    data: [], color: '#a78bfa' }
+          { name: '主機／濾器／軸承', data: [], color: '#22d3ee' },
+          { name: '油料／冷卻',       data: [], color: '#10b981' },
+          { name: '甲板／塗裝',       data: [], color: '#fbbf24' },
+          { name: '安全／救生',       data: [], color: '#fb923c' },
+          { name: '五金／維修件',     data: [], color: '#a78bfa' }
         ]
       });
     }
@@ -1415,10 +1415,10 @@
       $('#hhiVal').text(Math.round(hhi));
       const $pill = $('#hhiPill').removeClass('ok warn bad');
       let label, cls;
-      if (hhi < 1500) { label = '低集中度（健康）'; cls = 'ok'; }
-      else if (hhi < 2500) { label = '中度集中（注意）'; cls = 'warn'; }
-      else { label = '高集中度（風險）'; cls = 'bad'; }
-      $pill.addClass(cls).text('HHI ' + label);
+      if (hhi < 1500) { label = '集中度低（健康）'; cls = 'ok'; }
+      else if (hhi < 2500) { label = '中度集中（要注意）'; cls = 'warn'; }
+      else { label = '高度集中（有風險）'; cls = 'bad'; }
+      $pill.addClass(cls).text(label);
 
       vendorConcChart.xAxis[0].setCategories(cats, false);
       vendorConcChart.series[0].setData(data, false);
@@ -1469,7 +1469,7 @@
           series: [
             { name: '轉出金額', data: out },
             { name: '轉入金額', data: inn },
-            { name: '估計交船差異 (cross-charge 風險)', data: diff, type: 'spline' }
+            { name: '估計交船差異（跨主體計費風險）', data: diff, type: 'spline' }
           ]
         }, true, true);
       } else {
