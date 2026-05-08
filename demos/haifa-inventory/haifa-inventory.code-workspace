@@ -1,0 +1,31 @@
+{
+  "folders": [
+    {
+      "name": "🚢 海發進銷存 Demo",
+      "path": "."
+    },
+    {
+      "name": "📂 OneDrive 來源資料（截圖／手冊／dbml）",
+      "path": "C:\\Users\\SLAB\\OneDrive\\海發\\進銷存\\Claude"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/node_modules": true
+    },
+    "files.associations": {
+      "*.dbml": "sql"
+    },
+    "liveServer.settings.NoBrowser": false,
+    "liveServer.settings.port": 5500,
+    "liveServer.settings.donotShowInfoMsg": true,
+    "liveServer.settings.donotVerifyTags": true,
+    "liveServer.settings.root": "/"
+  },
+  "extensions": {
+    "recommendations": [
+      "ritwickdey.LiveServer"
+    ]
+  }
+}
