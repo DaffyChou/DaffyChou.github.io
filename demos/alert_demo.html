@@ -342,6 +342,93 @@ body {
   padding: 6px 10px;
 }
 .select2-search--dropdown .select2-search__field:focus { outline: 2px solid #4078c0; }
+
+/* ===== Email Preview Modal ===== */
+.email-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 9999;
+  align-items: flex-start; justify-content: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+}
+.email-overlay.show { display: flex; }
+.email-preview-modal {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 720px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  font-family: "Microsoft JhengHei","PingFang TC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color: #1a1a1a;
+  overflow: hidden;
+}
+.ep-header {
+  background: #1e1e1e;
+  color: #fff;
+  padding: 14px 22px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 15px; font-weight: 500;
+}
+.ep-header .close { margin-left: auto; cursor: pointer; font-size: 22px; line-height: 1; color: #9aa0a6; }
+.ep-header .close:hover { color: #fff; }
+.ep-meta {
+  background: #f6f8fa;
+  padding: 14px 22px;
+  border-bottom: 1px solid #e1e4e8;
+  font-size: 12px; color: #586069;
+}
+.ep-meta .row-meta { display: grid; grid-template-columns: 60px 1fr; gap: 8px; padding: 2px 0; }
+.ep-meta .label { color: #959da5; }
+.ep-meta .value { color: #24292e; word-break: break-all; }
+.ep-meta .ep-subject {
+  font-size: 15px; font-weight: 600; color: #1a1a1a;
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px dashed #d1d5da;
+}
+.ep-body {
+  padding: 22px 26px;
+  font-size: 14px; line-height: 1.7;
+  color: #24292e;
+  max-height: 60vh; overflow-y: auto;
+}
+.ep-body p { margin: 0 0 12px; }
+.ep-body .section {
+  font-size: 13px; font-weight: 600; color: #1a1a1a;
+  margin: 16px 0 8px;
+  padding-left: 8px;
+  border-left: 3px solid #4078c0;
+}
+.ep-body ul { margin: 0 0 12px; padding-left: 22px; }
+.ep-body ul li { margin-bottom: 4px; }
+.ep-body table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 13px; }
+.ep-body table th, .ep-body table td { border: 1px solid #e1e4e8; padding: 7px 10px; text-align: left; }
+.ep-body table th { background: #f6f8fa; font-weight: 600; }
+.ep-body .var-tag {
+  color: #d73a49; background: #fff5f5;
+  padding: 1px 4px; border-radius: 3px;
+  font-family: "SFMono-Regular",Consolas,monospace;
+  font-size: 0.9em;
+}
+.ep-body .badge {
+  display: inline-block; padding: 2px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600; margin-right: 6px;
+}
+.ep-body .badge-info  { background: #dbedff; color: #0366d6; }
+.ep-body .badge-warn  { background: #fff5b1; color: #735c0f; }
+.ep-body .badge-alert { background: #ffeef0; color: #d73a49; }
+.ep-body .badge-report{ background: #dcffe4; color: #22863a; }
+.ep-body .hint-line { font-size: 12px; color: #6a737d; margin-top: 14px; }
+.ep-footer {
+  background: #f6f8fa;
+  padding: 12px 22px;
+  border-top: 1px solid #e1e4e8;
+  font-size: 11px; color: #959da5;
+  line-height: 1.6;
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.btn-preview { color: #4078c0; border-color: #4078c0; }
 </style>
 </head>
 <body>
@@ -585,6 +672,7 @@ body {
     </div>
 
     <div class="btns">
+      <button class="btn btn-preview" id="btn-preview-email">📧 預覽 Email</button>
       <button class="btn btn-cancel">× Cancel</button>
       <button class="btn btn-primary">✓ Confirm</button>
     </div>
@@ -614,6 +702,27 @@ body {
 <div class="note">
   <strong style="color:#e8e8e8;">Demo 說明：</strong>
   本介面展示「警報類型 → 警報欄位 → 觸發條件」三層動態連動邏輯。警報範圍支援全船隊或多船複選（航次、CII、Bunker 類型），偵測頻率與警報頻率均可自訂排程（定時／每天／每周／每月）。通知設定勾選後即展開對應設定區塊，系統內部使用者支援複選，自訂 Mail 支援多筆輸入。所有資料為示意用途。
+</div>
+
+<!-- Email Preview Modal -->
+<div class="email-overlay" id="email-overlay">
+  <div class="email-preview-modal">
+    <div class="ep-header">
+      <span>📧 Email 通知預覽</span>
+      <span style="font-size:12px;color:#9aa0a6;font-weight:400;">依目前警報設定動態生成</span>
+      <span class="close" id="ep-close">×</span>
+    </div>
+    <div class="ep-meta">
+      <div class="row-meta"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="row-meta"><span class="label">To:</span><span class="value" id="ep-to">—</span></div>
+      <div class="ep-subject" id="ep-subject"></div>
+    </div>
+    <div class="ep-body" id="ep-body"></div>
+    <div class="ep-footer">
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生</div>
+      <div>觸發時間：<span id="ep-time"></span></div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -1003,6 +1112,339 @@ function genericDesc(field) {
   return field.desc(dummy);
 }
 
+// ===== Email templates =====
+const V = s => `<span class="var-tag">${s}</span>`;
+const NOW_SAMPLE = '2026-05-13 14:32';
+
+const EMAIL_TEMPLATES = {
+  // ---- 航次警報 ----
+  gate: (v, ctx) => ({
+    subject: `【航次警報】${ctx.shipName} 已${v.dir||'進入'}地理圍欄 — 高雄港 PIL`,
+    body: `
+      <p><span class="badge badge-info">航次警報</span><span class="badge badge-info">進／出港狀態</span></p>
+      <p>船舶「<strong>${ctx.shipName}</strong>」（IMO：${V('9234567')}）已於 ${V(NOW_SAMPLE+' UTC')} ${v.dir||'進入'}預設地理圍欄「${V('高雄港 PIL')}」。</p>
+      <div class="section">事件資訊</div>
+      <ul>
+        <li>位置：Lat ${V('22.6273')} / Lon ${V('120.2706')}</li>
+        <li>SOG：${V('5.2')} kn　Heading：${V('315')}°</li>
+        <li>預計下一港：${V('基隆港')}（ETA ${V('2026-05-15 08:00')}）</li>
+      </ul>
+      <div class="section">建議動作</div>
+      <ul>
+        <li>確認 Port Agent 已收到 NOR 通知</li>
+        <li>檢查靠泊／離泊作業排程</li>
+      </ul>
+    `
+  }),
+  eta: (v, ctx) => ({
+    subject: `【航次警報】${ctx.shipName} ETA ${v.ba||'前'} ${v.n||30} 小時提醒`,
+    body: `
+      <p><span class="badge badge-info">航次警報</span><span class="badge badge-info">ETA</span></p>
+      <p>船舶「<strong>${ctx.shipName}</strong>」目前距預估抵達 ${V('新加坡港')} 尚有 ${V(v.n||30)} 小時，已進入「ETA ${v.ba||'前'} ${v.n||30} 小時」之警示區間。</p>
+      <div class="section">航次資訊</div>
+      <ul>
+        <li>目的港：${V('新加坡港')}</li>
+        <li>原訂 ETA：${V('2026-05-14 22:00')}</li>
+        <li>最新 ETA：${V('2026-05-14 23:30')}（變動 ${V('+1.5')} 小時）</li>
+        <li>目前位置：Lat ${V('1.2655')} / Lon ${V('103.8240')}，SOG ${V('14.2')} kn</li>
+      </ul>
+      <div class="section">建議動作</div>
+      <ul>
+        <li>與 Port Agent 再次確認泊位安排</li>
+        <li>通知貨主／傭船人最新 ETA</li>
+      </ul>
+      <p class="hint-line">本警報每 1 小時提醒一次，限制 3 次。</p>
+    `
+  }),
+  off: (v, ctx) => ({
+    subject: `【航次警報】⚠ ${ctx.shipName} 偏離航線 ${v.n||5} 海浬`,
+    body: `
+      <p><span class="badge badge-alert">航次警報</span><span class="badge badge-alert">航線偏移</span></p>
+      <p>船舶「<strong>${ctx.shipName}</strong>」目前位置已偏離預計航線 ${V(v.n||5)} 海浬（門檻 ${V(v.n||5)} 海浬），請即時確認。</p>
+      <div class="section">位置資訊</div>
+      <ul>
+        <li>目前位置：Lat ${V('14.5832')} / Lon ${V('120.9762')}</li>
+        <li>預計航點：Lat ${V('14.6105')} / Lon ${V('120.8540')}</li>
+        <li>COG：${V('082')}°　SOG：${V('13.8')} kn</li>
+        <li>偏離時間：自 ${V('14:02')} 起持續 ${V('30')} 分鐘</li>
+      </ul>
+      <div class="section">可能原因（自動研判）</div>
+      <p>${V('東北季風 7 級，疑似避風繞航')}</p>
+      <div class="section">建議動作</div>
+      <ul>
+        <li>與船長確認偏航原因（避風／避碰／海流？）</li>
+        <li>評估燃油與 ETA 影響</li>
+      </ul>
+      <p class="hint-line">本警報每 30 分鐘提醒一次，直到船舶回到航線。</p>
+    `
+  }),
+  sea: (v, ctx) => ({
+    subject: `【航次警報】🌊 ${ctx.shipName} 前方海域氣象惡劣`,
+    body: `
+      <p><span class="badge badge-warn">航次警報</span><span class="badge badge-warn">惡劣海況</span></p>
+      <p>船舶「<strong>${ctx.shipName}</strong>」未來 ${V('12')} 小時內航經海域，氣象條件已達警示門檻。</p>
+      <div class="section">氣象資訊</div>
+      <ul>
+        <li>預測浪高：${V('5.2')} m（門檻 &gt; ${v.wave||4} m）</li>
+        <li>預測風力：${V('8')} 級（門檻 &gt; ${v.wind||7} 級）</li>
+        <li>預測時間／位置：${V('2026-05-14 02:00 UTC')} @ Lat ${V('25.1234')} / Lon ${V('122.8765')}</li>
+        <li>資料來源：${V('ECMWF / StormGeo')}</li>
+      </ul>
+      <div class="section">建議動作</div>
+      <ul>
+        <li>通知船長加強瞭望與固縛</li>
+        <li>評估減速、繞航或避風方案</li>
+        <li>提前向傭船人／貨主預警可能延誤</li>
+      </ul>
+      <p class="hint-line">條件持續存在時將再次發送。</p>
+    `
+  }),
+  spd: (v, ctx) => ({
+    subject: `【航次警報】${ctx.shipName} 船速異常下降 ${v.n||15}%`,
+    body: `
+      <p><span class="badge badge-warn">航次警報</span><span class="badge badge-warn">船速異常</span></p>
+      <p>船舶「<strong>${ctx.shipName}</strong>」主機 RPM 維持正常，但對地速度（SOG）較預期下降 ${V(v.n||15)}%（門檻 ${V(v.n||15)}%），疑似船體阻力異常。</p>
+      <div class="section">運轉資訊</div>
+      <ul>
+        <li>預期 SOG：${V('14.0')} kn</li>
+        <li>實際 SOG：${V('11.8')} kn</li>
+        <li>主機 RPM：${V('98')}（變動 ${V('-1.2')}%）</li>
+        <li>海流／風向：${V('北流 0.8 kn / 西北風 4 級')}</li>
+      </ul>
+      <div class="section">可能原因</div>
+      <ul>
+        <li>船底海生物附著</li>
+        <li>異常海流／逆風</li>
+        <li>主機效能下降</li>
+      </ul>
+      <div class="section">建議動作</div>
+      <ul>
+        <li>安排下次入塢清底評估</li>
+        <li>比對近 7 天能耗趨勢</li>
+      </ul>
+      <p class="hint-line">本警報每 4 小時提醒一次，限制 3 次。</p>
+    `
+  }),
+
+  // ---- CII ----
+  thism: (v) => ({
+    subject: `【CII 月報】5 月 — 3 艘船舶評等達 ${v.g||'C 級'}以上`,
+    body: `
+      <p><span class="badge badge-report">CII 評等</span><span class="badge badge-report">月報</span></p>
+      <p>依據本月航行資料計算，以下船舶 CII 評等已達或低於設定門檻（門檻：${v.op||'≥'} ${v.g||'C 級'}），請相關單位檢視改善計畫。</p>
+      <div class="section">本月達標清單</div>
+      <table>
+        <thead><tr><th>船舶</th><th>評等</th><th>AER 值</th><th>較上月</th></tr></thead>
+        <tbody>
+          <tr><td>慶豐輪</td><td>${v.g||'C 級'}</td><td>8.42</td><td>+0.3</td></tr>
+          <tr><td>台海明德號</td><td>D 級</td><td>9.05</td><td>+0.5</td></tr>
+          <tr><td>海洋之星</td><td>${v.g||'C 級'}</td><td>8.38</td><td>+0.1</td></tr>
+        </tbody>
+      </table>
+      <div class="section">建議動作</div>
+      <ul>
+        <li>啟動 SEEMP Part III 改善措施</li>
+        <li>評估速度最佳化／路徑優化</li>
+        <li>必要時提交 Corrective Action Plan</li>
+      </ul>
+      <p>完整報表：${V('https://srp.example.com/reports/cii-2026-05')}</p>
+    `
+  }),
+  nexty: (v) => ({
+    subject: `【CII 月報】明年度（2027）預測 — 4 艘船舶恐降至 ${v.g||'C 級'}`,
+    body: `
+      <p><span class="badge badge-report">CII 評等</span><span class="badge badge-report">年度預測</span></p>
+      <p>依目前航行軌跡推估，下列船舶於 ${V('2027')} 年度 CII 評等預測將達到 ${v.op||'≥'} ${v.g||'C 級'}，建議提早規劃改善方案。</p>
+      <div class="section">預測降級清單</div>
+      <ul>
+        <li>慶豐輪：B 級 → 預測 ${v.g||'C 級'}（信心度 ${V('87')}%）</li>
+        <li>台海明德號：C 級 → 預測 D 級（信心度 ${V('92')}%）</li>
+      </ul>
+      <div class="section">建議改善方向</div>
+      <ul>
+        <li>加裝節能裝置（PBCF / ESD）</li>
+        <li>重新規劃航速曲線</li>
+        <li>啟用替代燃料試點</li>
+      </ul>
+      <p>完整模擬報表：${V('https://srp.example.com/reports/cii-forecast-2027')}</p>
+    `
+  }),
+
+  // ---- Bunker ----
+  low: (v, ctx) => ({
+    subject: `【Bunker】⛽ ${ctx.shipName} 油料 ROB 已低於安全庫存`,
+    body: `
+      <p><span class="badge badge-alert">Bunker</span><span class="badge badge-alert">低庫存</span></p>
+      <p>船舶「<strong>${ctx.shipName}</strong>」目前剩餘油量（ROB）已低於系統推估之動態安全庫存，請儘速規劃補油。</p>
+      <div class="section">庫存資訊</div>
+      <ul>
+        <li>油種：${V('VLSFO')}</li>
+        <li>目前 ROB：${V('142.5')} MT</li>
+        <li>動態安全庫存：${V('180.0')} MT</li>
+        <li>預估可航行：${V('6.5')} 天 / ${V('1,820')} nm</li>
+        <li>下一補油港：${V('新加坡港')}（ETA ${V('2026-05-15 23:30')}）</li>
+      </ul>
+      <div class="section">建議動作</div>
+      <ul>
+        <li>與 Bunker Trader 確認下次補油量</li>
+        <li>評估是否需就近補油</li>
+      </ul>
+      <p class="hint-line">本警報每日提醒 1 次，直到 ROB 高於安全庫存。</p>
+    `
+  }),
+  high: (v) => ({
+    subject: `【Bunker 月報】5 月 — 2 艘船舶油耗異常`,
+    body: `
+      <p><span class="badge badge-report">Bunker</span><span class="badge badge-report">月報</span></p>
+      <p>下列船舶上月單位里程油耗已超過歷史同月平均（門檻：&gt; ${v.n||10}%），建議檢視主機狀態與航行條件。</p>
+      <div class="section">異常清單</div>
+      <table>
+        <thead><tr><th>船舶</th><th>本月 g/nm</th><th>歷史平均</th><th>偏離 %</th></tr></thead>
+        <tbody>
+          <tr><td>慶豐輪</td><td>4,850</td><td>4,280</td><td>+13.3%</td></tr>
+          <tr><td>彩虹輪</td><td>5,120</td><td>4,560</td><td>+12.3%</td></tr>
+        </tbody>
+      </table>
+      <div class="section">建議排查項目</div>
+      <ul>
+        <li>主機效能診斷</li>
+        <li>船底髒污程度評估</li>
+        <li>航行條件比對（風浪、載重、吃水）</li>
+      </ul>
+      <p>完整分析：${V('https://srp.example.com/reports/bunker-2026-05')}</p>
+    `
+  }),
+  eca: (v, ctx) => ({
+    subject: `【Bunker】🚨 ${ctx.shipName} 即將進入 ECA — 距邊界 ${v.n||50} 海浬`,
+    body: `
+      <p><span class="badge badge-alert">Bunker</span><span class="badge badge-alert">ECA 合規</span></p>
+      <p>船舶「<strong>${ctx.shipName}</strong>」距 ${V('North America ECA')} 排放控制區邊界僅 ${V(v.n||50)} 海浬（門檻 ${v.op||'<'} ${v.n||50} 海浬），請務必確認低硫油切換作業。</p>
+      <div class="section">航行資訊</div>
+      <ul>
+        <li>目前位置：Lat ${V('32.4865')} / Lon ${V('-117.8420')}</li>
+        <li>航向／速度：${V('045')}° / ${V('14.5')} kn</li>
+        <li>預估抵達 ECA：${V('2026-05-13 17:50')}</li>
+        <li>ECA 區域：${V('North America ECA')}（含硫量上限 ${V('0.10')}%）</li>
+      </ul>
+      <div class="section">合規檢查清單</div>
+      <ul>
+        <li>☐ 已切換至 ≤ 0.10% 低硫油</li>
+        <li>☐ 已記錄切換時間／位置／剩餘高硫油量</li>
+        <li>☐ Oil Record Book 完成填寫</li>
+      </ul>
+      <p class="hint-line">本警報每 30 分鐘提醒一次，直至完成切換或離開警示範圍。</p>
+    `
+  }),
+
+  // ---- 船員 ----
+  cert: (v) => ({
+    subject: `【船員週報】2026-05-13 ~ 2026-05-19 — 3 位船員證書即將／已逾期`,
+    body: `
+      <p><span class="badge badge-report">船員管理</span><span class="badge badge-report">週報</span></p>
+      <p>依據人事資料庫檢核，下列船員證書已落入「逾期${v.ba||'前'} ${v.n||30} 天」之警示範圍，請人資與船員部門儘速處理換證／補件作業。</p>
+      <div class="section">名單</div>
+      <table>
+        <thead><tr><th>姓名</th><th>職位</th><th>證書類別</th><th>到期日</th></tr></thead>
+        <tbody>
+          <tr><td>Chen Wei-Han</td><td>船長</td><td>STCW II/2</td><td>2026-06-08</td></tr>
+          <tr><td>Lin Mei-Ling</td><td>大副</td><td>GMDSS</td><td>2026-06-12</td></tr>
+          <tr><td>Wang Da-Ming</td><td>輪機長</td><td>STCW III/2</td><td>2026-05-30</td></tr>
+        </tbody>
+      </table>
+      <div class="section">建議動作</div>
+      <ul>
+        <li>安排換證所需訓練／體檢</li>
+        <li>評估替換船員調度方案</li>
+        <li>通知船長確認船上 STCW 合規</li>
+      </ul>
+    `
+  }),
+  age: (v) => ({
+    subject: `【船員週報】2026-05-13 ~ 2026-05-19 — 2 位船員年齡達 ${v.n||65} 歲`,
+    body: `
+      <p><span class="badge badge-report">船員管理</span><span class="badge badge-report">週報</span></p>
+      <p>依生日計算，下列現役船員年齡已達警示門檻（≥ ${V(v.n||65)} 歲），建議人資部門評估健康檢查、輪替或退休規劃。</p>
+      <div class="section">名單</div>
+      <ul>
+        <li>Chen Wei-Han（${V(v.n||65)} 歲，船長，現任船舶 慶豐輪）</li>
+        <li>Wang Da-Ming（${V('66')} 歲，輪機長，現任船舶 台海明德號）</li>
+      </ul>
+      <div class="section">建議動作</div>
+      <ul>
+        <li>加強年度健康檢查項目</li>
+        <li>啟動接班人才培訓</li>
+        <li>確認保險條款承保範圍</li>
+      </ul>
+    `
+  }),
+  svc: (v) => ({
+    subject: `【船員週報】2026-05-13 ~ 2026-05-19 — 2 位船員累計任職達 ${v.n||270} 天`,
+    body: `
+      <p><span class="badge badge-report">船員管理</span><span class="badge badge-report">週報</span></p>
+      <p>依 MLC 2006 規範及公司輪休政策，下列船員在船累計任職天數已達 ${V(v.n||270)} 天，請安排換班作業。</p>
+      <div class="section">名單</div>
+      <table>
+        <thead><tr><th>姓名</th><th>職位</th><th>累計天數</th><th>登船日</th></tr></thead>
+        <tbody>
+          <tr><td>Chen Wei-Han</td><td>船長</td><td>${v.n||270}</td><td>2025-08-15</td></tr>
+          <tr><td>Lin Mei-Ling</td><td>大副</td><td>275</td><td>2025-08-10</td></tr>
+        </tbody>
+      </table>
+      <div class="section">建議動作</div>
+      <ul>
+        <li>排定下個港口換班計畫</li>
+        <li>通知替補船員提前報到</li>
+        <li>確認 MLC 工時／休息合規記錄</li>
+      </ul>
+    `
+  })
+};
+
+function getRecipientsList() {
+  const list = [];
+  if (el('notif-internal').checked) {
+    try {
+      jQuery('#sel-users').select2('data').forEach(d => list.push(d.text));
+    } catch(e) {}
+  }
+  if (el('notif-mail').checked) {
+    emailState.forEach(e => list.push(e));
+  }
+  return list.length ? list.join(', ') : '（尚未設定收件人）';
+}
+
+function getSampleShipName() {
+  if (state.scope === 'ships') {
+    try {
+      const ships = jQuery('#sel-ships').select2('data');
+      if (ships.length) return ships[0].text;
+    } catch(e) {}
+  }
+  if (state.type === 'crew') return '—';
+  return '慶豐輪';
+}
+
+function showEmailPreview() {
+  const fieldKey = state.fieldKey;
+  const tpl = EMAIL_TEMPLATES[fieldKey];
+  if (!tpl) return;
+  const field = CONFIG[state.type].fields[fieldKey];
+  const ctx = {
+    shipName: getSampleShipName(),
+    alertName: el('f-name').value || `${field.name}：${field.desc(state.vals)}`
+  };
+  const result = tpl(state.vals || {}, ctx);
+  el('ep-to').textContent = getRecipientsList();
+  el('ep-subject').textContent = result.subject;
+  el('ep-body').innerHTML = result.body;
+  el('ep-time').textContent = new Date().toLocaleString('zh-TW');
+  el('email-overlay').classList.add('show');
+}
+
+function closeEmailPreview() {
+  el('email-overlay').classList.remove('show');
+}
+
 // ===== Render summary =====
 function render() {
   const field = CONFIG[state.type].fields[state.fieldKey];
@@ -1129,6 +1571,16 @@ jQuery(document).ready(function($) {
   emailInput.addEventListener('blur', () => {
     const val = emailInput.value.trim();
     if (val) { addEmail(val); emailInput.value = ''; }
+  });
+
+  // Email preview button + close
+  el('btn-preview-email').addEventListener('click', showEmailPreview);
+  el('ep-close').addEventListener('click', closeEmailPreview);
+  el('email-overlay').addEventListener('click', e => {
+    if (e.target.id === 'email-overlay') closeEmailPreview();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && el('email-overlay').classList.contains('show')) closeEmailPreview();
   });
 
   // Init view
