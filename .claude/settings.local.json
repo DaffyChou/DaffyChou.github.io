@@ -2,7 +2,20 @@
   "permissions": {
     "allow": [
       "Bash(python -m http.server 8899 --directory demos/alert-settings)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('demos/alert_demo.html','utf8'\\);const m=s.match\\(/<script>\\([\\\\s\\\\S]*\\)<\\\\/script>\\\\s*<\\\\/body>/\\);try{new Function\\(m[1]\\);console.log\\('OK'\\)}catch\\(e\\){console.log\\('ERR',e.message\\)}\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('demos/alert_demo_internal.html','utf8'\\);const m=s.match\\(/<script>\\([\\\\s\\\\S]*\\)<\\\\/script>\\\\s*<\\\\/body>/\\);try{new Function\\(m[1]\\);console.log\\('OK'\\)}catch\\(e\\){console.log\\('ERR',e.message\\)}\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('demos/alert_demo.html','utf8'\\);const m=s.match\\(/<script>\\([\\\\s\\\\S]*\\)<\\\\/script>\\\\s*<\\\\/body>/\\);try{new Function\\(m[1]\\);console.log\\('alert_demo.html: OK'\\)}catch\\(e\\){console.log\\('ERR',e.message\\)}\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('demos/alert_demo_internal.html','utf8'\\);const m=s.match\\(/<script>\\([\\\\s\\\\S]*\\)<\\\\/script>\\\\s*<\\\\/body>/\\);try{new Function\\(m[1]\\);console.log\\('alert_demo_internal.html: OK'\\)}catch\\(e\\){console.log\\('ERR',e.message\\)}\")",
+      "Bash(awk '/^const EMAIL_TEMPLATES = \\\\{/{start=NR} start && /^};$/{print start\"-\"NR; exit}' demos/alert_demo.html)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('demos/alert_demo.html','utf8'\\);const m=s.match\\(/<script>\\([\\\\s\\\\S]*\\)<\\\\/script>\\\\s*<\\\\/body>/\\);try{new Function\\(m[1]\\);console.log\\('SYNTAX OK'\\)}catch\\(e\\){console.log\\('ERR',e.message\\)}\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('demos/alert_demo.html','utf8'\\);const m=s.match\\(/<script>\\([\\\\s\\\\S]*\\)<\\\\/script>\\\\s*<\\\\/body>/\\);try{new Function\\(m[1]\\);console.log\\('CUSTOMER OK'\\)}catch\\(e\\){console.log\\('ERR',e.message\\)}\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('demos/alert_demo_internal.html','utf8'\\);const m=s.match\\(/<script>\\([\\\\s\\\\S]*\\)<\\\\/script>\\\\s*<\\\\/body>/\\);try{new Function\\(m[1]\\);console.log\\('INTERNAL OK'\\)}catch\\(e\\){console.log\\('ERR',e.message\\)}\")",
+      "Bash(git config *)"
     ]
   }
 }

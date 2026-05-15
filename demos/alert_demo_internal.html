@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>警報設定 Demo — 摯陞 SRP 系統</title>
+<title>警報設定 Demo（內部版）— 摯陞 SRP 系統</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" />
 <style>
 * { box-sizing: border-box; }
@@ -562,8 +562,8 @@ body.internal-mode .field-details-card { display: block; }
 <body>
 
 <div class="header">
-  <h1>警報功能 Demo — 船隊戰情室監控系統</h1>
-  <p>切換上方的警報類型，或在「警報欄位」下拉改變選項，可即時觀察「觸發條件」區塊與右側執行摘要的變化。</p>
+  <h1>警報功能 Demo（內部版）— 船隊戰情室監控系統</h1>
+  <p>此為內部技術說明版本，含觸發邏輯、資料來源、計算方式、業界依據等細節。客戶版請見 alert_demo.html。</p>
 </div>
 
 <div class="tabs" id="tabs">
@@ -876,7 +876,7 @@ body.internal-mode .field-details-card { display: block; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
 // ===== 模式切換：false = 客戶版（隱藏內部說明、隱藏 zone）；true = 內部版 =====
-const IS_INTERNAL = false;
+const IS_INTERNAL = true;
 
 // ===== Demo data =====
 const SHIPS = [

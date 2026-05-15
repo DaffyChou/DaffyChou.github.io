@@ -126,13 +126,13 @@
       <li><a href="#t3">3. 航線偏移</a></li>
       <li><a href="#t4">4. 惡劣海況預警</a></li>
       <li><a href="#t5">5. 船速異常下降</a></li>
+      <li><a href="#t6">6. 限制區域進入提醒</a></li>
       <li class="group">CII 評等警報</li>
-      <li><a href="#t6">6. 本月目標降等</a></li>
-      <li><a href="#t7">7. 明年度預測降級</a></li>
+      <li><a href="#t7">7. 本月目標降等</a></li>
+      <li><a href="#t8">8. 明年度預測降級</a></li>
       <li class="group">Bunker 管理警報</li>
-      <li><a href="#t8">8. 最低庫存警示</a></li>
-      <li><a href="#t9">9. 油耗異常偏高</a></li>
-      <li><a href="#t10">10. ECA 低硫油切換</a></li>
+      <li><a href="#t9">9. 最低庫存警示</a></li>
+      <li><a href="#t10">10. 油耗效能偏差</a></li>
       <li class="group">船員管理警報</li>
       <li><a href="#t11">11. 證書到期</a></li>
       <li><a href="#t12">12. 船員年齡警示</a></li>
@@ -212,7 +212,7 @@
     <div class="email-meta">
       <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
       <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
-      <div class="subject">【航次警報】⚠ <span class="var">{{shipName}}</span> 偏離航線 <span class="var">{{deviation}}</span> 海浬</div>
+      <div class="subject">【航次警報】<span class="var">{{shipName}}</span> 偏離航線 <span class="var">{{deviation}}</span> 海浬</div>
     </div>
     <div class="email-body">
       <p><span class="badge badge-alert">航次警報</span><span class="badge badge-alert">航線偏移</span></p>
@@ -225,9 +225,6 @@
         <li>COG：<span class="var">{{cog}}</span>°　SOG：<span class="var">{{sog}}</span> kn</li>
         <li>偏離時間：自 <span class="var">{{deviationStart}}</span> 起持續 <span class="var">{{durationMin}}</span> 分鐘</li>
       </ul>
-
-      <div class="section-title">可能原因（自動研判）</div>
-      <p><span class="var">{{reasonHint}}</span></p>
 
       <div class="section-title">建議動作</div>
       <ul>
@@ -248,7 +245,7 @@
     <div class="email-meta">
       <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
       <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
-      <div class="subject">【航次警報】🌊 <span class="var">{{shipName}}</span> 前方海域氣象惡劣</div>
+      <div class="subject">【航次警報】<span class="var">{{shipName}}</span> 前方海域氣象惡劣</div>
     </div>
     <div class="email-body">
       <p><span class="badge badge-warn">航次警報</span><span class="badge badge-warn">惡劣海況</span></p>
@@ -317,11 +314,46 @@
     </div>
   </div>
 
+  <!-- 6. 限制區域進入 -->
+  <div class="email-card anchor-target" id="t6">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【航次警報】<span class="var">{{shipName}}</span> 即將進入 <span class="var">{{areaName}}</span> — 距邊界 <span class="var">{{distance}}</span> 海浬</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-alert">航次警報</span><span class="badge badge-alert">區域進入</span></p>
+      <p>船舶「<span class="var">{{shipName}}</span>」距 <span class="var">{{areaName}}</span> 邊界僅 <span class="var">{{distance}}</span> 海浬（門檻 &lt; <span class="var">{{threshold}}</span> 海浬），請確認進入該區域所需準備事項。</p>
+
+      <div class="section-title">航行資訊</div>
+      <ul>
+        <li>目前位置：Lat <span class="var">{{lat}}</span> / Lon <span class="var">{{lon}}</span></li>
+        <li>航向／速度：<span class="var">{{cog}}</span>° / <span class="var">{{sog}}</span> kn</li>
+        <li>預估抵達區域：<span class="var">{{etaArea}}</span></li>
+        <li>目標區域：<span class="var">{{areaName}}</span></li>
+      </ul>
+
+      <div class="section-title">區域進入準備清單</div>
+      <ul>
+        <li>ECA：切換至 ≤ <span class="var">{{sLimit}}</span>% 低硫油、Oil Record Book 紀錄</li>
+        <li>HRA：部署反海盜措施（PCASP、Citadel 演練、加速通過）</li>
+        <li>JWLA 戰爭風險區：加保 War Risk 保險、評估替代航線</li>
+      </ul>
+
+      <p style="font-size:12px;color:#6a737d;margin-top:18px;">說明：本警報為位置型提醒。因油耗資料由船端午報（T+1）提供，系統無法即時驗證實際油料切換動作；合規執行須由船端 Oil Record Book、午報資料事後核對。</p>
+      <p style="font-size:12px;color:#6a737d;">本警報每 30 分鐘提醒一次。</p>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
   <!-- ============ CII 評等警報 ============ -->
   <div class="category-header">CII 評等警報 — CII Rating Alerts<small>船舶碳強度年度評等之月／年度檢視</small></div>
 
-  <!-- 6. 本月目標降等 -->
-  <div class="email-card anchor-target" id="t6">
+  <!-- 7. 本月目標降等 -->
+  <div class="email-card anchor-target" id="t7">
     <div class="email-meta">
       <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
       <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
@@ -357,8 +389,8 @@
     </div>
   </div>
 
-  <!-- 7. 明年度預測降級 -->
-  <div class="email-card anchor-target" id="t7">
+  <!-- 8. 明年度預測降級 -->
+  <div class="email-card anchor-target" id="t8">
     <div class="email-meta">
       <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
       <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
@@ -390,14 +422,14 @@
   </div>
 
   <!-- ============ Bunker 管理警報 ============ -->
-  <div class="category-header">Bunker 管理警報 — Bunker Management<small>燃油庫存、消耗、ECA 合規之即時／月度監控</small></div>
+  <div class="category-header">Bunker 管理警報 — Bunker Management<small>燃油庫存與效能偏差之即時／月度監控</small></div>
 
-  <!-- 8. 最低庫存 -->
-  <div class="email-card anchor-target" id="t8">
+  <!-- 9. 最低庫存 -->
+  <div class="email-card anchor-target" id="t9">
     <div class="email-meta">
       <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
       <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
-      <div class="subject">【Bunker】⛽ <span class="var">{{shipName}}</span> 油料 ROB 已低於安全庫存</div>
+      <div class="subject">【Bunker】<span class="var">{{shipName}}</span> 油料 ROB 已低於安全庫存</div>
     </div>
     <div class="email-body">
       <p><span class="badge badge-alert">Bunker</span><span class="badge badge-alert">低庫存</span></p>
@@ -409,7 +441,6 @@
         <li>目前 ROB：<span class="var">{{rob}}</span> MT</li>
         <li>動態安全庫存：<span class="var">{{safetyStock}}</span> MT</li>
         <li>預估可航行：<span class="var">{{daysRemaining}}</span> 天 / <span class="var">{{nmRemaining}}</span> nm</li>
-        <li>下一補油港：<span class="var">{{nextBunkerPort}}</span>（ETA <span class="var">{{bunkerEta}}</span>）</li>
       </ul>
 
       <div class="section-title">建議動作</div>
@@ -426,70 +457,37 @@
     </div>
   </div>
 
-  <!-- 9. 油耗異常 -->
-  <div class="email-card anchor-target" id="t9">
-    <div class="email-meta">
-      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
-      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
-      <div class="subject">【Bunker 月報】<span class="var">{{month}}</span> 月 — <span class="var">{{count}}</span> 艘船舶油耗異常</div>
-    </div>
-    <div class="email-body">
-      <p><span class="badge badge-report">Bunker</span><span class="badge badge-report">月報</span></p>
-      <p>下列船舶上月單位里程油耗已超過歷史同月平均（門檻：&gt; <span class="var">{{n}}</span>%），建議檢視主機狀態與航行條件。</p>
-
-      <div class="section-title">異常清單</div>
-      <table class="data-table">
-        <thead>
-          <tr><th>船舶</th><th class="num">本月 g/nm</th><th class="num">歷史平均</th><th class="num">偏離 %</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><span class="var">{{ship1}}</span></td><td class="num"><span class="var">{{c1}}</span></td><td class="num"><span class="var">{{a1}}</span></td><td class="num">+<span class="var">{{p1}}</span>%</td></tr>
-          <tr><td><span class="var">{{ship2}}</span></td><td class="num"><span class="var">{{c2}}</span></td><td class="num"><span class="var">{{a2}}</span></td><td class="num">+<span class="var">{{p2}}</span>%</td></tr>
-        </tbody>
-      </table>
-
-      <div class="section-title">建議排查項目</div>
-      <ul>
-        <li>主機效能診斷</li>
-        <li>船底髒污程度評估</li>
-        <li>航行條件比對（風浪、載重、吃水）</li>
-      </ul>
-
-      <p>完整分析：<a href="#" style="color:#0366d6;"><span class="var">{{reportLink}}</span></a></p>
-    </div>
-    <div class="email-footer">
-      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
-      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
-    </div>
-  </div>
-
-  <!-- 10. ECA -->
+  <!-- 10. 油耗效能偏差 -->
   <div class="email-card anchor-target" id="t10">
     <div class="email-meta">
       <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
       <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
-      <div class="subject">【Bunker】🚨 <span class="var">{{shipName}}</span> 即將進入 ECA — 距邊界 <span class="var">{{distance}}</span> 海浬</div>
+      <div class="subject">【Bunker 月報】<span class="var">{{month}}</span> 月 — <span class="var">{{count}}</span> 艘船舶油耗效能偏差</div>
     </div>
     <div class="email-body">
-      <p><span class="badge badge-alert">Bunker</span><span class="badge badge-alert">ECA 合規</span></p>
-      <p>船舶「<span class="var">{{shipName}}</span>」距 <span class="var">{{ecaName}}</span> 排放控制區邊界僅 <span class="var">{{distance}}</span> 海浬（門檻 &lt; <span class="var">{{threshold}}</span> 海浬），請務必確認低硫油切換作業。</p>
+      <p><span class="badge badge-report">Bunker</span><span class="badge badge-report">月報</span></p>
+      <p>下列船舶上月實際油耗已超過本船性能曲線預期（門檻：&gt; <span class="var">{{n}}</span>%）。基準採 SOG-RPM-Draft 性能曲線並依 ISO 19030 對風浪做標準化修正，已排除航線與海況差異；偏差再拆解為 Hull / Propeller / Engine 三項貢獻度。</p>
 
-      <div class="section-title">航行資訊</div>
+      <div class="section-title">效能偏差清單</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>船舶</th><th class="num">實際 g/kWh</th><th class="num">曲線預期</th><th class="num">偏差 %</th><th>主要貢獻</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="var">{{ship1}}</span></td><td class="num"><span class="var">{{c1}}</span></td><td class="num"><span class="var">{{e1}}</span></td><td class="num">+<span class="var">{{p1}}</span>%</td><td><span class="var">{{src1}}</span></td></tr>
+          <tr><td><span class="var">{{ship2}}</span></td><td class="num"><span class="var">{{c2}}</span></td><td class="num"><span class="var">{{e2}}</span></td><td class="num">+<span class="var">{{p2}}</span>%</td><td><span class="var">{{src2}}</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-title">建議排查項目（依貢獻度指向）</div>
       <ul>
-        <li>目前位置：Lat <span class="var">{{lat}}</span> / Lon <span class="var">{{lon}}</span></li>
-        <li>航向／速度：<span class="var">{{cog}}</span>° / <span class="var">{{sog}}</span> kn</li>
-        <li>預估抵達 ECA：<span class="var">{{etaEca}}</span></li>
-        <li>ECA 區域：<span class="var">{{ecaName}}</span>（含硫量上限 <span class="var">{{sLimit}}</span>%）</li>
+        <li>Hull 偏差為主：安排下次入塢、船底清洗評估</li>
+        <li>Propeller 偏差為主：考慮螺槳清磨或拋光（polishing）</li>
+        <li>Engine 偏差為主：燃油噴射、增壓器、缸壓量測診斷</li>
+        <li>持續監測：對照近 6 個月 baseline 確認趨勢</li>
       </ul>
 
-      <div class="section-title">合規檢查清單</div>
-      <ul class="checklist">
-        <li>已切換至 ≤ <span class="var">{{sLimit}}</span>% 低硫油</li>
-        <li>已記錄切換時間／位置／剩餘高硫油量</li>
-        <li>Oil Record Book 完成填寫</li>
-      </ul>
-
-      <p style="font-size:12px;color:#6a737d;margin-top:18px;">本警報每 30 分鐘提醒一次，直至完成切換或離開警示範圍。</p>
+      <p>完整分析：<a href="#" style="color:#0366d6;"><span class="var">{{reportLink}}</span></a></p>
     </div>
     <div class="email-footer">
       <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
