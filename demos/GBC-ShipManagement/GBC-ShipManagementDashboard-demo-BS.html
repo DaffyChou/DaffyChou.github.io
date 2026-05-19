@@ -271,6 +271,7 @@
                 </div>
             </div>
 
+            <!-- 貨物裝卸進度與周轉 (Cargo Handling) — 暫時隱藏
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body d-flex flex-column p-4">
@@ -291,6 +292,7 @@
                     </div>
                 </div>
             </div>
+            -->
 
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
@@ -602,7 +604,8 @@
                 ]
             });
 
-            // [圖表] 4. 貨物裝卸進度與周轉 (堆疊長條圖 - 支援動態單位)
+            // [圖表] 4. 貨物裝卸進度與周轉 (堆疊長條圖 - 支援動態單位) — 暫時隱藏 (對應 HTML 卡片已註解)
+            /*
             Highcharts.chart('chart-cargo', {
                 chart: { type: 'bar' }, xAxis: { categories: ships }, yAxis: { title: { text: '貨量' } },
                 tooltip: { 
@@ -634,6 +637,7 @@
                     { name: '剩餘未作業量 (Remaining)', data: [15000, 48000, 0, 15000, 8000], color: '#4b5563' }
                 ]
             });
+            */
 
             // [圖表] 5. 主機推進效率與轉速監控 (雙 Y 軸時間序列：漸層面積圖+折線圖)
             const dates = Array.from({length: 15}, (_, i) => `03/${String(i+10).padStart(2,'0')}`);

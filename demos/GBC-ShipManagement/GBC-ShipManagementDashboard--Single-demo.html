@@ -82,6 +82,7 @@
         .badge-risk { color: #f87171; background-color: rgba(127, 29, 29, 0.4); }
         .badge-calc { color: #34d399; background-color: rgba(6, 78, 59, 0.4); }
         .badge-ai { color: #c084fc; background-color: rgba(88, 28, 135, 0.4); border: 1px solid #c084fc; }
+        .badge-gap { color: #fbbf24; background-color: rgba(120, 53, 15, 0.4); border: 1px dashed #fbbf24; }
 
         .formula-box { background-color: var(--bg-main); padding: 0.5rem 1rem; border-radius: 0.25rem; margin: 0.5rem 0; border: 1px dashed #4b5563; color: var(--success); min-height: 52px; display: flex; align-items: center; justify-content: center; overflow: hidden; font-family: monospace; }
         .rule-box { background-color: var(--bg-main); padding: 0.75rem; border-radius: 0.25rem; margin: 0.5rem 0; border: 1px solid #4b5563; color: #60a5fa; font-size: var(--font-xs); }
@@ -141,10 +142,6 @@
             <div class="d-flex align-items-center gap-4">
                 <div><span class="ds-label">當前監控航次</span><span class="text-info fw-bold font-monospace fs-5">V.2630-E</span></div>
                 <div><span class="ds-label">資料庫最新同步</span><span class="text-light font-monospace fs-6">2026-03-27 18:00 CST</span></div>
-                <div class="ms-2 px-3 py-2 bg-success bg-opacity-25 rounded border border-success">
-                    <span class="rounded-circle bg-success d-inline-block live-indicator me-1" style="width: 10px; height: 10px;"></span>
-                    <span class="text-success fw-bold font-monospace">Live Sync</span>
-                </div>
             </div>
         </div>
     </div>
@@ -262,7 +259,15 @@
                         <div class="desc-box" style="border-left-color: #ef4444;">
                             <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>擷取自 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">SLIP(%)-滑失率</code>、<code class="text-info">蒲式風級</code> 與 <code class="text-info">浪級</code>。</div>
                             <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯</span>無近期水下洗船紀錄時，系統自動提取該船「過去一年內，在良好海象 (風級<3、浪級<2) 下的歷史平均滑失率」作為動態基準線。</div>
-                            <div><span class="badge-custom badge-risk">營運監控</span>若風/浪級皆低於 4 級，但實際滑失率卻持續大幅高於基準線，戰情室應警示「船體嚴重結垢(Fouling)或螺旋槳異常」，建議評估清艙洗船。</div>
+                            <div class="mb-2"><span class="badge-custom badge-risk">營運監控</span>若風/浪級皆低於 4 級，但實際滑失率卻持續大幅高於基準線，戰情室應警示「船體嚴重結垢(Fouling)或螺旋槳異常」，建議評估清艙洗船。</div>
+                            <div><span class="badge-custom badge-gap">資料缺口</span>動態基準線可信度仰賴下列欄位，目前船報未涵蓋，需另建/串接：
+                                <ul class="mb-0 mt-1 ps-3" style="color:#fbbf24;">
+                                    <li><b>船舶主資料表 (一次性建檔)</b>：<code class="text-warning">Propeller Pitch (P)</code>、<code class="text-warning">Gear Ratio</code>、<code class="text-warning">Design Draft</code>。</li>
+                                    <li><b>PMS 機務系統串接</b>：<code class="text-warning">水下洗船日期</code>、<code class="text-warning">塢檢日期</code>、<code class="text-warning">螺旋槳磨光日期</code>——無此資訊，基準線會被「剛洗船的低滑失率樣本」拉偏而誤判。</li>
+                                    <li><b>建議擴充電報欄位 (選配)</b>：<code class="text-warning">主機累計轉數 (Engine Counter)</code>——可取代人工填報的 SLIP%，自動勾稽校驗。</li>
+                                    <li><b>程式自動計算</b>：<code class="text-warning">Trim (縱傾)</code> = 船首吃水 − 船尾吃水（電報已有 F/M/A 吃水）。</li>
+                                </ul>
+                            </div>
                         </div>
                         
                         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary align-items-end">
@@ -292,7 +297,15 @@
                             <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯</span>利用轉速推算主機負荷：
                                 <div class="formula-box">$$Load (\%) = \left(\frac{Current\ RPM}{Max\ RPM}\right)^3 \times 100$$</div>
                             </div>
-                            <div><span class="badge-custom badge-risk">營運監控</span>若轉速(或負荷)調降，但汽缸油耗量未等比例減少，戰情室應提示「注油器設定可能異常」，避免過度注油浪費成本。</div>
+                            <div class="mb-2"><span class="badge-custom badge-risk">營運監控</span>若轉速(或負荷)調降，但汽缸油耗量未等比例減少，戰情室應提示「注油器設定可能異常」，避免過度注油浪費成本。</div>
+                            <div><span class="badge-custom badge-gap">資料缺口</span>負荷推算與「應耗多少油」的基準對比，需要下列主機型錄數據，目前船報未涵蓋：
+                                <ul class="mb-0 mt-1 ps-3" style="color:#fbbf24;">
+                                    <li><b>船舶主資料表 (一次性建檔)</b>：<code class="text-warning">MCR_RPM (額定最大轉速)</code>、<code class="text-warning">MCR_kW (額定功率)</code>、<code class="text-warning">Propulsion Type (FPP/CPP)</code>。</li>
+                                    <li><b>引擎台架數據</b>：<code class="text-warning">SFOC 曲線 (g/kWh @ 50/75/85/100% 負荷)</code>——用於把「應耗多少油」算出來，才能判定油耗是否過度。</li>
+                                    <li><b>注油器設定</b>：<code class="text-warning">Cylinder Oil Feed Rate 設定值 (g/kWh)</code>——MEPC / Alpha Lubricator 設定參數。</li>
+                                    <li><b>建議擴充 (選配 / 走 AMS/IoT 串接)</b>：<code class="text-warning">Scavenge Air Pressure</code>、<code class="text-warning">Exhaust Gas Temperature</code>——校正螺旋槳法則誤差，從「日級告警」升級為「即時告警」。</li>
+                                </ul>
+                            </div>
                         </div>
 
                         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary align-items-end">
@@ -321,7 +334,8 @@
 
         <div class="section-title text-info"><i class="me-2">■</i>港埠作業與航次周轉效能 (Port & Voyage Operations)</div>
         <div class="row g-4 mb-4">
-            
+
+            <!-- 貨物裝卸進度與周轉 (Cargo Handling) — 暫時隱藏
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
@@ -351,6 +365,7 @@
                     </div>
                 </div>
             </div>
+            -->
 
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
@@ -959,7 +974,8 @@
                 ]
             });
 
-            // 5. CCTV Cargo Chart
+            // 5. CCTV Cargo Chart — 暫時隱藏 (對應 HTML 卡片已註解)
+            /*
             Highcharts.chart('chart-cctv-cargo', {
                 chart: { type: 'bar' },
                 xAxis: { categories: ['Hold 1', 'Hold 2', 'Hold 3', 'Hold 4', 'Hold 5'] },
@@ -971,6 +987,7 @@
                 ],
                 tooltip: { shared: true, valueSuffix: ' MT' }
             });
+            */
 
             // 6. Port Ops Chart
             Highcharts.chart('chart-port-ops', {
