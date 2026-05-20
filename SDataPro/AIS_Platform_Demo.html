@@ -199,7 +199,9 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 .leaflet-popup-content-wrapper{background:rgba(22,27,34,0.96) !important;color:var(--text-0) !important;border:1px solid var(--line-strong) !important;border-radius:10px !important;backdrop-filter:blur(10px);box-shadow:var(--sh-lg) !important}
 .leaflet-popup-tip{background:rgba(22,27,34,0.96) !important;border:1px solid var(--line-strong)}
 .leaflet-popup-content{margin:16px 22px !important;font-size:17px !important;line-height:1.6;min-width:260px}
-.leaflet-popup-close-button{color:var(--text-2) !important;font-size:27px !important;padding:6px 9px !important}
+.leaflet-popup-close-button{color:var(--text-2) !important;font-size:22px !important;line-height:1 !important;width:28px !important;height:28px !important;padding:0 !important;display:flex !important;align-items:center !important;justify-content:center !important;top:4px !important;right:4px !important;border-radius:6px !important;transition:background .14s,color .14s}
+.leaflet-popup-close-button:hover{color:var(--text-0) !important;background:rgba(255,255,255,0.08) !important;text-decoration:none !important}
+.leaflet-popup-content{padding-right:8px}
 .popup-row{display:flex;justify-content:space-between;gap:16px;font-size:16px;padding:5px 0;border-bottom:1px dashed var(--line-soft)}
 .popup-row:last-child{border-bottom:none}
 .popup-row .lbl{color:var(--text-2)}
@@ -615,6 +617,39 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 .audit-table td{padding:11px 16px;border-bottom:1px solid var(--line-soft);color:var(--text-1)}
 .audit-status-arrow{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:15px}
 
+.audit-filter-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:14px 0;flex-wrap:wrap}
+.date-input{background:var(--bg-3);color:var(--text-0);border:1px solid var(--line-soft);border-radius:6px;padding:4px 8px;font-size:14px;font-family:inherit;min-width:130px}
+.date-input:focus{outline:none;border-color:var(--teal)}
+.date-input::-webkit-calendar-picker-indicator{filter:invert(0.7);cursor:pointer}
+.btn-ghost{background:transparent;border:1px solid var(--line-soft);color:var(--text-2);font-size:13px}
+.btn-ghost:hover{background:var(--bg-3);color:var(--text-0);border-color:var(--line-strong)}
+
+.audit-stats-panel{background:var(--bg-2);border:1px solid var(--line-soft);border-radius:8px;margin-bottom:14px;overflow:hidden}
+.audit-stats-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;cursor:pointer;user-select:none;transition:background .14s}
+.audit-stats-head:hover{background:var(--bg-3)}
+.audit-stats-chev{color:var(--text-3);font-size:14px;transition:transform .2s}
+.audit-stats-panel.collapsed .audit-stats-body{display:none}
+.audit-stats-panel.collapsed .audit-stats-chev{transform:rotate(-90deg)}
+.audit-stats-body{border-top:1px solid var(--line-soft)}
+.audit-stats-table-wrap{overflow-x:auto}
+.audit-stats-table{width:100%;border-collapse:collapse;font-size:14px}
+.audit-stats-table th{background:transparent;color:var(--text-3);padding:8px 14px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--line-soft)}
+.audit-stats-table th.ctr{text-align:center}
+.audit-stats-table td{padding:9px 14px;border-bottom:1px solid var(--line-soft);color:var(--text-1)}
+.audit-stats-table td.ctr{text-align:center;font-family:'JetBrains Mono',monospace}
+.audit-stats-table tbody tr{cursor:pointer;transition:background .12s}
+.audit-stats-table tbody tr:hover{background:var(--bg-3)}
+.audit-stats-table tbody tr.on{background:rgba(45,212,191,0.08)}
+.audit-stats-table tbody tr.on td:first-child{border-left:3px solid var(--teal);padding-left:11px}
+.audit-stats-table tbody tr:last-child td{border-bottom:none}
+.audit-stats-op{font-weight:600;color:var(--text-0)}
+.audit-stats-metric-good{color:var(--green)}
+.audit-stats-metric-warn{color:var(--amber)}
+.audit-stats-metric-bad{color:var(--red)}
+.audit-stats-metric-muted{color:var(--text-4)}
+.audit-stats-note{padding:10px 16px;font-size:12px;color:var(--text-3);line-height:1.6;background:var(--bg-1);border-top:1px solid var(--line-soft)}
+.audit-stats-empty{padding:18px;text-align:center;color:var(--text-3);font-size:13px}
+
 /* FORMULA CARDS (CPA risk explanation) */
 .formula-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;margin-top:14px}
 .formula-card{background:var(--bg-2);border:1px solid var(--line-soft);border-radius:10px;padding:18px}
@@ -997,13 +1032,51 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
     <div class="subview" id="cpa-audit">
       <div style="padding:18px 22px;flex:1;overflow:auto">
         <div class="info-banner mb-8">稽核紀錄記錄事件從建立到解除的完整操作軌跡 · Audit log records every action on each event from creation to resolution.</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0">
-          <div class="filterbar" style="padding:0;background:none;border:none">
+        <div class="audit-filter-row">
+          <div class="filterbar" style="padding:0;background:none;border:none;flex-wrap:wrap;gap:8px">
             <div class="fbox"><span class="lbl">事件 Event</span><select id="audit-event-filter"><option value="">全部 All</option></select></div>
             <div class="fbox"><span class="lbl">動作 Action</span><select id="audit-action-filter"><option value="">全部</option><option>新建 New</option><option>通知 Notified</option><option>查看 Viewed</option><option>備註 Comment</option><option>確認 Acknowledged</option><option>解除 Resolved</option><option>回放 Playback</option></select></div>
+            <div class="fbox"><span class="lbl">操作員 Operator</span><select id="audit-operator-filter"><option value="">全部 All</option></select></div>
+            <div class="fbox"><span class="lbl">從 From</span><input type="date" id="audit-date-from" class="date-input"></div>
+            <div class="fbox"><span class="lbl">到 To</span><input type="date" id="audit-date-to" class="date-input"></div>
+            <button class="btn btn-sm btn-ghost" id="audit-clear-filters">清除 Clear</button>
           </div>
-          <button class="btn btn-sm">匯出 Export</button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="small muted" id="audit-result-count">—</span>
+            <button class="btn btn-sm">匯出 Export</button>
+          </div>
         </div>
+
+        <div class="audit-stats-panel" id="audit-stats-panel">
+          <div class="audit-stats-head" id="audit-stats-toggle">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:14px;font-weight:600;color:var(--text-0)">操作員績效統計 · Operator Performance</span>
+              <span class="small muted" id="audit-stats-window">基於目前篩選結果</span>
+            </div>
+            <span class="audit-stats-chev" id="audit-stats-chev">▾</span>
+          </div>
+          <div class="audit-stats-body" id="audit-stats-body">
+            <div class="audit-stats-table-wrap">
+              <table class="audit-stats-table">
+                <thead><tr>
+                  <th>操作員 Operator</th>
+                  <th>角色 Role</th>
+                  <th class="ctr">動作數 Actions</th>
+                  <th class="ctr">反應時間 P50</th>
+                  <th class="ctr">反應時間 P95</th>
+                  <th class="ctr">平均解除耗時 Avg Resolve</th>
+                  <th class="ctr">最近活動 Last</th>
+                </tr></thead>
+                <tbody id="audit-stats-tbody"></tbody>
+              </table>
+            </div>
+            <div class="audit-stats-note">
+              <b>反應時間</b>：自系統發出通知（Notified）至該操作員首次查看／確認該事件的耗時。<br>
+              <b>解除耗時</b>：自事件建立（New）至該操作員執行解除（Resolved）的累計時間。System 操作不列入統計。
+            </div>
+          </div>
+        </div>
+
         <table class="audit-table" style="background:var(--bg-2);border:1px solid var(--line-soft);border-radius:8px;overflow:hidden">
           <thead><tr>
             <th>Audit ID</th><th>Event ID</th><th>船舶 Vessel</th><th>目標 Target</th>
@@ -1783,18 +1856,28 @@ $('#sum-toggle').addEventListener('click',()=>{
 
 function renderVessels(){
   if(!fleetMap)initFleetMap();
-  Object.values(vesselLayers).forEach(L_=>{L_.marker&&fleetMap.removeLayer(L_.marker);L_.circle&&fleetMap.removeLayer(L_.circle);L_.wake&&fleetMap.removeLayer(L_.wake)});
-  Object.values(foreignLayers).forEach(L_=>{L_.marker&&fleetMap.removeLayer(L_.marker)});
-  vesselLayers={};foreignLayers={};
   ownFleet.forEach(v=>{
-    const circle=L.circle([v.lat,v.lon],{radius:5*1852,color:'rgba(45,212,191,0.45)',weight:1,dashArray:'3 4',fillColor:'#2dd4bf',fillOpacity:0.03,interactive:false}).addTo(fleetMap);
-    let wake=null;
+    const existing = vesselLayers[v.mmsi];
+    let wakeCoords=null;
     if(v.sog>1){
       const dLat=3*Math.cos(v.cog*Math.PI/180),dLon=3*Math.sin(v.cog*Math.PI/180);
-      wake=L.polyline([[v.lat,v.lon],[v.lat-dLat/60,v.lon-dLon/(60*Math.cos(v.lat*Math.PI/180))]],{color:'rgba(251,113,133,0.7)',weight:2,dashArray:'4 4',interactive:false}).addTo(fleetMap);
+      wakeCoords=[[v.lat,v.lon],[v.lat-dLat/60,v.lon-dLon/(60*Math.cos(v.lat*Math.PI/180))]];
     }
-    const marker=L.marker([v.lat,v.lon],{icon:buildVesselIcon(v),riseOnHover:true}).addTo(fleetMap).on('click',()=>openShipModal(v));
-    vesselLayers[v.mmsi]={marker,circle,wake};
+    if(existing){
+      existing.marker.setLatLng([v.lat,v.lon]);
+      existing.circle.setLatLng([v.lat,v.lon]);
+      if(wakeCoords){
+        if(existing.wake){existing.wake.setLatLngs(wakeCoords)}
+        else{existing.wake=L.polyline(wakeCoords,{color:'rgba(251,113,133,0.7)',weight:2,dashArray:'4 4',interactive:false}).addTo(fleetMap)}
+      }else if(existing.wake){
+        fleetMap.removeLayer(existing.wake);existing.wake=null;
+      }
+    }else{
+      const circle=L.circle([v.lat,v.lon],{radius:5*1852,color:'rgba(45,212,191,0.45)',weight:1,dashArray:'3 4',fillColor:'#2dd4bf',fillOpacity:0.03,interactive:false}).addTo(fleetMap);
+      const wake=wakeCoords?L.polyline(wakeCoords,{color:'rgba(251,113,133,0.7)',weight:2,dashArray:'4 4',interactive:false}).addTo(fleetMap):null;
+      const marker=L.marker([v.lat,v.lon],{icon:buildVesselIcon(v),riseOnHover:true}).addTo(fleetMap).on('click',()=>openShipModal(v));
+      vesselLayers[v.mmsi]={marker,circle,wake};
+    }
   });
   surroundingObs.slice(0,10).forEach((o,idx)=>{
     const observer=ownFleet.find(x=>x.name===o.observedBy);
@@ -1806,8 +1889,13 @@ function renderVessels(){
     const dnm=Math.min(o.lastRng,4.8);
     const lat=observer.lat+dnm*Math.cos(brg)/60;
     const lon=observer.lon+dnm*Math.sin(brg)/(60*Math.cos(observer.lat*Math.PI/180));
-    const marker=L.marker([lat,lon],{icon:buildForeignIcon(o)}).addTo(fleetMap).bindPopup(`<div class="popup-title">${o.name}</div><div class="popup-row"><span class="lbl">MMSI</span><span class="val">${o.mmsi}</span></div><div class="popup-row"><span class="lbl">Flag</span><span class="val">${o.flag==='INSUF'?'資料不足':o.flag}</span></div><div class="popup-row"><span class="lbl">首次/最後</span><span class="val">${fmtTime(o.firstSeen)} / ${fmtTime(o.lastSeen)}</span></div><div class="popup-row"><span class="lbl">最後距離</span><span class="val">${o.lastRng.toFixed(1)} nm</span></div><div class="popup-warn">⚠ 觀測資料 · 非持續追蹤 / Observation only</div>`);
-    foreignLayers[o.mmsi]={marker};
+    const existing = foreignLayers[o.mmsi];
+    if(existing){
+      existing.marker.setLatLng([lat,lon]);
+    }else{
+      const marker=L.marker([lat,lon],{icon:buildForeignIcon(o)}).addTo(fleetMap).bindPopup(`<div class="popup-title">${o.name}</div><div class="popup-row"><span class="lbl">MMSI</span><span class="val">${o.mmsi}</span></div><div class="popup-row"><span class="lbl">Flag</span><span class="val">${o.flag==='INSUF'?'資料不足':o.flag}</span></div><div class="popup-row"><span class="lbl">首次/最後</span><span class="val">${fmtTime(o.firstSeen)} / ${fmtTime(o.lastSeen)}</span></div><div class="popup-row"><span class="lbl">最後距離</span><span class="val">${o.lastRng.toFixed(1)} nm</span></div><div class="popup-warn">⚠ 觀測資料 · 非持續追蹤 / Observation only</div>`,{autoClose:false,closeOnClick:false});
+      foreignLayers[o.mmsi]={marker};
+    }
   });
 
   $('#fleet-table-body').innerHTML = ownFleet.map(v=>{
@@ -2687,37 +2775,178 @@ $('#pb-exit')&&$('#pb-exit').addEventListener('click',()=>{ pbPause(); document.
 $$('#cpa-subtabs .subtab').forEach(t=>t.addEventListener('click',()=>{ if(t.dataset.cpasub!=='playback') pbPause() }));
 
 /* AUDIT LOG */
+function jumpToEvent(eventId){
+  const ev=cpaEvents.find(e=>e.id===eventId);
+  if(!ev)return;
+  selectedEvent=ev;
+  document.querySelector('.subtab[data-cpasub="events"]').click();
+  setTimeout(()=>{renderEventList();renderEventDetail();drawEventMap()},120);
+}
+
+function percentile(arr,p){
+  if(!arr.length)return null;
+  const s=[...arr].sort((a,b)=>a-b);
+  const idx=Math.min(s.length-1,Math.floor((p/100)*s.length));
+  return s[idx];
+}
+
+function fmtDuration(ms){
+  if(ms==null)return '—';
+  const m=Math.round(ms/60000);
+  if(m<60)return m+' 分';
+  const h=Math.floor(m/60), mm=m%60;
+  if(h<24)return h+'h'+(mm?' '+mm+'分':'');
+  const d=Math.floor(h/24), hh=h%24;
+  return d+'d'+(hh?' '+hh+'h':'');
+}
+
+function fmtRelative(ts){
+  const d=Date.now()-ts;
+  if(d<60000)return Math.floor(d/1000)+'秒前';
+  if(d<3600000)return Math.floor(d/60000)+'分前';
+  if(d<86400000)return Math.floor(d/3600000)+'h前';
+  return Math.floor(d/86400000)+'d前';
+}
+
+function computeOperatorStats(filtered){
+  // 排除 System
+  const humanLogs = filtered.filter(a=>a.role!=='System');
+  const byOp = {};
+  humanLogs.forEach(a=>{
+    if(!byOp[a.operator])byOp[a.operator]={role:a.role, count:0, lastTs:0, respTimes:[], resolveTimes:[]};
+    const o=byOp[a.operator];
+    o.count++;
+    if(a.ts>o.lastTs)o.lastTs=a.ts;
+    // 反應時間：以「通知」時間為基準；若無通知則退回「新建」
+    if(a.action.includes('查看') || a.action.includes('確認')){
+      const evAuds = auditLog.filter(x=>x.eventId===a.eventId).sort((x,y)=>x.ts-y.ts);
+      const baseline = evAuds.find(x=>x.action.includes('通知')) || evAuds.find(x=>x.action.includes('新建'));
+      if(baseline){
+        const dt = a.ts - baseline.ts;
+        if(dt>=0 && dt<7*86400000) o.respTimes.push(dt);
+      }
+    }
+    // 解除耗時：找該事件 New 時間
+    if(a.action.includes('解除')){
+      const newAud = auditLog.filter(x=>x.eventId===a.eventId && x.action.includes('新建')).sort((x,y)=>x.ts-y.ts)[0];
+      if(newAud){
+        const dt = a.ts - newAud.ts;
+        if(dt>=0) o.resolveTimes.push(dt);
+      }
+    }
+  });
+  return byOp;
+}
+
+function metricClass(ms, goodMax, warnMax){
+  if(ms==null)return 'audit-stats-metric-muted';
+  if(ms<=goodMax)return 'audit-stats-metric-good';
+  if(ms<=warnMax)return 'audit-stats-metric-warn';
+  return 'audit-stats-metric-bad';
+}
+
 function renderAuditLog(){
   const eFilter=$('#audit-event-filter')?$('#audit-event-filter').value:'';
   const aFilter=$('#audit-action-filter')?$('#audit-action-filter').value:'';
-  // event filter options
+  const oFilter=$('#audit-operator-filter')?$('#audit-operator-filter').value:'';
+  const fromV=$('#audit-date-from')?$('#audit-date-from').value:'';
+  const toV=$('#audit-date-to')?$('#audit-date-to').value:'';
+  const fromTs = fromV ? new Date(fromV+'T00:00:00').getTime() : null;
+  const toTs   = toV   ? new Date(toV+'T23:59:59').getTime() : null;
+
+  // populate event filter (once)
   if($('#audit-event-filter')&&$('#audit-event-filter').options.length<=1){
     $('#audit-event-filter').innerHTML='<option value="">全部 All</option>'+cpaEvents.map(e=>`<option value="${e.id}">${e.id} · ${e.own}</option>`).join('');
   }
+  // populate operator filter (rebuild each time so new ack/resolve ops appear)
+  if($('#audit-operator-filter')){
+    const ops=[...new Set(auditLog.filter(a=>a.role!=='System').map(a=>a.operator))].sort();
+    $('#audit-operator-filter').innerHTML='<option value="">全部 All</option>'+ops.map(o=>`<option value="${o}"${o===oFilter?' selected':''}>${o}</option>`).join('');
+  }
+
   const filtered=auditLog.filter(a=>{
     if(eFilter && a.eventId!==eFilter)return false;
     if(aFilter && !a.action.includes(aFilter.split(' ')[0]))return false;
+    if(oFilter && a.operator!==oFilter)return false;
+    if(fromTs!=null && a.ts<fromTs)return false;
+    if(toTs!=null   && a.ts>toTs)return false;
     return true;
   });
+
+  // 結果計數
+  if($('#audit-result-count'))$('#audit-result-count').textContent=`${filtered.length} 筆 · 共 ${auditLog.length}`;
+
+  // === 統計面板 ===
+  const stats = computeOperatorStats(filtered);
+  const opNames = Object.keys(stats).sort((a,b)=>stats[b].count-stats[a].count);
+  if($('#audit-stats-tbody')){
+    if(opNames.length===0){
+      $('#audit-stats-tbody').innerHTML='<tr><td colspan="7" class="audit-stats-empty">目前篩選結果無人類操作記錄（僅 System）</td></tr>';
+    } else {
+      $('#audit-stats-tbody').innerHTML=opNames.map(op=>{
+        const s=stats[op];
+        const p50=percentile(s.respTimes,50), p95=percentile(s.respTimes,95);
+        const avgRes = s.resolveTimes.length ? s.resolveTimes.reduce((a,b)=>a+b,0)/s.resolveTimes.length : null;
+        // 反應時間門檻：< 5分 good, < 15分 warn, > 15分 bad
+        // 解除耗時門檻：< 30分 good, < 2小時 warn, > 2小時 bad
+        return `<tr data-op="${op}" class="${op===oFilter?'on':''}">
+          <td><span class="audit-stats-op">${op}</span></td>
+          <td><span class="chip chip-gray">${s.role}</span></td>
+          <td class="ctr">${s.count}</td>
+          <td class="ctr ${metricClass(p50,5*60000,15*60000)}">${fmtDuration(p50)}</td>
+          <td class="ctr ${metricClass(p95,15*60000,60*60000)}">${fmtDuration(p95)}</td>
+          <td class="ctr ${metricClass(avgRes,30*60000,2*3600000)}">${fmtDuration(avgRes)}</td>
+          <td class="ctr" style="color:var(--text-3);font-family:'JetBrains Mono',monospace">${fmtRelative(s.lastTs)}</td>
+        </tr>`;
+      }).join('');
+      $$('#audit-stats-tbody tr[data-op]').forEach(r=>r.addEventListener('click',()=>{
+        const op=r.dataset.op;
+        $('#audit-operator-filter').value = (op===oFilter ? '' : op);
+        renderAuditLog();
+      }));
+    }
+  }
+
+  // === 主表 ===
   $('#audit-table-body').innerHTML = filtered.map(a=>`<tr>
-    <td class="mono">${a.id}</td>
+    <td class="mono"><button class="btn-link" data-jumpaud="${a.eventId}" title="跳到事件 ${a.eventId}">${a.id}</button></td>
     <td class="mono"><button class="btn-link" data-jumpevt="${a.eventId}">${a.eventId}</button></td>
     <td>${a.vessel}</td>
     <td>${a.target}</td>
     <td><span class="chip ${a.action.includes('解除')||a.action.includes('關閉')?'chip-green':a.action.includes('新建')?'chip-amber':a.action.includes('通知')||a.action.includes('查看')?'chip-blue':'chip-teal'}">${a.action}</span></td>
-    <td>${a.operator}</td>
+    <td><button class="btn-link" data-filterop="${a.operator}" style="color:${a.role==='System'?'var(--text-2)':'var(--teal)'};text-decoration:${a.role==='System'?'none':'underline'}">${a.operator}</button></td>
     <td><span class="chip chip-gray">${a.role}</span></td>
     <td><span class="audit-status-arrow"><span style="color:var(--text-3)">${a.statusBefore}</span> → <b style="color:var(--text-0)">${a.statusAfter}</b></span></td>
     <td style="font-size:15px;color:var(--text-1)">${a.comment}</td>
     <td class="mono">${fmtFull(a.ts)}</td>
   </tr>`).join('');
-  $$('[data-jumpevt]').forEach(b=>b.addEventListener('click',()=>{
-    const ev=cpaEvents.find(e=>e.id===b.dataset.jumpevt);
-    if(ev){selectedEvent=ev;document.querySelector('.subtab[data-cpasub="events"]').click();setTimeout(()=>{renderEventList();renderEventDetail();drawEventMap()},120)}
+
+  $$('[data-jumpevt]').forEach(b=>b.addEventListener('click',()=>jumpToEvent(b.dataset.jumpevt)));
+  $$('[data-jumpaud]').forEach(b=>b.addEventListener('click',()=>jumpToEvent(b.dataset.jumpaud)));
+  $$('[data-filterop]').forEach(b=>b.addEventListener('click',()=>{
+    const op=b.dataset.filterop;
+    if(op==='System')return;
+    $('#audit-operator-filter').value = (op===oFilter ? '' : op);
+    renderAuditLog();
   }));
 }
+
 $('#audit-event-filter')&&$('#audit-event-filter').addEventListener('change',renderAuditLog);
 $('#audit-action-filter')&&$('#audit-action-filter').addEventListener('change',renderAuditLog);
+$('#audit-operator-filter')&&$('#audit-operator-filter').addEventListener('change',renderAuditLog);
+$('#audit-date-from')&&$('#audit-date-from').addEventListener('change',renderAuditLog);
+$('#audit-date-to')&&$('#audit-date-to').addEventListener('change',renderAuditLog);
+$('#audit-clear-filters')&&$('#audit-clear-filters').addEventListener('click',()=>{
+  $('#audit-event-filter').value='';
+  $('#audit-action-filter').value='';
+  $('#audit-operator-filter').value='';
+  $('#audit-date-from').value='';
+  $('#audit-date-to').value='';
+  renderAuditLog();
+});
+$('#audit-stats-toggle')&&$('#audit-stats-toggle').addEventListener('click',()=>{
+  $('#audit-stats-panel').classList.toggle('collapsed');
+});
 
 /* FORMULA / RISK EXPLANATION */
 function renderFormulaCards(){
