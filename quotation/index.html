@@ -255,7 +255,26 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 .preset-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l);}
 
 /* Official quotation page */
-.official-layout{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start;max-width:1240px;margin:0 auto;}
+.official-wrap{max-width:1560px;margin:0 auto;}
+.official-layout{display:grid;grid-template-columns:300px 1fr 320px;gap:16px;align-items:start;}
+@media (max-width: 1280px){
+  .official-layout{grid-template-columns:1fr 320px;}
+  .worksheet-snap{display:none;}
+}
+
+/* Worksheet snapshot panel (left column on official page) */
+.worksheet-snap{position:sticky;top:0;max-height:calc(100vh - 88px);overflow-y:auto;background:var(--surf);border:1px solid var(--line);border-radius:var(--r12);box-shadow:var(--sh);padding:14px;}
+.worksheet-snap h4{font-size:13px;font-weight:700;color:var(--ink3);letter-spacing:.04em;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.ws-section{margin-bottom:14px;}
+.ws-section:last-child{margin-bottom:0;}
+.ws-sec-hd{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--surf3);display:flex;justify-content:space-between;align-items:center;}
+.ws-sec-hd .ws-sec-sub{color:var(--ink4);font-weight:500;font-family:var(--ffm);}
+.ws-row{padding:6px 0;border-bottom:1px dashed var(--surf3);font-size:13px;}
+.ws-row:last-child{border-bottom:none;}
+.ws-row-main{color:var(--ink);font-weight:600;line-height:1.4;}
+.ws-row-sub{color:var(--ink3);font-size:12px;font-family:var(--ffm);margin-top:2px;line-height:1.4;}
+.ws-qty{color:var(--ink4);font-weight:500;font-family:var(--ffm);font-size:12px;}
+.ws-empty{text-align:center;padding:30px 10px;color:var(--ink4);font-size:13px;}
 .cust-strip{display:flex;flex-wrap:wrap;gap:14px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:var(--r12);padding:12px 16px;margin-bottom:14px;box-shadow:var(--sh);font-size:14px;}
 .cust-strip .cs-item{display:flex;flex-direction:column;gap:2px;}
 .cust-strip .cs-lbl{font-size:12px;color:var(--ink4);font-weight:700;letter-spacing:.04em;}
@@ -583,18 +602,27 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 
   <!-- ══ OFFICIAL QUOTATION PAGE ══ -->
   <div class="page" id="page-official">
-    <div class="official-layout">
-      <div>
-        <!-- Customer summary strip -->
-        <div class="cust-strip" id="cs-strip">
-          <div class="cs-item"><span class="cs-lbl">客戶</span><span class="cs-val" id="cs-name">—</span></div>
-          <div class="cs-item"><span class="cs-lbl">統編</span><span class="cs-val mono" id="cs-tax">—</span></div>
-          <div class="cs-item"><span class="cs-lbl">聯絡人</span><span class="cs-val" id="cs-cp">—</span></div>
-          <div class="cust-strip-edit">
-            <button class="btn btn-sm" onclick="goPage('new')">✎ 編輯客戶資訊</button>
-          </div>
+    <div class="official-wrap">
+      <!-- Customer summary strip (full-width above grid) -->
+      <div class="cust-strip" id="cs-strip">
+        <div class="cs-item"><span class="cs-lbl">客戶</span><span class="cs-val" id="cs-name">—</span></div>
+        <div class="cs-item"><span class="cs-lbl">統編</span><span class="cs-val mono" id="cs-tax">—</span></div>
+        <div class="cs-item"><span class="cs-lbl">聯絡人</span><span class="cs-val" id="cs-cp">—</span></div>
+        <div class="cust-strip-edit">
+          <button class="btn btn-sm" onclick="switchEditTab('new')">✎ 編輯客戶資訊</button>
         </div>
+      </div>
 
+      <div class="official-layout">
+      <!-- Left: worksheet snapshot (read-only, scrollable) -->
+      <div class="worksheet-snap" id="ws-snap-wrap">
+        <h4>📊 工作表明細
+          <button class="btn btn-xs" onclick="switchEditTab('new')" title="編輯工作表">✎</button>
+        </h4>
+        <div id="ws-snapshot"></div>
+      </div>
+
+      <div>
         <!-- Quote no / date / preset -->
         <div class="card">
           <div class="ch">
@@ -671,7 +699,8 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
         </div>
         <button class="btn btn-amber qa-btn" style="margin-top:14px;padding:12px" onclick="generateOfficialXlsx()">⬇ 產生 .xlsx</button>
       </div>
-    </div>
+      </div><!-- /official-layout -->
+    </div><!-- /official-wrap -->
   </div>
 
   <!-- ══ TERMS MANAGEMENT ══ -->
@@ -1498,8 +1527,85 @@ function setupOfficialPage(){
   document.getElementById('of2-gt').value = ofState.gt;
 
   renderOfficialItems();
+  renderWorksheetSnapshot();
   updateCostPanel();
   ofPersist();
+}
+
+function renderWorksheetSnapshot(){
+  const wrap = document.getElementById('ws-snapshot');
+  if(!wrap) return;
+  const mm = num('p-matm')/100;
+  const lm = num('p-labm')/100;
+  let html = '';
+
+  // Materials
+  const matVisible = matR.filter(r=>r.name||r.cost);
+  if(matVisible.length){
+    let matCostTotal=0,matQuoteTotal=0;
+    matVisible.forEach(r=>{ matCostTotal+=r.cost*r.qty; matQuoteTotal+=Math.round(r.cost*(1+mm))*r.qty; });
+    html += `<div class="ws-section">
+      <div class="ws-sec-hd">📦 料件 (${matVisible.length}) <span class="ws-sec-sub">${fmt(matCostTotal)} → ${fmt(matQuoteTotal)}</span></div>`;
+    matVisible.forEach(r=>{
+      const uq = Math.round(r.cost*(1+mm));
+      const sub = uq*r.qty;
+      html += `<div class="ws-row">
+        <div class="ws-row-main">${esc(r.name||'(未命名)')} <span class="ws-qty">× ${r.qty}</span></div>
+        <div class="ws-row-sub">成本 ${fmt(r.cost)} → 報價 ${fmt(uq)} · 小計 <strong style="color:var(--blue2)">${fmt(sub)}</strong></div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // Labor
+  const wk = num('p-wk'), dy = num('p-dy'), wage = num('p-wage');
+  if(wk>0 && dy>0 && wage>0){
+    const lC = wk*dy*wage;
+    const lQ = Math.round(lC*(1+lm));
+    html += `<div class="ws-section">
+      <div class="ws-sec-hd">👷 施工人力 <span class="ws-sec-sub">${fmt(lC)} → ${fmt(lQ)}</span></div>
+      <div class="ws-row">
+        <div class="ws-row-main">${wk} 人 × ${dy} 日 × ${fmt(wage)}/日</div>
+        <div class="ws-row-sub">成本 ${fmt(lC)} → 報價 <strong style="color:var(--green)">${fmt(lQ)}</strong>（加成 ${num('p-labm')}%）</div>
+      </div>
+    </div>`;
+  }
+
+  // Services
+  const svcVisible = svcR.filter(r=>r.name||r.amount);
+  if(svcVisible.length){
+    let svcTotal=0; svcVisible.forEach(r=>svcTotal+=r.amount||0);
+    html += `<div class="ws-section">
+      <div class="ws-sec-hd">⚡ 技術服務費 (${svcVisible.length}) <span class="ws-sec-sub">${fmt(svcTotal)}</span></div>`;
+    svcVisible.forEach(r=>{
+      html += `<div class="ws-row">
+        <div class="ws-row-main">${esc(r.name||'(未命名)')}</div>
+        <div class="ws-row-sub"><strong style="color:var(--violet)">${fmt(r.amount||0)}</strong>${r.note?' · '+esc(r.note):''}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // Travel
+  const trvVisible = trvR.filter(r=>r.name||r.unit);
+  if(trvVisible.length){
+    let trvTotal=0; trvVisible.forEach(r=>trvTotal+=(r.persons||0)*(r.times||0)*(r.unit||0));
+    html += `<div class="ws-section">
+      <div class="ws-sec-hd">✈ 出差費用 (${trvVisible.length}) <span class="ws-sec-sub">${fmt(trvTotal)}</span></div>`;
+    trvVisible.forEach(r=>{
+      const sub = (r.persons||0)*(r.times||0)*(r.unit||0);
+      html += `<div class="ws-row">
+        <div class="ws-row-main">${esc(r.name||'(未命名)')}</div>
+        <div class="ws-row-sub">${r.persons} 人 × ${r.times} 次 × ${fmt(r.unit)} = <strong style="color:var(--amber)">${fmt(sub)}</strong></div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  if(!html){
+    html = `<div class="ws-empty">尚無工作表資料<br><button class="btn btn-xs" onclick="switchEditTab('new')" style="margin-top:10px">前往工作表填寫</button></div>`;
+  }
+  wrap.innerHTML = html;
 }
 
 function rebuildPresetSelect(){
