@@ -386,17 +386,14 @@ def rebuild_tables(html, vessels, cats, ai_ships, is_briefing):
         near_vessels = sorted([v for v in vessels if v['en'] in cats['near']], key=lambda x: -x['score'])
         s5_rows = []
         for v in near_vessels:
-            issues = []
-            if v['comp']['pos'] < 90: issues.append(f"位置 {v['comp']['pos']:.1f}%")
-            if v['comp']['hdg'] < 90: issues.append(f"艏向 {v['comp']['hdg']:.1f}%")
-            if v['comp']['sog'] < 95: issues.append(f"船速 {v['comp']['sog']:.1f}%")
-            issues_str = " ／ ".join(issues) if issues else "—"
             p95 = v['p95']['pos']
-            p95_str = f"{p95:.1f} km" if p95 else "—"
+            p95_str = f"{p95:.2f}" if p95 is not None else "—"
             s5_rows.append(
                 f'<tr>\n  <td class="ship-zh">{v["zh"]}</td>\n  <td class="ship-en">{v["en"]}</td>\n'
                 f'  <td class="score-cell">{v["score"]:.1f}</td>\n'
-                f'  <td class="issue">{issues_str}</td>\n  <td>{p95_str}</td>\n</tr>'
+                f'  <td>{v["comp"]["pos"]:.1f}%</td>\n  <td>{v["comp"]["hdg"]:.1f}%</td>\n'
+                f'  <td>{v["comp"]["sog"]:.1f}%</td>\n  <td>{v["comp"]["navistat"]:.1f}%</td>\n'
+                f'  <td>{p95_str}</td>\n</tr>'
             )
         html = replace_tbody_in_section(html, 's5', '\n'.join(s5_rows))
     
