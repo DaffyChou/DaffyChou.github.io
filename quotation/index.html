@@ -1648,16 +1648,20 @@ function renderOfficialItems(){
   if(!wrap) return;
   wrap.innerHTML = ofState.items.map((it, i)=>{
     const maxD = SLOTS[i].desc.length;
-    const descsHtml = it.descs.slice(0,maxD).map((d, di)=>`
+    const descsHtml = it.descs.map((d, di)=>`
       <div class="desc-row">
         <input type="text" value="${esc(d)}" placeholder="描述 ${di+1}（會自動加 ・ 前綴）" oninput="updateDesc(${i},${di},this.value)">
         <button class="btn btn-ghost btn-xs" onclick="removeDesc(${i},${di})">✕</button>
       </div>`).join('');
     const canRemove = ofState.items.length>1;
+    const over = it.descs.length > maxD;
+    const countText = over
+      ? `<span style="color:var(--amber)">${it.descs.length} 行</span>（超過 ${maxD}：第 ${maxD}+ 行會併入 Excel 最後一行儲存格）`
+      : `${it.descs.length} / ${maxD} 行`;
     return `
       <div class="item-block">
         <div class="it-title">
-          <span>品項 ${i+1}<span style="color:var(--ink4);font-weight:500;font-size:12px;margin-left:8px">最多 ${maxD} 行描述</span></span>
+          <span>品項 ${i+1}<span style="color:var(--ink4);font-weight:500;font-size:12px;margin-left:8px">範本獨立顯示 ${maxD} 行；超過會合併</span></span>
           <div class="item-controls">
             ${canRemove?`<button class="btn btn-ghost btn-xs" onclick="removeOfficialItem(${i})" title="刪除此品項">✕ 刪除</button>`:''}
           </div>
@@ -1669,8 +1673,8 @@ function renderOfficialItems(){
         </div>
         <div>${descsHtml}</div>
         <div class="row-actions">
-          <span style="font-size:12px;color:var(--ink4)">${it.descs.length} / ${maxD} 行 · 小計 <span style="font-family:var(--ffm);color:var(--blue2);font-weight:600">${fmt((+it.qty||0)*(+it.price||0))}</span></span>
-          <button class="btn btn-xs" onclick="addDesc(${i})" ${it.descs.length>=maxD?'disabled style="opacity:.4;cursor:not-allowed"':''}>＋ 新增描述行</button>
+          <span style="font-size:12px;color:var(--ink4)">${countText} · 小計 <span style="font-family:var(--ffm);color:var(--blue2);font-weight:600">${fmt((+it.qty||0)*(+it.price||0))}</span></span>
+          <button class="btn btn-xs" onclick="addDesc(${i})">＋ 新增描述行</button>
         </div>
       </div>`;
   }).join('');
@@ -1750,8 +1754,6 @@ function updateItemField(i, field, v){
 }
 function addDesc(itemIdx){
   const it = ofState.items[itemIdx]; if(!it) return;
-  const maxN = SLOTS[itemIdx].desc.length;
-  if(it.descs.length>=maxN){ toast(`此品項最多 ${maxN} 行描述`); return; }
   it.descs.push(''); renderOfficialItems(); ofPersist();
 }
 function updateDesc(itemIdx, di, v){
@@ -1811,9 +1813,24 @@ async function generateOfficialXlsx(){
       ws.getCell(slot.seq).value = i+1;
       ws.getCell(slot.title).value = String(it.title).trim();
       const descs = it.descs.map(normalizeBullet).filter(Boolean);
-      descs.slice(0, slot.desc.length).forEach((d, di)=>{
-        ws.getCell(slot.desc[di]).value = d;
-      });
+      const cap = slot.desc.length;
+      if(descs.length <= cap){
+        // Fits naturally — one description per template row
+        descs.forEach((d, di)=>{ ws.getCell(slot.desc[di]).value = d; });
+      }else{
+        // Overflow: first (cap-1) cells get one desc each; the rest collapse
+        // into the last desc cell with newline separators, and that row's
+        // height grows to fit all lines (Excel renders each \n as its own
+        // visual line; each line still overflows visually into empty C..H).
+        descs.slice(0, cap-1).forEach((d, di)=>{ ws.getCell(slot.desc[di]).value = d; });
+        const lastCellRef = slot.desc[cap-1];
+        const lastCell = ws.getCell(lastCellRef);
+        lastCell.value = descs.slice(cap-1).join('\n');
+        const lastRowNum = parseInt(lastCellRef.replace(/[^\d]/g,''));
+        const extraLines = descs.length - cap + 1;
+        // 17.25 is the template's default row height (in points)
+        ws.getRow(lastRowNum).height = Math.max(17.25, extraLines * 17.25);
+      }
       ws.getCell(slot.qty).value = parseInt(it.qty)||1;
       ws.getCell(slot.price).value = parseFloat(it.price)||0;
       ws.getCell(slot.total).value = { formula: `I${slot.rowNum}*J${slot.rowNum}` };
