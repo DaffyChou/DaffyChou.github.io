@@ -56,6 +56,16 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 .topbar{height:56px;background:var(--surf);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:12px;flex-shrink:0;}
 .topbar-title{font-size:16px;font-weight:600;color:var(--ink);flex:1;}
 .topbar-sub{font-size:12px;color:var(--ink4);}
+.edit-tabs{display:flex;gap:0;background:var(--surf2);border:1px solid var(--line);border-radius:var(--r8);padding:3px;}
+.tab-btn{padding:6px 14px;border:none;background:transparent;color:var(--ink3);font-size:13px;font-weight:600;border-radius:var(--r4);cursor:pointer;font-family:var(--ff);transition:all .15s;}
+.tab-btn:hover{color:var(--ink);}
+.tab-btn.active{background:var(--surf);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06);}
+
+/* New-quote primary action on list page */
+.list-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap;}
+.list-hd h2{font-size:20px;font-weight:700;color:var(--ink);}
+.btn-primary-new{padding:10px 18px;font-size:14px;font-weight:700;background:var(--blue);color:#fff;border-color:var(--blue);border-radius:var(--r8);display:inline-flex;align-items:center;gap:6px;}
+.btn-primary-new:hover{background:var(--blue2);}
 
 /* ─── PAGES ─── */
 .pages{flex:1;overflow:hidden;position:relative;}
@@ -301,17 +311,9 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     <span class="sb-logo-text">SLAB Quotation</span>
   </div>
   <nav class="sb-nav">
-    <div class="sb-item active" onclick="goPage('new')" id="nav-new">
-      <span class="sb-ico">✦</span>
-      <span class="sb-label" id="l-new">新建報價</span>
-    </div>
-    <div class="sb-item" onclick="goPage('official')" id="nav-official">
-      <span class="sb-ico">📄</span>
-      <span class="sb-label" id="l-official">官方報價單</span>
-    </div>
-    <div class="sb-item" onclick="goPage('hist')" id="nav-hist">
-      <span class="sb-ico">⊟</span>
-      <span class="sb-label" id="l-hist">歷史報價</span>
+    <div class="sb-item active" onclick="goPage('list')" id="nav-list">
+      <span class="sb-ico">📋</span>
+      <span class="sb-label" id="l-list">報價單列表</span>
       <span class="sb-badge" id="hist-count">0</span>
     </div>
     <div class="sb-item" onclick="goPage('tm')" id="nav-tm">
@@ -331,19 +333,23 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <span class="topbar-title" id="topbar-title">新建報價</span>
-    <div class="btn-row" id="topbar-btns">
+    <button class="btn btn-sm" id="btn-back" onclick="backToList()" style="display:none">← <span id="l-back">返回列表</span></button>
+    <span class="topbar-title" id="topbar-title">報價單列表</span>
+    <div class="edit-tabs" id="edit-tabs" style="display:none">
+      <button class="tab-btn" id="tab-new" onclick="switchEditTab('new')">✦ <span id="l-tab-new">工作表</span></button>
+      <button class="tab-btn" id="tab-official" onclick="switchEditTab('official')">📄 <span id="l-tab-off">官方報價單</span></button>
+    </div>
+    <div class="btn-row" id="topbar-btns" style="display:none">
       <button class="btn btn-sm" onclick="loadTemplate()" id="btn-tpl">📋 <span id="l-tpl">範本</span></button>
       <button class="btn btn-sm btn-green" onclick="saveQuote()" id="btn-save">💾 <span id="l-save">儲存</span></button>
       <button class="btn btn-sm" onclick="exportExcel()" id="btn-exp">⬇ <span id="l-exp">內部工作表</span></button>
-      <button class="btn btn-sm btn-amber" onclick="goPage('official')" id="btn-off">📄 <span id="l-off">官方報價單</span></button>
     </div>
   </div>
 
   <div class="pages">
 
   <!-- ══ NEW QUOTE ══ -->
-  <div class="page active" id="page-new">
+  <div class="page" id="page-new">
   <div class="quote-layout">
   <div>
 
@@ -536,8 +542,6 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     <div class="card">
       <div class="ch"><span class="ch-title">⚡ <span id="l-qa">快速操作</span></span></div>
       <div class="cb qa-list">
-        <button class="btn btn-amber qa-btn" onclick="goPage('official')">📄 <span id="qa-off">官方報價單編輯</span></button>
-        <button class="btn btn-ink qa-btn" onclick="exportExcel()">⬇ <span id="qa-exp">內部工作表 .xlsx</span></button>
         <button class="btn qa-btn" onclick="loadTemplate()">📋 <span id="qa-tpl">船舶 CCTV 範本</span></button>
         <button class="btn qa-btn" onclick="clearForm()" style="color:var(--red)">↺ <span id="qa-clr">清空重填</span></button>
       </div>
@@ -547,8 +551,12 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
   </div><!-- /quote-layout -->
   </div><!-- /page-new -->
 
-  <!-- ══ HISTORY ══ -->
-  <div class="page" id="page-hist">
+  <!-- ══ QUOTE LIST (default) ══ -->
+  <div class="page active" id="page-list">
+    <div class="list-hd">
+      <h2 id="list-title">📋 報價單列表</h2>
+      <button class="btn btn-primary-new" onclick="newQuote()" id="btn-new-quote">＋ <span id="l-new-quote">新增報價單</span></button>
+    </div>
     <div class="hist-stats" id="hist-stats"></div>
     <div class="hist-toolbar">
       <div class="search-box">
@@ -683,27 +691,11 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
   </div><!-- /pages -->
 </div><!-- /main -->
 
-<!-- Detail Modal -->
-<div class="modal-bg" id="detail-modal">
-  <div class="modal">
-    <div class="modal-hd">
-      <h3 id="dm-title">報價詳情</h3>
-      <button class="btn btn-ghost btn-sm" onclick="closeModal('detail-modal')">✕</button>
-    </div>
-    <div class="modal-body" id="dm-body"></div>
-    <div class="modal-ft">
-      <button class="btn btn-sm" onclick="closeModal('detail-modal')" id="dm-cancel">關閉</button>
-      <button class="btn btn-sm btn-blue" onclick="loadAndEdit()" id="dm-edit">✎ 載入編輯</button>
-      <button class="btn btn-sm btn-ink" onclick="exportDetail()" id="dm-exp">⬇ Excel</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
 // ══ State ══
-let lang='zh', curTypes=[], detailIdx=-1, termsType='software';
+let lang='zh', curTypes=[], termsType='software';
 let matR=[], svcR=[], trvR=[];
 let quotes=JSON.parse(localStorage.getItem('slab_q')||'[]');
 
@@ -750,7 +742,9 @@ const DEFAULTS = {
 // ══ i18n ══
 const T={
   zh:{
-    navNew:'新建報價',navHist:'歷史報價',
+    navNew:'新建報價',navHist:'歷史報價',navList:'報價單列表',
+    listTitle:'📋 報價單列表',newQuoteBtn:'新增報價單',backToList:'返回列表',
+    tabNew:'工作表',tabOff:'官方報價單',
     btnTpl:'範本',btnSave:'儲存',btnExp:'內部工作表',btnOff:'官方報價單',
     meta:'報價基本資料',client:'客戶名稱',proj:'工程名稱',no:'報價單號',date:'日期',
     cust:'客戶完整資訊',custHint:'用於官方報價單表頭',
@@ -786,7 +780,9 @@ const T={
     cpHd1:'工作表（成本）',cpHd2:'官方報價（5 槽合計）',
   },
   en:{
-    navNew:'New Quote',navHist:'History',
+    navNew:'New Quote',navHist:'History',navList:'Quotes',
+    listTitle:'📋 Quotes',newQuoteBtn:'New Quote',backToList:'Back to list',
+    tabNew:'Worksheet',tabOff:'Official Quote',
     btnTpl:'Template',btnSave:'Save',btnExp:'Worksheet',btnOff:'Official Quote',
     meta:'Quote Info',client:'Client',proj:'Project',no:'Quote No.',date:'Date',
     cust:'Customer Detail',custHint:'For official quotation header',
@@ -833,7 +829,9 @@ function setLang(l){
 
 function applyLang(){
   const map=[
-    ['l-new','navNew'],['l-hist','navHist'],['l-tm','navTm'],['l-official','navOfficial'],
+    ['l-list','navList'],['l-tm','navTm'],
+    ['l-back','backToList'],['l-new-quote','newQuoteBtn'],['list-title','listTitle'],
+    ['l-tab-new','tabNew'],['l-tab-off','tabOff'],
     ['tm-list-hd','tmListHd'],['tm-add','tmAdd'],
     ['of2-meta','of2Meta'],['of2-items-hd','of2ItemsHd'],['of2-terms-hd','of2TermsHd'],
     ['cp-hd1','cpHd1'],['cp-hd2','cpHd2'],
@@ -853,19 +851,17 @@ function applyLang(){
     ['l-sum','sum'],['sl-mat','slMat'],['sl-lab','slLab'],['sl-svc','slSvc'],['sl-trv','slTrv'],
     ['sl-cost','slCost'],['sl-profit','slProfit'],['sl-total','slTotal'],['sl-margin','slMargin'],
     ['sl-mpct','slMpct'],['sl-lpct','slLpct'],['sl-tpct','slTpct'],
-    ['l-qa','qa'],['qa-exp','qaExp'],['qa-off','qaOff'],['qa-tpl','qaTpl'],['qa-clr','qaClr'],
+    ['l-qa','qa'],['qa-tpl','qaTpl'],['qa-clr','qaClr'],
     ['l-amat','amat'],['l-asvc','asvc'],['l-atrv','atrv'],
     ['l-sw','sw'],['l-hw','hw'],['l-net','net'],['l-ship','ship'],
     ['fo-all','foAll'],['fo-sw','foSw'],['fo-hw','foHw'],['fo-net','foNet'],['fo-ship','foShip'],
     ['fs-all','fsAll'],['fs-dr','fsDr'],['fs-st','fsSt'],['fs-wn','fsWn'],['fs-ls','fsLs'],
-    ['dm-cancel','dmCancel'],['dm-edit','dmEdit'],['dm-exp','dmExp'],
   ];
   map.forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.textContent=t(k);});
   const hs=document.getElementById('h-search');if(hs)hs.placeholder=t('hsearch');
   const activePage = document.querySelector('.page.active');
-  const pageId = activePage ? activePage.id.replace('page-','') : 'new';
-  const titleMap={new:'navNew',hist:'navHist',tm:'navTm',official:'navOfficial'};
-  document.getElementById('topbar-title').textContent=t(titleMap[pageId]||'navNew');
+  const pageId = activePage ? activePage.id.replace('page-','') : 'list';
+  applyTopbar(pageId);
 }
 
 // ── Nav ──
@@ -873,13 +869,146 @@ function goPage(p){
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  document.getElementById('nav-'+p).classList.add('active');
-  const titleMap={new:'navNew',hist:'navHist',tm:'navTm',official:'navOfficial'};
-  document.getElementById('topbar-title').textContent=t(titleMap[p]||'navNew');
-  document.getElementById('topbar-btns').style.display=p==='new'?'flex':'none';
-  if(p==='hist'){renderHist();renderHistStats();}
+  // Sidebar: 'new' and 'official' don't have sidebar items; map them to no-highlight
+  const sbId = (p==='new'||p==='official') ? null : ('nav-'+p);
+  if(sbId){
+    const sbEl = document.getElementById(sbId);
+    if(sbEl) sbEl.classList.add('active');
+  }
+  applyTopbar(p);
+  if(p==='list'){renderHist();renderHistStats();}
   if(p==='tm'){tmRender();}
   if(p==='official'){setupOfficialPage();}
+}
+
+function applyTopbar(p){
+  const isEdit = (p==='new'||p==='official');
+  document.getElementById('btn-back').style.display = isEdit ? 'inline-flex' : 'none';
+  document.getElementById('edit-tabs').style.display = isEdit ? 'flex' : 'none';
+  document.getElementById('topbar-btns').style.display = isEdit ? 'flex' : 'none';
+  if(isEdit){
+    // Compose: 報價單號 · 客戶名
+    const no = document.getElementById('f-no').value || '—';
+    const client = document.getElementById('f-client').value || '(尚未填客戶)';
+    document.getElementById('topbar-title').textContent = `${no} · ${client}`;
+    document.getElementById('tab-new').classList.toggle('active', p==='new');
+    document.getElementById('tab-official').classList.toggle('active', p==='official');
+  }else{
+    const titleMap={list:'navList',tm:'navTm'};
+    document.getElementById('topbar-title').textContent = t(titleMap[p]||'navList');
+  }
+}
+
+// Switch between worksheet and official within edit mode
+function switchEditTab(target){
+  goPage(target);
+}
+
+// Back to list (with dirty check)
+function backToList(){
+  if(!confirmDiscard()) return;
+  goPage('list');
+}
+
+// ── Dirty tracking ──
+let isDirty = false;
+function markDirty(){ isDirty = true; }
+function markClean(){ isDirty = false; }
+// Catch input events on edit pages to flag dirty
+document.addEventListener('input', (e)=>{
+  if(!e.target) return;
+  const p = e.target.closest('#page-new, #page-official');
+  if(p) markDirty();
+});
+
+// Confirm before discarding unsaved edits. Returns true if OK to proceed.
+function confirmDiscard(){
+  if(!isDirty) return true;
+  const msg = lang==='zh'
+    ? '目前的報價單有未儲存的修改。\n\n[確定] 儲存後繼續\n[取消] 留在原處\n\n（若要丟棄不存，按取消後使用「↺ 清空重填」）'
+    : 'Unsaved changes. OK to save and continue, Cancel to stay.';
+  // Use a three-option flow via two prompts
+  const r1 = confirm(lang==='zh'
+    ? '目前的報價單有未儲存的修改，是否要先儲存？\n\n按「確定」= 儲存後繼續\n按「取消」= 不要儲存，繼續詢問'
+    : 'Save unsaved changes before continuing?\n\nOK = save & continue\nCancel = don\'t save, ask next');
+  if(r1){
+    saveQuote();
+    return true;
+  }
+  const r2 = confirm(lang==='zh'
+    ? '丟棄目前的修改，繼續？\n\n按「確定」= 丟棄並繼續\n按「取消」= 留在原處'
+    : 'Discard changes and continue?\n\nOK = discard\nCancel = stay');
+  return r2;
+}
+
+// ── New quote ──
+function newQuote(){
+  if(!confirmDiscard()) return;
+  // Clear all worksheet state
+  matR=[];svcR=[];trvR=[];curTypes=[];
+  ['sw','hw','net','ship'].forEach(tp=>document.getElementById('tp-'+tp).classList.remove('on'));
+  ['f-client','f-proj','f-terms','f-tax','f-phone','f-fax','f-addr','f-cp','f-cphone'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-no').value = genNo();
+  const d=new Date(),pad=n=>String(n).padStart(2,'0');
+  document.getElementById('f-date').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  // Reset params to defaults
+  document.getElementById('p-matm').value=60;
+  document.getElementById('p-labm').value=100;
+  document.getElementById('p-wage').value=3000;
+  document.getElementById('p-wk').value=4;
+  document.getElementById('p-dy').value=2;
+  setTermsType('software');
+  // Clear official draft
+  ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
+  ofPersist();
+  // Forget which existing quote was last loaded (so save creates a new entry)
+  currentQuoteNo = null;
+  renderAll();recalc();
+  markClean();
+  goPage('new');
+}
+
+// ── Load into editor (replaces detail modal) ──
+let currentQuoteNo = null;  // tracks which existing quote is being edited
+function loadIntoEditor(i){
+  if(!confirmDiscard()) return;
+  const q = quotes[i];
+  document.getElementById('f-client').value=q.client||'';
+  document.getElementById('f-proj').value=q.proj||'';
+  document.getElementById('f-no').value=q.no||'';
+  document.getElementById('f-date').value=q.date||'';
+  const c=q.customer||{};
+  document.getElementById('f-tax').value=c.tax_id||'';
+  document.getElementById('f-phone').value=c.phone||'';
+  document.getElementById('f-fax').value=c.fax||'';
+  document.getElementById('f-addr').value=c.address||'';
+  document.getElementById('f-cp').value=c.contact_person||'';
+  document.getElementById('f-cphone').value=c.contact_phone||'';
+  setTermsType(q.termsType||'software');
+  const p=q.params||{};
+  document.getElementById('p-matm').value=p.matm||60;
+  document.getElementById('p-labm').value=p.labm||100;
+  document.getElementById('p-wage').value=p.wage||3000;
+  document.getElementById('p-wk').value=p.wk||4;
+  document.getElementById('p-dy').value=p.dy||2;
+  curTypes=(q.types||[]).slice();
+  ['sw','hw','net','ship'].forEach(tp=>{
+    document.getElementById('tp-'+tp).classList.toggle('on',curTypes.includes(tp));
+  });
+  matR=JSON.parse(JSON.stringify(q.matR||[]));
+  svcR=JSON.parse(JSON.stringify(q.svcR||[]));
+  trvR=JSON.parse(JSON.stringify(q.trvR||[]));
+  document.getElementById('f-terms').value=q.terms||'';
+  if(q.officialDraft && Array.isArray(q.officialDraft.items)){
+    ofState = JSON.parse(JSON.stringify(q.officialDraft));
+  }else{
+    ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
+  }
+  ofPersist();
+  currentQuoteNo = q.no;
+  renderAll();recalc();
+  markClean();
+  goPage('new');
 }
 
 // ── Types ──
@@ -1005,6 +1134,7 @@ function calcTotals(){
 }
 function saveQuote(){
   const no=document.getElementById('f-no').value||genNo();
+  document.getElementById('f-no').value=no;
   const tt=calcTotals();
   const q={
     id:Date.now(),no,
@@ -1035,6 +1165,13 @@ function saveQuote(){
   if(ei>=0)quotes[ei]=q;else quotes.unshift(q);
   localStorage.setItem('slab_q',JSON.stringify(quotes));
   document.getElementById('hist-count').textContent=quotes.length;
+  currentQuoteNo = no;
+  markClean();
+  // Update topbar title (now that quote no / client may be filled)
+  if(document.getElementById('page-new').classList.contains('active') ||
+     document.getElementById('page-official').classList.contains('active')){
+    applyTopbar(document.getElementById('page-new').classList.contains('active')?'new':'official');
+  }
   toast(t('saved'));
 }
 
@@ -1075,7 +1212,7 @@ function renderHist(){
     const tags=(q.types||[]).map(tp=>`<span class="tag ${tagCls[tp]||''}">${typeText(tp)}</span>`).join('');
     const statuses=['draft','sent','won','lost'];
     const statusOpts=statuses.map(s=>`<option value="${s}"${q.status===s?' selected':''}>${t(s)}</option>`).join('');
-    return`<div class="qcard" onclick="openDetail(${i})">
+    return`<div class="qcard" onclick="loadIntoEditor(${i})">
       <div class="qcard-left">
         <div class="qcard-no">${q.no||'—'}</div>
         <div class="qcard-date">${(q.date||'').slice(0,10)}</div>
@@ -1091,7 +1228,8 @@ function renderHist(){
         <div class="qcard-margin">↑ ${q.mpct||0}% margin</div>
         <div class="qcard-actions" onclick="event.stopPropagation()">
           <select class="status-sel" onchange="setStatus(${i},this.value)">${statusOpts}</select>
-          <button class="btn btn-sm btn-ghost" onclick="deleteQuote(${i})" title="Delete">✕</button>
+          <button class="btn btn-sm btn-ghost" onclick="exportExcel(quotes[${i}])" title="匯出內部工作表">⬇</button>
+          <button class="btn btn-sm btn-ghost" onclick="deleteQuote(${i})" title="刪除">✕</button>
         </div>
       </div>
     </div>`;
@@ -1105,97 +1243,6 @@ function deleteQuote(i){
   document.getElementById('hist-count').textContent=quotes.length;
   renderHist();renderHistStats();
 }
-
-// ── Detail Modal ──
-function openDetail(i){
-  detailIdx=i;const q=quotes[i];
-  document.getElementById('dm-title').textContent=q.no||t('dmTitle');
-  const p=q.params||{};
-  const mm=(p.matm||0)/100;
-  let html=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;font-size:14px">
-    <div><span style="color:var(--ink3)">${t('client')}：</span><strong>${q.client||'—'}</strong></div>
-    <div><span style="color:var(--ink3)">${t('no')}：</span><strong style="font-family:var(--ffm)">${q.no||'—'}</strong></div>
-    <div><span style="color:var(--ink3)">${t('proj')}：</span><strong>${q.proj||'—'}</strong></div>
-    <div><span style="color:var(--ink3)">${t('date')}：</span><strong>${(q.date||'').slice(0,10)}</strong></div>
-  </div>`;
-  if((q.matR||[]).length){
-    html+=`<div style="font-size:13px;font-weight:700;color:var(--ink3);letter-spacing:.04em;margin-bottom:6px">${t('mat')}</div>`;
-    html+=`<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px">
-      <thead><tr style="border-bottom:1px solid var(--line)">
-        <th style="text-align:left;padding:4px 8px;color:var(--ink3)">${t('thN')}</th>
-        <th style="text-align:right;padding:4px 8px;color:var(--ink3)">${t('thQ')}</th>
-        <th style="text-align:right;padding:4px 8px;color:var(--ink3)">${t('thC')}</th>
-        <th style="text-align:right;padding:4px 8px;color:var(--ink3)">${t('thS')}</th>
-      </tr></thead><tbody>`;
-    (q.matR||[]).forEach(r=>{
-      const uq=Math.round(r.cost*(1+mm)),sub=uq*r.qty;
-      html+=`<tr style="border-bottom:1px solid var(--surf3)">
-        <td style="padding:4px 8px">${r.name}</td>
-        <td style="text-align:right;padding:4px 8px;font-family:var(--ffm)">${r.qty}</td>
-        <td style="text-align:right;padding:4px 8px;font-family:var(--ffm)">${fmt(r.cost)}</td>
-        <td style="text-align:right;padding:4px 8px;font-family:var(--ffm);color:var(--blue2)">${fmt(sub)}</td>
-      </tr>`;
-    });
-    html+=`</tbody></table>`;
-  }
-  html+=`<div style="background:var(--surf2);border-radius:var(--r8);padding:12px 14px;font-size:14px">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div style="color:var(--ink3)">${t('slMat')}</div><div style="text-align:right;font-family:var(--ffm);color:var(--blue2)">${fmt(q.matQ||0)}</div>
-      <div style="color:var(--ink3)">${t('slLab')}</div><div style="text-align:right;font-family:var(--ffm);color:var(--blue2)">${fmt(q.lQ||0)}</div>
-      <div style="color:var(--ink3)">${t('slSvc')}</div><div style="text-align:right;font-family:var(--ffm);color:var(--blue2)">${fmt(q.svcQ||0)}</div>
-      <div style="color:var(--ink3)">${t('slTrv')}</div><div style="text-align:right;font-family:var(--ffm);color:var(--blue2)">${fmt(q.trvQ||0)}</div>
-    </div>
-    <div style="border-top:1px solid var(--line);margin:10px 0;padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px">
-      <div style="font-weight:700">${t('slTotal')}</div>
-      <div style="text-align:right;font-family:var(--ffm);font-size:18px;font-weight:700;color:var(--blue2)">${fmt(q.total||0)}</div>
-      <div style="color:var(--ink3)">${t('slMargin')}</div>
-      <div style="text-align:right;font-family:var(--ffm);color:var(--green);font-weight:700">${q.mpct||0}%</div>
-    </div>
-  </div>`;
-  document.getElementById('dm-body').innerHTML=html;
-  document.getElementById('detail-modal').classList.add('open');
-}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function loadAndEdit(){
-  const q=quotes[detailIdx];
-  document.getElementById('f-client').value=q.client||'';
-  document.getElementById('f-proj').value=q.proj||'';
-  document.getElementById('f-no').value=q.no||'';
-  document.getElementById('f-date').value=q.date||'';
-  const c=q.customer||{};
-  document.getElementById('f-tax').value=c.tax_id||'';
-  document.getElementById('f-phone').value=c.phone||'';
-  document.getElementById('f-fax').value=c.fax||'';
-  document.getElementById('f-addr').value=c.address||'';
-  document.getElementById('f-cp').value=c.contact_person||'';
-  document.getElementById('f-cphone').value=c.contact_phone||'';
-  setTermsType(q.termsType||'software');
-  const p=q.params||{};
-  document.getElementById('p-matm').value=p.matm||60;
-  document.getElementById('p-labm').value=p.labm||100;
-  document.getElementById('p-wage').value=p.wage||3000;
-  document.getElementById('p-wk').value=p.wk||4;
-  document.getElementById('p-dy').value=p.dy||2;
-  curTypes=(q.types||[]).slice();
-  ['sw','hw','net','ship'].forEach(tp=>{
-    document.getElementById('tp-'+tp).classList.toggle('on',curTypes.includes(tp));
-  });
-  matR=JSON.parse(JSON.stringify(q.matR||[]));
-  svcR=JSON.parse(JSON.stringify(q.svcR||[]));
-  trvR=JSON.parse(JSON.stringify(q.trvR||[]));
-  document.getElementById('f-terms').value=q.terms||'';
-  // Restore official-quote draft if this quote has one; otherwise start fresh
-  if(q.officialDraft && Array.isArray(q.officialDraft.items)){
-    ofState = JSON.parse(JSON.stringify(q.officialDraft));
-  }else{
-    ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
-  }
-  ofPersist();
-  renderAll();recalc();
-  closeModal('detail-modal');goPage('new');
-  toast(lang==='zh'?'已載入報價，可直接修改後重新儲存':'Loaded — edit and save to update');
-}
-function exportDetail(){closeModal('detail-modal');exportExcel(quotes[detailIdx]);}
 
 // ── Internal worksheet Excel export ──
 function exportExcel(src){
@@ -1298,6 +1345,8 @@ function clearForm(){
   setTermsType('software');
   ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
   ofPersist();
+  currentQuoteNo = null;
+  markClean();
   renderAll();recalc();toast(t('cleared'));
 }
 
@@ -1813,8 +1862,12 @@ function tmResetBuiltin(id){
   document.getElementById('f-date').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   document.getElementById('f-no').value=genNo();
   document.getElementById('hist-count').textContent=quotes.length;
-  document.getElementById('topbar-btns').style.display='flex';
-  applyLang();recalc();
+  applyLang();
+  recalc();
+  // Default landing: quote list
+  renderHist();
+  renderHistStats();
+  applyTopbar('list');
 })();
 </script>
 </body>
