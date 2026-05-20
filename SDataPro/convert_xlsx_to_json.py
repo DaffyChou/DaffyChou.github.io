@@ -194,33 +194,37 @@ def process_v1(wb):
         if xy_sog is None or xy_sog > 102.3: ix['sog'] += 1
         if xy_rot is None or not (-128 <= xy_rot <= 127): ix['rot'] += 1
         
-        # SD 不合法計數（如果有資料）
+        # SD 不合法計數（如果有資料；要小心 SD 欄位可能是字串如 'NULL'）
         if not sd_zero:
             ix2 = inv_count[mmsi]['sd']
             ix2['n'] += 1
-            if sd_navi is None or not (0 <= sd_navi <= 15): ix2['navi'] += 1
-            if sd_hdg is None or sd_hdg > 360: ix2['hdg'] += 1
-            if sd_cog is None or sd_cog > 360: ix2['cog'] += 1
-            if sd_sog is None or sd_sog > 102.3: ix2['sog'] += 1
-            if sd_rot is None or not (-128 <= sd_rot <= 127): ix2['rot'] += 1
+            def is_num(x): return isinstance(x, (int, float))
+            if not is_num(sd_navi) or not (0 <= sd_navi <= 15): ix2['navi'] += 1
+            if not is_num(sd_hdg) or sd_hdg > 360: ix2['hdg'] += 1
+            if not is_num(sd_cog) or sd_cog > 360: ix2['cog'] += 1
+            if not is_num(sd_sog) or sd_sog > 102.3: ix2['sog'] += 1
+            if not is_num(sd_rot) or not (-128 <= sd_rot <= 127): ix2['rot'] += 1
         
         # 一致率（僅當 SD 有資料）
         if not sd_zero and xy_lat and xy_lon:
-            c = consistency[mmsi]
-            c['total'] += 1
+            cs = consistency[mmsi]
+            cs['total'] += 1
             lat_diff = abs(xy_lat - sd_lat)
             lon_diff = abs(xy_lon - sd_lon)
             pos_diff_km = ((lat_diff*111)**2 + (lon_diff*96)**2)**0.5
-            if pos_diff_km <= 5.5: c['pos_ok'] += 1
-            if xy_hdg is not None and sd_hdg is not None and abs(xy_hdg - sd_hdg) <= 5: c['hdg_ok'] += 1
-            if xy_cog is not None and sd_cog is not None and abs(xy_cog - sd_cog) <= 10: c['cog_ok'] += 1
-            if xy_sog is not None and sd_sog is not None and abs(xy_sog - sd_sog) <= 1: c['sog_ok'] += 1
-            if xy_navi == sd_navi: c['navi_ok'] += 1
+            if pos_diff_km <= 5.5: cs['pos_ok'] += 1
+            def safe_diff(a, b, t):
+                return isinstance(a, (int, float)) and isinstance(b, (int, float)) and abs(a - b) <= t
+            if safe_diff(xy_hdg, sd_hdg, 5): cs['hdg_ok'] += 1
+            if safe_diff(xy_cog, sd_cog, 10): cs['cog_ok'] += 1
+            if safe_diff(xy_sog, sd_sog, 1): cs['sog_ok'] += 1
+            if xy_navi == sd_navi: cs['navi_ok'] += 1
             
             p95_collect[mmsi]['pos'].append(pos_diff_km)
-            if xy_hdg is not None and sd_hdg is not None: p95_collect[mmsi]['hdg'].append(abs(xy_hdg - sd_hdg))
-            if xy_cog is not None and sd_cog is not None: p95_collect[mmsi]['cog'].append(abs(xy_cog - sd_cog))
-            if xy_sog is not None and sd_sog is not None: p95_collect[mmsi]['sog'].append(abs(xy_sog - sd_sog))
+            if isinstance(xy_hdg, (int, float)) and isinstance(sd_hdg, (int, float)): p95_collect[mmsi]['hdg'].append(abs(xy_hdg - sd_hdg))
+            if isinstance(xy_cog, (int, float)) and isinstance(sd_cog, (int, float)): p95_collect[mmsi]['cog'].append(abs(xy_cog - sd_cog))
+            if isinstance(xy_sog, (int, float)) and isinstance(sd_sog, (int, float)): p95_collect[mmsi]['sog'].append(abs(xy_sog - sd_sog))
+
         
         # 軌跡
         if xy_lat and xy_lon:
@@ -363,6 +367,45 @@ def categorize(vessels):
     return {'qual': qual, 'near': near, 'partial': partial_s, 'unqual': unqual, 'nodata': no_data}
 
 
+
+def find_main_period(times):
+    """找出實際連續資料的主要區間（過濾零星散落的資料點）
+    
+    Returns (start_date, end_date, n_days, sparse_dates)
+    其中 sparse_dates 是被排除的零星日期清單
+    """
+    from collections import Counter
+    from datetime import timedelta
+    if not times:
+        return None, None, 0, []
+    by_date = Counter(t.date() for t in times)
+    sorted_dates = sorted(by_date.keys())
+    total = sum(by_date.values())
+    
+    # 把「資料量 < 總量 5%」的日子視為零星
+    threshold = max(total * 0.05, 100)
+    substantial = [d for d in sorted_dates if by_date[d] >= threshold]
+    sparse = [d for d in sorted_dates if by_date[d] < threshold]
+    
+    if not substantial:
+        return sorted_dates[0], sorted_dates[-1], len(sorted_dates), []
+    
+    # 找出 substantial 中的最長連續區間
+    best_run = [substantial[0]]
+    current = [substantial[0]]
+    for i in range(1, len(substantial)):
+        if substantial[i] == substantial[i-1] + timedelta(days=1):
+            current.append(substantial[i])
+        else:
+            if len(current) > len(best_run):
+                best_run = current
+            current = [substantial[i]]
+    if len(current) > len(best_run):
+        best_run = current
+    
+    return best_run[0], best_run[-1], len(best_run), sparse
+
+
 def main():
     ap = argparse.ArgumentParser(description='Convert AIS comparison xlsx to JSON for SDataPro Reports')
     ap.add_argument('input', help='Input xlsx file path')
@@ -400,19 +443,35 @@ def main():
             ai_ships.append({'en': v['en'], 'zh': v['zh'], 'fill_pct': fill_pct, 'count': v['sd_filled_count']})
     ai_ships.sort(key=lambda x: -x['fill_pct'])
     
-    # 時間範圍
+    # 時間範圍（用「實際連續資料區間」而非跨距）
     all_xy = []
     for t in tracks_split.values():
         all_xy.extend(t.get('xy_times', []))
+    sparse_info = ""
     if all_xy:
-        period_start = min(all_xy).strftime('%Y/%m/%d')
-        period_end = max(all_xy).strftime('%Y/%m/%d')
-        period_label = f"{min(all_xy).strftime('%Y/%-m/%-d %H:%M')}-{max(all_xy).strftime('%Y/%-m/%-d %H:%M')}"
-        period_days = (max(all_xy) - min(all_xy)).days + 1
+        main_start, main_end, main_days, sparse = find_main_period(all_xy)
+        # 主要連續區間用於顯示
+        period_start = main_start.strftime('%Y/%m/%d').replace('/0', '/')
+        period_end = main_end.strftime('%Y/%m/%d').replace('/0', '/')
+        period_days = main_days
+        # 找該主要區間內的真實時戳邊界
+        in_main = [t for t in all_xy if main_start <= t.date() <= main_end]
+        if in_main:
+            period_label = f"{min(in_main).strftime('%Y/%-m/%-d %H:%M')}-{max(in_main).strftime('%Y/%-m/%-d %H:%M')}"
+        else:
+            period_label = f"{period_start}-{period_end}"
+        # 散落資料註記
+        if sparse:
+            sparse_strs = [d.strftime('%-m/%-d') for d in sparse]
+            sparse_info = f"另有 {sum(1 for t in all_xy if t.date() in sparse)} 筆零星資料分散於 {', '.join(sparse_strs)}（不計入主要區間）"
+        # 總跨距資訊（含散落）
+        total_span_start = min(all_xy).strftime('%Y/%m/%d').replace('/0', '/')
+        total_span_end = max(all_xy).strftime('%Y/%m/%d').replace('/0', '/')
     else:
         period_start = period_end = '?'
         period_label = '?'
         period_days = 0
+        total_span_start = total_span_end = '?'
     
     # Global aggregates
     total_pos_ok = sum(consistency[m]['pos_ok'] for m in consistency)
@@ -434,6 +493,9 @@ def main():
             'period_start': period_start,
             'period_end': period_end,
             'period_days': period_days,
+            'sparse_info': sparse_info,
+            'total_span_start': total_span_start,
+            'total_span_end': total_span_end,
             'report_date': args.date or period_end,
             'data_source': os.path.basename(args.input),
             'has_ai_fill': n_filled > 0,
