@@ -238,6 +238,27 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 .item-block{border:1px solid var(--line);border-radius:var(--r8);padding:12px;background:var(--surf2);margin-bottom:10px;}
 .item-block .it-title{font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
 .item-block textarea{width:100%;border:1px solid var(--line);border-radius:var(--r8);padding:8px 10px;font-size:13px;font-family:var(--ff);resize:vertical;background:var(--surf);}
+.item-controls{display:flex;gap:6px;align-items:center;}
+.add-item-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--blue-l);border:1px dashed var(--blue-m);border-radius:var(--r8);margin-bottom:10px;}
+.add-item-row.disabled{background:var(--surf3);border-color:var(--line);color:var(--ink4);}
+.preset-select{width:100%;border:1px solid var(--line);border-radius:var(--r8);padding:7px 10px;font-size:14px;font-family:var(--ff);color:var(--ink);background:var(--surf);}
+.preset-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l);}
+
+/* Terms management page */
+.tm-grid{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start;max-width:1180px;margin:0 auto;}
+.tm-list{display:flex;flex-direction:column;gap:6px;}
+.tm-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surf);border:1px solid var(--line);border-radius:var(--r8);cursor:pointer;transition:all .15s;}
+.tm-item:hover{border-color:var(--blue-m);background:var(--blue-l);}
+.tm-item.active{border-color:var(--blue);background:var(--blue-l);}
+.tm-item-name{font-size:14px;font-weight:600;color:var(--ink);}
+.tm-item-meta{font-size:12px;color:var(--ink3);margin-top:2px;}
+.tm-tag-builtin{font-size:12px;font-weight:700;color:var(--blue2);background:var(--blue-l);padding:2px 8px;border-radius:99px;}
+.tm-tag-default{font-size:12px;font-weight:700;color:var(--green);background:var(--green-l);padding:2px 8px;border-radius:99px;}
+.tm-editor{background:var(--surf);border:1px solid var(--line);border-radius:var(--r12);box-shadow:var(--sh);padding:18px 20px;}
+.tm-editor textarea{width:100%;border:1px solid var(--line);border-radius:var(--r8);padding:10px 12px;font-size:14px;font-family:var(--ff);resize:vertical;color:var(--ink);background:var(--surf);line-height:1.7;}
+.tm-editor textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l);}
+.tm-editor-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px;}
+.tm-editor-title{font-size:16px;font-weight:700;color:var(--ink);}
 </style>
 </head>
 <body>
@@ -257,6 +278,10 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       <span class="sb-ico">⊟</span>
       <span class="sb-label" id="l-hist">歷史報價</span>
       <span class="sb-badge" id="hist-count">0</span>
+    </div>
+    <div class="sb-item" onclick="goPage('tm')" id="nav-tm">
+      <span class="sb-ico">📑</span>
+      <span class="sb-label" id="l-tm">條件管理</span>
     </div>
   </nav>
   <div class="sb-divider"></div>
@@ -513,6 +538,20 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     <div id="hist-list"></div>
   </div>
 
+  <!-- ══ TERMS MANAGEMENT ══ -->
+  <div class="page" id="page-tm">
+    <div class="tm-grid">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:14px;font-weight:700;color:var(--ink3)" id="tm-list-hd">條件預設</span>
+          <button class="btn btn-sm btn-blue" onclick="tmCreate()">＋ <span id="tm-add">新增</span></button>
+        </div>
+        <div class="tm-list" id="tm-list"></div>
+      </div>
+      <div id="tm-editor-wrap"></div>
+    </div>
+  </div>
+
   </div><!-- /pages -->
 </div><!-- /main -->
 
@@ -553,34 +592,19 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
         <div class="field"><label>報價日期（民國）</label><input type="text" id="of-date" class="mono" placeholder="115/05/20"></div>
       </div>
 
-      <div class="section-hd"><span class="step">2</span><span id="of-s2">品項（最多 2 項）</span></div>
+      <div class="section-hd"><span class="step">2</span><span id="of-s2">品項（最多 5 項）</span><span style="margin-left:auto;font-size:12px;color:var(--ink4)" id="of-i-count">0 / 5</span></div>
 
-      <div class="item-block">
-        <div class="it-title">品項 1（必填）<span style="color:var(--ink4);font-weight:500;font-size:12px">最多 3 行描述</span></div>
-        <div class="fg fg-2" style="margin-bottom:8px">
-          <div class="field" style="grid-column:span 2"><label>標題</label><input type="text" id="of-i1-title" placeholder="例：核三廠人員管制系統 — 系統開發建置"></div>
-          <div class="field"><label>數量</label><input type="number" id="of-i1-qty" value="1" min="1" class="mono"></div>
-          <div class="field"><label>單價（TWD）</label><input type="number" id="of-i1-price" value="0" min="0" class="mono"></div>
-        </div>
-        <div id="of-i1-descs"></div>
-        <div class="row-actions"><button class="btn btn-xs" onclick="addDesc(1)">＋ 新增描述行</button></div>
-      </div>
-
-      <div class="item-block">
-        <div class="it-title">品項 2（選填）<span style="color:var(--ink4);font-weight:500;font-size:12px">最多 4 行描述</span></div>
-        <div class="fg fg-2" style="margin-bottom:8px">
-          <div class="field" style="grid-column:span 2"><label>標題</label><input type="text" id="of-i2-title" placeholder="例：年度維護費 — 整體系統資安維運服務（每年）"></div>
-          <div class="field"><label>數量</label><input type="number" id="of-i2-qty" value="1" min="1" class="mono"></div>
-          <div class="field"><label>單價（TWD）</label><input type="number" id="of-i2-price" value="0" min="0" class="mono"></div>
-        </div>
-        <div id="of-i2-descs"></div>
-        <div class="row-actions"><button class="btn btn-xs" onclick="addDesc(2)">＋ 新增描述行</button></div>
+      <div id="of-items"></div>
+      <div class="add-item-row" id="of-add-row">
+        <span style="font-size:13px;color:var(--ink3)" id="of-add-hint">繼續新增其他品項</span>
+        <button class="btn btn-sm btn-blue" id="of-add-btn" onclick="addOfficialItem()">＋ 新增品項</button>
       </div>
 
       <div class="section-hd">
         <span class="step">3</span><span id="of-s3">備註與一般條件</span>
-        <div style="margin-left:auto;display:flex;gap:6px">
-          <button class="btn btn-xs" onclick="reloadDefaultTerms()">↺ 套用預設</button>
+        <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+          <select class="preset-select" id="of-preset" onchange="applyPreset(this.value)" style="width:auto;padding:5px 8px;font-size:13px"></select>
+          <button class="btn btn-xs" onclick="openTermsFromModal()" title="開啟條件管理">⚙</button>
         </div>
       </div>
       <div class="field" style="margin-bottom:10px">
@@ -679,7 +703,8 @@ const T={
     saved:'✓ 報價已儲存',exported:'✓ Excel 已匯出',officialDone:'✓ 官方報價單已產生',cleared:'已清空',
     tplLoaded:'✓ 船舶CCTV範本已載入',
     noHist:'目前尚無報價記錄',
-    ofTitle:'📄 產生官方報價單',ofS1:'客戶資料',ofS2:'品項（最多 2 項）',ofS3:'備註與一般條件',
+    ofTitle:'📄 產生官方報價單',ofS1:'客戶資料',ofS2:'品項（最多 5 項）',ofS3:'備註與一般條件',
+    navTm:'條件管理',tmListHd:'條件預設',tmAdd:'新增',
   },
   en:{
     navNew:'New Quote',navHist:'History',
@@ -711,7 +736,8 @@ const T={
     saved:'✓ Saved',exported:'✓ Excel exported',officialDone:'✓ Official quote generated',cleared:'Cleared',
     tplLoaded:'✓ Template loaded',
     noHist:'No quotes yet',
-    ofTitle:'📄 Generate Official Quote',ofS1:'Customer',ofS2:'Items (max 2)',ofS3:'Notes & Terms',
+    ofTitle:'📄 Generate Official Quote',ofS1:'Customer',ofS2:'Items (max 5)',ofS3:'Notes & Terms',
+    navTm:'Terms',tmListHd:'Presets',tmAdd:'Add',
   }
 };
 const t=k=>(T[lang]||T.zh)[k]||k;
@@ -725,7 +751,8 @@ function setLang(l){
 
 function applyLang(){
   const map=[
-    ['l-new','navNew'],['l-hist','navHist'],
+    ['l-new','navNew'],['l-hist','navHist'],['l-tm','navTm'],
+    ['tm-list-hd','tmListHd'],['tm-add','tmAdd'],
     ['l-tpl','btnTpl'],['l-save','btnSave'],['l-exp','btnExp'],['l-off','btnOff'],
     ['l-meta','meta'],['l-client','client'],['l-proj','proj'],['l-no','no'],['l-date','date'],
     ['l-cust','cust'],['l-cust-hint','custHint'],
@@ -762,9 +789,11 @@ function goPage(p){
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   document.getElementById('nav-'+p).classList.add('active');
-  document.getElementById('topbar-title').textContent=t(p==='new'?'navNew':'navHist');
+  const titleKey = p==='new'?'navNew':(p==='hist'?'navHist':'navTm');
+  document.getElementById('topbar-title').textContent=t(titleKey);
   document.getElementById('topbar-btns').style.display=p==='new'?'flex':'none';
   if(p==='hist'){renderHist();renderHistStats();}
+  if(p==='tm'){tmRender();}
 }
 
 // ── Types ──
@@ -1184,20 +1213,50 @@ function toast(msg){
 }
 
 // ════════════════════════════════════════════════
+// ══ TERMS PRESETS (localStorage CRUD) ══
+// ════════════════════════════════════════════════
+const PRESETS_KEY = 'slab_terms_presets_v1';
+const BUILTIN_PRESETS = [
+  { id:'software', name:'軟體開發 / 維護', builtin:true, notes:DEFAULTS.software.notes, general_terms:DEFAULTS.software.general_terms },
+  { id:'hardware', name:'硬體 / 設備銷售', builtin:true, notes:DEFAULTS.hardware.notes, general_terms:DEFAULTS.hardware.general_terms },
+];
+function loadPresets(){
+  const raw = localStorage.getItem(PRESETS_KEY);
+  if(!raw){
+    return { presets: BUILTIN_PRESETS.map(p=>({...p})), defaultId:'software' };
+  }
+  try{
+    const s = JSON.parse(raw);
+    if(!Array.isArray(s.presets)) throw new Error('bad format');
+    BUILTIN_PRESETS.forEach(b=>{
+      if(!s.presets.find(p=>p.id===b.id)) s.presets.unshift({...b});
+    });
+    if(!s.defaultId) s.defaultId='software';
+    return s;
+  }catch(e){
+    return { presets: BUILTIN_PRESETS.map(p=>({...p})), defaultId:'software' };
+  }
+}
+let presetsState = loadPresets();
+function savePresets(){ localStorage.setItem(PRESETS_KEY, JSON.stringify(presetsState)); }
+function getPresetById(id){ return presetsState.presets.find(p=>p.id===id); }
+
+// ════════════════════════════════════════════════
 // ══ OFFICIAL QUOTATION (template.xlsx + ExcelJS) ══
 // ════════════════════════════════════════════════
 
-// Fixed cell map matching scripts/build_quotation.py
-const OFFICIAL_CELLS = {
+// 5 slots in the corporate template — rows 15/20/25/30/35
+const SLOTS = [
+  { seq:'A15', title:'B15', desc:['B16','B17','B18'],            qty:'I15', price:'J15', total:'K15', rowNum:15 },
+  { seq:'A20', title:'B20', desc:['B21','B22','B23','B24'],      qty:'I20', price:'J20', total:'K20', rowNum:20 },
+  { seq:'A25', title:'B25', desc:['B26','B27','B28','B29'],      qty:'I25', price:'J25', total:'K25', rowNum:25 },
+  { seq:'A30', title:'B30', desc:['B31','B32','B33','B34'],      qty:'I30', price:'J30', total:'K30', rowNum:30 },
+  { seq:'A35', title:'B35', desc:['B36'],                         qty:'I35', price:'J35', total:'K35', rowNum:35 },
+];
+const HEADER_CELLS = {
   customer_name:'B8', contact_person:'F8', quote_date:'J8',
   tax_id:'B9',        contact_phone:'F9',  quote_no:'J9',
   phone:'B10',        fax:'B11',           address:'B12',
-  item1_seq:'A15', item1_title:'B15',
-  item1_desc1:'B16', item1_desc2:'B17', item1_desc3:'B18',
-  item1_qty:'I15', item1_price:'J15', item1_total:'K15',
-  item2_seq:'A20', item2_title:'B20',
-  item2_desc1:'B21', item2_desc2:'B22', item2_desc3:'B23', item2_desc4:'B24',
-  item2_qty:'I20', item2_price:'J20', item2_total:'K20',
   notes:'B44', general_terms:'B49',
 };
 
@@ -1208,10 +1267,17 @@ function rocDate(d){
   return `${(+m[1])-1911}/${m[2]}/${m[3]}`;
 }
 
-let ofState={ descs1:[], descs2:[] };
+function normalizeBullet(s){
+  s=String(s||'').trim();
+  if(!s)return '';
+  s=s.replace(/^[\s・·•\-—*]+/,'');
+  return '・'+s;
+}
+
+let ofState = { items: [] };
 
 function openOfficialModal(){
-  // Pre-fill customer info from main form
+  // Customer info
   document.getElementById('of-name').value=document.getElementById('f-client').value;
   document.getElementById('of-tax').value=document.getElementById('f-tax').value;
   document.getElementById('of-phone').value=document.getElementById('f-phone').value;
@@ -1222,89 +1288,132 @@ function openOfficialModal(){
   document.getElementById('of-no').value=document.getElementById('f-no').value||genNo();
   document.getElementById('of-date').value=rocDate(document.getElementById('f-date').value);
 
-  // Pre-fill items by aggregation
+  // Items — seed with one item auto-aggregated from worksheet
   const tt=calcTotals();
   const proj=document.getElementById('f-proj').value||'';
-  document.getElementById('of-i1-title').value=proj?`${proj} — 系統開發建置`:'';
-  document.getElementById('of-i1-qty').value=1;
-  document.getElementById('of-i1-price').value=Math.round(tt.matQ+tt.lQ+tt.svcQ+tt.trvQ);
-
-  // Suggested descriptions for item 1 from material list (top 3) + summary
-  const sampleDescs=[];
+  const total=Math.round(tt.matQ+tt.lQ+tt.svcQ+tt.trvQ);
+  const descs=[];
   if(matR.length){
-    const top=matR.slice(0,2).map(r=>`・${r.name}（${r.qty} 套）`);
-    sampleDescs.push(...top);
+    matR.slice(0,2).forEach(r=>{ if(r.name) descs.push(`${r.name}（${r.qty} 套）`); });
   }
-  if(tt.lQ>0) sampleDescs.push(`・系統整合、現場安裝與測試（${num('p-wk')} 人 × ${num('p-dy')} 日）`);
-  if(svcR.length) sampleDescs.push(`・${svcR[0].name}${svcR[0].note?'（'+svcR[0].note+'）':''}`);
-  ofState.descs1=sampleDescs.slice(0,3);
-  renderDescs(1);
+  if(tt.lQ>0) descs.push(`系統整合、現場安裝與測試（${num('p-wk')} 人 × ${num('p-dy')} 日）`);
+  if(svcR.length && svcR[0].name) descs.push(`${svcR[0].name}${svcR[0].note?'（'+svcR[0].note+'）':''}`);
+  ofState.items = [{
+    title: proj ? `${proj} — 系統開發建置` : '',
+    descs: descs.slice(0,3),
+    qty: 1,
+    price: total>0 ? total : 0,
+  }];
+  renderOfficialItems();
 
-  // Item 2 default empty (often the optional maintenance line for software)
-  document.getElementById('of-i2-title').value='';
-  document.getElementById('of-i2-qty').value=1;
-  document.getElementById('of-i2-price').value=0;
-  ofState.descs2=[];
-  renderDescs(2);
-
-  // Notes & terms — load defaults for current termsType
-  reloadDefaultTerms();
+  // Preset selector — try termsType first (legacy), fall back to defaultId
+  rebuildPresetSelect();
+  const initialId = (termsType && getPresetById(termsType)) ? termsType : (presetsState.defaultId || 'software');
+  document.getElementById('of-preset').value = initialId;
+  applyPreset(initialId);
 
   document.getElementById('official-modal').classList.add('open');
 }
 
-function reloadDefaultTerms(){
-  document.getElementById('of-notes').value=DEFAULTS[termsType].notes;
-  document.getElementById('of-gt').value=DEFAULTS[termsType].general_terms;
+function rebuildPresetSelect(){
+  const sel = document.getElementById('of-preset');
+  sel.innerHTML = presetsState.presets.map(p=>{
+    const star = p.id===presetsState.defaultId ? ' ★' : '';
+    return `<option value="${esc(p.id)}">${esc(p.name)}${star}</option>`;
+  }).join('');
 }
 
-function renderDescs(n){
-  const arr=n===1?ofState.descs1:ofState.descs2;
-  const maxN=n===1?3:4;
-  const wrap=document.getElementById(`of-i${n}-descs`);
-  wrap.innerHTML=arr.slice(0,maxN).map((v,i)=>`
-    <div class="desc-row">
-      <input type="text" value="${esc(v)}" placeholder="描述 ${i+1}（會自動加上 ・ 前綴）" oninput="updateDesc(${n},${i},this.value)">
-      <button class="btn btn-ghost btn-xs" onclick="removeDesc(${n},${i})">✕</button>
-    </div>`).join('');
-}
-function addDesc(n){
-  const arr=n===1?ofState.descs1:ofState.descs2;
-  const maxN=n===1?3:4;
-  if(arr.length>=maxN){toast(`此品項最多 ${maxN} 行描述`);return;}
-  arr.push('');renderDescs(n);
-}
-function updateDesc(n,i,v){
-  const arr=n===1?ofState.descs1:ofState.descs2;
-  arr[i]=v;
-}
-function removeDesc(n,i){
-  const arr=n===1?ofState.descs1:ofState.descs2;
-  arr.splice(i,1);renderDescs(n);
+function applyPreset(id){
+  const p = getPresetById(id);
+  if(!p) return;
+  document.getElementById('of-notes').value = p.notes||'';
+  document.getElementById('of-gt').value = p.general_terms||'';
 }
 
-function normalizeBullet(s){
-  s=String(s||'').trim();
-  if(!s)return '';
-  // Strip leading half/full-width bullets / dashes, then prefix with ・
-  s=s.replace(/^[\s・·•\-—*]+/,'');
-  return '・'+s;
+function openTermsFromModal(){
+  closeModal('official-modal');
+  goPage('tm');
+}
+
+function renderOfficialItems(){
+  const wrap = document.getElementById('of-items');
+  wrap.innerHTML = ofState.items.map((it, i)=>{
+    const maxD = SLOTS[i].desc.length;
+    const descsHtml = it.descs.slice(0,maxD).map((d, di)=>`
+      <div class="desc-row">
+        <input type="text" value="${esc(d)}" placeholder="描述 ${di+1}（會自動加 ・ 前綴）" oninput="updateDesc(${i},${di},this.value)">
+        <button class="btn btn-ghost btn-xs" onclick="removeDesc(${i},${di})">✕</button>
+      </div>`).join('');
+    const canRemove = ofState.items.length>1;
+    return `
+      <div class="item-block">
+        <div class="it-title">
+          <span>品項 ${i+1}<span style="color:var(--ink4);font-weight:500;font-size:12px;margin-left:8px">最多 ${maxD} 行描述</span></span>
+          <div class="item-controls">
+            ${canRemove?`<button class="btn btn-ghost btn-xs" onclick="removeOfficialItem(${i})" title="刪除此品項">✕ 刪除</button>`:''}
+          </div>
+        </div>
+        <div class="fg fg-2" style="margin-bottom:8px">
+          <div class="field" style="grid-column:span 2"><label>標題</label><input type="text" value="${esc(it.title)}" oninput="updateItemField(${i},'title',this.value)" placeholder="例：核三廠人員管制系統 — 系統開發建置"></div>
+          <div class="field"><label>數量</label><input type="number" value="${it.qty}" min="1" class="mono" oninput="updateItemField(${i},'qty',this.value)"></div>
+          <div class="field"><label>單價（TWD）</label><input type="number" value="${it.price}" min="0" class="mono" oninput="updateItemField(${i},'price',this.value)"></div>
+        </div>
+        <div>${descsHtml}</div>
+        <div class="row-actions">
+          <span style="font-size:12px;color:var(--ink4)">${it.descs.length} / ${maxD} 行</span>
+          <button class="btn btn-xs" onclick="addDesc(${i})" ${it.descs.length>=maxD?'disabled style="opacity:.4;cursor:not-allowed"':''}>＋ 新增描述行</button>
+        </div>
+      </div>`;
+  }).join('');
+  document.getElementById('of-i-count').textContent = `${ofState.items.length} / 5`;
+  const atMax = ofState.items.length>=5;
+  document.getElementById('of-add-row').classList.toggle('disabled', atMax);
+  document.getElementById('of-add-btn').disabled = atMax;
+  document.getElementById('of-add-hint').textContent = atMax ? '已達上限（模板支援最多 5 項）' : '繼續新增其他品項';
+}
+
+function addOfficialItem(){
+  if(ofState.items.length>=5){ toast('已達上限（最多 5 項）'); return; }
+  ofState.items.push({ title:'', descs:[], qty:1, price:0 });
+  renderOfficialItems();
+}
+function removeOfficialItem(i){
+  if(ofState.items.length<=1){ toast('至少需保留 1 項'); return; }
+  ofState.items.splice(i,1);
+  renderOfficialItems();
+}
+function updateItemField(i, field, v){
+  if(!ofState.items[i]) return;
+  if(field==='qty'||field==='price') v = +v||0;
+  ofState.items[i][field] = v;
+}
+function addDesc(itemIdx){
+  const it = ofState.items[itemIdx]; if(!it) return;
+  const maxN = SLOTS[itemIdx].desc.length;
+  if(it.descs.length>=maxN){ toast(`此品項最多 ${maxN} 行描述`); return; }
+  it.descs.push(''); renderOfficialItems();
+}
+function updateDesc(itemIdx, di, v){
+  const it = ofState.items[itemIdx]; if(!it) return;
+  it.descs[di] = v;
+}
+function removeDesc(itemIdx, di){
+  const it = ofState.items[itemIdx]; if(!it) return;
+  it.descs.splice(di, 1); renderOfficialItems();
 }
 
 async function generateOfficialXlsx(){
+  if(!ofState.items.length){ toast('請至少新增一個品項'); return; }
   const name=document.getElementById('of-name').value.trim();
   const taxId=document.getElementById('of-tax').value.trim();
-  const title1=document.getElementById('of-i1-title').value.trim();
-  const price1=parseFloat(document.getElementById('of-i1-price').value)||0;
-  if(!name){toast('請填入客戶名稱');return;}
-  if(!taxId){toast('請填入統一編號');return;}
-  if(!title1){toast('請填入品項 1 標題');return;}
-  if(price1<=0){toast('請填入品項 1 單價');return;}
+  if(!name){ toast('請填入客戶名稱'); return; }
+  if(!taxId){ toast('請填入統一編號'); return; }
+  for(let i=0;i<ofState.items.length;i++){
+    const it=ofState.items[i];
+    if(!String(it.title).trim()){ toast(`品項 ${i+1} 缺少標題`); return; }
+    if(!(parseFloat(it.price)>0)){ toast(`品項 ${i+1} 單價必須大於 0`); return; }
+  }
 
-  const qty1=parseInt(document.getElementById('of-i1-qty').value)||1;
-  const title2=document.getElementById('of-i2-title').value.trim();
-  const qty2=parseInt(document.getElementById('of-i2-qty').value)||1;
-  const price2=parseFloat(document.getElementById('of-i2-price').value)||0;
   const quoteNo=document.getElementById('of-no').value.trim()||genNo();
   const quoteDate=document.getElementById('of-date').value.trim();
   const notes=document.getElementById('of-notes').value;
@@ -1319,47 +1428,36 @@ async function generateOfficialXlsx(){
     await wb.xlsx.load(buf);
     const ws=wb.worksheets[0];
 
-    // Clear sample rows 15-26 (cols A,B,I,J,K)
-    for(let r=15;r<27;r++){
-      for(const c of ['A','B','I','J','K']){
-        ws.getCell(c+r).value=null;
-      }
-    }
+    // Clear all item slots (rows 15-36)
+    for(let r=15;r<=36;r++) for(const c of ['A','B','I','J','K']) ws.getCell(c+r).value=null;
 
     // Customer header
-    ws.getCell(OFFICIAL_CELLS.customer_name).value=name;
-    ws.getCell(OFFICIAL_CELLS.tax_id).value=taxId;
-    ws.getCell(OFFICIAL_CELLS.phone).value=document.getElementById('of-phone').value.trim();
-    ws.getCell(OFFICIAL_CELLS.fax).value=document.getElementById('of-fax').value.trim();
-    ws.getCell(OFFICIAL_CELLS.address).value=document.getElementById('of-addr').value.trim();
-    ws.getCell(OFFICIAL_CELLS.contact_person).value=document.getElementById('of-cp').value.trim();
-    ws.getCell(OFFICIAL_CELLS.contact_phone).value=document.getElementById('of-cphone').value.trim();
-    ws.getCell(OFFICIAL_CELLS.quote_date).value=quoteDate;
-    ws.getCell(OFFICIAL_CELLS.quote_no).value=quoteNo;
+    ws.getCell(HEADER_CELLS.customer_name).value=name;
+    ws.getCell(HEADER_CELLS.tax_id).value=taxId;
+    ws.getCell(HEADER_CELLS.phone).value=document.getElementById('of-phone').value.trim();
+    ws.getCell(HEADER_CELLS.fax).value=document.getElementById('of-fax').value.trim();
+    ws.getCell(HEADER_CELLS.address).value=document.getElementById('of-addr').value.trim();
+    ws.getCell(HEADER_CELLS.contact_person).value=document.getElementById('of-cp').value.trim();
+    ws.getCell(HEADER_CELLS.contact_phone).value=document.getElementById('of-cphone').value.trim();
+    ws.getCell(HEADER_CELLS.quote_date).value=quoteDate;
+    ws.getCell(HEADER_CELLS.quote_no).value=quoteNo;
 
-    // Item 1
-    ws.getCell(OFFICIAL_CELLS.item1_seq).value=1;
-    ws.getCell(OFFICIAL_CELLS.item1_title).value=title1;
-    const d1=ofState.descs1.map(normalizeBullet).filter(Boolean);
-    d1.slice(0,3).forEach((d,i)=>{ ws.getCell(OFFICIAL_CELLS[`item1_desc${i+1}`]).value=d; });
-    ws.getCell(OFFICIAL_CELLS.item1_qty).value=qty1;
-    ws.getCell(OFFICIAL_CELLS.item1_price).value=price1;
-    ws.getCell(OFFICIAL_CELLS.item1_total).value={formula:'I15*J15'};
+    // Items — write into N slots
+    ofState.items.forEach((it, i)=>{
+      const slot = SLOTS[i];
+      ws.getCell(slot.seq).value = i+1;
+      ws.getCell(slot.title).value = String(it.title).trim();
+      const descs = it.descs.map(normalizeBullet).filter(Boolean);
+      descs.slice(0, slot.desc.length).forEach((d, di)=>{
+        ws.getCell(slot.desc[di]).value = d;
+      });
+      ws.getCell(slot.qty).value = parseInt(it.qty)||1;
+      ws.getCell(slot.price).value = parseFloat(it.price)||0;
+      ws.getCell(slot.total).value = { formula: `I${slot.rowNum}*J${slot.rowNum}` };
+    });
 
-    // Item 2 (optional)
-    if(title2 && price2>0){
-      ws.getCell(OFFICIAL_CELLS.item2_seq).value=2;
-      ws.getCell(OFFICIAL_CELLS.item2_title).value=title2;
-      const d2=ofState.descs2.map(normalizeBullet).filter(Boolean);
-      d2.slice(0,4).forEach((d,i)=>{ ws.getCell(OFFICIAL_CELLS[`item2_desc${i+1}`]).value=d; });
-      ws.getCell(OFFICIAL_CELLS.item2_qty).value=qty2;
-      ws.getCell(OFFICIAL_CELLS.item2_price).value=price2;
-      ws.getCell(OFFICIAL_CELLS.item2_total).value={formula:'I20*J20'};
-    }
-
-    // Notes & terms
-    if(notes) ws.getCell(OFFICIAL_CELLS.notes).value=notes;
-    if(gt) ws.getCell(OFFICIAL_CELLS.general_terms).value=gt;
+    if(notes) ws.getCell(HEADER_CELLS.notes).value=notes;
+    if(gt) ws.getCell(HEADER_CELLS.general_terms).value=gt;
 
     const out=await wb.xlsx.writeBuffer();
     const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
@@ -1376,6 +1474,130 @@ async function generateOfficialXlsx(){
     console.error(err);
     alert('產生官方報價單時發生錯誤：\n'+err.message+'\n\n請確認 template.xlsx 與本頁面在同一資料夾。');
   }
+}
+
+// ════════════════════════════════════════════════
+// ══ TERMS MANAGEMENT PAGE (CRUD) ══
+// ════════════════════════════════════════════════
+let tmSelectedId = null;
+
+function tmRender(){
+  if(!tmSelectedId || !getPresetById(tmSelectedId)){
+    tmSelectedId = presetsState.defaultId || (presetsState.presets[0] && presetsState.presets[0].id);
+  }
+  document.getElementById('tm-list').innerHTML = presetsState.presets.map(p=>{
+    const isActive = p.id===tmSelectedId;
+    const isDef = p.id===presetsState.defaultId;
+    return `
+      <div class="tm-item${isActive?' active':''}" onclick="tmSelect('${esc(p.id)}')">
+        <div>
+          <div class="tm-item-name">${esc(p.name)}</div>
+          <div class="tm-item-meta">${p.builtin?'內建模板':'自訂'}${isDef?' · 預設':''}</div>
+        </div>
+        <div style="display:flex;gap:4px;align-items:center">
+          ${p.builtin?'<span class="tm-tag-builtin">內建</span>':''}
+          ${isDef?'<span class="tm-tag-default">★</span>':''}
+        </div>
+      </div>`;
+  }).join('');
+  tmRenderEditor();
+}
+
+function tmRenderEditor(){
+  const p = getPresetById(tmSelectedId);
+  const wrap = document.getElementById('tm-editor-wrap');
+  if(!p){
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📑</div><p>請選擇左側預設</p></div>';
+    return;
+  }
+  const isDef = p.id===presetsState.defaultId;
+  wrap.innerHTML = `
+    <div class="tm-editor">
+      <div class="tm-editor-hd">
+        <div style="flex:1;min-width:0">
+          <input type="text" value="${esc(p.name)}" oninput="tmUpdateField('name',this.value)" style="font-size:18px;font-weight:700;border:none;outline:none;background:transparent;width:100%;padding:2px 0;color:var(--ink)" ${p.builtin?'readonly':''}>
+          <div style="font-size:12px;color:var(--ink4);margin-top:2px">${p.builtin?'內建模板（內容可編輯，名稱固定）':'自訂模板'}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;align-items:center">
+          ${isDef?'<span class="tm-tag-default">★ 預設</span>':`<button class="btn btn-sm" onclick="tmSetDefault('${esc(p.id)}')">設為預設</button>`}
+          ${p.builtin?`<button class="btn btn-sm" onclick="tmResetBuiltin('${esc(p.id)}')">↺ 還原內建</button>`:`<button class="btn btn-sm" onclick="tmDelete('${esc(p.id)}')" style="color:var(--red);border-color:var(--red-l)">🗑 刪除</button>`}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:6px">備註（notes）</div>
+          <textarea rows="16" oninput="tmUpdateField('notes',this.value)">${esc(p.notes||'')}</textarea>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:6px">一般條件（general_terms）</div>
+          <textarea rows="16" oninput="tmUpdateField('general_terms',this.value)">${esc(p.general_terms||'')}</textarea>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-size:12px;color:var(--ink4)">修改會自動儲存到瀏覽器，下次開啟「官方報價單」彈窗時可由下拉選單載入。</div>
+    </div>`;
+}
+
+function tmSelect(id){ tmSelectedId = id; tmRender(); }
+
+function tmUpdateField(field, v){
+  const p = getPresetById(tmSelectedId);
+  if(!p) return;
+  if(field==='name' && p.builtin) return;
+  p[field] = v;
+  savePresets();
+  if(field==='name'){
+    // Only re-render the list, leave editor alone to preserve focus
+    document.getElementById('tm-list').innerHTML = presetsState.presets.map(pp=>{
+      const isActive = pp.id===tmSelectedId;
+      const isDef = pp.id===presetsState.defaultId;
+      return `
+        <div class="tm-item${isActive?' active':''}" onclick="tmSelect('${esc(pp.id)}')">
+          <div>
+            <div class="tm-item-name">${esc(pp.name)}</div>
+            <div class="tm-item-meta">${pp.builtin?'內建模板':'自訂'}${isDef?' · 預設':''}</div>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center">
+            ${pp.builtin?'<span class="tm-tag-builtin">內建</span>':''}
+            ${isDef?'<span class="tm-tag-default">★</span>':''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+}
+
+function tmCreate(){
+  const id = 'custom_' + Date.now();
+  presetsState.presets.push({ id, name:'新預設', builtin:false, notes:'', general_terms:'' });
+  savePresets();
+  tmSelectedId = id;
+  tmRender();
+}
+
+function tmDelete(id){
+  const p = getPresetById(id); if(!p||p.builtin) return;
+  if(!confirm(`確定刪除預設「${p.name}」？`)) return;
+  const i = presetsState.presets.findIndex(x=>x.id===id);
+  presetsState.presets.splice(i,1);
+  if(presetsState.defaultId===id) presetsState.defaultId='software';
+  savePresets();
+  tmSelectedId = presetsState.defaultId;
+  tmRender();
+}
+
+function tmSetDefault(id){
+  presetsState.defaultId = id;
+  savePresets();
+  tmRender();
+}
+
+function tmResetBuiltin(id){
+  const seed = BUILTIN_PRESETS.find(b=>b.id===id);
+  if(!seed) return;
+  if(!confirm(`還原「${seed.name}」為內建內容？此操作會覆蓋目前的編輯。`)) return;
+  const p = getPresetById(id);
+  p.name = seed.name; p.notes = seed.notes; p.general_terms = seed.general_terms;
+  savePresets();
+  tmRender();
 }
 
 // ── Init ──
