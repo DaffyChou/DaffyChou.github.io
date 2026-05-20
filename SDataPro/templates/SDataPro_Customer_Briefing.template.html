@@ -231,17 +231,6 @@ footer a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
-<div class="version-bar">
-  <div class="version-bar-inner">
-    <span class="version-bar-label">📅 資料版本：</span>
-    <select class="version-bar-select" onchange="if(this.value!==location.pathname.split('/').pop()) location.href=this.value">
-        <option value="SDataPro_Customer_Briefing_20260515.html">2026-05-15</option>
-        <option value="SDataPro_Customer_Briefing_20260519.html" selected>2026-05-19</option>
-    </select>
-  </div>
-</div>
-
-
 <div class="hero">
   <div class="hero-meta">客戶簡報 ｜ CLIENT BRIEFING</div>
   <h1>📡 SDataPro 取代船訊網 AIS 評估</h1>
@@ -462,8 +451,8 @@ footer a:hover{text-decoration:underline}
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="p95hdg" checked> 艏向 P95</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="p95cog" checked> 航向 P95</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="p95sog" checked> 船速 P95</label>
-        <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="xyinv" checked> XY 不合法</label>
-        <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="sdinv" checked> SD 不合法</label>
+        <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="xyinv"> XY 不合法</label>
+        <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="sdinv"> SD 不合法</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="score" checked> 綜合評分</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="map" checked> 查看地圖</label>
       </div>
@@ -843,72 +832,102 @@ footer a:hover{text-decoration:underline}
           <th>中文船名</th>
           <th>英文船名</th>
           <th>綜合評分</th>
-          <th>主要差距</th>
-          <th>位置 P95</th>
+          <th>位置符合</th>
+          <th>艏向符合</th>
+          <th>船速符合</th>
+          <th>航行狀態</th>
+          <th>位置P95(km)</th>
         </tr></thead>
         <tbody>
 <tr>
   <td class="ship-zh">發明輪</td>
   <td class="ship-en">YM EFFICIENCY</td>
   <td class="score-cell">93.8</td>
-  <td class="issue">位置 89.0%</td>
-  <td>8.6 km</td>
+  <td>89.0%</td>
+  <td>95.0%</td>
+  <td>97.9%</td>
+  <td>100.0%</td>
+  <td>8.58</td>
 </tr>
 <tr>
   <td class="ship-zh">運明輪</td>
   <td class="ship-en">YM UPSURGENCE</td>
   <td class="score-cell">93.5</td>
-  <td class="issue">位置 82.1%</td>
-  <td>24.6 km</td>
+  <td>82.1%</td>
+  <td>99.0%</td>
+  <td>100.0%</td>
+  <td>100.0%</td>
+  <td>24.63</td>
 </tr>
 <tr>
   <td class="ship-zh">納明輪</td>
   <td class="ship-en">YM TROPHY</td>
   <td class="score-cell">92.7</td>
-  <td class="issue">位置 87.5%</td>
-  <td>56.6 km</td>
+  <td>87.5%</td>
+  <td>91.8%</td>
+  <td>98.0%</td>
+  <td>100.0%</td>
+  <td>56.56</td>
 </tr>
 <tr>
   <td class="ship-zh">結明輪</td>
   <td class="ship-en">YM UNIFORMITY</td>
   <td class="score-cell">90.7</td>
-  <td class="issue">位置 84.9%</td>
-  <td>10.7 km</td>
+  <td>84.9%</td>
+  <td>94.1%</td>
+  <td>95.7%</td>
+  <td>90.2%</td>
+  <td>10.73</td>
 </tr>
 <tr>
   <td class="ship-zh">業明輪</td>
   <td class="ship-en">YM IMAGE</td>
   <td class="score-cell">90.4</td>
-  <td class="issue">位置 81.6% ／ 艏向 89.8%</td>
-  <td>22.5 km</td>
+  <td>81.6%</td>
+  <td>89.8%</td>
+  <td>99.6%</td>
+  <td>100.0%</td>
+  <td>22.54</td>
 </tr>
 <tr>
   <td class="ship-zh">長明輪</td>
   <td class="ship-en">YM COOPERATION</td>
   <td class="score-cell">88.1</td>
-  <td class="issue">位置 83.6% ／ 艏向 86.3%</td>
-  <td>14.2 km</td>
+  <td>83.6%</td>
+  <td>86.3%</td>
+  <td>97.5%</td>
+  <td>100.0%</td>
+  <td>14.25</td>
 </tr>
 <tr>
   <td class="ship-zh">洋明輪</td>
   <td class="ship-en">YM CONTINENT</td>
   <td class="score-cell">86.2</td>
-  <td class="issue">位置 74.1% ／ 艏向 89.2%</td>
-  <td>28.6 km</td>
+  <td>74.1%</td>
+  <td>89.2%</td>
+  <td>96.1%</td>
+  <td>99.6%</td>
+  <td>28.62</td>
 </tr>
 <tr>
   <td class="ship-zh">宇明輪</td>
   <td class="ship-en">YM HEIGHTS</td>
   <td class="score-cell">85.3</td>
-  <td class="issue">位置 68.1% ／ 艏向 87.5%</td>
-  <td>17.7 km</td>
+  <td>68.1%</td>
+  <td>87.5%</td>
+  <td>99.0%</td>
+  <td>100.0%</td>
+  <td>17.72</td>
 </tr>
 <tr>
   <td class="ship-zh">盛明輪</td>
   <td class="ship-en">YM MILESTONE</td>
   <td class="score-cell">80.9</td>
-  <td class="issue">艏向 66.4% ／ 船速 90.4%</td>
-  <td>7.5 km</td>
+  <td>91.0%</td>
+  <td>66.4%</td>
+  <td>90.4%</td>
+  <td>74.6%</td>
+  <td>7.52</td>
 </tr>
         </tbody>
       </table>
@@ -1263,6 +1282,19 @@ document.addEventListener('click', e => {
 });
 
 // ============ Column visibility toggles for ④ table ============
+// Apply initial column visibility based on checkbox state (on page load)
+document.querySelectorAll('[data-col-toggle]').forEach(cb => {
+  if (!cb.checked) {
+    const col = cb.dataset.colToggle;
+    const fitSection = document.getElementById('s4-fit');
+    if (fitSection) {
+      fitSection.querySelectorAll('[data-col="' + col + '"]').forEach(el => {
+        el.style.display = 'none';
+      });
+    }
+  }
+});
+
 document.querySelectorAll('[data-col-toggle]').forEach(cb => {
   cb.addEventListener('change', () => {
     const col = cb.dataset.colToggle;
