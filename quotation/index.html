@@ -407,12 +407,6 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
           <div class="field" style="grid-column:span 3"><label id="l-addr">地址</label><input type="text" id="f-addr" placeholder="臺北市..."></div>
           <div class="field"><label id="l-cp">聯絡人</label><input type="text" id="f-cp"></div>
           <div class="field"><label id="l-cphone">聯絡人電話</label><input type="text" id="f-cphone"></div>
-          <div class="field"><label id="l-tterms">官方報價類型</label>
-            <div class="type-row" style="margin-top:2px">
-              <div class="terms-pill on" id="tt-sw" onclick="setTermsType('software')">💻 <span id="l-tt-sw">軟體</span></div>
-              <div class="terms-pill" id="tt-hw" onclick="setTermsType('hardware')">📦 <span id="l-tt-hw">硬體</span></div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -633,9 +627,6 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
             <div class="fg fg-3">
               <div class="field"><label>報價單號</label><input type="text" id="of2-no" class="mono" oninput="ofUpdateMeta('quoteNo',this.value)"></div>
               <div class="field"><label>日期（民國）</label><input type="text" id="of2-date" class="mono" placeholder="115/05/20" oninput="ofUpdateMeta('quoteDate',this.value)"></div>
-              <div class="field"><label>條件預設</label>
-                <select class="preset-select" id="of2-preset" onchange="ofPickPreset(this.value)"></select>
-              </div>
               <div class="field"><label>交貨日期</label><input type="text" id="of2-delivery" placeholder="例：簽約後 14 個工作日" oninput="ofUpdateMeta('delivery',this.value)"></div>
               <div class="field"><label>幣別</label><input type="text" id="of2-currency" placeholder="新台幣(NTD)" oninput="ofUpdateMeta('currency',this.value)"></div>
               <div class="field"><label>付款條件</label><input type="text" id="of2-payment" placeholder="T/T" oninput="ofUpdateMeta('payment',this.value)"></div>
@@ -669,11 +660,23 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
           </div>
           <div class="cb">
             <div class="field" style="margin-bottom:10px">
-              <label>備註（notes）</label>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px">
+                <label style="margin-bottom:0">備註（notes）</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:12px;color:var(--ink4)">套用條件管理：</span>
+                  <select class="preset-select" id="of2-notes-preset" onchange="ofPickNotesPreset(this.value)" style="width:auto;padding:5px 8px;font-size:13px"></select>
+                </div>
+              </div>
               <textarea id="of2-notes" rows="7" oninput="ofUpdateMeta('notes',this.value)" style="border:1px solid var(--line);border-radius:var(--r8);padding:8px 10px;font-size:14px;font-family:var(--ff);resize:vertical;color:var(--ink);width:100%"></textarea>
             </div>
             <div class="field">
-              <label>一般條件（general_terms）</label>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px">
+                <label style="margin-bottom:0">一般條件（general_terms）</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:12px;color:var(--ink4)">套用條件管理：</span>
+                  <select class="preset-select" id="of2-gt-preset" onchange="ofPickGtPreset(this.value)" style="width:auto;padding:5px 8px;font-size:13px"></select>
+                </div>
+              </div>
               <textarea id="of2-gt" rows="9" oninput="ofUpdateMeta('gt',this.value)" style="border:1px solid var(--line);border-radius:var(--r8);padding:8px 10px;font-size:14px;font-family:var(--ff);resize:vertical;color:var(--ink);width:100%"></textarea>
             </div>
           </div>
@@ -727,11 +730,11 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 
 <script>
 // ══ State ══
-let lang='zh', curTypes=[], termsType='software';
+let lang='zh', curTypes=[];
 let matR=[], svcR=[], trvR=[];
 let quotes=JSON.parse(localStorage.getItem('slab_q')||'[]');
 
-// Default notes / general terms by termsType
+// Default notes / general terms seeds (used by built-in presets in 條件管理)
 const DEFAULTS = {
   software: {
     notes:
@@ -781,7 +784,6 @@ const T={
     meta:'報價基本資料',client:'客戶名稱',proj:'工程名稱',no:'報價單號',date:'日期',
     cust:'客戶完整資訊',custHint:'用於官方報價單表頭',
     tax:'統一編號',phone:'電話',fax:'傳真',addr:'地址',cp:'聯絡人',cphone:'聯絡人電話',
-    tterms:'官方報價類型',ttSw:'軟體',ttHw:'硬體',
     params:'計算參數',matm:'料件毛利率 %',labm:'人力加成率 %',wage:'每人日薪（元）',
     hMatm:'成本 × 1.6 = 報價',hLabm:'日薪 × 2 = 報價',
     mat:'料件明細',labor:'施工人力',svc:'技術服務費',trv:'出差費用',terms:'內部備注',
@@ -819,7 +821,6 @@ const T={
     meta:'Quote Info',client:'Client',proj:'Project',no:'Quote No.',date:'Date',
     cust:'Customer Detail',custHint:'For official quotation header',
     tax:'Tax ID',phone:'Phone',fax:'Fax',addr:'Address',cp:'Contact',cphone:'Contact Phone',
-    tterms:'Quote Type',ttSw:'Software',ttHw:'Hardware',
     params:'Parameters',matm:'Material Margin %',labm:'Labor Markup %',wage:'Daily Wage',
     hMatm:'Cost × 1.6 = Quote',hLabm:'Wage × 2 = Quote',
     mat:'Materials',labor:'Labor',svc:'Service Fee',trv:'Travel',terms:'Internal Notes',
@@ -871,7 +872,6 @@ function applyLang(){
     ['l-meta','meta'],['l-client','client'],['l-proj','proj'],['l-no','no'],['l-date','date'],
     ['l-cust','cust'],['l-cust-hint','custHint'],
     ['l-tax','tax'],['l-phone','phone'],['l-fax','fax'],['l-addr','addr'],['l-cp','cp'],['l-cphone','cphone'],
-    ['l-tterms','tterms'],['l-tt-sw','ttSw'],['l-tt-hw','ttHw'],
     ['l-params','params'],['l-matm','matm'],['l-labm','labm'],['l-wage','wage'],
     ['h-matm','hMatm'],['h-labm','hLabm'],
     ['l-mat','mat'],['l-labor','labor'],['l-svc','svc'],['l-trv','trv'],['l-terms','terms'],
@@ -989,9 +989,8 @@ function newQuote(){
   document.getElementById('p-wage').value=3000;
   document.getElementById('p-wk').value=4;
   document.getElementById('p-dy').value=2;
-  setTermsType('software');
   // Clear official draft
-  ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
+  ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', notesPresetId:'', gtPresetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
   ofPersist();
   // Forget which existing quote was last loaded (so save creates a new entry)
   currentQuoteNo = null;
@@ -1016,7 +1015,6 @@ function loadIntoEditor(i){
   document.getElementById('f-addr').value=c.address||'';
   document.getElementById('f-cp').value=c.contact_person||'';
   document.getElementById('f-cphone').value=c.contact_phone||'';
-  setTermsType(q.termsType||'software');
   const p=q.params||{};
   document.getElementById('p-matm').value=p.matm||60;
   document.getElementById('p-labm').value=p.labm||100;
@@ -1034,7 +1032,7 @@ function loadIntoEditor(i){
   if(q.officialDraft && Array.isArray(q.officialDraft.items)){
     ofState = JSON.parse(JSON.stringify(q.officialDraft));
   }else{
-    ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
+    ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', notesPresetId:'', gtPresetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
   }
   ofPersist();
   currentQuoteNo = q.no;
@@ -1049,16 +1047,6 @@ function toggleType(tp){
   const i=curTypes.indexOf(tp);
   if(i>=0){curTypes.splice(i,1);el.classList.remove('on');}
   else{curTypes.push(tp);el.classList.add('on');}
-  // Auto-suggest termsType from main category
-  if(curTypes.length===1){
-    setTermsType(curTypes[0]==='sw'?'software':'hardware');
-  }
-}
-
-function setTermsType(tt){
-  termsType=tt;
-  document.getElementById('tt-sw').classList.toggle('on',tt==='software');
-  document.getElementById('tt-hw').classList.toggle('on',tt==='hardware');
 }
 
 // ── Rows ──
@@ -1174,7 +1162,6 @@ function saveQuote(){
     proj:document.getElementById('f-proj').value,
     date:document.getElementById('f-date').value,
     types:curTypes.slice(),
-    termsType,
     customer:{
       tax_id:document.getElementById('f-tax').value,
       phone:document.getElementById('f-phone').value,
@@ -1359,7 +1346,6 @@ function loadTemplate(){
   ];
   curTypes=['ship'];
   ['sw','hw','net','ship'].forEach(tp=>document.getElementById('tp-'+tp).classList.toggle('on',tp==='ship'));
-  setTermsType('hardware');
   document.getElementById('f-proj').value=lang==='zh'?'船舶CCTV監控系統安裝工程':'Ship CCTV Installation';
   document.getElementById('p-matm').value=60;document.getElementById('p-labm').value=100;
   document.getElementById('p-wage').value=3000;document.getElementById('p-wk').value=4;document.getElementById('p-dy').value=2;
@@ -1374,8 +1360,7 @@ function clearForm(){
   ['sw','hw','net','ship'].forEach(tp=>document.getElementById('tp-'+tp).classList.remove('on'));
   ['f-client','f-proj','f-terms','f-tax','f-phone','f-fax','f-addr','f-cp','f-cphone'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-no').value=genNo();
-  setTermsType('software');
-  ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
+  ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', notesPresetId:'', gtPresetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
   ofPersist();
   currentQuoteNo = null;
   markClean();
@@ -1451,7 +1436,7 @@ function loadOfDraft(){
     return s;
   }catch(e){ return null; }
 }
-let ofState = loadOfDraft() || { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
+let ofState = loadOfDraft() || { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', notesPresetId:'', gtPresetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
 
 let _ofSaveTimer = null;
 function ofPersist(){
@@ -1491,10 +1476,24 @@ function setupOfficialPage(){
   }
   if(!ofState.quoteNo) ofState.quoteNo = document.getElementById('f-no').value || genNo();
   if(!ofState.quoteDate) ofState.quoteDate = rocDate(document.getElementById('f-date').value);
-  if(!ofState.presetId){
-    ofState.presetId = (termsType && getPresetById(termsType)) ? termsType : (presetsState.defaultId || 'software');
-    const p = getPresetById(ofState.presetId);
-    if(p){ ofState.notes = p.notes||''; ofState.gt = p.general_terms||''; }
+  // Migration: drafts saved with old single presetId → split to notes/gt preset ids
+  if(ofState.presetId && !ofState.notesPresetId && !ofState.gtPresetId){
+    ofState.notesPresetId = ofState.presetId;
+    ofState.gtPresetId = ofState.presetId;
+    delete ofState.presetId;
+  }
+  // First-time defaults: seed notes/gt from the default preset
+  if(typeof ofState.notesPresetId !== 'string') ofState.notesPresetId = '';
+  if(typeof ofState.gtPresetId !== 'string') ofState.gtPresetId = '';
+  if(!ofState.notesPresetId && !ofState.notes){
+    ofState.notesPresetId = presetsState.defaultId || 'software';
+    const p = getPresetById(ofState.notesPresetId);
+    if(p) ofState.notes = p.notes || '';
+  }
+  if(!ofState.gtPresetId && !ofState.gt){
+    ofState.gtPresetId = presetsState.defaultId || 'software';
+    const p = getPresetById(ofState.gtPresetId);
+    if(p) ofState.gt = p.general_terms || '';
   }
   // Defaults for new fields (handles drafts saved before these fields existed)
   if(typeof ofState.delivery !== 'string') ofState.delivery = '';
@@ -1518,8 +1517,9 @@ function setupOfficialPage(){
   document.getElementById('of2-delivery').value = ofState.delivery;
   document.getElementById('of2-currency').value = ofState.currency;
   document.getElementById('of2-payment').value = ofState.payment;
-  rebuildPresetSelect();
-  document.getElementById('of2-preset').value = ofState.presetId;
+  rebuildPresetSelects();
+  document.getElementById('of2-notes-preset').value = ofState.notesPresetId || '';
+  document.getElementById('of2-gt-preset').value = ofState.gtPresetId || '';
 
   // Notes / gt
   document.getElementById('of2-notes').value = ofState.notes;
@@ -1607,23 +1607,40 @@ function renderWorksheetSnapshot(){
   wrap.innerHTML = html;
 }
 
-function rebuildPresetSelect(){
-  const sel = document.getElementById('of2-preset');
-  if(!sel) return;
-  sel.innerHTML = presetsState.presets.map(p=>{
+function rebuildPresetSelects(){
+  // Both notes and general_terms dropdowns share the same preset list.
+  // Selecting a preset only loads that one field (mix-and-match supported).
+  const options = '<option value="">— 不套用 —</option>' + presetsState.presets.map(p=>{
     const star = p.id===presetsState.defaultId ? ' ★' : '';
     return `<option value="${esc(p.id)}">${esc(p.name)}${star}</option>`;
   }).join('');
+  const ns = document.getElementById('of2-notes-preset');
+  const gs = document.getElementById('of2-gt-preset');
+  if(ns) ns.innerHTML = options;
+  if(gs) gs.innerHTML = options;
 }
 
-function ofPickPreset(id){
-  const p = getPresetById(id);
-  if(!p) return;
-  ofState.presetId = id;
-  ofState.notes = p.notes||'';
-  ofState.gt = p.general_terms||'';
-  document.getElementById('of2-notes').value = ofState.notes;
-  document.getElementById('of2-gt').value = ofState.gt;
+function ofPickNotesPreset(id){
+  ofState.notesPresetId = id || '';
+  if(id){
+    const p = getPresetById(id);
+    if(p){
+      ofState.notes = p.notes || '';
+      document.getElementById('of2-notes').value = ofState.notes;
+    }
+  }
+  ofPersist();
+}
+
+function ofPickGtPreset(id){
+  ofState.gtPresetId = id || '';
+  if(id){
+    const p = getPresetById(id);
+    if(p){
+      ofState.gt = p.general_terms || '';
+      document.getElementById('of2-gt').value = ofState.gt;
+    }
+  }
   ofPersist();
 }
 
