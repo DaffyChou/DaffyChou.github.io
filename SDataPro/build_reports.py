@@ -409,6 +409,7 @@ def main():
     ap.add_argument('--suffix', help='Override date suffix in output filenames')
     ap.add_argument('--rebuild-all', action='store_true', help='Rebuild from all JSONs in data/')
     ap.add_argument('--output-dir', default='.', help='Output directory (default: current)')
+    ap.add_argument('--no-suffix', action='store_true', help='Output as SDataPro_Customer_Briefing.html (no date suffix)')
     args = ap.parse_args()
     
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -451,8 +452,12 @@ def main():
         
         print(f"\n📦 處理 {jf} (suffix={suffix})")
         
-        cb_out = os.path.join(output_dir, f'SDataPro_Customer_Briefing_{suffix}.html')
-        fr_out = os.path.join(output_dir, f'SDataPro_Full_Report_{suffix}.html')
+        if args.no_suffix:
+            cb_out = os.path.join(output_dir, 'SDataPro_Customer_Briefing.html')
+            fr_out = os.path.join(output_dir, 'SDataPro_Full_Report.html')
+        else:
+            cb_out = os.path.join(output_dir, f'SDataPro_Customer_Briefing_{suffix}.html')
+            fr_out = os.path.join(output_dir, f'SDataPro_Full_Report_{suffix}.html')
         
         build_one(jf, cb_tpl, cb_out, data, is_briefing=True)
         build_one(jf, fr_tpl, fr_out, data, is_briefing=False)
