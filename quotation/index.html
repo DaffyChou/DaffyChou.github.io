@@ -1811,12 +1811,35 @@ async function generateOfficialXlsx(){
     const T_LAST_REGULAR = 35;
     const delta = itemsLastRow - T_LAST_THICK;
 
-    // Clear original item cells (template's rows 15-36) before any row shifting
+    // === Manage footer merges manually ===
+    // ExcelJS's duplicateRow / spliceRows does NOT correctly handle merged cells
+    // below the shift point — values get broadcast across columns within merged
+    // ranges (visible bug). Workaround: unmerge BEFORE the shift, remerge AFTER.
+    const FOOTER_MERGES = [
+      'A37:K37',              // divider row
+      'A44:A48',              // "備註：" label
+      'B44:H48',              // notes block
+      'J44:K44', 'J45:K45',   // 總價小計 / 銷貨折讓
+      'J46:K46', 'J47:K47',   // 合計金額 / 營業稅
+      'J48:K48',              // 總計金額
+      'I49:K49',              // "客戶確認簽回" label
+      'B49:H56',              // general_terms block
+    ];
+
+    // Unmerge BEFORE row shift (preserves top-left cell value, clears others)
+    FOOTER_MERGES.forEach(range => {
+      try { ws.unMergeCells(range); } catch(e) {}
+    });
+
+    // Clear ALL columns in items area to wipe any residual sample data /
+    // formulas. Need to cover A-K because shifting may have populated C-H too.
     for(let r=15;r<=T_LAST_THICK;r++){
-      for(const c of ['A','B','I','J','K']) ws.getCell(c+r).value=null;
+      for(const c of ['A','B','C','D','E','F','G','H','I','J','K']){
+        ws.getCell(c+r).value=null;
+      }
     }
 
-    // Adjust row count so items area becomes exactly itemsLastRow-15+1 rows
+    // Adjust row count so items area becomes exactly (itemsLastRow-15+1) rows
     if(delta > 0){
       // Insert `delta` regular desc rows after row 35 (before thickBot row 36)
       // The thickBot row 36 thereby ends up at row (36 + delta) = itemsLastRow
@@ -1827,6 +1850,13 @@ async function generateOfficialXlsx(){
       // thickBot, so original row 36 shifts up to itemsLastRow
       ws.spliceRows(T_LAST_THICK + delta, -delta);
     }
+
+    // Re-merge footer at shifted positions
+    FOOTER_MERGES.forEach(range => {
+      const m = range.match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/);
+      const newRange = `${m[1]}${parseInt(m[2])+delta}:${m[3]}${parseInt(m[4])+delta}`;
+      try { ws.mergeCells(newRange); } catch(e) { console.warn('remerge failed:', newRange, e); }
+    });
 
     // Footer positions shift by delta
     const SHIFT = delta;
