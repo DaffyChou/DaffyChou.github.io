@@ -1790,6 +1790,20 @@ async function generateOfficialXlsx(){
     await wb.xlsx.load(buf);
     const ws=wb.worksheets[0];
 
+    // === Capture template cell styles BEFORE any modification ===
+    // The template defines two cell-styling patterns:
+    //   - Title row (row 15): borders + alignment matching "品項標題列"
+    //   - Desc row (row 16): borders + alignment matching "描述列"
+    // When items shift to non-standard positions, we must re-apply these styles
+    // explicitly so each cell looks correct regardless of where it lands.
+    const COLS = ['A','B','C','D','E','F','G','H','I','J','K'];
+    const titleStyle = {};
+    const descStyle = {};
+    COLS.forEach(c => {
+      titleStyle[c] = JSON.parse(JSON.stringify(ws.getCell(`${c}15`).style || {}));
+      descStyle[c]  = JSON.parse(JSON.stringify(ws.getCell(`${c}16`).style || {}));
+    });
+
     // === Compute item layout (contiguous from row 15) ===
     // Each item occupies (1 title + N description) rows, no slot reservation
     const items = ofState.items.map(it => ({
@@ -1886,15 +1900,38 @@ async function generateOfficialXlsx(){
     ws.getCell('I12').value = `付款條件：${payment}`;
 
     // === Write items into dynamically-sized area ===
+    // Each title row + each desc row gets its corresponding template style
+    // re-applied so borders / alignment look identical regardless of position.
     items.forEach((it, i) => {
+      // Title row: apply title style to all 11 columns before writing values
+      COLS.forEach(c => {
+        ws.getCell(`${c}${it.titleRow}`).style = JSON.parse(JSON.stringify(titleStyle[c]));
+      });
       ws.getCell(`A${it.titleRow}`).value = i + 1;
       ws.getCell(`B${it.titleRow}`).value = it.title;
-      it.descs.forEach((d, di) => {
-        ws.getCell(`B${it.descRows[di]}`).value = d;
-      });
       ws.getCell(`I${it.titleRow}`).value = it.qty;
       ws.getCell(`J${it.titleRow}`).value = it.price;
       ws.getCell(`K${it.titleRow}`).value = { formula: `I${it.titleRow}*J${it.titleRow}` };
+
+      // Desc rows: apply desc style to all 11 columns before writing values
+      it.descs.forEach((d, di) => {
+        const row = it.descRows[di];
+        COLS.forEach(c => {
+          ws.getCell(`${c}${row}`).style = JSON.parse(JSON.stringify(descStyle[c]));
+        });
+        ws.getCell(`B${row}`).value = d;
+      });
+    });
+
+    // === Reinforce thick bottom border on the last items row ===
+    // After row shift, the original row 36's thickBot (row-level) ends up at
+    // itemsLastRow. But the cell styles we just applied (title or desc) may
+    // not include thick bottom borders. Explicitly set bottom border medium
+    // so the items section visually terminates with a strong line, matching
+    // the corporate template's appearance.
+    COLS.forEach(c => {
+      const cell = ws.getCell(`${c}${itemsLastRow}`);
+      cell.border = { ...(cell.border || {}), bottom: { style: 'medium' } };
     });
 
     // === Re-write footer formulas (ExcelJS shifts cells but not formula text) ===
