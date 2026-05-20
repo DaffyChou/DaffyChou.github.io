@@ -1791,11 +1791,10 @@ async function generateOfficialXlsx(){
     const ws=wb.worksheets[0];
 
     // === Capture template cell styles BEFORE any modification ===
-    // The template defines two cell-styling patterns:
-    //   - Title row (row 15): borders + alignment matching "品項標題列"
-    //   - Desc row (row 16): borders + alignment matching "描述列"
-    // When items shift to non-standard positions, we must re-apply these styles
-    // explicitly so each cell looks correct regardless of where it lands.
+    // When ExcelJS's spliceRows / duplicateRow shifts rows, cell-level styles
+    // can be lost — especially for the "buffer" area (rows 38-43, between the
+    // divider and the notes block) where each row has distinct styling. We
+    // capture them now and re-apply after the shift.
     const COLS = ['A','B','C','D','E','F','G','H','I','J','K'];
     const titleStyle = {};
     const descStyle = {};
@@ -1803,6 +1802,20 @@ async function generateOfficialXlsx(){
       titleStyle[c] = JSON.parse(JSON.stringify(ws.getCell(`${c}15`).style || {}));
       descStyle[c]  = JSON.parse(JSON.stringify(ws.getCell(`${c}16`).style || {}));
     });
+
+    // Capture divider (row 37) + buffer area (rows 38-43) cell styles + row heights
+    const bufferStyles = {};  // row -> {col: style}
+    const rowHeights = {};    // row -> height
+    for(let r=37; r<=43; r++){
+      bufferStyles[r] = {};
+      COLS.forEach(c => {
+        bufferStyles[r][c] = JSON.parse(JSON.stringify(ws.getCell(`${c}${r}`).style || {}));
+      });
+      const h = ws.getRow(r).height;
+      if(h != null) rowHeights[r] = h;
+    }
+    // Default thickBot row 36 height also matters for the last items row
+    const row36Height = ws.getRow(36).height ?? 17.25;
 
     // === Compute item layout (contiguous from row 15) ===
     // Each item occupies (1 title + N description) rows, no slot reservation
@@ -1872,6 +1885,18 @@ async function generateOfficialXlsx(){
       try { ws.mergeCells(newRange); } catch(e) { console.warn('remerge failed:', newRange, e); }
     });
 
+    // Re-apply divider + buffer area cell styles at shifted positions
+    // (spliceRows / duplicateRow does not always preserve them)
+    for(let r=37; r<=43; r++){
+      const newRow = r + delta;
+      COLS.forEach(c => {
+        ws.getCell(`${c}${newRow}`).style = JSON.parse(JSON.stringify(bufferStyles[r][c]));
+      });
+      if(rowHeights[r] != null) ws.getRow(newRow).height = rowHeights[r];
+    }
+    // Restore last items row height too
+    ws.getRow(itemsLastRow).height = row36Height;
+
     // Footer positions shift by delta
     const SHIFT = delta;
     const NEW_J44 = 44 + SHIFT;
@@ -1926,12 +1951,12 @@ async function generateOfficialXlsx(){
     // === Reinforce thick bottom border on the last items row ===
     // After row shift, the original row 36's thickBot (row-level) ends up at
     // itemsLastRow. But the cell styles we just applied (title or desc) may
-    // not include thick bottom borders. Explicitly set bottom border medium
+    // not include thick bottom borders. Explicitly set bottom border thick
     // so the items section visually terminates with a strong line, matching
     // the corporate template's appearance.
     COLS.forEach(c => {
       const cell = ws.getCell(`${c}${itemsLastRow}`);
-      cell.border = { ...(cell.border || {}), bottom: { style: 'medium' } };
+      cell.border = { ...(cell.border || {}), bottom: { style: 'thick' } };
     });
 
     // === Re-write footer formulas (ExcelJS shifts cells but not formula text) ===
