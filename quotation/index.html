@@ -244,6 +244,37 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 .preset-select{width:100%;border:1px solid var(--line);border-radius:var(--r8);padding:7px 10px;font-size:14px;font-family:var(--ff);color:var(--ink);background:var(--surf);}
 .preset-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l);}
 
+/* Official quotation page */
+.official-layout{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start;max-width:1240px;margin:0 auto;}
+.cust-strip{display:flex;flex-wrap:wrap;gap:14px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:var(--r12);padding:12px 16px;margin-bottom:14px;box-shadow:var(--sh);font-size:14px;}
+.cust-strip .cs-item{display:flex;flex-direction:column;gap:2px;}
+.cust-strip .cs-lbl{font-size:12px;color:var(--ink4);font-weight:700;letter-spacing:.04em;}
+.cust-strip .cs-val{font-size:14px;font-weight:600;color:var(--ink);font-family:var(--ff);}
+.cust-strip .cs-val.mono{font-family:var(--ffm);}
+.cust-strip .cs-val.empty{color:var(--ink4);font-weight:400;font-style:italic;}
+.cust-strip-edit{margin-left:auto;}
+.cost-panel{position:sticky;top:0;}
+.cost-card{background:var(--surf);border:1px solid var(--line);border-radius:var(--r12);box-shadow:var(--sh);padding:16px;margin-bottom:14px;}
+.cost-card h4{font-size:13px;font-weight:700;color:var(--ink3);letter-spacing:.04em;margin-bottom:10px;}
+.cost-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:14px;border-bottom:1px dashed var(--surf3);}
+.cost-row:last-child{border-bottom:none;}
+.cost-row .cl{color:var(--ink3);}
+.cost-row .cv{font-family:var(--ffm);font-weight:600;color:var(--ink);}
+.cost-row .cv.blue{color:var(--blue2);}
+.cost-row .cv.green{color:var(--green);}
+.cost-row .cv.amber{color:var(--amber);}
+.cost-row .cv.red{color:var(--red);}
+.cost-row.hi{padding-top:8px;border-top:2px solid var(--line);border-bottom:none;}
+.cost-row.hi .cl{color:var(--ink);font-weight:600;}
+.margin-hero{background:var(--ink);border-radius:var(--r12);padding:16px 18px;margin-top:10px;}
+.margin-hero .mh-lbl{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.04em;}
+.margin-hero .mh-val{font-size:28px;font-weight:700;color:#FACC15;font-family:var(--ffm);letter-spacing:-.02em;}
+.margin-hero .mh-sub{font-size:13px;color:rgba(255,255,255,.7);margin-top:2px;font-family:var(--ffm);}
+.delta-up{color:var(--green);}.delta-down{color:var(--red);}
+.draft-status{font-size:12px;color:var(--ink4);display:flex;align-items:center;gap:4px;}
+.draft-status .dot-saving{width:6px;height:6px;border-radius:50%;background:var(--amber);}
+.draft-status .dot-saved{width:6px;height:6px;border-radius:50%;background:var(--green);}
+
 /* Terms management page */
 .tm-grid{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start;max-width:1180px;margin:0 auto;}
 .tm-list{display:flex;flex-direction:column;gap:6px;}
@@ -274,6 +305,10 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       <span class="sb-ico">✦</span>
       <span class="sb-label" id="l-new">新建報價</span>
     </div>
+    <div class="sb-item" onclick="goPage('official')" id="nav-official">
+      <span class="sb-ico">📄</span>
+      <span class="sb-label" id="l-official">官方報價單</span>
+    </div>
     <div class="sb-item" onclick="goPage('hist')" id="nav-hist">
       <span class="sb-ico">⊟</span>
       <span class="sb-label" id="l-hist">歷史報價</span>
@@ -301,7 +336,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       <button class="btn btn-sm" onclick="loadTemplate()" id="btn-tpl">📋 <span id="l-tpl">範本</span></button>
       <button class="btn btn-sm btn-green" onclick="saveQuote()" id="btn-save">💾 <span id="l-save">儲存</span></button>
       <button class="btn btn-sm" onclick="exportExcel()" id="btn-exp">⬇ <span id="l-exp">內部工作表</span></button>
-      <button class="btn btn-sm btn-amber" onclick="openOfficialModal()" id="btn-off">📄 <span id="l-off">官方報價單</span></button>
+      <button class="btn btn-sm btn-amber" onclick="goPage('official')" id="btn-off">📄 <span id="l-off">官方報價單</span></button>
     </div>
   </div>
 
@@ -501,7 +536,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     <div class="card">
       <div class="ch"><span class="ch-title">⚡ <span id="l-qa">快速操作</span></span></div>
       <div class="cb qa-list">
-        <button class="btn btn-amber qa-btn" onclick="openOfficialModal()">📄 <span id="qa-off">產生官方報價單 .xlsx</span></button>
+        <button class="btn btn-amber qa-btn" onclick="goPage('official')">📄 <span id="qa-off">官方報價單編輯</span></button>
         <button class="btn btn-ink qa-btn" onclick="exportExcel()">⬇ <span id="qa-exp">內部工作表 .xlsx</span></button>
         <button class="btn qa-btn" onclick="loadTemplate()">📋 <span id="qa-tpl">船舶 CCTV 範本</span></button>
         <button class="btn qa-btn" onclick="clearForm()" style="color:var(--red)">↺ <span id="qa-clr">清空重填</span></button>
@@ -538,6 +573,99 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     <div id="hist-list"></div>
   </div>
 
+  <!-- ══ OFFICIAL QUOTATION PAGE ══ -->
+  <div class="page" id="page-official">
+    <div class="official-layout">
+      <div>
+        <!-- Customer summary strip -->
+        <div class="cust-strip" id="cs-strip">
+          <div class="cs-item"><span class="cs-lbl">客戶</span><span class="cs-val" id="cs-name">—</span></div>
+          <div class="cs-item"><span class="cs-lbl">統編</span><span class="cs-val mono" id="cs-tax">—</span></div>
+          <div class="cs-item"><span class="cs-lbl">聯絡人</span><span class="cs-val" id="cs-cp">—</span></div>
+          <div class="cust-strip-edit">
+            <button class="btn btn-sm" onclick="goPage('new')">✎ 編輯客戶資訊</button>
+          </div>
+        </div>
+
+        <!-- Quote no / date / preset -->
+        <div class="card">
+          <div class="ch">
+            <span class="ch-title">📄 <span id="of2-meta">報價單表頭</span></span>
+            <div class="draft-status" id="of-draft-status"><span class="dot-saved"></span>已儲存</div>
+          </div>
+          <div class="cb">
+            <div class="fg fg-3">
+              <div class="field"><label>報價單號</label><input type="text" id="of2-no" class="mono" oninput="ofUpdateMeta('quoteNo',this.value)"></div>
+              <div class="field"><label>日期（民國）</label><input type="text" id="of2-date" class="mono" placeholder="115/05/20" oninput="ofUpdateMeta('quoteDate',this.value)"></div>
+              <div class="field"><label>條件預設</label>
+                <select class="preset-select" id="of2-preset" onchange="ofPickPreset(this.value)"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div class="card">
+          <div class="ch">
+            <span class="ch-title">📋 <span id="of2-items-hd">品項清單</span></span>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:12px;color:var(--ink4)" id="of2-i-count">0 / 5</span>
+              <button class="btn btn-sm" onclick="ofReseedFromWorksheet()" title="重新從工作表彙整 1 個品項">↻ 從工作表彙整</button>
+            </div>
+          </div>
+          <div class="cb">
+            <div id="of2-items"></div>
+            <div class="add-item-row" id="of2-add-row" style="margin-bottom:0">
+              <span style="font-size:13px;color:var(--ink3)" id="of2-add-hint">繼續新增其他品項</span>
+              <button class="btn btn-sm btn-blue" id="of2-add-btn" onclick="addOfficialItem()">＋ 新增品項</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes / Terms -->
+        <div class="card">
+          <div class="ch">
+            <span class="ch-title">📝 <span id="of2-terms-hd">備註與一般條件</span></span>
+            <button class="btn btn-xs" onclick="goPage('tm')" title="開啟條件管理">⚙ <span style="margin-left:2px">管理預設</span></button>
+          </div>
+          <div class="cb">
+            <div class="field" style="margin-bottom:10px">
+              <label>備註（notes）</label>
+              <textarea id="of2-notes" rows="7" oninput="ofUpdateMeta('notes',this.value)" style="border:1px solid var(--line);border-radius:var(--r8);padding:8px 10px;font-size:14px;font-family:var(--ff);resize:vertical;color:var(--ink);width:100%"></textarea>
+            </div>
+            <div class="field">
+              <label>一般條件（general_terms）</label>
+              <textarea id="of2-gt" rows="9" oninput="ofUpdateMeta('gt',this.value)" style="border:1px solid var(--line);border-radius:var(--r8);padding:8px 10px;font-size:14px;font-family:var(--ff);resize:vertical;color:var(--ink);width:100%"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cost panel (sticky right) -->
+      <div class="cost-panel">
+        <div class="cost-card">
+          <h4 id="cp-hd1">工作表（成本）</h4>
+          <div class="cost-row"><span class="cl">料件成本</span><span class="cv" id="cp-mat-c">$0</span></div>
+          <div class="cost-row"><span class="cl">人工成本</span><span class="cv" id="cp-lab-c">$0</span></div>
+          <div class="cost-row"><span class="cl">出差費</span><span class="cv" id="cp-trv">$0</span></div>
+          <div class="cost-row hi"><span class="cl">總成本</span><span class="cv" id="cp-cost">$0</span></div>
+        </div>
+        <div class="cost-card">
+          <h4 id="cp-hd2">官方報價（5 槽合計）</h4>
+          <div id="cp-items"></div>
+          <div class="cost-row hi"><span class="cl">官方總計</span><span class="cv blue" id="cp-of-total">$0</span></div>
+          <div class="cost-row"><span class="cl">vs 工作表報價</span><span class="cv" id="cp-vs-ws">—</span></div>
+        </div>
+        <div class="margin-hero">
+          <div class="mh-lbl">毛利率（官方總計 − 工作表成本）</div>
+          <div class="mh-val" id="cp-mpct">0%</div>
+          <div class="mh-sub" id="cp-mamt">$0</div>
+        </div>
+        <button class="btn btn-amber qa-btn" style="margin-top:14px;padding:12px" onclick="generateOfficialXlsx()">⬇ 產生 .xlsx</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ══ TERMS MANAGEMENT ══ -->
   <div class="page" id="page-tm">
     <div class="tm-grid">
@@ -567,58 +695,6 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       <button class="btn btn-sm" onclick="closeModal('detail-modal')" id="dm-cancel">關閉</button>
       <button class="btn btn-sm btn-blue" onclick="loadAndEdit()" id="dm-edit">✎ 載入編輯</button>
       <button class="btn btn-sm btn-ink" onclick="exportDetail()" id="dm-exp">⬇ Excel</button>
-    </div>
-  </div>
-</div>
-
-<!-- Official Quotation Modal -->
-<div class="modal-bg" id="official-modal">
-  <div class="modal modal-lg">
-    <div class="modal-hd">
-      <h3 id="of-title">📄 產生官方報價單</h3>
-      <button class="btn btn-ghost btn-sm" onclick="closeModal('official-modal')">✕</button>
-    </div>
-    <div class="modal-body" id="of-body">
-      <div class="section-hd"><span class="step">1</span><span id="of-s1">客戶資料</span></div>
-      <div class="fg fg-2" style="margin-bottom:8px">
-        <div class="field"><label>客戶名稱</label><input type="text" id="of-name"></div>
-        <div class="field"><label>統一編號</label><input type="text" id="of-tax" class="mono" maxlength="8"></div>
-        <div class="field"><label>電話</label><input type="text" id="of-phone"></div>
-        <div class="field"><label>傳真</label><input type="text" id="of-fax"></div>
-        <div class="field" style="grid-column:span 2"><label>地址</label><input type="text" id="of-addr"></div>
-        <div class="field"><label>聯絡人</label><input type="text" id="of-cp"></div>
-        <div class="field"><label>聯絡人電話</label><input type="text" id="of-cphone"></div>
-        <div class="field"><label>報價單號</label><input type="text" id="of-no" class="mono"></div>
-        <div class="field"><label>報價日期（民國）</label><input type="text" id="of-date" class="mono" placeholder="115/05/20"></div>
-      </div>
-
-      <div class="section-hd"><span class="step">2</span><span id="of-s2">品項（最多 5 項）</span><span style="margin-left:auto;font-size:12px;color:var(--ink4)" id="of-i-count">0 / 5</span></div>
-
-      <div id="of-items"></div>
-      <div class="add-item-row" id="of-add-row">
-        <span style="font-size:13px;color:var(--ink3)" id="of-add-hint">繼續新增其他品項</span>
-        <button class="btn btn-sm btn-blue" id="of-add-btn" onclick="addOfficialItem()">＋ 新增品項</button>
-      </div>
-
-      <div class="section-hd">
-        <span class="step">3</span><span id="of-s3">備註與一般條件</span>
-        <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-          <select class="preset-select" id="of-preset" onchange="applyPreset(this.value)" style="width:auto;padding:5px 8px;font-size:13px"></select>
-          <button class="btn btn-xs" onclick="openTermsFromModal()" title="開啟條件管理">⚙</button>
-        </div>
-      </div>
-      <div class="field" style="margin-bottom:10px">
-        <label>備註（notes）</label>
-        <textarea id="of-notes" rows="7"></textarea>
-      </div>
-      <div class="field">
-        <label>一般條件（general_terms）</label>
-        <textarea id="of-gt" rows="9"></textarea>
-      </div>
-    </div>
-    <div class="modal-ft">
-      <button class="btn btn-sm" onclick="closeModal('official-modal')">取消</button>
-      <button class="btn btn-sm btn-amber" onclick="generateOfficialXlsx()">⬇ 產生 .xlsx</button>
     </div>
   </div>
 </div>
@@ -691,7 +767,7 @@ const T={
     sum:'報價摘要',slMat:'料件',slLab:'人工',slSvc:'技術服務費',slTrv:'出差費',
     slCost:'總成本',slProfit:'總毛利',slTotal:'工程總報價',slMargin:'毛利率',
     slMpct:'料件',slLpct:'人工',slTpct:'出差',
-    qa:'快速操作',qaExp:'內部工作表 .xlsx',qaOff:'產生官方報價單 .xlsx',qaTpl:'船舶 CCTV 範本',qaClr:'清空重填',
+    qa:'快速操作',qaExp:'內部工作表 .xlsx',qaOff:'官方報價單編輯',qaTpl:'船舶 CCTV 範本',qaClr:'清空重填',
     amat:'新增料件',asvc:'新增',atrv:'新增',
     sw:'軟體',hw:'硬體',net:'系統整合',ship:'船舶',
     foAll:'全部類型',foSw:'軟體開發',foHw:'硬體服務',foNet:'系統整合',foShip:'船舶工程',
@@ -705,6 +781,9 @@ const T={
     noHist:'目前尚無報價記錄',
     ofTitle:'📄 產生官方報價單',ofS1:'客戶資料',ofS2:'品項（最多 5 項）',ofS3:'備註與一般條件',
     navTm:'條件管理',tmListHd:'條件預設',tmAdd:'新增',
+    navOfficial:'官方報價單',
+    of2Meta:'報價單表頭',of2ItemsHd:'品項清單',of2TermsHd:'備註與一般條件',
+    cpHd1:'工作表（成本）',cpHd2:'官方報價（5 槽合計）',
   },
   en:{
     navNew:'New Quote',navHist:'History',
@@ -724,7 +803,7 @@ const T={
     sum:'Summary',slMat:'Materials',slLab:'Labor',slSvc:'Services',slTrv:'Travel',
     slCost:'Total Cost',slProfit:'Gross Profit',slTotal:'Total Quote',slMargin:'Margin',
     slMpct:'Mat.',slLpct:'Labor',slTpct:'Travel',
-    qa:'Quick Actions',qaExp:'Worksheet .xlsx',qaOff:'Official Quote .xlsx',qaTpl:'Ship CCTV Template',qaClr:'Clear',
+    qa:'Quick Actions',qaExp:'Worksheet .xlsx',qaOff:'Official Quote Editor',qaTpl:'Ship CCTV Template',qaClr:'Clear',
     amat:'Add Item',asvc:'Add',atrv:'Add',
     sw:'Software',hw:'Hardware',net:'Systems',ship:'Marine',
     foAll:'All Types',foSw:'Software',foHw:'Hardware',foNet:'Systems',foShip:'Marine',
@@ -738,6 +817,9 @@ const T={
     noHist:'No quotes yet',
     ofTitle:'📄 Generate Official Quote',ofS1:'Customer',ofS2:'Items (max 5)',ofS3:'Notes & Terms',
     navTm:'Terms',tmListHd:'Presets',tmAdd:'Add',
+    navOfficial:'Official Quote',
+    of2Meta:'Quote Header',of2ItemsHd:'Items',of2TermsHd:'Notes & Terms',
+    cpHd1:'Worksheet (cost)',cpHd2:'Official quote (5 slots)',
   }
 };
 const t=k=>(T[lang]||T.zh)[k]||k;
@@ -751,8 +833,10 @@ function setLang(l){
 
 function applyLang(){
   const map=[
-    ['l-new','navNew'],['l-hist','navHist'],['l-tm','navTm'],
+    ['l-new','navNew'],['l-hist','navHist'],['l-tm','navTm'],['l-official','navOfficial'],
     ['tm-list-hd','tmListHd'],['tm-add','tmAdd'],
+    ['of2-meta','of2Meta'],['of2-items-hd','of2ItemsHd'],['of2-terms-hd','of2TermsHd'],
+    ['cp-hd1','cpHd1'],['cp-hd2','cpHd2'],
     ['l-tpl','btnTpl'],['l-save','btnSave'],['l-exp','btnExp'],['l-off','btnOff'],
     ['l-meta','meta'],['l-client','client'],['l-proj','proj'],['l-no','no'],['l-date','date'],
     ['l-cust','cust'],['l-cust-hint','custHint'],
@@ -775,12 +859,13 @@ function applyLang(){
     ['fo-all','foAll'],['fo-sw','foSw'],['fo-hw','foHw'],['fo-net','foNet'],['fo-ship','foShip'],
     ['fs-all','fsAll'],['fs-dr','fsDr'],['fs-st','fsSt'],['fs-wn','fsWn'],['fs-ls','fsLs'],
     ['dm-cancel','dmCancel'],['dm-edit','dmEdit'],['dm-exp','dmExp'],
-    ['of-title','ofTitle'],['of-s1','ofS1'],['of-s2','ofS2'],['of-s3','ofS3'],
   ];
   map.forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.textContent=t(k);});
   const hs=document.getElementById('h-search');if(hs)hs.placeholder=t('hsearch');
-  document.getElementById('topbar-title').textContent=
-    document.getElementById('page-new').classList.contains('active')?t('navNew'):t('navHist');
+  const activePage = document.querySelector('.page.active');
+  const pageId = activePage ? activePage.id.replace('page-','') : 'new';
+  const titleMap={new:'navNew',hist:'navHist',tm:'navTm',official:'navOfficial'};
+  document.getElementById('topbar-title').textContent=t(titleMap[pageId]||'navNew');
 }
 
 // ── Nav ──
@@ -789,11 +874,12 @@ function goPage(p){
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   document.getElementById('nav-'+p).classList.add('active');
-  const titleKey = p==='new'?'navNew':(p==='hist'?'navHist':'navTm');
-  document.getElementById('topbar-title').textContent=t(titleKey);
+  const titleMap={new:'navNew',hist:'navHist',tm:'navTm',official:'navOfficial'};
+  document.getElementById('topbar-title').textContent=t(titleMap[p]||'navNew');
   document.getElementById('topbar-btns').style.display=p==='new'?'flex':'none';
   if(p==='hist'){renderHist();renderHistStats();}
   if(p==='tm'){tmRender();}
+  if(p==='official'){setupOfficialPage();}
 }
 
 // ── Types ──
@@ -940,6 +1026,7 @@ function saveQuote(){
     svcR:JSON.parse(JSON.stringify(svcR)),
     trvR:JSON.parse(JSON.stringify(trvR)),
     terms:document.getElementById('f-terms').value,
+    officialDraft: JSON.parse(JSON.stringify(ofState)),
     status:'draft',
     savedAt:new Date().toISOString(),
     ...tt
@@ -1097,6 +1184,13 @@ function loadAndEdit(){
   svcR=JSON.parse(JSON.stringify(q.svcR||[]));
   trvR=JSON.parse(JSON.stringify(q.trvR||[]));
   document.getElementById('f-terms').value=q.terms||'';
+  // Restore official-quote draft if this quote has one; otherwise start fresh
+  if(q.officialDraft && Array.isArray(q.officialDraft.items)){
+    ofState = JSON.parse(JSON.stringify(q.officialDraft));
+  }else{
+    ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
+  }
+  ofPersist();
   renderAll();recalc();
   closeModal('detail-modal');goPage('new');
   toast(lang==='zh'?'已載入報價，可直接修改後重新儲存':'Loaded — edit and save to update');
@@ -1196,12 +1290,14 @@ function loadTemplate(){
 
 // ── Clear ──
 function clearForm(){
-  if(!confirm(lang==='zh'?'確定清空？':'Clear all?'))return;
+  if(!confirm(lang==='zh'?'確定清空？（包含官方報價單草稿）':'Clear all (including official draft)?'))return;
   matR=[];svcR=[];trvR=[];curTypes=[];
   ['sw','hw','net','ship'].forEach(tp=>document.getElementById('tp-'+tp).classList.remove('on'));
   ['f-client','f-proj','f-terms','f-tax','f-phone','f-fax','f-addr','f-cp','f-cphone'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-no').value=genNo();
   setTermsType('software');
+  ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
+  ofPersist();
   renderAll();recalc();toast(t('cleared'));
 }
 
@@ -1274,21 +1370,33 @@ function normalizeBullet(s){
   return '・'+s;
 }
 
-let ofState = { items: [] };
+// State persists between page visits and across sessions
+const OF_DRAFT_KEY = 'slab_official_draft_v1';
+function loadOfDraft(){
+  try{
+    const raw = localStorage.getItem(OF_DRAFT_KEY);
+    if(!raw) return null;
+    const s = JSON.parse(raw);
+    if(!s || !Array.isArray(s.items)) return null;
+    return s;
+  }catch(e){ return null; }
+}
+let ofState = loadOfDraft() || { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
 
-function openOfficialModal(){
-  // Customer info
-  document.getElementById('of-name').value=document.getElementById('f-client').value;
-  document.getElementById('of-tax').value=document.getElementById('f-tax').value;
-  document.getElementById('of-phone').value=document.getElementById('f-phone').value;
-  document.getElementById('of-fax').value=document.getElementById('f-fax').value;
-  document.getElementById('of-addr').value=document.getElementById('f-addr').value;
-  document.getElementById('of-cp').value=document.getElementById('f-cp').value;
-  document.getElementById('of-cphone').value=document.getElementById('f-cphone').value;
-  document.getElementById('of-no').value=document.getElementById('f-no').value||genNo();
-  document.getElementById('of-date').value=rocDate(document.getElementById('f-date').value);
+let _ofSaveTimer = null;
+function ofPersist(){
+  // Debounced save to localStorage; also flag draft-status visually
+  const st = document.getElementById('of-draft-status');
+  if(st){ st.innerHTML = '<span class="dot-saving"></span>儲存中…'; }
+  clearTimeout(_ofSaveTimer);
+  _ofSaveTimer = setTimeout(()=>{
+    try{ localStorage.setItem(OF_DRAFT_KEY, JSON.stringify(ofState)); }catch(e){}
+    if(st){ st.innerHTML = '<span class="dot-saved"></span>已儲存'; }
+  }, 400);
+}
 
-  // Items — seed with one item auto-aggregated from worksheet
+function ofMakeSeed(){
+  // Auto-seed from current worksheet (used when draft is empty)
   const tt=calcTotals();
   const proj=document.getElementById('f-proj').value||'';
   const total=Math.round(tt.matQ+tt.lQ+tt.svcQ+tt.trvQ);
@@ -1298,45 +1406,91 @@ function openOfficialModal(){
   }
   if(tt.lQ>0) descs.push(`系統整合、現場安裝與測試（${num('p-wk')} 人 × ${num('p-dy')} 日）`);
   if(svcR.length && svcR[0].name) descs.push(`${svcR[0].name}${svcR[0].note?'（'+svcR[0].note+'）':''}`);
-  ofState.items = [{
+  return [{
     title: proj ? `${proj} — 系統開發建置` : '',
     descs: descs.slice(0,3),
     qty: 1,
     price: total>0 ? total : 0,
   }];
-  renderOfficialItems();
+}
 
-  // Preset selector — try termsType first (legacy), fall back to defaultId
+function setupOfficialPage(){
+  // First-time seed (no items yet)
+  if(!ofState.items.length){
+    ofState.items = ofMakeSeed();
+  }
+  if(!ofState.quoteNo) ofState.quoteNo = document.getElementById('f-no').value || genNo();
+  if(!ofState.quoteDate) ofState.quoteDate = rocDate(document.getElementById('f-date').value);
+  if(!ofState.presetId){
+    ofState.presetId = (termsType && getPresetById(termsType)) ? termsType : (presetsState.defaultId || 'software');
+    const p = getPresetById(ofState.presetId);
+    if(p){ ofState.notes = p.notes||''; ofState.gt = p.general_terms||''; }
+  }
+
+  // Customer strip from worksheet
+  const name=document.getElementById('f-client').value.trim();
+  const tax=document.getElementById('f-tax').value.trim();
+  const cp=document.getElementById('f-cp').value.trim();
+  document.getElementById('cs-name').textContent = name || '—';
+  document.getElementById('cs-name').classList.toggle('empty', !name);
+  document.getElementById('cs-tax').textContent = tax || '—';
+  document.getElementById('cs-tax').classList.toggle('empty', !tax);
+  document.getElementById('cs-cp').textContent = cp || '—';
+  document.getElementById('cs-cp').classList.toggle('empty', !cp);
+
+  // Header fields
+  document.getElementById('of2-no').value = ofState.quoteNo;
+  document.getElementById('of2-date').value = ofState.quoteDate;
   rebuildPresetSelect();
-  const initialId = (termsType && getPresetById(termsType)) ? termsType : (presetsState.defaultId || 'software');
-  document.getElementById('of-preset').value = initialId;
-  applyPreset(initialId);
+  document.getElementById('of2-preset').value = ofState.presetId;
 
-  document.getElementById('official-modal').classList.add('open');
+  // Notes / gt
+  document.getElementById('of2-notes').value = ofState.notes;
+  document.getElementById('of2-gt').value = ofState.gt;
+
+  renderOfficialItems();
+  updateCostPanel();
+  ofPersist();
 }
 
 function rebuildPresetSelect(){
-  const sel = document.getElementById('of-preset');
+  const sel = document.getElementById('of2-preset');
+  if(!sel) return;
   sel.innerHTML = presetsState.presets.map(p=>{
     const star = p.id===presetsState.defaultId ? ' ★' : '';
     return `<option value="${esc(p.id)}">${esc(p.name)}${star}</option>`;
   }).join('');
 }
 
-function applyPreset(id){
+function ofPickPreset(id){
   const p = getPresetById(id);
   if(!p) return;
-  document.getElementById('of-notes').value = p.notes||'';
-  document.getElementById('of-gt').value = p.general_terms||'';
+  ofState.presetId = id;
+  ofState.notes = p.notes||'';
+  ofState.gt = p.general_terms||'';
+  document.getElementById('of2-notes').value = ofState.notes;
+  document.getElementById('of2-gt').value = ofState.gt;
+  ofPersist();
 }
 
-function openTermsFromModal(){
-  closeModal('official-modal');
-  goPage('tm');
+function ofUpdateMeta(field, v){
+  ofState[field] = v;
+  ofPersist();
+}
+
+function ofReseedFromWorksheet(){
+  if(ofState.items.length>0){
+    if(!confirm('將以工作表目前內容覆蓋第 1 個品項（其餘品項保留）。確定？')) return;
+  }
+  const seed = ofMakeSeed();
+  ofState.items[0] = seed[0];
+  renderOfficialItems(); updateCostPanel(); ofPersist();
+  toast('已從工作表彙整至品項 1');
 }
 
 function renderOfficialItems(){
-  const wrap = document.getElementById('of-items');
+  const wrap = document.getElementById('of2-items');
+  if(!wrap) return;
   wrap.innerHTML = ofState.items.map((it, i)=>{
     const maxD = SLOTS[i].desc.length;
     const descsHtml = it.descs.slice(0,maxD).map((d, di)=>`
@@ -1360,64 +1514,118 @@ function renderOfficialItems(){
         </div>
         <div>${descsHtml}</div>
         <div class="row-actions">
-          <span style="font-size:12px;color:var(--ink4)">${it.descs.length} / ${maxD} 行</span>
+          <span style="font-size:12px;color:var(--ink4)">${it.descs.length} / ${maxD} 行 · 小計 <span style="font-family:var(--ffm);color:var(--blue2);font-weight:600">${fmt((+it.qty||0)*(+it.price||0))}</span></span>
           <button class="btn btn-xs" onclick="addDesc(${i})" ${it.descs.length>=maxD?'disabled style="opacity:.4;cursor:not-allowed"':''}>＋ 新增描述行</button>
         </div>
       </div>`;
   }).join('');
-  document.getElementById('of-i-count').textContent = `${ofState.items.length} / 5`;
+  document.getElementById('of2-i-count').textContent = `${ofState.items.length} / 5`;
   const atMax = ofState.items.length>=5;
-  document.getElementById('of-add-row').classList.toggle('disabled', atMax);
-  document.getElementById('of-add-btn').disabled = atMax;
-  document.getElementById('of-add-hint').textContent = atMax ? '已達上限（模板支援最多 5 項）' : '繼續新增其他品項';
+  document.getElementById('of2-add-row').classList.toggle('disabled', atMax);
+  document.getElementById('of2-add-btn').disabled = atMax;
+  document.getElementById('of2-add-hint').textContent = atMax ? '已達上限（模板支援最多 5 項）' : '繼續新增其他品項';
+}
+
+function updateCostPanel(){
+  const tt = calcTotals();
+  document.getElementById('cp-mat-c').textContent = fmt(tt.cost - (tt.lQ ? (num('p-wk')*num('p-dy')*num('p-wage')) : 0) - tt.trvQ);
+  // Re-compute material cost cleanly:
+  let matC=0;matR.forEach(r=>{matC+=r.cost*r.qty;});
+  const lC=num('p-wk')*num('p-dy')*num('p-wage');
+  document.getElementById('cp-mat-c').textContent = fmt(matC);
+  document.getElementById('cp-lab-c').textContent = fmt(lC);
+  document.getElementById('cp-trv').textContent = fmt(tt.trvQ);
+  document.getElementById('cp-cost').textContent = fmt(tt.cost);
+
+  // Official items
+  const itemsList = document.getElementById('cp-items');
+  let ofTotal = 0;
+  itemsList.innerHTML = ofState.items.map((it, i)=>{
+    const sub = (+it.qty||0)*(+it.price||0);
+    ofTotal += sub;
+    const label = (it.title||'').slice(0,18) || `品項 ${i+1}`;
+    return `<div class="cost-row"><span class="cl" style="font-size:13px">${esc(label)}</span><span class="cv blue">${fmt(sub)}</span></div>`;
+  }).join('') || `<div class="cost-row"><span class="cl" style="font-size:13px;font-style:italic;color:var(--ink4)">尚無品項</span><span class="cv">$0</span></div>`;
+  document.getElementById('cp-of-total').textContent = fmt(ofTotal);
+
+  // Diff vs worksheet quote
+  const wsQ = tt.total;
+  const diff = ofTotal - wsQ;
+  const diffEl = document.getElementById('cp-vs-ws');
+  if(wsQ===0 && ofTotal===0){
+    diffEl.textContent = '—';
+    diffEl.className = 'cv';
+  }else{
+    const sign = diff>=0 ? '+' : '−';
+    diffEl.textContent = `${sign}${fmt(Math.abs(diff)).replace('$','$')} (${wsQ?Math.round(diff/wsQ*100):0}%)`;
+    diffEl.className = 'cv ' + (diff>=0 ? 'delta-up' : 'delta-down');
+  }
+
+  // Margin
+  const margin = ofTotal - tt.cost;
+  const mpct = ofTotal>0 ? Math.round(margin/ofTotal*100) : 0;
+  document.getElementById('cp-mpct').textContent = mpct+'%';
+  document.getElementById('cp-mamt').textContent = fmt(margin) + (margin<0?' 虧損':' 毛利');
 }
 
 function addOfficialItem(){
   if(ofState.items.length>=5){ toast('已達上限（最多 5 項）'); return; }
   ofState.items.push({ title:'', descs:[], qty:1, price:0 });
-  renderOfficialItems();
+  renderOfficialItems(); updateCostPanel(); ofPersist();
 }
 function removeOfficialItem(i){
   if(ofState.items.length<=1){ toast('至少需保留 1 項'); return; }
   ofState.items.splice(i,1);
-  renderOfficialItems();
+  renderOfficialItems(); updateCostPanel(); ofPersist();
 }
 function updateItemField(i, field, v){
   if(!ofState.items[i]) return;
   if(field==='qty'||field==='price') v = +v||0;
   ofState.items[i][field] = v;
+  // Don't re-render entire items section (would lose focus); just update cost panel
+  updateCostPanel();
+  // Update the sub line in the same row
+  const rows = document.querySelectorAll('#of2-items .item-block');
+  const row = rows[i];
+  if(row){
+    const subSpan = row.querySelector('.row-actions span span');
+    if(subSpan) subSpan.textContent = fmt((+ofState.items[i].qty||0)*(+ofState.items[i].price||0));
+  }
+  ofPersist();
 }
 function addDesc(itemIdx){
   const it = ofState.items[itemIdx]; if(!it) return;
   const maxN = SLOTS[itemIdx].desc.length;
   if(it.descs.length>=maxN){ toast(`此品項最多 ${maxN} 行描述`); return; }
-  it.descs.push(''); renderOfficialItems();
+  it.descs.push(''); renderOfficialItems(); ofPersist();
 }
 function updateDesc(itemIdx, di, v){
   const it = ofState.items[itemIdx]; if(!it) return;
   it.descs[di] = v;
+  ofPersist();
 }
 function removeDesc(itemIdx, di){
   const it = ofState.items[itemIdx]; if(!it) return;
-  it.descs.splice(di, 1); renderOfficialItems();
+  it.descs.splice(di, 1); renderOfficialItems(); ofPersist();
 }
 
 async function generateOfficialXlsx(){
   if(!ofState.items.length){ toast('請至少新增一個品項'); return; }
-  const name=document.getElementById('of-name').value.trim();
-  const taxId=document.getElementById('of-tax').value.trim();
-  if(!name){ toast('請填入客戶名稱'); return; }
-  if(!taxId){ toast('請填入統一編號'); return; }
+  // Customer pulled live from main worksheet form
+  const name=document.getElementById('f-client').value.trim();
+  const taxId=document.getElementById('f-tax').value.trim();
+  if(!name){ toast('請先到「新建報價」填入客戶名稱'); goPage('new'); return; }
+  if(!taxId){ toast('請先到「新建報價」填入統一編號'); goPage('new'); return; }
   for(let i=0;i<ofState.items.length;i++){
     const it=ofState.items[i];
     if(!String(it.title).trim()){ toast(`品項 ${i+1} 缺少標題`); return; }
     if(!(parseFloat(it.price)>0)){ toast(`品項 ${i+1} 單價必須大於 0`); return; }
   }
 
-  const quoteNo=document.getElementById('of-no').value.trim()||genNo();
-  const quoteDate=document.getElementById('of-date').value.trim();
-  const notes=document.getElementById('of-notes').value;
-  const gt=document.getElementById('of-gt').value;
+  const quoteNo=(ofState.quoteNo||document.getElementById('f-no').value).trim()||genNo();
+  const quoteDate=(ofState.quoteDate||rocDate(document.getElementById('f-date').value)).trim();
+  const notes=ofState.notes;
+  const gt=ofState.gt;
 
   try{
     const buf=await fetch('template.xlsx',{cache:'no-cache'}).then(r=>{
@@ -1431,14 +1639,14 @@ async function generateOfficialXlsx(){
     // Clear all item slots (rows 15-36)
     for(let r=15;r<=36;r++) for(const c of ['A','B','I','J','K']) ws.getCell(c+r).value=null;
 
-    // Customer header
+    // Customer header — pulled live from worksheet form
     ws.getCell(HEADER_CELLS.customer_name).value=name;
     ws.getCell(HEADER_CELLS.tax_id).value=taxId;
-    ws.getCell(HEADER_CELLS.phone).value=document.getElementById('of-phone').value.trim();
-    ws.getCell(HEADER_CELLS.fax).value=document.getElementById('of-fax').value.trim();
-    ws.getCell(HEADER_CELLS.address).value=document.getElementById('of-addr').value.trim();
-    ws.getCell(HEADER_CELLS.contact_person).value=document.getElementById('of-cp').value.trim();
-    ws.getCell(HEADER_CELLS.contact_phone).value=document.getElementById('of-cphone').value.trim();
+    ws.getCell(HEADER_CELLS.phone).value=document.getElementById('f-phone').value.trim();
+    ws.getCell(HEADER_CELLS.fax).value=document.getElementById('f-fax').value.trim();
+    ws.getCell(HEADER_CELLS.address).value=document.getElementById('f-addr').value.trim();
+    ws.getCell(HEADER_CELLS.contact_person).value=document.getElementById('f-cp').value.trim();
+    ws.getCell(HEADER_CELLS.contact_phone).value=document.getElementById('f-cphone').value.trim();
     ws.getCell(HEADER_CELLS.quote_date).value=quoteDate;
     ws.getCell(HEADER_CELLS.quote_no).value=quoteNo;
 
@@ -1468,7 +1676,6 @@ async function generateOfficialXlsx(){
     document.body.appendChild(a); a.click();
     setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },1000);
 
-    closeModal('official-modal');
     toast(t('officialDone'));
   }catch(err){
     console.error(err);
