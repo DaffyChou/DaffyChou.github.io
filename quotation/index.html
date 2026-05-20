@@ -636,6 +636,9 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
               <div class="field"><label>條件預設</label>
                 <select class="preset-select" id="of2-preset" onchange="ofPickPreset(this.value)"></select>
               </div>
+              <div class="field"><label>交貨日期</label><input type="text" id="of2-delivery" placeholder="例：簽約後 14 個工作日" oninput="ofUpdateMeta('delivery',this.value)"></div>
+              <div class="field"><label>幣別</label><input type="text" id="of2-currency" placeholder="新台幣(NTD)" oninput="ofUpdateMeta('currency',this.value)"></div>
+              <div class="field"><label>付款條件</label><input type="text" id="of2-payment" placeholder="T/T" oninput="ofUpdateMeta('payment',this.value)"></div>
             </div>
           </div>
         </div>
@@ -988,7 +991,7 @@ function newQuote(){
   document.getElementById('p-dy').value=2;
   setTermsType('software');
   // Clear official draft
-  ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
+  ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
   ofPersist();
   // Forget which existing quote was last loaded (so save creates a new entry)
   currentQuoteNo = null;
@@ -1031,7 +1034,7 @@ function loadIntoEditor(i){
   if(q.officialDraft && Array.isArray(q.officialDraft.items)){
     ofState = JSON.parse(JSON.stringify(q.officialDraft));
   }else{
-    ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
+    ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
   }
   ofPersist();
   currentQuoteNo = q.no;
@@ -1372,7 +1375,7 @@ function clearForm(){
   ['f-client','f-proj','f-terms','f-tax','f-phone','f-fax','f-addr','f-cp','f-cphone'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-no').value=genNo();
   setTermsType('software');
-  ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
+  ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
   ofPersist();
   currentQuoteNo = null;
   markClean();
@@ -1419,20 +1422,9 @@ function getPresetById(id){ return presetsState.presets.find(p=>p.id===id); }
 // ══ OFFICIAL QUOTATION (template.xlsx + ExcelJS) ══
 // ════════════════════════════════════════════════
 
-// 5 slots in the corporate template — rows 15/20/25/30/35
-const SLOTS = [
-  { seq:'A15', title:'B15', desc:['B16','B17','B18'],            qty:'I15', price:'J15', total:'K15', rowNum:15 },
-  { seq:'A20', title:'B20', desc:['B21','B22','B23','B24'],      qty:'I20', price:'J20', total:'K20', rowNum:20 },
-  { seq:'A25', title:'B25', desc:['B26','B27','B28','B29'],      qty:'I25', price:'J25', total:'K25', rowNum:25 },
-  { seq:'A30', title:'B30', desc:['B31','B32','B33','B34'],      qty:'I30', price:'J30', total:'K30', rowNum:30 },
-  { seq:'A35', title:'B35', desc:['B36'],                         qty:'I35', price:'J35', total:'K35', rowNum:35 },
-];
-const HEADER_CELLS = {
-  customer_name:'B8', contact_person:'F8', quote_date:'J8',
-  tax_id:'B9',        contact_phone:'F9',  quote_no:'J9',
-  phone:'B10',        fax:'B11',           address:'B12',
-  notes:'B44', general_terms:'B49',
-};
+// Items are written contiguously starting at row 15 (no fixed slots).
+// generateOfficialXlsx dynamically inserts/removes rows so the corporate
+// template's notes/general_terms/totals follow right after the last item row.
 
 function rocDate(d){
   if(!d) return '';
@@ -1459,7 +1451,7 @@ function loadOfDraft(){
     return s;
   }catch(e){ return null; }
 }
-let ofState = loadOfDraft() || { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'' };
+let ofState = loadOfDraft() || { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', presetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
 
 let _ofSaveTimer = null;
 function ofPersist(){
@@ -1504,6 +1496,10 @@ function setupOfficialPage(){
     const p = getPresetById(ofState.presetId);
     if(p){ ofState.notes = p.notes||''; ofState.gt = p.general_terms||''; }
   }
+  // Defaults for new fields (handles drafts saved before these fields existed)
+  if(typeof ofState.delivery !== 'string') ofState.delivery = '';
+  if(typeof ofState.currency !== 'string' || ofState.currency==='') ofState.currency = '新台幣(NTD)';
+  if(typeof ofState.payment !== 'string' || ofState.payment==='') ofState.payment = 'T/T';
 
   // Customer strip from worksheet
   const name=document.getElementById('f-client').value.trim();
@@ -1519,6 +1515,9 @@ function setupOfficialPage(){
   // Header fields
   document.getElementById('of2-no').value = ofState.quoteNo;
   document.getElementById('of2-date').value = ofState.quoteDate;
+  document.getElementById('of2-delivery').value = ofState.delivery;
+  document.getElementById('of2-currency').value = ofState.currency;
+  document.getElementById('of2-payment').value = ofState.payment;
   rebuildPresetSelect();
   document.getElementById('of2-preset').value = ofState.presetId;
 
@@ -1647,21 +1646,16 @@ function renderOfficialItems(){
   const wrap = document.getElementById('of2-items');
   if(!wrap) return;
   wrap.innerHTML = ofState.items.map((it, i)=>{
-    const maxD = SLOTS[i].desc.length;
     const descsHtml = it.descs.map((d, di)=>`
       <div class="desc-row">
         <input type="text" value="${esc(d)}" placeholder="描述 ${di+1}（會自動加 ・ 前綴）" oninput="updateDesc(${i},${di},this.value)">
         <button class="btn btn-ghost btn-xs" onclick="removeDesc(${i},${di})">✕</button>
       </div>`).join('');
     const canRemove = ofState.items.length>1;
-    const over = it.descs.length > maxD;
-    const countText = over
-      ? `<span style="color:var(--amber)">${it.descs.length} 行</span>（超過 ${maxD}：第 ${maxD}+ 行會併入 Excel 最後一行儲存格）`
-      : `${it.descs.length} / ${maxD} 行`;
     return `
       <div class="item-block">
         <div class="it-title">
-          <span>品項 ${i+1}<span style="color:var(--ink4);font-weight:500;font-size:12px;margin-left:8px">範本獨立顯示 ${maxD} 行；超過會合併</span></span>
+          <span>品項 ${i+1}<span style="color:var(--ink4);font-weight:500;font-size:12px;margin-left:8px">描述可自由增減；Excel 會依實際行數往下延伸</span></span>
           <div class="item-controls">
             ${canRemove?`<button class="btn btn-ghost btn-xs" onclick="removeOfficialItem(${i})" title="刪除此品項">✕ 刪除</button>`:''}
           </div>
@@ -1673,7 +1667,7 @@ function renderOfficialItems(){
         </div>
         <div>${descsHtml}</div>
         <div class="row-actions">
-          <span style="font-size:12px;color:var(--ink4)">${countText} · 小計 <span style="font-family:var(--ffm);color:var(--blue2);font-weight:600">${fmt((+it.qty||0)*(+it.price||0))}</span></span>
+          <span style="font-size:12px;color:var(--ink4)">${it.descs.length} 行 · 小計 <span style="font-family:var(--ffm);color:var(--blue2);font-weight:600">${fmt((+it.qty||0)*(+it.price||0))}</span></span>
           <button class="btn btn-xs" onclick="addDesc(${i})">＋ 新增描述行</button>
         </div>
       </div>`;
@@ -1781,8 +1775,11 @@ async function generateOfficialXlsx(){
 
   const quoteNo=(ofState.quoteNo||document.getElementById('f-no').value).trim()||genNo();
   const quoteDate=(ofState.quoteDate||rocDate(document.getElementById('f-date').value)).trim();
-  const notes=ofState.notes;
-  const gt=ofState.gt;
+  const notes=ofState.notes||'';
+  const gt=ofState.gt||'';
+  const delivery=(ofState.delivery||'').trim();
+  const currency=(ofState.currency||'新台幣(NTD)').trim();
+  const payment=(ofState.payment||'T/T').trim();
 
   try{
     const buf=await fetch('template.xlsx',{cache:'no-cache'}).then(r=>{
@@ -1793,51 +1790,92 @@ async function generateOfficialXlsx(){
     await wb.xlsx.load(buf);
     const ws=wb.worksheets[0];
 
-    // Clear all item slots (rows 15-36)
-    for(let r=15;r<=36;r++) for(const c of ['A','B','I','J','K']) ws.getCell(c+r).value=null;
+    // === Compute item layout (contiguous from row 15) ===
+    // Each item occupies (1 title + N description) rows, no slot reservation
+    const items = ofState.items.map(it => ({
+      title: String(it.title).trim(),
+      descs: it.descs.map(normalizeBullet).filter(Boolean),
+      qty: parseInt(it.qty)||1,
+      price: parseFloat(it.price)||0,
+    }));
+    let cursor = 15;
+    items.forEach(it => {
+      it.titleRow = cursor;
+      it.descRows = it.descs.map((_, di) => cursor + 1 + di);
+      cursor += 1 + it.descs.length;
+    });
+    const itemsLastRow = cursor - 1;  // last row used by items (inclusive)
 
-    // Customer header — pulled live from worksheet form
-    ws.getCell(HEADER_CELLS.customer_name).value=name;
-    ws.getCell(HEADER_CELLS.tax_id).value=taxId;
-    ws.getCell(HEADER_CELLS.phone).value=document.getElementById('f-phone').value.trim();
-    ws.getCell(HEADER_CELLS.fax).value=document.getElementById('f-fax').value.trim();
-    ws.getCell(HEADER_CELLS.address).value=document.getElementById('f-addr').value.trim();
-    ws.getCell(HEADER_CELLS.contact_person).value=document.getElementById('f-cp').value.trim();
-    ws.getCell(HEADER_CELLS.contact_phone).value=document.getElementById('f-cphone').value.trim();
-    ws.getCell(HEADER_CELLS.quote_date).value=quoteDate;
-    ws.getCell(HEADER_CELLS.quote_no).value=quoteNo;
+    // Template's items area: rows 15-36 (row 36 has thickBot styling)
+    const T_LAST_THICK = 36;
+    const T_LAST_REGULAR = 35;
+    const delta = itemsLastRow - T_LAST_THICK;
 
-    // Items — write into N slots
-    ofState.items.forEach((it, i)=>{
-      const slot = SLOTS[i];
-      ws.getCell(slot.seq).value = i+1;
-      ws.getCell(slot.title).value = String(it.title).trim();
-      const descs = it.descs.map(normalizeBullet).filter(Boolean);
-      const cap = slot.desc.length;
-      if(descs.length <= cap){
-        // Fits naturally — one description per template row
-        descs.forEach((d, di)=>{ ws.getCell(slot.desc[di]).value = d; });
-      }else{
-        // Overflow: first (cap-1) cells get one desc each; the rest collapse
-        // into the last desc cell with newline separators, and that row's
-        // height grows to fit all lines (Excel renders each \n as its own
-        // visual line; each line still overflows visually into empty C..H).
-        descs.slice(0, cap-1).forEach((d, di)=>{ ws.getCell(slot.desc[di]).value = d; });
-        const lastCellRef = slot.desc[cap-1];
-        const lastCell = ws.getCell(lastCellRef);
-        lastCell.value = descs.slice(cap-1).join('\n');
-        const lastRowNum = parseInt(lastCellRef.replace(/[^\d]/g,''));
-        const extraLines = descs.length - cap + 1;
-        // 17.25 is the template's default row height (in points)
-        ws.getRow(lastRowNum).height = Math.max(17.25, extraLines * 17.25);
-      }
-      ws.getCell(slot.qty).value = parseInt(it.qty)||1;
-      ws.getCell(slot.price).value = parseFloat(it.price)||0;
-      ws.getCell(slot.total).value = { formula: `I${slot.rowNum}*J${slot.rowNum}` };
+    // Clear original item cells (template's rows 15-36) before any row shifting
+    for(let r=15;r<=T_LAST_THICK;r++){
+      for(const c of ['A','B','I','J','K']) ws.getCell(c+r).value=null;
+    }
+
+    // Adjust row count so items area becomes exactly itemsLastRow-15+1 rows
+    if(delta > 0){
+      // Insert `delta` regular desc rows after row 35 (before thickBot row 36)
+      // The thickBot row 36 thereby ends up at row (36 + delta) = itemsLastRow
+      ws.duplicateRow(T_LAST_REGULAR, delta, true);
+    }else if(delta < 0){
+      // Remove (-delta) rows from end of items area, keeping the thickBot styling
+      // Remove rows from (T_LAST_THICK + delta) which is one row before original
+      // thickBot, so original row 36 shifts up to itemsLastRow
+      ws.spliceRows(T_LAST_THICK + delta, -delta);
+    }
+
+    // Footer positions shift by delta
+    const SHIFT = delta;
+    const NEW_J44 = 44 + SHIFT;
+    const NEW_J45 = 45 + SHIFT;
+    const NEW_J46 = 46 + SHIFT;
+    const NEW_J47 = 47 + SHIFT;
+    const NEW_J48 = 48 + SHIFT;
+    const NEW_NOTES = 44 + SHIFT;
+    const NEW_TERMS = 49 + SHIFT;
+
+    // === Customer header (always at rows 8-12, never shifted) ===
+    ws.getCell('B8').value=name;
+    ws.getCell('B9').value=taxId;
+    ws.getCell('B10').value=document.getElementById('f-phone').value.trim();
+    ws.getCell('B11').value=document.getElementById('f-fax').value.trim();
+    ws.getCell('B12').value=document.getElementById('f-addr').value.trim();
+    ws.getCell('F8').value=document.getElementById('f-cp').value.trim();
+    ws.getCell('F9').value=document.getElementById('f-cphone').value.trim();
+    ws.getCell('J8').value=quoteDate;
+    ws.getCell('J9').value=quoteNo;
+
+    // === New input fields: 交貨日期 / 幣別 / 付款條件 ===
+    // J10 is empty in template; I11/I12 are combined "label：value" strings
+    ws.getCell('J10').value = delivery;
+    ws.getCell('I11').value = `幣別：${currency}`;
+    ws.getCell('I12').value = `付款條件：${payment}`;
+
+    // === Write items into dynamically-sized area ===
+    items.forEach((it, i) => {
+      ws.getCell(`A${it.titleRow}`).value = i + 1;
+      ws.getCell(`B${it.titleRow}`).value = it.title;
+      it.descs.forEach((d, di) => {
+        ws.getCell(`B${it.descRows[di]}`).value = d;
+      });
+      ws.getCell(`I${it.titleRow}`).value = it.qty;
+      ws.getCell(`J${it.titleRow}`).value = it.price;
+      ws.getCell(`K${it.titleRow}`).value = { formula: `I${it.titleRow}*J${it.titleRow}` };
     });
 
-    if(notes) ws.getCell(HEADER_CELLS.notes).value=notes;
-    if(gt) ws.getCell(HEADER_CELLS.general_terms).value=gt;
+    // === Re-write footer formulas (ExcelJS shifts cells but not formula text) ===
+    ws.getCell(`J${NEW_J44}`).value = { formula: `SUM(K15:K${itemsLastRow})` };
+    ws.getCell(`J${NEW_J46}`).value = { formula: `J${NEW_J44}+J${NEW_J45}` };
+    ws.getCell(`J${NEW_J47}`).value = { formula: `J${NEW_J46}*0.05` };
+    ws.getCell(`J${NEW_J48}`).value = { formula: `SUM(J${NEW_J46}:K${NEW_J47})` };
+
+    // Notes & general_terms at shifted positions
+    if(notes) ws.getCell(`B${NEW_NOTES}`).value = notes;
+    if(gt) ws.getCell(`B${NEW_TERMS}`).value = gt;
 
     const out=await wb.xlsx.writeBuffer();
     const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
