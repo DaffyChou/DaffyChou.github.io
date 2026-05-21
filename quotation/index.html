@@ -418,28 +418,45 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
     </div>
 
-    <!-- Params (v1.3: only 料件毛利率 remains global; 人力 / 日薪 改為 per-row 在安裝施工區) -->
-    <div class="card" data-section="params">
+    <!-- Params (v1.4: 5 個依類型動態顯示的計算參數；對應區塊隱藏時，該參數也隱藏；
+                       所有參數都隱藏時整張卡也隱藏)  -->
+    <div class="card" data-section="params" id="params-card">
       <div class="ch"><span class="ch-title">⚙️ <span id="l-params">計算參數</span></span></div>
       <div class="cb">
         <div class="fg fg-3">
-          <div class="field">
+          <!-- 料件 (mat) -->
+          <div class="field" data-section="mat">
             <label id="l-matm">料件毛利率 %</label>
             <input type="number" id="p-matm" value="60" min="0" max="999" class="mono" oninput="recalc()">
-            <span class="hint" id="h-matm">成本 × (1 + 此%) = 報價</span>
+            <span class="hint">料件成本 × (1 + 此%) = 報價</span>
           </div>
-          <div class="field">
+          <!-- 安裝施工 (install) -->
+          <div class="field" data-section="install">
             <label>安裝施工 — 預設加成 %</label>
-            <input type="number" value="100" min="0" max="999" class="mono" oninput="document.getElementById('p-labm').value=this.value">
+            <input type="number" id="p-labm" value="100" min="0" max="999" class="mono">
             <span class="hint">新增施工項目時的預設加成率</span>
           </div>
-          <div class="field">
+          <div class="field" data-section="install">
             <label>安裝施工 — 預設日薪</label>
-            <input type="number" value="3000" min="0" step="500" class="mono" oninput="document.getElementById('p-wage').value=this.value">
+            <input type="number" id="p-wage" value="3000" min="0" step="500" class="mono">
             <span class="hint">新增施工項目時的預設日薪</span>
+          </div>
+          <!-- 軟體開發 (software) -->
+          <div class="field" data-section="software">
+            <label>軟體 — 預設加成 %</label>
+            <input type="number" id="p-sw-markup" value="30" min="0" max="999" class="mono">
+            <span class="hint">新增軟體模組時的預設加成率</span>
+          </div>
+          <div class="field" data-section="software">
+            <label>軟體 — 預設人日成本</label>
+            <input type="number" id="p-sw-rate" value="8000" min="0" step="500" class="mono">
+            <span class="hint">新增軟體模組時的預設人日成本</span>
           </div>
         </div>
       </div>
+      <!-- legacy hidden inputs (kept for backward-compat: addRow 仍可讀 num('p-wk') / 'p-dy') -->
+      <input type="hidden" id="p-wk" value="0">
+      <input type="hidden" id="p-dy" value="0">
     </div>
 
     <!-- Materials -->
@@ -486,11 +503,6 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
           </tr></tfoot>
         </table>
       </div>
-      <!-- Hidden legacy inputs (kept so existing JS that reads p-wk/p-dy/p-labm/p-wage as defaults still works) -->
-      <input type="hidden" id="p-wk" value="0">
-      <input type="hidden" id="p-dy" value="0">
-      <input type="hidden" id="p-labm" value="100">
-      <input type="hidden" id="p-wage" value="3000">
     </div>
 
     <!-- Services (v1.3: amount → cost + quote split) -->
@@ -961,6 +973,7 @@ function syncCustStrip(){
 
 function applySectionVisibility(){
   const conf = currentCategory ? CATEGORY_CONFIG[currentCategory] : null;
+  // First pass: show/hide individual elements based on their data-section
   document.querySelectorAll('[data-section]').forEach(el => {
     if(!conf){
       el.style.display = '';  // No category set → show everything
@@ -968,6 +981,15 @@ function applySectionVisibility(){
     }
     const section = el.getAttribute('data-section');
     el.style.display = conf.sections.includes(section) ? '' : 'none';
+  });
+  // Second pass: if a card contains its own data-section children, hide the
+  // card when all children are hidden (handles 計算參數 card whose 5 fields
+  // are each tagged with a section).
+  document.querySelectorAll('.card[data-section]').forEach(card => {
+    const innerSec = card.querySelectorAll(':scope .cb [data-section]');
+    if(!innerSec.length) return;
+    const anyVisible = Array.from(innerSec).some(el => el.style.display !== 'none');
+    if(!anyVisible) card.style.display = 'none';
   });
   // Update the category badge on cost-assessment page
   const badgeName = document.getElementById('cat-badge-name');
@@ -1379,7 +1401,15 @@ function addRow(kind){
     });
   }
   // v1.3 new cost sections:
-  if(kind==='software'){softwareR.push({name:'',role:'PM',days:1,dayRate:8000,markup:30,note:''});}
+  if(kind==='software'){
+    // v1.4: defaults from 計算參數卡的「軟體預設加成%」「軟體預設人日成本」
+    softwareR.push({
+      name:'', role:'PM', days:1,
+      dayRate: num('p-sw-rate')||8000,
+      markup:  num('p-sw-markup')||30,
+      note:''
+    });
+  }
   if(kind==='integration'){integrationR.push({name:'',target:'',complexity:'中',days:1,cost:0,quote:0,note:''});}
   if(kind==='third'){thirdR.push({name:'',supplier:'',billing:'一次性',cost:0,quote:0,note:''});}
   if(kind==='maint'){maintR.push({name:'',period:'年',cost:0,quote:0,sla:'',note:''});}
