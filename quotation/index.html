@@ -922,12 +922,12 @@ const CATEGORY_CONFIG = {
     presetHint:'hardware', sections:['params','mat','install','svc','trv','maint']
   },
   software_dev: {
-    label:'軟體開發', icon:'💻', hint:'SRP、Dashboard、進銷存、客製模組',
-    presetHint:'software', sections:['params','software','integration','svc','third','maint']
+    label:'軟體類', icon:'💻', hint:'系統開發、客製模組、年度維護皆適用（recurring 區塊可選用）',
+    presetHint:'software', sections:['params','software','integration','svc','third','maint','recurring']
   },
   integration: {
     label:'軟硬體整合', icon:'🔌', hint:'IoT Gateway、API 串接、船端＋岸端平台',
-    presetHint:'software', sections:['params','mat','software','integration','install','svc','trv','third','maint']
+    presetHint:'software', sections:['params','mat','software','integration','install','svc','trv','third','maint','recurring']
   },
   subscription: {
     label:'訂閱服務', icon:'☁️', hint:'SaaS、SDataPro 年費、資料服務',
@@ -936,11 +936,8 @@ const CATEGORY_CONFIG = {
   rental: {
     label:'租賃服務', icon:'📅', hint:'設備月租、通訊設備租賃',
     presetHint:'hardware', sections:['params','mat','svc','trv','third','maint','recurring']
-  },
-  maintenance: {
-    label:'維護服務', icon:'🔧', hint:'年維護、SLA、遠端支援',
-    presetHint:'software', sections:['params','software','integration','svc','third','maint','recurring']
   }
+  // v1.4: 維護服務 (maintenance) 已併入軟體類；舊資料會在 loadIntoEditor 自動遷移
 };
 
 let currentCategory = null;  // null = show all sections (backward compat for legacy quotes)
@@ -1349,7 +1346,10 @@ function loadIntoEditor(i){
   ofPersist();
   currentQuoteNo = q.no;
   // Restore category (legacy quotes may not have it → null shows all sections)
-  currentCategory = (q.category && CATEGORY_CONFIG[q.category]) ? q.category : null;
+  // v1.4 migration: 維護服務 (maintenance) 已併入軟體類 (software_dev)
+  let cat = q.category;
+  if(cat === 'maintenance') cat = 'software_dev';
+  currentCategory = (cat && CATEGORY_CONFIG[cat]) ? cat : null;
   applySectionVisibility();
   renderAll();recalc();
   markClean();
