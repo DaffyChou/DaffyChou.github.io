@@ -23,7 +23,7 @@ body {
 .sidebar {
   background: #0d0d0d; color: #e4eaf2;
   flex: 0 0 auto;
-  width: 56px;
+  width: 50px;
   display: flex; flex-direction: column;
   border-right: 1px solid #2a2a2a;
   transition: width 0.22s cubic-bezier(.4,.0,.2,1);
@@ -36,7 +36,7 @@ body {
 .sidebar .brand {
   position: relative;
   display: flex; align-items: center; gap: 10px;
-  padding: 14px 14px 12px;
+  padding: 12px;
   border-bottom: 1px solid #2a2a2a;
   white-space: nowrap;
 }
@@ -44,7 +44,7 @@ body {
   flex: 0 0 28px; width: 28px; height: 28px;
   border-radius: 6px;
   background: linear-gradient(135deg, #4a9eff 0%, #7ec5ff 100%);
-  color: #0d0d0d; font-weight: 800; font-size: 13px;
+  color: #0d0d0d; font-weight: 800; font-size: 14px;
   display: inline-flex; align-items: center; justify-content: center;
 }
 .sidebar .brand .brand-text {
@@ -53,15 +53,15 @@ body {
 }
 .sidebar:hover .brand-text,
 .sidebar.pinned .brand-text { opacity: 1; }
-.sidebar .brand .brand-text b { font-size: 14px; font-weight: 600; color: #e4eaf2; }
-.sidebar .brand .brand-text small { font-size: 10.5px; color: #7c8a9e; }
+.sidebar .brand .brand-text b { font-size: 16px; font-weight: 600; color: #e4eaf2; }
+.sidebar .brand .brand-text small { font-size: 10px; color: #7c8a9e; }
 
 .sidebar nav { display: flex; flex-direction: column; padding: 6px 0; flex: 1 1 auto; }
 .sidebar nav a {
   display: flex; align-items: center; gap: 12px;
-  padding: 9px 14px;
+  padding: 9px 12px;
   color: #d8dee9; text-decoration: none;
-  font-size: 13px; white-space: nowrap;
+  font-size: 14px; white-space: nowrap;
   border-left: 3px solid transparent;
 }
 .sidebar nav a .sb-ico {
@@ -110,7 +110,7 @@ body {
 
 main {
   flex: 1; min-width: 0; min-height: 0;
-  padding: 20px 24px;
+  padding: 14px;
   overflow: auto;
   display: flex; flex-direction: column;
 }
@@ -118,7 +118,7 @@ main {
 main.fleet-mode { overflow: hidden; }
 
 .page-title { margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #e4eaf2; }
-.page-title small { font-size: 12px; color: #7c8a9e; margin-left: 8px; font-weight: 400; }
+.page-title small { font-size: 14px; color: #7c8a9e; margin-left: 8px; font-weight: 400; }
 
 /* ── Fleet page layout：map top + table bottom ─────────────────── */
 .fleet-layout {
@@ -156,9 +156,9 @@ main.fleet-mode { overflow: hidden; }
 .list-handle {
   flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  height: 18px;
+  height: 24px;
   background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px;
-  color: #7c8a9e; font-size: 11px; cursor: pointer;
+  color: #7c8a9e; font-size: 12px; cursor: pointer;
   user-select: none;
   transition: background 0.15s ease;
 }
@@ -193,17 +193,17 @@ table.alert-table td.cell-vessel { z-index: 2; background: #141414; }
 table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
 
 /* 1080px 以下螢幕：船舶欄固定 250px，避免橫向卷動時欄寬隨內容跳動 */
-@media (max-width: 1080px) {
+@media (min-width: 980px) {
   table.alert-table th.col-vessel,
   table.alert-table td.cell-vessel {
-    width: 250px;
-    min-width: 250px;
-    max-width: 250px;
+    width: 230px;
+    min-width: 230px;
+    max-width: 230px;
   }
   /* 船名過長時收尾省略，pill + 連結維持單行 */
   table.alert-table td.cell-vessel a.vessel-link {
     display: inline-block;
-    max-width: calc(250px - 32px);
+    max-width: calc(230px - 32px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -224,12 +224,12 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   -webkit-backdrop-filter: blur(4px);
   max-width: calc(100% - 20px);
 }
-.map-overlay-toolbar label { font-size: 12px; color: #9aa5b8; }
+.map-overlay-toolbar label { font-size: 14px; color: #9aa5b8; }
 .map-overlay-toolbar select,
 .map-overlay-toolbar input {
   /* input / select 高度一致：相同 padding + line-height + border + font-size */
   height: 28px; box-sizing: border-box;
-  padding: 0 10px; font-size: 12px;
+  padding: 0 10px; font-size: 14px;
   border: 1px solid #2a2a2a; border-radius: 4px;
   background: #141414; color: #e4eaf2;
   outline: none; line-height: 1;
@@ -237,7 +237,7 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
 }
 .map-overlay-toolbar input { min-width: 220px; }
 .map-overlay-toolbar .summary-pills { margin-left: 6px; }
-.map-overlay-toolbar .summary-pill { padding: 3px 9px; font-size: 11px; }
+.map-overlay-toolbar .summary-pill { padding: 3px 9px; font-size: 14px; }
 
 .map-overlay-banner {
   position: absolute; top: 10px; right: 10px; z-index: 600;
@@ -245,7 +245,7 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   background: rgba(120, 20, 22, 0.92);
   border: 1px solid #c0392b; border-radius: 6px;
   padding: 7px 10px 7px 12px;
-  color: #ffd9da; font-size: 12px;
+  color: #ffd9da; font-size: 14px;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   max-width: 50%;
@@ -267,7 +267,7 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   border: 1px solid #c0392b; border-radius: 50%;
   width: 32px; height: 32px;
   display: inline-flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 14px; cursor: pointer;
+  color: #fff; font-size: 16px; cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.5);
   animation: alert-pulse 2.2s ease-in-out infinite;
 }
@@ -280,7 +280,7 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   position: absolute; top: -4px; right: -4px;
   background: #fff; color: #c0392b;
   min-width: 16px; height: 16px; padding: 0 4px;
-  border-radius: 8px; font-size: 10px; font-weight: 700;
+  border-radius: 8px; font-size: 14px; font-weight: 700;
   display: inline-flex; align-items: center; justify-content: center;
 }
 @keyframes alert-pulse {
@@ -307,7 +307,7 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
   background: #0d0d0d; border: 1px solid #333333;
   padding: 6px 10px; border-radius: 4px;
-  font-size: 11px; font-weight: 400; color: #d8dee9;
+  font-size: 14px; font-weight: 400; color: #d8dee9;
   white-space: pre-line; text-transform: none; letter-spacing: 0;
   text-align: left; line-height: 1.5;
   min-width: 160px; max-width: 240px;
@@ -339,10 +339,10 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   border-left: 1px solid #2a2a2a;
   padding: 14px 16px;
   overflow-y: auto;
-  font-size: 13px;
+  font-size: 14px;
 }
 .fleet-detail-panel h3 {
-  font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;
   margin: 14px 0 6px; color: #7c8a9e;
   border-bottom: 1px solid #2a2a2a; padding-bottom: 5px;
 }
@@ -352,19 +352,19 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   background: rgba(20, 20, 20, 0.92);
   border: 1px solid #2a2a2a; border-radius: 4px;
   padding: 5px 12px; cursor: pointer;
-  color: #9ec5ff; font-size: 12px; font-weight: 500;
+  color: #9ec5ff; font-size: 14px; font-weight: 500;
   font-family: inherit;
 }
 .fleet-detail-back:hover { background: rgba(44,108,219,0.25); color: #e4eaf2; }
-.fleet-detail-back .en { color: #7c8a9e; margin-left: 4px; font-size: 11px; }
+.fleet-detail-back .en { color: #7c8a9e; margin-left: 4px; font-size: 14px; }
 
 .detail-header {
   display: flex; align-items: center; gap: 8px;
   margin-bottom: 10px; padding-bottom: 8px;
   border-bottom: 1px solid #2a2a2a;
 }
-.detail-header .name { font-weight: 600; color: #e4eaf2; font-size: 14px; }
-.detail-header .imo { color: #7c8a9e; font-size: 11px; margin-left: auto; }
+.detail-header .name { font-weight: 600; color: #e4eaf2; font-size: 16px; }
+.detail-header .imo { color: #7c8a9e; font-size: 14px; margin-left: auto; }
 
 /* 表格內船名 cell：可點擊樣式 */
 table.alert-table td.cell-vessel a.vessel-link.is-active {
@@ -372,7 +372,7 @@ table.alert-table td.cell-vessel a.vessel-link.is-active {
 }
 table.alert-table td.cell-vessel a.vessel-link.is-active::before {
   content: "▶ ";
-  color: #9ec5ff; font-size: 10px;
+  color: #9ec5ff; font-size: 14px;
 }
 
 /* 船舶圖示在船隊地圖上的脈動警示光環 */
@@ -400,31 +400,31 @@ table.alert-table td.cell-vessel a.vessel-link.is-active::before {
 .bi-th {
   display: flex; flex-direction: column;
   line-height: 1.25;
-  font-size: 11px;
+  font-size: 12px;
 }
 .bi-th .en {
-  font-weight: 400; font-size: 10px;
+  font-weight: 400; font-size: 12px;
   color: #5e6b80; letter-spacing: 0.3px;
   text-transform: none;
 }
 .bi-line { color: #9aa5b8; }
-.bi-line .en { color: #5e6b80; margin-left: 4px; font-size: 11px; }
+.bi-line .en { color: #5e6b80; margin-left: 4px; font-size: 14px; }
 
 /* 數字合併欄樣式 */
 .num-compound {
   font-family: ui-monospace, "SF Mono", Consolas, monospace;
   font-variant-numeric: tabular-nums;
-  white-space: nowrap; font-size: 12px;
+  white-space: nowrap; font-size: 14px;
 }
 .num-compound .primary  { color: #e4eaf2; font-weight: 600; }
 .num-compound .sep      { color: #4a5872; margin: 0 1px; }
 .num-compound .secondary{ color: #c4cdda; }
-.num-compound .meta     { color: #7c8a9e; font-weight: 400; margin-left: 4px; font-size: 11px; }
+.num-compound .meta     { color: #7c8a9e; font-weight: 400; margin-left: 4px; font-size: 14px; }
 .num-compound .warn     { color: #ff8a8a; }
 .num-compound .amber    { color: #f5b753; }
 .num-compound .dev-tag  {
   display: inline-block;
-  font-size: 10px; padding: 1px 6px;
+  font-size: 14px; padding: 1px 6px;
   background: rgba(255,107,107,0.18); color: #ff8a8a;
   border-radius: 8px; margin-left: 4px;
   font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
@@ -440,11 +440,11 @@ table.alert-table td.cell-vessel a.vessel-link.is-active::before {
 }
 table.alert-table {
   width: 100%; border-collapse: collapse;
-  font-size: 13px; color: #d8dee9; min-width: 1620px;
+  font-size: 14px; color: #d8dee9; min-width: 1620px;
 }
 table.alert-table th {
   background: #0f0f0f; font-weight: 600;
-  color: #9aa5b8; font-size: 11px;
+  color: #9aa5b8; font-size: 14px;
   text-transform: uppercase; letter-spacing: 0.3px;
   padding: 10px 8px; text-align: center;
   border-bottom: 1px solid #2a2a2a;
@@ -541,7 +541,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
   display: inline-flex; align-items: center; gap: 6px;
   padding: 3px 9px; border-radius: 12px;
   background: rgba(44,108,219,0.18); color: #9ec5ff;
-  font-size: 11px; font-weight: 600; margin-right: 8px;
+  font-size: 14px; font-weight: 600; margin-right: 8px;
 }
 .vessel-pill::before {
   content: ""; display: inline-block;
@@ -550,7 +550,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 
 .ais-status {
   display: inline-block; padding: 3px 10px; border-radius: 3px;
-  font-size: 11px; font-weight: 500; letter-spacing: 0.3px;
+  font-size: 14px; font-weight: 500; letter-spacing: 0.3px;
   background: #222222; color: #c4cdda;
 }
 .ais-status.moored  { background: #222222; color: #c4cdda; }
@@ -558,13 +558,13 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .ais-status.anchored  { background: rgba(245,166,35,0.18); color: #f5b753; }
 .ais-status.unknown   { background: #1f1f1f; color: #7c8a9e; }
 
-.mono { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 12px; color: #c4cdda; }
+.mono { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 14px; color: #c4cdda; }
 .muted { color: #7c8a9e; }
 
 .btn {
   display: inline-block; padding: 5px 12px; border-radius: 4px;
   background: #2c6cdb; color: #fff; text-decoration: none;
-  font-size: 12px; border: none; cursor: pointer;
+  font-size: 14px; border: none; cursor: pointer;
 }
 .btn:hover { background: #3d7eed; }
 .btn-secondary { background: transparent; color: #7ec5ff; border: 1px solid #2c6cdb; }
@@ -575,7 +575,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
   margin-bottom: 14px; flex-wrap: wrap;
 }
 .toolbar select, .toolbar input {
-  padding: 6px 10px; font-size: 13px;
+  padding: 6px 10px; font-size: 14px;
   border: 1px solid #333333; border-radius: 4px;
   background: #1a1a1a; color: #d8dee9;
 }
@@ -584,7 +584,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
   display: inline-flex; align-items: center; gap: 8px;
   padding: 5px 12px; border-radius: 14px;
   background: #1a1a1a; border: 1px solid #2a2a2a;
-  font-size: 12px; color: #c4cdda;
+  font-size: 14px; color: #c4cdda;
 }
 .summary-pill .dot {
   width: 8px; height: 8px; border-radius: 50%;
@@ -597,7 +597,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
   background: #141414; border: 1px solid #2a2a2a;
   border-radius: 6px; padding: 10px 14px;
   display: flex; gap: 22px; align-items: center;
-  flex-wrap: wrap; font-size: 12px; color: #c4cdda;
+  flex-wrap: wrap; font-size: 14px; color: #c4cdda;
   margin-top: 12px;
 }
 .legend-bar b { color: #e4eaf2; }
@@ -606,7 +606,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 
 .banner {
   background: rgba(245,77,79,0.10); border-left: 4px solid #ff4d4f;
-  padding: 10px 14px; font-size: 13px; color: #ffb3b4;
+  padding: 10px 14px; font-size: 14px; color: #ffb3b4;
   border-radius: 4px; margin-bottom: 14px;
 }
 
@@ -618,10 +618,10 @@ table.alert-table tr:last-child td { border-bottom: none; }
   border-radius: 3px; overflow: hidden; min-width: 60px;
 }
 .progress-fill { height: 100%; }
-.progress-pct { font-size: 12px; color: #9aa5b8; min-width: 36px; }
+.progress-pct { font-size: 14px; color: #9aa5b8; min-width: 36px; }
 .dev-count {
   display: inline-block; margin-left: 6px;
-  font-size: 11px; padding: 1px 7px;
+  font-size: 14px; padding: 1px 7px;
   background: rgba(255,107,107,0.18); color: #ff8a8a;
   border-radius: 8px;
 }
@@ -639,7 +639,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
   color: #d8dee9;
 }
 .side-panel h3 {
-  font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+  font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;
   margin: 16px 0 8px; color: #7c8a9e;
   border-bottom: 1px solid #2a2a2a; padding-bottom: 6px;
 }
@@ -653,9 +653,9 @@ table.alert-table tr:last-child td { border-bottom: none; }
   display: flex; align-items: baseline; justify-content: space-between;
   margin-bottom: 8px;
 }
-.xtd-label { font-size: 12px; color: #9aa5b8; text-transform: uppercase; letter-spacing: 0.4px; }
+.xtd-label { font-size: 14px; color: #9aa5b8; text-transform: uppercase; letter-spacing: 0.4px; }
 .xtd-value { font-size: 24px; font-weight: 600; color: #e4eaf2; font-variant-numeric: tabular-nums; }
-.xtd-value .unit { font-size: 12px; color: #7c8a9e; margin-left: 4px; font-weight: 400; }
+.xtd-value .unit { font-size: 14px; color: #7c8a9e; margin-left: 4px; font-weight: 400; }
 .xtd-bar {
   position: relative; height: 8px; background: #1f1f1f;
   border-radius: 4px; overflow: hidden; margin: 8px 0 6px;
@@ -670,7 +670,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 }
 .xtd-foot {
   display: flex; justify-content: space-between;
-  font-size: 11px; color: #7c8a9e;
+  font-size: 14px; color: #7c8a9e;
 }
 
 .alert-list {
@@ -680,13 +680,13 @@ table.alert-table tr:last-child td { border-bottom: none; }
   display: grid; grid-template-columns: 28px 1fr auto;
   align-items: center; gap: 10px;
   padding: 8px 10px; background: #1a1a1a;
-  border-radius: 4px; font-size: 13px;
+  border-radius: 4px; font-size: 14px;
 }
 .alert-row .alert-icon { display: flex; align-items: center; justify-content: center; }
 .alert-row .alert-name { color: #e4eaf2; font-weight: 500; }
-.alert-row .alert-meta { font-size: 11px; color: #7c8a9e; margin-top: 1px; }
+.alert-row .alert-meta { font-size: 14px; color: #7c8a9e; margin-top: 1px; }
 .alert-row .alert-tag {
-  font-size: 10px; font-weight: 600; padding: 2px 8px;
+  font-size: 14px; font-weight: 600; padding: 2px 8px;
   border-radius: 8px; text-transform: uppercase; letter-spacing: 0.4px;
 }
 .alert-tag.critical { background: rgba(255,77,79,0.15); color: #ff8a8a; }
@@ -694,14 +694,14 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .alert-tag.normal   { background: rgba(108,122,145,0.15); color: #aab4c4; }
 .alert-tag.na       { background: rgba(108,122,145,0.10); color: #7c8a9e; }
 
-.kv { font-size: 13px; display: grid; grid-template-columns: 110px 1fr; gap: 4px 8px; }
-.kv .k { color: #7c8a9e; font-size: 12px; }
+.kv { font-size: 14px; display: grid; grid-template-columns: 110px 1fr; gap: 4px 8px; }
+.kv .k { color: #7c8a9e; font-size: 14px; }
 .kv .v { color: #e4eaf2; font-weight: 500; }
 
 /* Map overlays */
 .legend {
   display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
-  font-size: 12px; color: #c4cdda;
+  font-size: 14px; color: #c4cdda;
   background: rgba(20, 20, 20, 0.92); padding: 6px 12px;
   border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.4);
   border: 1px solid #2a2a2a;
@@ -714,7 +714,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
   background: rgba(20, 20, 20, 0.92);
   padding: 8px 12px; border-radius: 6px;
   border: 1px solid #2a2a2a;
-  font-size: 12px; color: #d8dee9;
+  font-size: 14px; color: #d8dee9;
   min-width: 200px;
 }
 .layer-toggle label { display: flex; align-items: center; gap: 6px; margin: 3px 0; cursor: pointer; }
@@ -724,7 +724,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
   position: absolute; left: 12px; bottom: 12px; z-index: 500;
   background: rgba(20, 20, 20, 0.92);
   border: 1px solid #2a2a2a; border-radius: 6px;
-  color: #d8dee9; font-size: 12px;
+  color: #d8dee9; font-size: 14px;
   max-width: 280px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.5);
   backdrop-filter: blur(4px);
@@ -738,7 +738,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 }
 .risk-toggle.open .rt-head { border-bottom-color: #2a2a2a; }
 .risk-toggle .rt-title { font-weight: 600; color: #e4eaf2; }
-.risk-toggle .rt-title .en { color: #7c8a9e; font-weight: 400; margin-left: 4px; font-size: 11px; }
+.risk-toggle .rt-title .en { color: #7c8a9e; font-weight: 400; margin-left: 4px; font-size: 14px; }
 .risk-toggle .rt-chev { color: #7c8a9e; transition: transform 0.18s ease; }
 .risk-toggle.open .rt-chev { transform: rotate(180deg); }
 .risk-toggle .rt-body {
@@ -752,7 +752,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
   padding-bottom: 6px; border-bottom: 1px dashed #2a2a2a;
 }
 .risk-toggle .rt-actions button {
-  flex: 1; padding: 3px 6px; font-size: 11px;
+  flex: 1; padding: 3px 6px; font-size: 14px;
   background: #1a1a1a; color: #c4cdda;
   border: 1px solid #333333; border-radius: 3px;
   cursor: pointer; font-family: inherit;
@@ -769,31 +769,31 @@ table.alert-table tr:last-child td { border-bottom: none; }
   border: 1px solid rgba(255,255,255,0.15);
 }
 .risk-toggle .rt-cnt {
-  margin-left: auto; color: #7c8a9e; font-size: 10px;
+  margin-left: auto; color: #7c8a9e; font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 
 /* 風險區 popup 內容樣式 */
-.rz-popup { font-size: 12px; line-height: 1.5; max-width: 300px; }
+.rz-popup { font-size: 14px; line-height: 1.5; max-width: 300px; }
 .rz-popup .rz-cat {
   display: inline-block; padding: 1px 8px; border-radius: 8px;
-  font-size: 10px; font-weight: 600; margin-bottom: 6px;
+  font-size: 14px; font-weight: 600; margin-bottom: 6px;
   letter-spacing: 0.3px;
 }
-.rz-popup .rz-name { font-weight: 600; color: #e4eaf2; font-size: 13px; margin-bottom: 2px; }
-.rz-popup .rz-name-en { color: #7c8a9e; font-size: 11px; margin-bottom: 4px; }
+.rz-popup .rz-name { font-weight: 600; color: #e4eaf2; font-size: 14px; margin-bottom: 2px; }
+.rz-popup .rz-name-en { color: #7c8a9e; font-size: 14px; margin-bottom: 4px; }
 .rz-popup .rz-type {
   display: inline-block;
-  font-size: 10.5px; color: #c4cdda;
+  font-size: 14px; color: #c4cdda;
   padding: 1px 6px; margin: 0 0 6px;
   background: rgba(255,255,255,0.06); border-radius: 3px;
 }
 .rz-popup .rz-desc { color: #c4cdda; margin-bottom: 4px; }
-.rz-popup .rz-desc-en { color: #7c8a9e; font-size: 11px; margin-bottom: 8px; font-style: italic; }
+.rz-popup .rz-desc-en { color: #7c8a9e; font-size: 14px; margin-bottom: 8px; font-style: italic; }
 .rz-popup .rz-meta {
   margin-top: 6px; padding-top: 6px;
   border-top: 1px solid #2a2a2a;
-  font-size: 11px; color: #9aa5b8;
+  font-size: 14px; color: #9aa5b8;
 }
 .rz-popup .rz-meta .rz-kv {
   display: grid; grid-template-columns: 74px 1fr;
@@ -805,7 +805,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .rz-popup .rz-meta a:hover { text-decoration: underline; }
 .rz-popup .rz-bbox {
   font-family: ui-monospace, "SF Mono", Consolas, monospace;
-  font-size: 10.5px;
+  font-size: 14px;
 }
 
 .alert-banner-strip {
@@ -815,7 +815,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .alert-chip {
   background: rgba(20, 20, 20, 0.92); border: 1px solid #2a2a2a;
   border-radius: 14px; padding: 5px 12px;
-  font-size: 12px; color: #e4eaf2; font-weight: 500;
+  font-size: 14px; color: #e4eaf2; font-weight: 500;
   display: inline-flex; align-items: center; gap: 6px;
 }
 .alert-chip .dot { width: 8px; height: 8px; border-radius: 50%; }
@@ -829,7 +829,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .ship-icon-label {
   margin-top: 2px; padding: 2px 8px;
   background: rgba(20, 20, 20, 0.92);
-  color: #e4eaf2; font-size: 12px; font-weight: 600;
+  color: #e4eaf2; font-size: 14px; font-weight: 600;
   border-radius: 8px; white-space: nowrap;
   border: 1px solid #2a2a2a;
 }
@@ -862,27 +862,27 @@ table.alert-table tr:last-child td { border-bottom: none; }
 /* ── Event handling UI ─────────────────────────────────────────── */
 .ev-status {
   display: inline-block; padding: 3px 10px; border-radius: 10px;
-  font-size: 11px; font-weight: 600; white-space: nowrap;
+  font-size: 14px; font-weight: 600; white-space: nowrap;
 }
 .ev-row {
   display: grid; grid-template-columns: 1fr auto;
   align-items: start; gap: 8px;
   padding: 8px 10px; background: #1a1a1a;
-  border-radius: 4px; font-size: 12px;
+  border-radius: 4px; font-size: 14px;
   cursor: pointer; transition: background 0.15s;
 }
 .ev-row:hover { background: #222222; }
 .ev-row .ev-title { color: #e4eaf2; font-weight: 500; }
-.ev-row .ev-meta  { color: #7c8a9e; font-size: 11px; margin-top: 2px; }
+.ev-row .ev-meta  { color: #7c8a9e; font-size: 14px; margin-top: 2px; }
 .ev-row .ev-dim {
   display: inline-block; padding: 0 6px;
   background: #141414; color: #9aa5b8;
-  border-radius: 3px; font-size: 10px; margin-right: 4px;
+  border-radius: 3px; font-size: 14px; margin-right: 4px;
 }
 .ev-row.cleared { opacity: 0.55; }
 .ev-row.cleared .ev-title::after {
   content: " · 條件已消失 / cleared";
-  color: #5e6b80; font-weight: 400; font-size: 10px;
+  color: #5e6b80; font-weight: 400; font-size: 14px;
 }
 
 /* Event modal */
@@ -901,7 +901,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 }
 .modal h3 { margin: 0 0 4px; font-size: 16px; color: #e4eaf2; }
 .modal .modal-sub {
-  color: #7c8a9e; font-size: 12px; margin-bottom: 14px;
+  color: #7c8a9e; font-size: 14px; margin-bottom: 14px;
   padding-bottom: 12px; border-bottom: 1px solid #2a2a2a;
 }
 .modal .modal-actions { margin-top: 16px; text-align: right; }
@@ -913,7 +913,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 }
 .modal-close:hover { color: #e4eaf2; }
 .modal h4 {
-  font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
+  font-size: 14px; text-transform: uppercase; letter-spacing: 0.4px;
   margin: 14px 0 6px; color: #7c8a9e;
   border-bottom: 1px solid #2a2a2a; padding-bottom: 4px;
 }
@@ -927,7 +927,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .trans-btn {
   border: none; cursor: pointer; font-family: inherit;
   padding: 7px 14px; border-radius: 4px;
-  font-size: 13px; font-weight: 500;
+  font-size: 14px; font-weight: 500;
   background: #2c6cdb; color: #fff;
 }
 .trans-btn:hover { background: #3d7eed; }
@@ -940,17 +940,17 @@ table.alert-table tr:last-child td { border-bottom: none; }
 }
 .note-item {
   background: #1a1a1a; border-radius: 4px;
-  padding: 6px 10px; font-size: 12px;
+  padding: 6px 10px; font-size: 14px;
 }
-.note-item .note-head { color: #7c8a9e; font-size: 11px; margin-bottom: 2px; }
+.note-item .note-head { color: #7c8a9e; font-size: 14px; margin-bottom: 2px; }
 .note-input {
   width: 100%; padding: 8px 10px;
   background: #1a1a1a; border: 1px solid #333333;
   border-radius: 4px; color: #e4eaf2; font-family: inherit;
-  font-size: 13px; resize: vertical; min-height: 60px;
+  font-size: 14px; resize: vertical; min-height: 60px;
 }
 
-.history-list { font-size: 12px; }
+.history-list { font-size: 14px; }
 .history-item {
   display: flex; gap: 8px;
   padding: 4px 0;
@@ -962,7 +962,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .history-item .h-arrow { color: #5e6b80; }
 
 select.ev-select {
-  padding: 6px 10px; font-size: 13px;
+  padding: 6px 10px; font-size: 14px;
   border: 1px solid #333333; border-radius: 4px;
   background: #1a1a1a; color: #d8dee9; font-family: inherit;
 }
@@ -979,7 +979,7 @@ select.ev-select {
   width: 80px;
   background: transparent; border: none;
   padding: 4px 8px;
-  font: 600 13px ui-monospace, "SF Mono", Consolas, monospace;
+  font: 600 14px ui-monospace, "SF Mono", Consolas, monospace;
   outline: none;
   text-align: right;
 }
@@ -992,7 +992,7 @@ select.ev-select {
   padding: 0 8px;
   background: #1a1a1a;
   border-left: 1px solid #2a2a2a;
-  color: #9aa5b8; font-size: 11px;
+  color: #9aa5b8; font-size: 14px;
   white-space: nowrap;
   cursor: help;
 }
@@ -1006,9 +1006,9 @@ select.ev-select {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 14px; border-radius: 14px;
   background: #141414; border: 1px solid #2a2a2a;
-  font-size: 12px; color: #c4cdda;
+  font-size: 14px; color: #c4cdda;
 }
-.ev-stat-pill .num { color: #e4eaf2; font-weight: 600; font-size: 14px; }
+.ev-stat-pill .num { color: #e4eaf2; font-weight: 600; font-size: 16px; }
 
 /* Timeline */
 .timeline {
@@ -1037,13 +1037,13 @@ select.ev-select {
   display: flex; justify-content: space-between; align-items: baseline;
   margin-bottom: 4px;
 }
-.timeline-item .t-title { color: #e4eaf2; font-weight: 600; font-size: 13px; }
-.timeline-item .t-time { color: #7c8a9e; font-size: 11px; font-variant-numeric: tabular-nums; }
-.timeline-item .t-body { color: #c4cdda; font-size: 12px; line-height: 1.5; }
+.timeline-item .t-title { color: #e4eaf2; font-weight: 600; font-size: 14px; }
+.timeline-item .t-time { color: #7c8a9e; font-size: 14px; font-variant-numeric: tabular-nums; }
+.timeline-item .t-body { color: #c4cdda; font-size: 14px; line-height: 1.5; }
 .timeline-item .t-vessel {
   display: inline-block; padding: 1px 8px;
   background: rgba(44,108,219,0.18); color: #9ec5ff;
-  font-size: 11px; border-radius: 8px; margin-left: 6px;
+  font-size: 14px; border-radius: 8px; margin-left: 6px;
 }
 </style>
 </head>
@@ -1904,9 +1904,9 @@ function renderUpperArea(enriched) {
       <div class="alert-row" style="grid-template-columns:24px 1fr auto;gap:8px;padding:8px 10px">
         <div class="alert-icon">${DIM_META[k].icon(iconColor)}</div>
         <div style="min-width:0">
-          <div style="font-size:12px">
+          <div style="font-size:14px">
             <span class="alert-name">${DIM_META[k].label}</span>
-            <span style="color:#5e6b80;margin-left:4px;font-size:11px">${DIM_META[k].short}</span>
+            <span style="color:#5e6b80;margin-left:4px;font-size:14px">${DIM_META[k].short}</span>
           </div>
           <div class="alert-meta" style="margin-top:3px;line-height:1.45">${dimDescription(v, k, a)}</div>
         </div>
@@ -1934,7 +1934,7 @@ function renderUpperArea(enriched) {
       <aside class="fleet-detail-panel">
         <div class="detail-header">
           <span class="name">${escapeHtml(v.vessel_name)}</span>
-          <span class="ais-status ${status.key}" style="font-size:10px">${status.label}</span>
+          <span class="ais-status ${status.key}" style="font-size:14px">${status.label}</span>
           <span class="imo">IMO ${v.imo}</span>
         </div>
 
@@ -1963,10 +1963,10 @@ function renderUpperArea(enriched) {
                 </div>
                 <div class="ev-meta">${DIM_META[e.dimension].label} · 開立 ${e.opened_at.slice(5,16)}${e.assignee ? ` · ${escapeHtml(e.assignee)}` : ""}</div>
               </div>
-              <div style="color:#5e6b80;font-size:11px">›</div>
+              <div style="color:#5e6b80;font-size:14px">›</div>
             </div>`).join("");
           const moreLink = vEvents.length > 6
-            ? `<a href="#/events" style="font-size:11px;color:#9ec5ff;text-decoration:none;display:block;margin-top:4px;text-align:right">查看全部 ${vEvents.length} 件 / View all →</a>`
+            ? `<a href="#/events" style="font-size:14px;color:#9ec5ff;text-decoration:none;display:block;margin-top:4px;text-align:right">查看全部 ${vEvents.length} 件 / View all →</a>`
             : "";
           return `
             <h3>進行中事件 <span style="color:#5e6b80;text-transform:none;font-weight:400">/ Active Events (${vEvents.length})</span></h3>
@@ -1975,7 +1975,7 @@ function renderUpperArea(enriched) {
         })()}
 
         <h3>當前 AIS 位置 <span style="color:#5e6b80;text-transform:none;font-weight:400">/ Current AIS Position</span></h3>
-        <div class="kv" style="font-size:12px">
+        <div class="kv" style="font-size:14px">
           <span class="k">MMSI</span><span class="v mono">${v.mmsi || "-"}</span>
           <span class="k">緯度 / Lat</span><span class="v mono">${dms(v.latitude, "lat")}</span>
           <span class="k">經度 / Lon</span><span class="v mono">${dms(v.longitude, "lon")}</span>
@@ -1986,7 +1986,7 @@ function renderUpperArea(enriched) {
         </div>
 
         <h3>計畫航線 <span style="color:#5e6b80;text-transform:none;font-weight:400">/ Planned Route</span></h3>
-        <div class="kv" style="font-size:12px">
+        <div class="kv" style="font-size:14px">
           <span class="k">Plan ID</span><span class="v mono">${v.plan_id}</span>
           <span class="k">來源 / Source</span><span class="v">${v.plan_source}</span>
           <span class="k">計畫點數 / Pts</span><span class="v mono">${v.planned_track.length}</span>
@@ -1996,7 +1996,7 @@ function renderUpperArea(enriched) {
 
         ${v.open_event ? `
         <h3>Open Event <span style="color:#5e6b80;text-transform:none;font-weight:400">/ 未結案事件</span></h3>
-        <div class="kv" style="font-size:12px">
+        <div class="kv" style="font-size:14px">
           <span class="k">Event ID</span><span class="v mono">#${v.open_event.id}</span>
           <span class="k">等級 / Level</span><span class="v">${levelTag(v.open_event.event_level === "Warning" ? "critical" : "warning")}</span>
           <span class="k">開始 / Start</span><span class="v mono">${v.open_event.start_time}</span>
@@ -2078,7 +2078,7 @@ function renderFleet() {
         <option value="NORMAL">僅 Normal</option>
       </select>
       <input type="search" id="fleet-keyword" placeholder="搜尋船名或 IMO / Search vessel or IMO" value="${escapeHtml(_fleetKeyword)}">
-      <span style="font-size:11px;color:${_fleetKeyword || _fleetFilter !== "ALL" ? "#9ec5ff" : "#7c8a9e"}">列表/地圖：${filtered.length} / ${enriched.length}</span>
+      <span style="font-size:14px;color:${_fleetKeyword || _fleetFilter !== "ALL" ? "#9ec5ff" : "#7c8a9e"}">列表/地圖：${filtered.length} / ${enriched.length}</span>
       <div class="summary-pills">
         <span class="summary-pill"><span class="dot critical"></span>C · <b>${counts.critical}</b></span>
         <span class="summary-pill"><span class="dot warning"></span>W · <b>${counts.warning}</b></span>
@@ -2330,28 +2330,28 @@ function drawFleetDetailMap(v) {
   MAILS.filter(m => m.vessel_name === v.vessel_name && m.latitude !== null).forEach(m => {
     const isWarn = m.warning_level === "Warning";
     const bg = isWarn ? "#c0392b" : "#1c5a96";
-    const html = `<div style="background:${bg};color:#fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);width:22px;height:22px;border:2px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.5)"><span style="transform:rotate(45deg);font-size:12px;font-weight:700">!</span></div>`;
+    const html = `<div style="background:${bg};color:#fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);width:22px;height:22px;border:2px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.5)"><span style="transform:rotate(45deg);font-size:14px;font-weight:700">!</span></div>`;
     const popupHtml = `
       <div style="min-width:280px;max-width:340px">
-        <div style="font-size:11px;color:#9aa5b8">事件時間 / Event time</div>
-        <div style="font-size:12px;color:#e4eaf2;font-weight:500;margin-bottom:6px">${m.warning_event_time || "-"}</div>
+        <div style="font-size:14px;color:#9aa5b8">事件時間 / Event time</div>
+        <div style="font-size:14px;color:#e4eaf2;font-weight:500;margin-bottom:6px">${m.warning_event_time || "-"}</div>
         <div style="margin:4px 0">
           ${levelTag(isWarn ? "critical" : "warning")}
           <b style="margin-left:6px;color:#e4eaf2">(${m.warning_code})</b>
         </div>
-        <div style="font-size:12px;color:#d8dee9;margin-top:6px;line-height:1.45">${escapeHtml(m.warning_description)}</div>
+        <div style="font-size:14px;color:#d8dee9;margin-top:6px;line-height:1.45">${escapeHtml(m.warning_description)}</div>
         ${m.matched_port_code ? `
           <hr style="margin:8px 0;border:none;border-top:1px solid #333333">
-          <div style="font-size:11px;color:#7ec5ff">
+          <div style="font-size:14px;color:#7ec5ff">
             📍 計畫航線匹配 / Plan match：<b style="color:#e4eaf2">${escapeHtml(m.matched_position_type)}</b> · ${escapeHtml(m.matched_port_code)} / ${escapeHtml(m.matched_port_name || "-")}<br>
             <span style="color:#9aa5b8">航段時間 ${m.matched_event_date} · ${m.match_method}</span>
           </div>
         ` : (m.match_method ? `
           <hr style="margin:8px 0;border:none;border-top:1px solid #333333">
-          <div style="font-size:11px;color:#9aa5b8">標註方式 / Match：${m.match_method}</div>
+          <div style="font-size:14px;color:#9aa5b8">標註方式 / Match：${m.match_method}</div>
         ` : "")}
         <hr style="margin:8px 0;border:none;border-top:1px solid #333333">
-        <div style="font-size:11px;color:#9aa5b8">${escapeHtml(m.vessel_name)} · IMO ${m.imo} · 接收 ${m.received_time}</div>
+        <div style="font-size:14px;color:#9aa5b8">${escapeHtml(m.vessel_name)} · IMO ${m.imo} · 接收 ${m.received_time}</div>
       </div>`;
     L.marker([m.latitude, m.longitude], {
       icon: L.divIcon({ html, className: "", iconSize: [22,22], iconAnchor: [11,22] })
@@ -2445,7 +2445,7 @@ function drawRiskZones(map) {
         color: cat.color, weight: 1.2, opacity: 0.85,
         fillColor: cat.color, fillOpacity,
         dashArray: cat.key === "eca" || cat.key === "protected" ? "4 3" : null,
-      }, `<b>${escapeHtml(z.name)}</b> <span style="color:#7c8a9e">/ ${escapeHtml(z.name_en)}</span><br><span style="color:${cat.color};font-size:11px">${escapeHtml(cat.label)}</span>`);
+      }, `<b>${escapeHtml(z.name)}</b> <span style="color:#7c8a9e">/ ${escapeHtml(z.name_en)}</span><br><span style="color:${cat.color};font-size:14px">${escapeHtml(cat.label)}</span>`);
       // 每份 wrapped 副本都需要綁同一份 popup
       group.eachLayer(layer => {
         if (!layer._rzBound && layer instanceof L.Polygon) {
@@ -2481,7 +2481,7 @@ function injectRiskTogglePanel(mapWrap) {
     <label>
       <input type="checkbox" data-rz="${c.key}" ${_riskLayerState[c.key] ? "checked" : ""}>
       <span class="rt-swatch" style="background:${c.color}40;border-color:${c.color}"></span>
-      <span>${escapeHtml(c.label)}<span style="color:#7c8a9e;font-size:10px;display:block">${escapeHtml(c.label_en)}</span></span>
+      <span>${escapeHtml(c.label)}<span style="color:#7c8a9e;font-size:14px;display:block">${escapeHtml(c.label_en)}</span></span>
       <span class="rt-cnt">${buckets[c.key] || 0}</span>
     </label>`).join("");
   const panel = document.createElement("div");
@@ -2786,7 +2786,7 @@ function renderDetail(vesselId) {
 
   document.getElementById("main").innerHTML = `
     <h2 class="page-title">
-      <a href="#/fleet" style="color:#7ec5ff;text-decoration:none;font-size:13px;margin-right:8px">← 返回船隊</a>
+      <a href="#/fleet" style="color:#7ec5ff;text-decoration:none;font-size:14px;margin-right:8px">← 返回船隊</a>
       ${escapeHtml(v.vessel_name)}
       <small>IMO ${v.imo} · 計畫 ${v.planned_track.length} 點 · AIS ${v.ais_track.length} 點${deviatedCount>0?` · <b style="color:#ff8a8a">偏移 ${deviatedCount} 點</b>`:""}</small>
     </h2>
@@ -3007,14 +3007,14 @@ function drawMap(v, vesselMails) {
   vesselMails.forEach(m => {
     const isWarn = m.warning_level === "Warning";
     const bg = isWarn ? "#c0392b" : "#1c5a96";
-    const html = `<div style="background:${bg};color:#fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);width:24px;height:24px;border:2px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.5)"><span style="transform:rotate(45deg);font-size:13px;font-weight:700">!</span></div>`;
+    const html = `<div style="background:${bg};color:#fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);width:24px;height:24px;border:2px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.5)"><span style="transform:rotate(45deg);font-size:14px;font-weight:700">!</span></div>`;
     L.marker([m.latitude, m.longitude], {
       icon: L.divIcon({ html, className: "", iconSize: [24,24], iconAnchor: [12,24] })
     }).bindPopup(`
       <div style="min-width:240px">
-        <div style="font-size:12px;color:#9aa5b8">${m.warning_event_time}</div>
+        <div style="font-size:14px;color:#9aa5b8">${m.warning_event_time}</div>
         <div style="margin:4px 0;font-weight:600">${m.warning_level} (${m.warning_code})</div>
-        <div style="font-size:12px;color:#c4cdda">${escapeHtml(m.warning_description.substring(0,140))}${m.warning_description.length>140?'…':''}</div>
+        <div style="font-size:14px;color:#c4cdda">${escapeHtml(m.warning_description.substring(0,140))}${m.warning_description.length>140?'…':''}</div>
       </div>
     `).addTo(_layers.mails);
   });
@@ -3077,20 +3077,20 @@ function renderEvents() {
     const noteCount = e.notes.length;
     return `
       <tr style="cursor:pointer" onclick="openEventModal('${e.id}')">
-        <td class="cell-data mono" style="font-size:11px">${e.id}</td>
+        <td class="cell-data mono" style="font-size:14px">${e.id}</td>
         <td class="cell-data"><span class="vessel-pill">${e.vessel_id}</span>${escapeHtml(e.vessel_name)}</td>
         <td class="cell-data">
           <span style="display:inline-flex;align-items:center;gap:6px">
             ${dim.icon()} <span>${dim.label}</span>
-            <span style="color:#5e6b80;font-size:11px">${dim.short}</span>
+            <span style="color:#5e6b80;font-size:14px">${dim.short}</span>
           </span>
         </td>
         <td>${lvl}</td>
-        <td class="cell-data mono" style="font-size:11px">${e.opened_at}</td>
+        <td class="cell-data mono" style="font-size:14px">${e.opened_at}</td>
         <td>${statusBadge(e.status)}</td>
         <td class="cell-data">${e.assignee ? `<span style="color:#9ec5ff">${escapeHtml(e.assignee)}</span>` : '<span class="muted">未指派 / Unassigned</span>'}</td>
         <td style="text-align:center" title="備註數 / Notes">${noteCount > 0 ? `💬 ${noteCount}` : '<span class="muted">-</span>'}</td>
-        <td class="cell-data">${e.cleared ? '<span class="muted" style="font-size:11px">條件已消失<br>cleared</span>' : ''}</td>
+        <td class="cell-data">${e.cleared ? '<span class="muted" style="font-size:14px">條件已消失<br>cleared</span>' : ''}</td>
       </tr>`;
   }).join("");
 
@@ -3108,7 +3108,7 @@ function renderEvents() {
     </div>
 
     <div class="toolbar">
-      <label style="font-size:12px;color:#9aa5b8">狀態 / Status：</label>
+      <label style="font-size:14px;color:#9aa5b8">狀態 / Status：</label>
       <select id="ef-status" class="ev-select">
         <option value="ALL">全部</option>
         <option value="new">新立案</option>
@@ -3116,18 +3116,18 @@ function renderEvents() {
         <option value="in_progress">處理中</option>
         <option value="resolved">已解決</option>
       </select>
-      <label style="font-size:12px;color:#9aa5b8;margin-left:6px">等級 / Level：</label>
+      <label style="font-size:14px;color:#9aa5b8;margin-left:6px">等級 / Level：</label>
       <select id="ef-level" class="ev-select">
         <option value="ALL">全部</option>
         <option value="critical">Critical</option>
         <option value="warning">Warning</option>
       </select>
-      <label style="font-size:12px;color:#9aa5b8;margin-left:6px">維度 / Dimension：</label>
+      <label style="font-size:14px;color:#9aa5b8;margin-left:6px">維度 / Dimension：</label>
       <select id="ef-dim" class="ev-select">
         <option value="ALL">全部</option>
         ${dimOpts}
       </select>
-      <label style="font-size:12px;color:#9aa5b8;margin-left:6px">船舶 / Vessel：</label>
+      <label style="font-size:14px;color:#9aa5b8;margin-left:6px">船舶 / Vessel：</label>
       <select id="ef-vessel" class="ev-select">
         <option value="ALL">全部</option>
         ${vesselOpts}
@@ -3195,7 +3195,7 @@ window.openEventModal = function(evId) {
 
   // 備註列表
   const notesHtml = e.notes.length === 0
-    ? `<span class="muted" style="font-size:12px">尚無備註 / No notes</span>`
+    ? `<span class="muted" style="font-size:14px">尚無備註 / No notes</span>`
     : e.notes.map(n => `
       <div class="note-item">
         <div class="note-head">${n.at} · ${escapeHtml(n.by)}</div>
@@ -3209,7 +3209,7 @@ window.openEventModal = function(evId) {
 
   document.getElementById("ev-modal-body").innerHTML = `
     <button class="modal-close" onclick="closeEventModal()">×</button>
-    <h3>${dim.icon()} ${dim.label} <span style="color:#7c8a9e;font-size:13px;font-weight:400">/ ${dim.short}</span></h3>
+    <h3>${dim.icon()} ${dim.label} <span style="color:#7c8a9e;font-size:14px;font-weight:400">/ ${dim.short}</span></h3>
     <div class="modal-sub">
       ${e.id} · ${escapeHtml(e.vessel_name)} (IMO ${v?.imo || "-"})
       ${e.cleared ? `<span class="muted" style="margin-left:8px">· 條件已消失 / cleared</span>` : ""}
@@ -3219,14 +3219,14 @@ window.openEventModal = function(evId) {
     <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">
       ${statusBadge(e.status)}
       ${lvlTag}
-      <span class="muted" style="font-size:12px;margin-left:auto">開立 ${e.opened_at}</span>
+      <span class="muted" style="font-size:14px;margin-left:auto">開立 ${e.opened_at}</span>
     </div>
 
     <h4>警示內容 / Alert Description</h4>
-    <div style="font-size:13px;color:#d8dee9;line-height:1.55;background:#1a1a1a;padding:10px 12px;border-radius:4px">${desc}</div>
+    <div style="font-size:14px;color:#d8dee9;line-height:1.55;background:#1a1a1a;padding:10px 12px;border-radius:4px">${desc}</div>
 
     <h4>狀態轉換 / Status Transition</h4>
-    <div class="trans-buttons">${transBtns || '<span class="muted" style="font-size:12px">無可用轉換 / No transitions available</span>'}</div>
+    <div class="trans-buttons">${transBtns || '<span class="muted" style="font-size:14px">無可用轉換 / No transitions available</span>'}</div>
 
     <h4>指派 / Assignee</h4>
     <select class="ev-select" id="ev-assign" style="width:auto;min-width:200px" onchange="doAssign('${e.id}', this.value)">
@@ -3280,7 +3280,7 @@ window.doAssign = function(evId, assignee) {
     if (!tip) {
       tip = document.createElement("span");
       tip.id = "ev-assign-saved";
-      tip.style.cssText = "margin-left:10px;font-size:11px;color:#6ee094";
+      tip.style.cssText = "margin-left:10px;font-size:14px;color:#6ee094";
       sel.parentElement.insertBefore(tip, sel.nextSibling);
     }
     tip.textContent = assignee ? `已儲存：${assignee} / Saved` : "已清除指派 / Cleared";
@@ -3374,7 +3374,7 @@ function renderThresholdsModalBody() {
       <tr data-k="${k}">
         <td style="padding:8px 10px">
           <div style="font-weight:600">${DIM_META[k]?.icon ? DIM_META[k].icon() : ""} ${m.label}</div>
-          <div style="color:#7c8a9e;font-size:11px;margin-top:2px">${m.short} · ${m.unit}（${m.range}）</div>
+          <div style="color:#7c8a9e;font-size:14px;margin-top:2px">${m.short} · ${m.unit}（${m.range}）</div>
         </td>
         <td style="padding:8px 6px">
           <div class="th-input-wrap">
@@ -3383,7 +3383,7 @@ function renderThresholdsModalBody() {
                    style="color:#f5b753">
             ${unitSpan}
           </div>
-          <div style="color:#5e6b80;font-size:10px;margin-top:3px">預設 ${def.warning} ${escapeHtml(m.unitShort)}</div>
+          <div style="color:#5e6b80;font-size:14px;margin-top:3px">預設 ${def.warning} ${escapeHtml(m.unitShort)}</div>
         </td>
         <td style="padding:8px 6px">
           <div class="th-input-wrap">
@@ -3392,18 +3392,18 @@ function renderThresholdsModalBody() {
                    style="color:#ff8a8a">
             ${unitSpan}
           </div>
-          <div style="color:#5e6b80;font-size:10px;margin-top:3px">預設 ${def.critical} ${escapeHtml(m.unitShort)}</div>
+          <div style="color:#5e6b80;font-size:14px;margin-top:3px">預設 ${def.critical} ${escapeHtml(m.unitShort)}</div>
         </td>
-        <td style="padding:8px 6px;width:32px">${dirty ? '<span style="color:#f5b753;font-size:11px" title="已修改 / Modified">●</span>' : ""}</td>
+        <td style="padding:8px 6px;width:32px">${dirty ? '<span style="color:#f5b753;font-size:14px" title="已修改 / Modified">●</span>' : ""}</td>
       </tr>`;
   }).join("");
 
   document.getElementById("th-modal-body").innerHTML = `
     <button class="modal-close" onclick="closeThresholdsModal()">×</button>
-    <h3>⚙ 閾值設定 <span style="color:#7c8a9e;font-size:13px;font-weight:400">/ Open Event Thresholds</span></h3>
+    <h3>⚙ 閾值設定 <span style="color:#7c8a9e;font-size:14px;font-weight:400">/ Open Event Thresholds</span></h3>
     <div class="modal-sub">調整各維度的 Warning / Critical 觸發點。儲存後立即重算所有船舶警示與事件立案。</div>
 
-    <table style="width:100%;font-size:12px;margin-top:10px;border-collapse:collapse">
+    <table style="width:100%;font-size:14px;margin-top:10px;border-collapse:collapse">
       <thead>
         <tr style="color:#9aa5b8;border-bottom:1px solid #2a2a2a">
           <th style="text-align:left;padding:6px 10px;font-weight:600">維度 / Dimension</th>
@@ -3415,7 +3415,7 @@ function renderThresholdsModalBody() {
       <tbody>${rows}</tbody>
     </table>
 
-    <div style="background:#141414;border:1px solid #2a2a2a;border-radius:4px;padding:10px 12px;margin-top:14px;font-size:11px;color:#9aa5b8;line-height:1.55">
+    <div style="background:#141414;border:1px solid #2a2a2a;border-radius:4px;padding:10px 12px;margin-top:14px;font-size:14px;color:#9aa5b8;line-height:1.55">
       <b style="color:#9ec5ff">觸發邏輯 / Trigger logic</b><br>
       ・<b>route</b>：max(目前 XTD, 歷史最大偏移) ≥ Safety Frame × 閾值<br>
       ・<b>speed</b>：|SOG − 計畫平均|/計畫平均 &gt; 閾值（另：航行中近乎停止永遠 warning）<br>
@@ -3428,7 +3428,7 @@ function renderThresholdsModalBody() {
       <button class="trans-btn" onclick="saveThresholdsFromModal()">儲存並重算 / Save &amp; Re-evaluate</button>
     </div>
 
-    <div id="th-saved-tip" style="text-align:right;font-size:11px;color:#6ee094;margin-top:6px;min-height:14px"></div>
+    <div id="th-saved-tip" style="text-align:right;font-size:14px;color:#6ee094;margin-top:6px;min-height:14px"></div>
   `;
 }
 window.saveThresholdsFromModal = function() {
