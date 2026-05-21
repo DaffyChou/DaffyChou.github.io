@@ -304,6 +304,21 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 .draft-status .dot-saving{width:6px;height:6px;border-radius:50%;background:var(--amber);}
 .draft-status .dot-saved{width:6px;height:6px;border-radius:50%;background:var(--green);}
 
+/* Category badge on cost-assessment page */
+.cat-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;background:var(--blue-l);color:var(--blue2);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--blue-m);transition:all .15s;}
+.cat-badge:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
+.cat-badge .cat-badge-empty{color:var(--ink4);font-style:italic;}
+
+/* Category picker modal */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.cat-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px 16px;border:1.5px solid var(--line);border-radius:var(--r12);background:var(--surf);cursor:pointer;text-align:left;transition:all .15s;font-family:var(--ff);}
+.cat-btn:hover{border-color:var(--blue);background:var(--blue-l);}
+.cat-btn.active{border-color:var(--blue);background:var(--blue-l);box-shadow:0 0 0 3px rgba(26,86,219,.15);}
+.cat-btn .cat-row1{display:flex;align-items:center;gap:8px;width:100%;}
+.cat-btn .cat-icon{font-size:20px;}
+.cat-btn .cat-name{font-size:15px;font-weight:700;color:var(--ink);}
+.cat-btn .cat-hint{font-size:12px;color:var(--ink3);line-height:1.4;}
+
 /* Terms management page */
 .tm-grid{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start;max-width:1180px;margin:0 auto;}
 .tm-list{display:flex;flex-direction:column;gap:6px;}
@@ -375,7 +390,13 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     <div class="card">
       <div class="ch">
         <span class="ch-title">📄 <span id="l-meta">報價基本資料</span></span>
-        <div class="type-row" id="type-row">
+        <div class="cat-badge" onclick="openCategoryModal()" title="點擊變更報價類型">
+          <span id="cat-badge-icon">◯</span>
+          <span id="cat-badge-name">— 尚未選擇 —</span>
+          <span style="color:var(--ink4);font-size:11px;margin-left:4px">✎</span>
+        </div>
+        <!-- Legacy secondary tags (kept for history filter backward compat; hidden by default) -->
+        <div class="type-row" id="type-row" style="display:none">
           <div class="type-pill tp-sw" onclick="toggleType('sw')" id="tp-sw">💻 <span id="l-sw">軟體</span></div>
           <div class="type-pill tp-hw" onclick="toggleType('hw')" id="tp-hw">⚙️ <span id="l-hw">硬體</span></div>
           <div class="type-pill tp-net" onclick="toggleType('net')" id="tp-net">🌐 <span id="l-net">系統整合</span></div>
@@ -392,26 +413,8 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
     </div>
 
-    <!-- Customer detail (for official quotation) -->
-    <div class="card">
-      <div class="ch">
-        <span class="ch-title">🏢 <span id="l-cust">客戶完整資訊</span></span>
-        <span style="font-size:12px;color:var(--ink4)" id="l-cust-hint">用於報價單表頭</span>
-      </div>
-      <div class="cb">
-        <div class="fg fg-3">
-          <div class="field"><label id="l-tax">統一編號</label><input type="text" id="f-tax" class="mono" placeholder="12345678" maxlength="8"></div>
-          <div class="field"><label id="l-phone">電話</label><input type="text" id="f-phone" placeholder="02-1234-5678"></div>
-          <div class="field"><label id="l-fax">傳真</label><input type="text" id="f-fax" placeholder="02-1234-5679"></div>
-          <div class="field" style="grid-column:span 3"><label id="l-addr">地址</label><input type="text" id="f-addr" placeholder="臺北市..."></div>
-          <div class="field"><label id="l-cp">聯絡人</label><input type="text" id="f-cp"></div>
-          <div class="field"><label id="l-cphone">聯絡人電話</label><input type="text" id="f-cphone"></div>
-        </div>
-      </div>
-    </div>
-
     <!-- Params -->
-    <div class="card">
+    <div class="card" data-section="params">
       <div class="ch"><span class="ch-title">⚙️ <span id="l-params">計算參數</span></span></div>
       <div class="cb">
         <div class="fg fg-3">
@@ -434,7 +437,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     </div>
 
     <!-- Materials -->
-    <div class="card">
+    <div class="card" data-section="mat">
       <div class="ch">
         <span class="ch-title"><span class="dot dot-mat"></span><span id="l-mat">料件明細</span></span>
         <button class="btn btn-sm btn-blue" onclick="addRow('mat')" id="btn-amat">＋ <span id="l-amat">新增料件</span></button>
@@ -456,9 +459,9 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
     </div>
 
-    <!-- Labor -->
-    <div class="card">
-      <div class="ch"><span class="ch-title"><span class="dot dot-lab"></span><span id="l-labor">施工人力</span></span></div>
+    <!-- Install / Labor -->
+    <div class="card" data-section="install">
+      <div class="ch"><span class="ch-title"><span class="dot dot-lab"></span><span id="l-labor">安裝施工</span></span></div>
       <div class="cb">
         <div class="fg fg-4">
           <div class="field"><label id="l-wk">人數</label><input type="number" id="p-wk" value="4" min="1" class="mono" oninput="recalc()"></div>
@@ -470,7 +473,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     </div>
 
     <!-- Services -->
-    <div class="card">
+    <div class="card" data-section="svc">
       <div class="ch">
         <span class="ch-title"><span class="dot dot-svc"></span><span id="l-svc">技術服務費</span></span>
         <button class="btn btn-sm btn-blue" onclick="addRow('svc')" id="btn-asvc">＋ <span id="l-asvc">新增</span></button>
@@ -491,7 +494,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     </div>
 
     <!-- Travel -->
-    <div class="card">
+    <div class="card" data-section="trv">
       <div class="ch">
         <span class="ch-title"><span class="dot dot-trv"></span><span id="l-trv">出差費用</span></span>
         <button class="btn btn-sm btn-blue" onclick="addRow('trv')" id="btn-atrv">＋ <span id="l-atrv">新增</span></button>
@@ -595,13 +598,13 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
   <!-- ══ OFFICIAL QUOTATION PAGE ══ -->
   <div class="page" id="page-official">
     <div class="official-wrap">
-      <!-- Customer summary strip (full-width above grid) -->
+      <!-- Customer summary strip (quick reference, auto-updates from inputs below) -->
       <div class="cust-strip" id="cs-strip">
         <div class="cs-item"><span class="cs-lbl">客戶</span><span class="cs-val" id="cs-name">—</span></div>
         <div class="cs-item"><span class="cs-lbl">統編</span><span class="cs-val mono" id="cs-tax">—</span></div>
         <div class="cs-item"><span class="cs-lbl">聯絡人</span><span class="cs-val" id="cs-cp">—</span></div>
         <div class="cust-strip-edit">
-          <button class="btn btn-sm" onclick="switchEditTab('new')">✎ 編輯客戶資訊</button>
+          <button class="btn btn-sm" onclick="switchEditTab('new')">✎ 編輯成本評估</button>
         </div>
       </div>
 
@@ -615,6 +618,24 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
 
       <div>
+        <!-- Customer full info (moved from 成本評估 in v1.2) -->
+        <div class="card">
+          <div class="ch">
+            <span class="ch-title">🏢 <span id="l-cust-qt">客戶完整資訊</span></span>
+            <span style="font-size:12px;color:var(--ink4)" id="l-cust-hint-qt">用於報價單表頭與聯絡資料</span>
+          </div>
+          <div class="cb">
+            <div class="fg fg-3">
+              <div class="field"><label id="l-tax">統一編號</label><input type="text" id="f-tax" class="mono" placeholder="12345678" maxlength="8" oninput="syncCustStrip()"></div>
+              <div class="field"><label id="l-phone">電話</label><input type="text" id="f-phone" placeholder="02-1234-5678"></div>
+              <div class="field"><label id="l-fax">傳真</label><input type="text" id="f-fax" placeholder="02-1234-5679"></div>
+              <div class="field" style="grid-column:span 3"><label id="l-addr">地址</label><input type="text" id="f-addr" placeholder="臺北市..."></div>
+              <div class="field"><label id="l-cp">聯絡人</label><input type="text" id="f-cp" oninput="syncCustStrip()"></div>
+              <div class="field"><label id="l-cphone">聯絡人電話</label><input type="text" id="f-cphone"></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Quote no / date / preset -->
         <div class="card">
           <div class="ch">
@@ -724,6 +745,27 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
   </div><!-- /pages -->
 </div><!-- /main -->
 
+<!-- Category Picker Modal -->
+<div class="modal-bg" id="category-modal">
+  <div class="modal modal-lg">
+    <div class="modal-hd">
+      <h3 id="cat-modal-title">選擇報價類型</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeCategoryModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:12px">
+        報價類型會帶出對應的成本區塊。可以隨時從報價基本資料卡的徽章變更。
+      </div>
+      <div class="cat-grid" id="cat-grid">
+        <!-- Buttons rendered by JS from CATEGORY_CONFIG -->
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-sm" onclick="closeCategoryModal()">取消</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -731,6 +773,120 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 let lang='zh', curTypes=[];
 let matR=[], svcR=[], trvR=[];
 let quotes=JSON.parse(localStorage.getItem('slab_q')||'[]');
+
+// ══ Category configuration (multi-type quotation) ══
+// Each category controls which cost sections are visible on the 成本評估 page.
+// `presetHint` suggests which condition preset to load (軟體/硬體) when opened.
+// `sections` list maps to data-section attributes on the cost section cards.
+const CATEGORY_CONFIG = {
+  hardware_sale: {
+    label:'硬體銷售', icon:'📦', hint:'單賣設備、零組件、裝置',
+    presetHint:'hardware', sections:['params','mat','third','maint']
+  },
+  hardware_install: {
+    label:'硬體＋安裝施工', icon:'🛠', hint:'CCTV、Router、OneWeb、SD-WAN 設定',
+    presetHint:'hardware', sections:['params','mat','install','svc','trv','maint']
+  },
+  software_dev: {
+    label:'軟體開發', icon:'💻', hint:'SRP、Dashboard、進銷存、客製模組',
+    presetHint:'software', sections:['params','software','integration','svc','third','maint']
+  },
+  integration: {
+    label:'軟硬體整合', icon:'🔌', hint:'IoT Gateway、API 串接、船端＋岸端平台',
+    presetHint:'software', sections:['params','mat','software','integration','install','svc','trv','third','maint']
+  },
+  subscription: {
+    label:'訂閱服務', icon:'☁️', hint:'SaaS、SDataPro 年費、資料服務',
+    presetHint:'software', sections:['params','svc','third','maint','recurring']
+  },
+  rental: {
+    label:'租賃服務', icon:'📅', hint:'設備月租、通訊設備租賃',
+    presetHint:'hardware', sections:['params','mat','svc','trv','third','maint','recurring']
+  },
+  maintenance: {
+    label:'維護服務', icon:'🔧', hint:'年維護、SLA、遠端支援',
+    presetHint:'software', sections:['params','software','integration','svc','third','maint','recurring']
+  }
+};
+
+let currentCategory = null;  // null = show all sections (backward compat for legacy quotes)
+
+// Mirror customer fields into the read-only summary strip on 報價單 page.
+// Called both on page setup and on every input change in the customer card.
+function syncCustStrip(){
+  const name = document.getElementById('f-client').value.trim();
+  const tax  = document.getElementById('f-tax').value.trim();
+  const cp   = document.getElementById('f-cp').value.trim();
+  const setVal = (id, v) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = v || '—';
+    el.classList.toggle('empty', !v);
+  };
+  setVal('cs-name', name);
+  setVal('cs-tax', tax);
+  setVal('cs-cp', cp);
+}
+
+function applySectionVisibility(){
+  const conf = currentCategory ? CATEGORY_CONFIG[currentCategory] : null;
+  document.querySelectorAll('[data-section]').forEach(el => {
+    if(!conf){
+      el.style.display = '';  // No category set → show everything
+      return;
+    }
+    const section = el.getAttribute('data-section');
+    el.style.display = conf.sections.includes(section) ? '' : 'none';
+  });
+  // Update the category badge on cost-assessment page
+  const badgeName = document.getElementById('cat-badge-name');
+  const badgeIcon = document.getElementById('cat-badge-icon');
+  if(badgeName) badgeName.textContent = conf ? conf.label : '— 尚未選擇 —';
+  if(badgeIcon) badgeIcon.textContent = conf ? conf.icon : '◯';
+}
+
+// === Category picker modal ===
+function openCategoryModal(){
+  // Render category buttons (each highlighted if currently selected)
+  const grid = document.getElementById('cat-grid');
+  if(!grid) return;
+  grid.innerHTML = Object.entries(CATEGORY_CONFIG).map(([id, conf]) => `
+    <button class="cat-btn${currentCategory===id?' active':''}" onclick="pickCategory('${id}')">
+      <div class="cat-row1">
+        <span class="cat-icon">${conf.icon}</span>
+        <span class="cat-name">${esc(conf.label)}</span>
+      </div>
+      <div class="cat-hint">${esc(conf.hint)}</div>
+    </button>`).join('');
+  document.getElementById('category-modal').classList.add('open');
+}
+function closeCategoryModal(){
+  document.getElementById('category-modal').classList.remove('open');
+}
+function pickCategory(id){
+  if(!CATEGORY_CONFIG[id]) return;
+  currentCategory = id;
+  applySectionVisibility();
+  closeCategoryModal();
+  markDirty();
+  // If the picked category has a strong preset hint, also default the
+  // 條件管理 dropdowns on report page (only when user hasn't picked any yet)
+  const conf = CATEGORY_CONFIG[id];
+  if(conf.presetHint && getPresetById(conf.presetHint)){
+    if(!ofState.notesPresetId){
+      ofState.notesPresetId = conf.presetHint;
+      const p = getPresetById(conf.presetHint);
+      if(p) ofState.notes = p.notes || '';
+    }
+    if(!ofState.gtPresetId){
+      ofState.gtPresetId = conf.presetHint;
+      const p = getPresetById(conf.presetHint);
+      if(p) ofState.gt = p.general_terms || '';
+    }
+    ofPersist();
+  }
+  toast(`✓ 已選擇報價類型：${conf.label}`);
+}
 
 // Default notes / general terms seeds (used by built-in presets in 條件管理)
 const DEFAULTS = {
@@ -784,7 +940,7 @@ const T={
     tax:'統一編號',phone:'電話',fax:'傳真',addr:'地址',cp:'聯絡人',cphone:'聯絡人電話',
     params:'計算參數',matm:'料件毛利率 %',labm:'人力加成率 %',wage:'每人日薪（元）',
     hMatm:'成本 × 1.6 = 報價',hLabm:'日薪 × 2 = 報價',
-    mat:'料件明細',labor:'施工人力',svc:'技術服務費',trv:'出差費用',terms:'內部備注',
+    mat:'料件明細',labor:'安裝施工',svc:'技術服務費',trv:'出差費用',terms:'內部備注',
     wk:'人數',dy:'天數',lc:'直接成本',lq:'人工報價',
     thN:'品項',thQ:'數量',thC:'成本',thP:'報價',thS:'小計',thNt:'備注',
     thSn:'項目',thSa:'金額',thSd:'說明',
@@ -990,9 +1146,14 @@ function newQuote(){
   ofPersist();
   // Forget which existing quote was last loaded (so save creates a new entry)
   currentQuoteNo = null;
+  // Reset category so section visibility starts fresh; picker modal opens after page transitions
+  currentCategory = null;
+  applySectionVisibility();
   renderAll();recalc();
   markClean();
   goPage('new');
+  // Prompt user to pick a category up-front (new flow per v1.2 spec)
+  openCategoryModal();
 }
 
 // ── Load into editor (replaces detail modal) ──
@@ -1032,6 +1193,9 @@ function loadIntoEditor(i){
   }
   ofPersist();
   currentQuoteNo = q.no;
+  // Restore category (legacy quotes may not have it → null shows all sections)
+  currentCategory = (q.category && CATEGORY_CONFIG[q.category]) ? q.category : null;
+  applySectionVisibility();
   renderAll();recalc();
   markClean();
   goPage('new');
@@ -1158,6 +1322,7 @@ function saveQuote(){
     proj:document.getElementById('f-proj').value,
     date:document.getElementById('f-date').value,
     types:curTypes.slice(),
+    category: currentCategory,
     customer:{
       tax_id:document.getElementById('f-tax').value,
       phone:document.getElementById('f-phone').value,
@@ -1292,7 +1457,7 @@ function exportExcel(src){
   ];
   mr.forEach(r=>{const uq=Math.round(r.cost*(1+mm));rows.push([r.name,r.qty,r.cost,uq,uq*r.qty,r.note]);});
   rows.push([t('matsub'),'','','',matQ,''],'');
-  rows.push([lang==='zh'?'二、施工人力':'II. Labor','','','','','']);
+  rows.push([lang==='zh'?'二、安裝施工':'II. Labor','','','','','']);
   rows.push([t('wk'),t('dy'),t('wage'),lang==='zh'?'成本':'Cost',lang==='zh'?'報價':'Quote','']);
   rows.push([wk,dy,wage,lC,lQ,''],'');
   if(sr.length){rows.push([lang==='zh'?'三、技術服務費':'III. Services','','','','','']);sr.forEach(r=>rows.push([r.name,'',r.amount,'','',r.note]));rows.push([t('svcsub'),'',svcQ,'','',''],'');}
@@ -1329,6 +1494,8 @@ function clearForm(){
   ['sw','hw','net','ship'].forEach(tp=>document.getElementById('tp-'+tp).classList.remove('on'));
   ['f-client','f-proj','f-terms','f-tax','f-phone','f-fax','f-addr','f-cp','f-cphone'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-no').value=genNo();
+  currentCategory = null;
+  applySectionVisibility();
   ofState = { items: [], quoteNo:'', quoteDate:'', notes:'', gt:'', notesPresetId:'', gtPresetId:'', delivery:'', currency:'新台幣(NTD)', payment:'T/T' };
   ofPersist();
   currentQuoteNo = null;
@@ -1469,16 +1636,7 @@ function setupOfficialPage(){
   if(typeof ofState.currency !== 'string' || ofState.currency==='') ofState.currency = '新台幣(NTD)';
   if(typeof ofState.payment !== 'string' || ofState.payment==='') ofState.payment = 'T/T';
 
-  // Customer strip from worksheet
-  const name=document.getElementById('f-client').value.trim();
-  const tax=document.getElementById('f-tax').value.trim();
-  const cp=document.getElementById('f-cp').value.trim();
-  document.getElementById('cs-name').textContent = name || '—';
-  document.getElementById('cs-name').classList.toggle('empty', !name);
-  document.getElementById('cs-tax').textContent = tax || '—';
-  document.getElementById('cs-tax').classList.toggle('empty', !tax);
-  document.getElementById('cs-cp').textContent = cp || '—';
-  document.getElementById('cs-cp').classList.toggle('empty', !cp);
+  syncCustStrip();
 
   // Header fields
   document.getElementById('of2-no').value = ofState.quoteNo;
@@ -1531,7 +1689,7 @@ function renderWorksheetSnapshot(){
     const lC = wk*dy*wage;
     const lQ = Math.round(lC*(1+lm));
     html += `<div class="ws-section">
-      <div class="ws-sec-hd">👷 施工人力 <span class="ws-sec-sub">${fmt(lC)} → ${fmt(lQ)}</span></div>
+      <div class="ws-sec-hd">👷 安裝施工 <span class="ws-sec-sub">${fmt(lC)} → ${fmt(lQ)}</span></div>
       <div class="ws-row">
         <div class="ws-row-main">${wk} 人 × ${dy} 日 × ${fmt(wage)}/日</div>
         <div class="ws-row-sub">成本 ${fmt(lC)} → 報價 <strong style="color:var(--green)">${fmt(lQ)}</strong>（加成 ${num('p-labm')}%）</div>
@@ -2103,6 +2261,7 @@ function tmResetBuiltin(id){
   document.getElementById('hist-count').textContent=quotes.length;
   applyLang();
   recalc();
+  applySectionVisibility();  // Initial state: currentCategory=null → all sections visible
   // Default landing: quote list
   renderHist();
   renderHistStats();
