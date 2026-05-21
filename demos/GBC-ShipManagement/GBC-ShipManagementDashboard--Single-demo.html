@@ -177,10 +177,10 @@
                             <th>L/PORT <i class="info-icon" title="起運港/裝貨港口 (Loading Port)" onclick="event.stopPropagation()">i</i></th>
                             <th>D/PORT <i class="info-icon" title="目的港/卸貨港口 (Discharging Port)" onclick="event.stopPropagation()">i</i></th>
                             <th>DIST <i class="info-icon" title="航行總距離 海浬 (Distance NM)" onclick="event.stopPropagation()">i</i></th>
-                            <th class="text-danger">FO CONS <i class="info-icon" title="重油總消耗量 (Fuel Oil Consumption MT)" onclick="event.stopPropagation()">i</i></th>
-                            <th class="text-warning">DO CONS <i class="info-icon" title="輕油總消耗量 (Diesel Oil Consumption MT)" onclick="event.stopPropagation()">i</i></th>
-                            <th class="text-info">F.W CONS <i class="info-icon" title="淡水總消耗量 (Fresh Water Consumption MT)" onclick="event.stopPropagation()">i</i></th>
-                            <th class="text-primary">CYL OIL <i class="info-icon" title="汽缸油總消耗量 (Cylinder Oil L)" onclick="event.stopPropagation()">i</i></th>
+                            <th>FO CONS <i class="info-icon" title="重油總消耗量 (Fuel Oil Consumption MT)" onclick="event.stopPropagation()">i</i></th>
+                            <th>DO CONS <i class="info-icon" title="輕油總消耗量 (Diesel Oil Consumption MT)" onclick="event.stopPropagation()">i</i></th>
+                            <th>F.W CONS <i class="info-icon" title="淡水總消耗量 (Fresh Water Consumption MT)" onclick="event.stopPropagation()">i</i></th>
+                            <th>CYL OIL <i class="info-icon" title="汽缸油總消耗量 (Cylinder Oil L)" onclick="event.stopPropagation()">i</i></th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -209,14 +209,15 @@
                         </div>
 
                         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary align-items-end">
-                            <div class="col-12 col-md-3">
-                                <span class="ds-label">時間維度</span>
-                                <select class="form-select ds-select" onchange="renderTimeInput(this.value, 'fw-time-container')">
-                                    <option value="year" selected>年度區間</option><option value="quarter">季度區間</option><option value="month">月份區間</option><option value="day">自訂日區間</option>
-                                </select>
+                            <div class="col-6 col-md-4">
+                                <span class="ds-label">船報日期 (起)</span>
+                                <input type="date" class="form-control ds-select date-start" value="2026-03-15">
                             </div>
-                            <div id="fw-time-container" class="col-12 col-md-7"></div>
-                            <div class="col-12 col-md-2 d-flex justify-content-end">
+                            <div class="col-6 col-md-4">
+                                <span class="ds-label">船報日期 (訖)</span>
+                                <input type="date" class="form-control ds-select date-end" value="2026-03-27">
+                            </div>
+                            <div class="col-12 col-md-4 d-flex justify-content-end">
                                 <button onclick="applyFilter('chart-fw-balance', this)" class="btn btn-primary w-100 ds-btn">套用</button>
                             </div>
                         </div>
@@ -271,14 +272,15 @@
                         </div>
                         
                         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary align-items-end">
-                            <div class="col-12 col-md-3">
-                                <span class="ds-label">時間維度</span>
-                                <select class="form-select ds-select" onchange="renderTimeInput(this.value, 'slip-time-container')">
-                                    <option value="year" selected>年度區間</option><option value="quarter">季度區間</option><option value="month">月份區間</option><option value="day">自訂日區間</option>
-                                </select>
+                            <div class="col-6 col-md-4">
+                                <span class="ds-label">船報日期 (起)</span>
+                                <input type="date" class="form-control ds-select date-start" value="2026-03-15">
                             </div>
-                            <div id="slip-time-container" class="col-12 col-md-7"></div>
-                            <div class="col-12 col-md-2 d-flex justify-content-end">
+                            <div class="col-6 col-md-4">
+                                <span class="ds-label">船報日期 (訖)</span>
+                                <input type="date" class="form-control ds-select date-end" value="2026-03-27">
+                            </div>
+                            <div class="col-12 col-md-4 d-flex justify-content-end">
                                 <button onclick="applyFilter('chart-slip-weather', this)" class="btn btn-primary w-100 ds-btn">套用</button>
                             </div>
                         </div>
@@ -309,18 +311,19 @@
                         </div>
 
                         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary align-items-end">
-                            <div class="col-6 col-md-3">
+                            <div class="col-12 col-md-3">
                                 <span class="ds-label">對比參數</span>
                                 <select class="form-select ds-select"><option value="rpm">轉速 vs 油耗</option><option value="load">負荷 vs 油耗</option></select>
                             </div>
                             <div class="col-6 col-md-3">
-                                <span class="ds-label">時間維度</span>
-                                <select class="form-select ds-select" onchange="renderTimeInput(this.value, 'cyl-time-container')">
-                                    <option value="year" selected>年度區間</option><option value="quarter">季度區間</option><option value="month">月份區間</option><option value="day">自訂日區間</option>
-                                </select>
+                                <span class="ds-label">船報日期 (起)</span>
+                                <input type="date" class="form-control ds-select date-start" value="2026-03-15">
                             </div>
-                            <div id="cyl-time-container" class="col-12 col-md-4"></div>
-                            <div class="col-12 col-md-2 d-flex justify-content-end">
+                            <div class="col-6 col-md-3">
+                                <span class="ds-label">船報日期 (訖)</span>
+                                <input type="date" class="form-control ds-select date-end" value="2026-03-27">
+                            </div>
+                            <div class="col-12 col-md-3 d-flex justify-content-end">
                                 <button onclick="applyFilter('chart-cyl-rpm', this)" class="btn btn-primary w-100 ds-btn">套用</button>
                             </div>
                         </div>
@@ -377,21 +380,22 @@
                         </div>
 
                         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary align-items-end">
-                            <div class="col-12 col-md-2">
+                            <div class="col-6 col-md-2">
                                 <span class="ds-label">港口篩選</span>
                                 <select class="form-select ds-select"><option>全部</option><option selected>KHH</option><option>SIN</option></select>
                             </div>
-                            <div class="col-12 col-md-2">
+                            <div class="col-6 col-md-2">
                                 <span class="ds-label">作業類型</span>
                                 <select class="form-select ds-select"><option>全部</option><option selected>裝貨 (Load)</option><option>卸貨 (Disch)</option></select>
                             </div>
-                            <div class="col-12 col-md-2">
-                                <span class="ds-label">時間維度</span>
-                                <select class="form-select ds-select" onchange="renderTimeInput(this.value, 'port-time-container')">
-                                    <option value="year">年度區間</option><option value="quarter">季度區間</option><option value="month">月份區間</option><option value="day" selected>自訂日區間</option>
-                                </select>
+                            <div class="col-6 col-md-3">
+                                <span class="ds-label">船報日期 (起)</span>
+                                <input type="date" class="form-control ds-select date-start" value="2026-03-01">
                             </div>
-                            <div id="port-time-container" class="col-12 col-md-4"></div>
+                            <div class="col-6 col-md-3">
+                                <span class="ds-label">船報日期 (訖)</span>
+                                <input type="date" class="form-control ds-select date-end" value="2026-03-27">
+                            </div>
                             <div class="col-12 col-md-2 d-flex justify-content-end">
                                 <button onclick="applyFilter('chart-port-ops', this)" class="btn btn-primary w-100 ds-btn">套用</button>
                             </div>
@@ -564,12 +568,13 @@
                         <label class="ds-label">電報格式過濾</label>
                         <select id="reportTypeFilter" class="form-select ds-select">
                             <option value="">全部格式</option>
-                            <option value="格式1">格式1 - 船位報 (NOON/MORN)</option>
-                            <option value="格式2">格式2 - 抵港報 (ARVL)</option>
-                            <option value="格式3">格式3 - 日電報 (DR)</option>
-                            <option value="格式4">格式4 - 完工/離港報 (DEPT)</option>
-                            <option value="格式5">格式5 - 移泊報 (SHIFTING)</option>
-                            <option value="格式6">格式6 - 特殊情況報 (SPECIAL)</option>
+                            <option value="Noon Report">Noon Report (船位報-午報)</option>
+                            <option value="Morning Report">Morning Report (船位報-早報)</option>
+                            <option value="Arrival Report">Arrival Report (抵港報)</option>
+                            <option value="Daily Report">Daily Report (每日報)</option>
+                            <option value="Departure Report">Departure Report (離港報)</option>
+                            <option value="Shifting Report">Shifting Report (移泊報)</option>
+                            <option value="Irregular Report">Irregular Report (特殊情況報)</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-3 text-end">
@@ -717,6 +722,31 @@
         // ==========================================
         // 核心：套用過濾器，並動態變更圖表內容
         // ==========================================
+        // 由 row 內的 date input 讀取「船報日期」起訖，回傳 MM/DD 字串陣列
+        // sparse=true 時模擬「不連續日期」（隨機跳過約 35% 沒事件的日子）
+        function getReportDateRange(row, sparse) {
+            const startInput = row.querySelector('input.date-start');
+            const endInput = row.querySelector('input.date-end');
+            if (!startInput || !endInput || !startInput.value || !endInput.value) return [];
+            const start = new Date(startInput.value);
+            const end = new Date(endInput.value);
+            if (isNaN(start) || isNaN(end) || start > end) return [];
+            const dates = [];
+            const cur = new Date(start);
+            while (cur <= end) {
+                if (!sparse || Math.random() > 0.35) {
+                    dates.push(`${String(cur.getMonth()+1).padStart(2,'0')}/${String(cur.getDate()).padStart(2,'0')}`);
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+            // 不連續模式至少保留 2 個點，避免空圖
+            if (sparse && dates.length < 2) {
+                dates.push(`${String(start.getMonth()+1).padStart(2,'0')}/${String(start.getDate()).padStart(2,'0')}`);
+                dates.push(`${String(end.getMonth()+1).padStart(2,'0')}/${String(end.getDate()).padStart(2,'0')}`);
+            }
+            return dates;
+        }
+
         function applyFilter(chartId, btnElement) {
             const originalText = btnElement.innerText;
             btnElement.innerText = '載入中..';
@@ -724,27 +754,9 @@
             btnElement.style.cursor = 'wait';
             btnElement.disabled = true;
 
-            const selectEl = btnElement.closest('.row').querySelector('select[onchange*="renderTimeInput"]');
+            const row = btnElement.closest('.row');
+            const selectEl = row.querySelector('select[onchange*="renderTimeInput"]');
             const dimension = selectEl ? selectEl.value : 'year';
-
-            if (chartId === 'chart-fw-balance') {
-                const resSelect = btnElement.closest('.row').querySelectorAll('select')[0].value;
-                const fwDesc = document.getElementById('fw-risk-desc');
-                const calcDesc = document.getElementById('fw-calc-desc');
-                if(resSelect === 'fo') {
-                    fwDesc.innerHTML = `<span class="badge-custom badge-risk">營運監控</span><br>
-                    <span class="text-danger fw-bold">【即時風險】</span>監控重油存量是否低於安全底線(通常為3-5天耗量)，防範失去動力的航行危機。<br>
-                    <span class="text-warning fw-bold">【長期趨勢】</span>透過年/季區間建立不同海象與載重下的「健康耗油基準線」，用以評估主機衰退老化程度及油品異常消耗。`;
-                    calcDesc.innerHTML = `<span class="badge-custom badge-calc">基準線計算</span>健康耗油基準線 = 
-                    <div class="formula-box">$$FO_{baseline} = \frac{\sum_{i=1}^{N} Daily\ FO\ Cons_i}{N\ (Days)}$$</div>`;
-                } else {
-                    fwDesc.innerHTML = `<span class="badge-custom badge-risk">營運監控</span><br>
-                    <span class="text-danger fw-bold">【即時風險】</span>若「淡水存量」呈現非邏輯崩跌或「日耗量」異常飆高，為管路破裂警訊，需立即通報船上徹查。<br>
-                    <span class="text-warning fw-bold">【長期趨勢】</span>透過年/季區間建立各季節與航線的「健康耗水基準線」。若長期耗水偏高，可排查造水機效率衰退或人為用水異常。`;
-                    calcDesc.innerHTML = `<span class="badge-custom badge-calc">基準線計算</span>健康耗水基準線 = 
-                    <div class="formula-box">$$FW_{baseline} = \frac{\sum_{i=1}^{N} Daily\ FW\ Cons_i}{N\ (Days)}$$</div>`;
-                }
-            }
 
             setTimeout(() => {
                 const chart = Highcharts.charts.find(c => c && c.renderTo.id === chartId);
@@ -752,9 +764,9 @@
                     let newCategories = [];
                     let newDataLen = 0;
 
-                    // 1. 動態 Y 軸與名稱更新
+                    // 1. 動態 Y 軸與名稱更新 (僅 cyl-rpm 切換對比參數時需要)
                     if (chartId === 'chart-cyl-rpm') {
-                        const paramSelect = btnElement.closest('.row').querySelectorAll('select')[0].value;
+                        const paramSelect = row.querySelectorAll('select')[0].value;
                         if (paramSelect === 'load') {
                             chart.yAxis[1].setTitle({ text: '主機負荷 (%)' }, false);
                             chart.series[1].update({ name: '主機負荷 (%)', tooltip: { valueSuffix: ' %' } }, false);
@@ -762,29 +774,16 @@
                             chart.yAxis[1].setTitle({ text: '主機轉速 (RPM)' }, false);
                             chart.series[1].update({ name: '主機轉速 (RPM)', tooltip: { valueSuffix: ' RPM' } }, false);
                         }
-                    } else if (chartId === 'chart-fw-balance') {
-                        const resSelect = btnElement.closest('.row').querySelectorAll('select')[0].value;
-                        if (resSelect === 'fo') {
-                            chart.yAxis[0].setTitle({ text: '重油日耗量 (MT)' }, false);
-                            chart.yAxis[1].setTitle({ text: '重油存量 (MT)' }, false);
-                            chart.series[0].update({ name: '重油日耗量 (MT)', color: '#f59e0b' }, false);
-                            chart.series[1].update({ name: '重油存量 ROB (MT)', color: '#ef4444' }, false);
-                            chart.series[2].update({ name: '健康耗油基準線' }, false);
-                        } else {
-                            chart.yAxis[0].setTitle({ text: '淡水日耗量 (MT)' }, false);
-                            chart.yAxis[1].setTitle({ text: '淡水存量 (MT)' }, false);
-                            chart.series[0].update({ name: '淡水日耗量 (MT)', color: '#f87171' }, false);
-                            chart.series[1].update({ name: '淡水存量 ROB (MT)', color: '#0ea5e9' }, false);
-                            chart.series[2].update({ name: '健康耗水基準線' }, false);
-                        }
                     }
 
-                    // 2. 根據維度動態建立新的 X 軸陣列
-                    if (chartId !== 'chart-time-util' && chartId !== 'chart-fuel-warning' && chartId !== 'chart-cctv-cargo') {
-                        if (dimension === 'year') { newCategories = ['2023', '2024', '2025', '2026']; newDataLen = 4; }
-                        else if (dimension === 'quarter') { newCategories = ['25 Q2', '25 Q3', '25 Q4', '26 Q1']; newDataLen = 4; }
-                        else if (dimension === 'month') { newCategories = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']; newDataLen = 6; }
-                        else if (dimension === 'day') { newCategories = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7']; newDataLen = 7; }
+                    // 2. 建立新的 X 軸陣列
+                    //    TASK-3 / TASK-4 受影響圖表：以「船報日期」為基準，禁用月/年加總
+                    const dateAxisCharts = ['chart-fw-balance', 'chart-slip-weather', 'chart-cyl-rpm', 'chart-port-ops'];
+                    if (dateAxisCharts.includes(chartId)) {
+                        const sparse = (chartId === 'chart-port-ops'); // 港埠延滯：不連續日期
+                        newCategories = getReportDateRange(row, sparse);
+                        if (newCategories.length === 0) newCategories = ['(無資料)'];
+                        newDataLen = newCategories.length;
                         chart.xAxis[0].setCategories(newCategories, false);
                     } else if (chartId === 'chart-time-util') {
                         if (dimension === 'year') { newCategories = ['V.2510', 'V.2511', 'V.2601', 'V.2602', 'V.2603', 'V.2604']; newDataLen = 6; }
@@ -792,12 +791,18 @@
                         else if (dimension === 'month') { newCategories = ['V.2603', 'V.2604']; newDataLen = 2; }
                         else if (dimension === 'day') { newCategories = ['V.2604']; newDataLen = 1; }
                         chart.xAxis[0].setCategories(newCategories, false);
+                    } else if (chartId === 'chart-eeoi') {
+                        if (dimension === 'year') { newCategories = ['2023', '2024', '2025', '2026']; newDataLen = 4; }
+                        else if (dimension === 'quarter') { newCategories = ['25 Q2', '25 Q3', '25 Q4', '26 Q1']; newDataLen = 4; }
+                        else if (dimension === 'month') { newCategories = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']; newDataLen = 6; }
+                        else if (dimension === 'day') { newCategories = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7']; newDataLen = 7; }
+                        chart.xAxis[0].setCategories(newCategories, false);
                     }
 
                     // 3. 重算資料點
                     chart.series.forEach((s, idx) => {
                         let newValues = [];
-                        
+
                         if (chartId === 'chart-fuel-warning') {
                             let foMT = Math.max(20, 150 + (Math.random()*100 - 50));
                             let doMT = Math.max(5, 12 + (Math.random()*10 - 5));
@@ -805,15 +810,15 @@
                             let baseDO = 2.5;
                             let foDays = parseFloat((foMT/baseFO).toFixed(1));
                             let doDays = parseFloat((doMT/baseDO).toFixed(1));
-                            
+
                             let foColor = foDays <= 3 ? '#ef4444' : (foDays <= 5 ? '#f59e0b' : '#10b981');
                             let doColor = doDays <= 3 ? '#ef4444' : (doDays <= 5 ? '#f59e0b' : '#0ea5e9');
-                            
+
                             s.setData([
                                 { y: foDays, mt: Math.round(foMT), baseline: baseFO, source: '格式1-船位報', color: foColor },
                                 { y: doDays, mt: Math.round(doMT), baseline: baseDO, source: '格式1-船位報', color: doColor }
                             ], false);
-                            return; 
+                            return;
                         }
 
                         if (chartId === 'chart-cctv-cargo') {
@@ -821,8 +826,22 @@
                             for(let i=0; i<holds; i++) {
                                 let total = 15000 + Math.random()*5000;
                                 let done = total * (0.3 + Math.random()*0.6);
-                                if (idx === 0) newValues.push(Math.round(done)); 
-                                else newValues.push(Math.round(total - done)); 
+                                if (idx === 0) newValues.push(Math.round(done));
+                                else newValues.push(Math.round(total - done));
+                            }
+                            s.setData(newValues, false);
+                            return;
+                        }
+
+                        // FW 圖表：先算「每日耗量」再以平均填基準線 (TASK-4)
+                        if (chartId === 'chart-fw-balance') {
+                            if (idx === 0) {
+                                newValues = newCategories.map(() => parseFloat((5 + Math.random() * 12).toFixed(1)));
+                            } else {
+                                // 第二條系列 = 平均耗量基準線。讀取第一條已 set 的資料計算平均
+                                const dailyArr = chart.series[0].options.data || [];
+                                const avg = dailyArr.length ? parseFloat((dailyArr.reduce((a,b)=>a+b,0) / dailyArr.length).toFixed(2)) : 9;
+                                newValues = newCategories.map(() => avg);
                             }
                             s.setData(newValues, false);
                             return;
@@ -830,38 +849,27 @@
 
                         for(let i = 0; i < newDataLen; i++) {
                             if (chartId === 'chart-slip-weather') {
-                                if (idx === 0) newValues.push(Math.floor(Math.random() * 6 + 2)); 
-                                else if (idx === 1) newValues.push(Math.floor(Math.random() * 4 + 1)); 
-                                else if (idx === 2) newValues.push(parseFloat((11 + Math.random() * 5).toFixed(1))); 
-                                else newValues.push(12.5); 
+                                if (idx === 0) newValues.push(Math.floor(Math.random() * 6 + 2));
+                                else if (idx === 1) newValues.push(Math.floor(Math.random() * 4 + 1));
+                                else if (idx === 2) newValues.push(parseFloat((11 + Math.random() * 5).toFixed(1)));
+                                else newValues.push(12.5);
                             } else if (chartId === 'chart-cyl-rpm') {
-                                const paramSelect = btnElement.closest('.row').querySelectorAll('select')[0].value;
-                                if (idx === 0) newValues.push(Math.floor(150 + Math.random() * 30)); 
+                                const paramSelect = row.querySelectorAll('select')[0].value;
+                                if (idx === 0) newValues.push(Math.floor(150 + Math.random() * 30));
                                 else {
-                                    if(paramSelect === 'load') newValues.push(Math.floor(65 + Math.random() * 25)); 
-                                    else newValues.push(Math.floor(85 + Math.random() * 25)); 
-                                }
-                            } else if (chartId === 'chart-fw-balance') {
-                                const resSelect = btnElement.closest('.row').querySelectorAll('select')[0].value;
-                                if(resSelect === 'fo') {
-                                    if (idx === 0) newValues.push(parseFloat((20 + Math.random() * 10).toFixed(1))); // FO日耗
-                                    else if (idx === 1) newValues.push(parseFloat((500 + Math.random() * 200).toFixed(1))); // FO存量
-                                    else newValues.push(28.0); // FO Baseline
-                                } else {
-                                    if (idx === 0) newValues.push(parseFloat((5 + Math.random() * 15).toFixed(1))); // FW日耗
-                                    else if (idx === 1) newValues.push(parseFloat((120 + Math.random() * 60).toFixed(1))); // FW存量
-                                    else newValues.push(9.0); // FW Baseline
+                                    if(paramSelect === 'load') newValues.push(Math.floor(65 + Math.random() * 25));
+                                    else newValues.push(Math.floor(85 + Math.random() * 25));
                                 }
                             } else if (chartId === 'chart-port-ops') {
                                 if (idx === 0) newValues.push(Math.floor(4000 + Math.random() * 10000));
                                 else newValues.push(Math.floor(1 + Math.random() * 3));
                             } else if (chartId === 'chart-time-util') {
-                                if (idx === 0) newValues.push(Math.floor(50 + Math.random() * 20)); 
-                                else if (idx === 1) newValues.push(Math.floor(5 + Math.random() * 15)); 
-                                else newValues.push(Math.floor(15 + Math.random() * 15)); 
+                                if (idx === 0) newValues.push(Math.floor(50 + Math.random() * 20));
+                                else if (idx === 1) newValues.push(Math.floor(5 + Math.random() * 15));
+                                else newValues.push(Math.floor(15 + Math.random() * 15));
                             } else if (chartId === 'chart-eeoi') {
-                                let reqVal = parseFloat((13.5 - i * 0.4).toFixed(1)); 
-                                if (idx === 0) newValues.push(parseFloat((10.5 + Math.random() * 4).toFixed(1))); 
+                                let reqVal = parseFloat((13.5 - i * 0.4).toFixed(1));
+                                if (idx === 0) newValues.push(parseFloat((10.5 + Math.random() * 4).toFixed(1)));
                                 else if (idx === 1) {
                                     let ciiVal = parseFloat((11.5 + Math.random() * 2).toFixed(1));
                                     let grade = 'C';
@@ -870,9 +878,9 @@
                                     else if (ciiVal <= reqVal * 1.05) grade = 'C';
                                     else if (ciiVal <= reqVal * 1.15) grade = 'D';
                                     else grade = 'E';
-                                    newValues.push({ y: ciiVal, grade: grade }); 
+                                    newValues.push({ y: ciiVal, grade: grade });
                                 }
-                                else newValues.push(reqVal); 
+                                else newValues.push(reqVal);
                             }
                         }
                         s.setData(newValues, false);
@@ -880,7 +888,7 @@
 
                     chart.redraw({ duration: 800 });
                 }
-                
+
                 btnElement.innerText = originalText;
                 btnElement.classList.remove('opacity-75');
                 btnElement.style.cursor = '';
@@ -903,23 +911,27 @@
         });
 
         function initCharts() {
-            const timeContainers = ['slip-time-container', 'cyl-time-container', 'fw-time-container', 'port-time-container', 'eeoi-time-container', 'time-util-container'];
+            const timeContainers = ['eeoi-time-container', 'time-util-container'];
             timeContainers.forEach(containerId => {
                 const selectEl = document.querySelector(`select[onchange*="${containerId}"]`);
                 if(selectEl) renderTimeInput(selectEl.value, containerId);
             });
 
             const defaultCategories = ['2023', '2024', '2025', '2026'];
-            const defaultDays = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'];
+            // 三個受 TASK-3 影響的圖表預設「船報日期」X 軸 (3/15 ~ 3/27 連續日期)
+            const reportDates = ['03/15','03/16','03/17','03/18','03/19','03/20','03/21','03/22','03/23','03/24','03/25','03/26','03/27'];
+            // 港埠延滯：只顯示有裝卸事件的日期 (不連續日期，跳過沒事件的日子)
+            const portEventDates = ['03/02','03/03','03/05','03/06','03/07','03/11','03/12','03/18','03/19','03/20','03/25','03/26'];
 
-            // 1. FW Chart
+            // 1. FW Chart — 每日耗量 vs 平均耗量比較 (X 軸：船報日期)
+            const fwDailyDemo = reportDates.map(() => parseFloat((6 + Math.random() * 8).toFixed(1)));
+            const fwAvg = parseFloat((fwDailyDemo.reduce((a, b) => a + b, 0) / fwDailyDemo.length).toFixed(2));
             Highcharts.chart('chart-fw-balance', {
-                xAxis: { categories: defaultCategories },
-                yAxis: [{ title: { text: '淡水日耗量 (MT)' } }, { title: { text: '淡水存量 (MT)' }, opposite: true }],
+                xAxis: { categories: reportDates, title: { text: '船報日期' } },
+                yAxis: { title: { text: '淡水耗量 (MT)' }, min: 0 },
                 series: [
-                    { name: '淡水日耗量 (MT)', type: 'column', yAxis: 0, data: [8.5, 9.2, 8.1, 8.8], color: '#f87171' },
-                    { name: '淡水存量 ROB (MT)', type: 'spline', yAxis: 1, data: [160.5, 155.2, 165.0, 158.5], color: '#0ea5e9', lineWidth: 3 },
-                    { name: '健康耗水基準線', type: 'line', yAxis: 0, data: [9.0, 9.0, 9.0, 9.0], color: '#10b981', dashStyle: 'ShortDash', marker: { enabled: false } }
+                    { name: '每日耗量 (MT)', type: 'column', data: fwDailyDemo, color: '#f87171' },
+                    { name: '平均耗量基準線 (MT)', type: 'line', data: reportDates.map(() => fwAvg), color: '#10b981', dashStyle: 'ShortDash', marker: { enabled: false }, lineWidth: 2 }
                 ]
             });
 
@@ -952,25 +964,25 @@
                 }
             });
 
-            // 3. Slip Chart
+            // 3. Slip Chart — X 軸：船報日期 (連續日)
             Highcharts.chart('chart-slip-weather', {
-                xAxis: { categories: defaultCategories },
+                xAxis: { categories: reportDates, title: { text: '船報日期' } },
                 yAxis: [{ title: { text: '風/浪級' } }, { title: { text: '滑失率 %' }, opposite: true }],
                 series: [
-                    { name: '蒲式風級', type: 'column', yAxis: 0, data: [3, 5, 4, 3], color: '#4b5563' },
-                    { name: '海象浪級', type: 'column', yAxis: 0, data: [2, 4, 3, 2], color: '#6b7280' },
-                    { name: '實際滑失率', type: 'spline', yAxis: 1, data: [11.5, 12.8, 11.2, 12.5], color: '#ef4444', lineWidth: 3, marker: { radius: 4 } },
-                    { name: '動態基準線', type: 'line', yAxis: 1, data: [12.5, 12.5, 12.5, 12.5], color: '#10b981', dashStyle: 'Dash', marker: { enabled: false } }
+                    { name: '蒲式風級', type: 'column', yAxis: 0, data: reportDates.map(() => Math.floor(2 + Math.random() * 5)), color: '#4b5563' },
+                    { name: '海象浪級', type: 'column', yAxis: 0, data: reportDates.map(() => Math.floor(1 + Math.random() * 4)), color: '#6b7280' },
+                    { name: '實際滑失率', type: 'spline', yAxis: 1, data: reportDates.map(() => parseFloat((11 + Math.random() * 5).toFixed(1))), color: '#ef4444', lineWidth: 3, marker: { radius: 4 } },
+                    { name: '動態基準線', type: 'line', yAxis: 1, data: reportDates.map(() => 12.5), color: '#10b981', dashStyle: 'Dash', marker: { enabled: false } }
                 ]
             });
 
-            // 4. Cyl/RPM Chart
+            // 4. Cyl/RPM Chart — X 軸：船報日期 (連續日)
             Highcharts.chart('chart-cyl-rpm', {
-                xAxis: { categories: defaultCategories },
+                xAxis: { categories: reportDates, title: { text: '船報日期' } },
                 yAxis: [{ title: { text: '汽缸油耗 (L)' } }, { title: { text: '主機轉速 (RPM)' }, opposite: true }],
                 series: [
-                    { name: '汽缸油耗 (L)', type: 'column', yAxis: 0, data: [165, 168, 160, 166], color: '#c084fc' },
-                    { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: [102, 105, 100, 104], color: '#f59e0b', lineWidth: 3, tooltip: { valueSuffix: ' RPM' } }
+                    { name: '汽缸油耗 (L)', type: 'column', yAxis: 0, data: reportDates.map(() => Math.floor(150 + Math.random() * 30)), color: '#c084fc' },
+                    { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: reportDates.map(() => Math.floor(95 + Math.random() * 15)), color: '#f59e0b', lineWidth: 3, tooltip: { valueSuffix: ' RPM' } }
                 ]
             });
 
@@ -989,13 +1001,27 @@
             });
             */
 
-            // 6. Port Ops Chart
+            // 6. Port Ops Chart — X 軸：船報日期 (不連續，僅顯示有裝卸事件之日)
             Highcharts.chart('chart-port-ops', {
-                xAxis: { categories: defaultDays },
+                xAxis: {
+                    categories: portEventDates,
+                    title: { text: '船報日期 (僅顯示有裝卸事件之日)' },
+                    labels: { rotation: -30 }
+                },
                 yAxis: [{ title: { text: '裝卸貨量 (MT)' } }, { title: { text: '工班數' }, opposite: true }],
+                tooltip: {
+                    shared: true,
+                    formatter: function () {
+                        let s = `<b>船報日期 ${this.x}</b><br/>`;
+                        this.points.forEach(p => {
+                            s += `<span style="color:${p.color}">●</span> ${p.series.name}: <b>${p.y}</b><br/>`;
+                        });
+                        return s;
+                    }
+                },
                 series: [
-                    { name: '日裝卸貨量 (MT)', type: 'column', yAxis: 0, data: [12500, 13200, 11800, 12900, 13100], color: '#10b981' },
-                    { name: '工班數量', type: 'spline', yAxis: 1, data: [2, 3, 2, 2, 2], color: '#facc15', lineWidth: 0, marker: { radius: 6, symbol: 'circle' } }
+                    { name: '日裝卸貨量 (MT)', type: 'column', yAxis: 0, data: portEventDates.map(() => Math.floor(4000 + Math.random() * 10000)), color: '#10b981' },
+                    { name: '工班數量', type: 'spline', yAxis: 1, data: portEventDates.map(() => Math.floor(1 + Math.random() * 3)), color: '#facc15', lineWidth: 0, marker: { radius: 6, symbol: 'circle' } }
                 ]
             });
 
@@ -1058,10 +1084,10 @@
                 voyHtml += `<tr>
                     <td>V.26${voyNum}-E</td><td>${date}</td><td>KAOHSIUNG</td><td>SINGAPORE</td>
                     <td>${(Math.random()*2000 + 500).toFixed(0)}</td>
-                    <td class="text-danger">${(Math.random()*200 + 100).toFixed(1)}</td>
-                    <td class="text-warning">${(Math.random()*15 + 2).toFixed(1)}</td>
-                    <td class="text-info">${(Math.random()*80 + 10).toFixed(1)}</td>
-                    <td class="text-primary">${(Math.random()*1000 + 200).toFixed(0)}</td>
+                    <td>${(Math.random()*200 + 100).toFixed(1)}</td>
+                    <td>${(Math.random()*15 + 2).toFixed(1)}</td>
+                    <td>${(Math.random()*80 + 10).toFixed(1)}</td>
+                    <td>${(Math.random()*1000 + 200).toFixed(0)}</td>
                 </tr>`;
             }
             $('#voyageSummaryTable tbody').html(voyHtml);
@@ -1069,15 +1095,22 @@
             // ==========================================
             // 動態產生依循「真實航次動線」的假資料
             // ==========================================
+            // 船報英文名稱對照 (依《電報信文草稿》)：
+            //   格式1 = Noon Report / Morning Report (船位報，依實際發報時間二擇一)
+            //   格式2 = Arrival Report (抵港報)
+            //   格式3 = Daily Report (每日報，含裝卸/等泊/作業)
+            //   格式4 = Departure Report (離港報)
+            //   格式5 = Shifting Report (移泊報)
+            //   格式6 = Irregular Report (特殊情況報)
             const voyageTimeline = [
-                { f: 1, name: '格式1', badge: 'bg-primary', status: 'Sailing', lt: '12:00', gmt: '04:00' },
-                { f: 1, name: '格式1', badge: 'bg-primary', status: 'Sailing', lt: '12:00', gmt: '04:00' },
-                { f: 2, name: '格式2', badge: 'bg-secondary', status: 'At Port', lt: '07:30', gmt: '23:30' },
-                { f: 6, name: '格式6', badge: 'bg-danger', status: 'Anchorage', lt: '09:00', gmt: '01:00' },
-                { f: 3, name: '格式3', badge: 'bg-info text-dark', status: 'Discharging', lt: '08:00', gmt: '00:00' },
-                { f: 5, name: '格式5', badge: 'bg-warning text-dark', status: 'Shifting', lt: '14:00', gmt: '06:00' },
-                { f: 3, name: '格式3', badge: 'bg-info text-dark', status: 'Discharging', lt: '08:00', gmt: '00:00' },
-                { f: 4, name: '格式4', badge: 'bg-success', status: 'Sailing', lt: '18:00', gmt: '10:00' }
+                { f: 1, name: 'Noon Report',      zh: '船位報 (午報)',     badge: 'bg-primary',           status: 'Sailing',     lt: '12:00', gmt: '04:00' },
+                { f: 1, name: 'Morning Report',   zh: '船位報 (早報)',     badge: 'bg-primary',           status: 'Sailing',     lt: '06:00', gmt: '22:00' },
+                { f: 2, name: 'Arrival Report',   zh: '抵港報',            badge: 'bg-secondary',         status: 'At Port',     lt: '07:30', gmt: '23:30' },
+                { f: 6, name: 'Irregular Report', zh: '特殊情況報',        badge: 'bg-danger',            status: 'Anchorage',   lt: '09:00', gmt: '01:00' },
+                { f: 3, name: 'Daily Report',     zh: '每日報',            badge: 'bg-info text-dark',    status: 'Discharging', lt: '08:00', gmt: '00:00' },
+                { f: 5, name: 'Shifting Report',  zh: '移泊報',            badge: 'bg-warning text-dark', status: 'Shifting',    lt: '14:00', gmt: '06:00' },
+                { f: 3, name: 'Daily Report',     zh: '每日報',            badge: 'bg-info text-dark',    status: 'Discharging', lt: '08:00', gmt: '00:00' },
+                { f: 4, name: 'Departure Report', zh: '離港報',            badge: 'bg-success',           status: 'Sailing',     lt: '18:00', gmt: '10:00' }
             ];
 
             let chronologicalData = [];
@@ -1106,7 +1139,7 @@
                         <td>${currentVoy}</td>
                         <td>${dStr} ${report.lt}</td>
                         <td>${dStr} ${report.gmt}</td>
-                        <td><span class="badge ${report.badge}">${report.name}</span></td>
+                        <td><span class="badge ${report.badge}" title="${report.zh}">${report.name}</span></td>
                         <td class="fw-bold">${report.status}</td>
                         
                         <td>${(Math.random()*200 + 100).toFixed(1)}</td>
