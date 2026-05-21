@@ -69,7 +69,7 @@ body {
   display: inline-flex; align-items: center; justify-content: center;
   opacity: 0.85;
 }
-.sidebar nav a .sb-ico svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.sidebar nav a .sb-ico svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .sidebar nav a .sb-label {
   opacity: 0; transition: opacity 0.12s 0.05s ease;
 }
@@ -185,14 +185,16 @@ table.alert-table thead th {
 table.alert-table th.col-vessel,
 table.alert-table td.cell-vessel {
   position: sticky; left: 0;
-  box-shadow: 1px 0 0 0 #2a2a2a;  /* 右側分隔線，sticky 時取代 border-right 才不會被擋住 */
+  box-shadow: 1px 0 0 0 #2a2a2a; 
+  font-size: 12px; /* 右側分隔線，sticky 時取代 border-right 才不會被擋住 */
 }
 table.alert-table th.col-vessel { z-index: 4; background: #0f0f0f; }
 table.alert-table td.cell-vessel { z-index: 2; background: #141414; }
 /* hover 時 sticky 欄位也要跟著變色，否則 cell-vessel 會與其他 td 不同步 */
 table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
 
-/* 1080px 以下螢幕：船舶欄固定 250px，避免橫向卷動時欄寬隨內容跳動 */
+/* ≥980px 螢幕：船舶欄固定 230px。寬度不夠時 IMO pill 與英文名「換行下來」，
+ * 不再用 ellipsis 截斷，整個船名都看得到。 */
 @media (min-width: 980px) {
   table.alert-table th.col-vessel,
   table.alert-table td.cell-vessel {
@@ -200,14 +202,19 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
     min-width: 230px;
     max-width: 230px;
   }
-  /* 船名過長時收尾省略，pill + 連結維持單行 */
   table.alert-table td.cell-vessel a.vessel-link {
-    display: inline-block;
-    max-width: calc(230px - 32px);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: middle;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    max-width: calc(230px - 16px);
+  }
+  /* vessel-name 占滿剩餘空間；裝不下時自動換行下來到 pill 下一行 */
+  table.alert-table td.cell-vessel .vessel-name {
+    flex: 1 1 auto;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.35;
   }
 }
 
@@ -288,20 +295,14 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   50%      { box-shadow: 0 0 0 8px rgba(192, 57, 43, 0);    }
 }
 
-/* 表頭：icon 旁加小型 info(i)，hover 才顯示完整說明 */
+/* 表頭：滑鼠移到維度 icon 直接顯示說明（不再額外放 i 圖示） */
 .icon-header {
-  display: inline-flex; align-items: center; gap: 4px;
-  line-height: 1.2;
-}
-.ih-info {
   position: relative;
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 13px; height: 13px;
-  color: #5e6b80; cursor: help;
+  display: inline-flex; align-items: center;
+  line-height: 1.2;
+  cursor: help;
 }
-.ih-info:hover { color: #9ec5ff; }
-.icon-header .ih-info svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.4; }
-.ih-info::after {
+.icon-header::after {
   content: attr(data-tip);
   position: absolute;
   top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
@@ -316,7 +317,7 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   transition: opacity 0.12s ease;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
-.ih-info::before {
+.icon-header::before {
   /* tooltip 上方小箭頭 */
   content: ""; position: absolute;
   top: calc(100% + 1px); left: 50%; transform: translateX(-50%);
@@ -324,8 +325,10 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   opacity: 0; transition: opacity 0.12s ease;
   z-index: 11;
 }
-.ih-info:hover::after,
-.ih-info:hover::before { opacity: 1; }
+.icon-header:hover::after,
+.icon-header:hover::before { opacity: 1; }
+/* hover 時 icon stroke 變亮，明確提示這是可互動目標 */
+.icon-header:hover svg { stroke: #9ec5ff; }
 
 /* 上方地圖切換至單船 detail 模式時：左圖 + 右資訊面板 */
 .fleet-detail-grid {
@@ -424,7 +427,7 @@ table.alert-table td.cell-vessel a.vessel-link.is-active::before {
 .num-compound .amber    { color: #f5b753; }
 .num-compound .dev-tag  {
   display: inline-block;
-  font-size: 14px; padding: 1px 6px;
+  font-size: 11px; padding: 1px 6px;
   background: rgba(255,107,107,0.18); color: #ff8a8a;
   border-radius: 8px; margin-left: 4px;
   font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
@@ -495,7 +498,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .heat-na {
   background: transparent;
   border: 1px dashed #333333;
-  width: 18px; height: 18px;
+  width: 10px; height: 10px;
   background-image: repeating-linear-gradient(
     45deg, transparent 0 4px, rgba(58,77,106,0.18) 4px 5px
   );
@@ -535,13 +538,18 @@ table.alert-table tr:last-child td { border-bottom: none; }
 
 .vessel-link {
   color: #e4eaf2; text-decoration: none; font-weight: 600;
+  display: inline-flex; align-items: center;
+  gap: 8px; column-gap: 8px;
+  /* 預設不換行；@media (max-width:1080px) 才放行讓 IMO + 英文名換行下來 */
 }
 .vessel-link:hover { color: #9ec5ff; }
+.vessel-name { white-space: nowrap; }
 .vessel-pill {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 3px 9px; border-radius: 12px;
   background: rgba(44,108,219,0.18); color: #9ec5ff;
-  font-size: 14px; font-weight: 600; margin-right: 8px;
+  font-size: 12px; font-weight: 600;
+  white-space: nowrap;
 }
 .vessel-pill::before {
   content: ""; display: inline-block;
@@ -550,13 +558,24 @@ table.alert-table tr:last-child td { border-bottom: none; }
 
 .ais-status {
   display: inline-block; padding: 3px 10px; border-radius: 3px;
-  font-size: 14px; font-weight: 500; letter-spacing: 0.3px;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.3px;
   background: #222222; color: #c4cdda;
+  cursor: help;
+  white-space: nowrap;
 }
 .ais-status.moored  { background: #222222; color: #c4cdda; }
 .ais-status.under-way { background: rgba(80,160,80,0.18); color: #88d796; }
 .ais-status.anchored  { background: rgba(245,166,35,0.18); color: #f5b753; }
 .ais-status.unknown   { background: #1f1f1f; color: #7c8a9e; }
+
+/* AIS Status 表格欄固定 80px，文字以縮寫顯示，完整名稱在 hover title 內 */
+table.alert-table th.col-status,
+table.alert-table td.cell-status {
+  width: 80px; min-width: 80px; max-width: 80px;
+}
+table.alert-table td.cell-status .ais-status {
+  padding: 3px 6px;  /* 80px 欄寬內收緊左右內距，文字仍居中 */
+}
 
 .mono { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 14px; color: #c4cdda; }
 .muted { color: #7c8a9e; }
@@ -615,10 +634,10 @@ table.alert-table tr:last-child td { border-bottom: none; }
 }
 .progress-bar {
   flex: 1; height: 6px; background: #1f1f1f;
-  border-radius: 3px; overflow: hidden; min-width: 60px;
+  border-radius: 3px; overflow: hidden; min-width: 40px;
 }
 .progress-fill { height: 100%; }
-.progress-pct { font-size: 14px; color: #9aa5b8; min-width: 36px; }
+.progress-pct { font-size: 14px; color: #9aa5b8; min-width: 32px; text-align: right; }
 .dev-count {
   display: inline-block; margin-left: 6px;
   font-size: 14px; padding: 1px 7px;
@@ -685,9 +704,11 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .alert-row .alert-icon { display: flex; align-items: center; justify-content: center; }
 .alert-row .alert-name { color: #e4eaf2; font-weight: 500; }
 .alert-row .alert-meta { font-size: 14px; color: #7c8a9e; margin-top: 1px; }
-.alert-row .alert-tag {
-  font-size: 14px; font-weight: 600; padding: 2px 8px;
+/* alert-tag：critical/warning/normal/na 等級徽章；不論放在 .alert-row 或 .ev-row 都統一 12px */
+.alert-tag {
+  font-size: 12px; font-weight: 600; padding: 2px 8px;
   border-radius: 8px; text-transform: uppercase; letter-spacing: 0.4px;
+  display: inline-block; line-height: 1.45;
 }
 .alert-tag.critical { background: rgba(255,77,79,0.15); color: #ff8a8a; }
 .alert-tag.warning  { background: rgba(245,166,35,0.15); color: #f5b753; }
@@ -862,7 +883,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 /* ── Event handling UI ─────────────────────────────────────────── */
 .ev-status {
   display: inline-block; padding: 3px 10px; border-radius: 10px;
-  font-size: 14px; font-weight: 600; white-space: nowrap;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
 }
 .ev-row {
   display: grid; grid-template-columns: 1fr auto;
@@ -967,7 +988,48 @@ select.ev-select {
   background: #1a1a1a; color: #d8dee9; font-family: inherit;
 }
 
-/* 閾值設定 modal：input + 單位後綴 */
+/* 閾值設定獨立頁面 #/thresholds */
+.th-page-wrap {
+  background: #141414; border: 1px solid #2a2a2a;
+  border-radius: 8px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  margin-bottom: 14px;
+}
+table.th-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 14px; color: #d8dee9;
+}
+table.th-table thead th {
+  background: #0f0f0f; font-weight: 600;
+  color: #9aa5b8; font-size: 14px;
+  text-align: left; padding: 10px 12px;
+  border-bottom: 1px solid #2a2a2a;
+  letter-spacing: 0.3px;
+}
+table.th-table tbody td { border-bottom: 1px solid #1a1a1a; vertical-align: middle; }
+table.th-table tbody tr:last-child td { border-bottom: none; }
+table.th-table tbody tr:hover td { background: #1a1a1a; }
+
+.th-trigger-info {
+  background: #141414; border: 1px solid #2a2a2a; border-radius: 6px;
+  padding: 12px 14px; margin-bottom: 14px;
+  font-size: 14px; color: #9aa5b8; line-height: 1.7;
+}
+.th-trigger-info code {
+  background: #1a1a1a; padding: 1px 6px;
+  border-radius: 3px; color: #c4cdda;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 14px;
+}
+.th-actions {
+  display: flex; gap: 10px; align-items: center;
+  justify-content: flex-end;
+}
+
+/* 閾值設定：input + 自訂上下按鈕 + 單位後綴
+ * 原生 type=number spinner 在不同瀏覽器樣式不一、又無法配合深色主題，
+ * 一律隱藏，改用自訂 .th-stepper 雙按鈕。
+ */
 .th-input-wrap {
   display: inline-flex; align-items: stretch;
   border: 1px solid #2a2a2a; border-radius: 4px;
@@ -976,20 +1038,47 @@ select.ev-select {
 }
 .th-input-wrap:focus-within { border-color: #4a9eff; }
 .th-input-wrap .th-input {
-  width: 80px;
+  width: 72px;
   background: transparent; border: none;
   padding: 4px 8px;
   font: 600 14px ui-monospace, "SF Mono", Consolas, monospace;
   outline: none;
   text-align: right;
+  -moz-appearance: textfield;       /* Firefox 隱藏 spinner */
+  appearance: textfield;
 }
 .th-input-wrap .th-input::-webkit-inner-spin-button,
 .th-input-wrap .th-input::-webkit-outer-spin-button {
-  opacity: 0.5;
+  -webkit-appearance: none;          /* Chrome / Safari / Edge 隱藏 spinner */
+  margin: 0;
 }
+/* 自訂上下調整按鈕 — 細條疊在 input 右側 */
+.th-stepper {
+  display: flex; flex-direction: column;
+  border-left: 1px solid #2a2a2a;
+  flex-shrink: 0;
+}
+.th-stepper button {
+  background: #1a1a1a;
+  border: none;
+  color: #9aa5b8;
+  cursor: pointer;
+  width: 20px;
+  padding: 0;
+  font: inherit;
+  font-size: 10px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.th-stepper button:hover  { background: #222222; color: #e4eaf2; }
+.th-stepper button:active { background: #2a2a2a; }
+.th-stepper button:focus  { outline: none; background: #222222; color: #e4eaf2; }
+.th-stepper .th-step-up   { border-bottom: 1px solid #2a2a2a; }
+.th-stepper button svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
 .th-input-wrap .th-unit {
   display: inline-flex; align-items: center;
-  padding: 0 8px;
+  padding: 0 10px;
   background: #1a1a1a;
   border-left: 1px solid #2a2a2a;
   color: #9aa5b8; font-size: 14px;
@@ -1073,7 +1162,7 @@ select.ev-select {
       <span class="sb-ico"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="6" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="6" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="6" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg></span>
       <span class="sb-label">警示時間線</span>
     </a>
-    <a href="javascript:void(0)" onclick="openThresholdsModal()" title="閾值設定 / Thresholds">
+    <a href="#/thresholds" data-route="thresholds" title="閾值設定 / Thresholds">
       <span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
       <span class="sb-label">閾值設定</span>
     </a>
@@ -1089,12 +1178,6 @@ select.ev-select {
 <div class="modal-mask" id="ev-modal" onclick="if(event.target.id==='ev-modal')closeEventModal()">
   <div class="modal" id="ev-modal-body" style="position:relative">
     <button class="modal-close" onclick="closeEventModal()">×</button>
-  </div>
-</div>
-
-<div class="modal-mask" id="th-modal" onclick="if(event.target.id==='th-modal')closeThresholdsModal()">
-  <div class="modal" id="th-modal-body" style="position:relative">
-    <button class="modal-close" onclick="closeThresholdsModal()">×</button>
   </div>
 </div>
 
@@ -1494,11 +1577,29 @@ function levelTag(level) {
   return `<span class="alert-tag ${level}">${txt}</span>`;
 }
 
+/* AIS 導航狀態（ITU-R M.1371 命名）：
+ *   - 表格內用縮寫顯示，避免長字串撐爆 120px AIS Status 欄
+ *   - title 給滑鼠 hover 用，可看到完整中英文描述
+ *   - label 維持顯示在欄位內、labelFull 給單船 detail 等空間較大的位置用 */
+/* AIS 導航狀態（ITU-R M.1371）：表格與單船 detail 都用 3-4 字母縮寫顯示，
+ * 完整名稱與 SOG 條件在 hover title 內。 */
 function aisStatusFromSog(sog) {
-  if (sog === null || sog === undefined) return { key: "unknown", label: "unknown" };
-  if (sog < 0.5)   return { key: "moored",   label: "moored" };
-  if (sog < 2)     return { key: "anchored", label: "at anchor" };
-  return { key: "under-way", label: "under way using engine" };
+  if (sog === null || sog === undefined) return {
+    key: "unknown", label: "UNK",
+    title: "AIS 狀態不明 / Status unknown — 無 SOG 資料",
+  };
+  if (sog < 0.5) return {
+    key: "moored", label: "MOOR",
+    title: "繫泊 / Moored — 已靠泊（SOG < 0.5 kn）",
+  };
+  if (sog < 2) return {
+    key: "anchored", label: "ANC",
+    title: "拋錨 / At anchor — 錨泊中（0.5 ≤ SOG < 2 kn）",
+  };
+  return {
+    key: "under-way", label: "U/W",
+    title: "引擎航行中 / Under way using engine — 動力推進（SOG ≥ 2 kn）",
+  };
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -1531,6 +1632,9 @@ function route() {
   } else if (h === "#/timeline") {
     setMainMode("");
     renderTimeline(); navHighlight("timeline");
+  } else if (h === "#/thresholds") {
+    setMainMode("");
+    renderThresholds(); navHighlight("thresholds");
   } else {
     setMainMode("fleet-mode");
     renderFleet(); navHighlight("fleet");
@@ -1934,7 +2038,7 @@ function renderUpperArea(enriched) {
       <aside class="fleet-detail-panel">
         <div class="detail-header">
           <span class="name">${escapeHtml(v.vessel_name)}</span>
-          <span class="ais-status ${status.key}" style="font-size:14px">${status.label}</span>
+          <span class="ais-status ${status.key}" style="font-size:14px" title="${escapeHtml(status.title)}">${status.label}</span>
           <span class="imo">IMO ${v.imo}</span>
         </div>
 
@@ -1981,7 +2085,7 @@ function renderUpperArea(enriched) {
           <span class="k">經度 / Lon</span><span class="v mono">${dms(v.longitude, "lon")}</span>
           <span class="k">航速 / SOG</span><span class="v mono">${fmt(v.sog,1)} kn</span>
           <span class="k">航向 / COG</span><span class="v mono">${fmt(v.cog,0)}°</span>
-          <span class="k">狀態 / Status</span><span class="v"><span class="ais-status ${status.key}">${status.label}</span></span>
+          <span class="k">狀態 / Status</span><span class="v"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.label}</span></span>
           <span class="k">時間 / Time</span><span class="v mono">${v.ais_timestamp || "-"}</span>
         </div>
 
@@ -2591,16 +2695,13 @@ function biTh(cn, en, opts = {}) {
 }
 
 function renderMatrixTable(filtered) {
-  // 警示維度欄頭：icon + info(i)，hover info 才顯示完整說明（避免長文字佔欄寬）
+  // 警示維度欄頭：只有 icon，hover 直接看 tooltip（不再放 i 圖示）
   const headerCells = DIM_KEYS.map(k => {
     const m = DIM_META[k];
     const tip = `${m.label} / ${m.short}\n${m.desc || ""}`;
     return `<th>
-       <span class="icon-header">
+       <span class="icon-header" data-tip="${escapeHtml(tip)}" tabindex="0" aria-label="${escapeHtml(m.label)} 說明">
          ${m.icon()}
-         <span class="ih-info" data-tip="${escapeHtml(tip)}" tabindex="0" aria-label="${escapeHtml(m.label)} 說明">
-           <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7"/><circle cx="8" cy="4.6" r="0.85" fill="currentColor" stroke="none"/><path d="M8 7.5v4" stroke-linecap="round"/></svg>
-         </span>
        </span>
      </th>`;
   }).join("");
@@ -2636,7 +2737,7 @@ function renderMatrixTable(filtered) {
     const countsCell = `
       <span class="num-compound">
         <span class="primary">${planCount}</span><span class="sep">/</span><span class="secondary">${aisCount}</span>
-        ${devCount > 0 ? `<span class="dev-tag">偏移 ${devCount} / Dev ${devCount}</span>` : ""}
+        ${devCount > 0 ? `<span class="dev-tag" title="偏移點數 / Deviated points">Dev ${devCount}</span>` : ""}
       </span>`;
 
     const devCell = `
@@ -2649,20 +2750,20 @@ function renderMatrixTable(filtered) {
     <tr>
       <td class="cell-vessel">
         <a class="vessel-link${isActive ? " is-active" : ""}" href="javascript:void(0)" onclick="selectVessel(${v.vessel_id})">
-          <span class="vessel-pill">${v.vessel_id}</span>${escapeHtml(v.vessel_name)}
+          <span class="vessel-pill" title="IMO ${escapeHtml(v.imo)}">${escapeHtml(v.imo)}</span><span class="vessel-name">${escapeHtml(v.vessel_name)}</span>
         </a>
       </td>
       <td>${riskDot(a.risk, "lg")}</td>
       ${cells}
       <td class="cell-data">${countsCell}</td>
-      <td class="cell-data" style="min-width:130px">${pct !== undefined ? `
+      <td class="cell-data" style="min-width:80px">${pct !== undefined ? `
         <div class="progress">
           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${progressColor}"></div></div>
           <span class="progress-pct">${pct}%</span>
         </div>` : '<span class="muted">-</span>'}</td>
       <td class="cell-data">${devCell}</td>
       <td class="cell-data mono">${v.ais_timestamp ? v.ais_timestamp.replace(/-/g,'/').slice(5,16) : "-"}</td>
-      <td class="cell-data"><span class="ais-status ${status.key}">${status.label}</span></td>
+      <td class="cell-data cell-status"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.label}</span></td>
       <td class="num mono">${v.sog !== null ? v.sog.toFixed(1) : "-"}</td>
       <td class="num mono">${v.cog !== null ? Math.round(v.cog) : "-"}</td>
       <td class="cell-data mono">${dms(v.latitude, "lat")}</td>
@@ -2685,7 +2786,7 @@ function renderMatrixTable(filtered) {
             ${biTh("航行進度", "Progress", { cls: "col-data" })}
             ${biTh("偏移量 NM", "Dev / Max (Safety)", { cls: "col-data" })}
             ${biTh("AIS 時間", "Latest AIS Time", { cls: "col-data" })}
-            ${biTh("AIS 狀態", "AIS Status", { cls: "col-data" })}
+            ${biTh("AIS 狀態", "AIS Status", { cls: "col-data col-status" })}
             ${biTh("速度", "SOG", { cls: "num" })}
             ${biTh("航向", "HDG", { cls: "num" })}
             ${biTh("緯度", "Lat", { cls: "col-data" })}
@@ -2841,7 +2942,7 @@ function renderDetail(vesselId) {
           <span class="k">Lon</span><span class="v mono">${dms(v.longitude, "lon")}</span>
           <span class="k">SOG</span><span class="v">${fmt(v.sog,1)} kn</span>
           <span class="k">COG</span><span class="v">${fmt(v.cog,0)}°</span>
-          <span class="k">AIS Status</span><span class="v"><span class="ais-status ${status.key}">${status.label}</span></span>
+          <span class="k">AIS Status</span><span class="v"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.label}</span></span>
           <span class="k">AIS Time</span><span class="v mono">${v.ais_timestamp || "-"}</span>
         </div>
 
@@ -3354,14 +3455,8 @@ function renderTimeline() {
 /* ─────────────────────────────────────────────────────────────────
  * Threshold settings modal — 調整 Open Event 觸發條件
  * ───────────────────────────────────────────────────────────────── */
-window.openThresholdsModal = function() {
-  renderThresholdsModalBody();
-  document.getElementById("th-modal").classList.add("open");
-};
-window.closeThresholdsModal = function() {
-  document.getElementById("th-modal").classList.remove("open");
-};
-function renderThresholdsModalBody() {
+/* 閾值設定：獨立 routed 頁面 #/thresholds，內容寫入 #main（非 modal） */
+function renderThresholds() {
   const rows = Object.keys(THRESHOLD_META).map(k => {
     const m = THRESHOLD_META[k];
     const cur = _thresholds[k];
@@ -3370,92 +3465,129 @@ function renderThresholdsModalBody() {
     // 數值輸入框旁的單位文字（讓使用者一眼看出這個閾值是「× SF」、「pts」還是「score」）
     const unitTip = `${m.unit} (${m.range})`;
     const unitSpan = `<span class="th-unit" title="${escapeHtml(unitTip)}">${escapeHtml(m.unitShort)}</span>`;
+    // 自訂上下按鈕：取代原生 spinner，深色主題下視覺一致
+    const stepperHtml = `
+      <div class="th-stepper">
+        <button type="button" class="th-step-up" tabindex="-1" aria-label="增加">
+          <svg viewBox="0 0 12 12"><path d="M2 8 L6 4 L10 8"/></svg>
+        </button>
+        <button type="button" class="th-step-down" tabindex="-1" aria-label="減少">
+          <svg viewBox="0 0 12 12"><path d="M2 4 L6 8 L10 4"/></svg>
+        </button>
+      </div>`;
     return `
       <tr data-k="${k}">
-        <td style="padding:8px 10px">
-          <div style="font-weight:600">${DIM_META[k]?.icon ? DIM_META[k].icon() : ""} ${m.label}</div>
+        <td style="padding:10px 12px">
+          <div style="font-weight:600;display:flex;align-items:center;gap:6px">${DIM_META[k]?.icon ? DIM_META[k].icon() : ""} ${m.label}</div>
           <div style="color:#7c8a9e;font-size:14px;margin-top:2px">${m.short} · ${m.unit}（${m.range}）</div>
         </td>
-        <td style="padding:8px 6px">
+        <td style="padding:10px 8px">
           <div class="th-input-wrap">
             <input type="number" class="th-input" data-k="${k}" data-lvl="warning"
                    value="${cur.warning}" step="${m.step}" min="${m.min}" max="${m.max}"
                    style="color:#f5b753">
+            ${stepperHtml}
             ${unitSpan}
           </div>
           <div style="color:#5e6b80;font-size:14px;margin-top:3px">預設 ${def.warning} ${escapeHtml(m.unitShort)}</div>
         </td>
-        <td style="padding:8px 6px">
+        <td style="padding:10px 8px">
           <div class="th-input-wrap">
             <input type="number" class="th-input" data-k="${k}" data-lvl="critical"
                    value="${cur.critical}" step="${m.step}" min="${m.min}" max="${m.max}"
                    style="color:#ff8a8a">
+            ${stepperHtml}
             ${unitSpan}
           </div>
           <div style="color:#5e6b80;font-size:14px;margin-top:3px">預設 ${def.critical} ${escapeHtml(m.unitShort)}</div>
         </td>
-        <td style="padding:8px 6px;width:32px">${dirty ? '<span style="color:#f5b753;font-size:14px" title="已修改 / Modified">●</span>' : ""}</td>
+        <td style="padding:10px 8px;width:32px">${dirty ? '<span style="color:#f5b753;font-size:14px" title="已修改 / Modified">●</span>' : ""}</td>
       </tr>`;
   }).join("");
 
-  document.getElementById("th-modal-body").innerHTML = `
-    <button class="modal-close" onclick="closeThresholdsModal()">×</button>
-    <h3>⚙ 閾值設定 <span style="color:#7c8a9e;font-size:14px;font-weight:400">/ Open Event Thresholds</span></h3>
-    <div class="modal-sub">調整各維度的 Warning / Critical 觸發點。儲存後立即重算所有船舶警示與事件立案。</div>
+  const dirtyCount = Object.keys(THRESHOLD_META).filter(k => {
+    const cur = _thresholds[k], def = DEFAULT_THRESHOLDS[k];
+    return (cur.warning !== def.warning) || (cur.critical !== def.critical);
+  }).length;
 
-    <table style="width:100%;font-size:14px;margin-top:10px;border-collapse:collapse">
-      <thead>
-        <tr style="color:#9aa5b8;border-bottom:1px solid #2a2a2a">
-          <th style="text-align:left;padding:6px 10px;font-weight:600">維度 / Dimension</th>
-          <th style="text-align:left;padding:6px 6px;font-weight:600;color:#f5b753">Warning ≥</th>
-          <th style="text-align:left;padding:6px 6px;font-weight:600;color:#ff8a8a">Critical ≥</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
+  document.getElementById("main").innerHTML = `
+    <h2 class="page-title">
+      閾值設定 <span class="bi-line"><span class="en">/ Open Event Thresholds</span></span>
+      <small>共 ${Object.keys(THRESHOLD_META).length} 個維度${dirtyCount > 0 ? ` · <span style="color:#f5b753">${dirtyCount} 項已修改</span>` : " · 全部為預設值"}</small>
+    </h2>
 
-    <div style="background:#141414;border:1px solid #2a2a2a;border-radius:4px;padding:10px 12px;margin-top:14px;font-size:14px;color:#9aa5b8;line-height:1.55">
+    <div style="color:#9aa5b8;font-size:14px;margin-bottom:14px;line-height:1.55">
+      調整各維度的 Warning / Critical 觸發點。儲存後立即重算所有船舶警示，並依新閾值補立事件、消失條件的事件會標記 cleared。
+    </div>
+
+    <div class="th-page-wrap">
+      <table class="th-table">
+        <thead>
+          <tr>
+            <th>維度 / Dimension</th>
+            <th style="color:#f5b753">Warning ≥</th>
+            <th style="color:#ff8a8a">Critical ≥</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+
+    <div class="th-trigger-info">
       <b style="color:#9ec5ff">觸發邏輯 / Trigger logic</b><br>
       ・<b>route</b>：max(目前 XTD, 歷史最大偏移) ≥ Safety Frame × 閾值<br>
       ・<b>speed</b>：|SOG − 計畫平均|/計畫平均 &gt; 閾值（另：航行中近乎停止永遠 warning）<br>
       ・<b>sea / comm / port / engine</b>：對應的偵測分數 &gt; 閾值<br>
-      頁面載入時 syncEventsFromAlerts() 會根據新閾值自動立案；既有事件不會被刪除，但「條件已消失 / cleared」標記會更新。
+      頁面載入時 <code>syncEventsFromAlerts()</code> 會根據新閾值自動立案；既有事件不會被刪除，但「條件已消失 / cleared」標記會更新。
     </div>
 
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
-      <button class="trans-btn secondary" onclick="resetThresholdsAndRefresh()">恢復預設 / Reset</button>
-      <button class="trans-btn" onclick="saveThresholdsFromModal()">儲存並重算 / Save &amp; Re-evaluate</button>
+    <div class="th-actions">
+      <span id="th-saved-tip" style="font-size:14px;color:#6ee094;flex:1"></span>
+      <button class="trans-btn secondary" id="th-reset">恢復預設 / Reset</button>
+      <button class="trans-btn" id="th-save">儲存並重算 / Save &amp; Re-evaluate</button>
     </div>
-
-    <div id="th-saved-tip" style="text-align:right;font-size:14px;color:#6ee094;margin-top:6px;min-height:14px"></div>
   `;
+
+  document.getElementById("th-save").addEventListener("click", saveThresholdsFromPage);
+  document.getElementById("th-reset").addEventListener("click", resetThresholdsAndRefresh);
+
+  // 自訂上下按鈕：呼叫 HTMLInputElement.stepUp / stepDown，自動套用 step/min/max
+  document.querySelectorAll("#main .th-stepper button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const input = btn.closest(".th-input-wrap").querySelector(".th-input");
+      try {
+        if (btn.classList.contains("th-step-up")) input.stepUp();
+        else                                      input.stepDown();
+      } catch (e) {
+        // 邊界值（已達 min 或 max）會 throw，忽略即可
+      }
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  });
 }
-window.saveThresholdsFromModal = function() {
-  // 從 modal 內所有 .th-input 讀回
-  document.querySelectorAll("#th-modal-body .th-input").forEach(el => {
+
+function saveThresholdsFromPage() {
+  // 從頁面內所有 .th-input 讀回
+  document.querySelectorAll("#main .th-input").forEach(el => {
     const k = el.dataset.k, lvl = el.dataset.lvl;
     const v = parseFloat(el.value);
     if (!isNaN(v) && _thresholds[k]) _thresholds[k][lvl] = v;
   });
   saveThresholds();
   syncEventsFromAlerts();   // 用新閾值重評估、補立案
-  // 重畫目前頁面（船隊矩陣／事件清單 都會反映新等級）
-  route();
-  // 提示
+  renderThresholds();        // 重畫本頁，更新「已修改」標記與計數
   const tip = document.getElementById("th-saved-tip");
   if (tip) {
     tip.textContent = `已儲存 / Saved at ${new Date().toLocaleTimeString()}`;
     clearTimeout(window.__thSavedTimer);
     window.__thSavedTimer = setTimeout(() => { tip.textContent = ""; }, 2500);
   }
-  renderThresholdsModalBody();  // 重繪以更新「已修改」標記
-};
+}
 window.resetThresholdsAndRefresh = function() {
   resetThresholds();
   syncEventsFromAlerts();
-  route();
-  renderThresholdsModalBody();
+  renderThresholds();
 };
 
 /* ─────────────────────────────────────────────────────────────────
