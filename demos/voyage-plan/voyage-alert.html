@@ -8,23 +8,24 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="mockup-data.js"></script>
+<script src="risk-zones.js"></script>
 
 <style>
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; height: 100%; }
 body {
   font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
-  background: #0b1426; color: #d8dee9;
+  background: #000; color: #d8dee9;
   display: flex; flex-direction: row; height: 100vh;
 }
 
 /* ── Sidebar：預設收合（56px），hover 暫時展開，pin 鎖定展開 ───── */
 .sidebar {
-  background: #08111f; color: #e4eaf2;
+  background: #0d0d0d; color: #e4eaf2;
   flex: 0 0 auto;
   width: 56px;
   display: flex; flex-direction: column;
-  border-right: 1px solid #1c2740;
+  border-right: 1px solid #2a2a2a;
   transition: width 0.22s cubic-bezier(.4,.0,.2,1);
   overflow: hidden;
 }
@@ -36,14 +37,14 @@ body {
   position: relative;
   display: flex; align-items: center; gap: 10px;
   padding: 14px 14px 12px;
-  border-bottom: 1px solid #1c2740;
+  border-bottom: 1px solid #2a2a2a;
   white-space: nowrap;
 }
 .sidebar .brand .logo-mark {
   flex: 0 0 28px; width: 28px; height: 28px;
   border-radius: 6px;
   background: linear-gradient(135deg, #4a9eff 0%, #7ec5ff 100%);
-  color: #08111f; font-weight: 800; font-size: 13px;
+  color: #0d0d0d; font-weight: 800; font-size: 13px;
   display: inline-flex; align-items: center; justify-content: center;
 }
 .sidebar .brand .brand-text {
@@ -88,7 +89,7 @@ body {
   position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
   width: 24px; height: 24px;
   padding: 0;
-  background: rgba(255,255,255,0.04); border: 1px solid #1c2740;
+  background: rgba(255,255,255,0.04); border: 1px solid #2a2a2a;
   border-radius: 4px;
   color: #9aa5b8; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
@@ -103,7 +104,7 @@ body {
 .sidebar .sb-toggle svg { width: 14px; height: 14px; transition: transform 0.18s ease; }
 /* pin 中：圖示填色 + 微旋轉，明確表達已固定狀態 */
 .sidebar.pinned .sb-toggle {
-  color: #9ec5ff; border-color: #2c4a7a; background: rgba(44,108,219,0.18);
+  color: #9ec5ff; border-color: #333333; background: rgba(44,108,219,0.18);
 }
 .sidebar.pinned .sb-toggle svg { transform: rotate(-45deg); }
 
@@ -136,8 +137,8 @@ main.fleet-mode { overflow: hidden; }
   position: relative;
   flex: 7 1 0; min-height: 0;
   border-radius: 6px; overflow: hidden;
-  border: 1px solid #1c2740;
-  background: #08111f;
+  border: 1px solid #2a2a2a;
+  background: #000;
   transition: flex-grow 0.28s cubic-bezier(.4,.0,.2,1);
 }
 .fleet-map { width: 100%; height: 100%; }
@@ -156,12 +157,12 @@ main.fleet-mode { overflow: hidden; }
   flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center; gap: 8px;
   height: 18px;
-  background: #142036; border: 1px solid #1c2740; border-radius: 4px;
+  background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px;
   color: #7c8a9e; font-size: 11px; cursor: pointer;
   user-select: none;
   transition: background 0.15s ease;
 }
-.list-handle:hover { background: #1a2740; color: #e4eaf2; }
+.list-handle:hover { background: #222222; color: #e4eaf2; }
 .list-handle .chev {
   display: inline-block; width: 14px; height: 14px;
   transition: transform 0.28s ease;
@@ -169,7 +170,7 @@ main.fleet-mode { overflow: hidden; }
 .fleet-split.list-expanded .list-handle .chev { transform: rotate(180deg); }
 .list-handle .grip {
   display: inline-block; width: 28px; height: 3px;
-  border-radius: 2px; background: #2a3a5c;
+  border-radius: 2px; background: #333333;
 }
 
 .fleet-list-wrap .alert-table-wrap {
@@ -177,7 +178,37 @@ main.fleet-mode { overflow: hidden; }
 }
 table.alert-table thead th {
   position: sticky; top: 0; z-index: 3;
-  /* th 的 background 在下方規則裡有 #0a1426，sticky 才不會透出資料列 */
+  /* th 的 background 在下方規則裡有 #0f0f0f，sticky 才不會透出資料列 */
+}
+
+/* 船舶欄 sticky-left：橫向卷動時固定欄位、留可辨識的右邊框 */
+table.alert-table th.col-vessel,
+table.alert-table td.cell-vessel {
+  position: sticky; left: 0;
+  box-shadow: 1px 0 0 0 #2a2a2a;  /* 右側分隔線，sticky 時取代 border-right 才不會被擋住 */
+}
+table.alert-table th.col-vessel { z-index: 4; background: #0f0f0f; }
+table.alert-table td.cell-vessel { z-index: 2; background: #141414; }
+/* hover 時 sticky 欄位也要跟著變色，否則 cell-vessel 會與其他 td 不同步 */
+table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
+
+/* 1080px 以下螢幕：船舶欄固定 250px，避免橫向卷動時欄寬隨內容跳動 */
+@media (max-width: 1080px) {
+  table.alert-table th.col-vessel,
+  table.alert-table td.cell-vessel {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+  }
+  /* 船名過長時收尾省略，pill + 連結維持單行 */
+  table.alert-table td.cell-vessel a.vessel-link {
+    display: inline-block;
+    max-width: calc(250px - 32px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+  }
 }
 
 /* ── 地圖上的浮動覆蓋：Banner / Toolbar ──────────────────────────
@@ -186,8 +217,8 @@ table.alert-table thead th {
 .map-overlay-toolbar {
   position: absolute; top: 10px; left: 10px; z-index: 600;
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  background: rgba(8, 17, 31, 0.88);
-  border: 1px solid #1c2740; border-radius: 6px;
+  background: rgba(13, 13, 13, 0.88);
+  border: 1px solid #2a2a2a; border-radius: 6px;
   padding: 8px 10px;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -199,8 +230,8 @@ table.alert-table thead th {
   /* input / select 高度一致：相同 padding + line-height + border + font-size */
   height: 28px; box-sizing: border-box;
   padding: 0 10px; font-size: 12px;
-  border: 1px solid #1c2740; border-radius: 4px;
-  background: #0e1a30; color: #e4eaf2;
+  border: 1px solid #2a2a2a; border-radius: 4px;
+  background: #141414; color: #e4eaf2;
   outline: none; line-height: 1;
   font-family: inherit;
 }
@@ -274,7 +305,7 @@ table.alert-table thead th {
   content: attr(data-tip);
   position: absolute;
   top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-  background: #08111f; border: 1px solid #2a3548;
+  background: #0d0d0d; border: 1px solid #333333;
   padding: 6px 10px; border-radius: 4px;
   font-size: 11px; font-weight: 400; color: #d8dee9;
   white-space: pre-line; text-transform: none; letter-spacing: 0;
@@ -289,7 +320,7 @@ table.alert-table thead th {
   /* tooltip 上方小箭頭 */
   content: ""; position: absolute;
   top: calc(100% + 1px); left: 50%; transform: translateX(-50%);
-  border: 5px solid transparent; border-bottom-color: #2a3548;
+  border: 5px solid transparent; border-bottom-color: #333333;
   opacity: 0; transition: opacity 0.12s ease;
   z-index: 11;
 }
@@ -304,8 +335,8 @@ table.alert-table thead th {
 }
 .fleet-detail-grid #fleet-map { height: 100%; }
 .fleet-detail-panel {
-  background: #0e1a30;
-  border-left: 1px solid #1c2740;
+  background: #141414;
+  border-left: 1px solid #2a2a2a;
   padding: 14px 16px;
   overflow-y: auto;
   font-size: 13px;
@@ -313,13 +344,13 @@ table.alert-table thead th {
 .fleet-detail-panel h3 {
   font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
   margin: 14px 0 6px; color: #7c8a9e;
-  border-bottom: 1px solid #1c2740; padding-bottom: 5px;
+  border-bottom: 1px solid #2a2a2a; padding-bottom: 5px;
 }
 .fleet-detail-panel h3:first-of-type { margin-top: 0; }
 .fleet-detail-back {
   position: absolute; top: 10px; left: 10px; z-index: 600;
-  background: rgba(14,26,48,0.92);
-  border: 1px solid #1c2740; border-radius: 4px;
+  background: rgba(20, 20, 20, 0.92);
+  border: 1px solid #2a2a2a; border-radius: 4px;
   padding: 5px 12px; cursor: pointer;
   color: #9ec5ff; font-size: 12px; font-weight: 500;
   font-family: inherit;
@@ -330,7 +361,7 @@ table.alert-table thead th {
 .detail-header {
   display: flex; align-items: center; gap: 8px;
   margin-bottom: 10px; padding-bottom: 8px;
-  border-bottom: 1px solid #1c2740;
+  border-bottom: 1px solid #2a2a2a;
 }
 .detail-header .name { font-weight: 600; color: #e4eaf2; font-size: 14px; }
 .detail-header .imo { color: #7c8a9e; font-size: 11px; margin-left: auto; }
@@ -401,8 +432,8 @@ table.alert-table td.cell-vessel a.vessel-link.is-active::before {
 
 /* ── Fleet alert table ─────────────────────────────────────────── */
 .alert-table-wrap {
-  background: #0e1a30;
-  border: 1px solid #1c2740;
+  background: #141414;
+  border: 1px solid #2a2a2a;
   border-radius: 6px;
   overflow: auto;
   box-shadow: 0 1px 3px rgba(0,0,0,0.4);
@@ -412,18 +443,18 @@ table.alert-table {
   font-size: 13px; color: #d8dee9; min-width: 1620px;
 }
 table.alert-table th {
-  background: #0a1426; font-weight: 600;
+  background: #0f0f0f; font-weight: 600;
   color: #9aa5b8; font-size: 11px;
   text-transform: uppercase; letter-spacing: 0.3px;
   padding: 10px 8px; text-align: center;
-  border-bottom: 1px solid #1c2740;
+  border-bottom: 1px solid #2a2a2a;
   white-space: nowrap;
 }
 table.alert-table th.col-vessel { text-align: left; padding-left: 16px; }
 table.alert-table th.col-data    { text-align: left; }
 table.alert-table th.col-action  { text-align: right; padding-right: 16px; }
 table.alert-table td {
-  padding: 10px 8px; border-bottom: 1px solid #142036;
+  padding: 10px 8px; border-bottom: 1px solid #1a1a1a;
   text-align: center; vertical-align: middle;
 }
 table.alert-table td.cell-vessel { text-align: left; padding-left: 16px; }
@@ -435,14 +466,14 @@ table.alert-table td.num {
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 table.alert-table th.num small { color: #5e6b80; display: block; margin-top: 1px; }
-table.alert-table tr:hover td { background: #142036; }
+table.alert-table tr:hover td { background: #1a1a1a; }
 table.alert-table tr:last-child td { border-bottom: none; }
 
-/* Heatmap risk cells — 圓角實心色塊取代雙圓 */
+/* Heatmap risk cells — 正方形實心色塊 */
 .heat-cell {
   display: inline-block; vertical-align: middle;
-  width: 30px; height: 18px;
-  border-radius: 4px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
   position: relative;
   transition: transform 0.15s ease;
 }
@@ -450,8 +481,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .heat-critical {
   background: linear-gradient(180deg, #ff5c5e 0%, #e23a3c 100%);
   box-shadow: 0 0 0 1px rgba(255,92,94,0.35),
-              inset 0 1px 0 rgba(255,255,255,0.18),
-              0 0 8px rgba(255,77,79,0.25);
+              inset 0 1px 0 rgba(255,255,255,0.18);
 }
 .heat-warning {
   background: linear-gradient(180deg, #fbbf3a 0%, #e89010 100%);
@@ -459,34 +489,43 @@ table.alert-table tr:last-child td { border-bottom: none; }
               inset 0 1px 0 rgba(255,255,255,0.18);
 }
 .heat-normal {
-  background: #1e2a44;
-  box-shadow: inset 0 0 0 1px #2a3a5c;
+  background: #1f1f1f;
+  box-shadow: inset 0 0 0 1px #333333;
 }
 .heat-na {
   background: transparent;
-  border: 1px dashed #2a3a5c;
-  width: 28px; height: 16px;
+  border: 1px dashed #333333;
+  width: 18px; height: 18px;
   background-image: repeating-linear-gradient(
     45deg, transparent 0 4px, rgba(58,77,106,0.18) 4px 5px
   );
 }
-.heat-cell.heat-sm { width: 18px; height: 11px; border-radius: 2px; }
-.heat-cell.heat-lg { width: 36px; height: 20px; border-radius: 5px; }
-.heat-cell.heat-na.heat-sm { width: 16px; height: 9px; }
-.heat-cell.heat-na.heat-lg { width: 34px; height: 18px; }
+.heat-cell.heat-sm { width: 12px; height: 12px; border-radius: 50%; }
+.heat-cell.heat-lg { width: 15px; height: 15px; border-radius: 50%; }
+.heat-cell.heat-na.heat-sm { width: 10px; height: 10px; }
+.heat-cell.heat-na.heat-lg { width: 15px; height: 15px; }
 
-/* 在 critical 色塊內加入一個微妙的脈動點，吸引注意但不浮誇 */
+/* critical 色塊改為整體外圍光暈閃爍（取代原本的中心圓點脈動） */
 .heat-critical::after {
   content: ""; position: absolute;
-  top: 50%; left: 50%; width: 4px; height: 4px;
-  margin: -2px 0 0 -2px;
-  background: rgba(255,255,255,0.85);
-  border-radius: 50%;
-  animation: heat-pulse 1.6s ease-in-out infinite;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(255,92,94,0.55),
+              0 0 5px 1px rgba(255,77,79,0.75);
+  animation: heat-halo 2s ease-in-out infinite;
 }
-@keyframes heat-pulse {
-  0%, 100% { opacity: 0.85; transform: scale(1); }
-  50%      { opacity: 0.35; transform: scale(0.6); }
+@keyframes heat-halo {
+  0%, 100% {
+    opacity: 0.4;
+    box-shadow: 0 0 0 1px rgba(255,92,94,0.30),
+                0 0 4px 0px rgba(255,77,79,0.30);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 1px rgba(255,92,94,0.65),
+                0 0 5px 1px rgba(255,77,79,0.85);
+  }
 }
 
 .icon-header svg {
@@ -512,12 +551,12 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .ais-status {
   display: inline-block; padding: 3px 10px; border-radius: 3px;
   font-size: 11px; font-weight: 500; letter-spacing: 0.3px;
-  background: #1a2740; color: #c4cdda;
+  background: #222222; color: #c4cdda;
 }
-.ais-status.moored  { background: #1a2740; color: #c4cdda; }
+.ais-status.moored  { background: #222222; color: #c4cdda; }
 .ais-status.under-way { background: rgba(80,160,80,0.18); color: #88d796; }
 .ais-status.anchored  { background: rgba(245,166,35,0.18); color: #f5b753; }
-.ais-status.unknown   { background: #1f2a40; color: #7c8a9e; }
+.ais-status.unknown   { background: #1f1f1f; color: #7c8a9e; }
 
 .mono { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 12px; color: #c4cdda; }
 .muted { color: #7c8a9e; }
@@ -537,14 +576,14 @@ table.alert-table tr:last-child td { border-bottom: none; }
 }
 .toolbar select, .toolbar input {
   padding: 6px 10px; font-size: 13px;
-  border: 1px solid #2a3548; border-radius: 4px;
-  background: #16202d; color: #d8dee9;
+  border: 1px solid #333333; border-radius: 4px;
+  background: #1a1a1a; color: #d8dee9;
 }
 .summary-pills { display: flex; gap: 10px; margin-left: auto; }
 .summary-pill {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 5px 12px; border-radius: 14px;
-  background: #16202d; border: 1px solid #1f2a3d;
+  background: #1a1a1a; border: 1px solid #2a2a2a;
   font-size: 12px; color: #c4cdda;
 }
 .summary-pill .dot {
@@ -555,7 +594,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .summary-pill .dot.normal   { background: #6c7a91; }
 
 .legend-bar {
-  background: #0e1a30; border: 1px solid #1c2740;
+  background: #141414; border: 1px solid #2a2a2a;
   border-radius: 6px; padding: 10px 14px;
   display: flex; gap: 22px; align-items: center;
   flex-wrap: wrap; font-size: 12px; color: #c4cdda;
@@ -575,7 +614,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
   display: flex; align-items: center; gap: 6px;
 }
 .progress-bar {
-  flex: 1; height: 6px; background: #1f2a40;
+  flex: 1; height: 6px; background: #1f1f1f;
   border-radius: 3px; overflow: hidden; min-width: 60px;
 }
 .progress-fill { height: 100%; }
@@ -592,22 +631,22 @@ table.alert-table tr:last-child td { border-bottom: none; }
   display: grid; grid-template-columns: 1fr 380px;
   gap: 16px; height: calc(100vh - 130px);
 }
-#map { height: 100%; border-radius: 6px; background: #08111f; }
+#map { height: 100%; border-radius: 6px; background: #000; }
 .side-panel {
-  background: #0e1a30; border-radius: 6px;
+  background: #141414; border-radius: 6px;
   padding: 16px 18px; overflow-y: auto;
-  border: 1px solid #1c2740;
+  border: 1px solid #2a2a2a;
   color: #d8dee9;
 }
 .side-panel h3 {
   font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
   margin: 16px 0 8px; color: #7c8a9e;
-  border-bottom: 1px solid #1c2740; padding-bottom: 6px;
+  border-bottom: 1px solid #2a2a2a; padding-bottom: 6px;
 }
 .side-panel h3:first-child { margin-top: 0; }
 
 .xtd-block {
-  background: #142036; border-radius: 6px; padding: 14px 16px;
+  background: #1a1a1a; border-radius: 6px; padding: 14px 16px;
   margin-bottom: 6px;
 }
 .xtd-row {
@@ -618,7 +657,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .xtd-value { font-size: 24px; font-weight: 600; color: #e4eaf2; font-variant-numeric: tabular-nums; }
 .xtd-value .unit { font-size: 12px; color: #7c8a9e; margin-left: 4px; font-weight: 400; }
 .xtd-bar {
-  position: relative; height: 8px; background: #1f2a40;
+  position: relative; height: 8px; background: #1f1f1f;
   border-radius: 4px; overflow: hidden; margin: 8px 0 6px;
 }
 .xtd-bar .fill {
@@ -640,7 +679,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .alert-row {
   display: grid; grid-template-columns: 28px 1fr auto;
   align-items: center; gap: 10px;
-  padding: 8px 10px; background: #142036;
+  padding: 8px 10px; background: #1a1a1a;
   border-radius: 4px; font-size: 13px;
 }
 .alert-row .alert-icon { display: flex; align-items: center; justify-content: center; }
@@ -663,29 +702,118 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .legend {
   display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
   font-size: 12px; color: #c4cdda;
-  background: rgba(14,26,48,0.92); padding: 6px 12px;
+  background: rgba(20, 20, 20, 0.92); padding: 6px 12px;
   border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-  border: 1px solid #1c2740;
+  border: 1px solid #2a2a2a;
   position: absolute; bottom: 12px; left: 12px; z-index: 500;
   max-width: 80%;
 }
 .legend-swatch { width: 14px; height: 14px; border-radius: 2px; }
 .layer-toggle {
   position: absolute; top: 12px; right: 12px; z-index: 500;
-  background: rgba(14,26,48,0.92);
+  background: rgba(20, 20, 20, 0.92);
   padding: 8px 12px; border-radius: 6px;
-  border: 1px solid #1c2740;
+  border: 1px solid #2a2a2a;
   font-size: 12px; color: #d8dee9;
   min-width: 200px;
 }
 .layer-toggle label { display: flex; align-items: center; gap: 6px; margin: 3px 0; cursor: pointer; }
+
+/* 風險區圖層控制：左下角浮動，預設摺疊；展開時顯示 8 類風險區勾選 */
+.risk-toggle {
+  position: absolute; left: 12px; bottom: 12px; z-index: 500;
+  background: rgba(20, 20, 20, 0.92);
+  border: 1px solid #2a2a2a; border-radius: 6px;
+  color: #d8dee9; font-size: 12px;
+  max-width: 280px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.risk-toggle .rt-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 6px 10px;
+  cursor: pointer; user-select: none;
+  border-bottom: 1px solid transparent;
+}
+.risk-toggle.open .rt-head { border-bottom-color: #2a2a2a; }
+.risk-toggle .rt-title { font-weight: 600; color: #e4eaf2; }
+.risk-toggle .rt-title .en { color: #7c8a9e; font-weight: 400; margin-left: 4px; font-size: 11px; }
+.risk-toggle .rt-chev { color: #7c8a9e; transition: transform 0.18s ease; }
+.risk-toggle.open .rt-chev { transform: rotate(180deg); }
+.risk-toggle .rt-body {
+  display: none;
+  padding: 6px 10px 8px;
+  max-height: 280px; overflow-y: auto;
+}
+.risk-toggle.open .rt-body { display: block; }
+.risk-toggle .rt-actions {
+  display: flex; gap: 6px; margin-bottom: 6px;
+  padding-bottom: 6px; border-bottom: 1px dashed #2a2a2a;
+}
+.risk-toggle .rt-actions button {
+  flex: 1; padding: 3px 6px; font-size: 11px;
+  background: #1a1a1a; color: #c4cdda;
+  border: 1px solid #333333; border-radius: 3px;
+  cursor: pointer; font-family: inherit;
+}
+.risk-toggle .rt-actions button:hover { background: #222222; color: #e4eaf2; }
+.risk-toggle label {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 2px; cursor: pointer;
+  line-height: 1.35;
+}
+.risk-toggle label:hover { background: rgba(255,255,255,0.04); border-radius: 3px; }
+.risk-toggle .rt-swatch {
+  width: 14px; height: 10px; border-radius: 2px; flex: 0 0 14px;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.risk-toggle .rt-cnt {
+  margin-left: auto; color: #7c8a9e; font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 風險區 popup 內容樣式 */
+.rz-popup { font-size: 12px; line-height: 1.5; max-width: 300px; }
+.rz-popup .rz-cat {
+  display: inline-block; padding: 1px 8px; border-radius: 8px;
+  font-size: 10px; font-weight: 600; margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+.rz-popup .rz-name { font-weight: 600; color: #e4eaf2; font-size: 13px; margin-bottom: 2px; }
+.rz-popup .rz-name-en { color: #7c8a9e; font-size: 11px; margin-bottom: 4px; }
+.rz-popup .rz-type {
+  display: inline-block;
+  font-size: 10.5px; color: #c4cdda;
+  padding: 1px 6px; margin: 0 0 6px;
+  background: rgba(255,255,255,0.06); border-radius: 3px;
+}
+.rz-popup .rz-desc { color: #c4cdda; margin-bottom: 4px; }
+.rz-popup .rz-desc-en { color: #7c8a9e; font-size: 11px; margin-bottom: 8px; font-style: italic; }
+.rz-popup .rz-meta {
+  margin-top: 6px; padding-top: 6px;
+  border-top: 1px solid #2a2a2a;
+  font-size: 11px; color: #9aa5b8;
+}
+.rz-popup .rz-meta .rz-kv {
+  display: grid; grid-template-columns: 74px 1fr;
+  gap: 2px 8px; margin-bottom: 3px;
+}
+.rz-popup .rz-meta .rz-k { color: #7c8a9e; }
+.rz-popup .rz-meta .rz-v { color: #c4cdda; word-break: break-word; }
+.rz-popup .rz-meta a { color: #9ec5ff; text-decoration: none; }
+.rz-popup .rz-meta a:hover { text-decoration: underline; }
+.rz-popup .rz-bbox {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 10.5px;
+}
 
 .alert-banner-strip {
   position: absolute; top: 12px; left: 12px; z-index: 500;
   display: flex; gap: 8px; max-width: 60%;
 }
 .alert-chip {
-  background: rgba(14,26,48,0.92); border: 1px solid #1c2740;
+  background: rgba(20, 20, 20, 0.92); border: 1px solid #2a2a2a;
   border-radius: 14px; padding: 5px 12px;
   font-size: 12px; color: #e4eaf2; font-weight: 500;
   display: inline-flex; align-items: center; gap: 6px;
@@ -700,10 +828,10 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .ship-icon-svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7)); pointer-events: auto; }
 .ship-icon-label {
   margin-top: 2px; padding: 2px 8px;
-  background: rgba(14,26,48,0.92);
+  background: rgba(20, 20, 20, 0.92);
   color: #e4eaf2; font-size: 12px; font-weight: 600;
   border-radius: 8px; white-space: nowrap;
-  border: 1px solid #1c2740;
+  border: 1px solid #2a2a2a;
 }
 .ship-icon-pulse {
   position: absolute; top: 50%; left: 50%;
@@ -719,17 +847,17 @@ table.alert-table tr:last-child td { border-bottom: none; }
 
 /* Leaflet dark overrides */
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-  background: #0e1a30; color: #d8dee9; border: 1px solid #1c2740;
+  background: #141414; color: #d8dee9; border: 1px solid #2a2a2a;
 }
 .leaflet-popup-content b { color: #e4eaf2; }
-.leaflet-container { background: #08111f; }
-.leaflet-control-attribution { background: rgba(14,26,48,0.85) !important; color: #7c8a9e !important; }
+.leaflet-container { background: #000; }
+.leaflet-control-attribution { background: rgba(20, 20, 20, 0.85) !important; color: #7c8a9e !important; }
 .leaflet-control-attribution a { color: #9ec5ff !important; }
 .leaflet-control-zoom a {
-  background: #0e1a30 !important; color: #d8dee9 !important;
-  border-color: #1c2740 !important;
+  background: #141414 !important; color: #d8dee9 !important;
+  border-color: #2a2a2a !important;
 }
-.leaflet-control-zoom a:hover { background: #142036 !important; }
+.leaflet-control-zoom a:hover { background: #1a1a1a !important; }
 
 /* ── Event handling UI ─────────────────────────────────────────── */
 .ev-status {
@@ -739,16 +867,16 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .ev-row {
   display: grid; grid-template-columns: 1fr auto;
   align-items: start; gap: 8px;
-  padding: 8px 10px; background: #142036;
+  padding: 8px 10px; background: #1a1a1a;
   border-radius: 4px; font-size: 12px;
   cursor: pointer; transition: background 0.15s;
 }
-.ev-row:hover { background: #1a2740; }
+.ev-row:hover { background: #222222; }
 .ev-row .ev-title { color: #e4eaf2; font-weight: 500; }
 .ev-row .ev-meta  { color: #7c8a9e; font-size: 11px; margin-top: 2px; }
 .ev-row .ev-dim {
   display: inline-block; padding: 0 6px;
-  background: #0e1a30; color: #9aa5b8;
+  background: #141414; color: #9aa5b8;
   border-radius: 3px; font-size: 10px; margin-right: 4px;
 }
 .ev-row.cleared { opacity: 0.55; }
@@ -765,16 +893,16 @@ table.alert-table tr:last-child td { border-bottom: none; }
 }
 .modal-mask.open { display: flex; }
 .modal {
-  background: #0e1a30; border-radius: 8px;
+  background: #141414; border-radius: 8px;
   width: min(640px, 92vw); max-height: 88vh;
   overflow: auto; padding: 18px 22px;
-  color: #d8dee9; border: 1px solid #1c2740;
+  color: #d8dee9; border: 1px solid #2a2a2a;
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
 }
 .modal h3 { margin: 0 0 4px; font-size: 16px; color: #e4eaf2; }
 .modal .modal-sub {
   color: #7c8a9e; font-size: 12px; margin-bottom: 14px;
-  padding-bottom: 12px; border-bottom: 1px solid #1c2740;
+  padding-bottom: 12px; border-bottom: 1px solid #2a2a2a;
 }
 .modal .modal-actions { margin-top: 16px; text-align: right; }
 .modal .modal-actions button { margin-left: 6px; }
@@ -787,7 +915,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .modal h4 {
   font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
   margin: 14px 0 6px; color: #7c8a9e;
-  border-bottom: 1px solid #1c2740; padding-bottom: 4px;
+  border-bottom: 1px solid #2a2a2a; padding-bottom: 4px;
 }
 .modal h4:first-of-type { margin-top: 0; }
 
@@ -803,21 +931,21 @@ table.alert-table tr:last-child td { border-bottom: none; }
   background: #2c6cdb; color: #fff;
 }
 .trans-btn:hover { background: #3d7eed; }
-.trans-btn.secondary { background: transparent; color: #9aa5b8; border: 1px solid #2a3548; }
-.trans-btn.secondary:hover { background: #142036; color: #d8dee9; }
+.trans-btn.secondary { background: transparent; color: #9aa5b8; border: 1px solid #333333; }
+.trans-btn.secondary:hover { background: #1a1a1a; color: #d8dee9; }
 .trans-btn.danger { background: rgba(255,77,79,0.18); color: #ff8a8a; border: 1px solid rgba(255,77,79,0.35); }
 
 .modal .notes-list {
   display: flex; flex-direction: column; gap: 6px;
 }
 .note-item {
-  background: #142036; border-radius: 4px;
+  background: #1a1a1a; border-radius: 4px;
   padding: 6px 10px; font-size: 12px;
 }
 .note-item .note-head { color: #7c8a9e; font-size: 11px; margin-bottom: 2px; }
 .note-input {
   width: 100%; padding: 8px 10px;
-  background: #142036; border: 1px solid #2a3548;
+  background: #1a1a1a; border: 1px solid #333333;
   border-radius: 4px; color: #e4eaf2; font-family: inherit;
   font-size: 13px; resize: vertical; min-height: 60px;
 }
@@ -826,7 +954,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .history-item {
   display: flex; gap: 8px;
   padding: 4px 0;
-  border-bottom: 1px dashed #1c2740;
+  border-bottom: 1px dashed #2a2a2a;
 }
 .history-item:last-child { border-bottom: none; }
 .history-item .h-time { color: #7c8a9e; font-variant-numeric: tabular-nums; min-width: 110px; }
@@ -835,8 +963,38 @@ table.alert-table tr:last-child td { border-bottom: none; }
 
 select.ev-select {
   padding: 6px 10px; font-size: 13px;
-  border: 1px solid #2a3548; border-radius: 4px;
-  background: #16202d; color: #d8dee9; font-family: inherit;
+  border: 1px solid #333333; border-radius: 4px;
+  background: #1a1a1a; color: #d8dee9; font-family: inherit;
+}
+
+/* 閾值設定 modal：input + 單位後綴 */
+.th-input-wrap {
+  display: inline-flex; align-items: stretch;
+  border: 1px solid #2a2a2a; border-radius: 4px;
+  overflow: hidden;
+  background: #141414;
+}
+.th-input-wrap:focus-within { border-color: #4a9eff; }
+.th-input-wrap .th-input {
+  width: 80px;
+  background: transparent; border: none;
+  padding: 4px 8px;
+  font: 600 13px ui-monospace, "SF Mono", Consolas, monospace;
+  outline: none;
+  text-align: right;
+}
+.th-input-wrap .th-input::-webkit-inner-spin-button,
+.th-input-wrap .th-input::-webkit-outer-spin-button {
+  opacity: 0.5;
+}
+.th-input-wrap .th-unit {
+  display: inline-flex; align-items: center;
+  padding: 0 8px;
+  background: #1a1a1a;
+  border-left: 1px solid #2a2a2a;
+  color: #9aa5b8; font-size: 11px;
+  white-space: nowrap;
+  cursor: help;
 }
 
 /* Event 統計 pill bar，給事件清單頁頂部用 */
@@ -847,7 +1005,7 @@ select.ev-select {
 .ev-stat-pill {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 14px; border-radius: 14px;
-  background: #0e1a30; border: 1px solid #1c2740;
+  background: #141414; border: 1px solid #2a2a2a;
   font-size: 12px; color: #c4cdda;
 }
 .ev-stat-pill .num { color: #e4eaf2; font-weight: 600; font-size: 14px; }
@@ -859,18 +1017,18 @@ select.ev-select {
 .timeline::before {
   content: ""; position: absolute;
   left: 8px; top: 0; bottom: 0;
-  width: 2px; background: #1c2740;
+  width: 2px; background: #2a2a2a;
 }
 .timeline-item {
   position: relative; padding: 10px 14px;
-  background: #0e1a30; border: 1px solid #1c2740;
+  background: #141414; border: 1px solid #2a2a2a;
   border-radius: 6px; margin-bottom: 10px;
 }
 .timeline-item::before {
   content: ""; position: absolute;
   left: -24px; top: 14px;
   width: 12px; height: 12px; border-radius: 50%;
-  border: 2px solid #0b1426;
+  border: 2px solid #0d0d0d;
 }
 .timeline-item.critical::before { background: #ff4d4f; }
 .timeline-item.warning::before  { background: #f5a623; }
@@ -1121,7 +1279,7 @@ function dms(coord, type) {
  *     comm    - AIS 訊號新鮮度 (模擬)
  *     event   - 系統 Open Event
  * ───────────────────────────────────────────────────────────────── */
-const DIM_KEYS = ["route", "speed", "sea", "port", "engine", "alert", "comm", "event"];
+const DIM_KEYS = ["route", "speed", "sea", "port", "engine", "alert", "comm", "event", "zone"];
 const DIM_META = {
   route:  { label: "航線偏移",   short: "Route Dev",  icon: iconRoute,
             desc: "max(目前 XTD, 歷史最大偏移) ≥ Safety Frame × 閾值即觸發" },
@@ -1139,6 +1297,8 @@ const DIM_META = {
             desc: "AIS 訊號延遲指標；超過閾值表示位置回報太久沒更新" },
   event:  { label: "進行中偏移事件", short: "Open Deviation", icon: iconEvent,
             desc: "對應 open_event：Warning level 視為 critical、其餘 warning" },
+  zone:   { label: "區域警示",   short: "Zone Alert", icon: iconZone,
+            desc: "船舶當前位置是否落入海盜 / 戰爭 / 制裁 / 軍演 / 氣象 / ECA / 保護區 / 壅塞 等風險區（critical+high→critical；medium+low+info→warning）" },
 };
 
 // Risk dot icons (header)
@@ -1170,6 +1330,43 @@ function iconPort(c="#9aa5b8") {
 function iconEngine(c="#9aa5b8") {
   // 齒輪 icon — 表達主機監測
   return `<svg width="18" height="18" viewBox="-12 -12 24 24"><path d="M 0 -9 L 1.5 -7 L -1.5 -7 Z M 6.4 -6.4 L 5 -4.5 L 7 -3 Z M 9 0 L 7 1.5 L 7 -1.5 Z M 6.4 6.4 L 3 5 L 4.5 7 Z M 0 9 L -1.5 7 L 1.5 7 Z M -6.4 6.4 L -5 4.5 L -7 3 Z M -9 0 L -7 -1.5 L -7 1.5 Z M -6.4 -6.4 L -3 -5 L -4.5 -7 Z" fill="${c}"/><circle cx="0" cy="0" r="3.2" fill="none" stroke="${c}" stroke-width="1.6"/></svg>`;
+}
+function iconZone(c="#9aa5b8") {
+  // 區域警示：圈定區域邊界 + 中央驚嘆號
+  return `<svg width="18" height="18" viewBox="-12 -12 24 24"><path d="M -8 -3 L 0 -9 L 8 -3 L 5 8 L -5 8 Z" fill="none" stroke="${c}" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 -3 L 0 3" stroke="${c}" stroke-width="2" stroke-linecap="round"/><circle cx="0" cy="5.5" r="1.2" fill="${c}"/></svg>`;
+}
+
+/* 區域警示：判斷船舶是否落入 RISK_ZONES 任一個多邊形。
+ *   - pointInPolygon: ray casting，O(n) per polygon。風險區邊界不跨換日線時直接適用。
+ *   - vesselZoneAlert: 回傳船舶命中的所有風險區、最嚴重的一個、以及對應警示等級。
+ *     等級映射：critical / high → critical；medium / low / info → warning；無命中 → normal。
+ */
+function pointInPolygon(lat, lon, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const yi = polygon[i][0], xi = polygon[i][1];
+    const yj = polygon[j][0], xj = polygon[j][1];
+    const denom = (yj - yi) || 1e-9;
+    const intersect = ((yi > lat) !== (yj > lat))
+      && (lon < (xj - xi) * (lat - yi) / denom + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+const ZONE_LEVEL_RANK = { critical: 4, high: 3, medium: 2, low: 1, info: 0 };
+function vesselZoneAlert(v) {
+  if (v.latitude === null || v.latitude === undefined ||
+      v.longitude === null || v.longitude === undefined ||
+      !window.RISK_ZONES) {
+    return { level: "normal", hits: [], top: null };
+  }
+  const hits = window.RISK_ZONES.filter(z =>
+    pointInPolygon(v.latitude, v.longitude, z.coords));
+  if (hits.length === 0) return { level: "normal", hits: [], top: null };
+  hits.sort((a, b) => (ZONE_LEVEL_RANK[b.level] ?? -1) - (ZONE_LEVEL_RANK[a.level] ?? -1));
+  const top = hits[0];
+  const level = (top.level === "critical" || top.level === "high") ? "critical" : "warning";
+  return { level, hits, top };
 }
 
 /* Compute risk per dimension for a vessel.
@@ -1260,6 +1457,13 @@ function computeAlerts(v) {
   if (engHash > T.engine.critical)      a.engine = "critical";   // 溫度或油壓嚴重越線
   else if (engHash > T.engine.warning)  a.engine = "warning";    // 趨勢偏移
   else                                  a.engine = "normal";
+
+  // 10. 區域警示：船舶當前位置是否落入海盜 / 戰爭 / 制裁 / 軍演 / 氣象 /
+  //               ECA / 保護區 / 壅塞 等風險區。
+  //     critical / high → critical，medium / low / info → warning。
+  const za = vesselZoneAlert(v);
+  a.zone = za.level;
+  a._zone = za;  // 內部欄位：給 dimDescription / tooltip 顯示落點區名稱
 
   // Overall risk (composite)
   const levels = DIM_KEYS.map(k => a[k]);
@@ -1359,12 +1563,12 @@ const DEFAULT_THRESHOLDS = {
   engine: { warning: 78,   critical: 93  },    // 主機異常指標 0~100
 };
 const THRESHOLD_META = {
-  route:  { label: "航線偏移",   short: "Route Dev",   unit: "× Safety Frame", step: 0.05, min: 0,  max: 5,   isPct: false },
-  speed:  { label: "速度異常",   short: "Speed Anom",  unit: "× planAvg",      step: 0.05, min: 0,  max: 2,   isPct: false },
-  sea:    { label: "海況/天候",  short: "Sea State",   unit: "0~1",            step: 0.05, min: 0,  max: 1,   isPct: false },
-  comm:   { label: "AIS 訊號",   short: "AIS Comm",    unit: "0~100",          step: 1,    min: 0,  max: 100, isPct: false },
-  port:   { label: "到港/離港",  short: "Port Phase",  unit: "0~100",          step: 1,    min: 0,  max: 100, isPct: false },
-  engine: { label: "主機異常",   short: "Engine",      unit: "0~100",          step: 1,    min: 0,  max: 100, isPct: false },
+  route:  { label: "航線偏移",   short: "Route Dev",   unit: "× Safety Frame", unitShort: "× SF",     range: "0 – 5",     step: 0.05, min: 0,  max: 5,   isPct: false },
+  speed:  { label: "速度異常",   short: "Speed Anom",  unit: "× 計畫平均速度", unitShort: "× planAvg", range: "0 – 2",     step: 0.05, min: 0,  max: 2,   isPct: false },
+  sea:    { label: "海況/天候",  short: "Sea State",   unit: "海況指數",       unitShort: "score",     range: "0 – 1",     step: 0.05, min: 0,  max: 1,   isPct: false },
+  comm:   { label: "AIS 訊號",   short: "AIS Comm",    unit: "通訊延遲分數",   unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
+  port:   { label: "到港/離港",  short: "Port Phase",  unit: "進出港敏感分數", unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
+  engine: { label: "主機異常",   short: "Engine",      unit: "主機異常分數",   unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
 };
 let _thresholds = JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS));
 function loadThresholds() {
@@ -1573,6 +1777,20 @@ function dimDescription(v, k, a) {
                      :                       "RPM, Temp, Pressure nominal";
       return `${detail}<br><span style="color:#5e6b80">${detailEN}</span>`;
     }
+    case "zone": {
+      const info = a._zone;
+      if (!info || info.hits.length === 0) {
+        return `未進入任何風險區<br><span style="color:#5e6b80">Not inside any risk zone</span>`;
+      }
+      const top = info.top;
+      const cat = (window.RISK_ZONE_CATEGORIES || []).find(c => c.key === top.cat);
+      const catLabel    = cat ? cat.label    : top.cat;
+      const catLabelEn  = cat ? cat.label_en : top.cat;
+      const more = info.hits.length > 1
+        ? `（另含 ${info.hits.length - 1} 區 / +${info.hits.length - 1} more）` : "";
+      return `<b>${escapeHtml(top.name)}</b> · ${escapeHtml(catLabel)}（Lv. ${top.level}）${more}`
+           + `<br><span style="color:#5e6b80">${escapeHtml(top.name_en)} · ${escapeHtml(catLabelEn)}</span>`;
+    }
     default: return "";
   }
 }
@@ -1664,6 +1882,14 @@ function renderUpperArea(enriched) {
     }
     if (k === "engine") {
       return `RPM ${engRpm} · 排氣溫 ${engTemp}°C · 油壓 ${engOil} bar`;
+    }
+    if (k === "zone") {
+      const info = a._zone;
+      if (!info || info.hits.length === 0) return "未進入風險區 / No risk zone";
+      const top = info.top;
+      const cat = (window.RISK_ZONE_CATEGORIES || []).find(c => c.key === top.cat);
+      const more = info.hits.length > 1 ? ` · +${info.hits.length - 1} more` : "";
+      return `${top.name}（${cat ? cat.label : top.cat} Lv. ${top.level}）${more}`;
     }
     return "";
   }
@@ -1887,6 +2113,8 @@ function renderFleet() {
         banner.classList.remove("hidden");
       });
     }
+
+    injectRiskTogglePanel(mapWrap);
   }
 
   // 注意：detail 模式時 toolbar 不會注入，這兩個元素可能為 null
@@ -1966,6 +2194,10 @@ function renderFleet() {
         setFleetLayer(k, el.checked);
       });
     });
+
+    // 單船 detail 也保留全球風險區圖層面板（注入到 .fleet-map-wrap 內）
+    const detailWrap = document.querySelector("#fleet-split .fleet-map-wrap");
+    if (detailWrap) injectRiskTogglePanel(detailWrap);
   }
 }
 
@@ -2003,6 +2235,9 @@ function drawFleetDetailMap(v) {
     subdomains: "abcd", maxZoom: 19,
   }).addTo(map);
 
+  // 單船 detail 視角也保留全球風險區圖層（依 _riskLayerState 顯示）
+  drawRiskZones(map);
+
   // 自訂 pane 控制疊放順序（值越大越上層）
   map.createPane("corridorPane").style.zIndex = 400;
   map.createPane("plannedPane").style.zIndex = 410;
@@ -2028,7 +2263,7 @@ function drawFleetDetailMap(v) {
   v.planned_track.forEach(w => {
     addWrappedCircleMarker(_fleetLayers.planned, w.latitude, w.longitude, {
       pane: "plannedPane",
-      radius: 3, color: "#4a9eff", fillColor: "#0a1220", fillOpacity: 1, weight: 1.5
+      radius: 3, color: "#4a9eff", fillColor: "#0d0d0d", fillOpacity: 1, weight: 1.5
     }, `#${w.index} · ${w.position_type}<br>${w.date || ""}`);
   });
 
@@ -2070,7 +2305,7 @@ function drawFleetDetailMap(v) {
         pane: "aisPane",
         radius: p.is_deviated ? 5 : 3,
         color: p.is_deviated ? "#ff6b6b" : "#4cd97a",
-        fillColor: p.is_deviated ? "#ff6b6b" : "#0a1220",
+        fillColor: p.is_deviated ? "#ff6b6b" : "#0d0d0d",
         fillOpacity: p.is_deviated ? 0.8 : 1, weight: p.is_deviated ? 2 : 1,
       }, `<b>AIS #${p.index}</b><br>${p.ais_timestamp}<br>SOG ${fmt(p.sog,1)} kn · COG ${fmt(p.cog,0)}°<br>偏移 ${fmt(p.deviation_nm,2)} NM`);
     });
@@ -2106,16 +2341,16 @@ function drawFleetDetailMap(v) {
         </div>
         <div style="font-size:12px;color:#d8dee9;margin-top:6px;line-height:1.45">${escapeHtml(m.warning_description)}</div>
         ${m.matched_port_code ? `
-          <hr style="margin:8px 0;border:none;border-top:1px solid #2a3548">
+          <hr style="margin:8px 0;border:none;border-top:1px solid #333333">
           <div style="font-size:11px;color:#7ec5ff">
             📍 計畫航線匹配 / Plan match：<b style="color:#e4eaf2">${escapeHtml(m.matched_position_type)}</b> · ${escapeHtml(m.matched_port_code)} / ${escapeHtml(m.matched_port_name || "-")}<br>
             <span style="color:#9aa5b8">航段時間 ${m.matched_event_date} · ${m.match_method}</span>
           </div>
         ` : (m.match_method ? `
-          <hr style="margin:8px 0;border:none;border-top:1px solid #2a3548">
+          <hr style="margin:8px 0;border:none;border-top:1px solid #333333">
           <div style="font-size:11px;color:#9aa5b8">標註方式 / Match：${m.match_method}</div>
         ` : "")}
-        <hr style="margin:8px 0;border:none;border-top:1px solid #2a3548">
+        <hr style="margin:8px 0;border:none;border-top:1px solid #333333">
         <div style="font-size:11px;color:#9aa5b8">${escapeHtml(m.vessel_name)} · IMO ${m.imo} · 接收 ${m.received_time}</div>
       </div>`;
     L.marker([m.latitude, m.longitude], {
@@ -2135,6 +2370,166 @@ function drawFleetDetailMap(v) {
   if (all.length) map.fitBounds(L.latLngBounds(all).pad(0.15));
 }
 
+/* 風險區圖層：依類別建立 LayerGroup，依 _riskLayerState 決定預設掛上。
+ * 預設只開「海盜 / 戰爭 / 軍演 / 壅塞」四類最關鍵的；ECA、保護區、氣象、制裁預設關閉，
+ * 避免世界視角同時 8 類疊在一起遮擋船舶 icon。 */
+let _fleetRiskLayers = {};
+let _riskLayerState = (() => {
+  const saved = (() => { try { return JSON.parse(sessionStorage.getItem("slab_va_risk_layers") || "null"); } catch (e) { return null; } })();
+  if (saved && typeof saved === "object") return saved;
+  return {
+    piracy: true, war: true, military: true, congestion: true,
+    sanction: false, weather: false, eca: false, protected: false,
+  };
+})();
+function persistRiskLayerState() {
+  try { sessionStorage.setItem("slab_va_risk_layers", JSON.stringify(_riskLayerState)); } catch (e) {}
+}
+
+function drawRiskZones(map) {
+  _fleetRiskLayers = {};
+  if (!window.RISK_ZONES || !window.RISK_ZONE_CATEGORIES) return;
+
+  const catMap = {};
+  window.RISK_ZONE_CATEGORIES.forEach(c => { catMap[c.key] = c; });
+
+  // 先依類別分桶，方便建立 LayerGroup
+  const buckets = {};
+  window.RISK_ZONES.forEach(z => {
+    if (!buckets[z.cat]) buckets[z.cat] = [];
+    buckets[z.cat].push(z);
+  });
+
+  window.RISK_ZONE_CATEGORIES.forEach(cat => {
+    const zones = buckets[cat.key] || [];
+    const group = L.layerGroup();
+    zones.forEach(z => {
+      const fillOpacity = z.level === "critical" ? 0.28
+                       : z.level === "high"     ? 0.22
+                       : z.level === "medium"   ? 0.16
+                       :                          0.12;
+
+      // 邊界 bbox：從 coords 算 min/max lat/lon，給 popup 顯示用
+      const lats = z.coords.map(p => p[0]), lons = z.coords.map(p => p[1]);
+      const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+      const minLon = Math.min(...lons), maxLon = Math.max(...lons);
+      const fmtLat = v => `${Math.abs(v).toFixed(1)}°${v >= 0 ? "N" : "S"}`;
+      const fmtLon = v => `${Math.abs(v).toFixed(1)}°${v >= 0 ? "E" : "W"}`;
+      const bboxStr = `${fmtLat(minLat)}–${fmtLat(maxLat)},&nbsp;${fmtLon(minLon)}–${fmtLon(maxLon)}`;
+
+      const sourceLink = z.source_url
+        ? `<a href="${escapeHtml(z.source_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(z.source || "")} ↗</a>`
+        : escapeHtml(z.source || "—");
+
+      const effective = z.effective_to && z.effective_to !== z.effective_from
+        ? `${escapeHtml(z.effective_from || "—")} ~ ${escapeHtml(z.effective_to)}`
+        : escapeHtml(z.effective_from || "—");
+
+      const popupHtml = `
+        <div class="rz-popup">
+          <span class="rz-cat" style="background:${cat.color}22;color:${cat.color};border:1px solid ${cat.color}55">${escapeHtml(cat.label)} / ${escapeHtml(cat.label_en)}</span>
+          <div class="rz-name">${escapeHtml(z.name)}</div>
+          <div class="rz-name-en">${escapeHtml(z.name_en)}</div>
+          ${z.type ? `<span class="rz-type">${escapeHtml(z.type)}${z.type_en ? ` <span style="color:#7c8a9e">· ${escapeHtml(z.type_en)}</span>` : ""}</span>` : ""}
+          <div class="rz-desc">${escapeHtml(z.desc || "")}</div>
+          ${z.desc_en ? `<div class="rz-desc-en">${escapeHtml(z.desc_en)}</div>` : ""}
+          <div class="rz-meta">
+            <div class="rz-kv"><span class="rz-k">區域類型 Type</span><span class="rz-v">${escapeHtml(z.type_en || cat.label_en)}</span></div>
+            <div class="rz-kv"><span class="rz-k">生效 Effective</span><span class="rz-v">${effective}</span></div>
+            <div class="rz-kv"><span class="rz-k">邊界 Bounds</span><span class="rz-v rz-bbox">${bboxStr}</span></div>
+            <div class="rz-kv"><span class="rz-k">來源 Source</span><span class="rz-v">${sourceLink}</span></div>
+            <div class="rz-kv"><span class="rz-k">代碼 ID</span><span class="rz-v">${escapeHtml(z.id)} · Lv. ${escapeHtml(z.level)}</span></div>
+          </div>
+        </div>`;
+      addWrappedPolygon(group, z.coords, {
+        color: cat.color, weight: 1.2, opacity: 0.85,
+        fillColor: cat.color, fillOpacity,
+        dashArray: cat.key === "eca" || cat.key === "protected" ? "4 3" : null,
+      }, `<b>${escapeHtml(z.name)}</b> <span style="color:#7c8a9e">/ ${escapeHtml(z.name_en)}</span><br><span style="color:${cat.color};font-size:11px">${escapeHtml(cat.label)}</span>`);
+      // 每份 wrapped 副本都需要綁同一份 popup
+      group.eachLayer(layer => {
+        if (!layer._rzBound && layer instanceof L.Polygon) {
+          layer.bindPopup(popupHtml, { maxWidth: 320 });
+          layer._rzBound = true;
+        }
+      });
+    });
+    _fleetRiskLayers[cat.key] = group;
+    if (_riskLayerState[cat.key]) group.addTo(map);
+  });
+}
+
+function setRiskLayer(key, enabled) {
+  const g = _fleetRiskLayers[key];
+  if (!g || !_fleetMap) return;
+  if (enabled) { if (!_fleetMap.hasLayer(g)) g.addTo(_fleetMap); }
+  else { if (_fleetMap.hasLayer(g)) _fleetMap.removeLayer(g); }
+}
+
+/* 在 mapWrap 內注入「全球風險區」摺疊面板，總覽與單船 detail 兩種模式共用 */
+function injectRiskTogglePanel(mapWrap) {
+  if (!mapWrap || !window.RISK_ZONE_CATEGORIES) return;
+  // 避免重複注入
+  const old = mapWrap.querySelector(".risk-toggle");
+  if (old) old.remove();
+
+  const buckets = {};
+  (window.RISK_ZONES || []).forEach(z => { buckets[z.cat] = (buckets[z.cat] || 0) + 1; });
+  // 預設展開；按過收合後在 session 內保留
+  const isOpen = (sessionStorage.getItem("slab_va_risk_panel_open") ?? "1") === "1";
+  const rows = window.RISK_ZONE_CATEGORIES.map(c => `
+    <label>
+      <input type="checkbox" data-rz="${c.key}" ${_riskLayerState[c.key] ? "checked" : ""}>
+      <span class="rt-swatch" style="background:${c.color}40;border-color:${c.color}"></span>
+      <span>${escapeHtml(c.label)}<span style="color:#7c8a9e;font-size:10px;display:block">${escapeHtml(c.label_en)}</span></span>
+      <span class="rt-cnt">${buckets[c.key] || 0}</span>
+    </label>`).join("");
+  const panel = document.createElement("div");
+  panel.className = "risk-toggle" + (isOpen ? " open" : "");
+  panel.innerHTML = `
+    <div class="rt-head">
+      <span class="rt-title">⚠ 全球風險區<span class="en">/ Risk Zones</span></span>
+      <span class="rt-chev">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+      </span>
+    </div>
+    <div class="rt-body">
+      <div class="rt-actions">
+        <button type="button" data-rt-act="all">全開 / All on</button>
+        <button type="button" data-rt-act="none">全關 / All off</button>
+      </div>
+      ${rows}
+    </div>`;
+  mapWrap.appendChild(panel);
+
+  // 摺疊／展開
+  panel.querySelector(".rt-head").addEventListener("click", () => {
+    panel.classList.toggle("open");
+    sessionStorage.setItem("slab_va_risk_panel_open", panel.classList.contains("open") ? "1" : "0");
+  });
+  // 個別 checkbox
+  panel.querySelectorAll("input[data-rz]").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const k = cb.getAttribute("data-rz");
+      _riskLayerState[k] = cb.checked;
+      setRiskLayer(k, cb.checked);
+      persistRiskLayerState();
+    });
+  });
+  // 全開／全關
+  function bulkSet(on) {
+    panel.querySelectorAll("input[data-rz]").forEach(cb => {
+      cb.checked = on;
+      const k = cb.getAttribute("data-rz");
+      _riskLayerState[k] = on;
+      setRiskLayer(k, on);
+    });
+    persistRiskLayerState();
+  }
+  panel.querySelector('[data-rt-act="all"]').addEventListener("click", () => bulkSet(true));
+  panel.querySelector('[data-rt-act="none"]').addEventListener("click", () => bulkSet(false));
+}
+
 function drawFleetMap(enriched) {
   if (_fleetMap) { _fleetMap.remove(); _fleetMap = null; }
   // zoom control 改到右下，避開左上的浮動 toolbar
@@ -2147,30 +2542,46 @@ function drawFleetMap(enriched) {
   }).addTo(map);
   attachMapResize(map, document.getElementById("fleet-map"));
 
+  // 全球風險區圖層：每類一個 layerGroup，依 _riskLayerState 決定是否掛上 map
+  drawRiskZones(map);
+
   const points = [];
   enriched.forEach(({ v, a }) => {
     if (v.latitude === null) return;
     const status = aisStatusFromSog(v.sog);
     const riskLabel = { critical: "Critical 危急", warning: "Warning 警示", normal: "Normal 正常", na: "N/A" }[a.risk] || "-";
-    L.marker([v.latitude, v.longitude], {
-      icon: fleetShipIcon(v, a),
-      riseOnHover: true,
-    }).bindTooltip(
+    const tooltipHtml =
       `<b>${escapeHtml(v.vessel_name)}</b> · ${riskLabel}<br>` +
       `IMO ${v.imo} · MMSI ${v.mmsi || "-"}<br>` +
       `${dms(v.latitude, "lat")} ${dms(v.longitude, "lon")}<br>` +
       `SOG ${fmt(v.sog,1)} kn · COG ${fmt(v.cog,0)}° · ${status.label}<br>` +
       `<span style="color:#7c8a9e">${v.ais_timestamp || "-"}</span><br>` +
-      `<span style="color:#9ec5ff">點擊查看詳細 / Click for details</span>`,
-      { direction: "top", offset: [0, -6] }
-    ).on("click", () => selectVessel(v.vessel_id))
-     .addTo(map);
+      `<span style="color:#9ec5ff">點擊查看詳細 / Click for details</span>`;
+    // 跨經度 3 份副本：解決靠近換日線的船舶（例如 YM WELLBEING lon≈-176 與
+    // YM MUTUALITY lon≈+168）在世界視角中被切成兩邊顯示的問題。
+    // 原本 marker 只在「主」世界副本繪製，搬到對面的 ±360 副本後，使用者就能在
+    // 同一片可見範圍內看見彼此鄰近的船。fitBounds 仍只用原始座標（避免跨經度誤判）。
+    [-360, 0, 360].forEach(dx => {
+      L.marker([v.latitude, v.longitude + dx], {
+        icon: fleetShipIcon(v, a),
+        riseOnHover: true,
+      }).bindTooltip(tooltipHtml, { direction: "top", offset: [0, -6] })
+       .on("click", () => selectVessel(v.vessel_id))
+       .addTo(map);
+    });
     points.push([v.latitude, v.longitude]);
   });
 
   setTimeout(() => map.invalidateSize(), 80);
   if (points.length) {
-    map.fitBounds(L.latLngBounds(points).pad(0.25), { maxZoom: 5 });
+    // 若船隊整體跨換日線（lon 跨度 > 180°），把所有點 unwrap 到連續區間後再算 bounds，
+    // 避免 latLngBounds 走錯方向把地圖縮到只看到大半個地球。
+    const lons = points.map(p => p[1]);
+    const span = Math.max(...lons) - Math.min(...lons);
+    const fitPts = span > 180
+      ? points.map(p => [p[0], p[1] < 0 ? p[1] + 360 : p[1]])
+      : points;
+    map.fitBounds(L.latLngBounds(fitPts).pad(0.25), { maxZoom: 5 });
   }
 }
 
@@ -2196,9 +2607,15 @@ function renderMatrixTable(filtered) {
 
   const rows = filtered.map(({ v, a }) => {
     const status = aisStatusFromSog(v.sog);
-    const cells = DIM_KEYS.map(k =>
-      `<td title="${DIM_META[k].label} / ${DIM_META[k].short}：${a[k]}">${riskStack(a[k])}</td>`
-    ).join("");
+    const cells = DIM_KEYS.map(k => {
+      let extra = "";
+      if (k === "zone" && a._zone && a._zone.hits.length) {
+        const top = a._zone.top;
+        extra = ` · ${top.name}（Lv. ${top.level}）`;
+        if (a._zone.hits.length > 1) extra += ` +${a._zone.hits.length - 1}`;
+      }
+      return `<td title="${DIM_META[k].label} / ${DIM_META[k].short}：${a[k]}${extra}">${riskStack(a[k])}</td>`;
+    }).join("");
 
     const planCount = v.planned_track ? v.planned_track.length : 0;
     const aisCount  = (v.ais_track || []).length;
@@ -2520,7 +2937,7 @@ function drawMap(v, vesselMails) {
   v.planned_track.forEach(w => {
     addWrappedCircleMarker(_layers.planned, w.latitude, w.longitude, {
       pane: "plannedPane",
-      radius: 3, color: "#4a9eff", fillColor: "#0a1220",
+      radius: 3, color: "#4a9eff", fillColor: "#0d0d0d",
       fillOpacity: 1, weight: 1.5
     }, `#${w.index} · ${w.position_type}<br>${w.date}`);
   });
@@ -2563,7 +2980,7 @@ function drawMap(v, vesselMails) {
         pane: "aisPane",
         radius: p.is_deviated ? 5 : 3,
         color: p.is_deviated ? "#ff6b6b" : "#4cd97a",
-        fillColor: p.is_deviated ? "#ff6b6b" : "#0a1220",
+        fillColor: p.is_deviated ? "#ff6b6b" : "#0d0d0d",
         fillOpacity: p.is_deviated ? 0.8 : 1, weight: p.is_deviated ? 2 : 1,
       }, `<b>AIS #${p.index}</b><br>${p.ais_timestamp}<br>SOG ${fmt(p.sog,1)} kn · COG ${fmt(p.cog,0)}°<br>偏移：<b style="color:${p.is_deviated?'#ff8a8a':'#6ee094'}">${fmt(p.deviation_nm,2)} NM</b>`);
     });
@@ -2806,7 +3223,7 @@ window.openEventModal = function(evId) {
     </div>
 
     <h4>警示內容 / Alert Description</h4>
-    <div style="font-size:13px;color:#d8dee9;line-height:1.55;background:#142036;padding:10px 12px;border-radius:4px">${desc}</div>
+    <div style="font-size:13px;color:#d8dee9;line-height:1.55;background:#1a1a1a;padding:10px 12px;border-radius:4px">${desc}</div>
 
     <h4>狀態轉換 / Status Transition</h4>
     <div class="trans-buttons">${transBtns || '<span class="muted" style="font-size:12px">無可用轉換 / No transitions available</span>'}</div>
@@ -2950,23 +3367,32 @@ function renderThresholdsModalBody() {
     const cur = _thresholds[k];
     const def = DEFAULT_THRESHOLDS[k];
     const dirty = (cur.warning !== def.warning) || (cur.critical !== def.critical);
+    // 數值輸入框旁的單位文字（讓使用者一眼看出這個閾值是「× SF」、「pts」還是「score」）
+    const unitTip = `${m.unit} (${m.range})`;
+    const unitSpan = `<span class="th-unit" title="${escapeHtml(unitTip)}">${escapeHtml(m.unitShort)}</span>`;
     return `
       <tr data-k="${k}">
         <td style="padding:8px 10px">
           <div style="font-weight:600">${DIM_META[k]?.icon ? DIM_META[k].icon() : ""} ${m.label}</div>
-          <div style="color:#7c8a9e;font-size:11px;margin-top:2px">${m.short} · ${m.unit}</div>
+          <div style="color:#7c8a9e;font-size:11px;margin-top:2px">${m.short} · ${m.unit}（${m.range}）</div>
         </td>
         <td style="padding:8px 6px">
-          <input type="number" class="th-input" data-k="${k}" data-lvl="warning"
-                 value="${cur.warning}" step="${m.step}" min="${m.min}" max="${m.max}"
-                 style="width:90px;background:#0e1a30;border:1px solid #1c2740;color:#f5b753;border-radius:4px;padding:4px 8px;font:600 13px monospace;outline:none">
-          <div style="color:#5e6b80;font-size:10px;margin-top:3px">預設 ${def.warning}</div>
+          <div class="th-input-wrap">
+            <input type="number" class="th-input" data-k="${k}" data-lvl="warning"
+                   value="${cur.warning}" step="${m.step}" min="${m.min}" max="${m.max}"
+                   style="color:#f5b753">
+            ${unitSpan}
+          </div>
+          <div style="color:#5e6b80;font-size:10px;margin-top:3px">預設 ${def.warning} ${escapeHtml(m.unitShort)}</div>
         </td>
         <td style="padding:8px 6px">
-          <input type="number" class="th-input" data-k="${k}" data-lvl="critical"
-                 value="${cur.critical}" step="${m.step}" min="${m.min}" max="${m.max}"
-                 style="width:90px;background:#0e1a30;border:1px solid #1c2740;color:#ff8a8a;border-radius:4px;padding:4px 8px;font:600 13px monospace;outline:none">
-          <div style="color:#5e6b80;font-size:10px;margin-top:3px">預設 ${def.critical}</div>
+          <div class="th-input-wrap">
+            <input type="number" class="th-input" data-k="${k}" data-lvl="critical"
+                   value="${cur.critical}" step="${m.step}" min="${m.min}" max="${m.max}"
+                   style="color:#ff8a8a">
+            ${unitSpan}
+          </div>
+          <div style="color:#5e6b80;font-size:10px;margin-top:3px">預設 ${def.critical} ${escapeHtml(m.unitShort)}</div>
         </td>
         <td style="padding:8px 6px;width:32px">${dirty ? '<span style="color:#f5b753;font-size:11px" title="已修改 / Modified">●</span>' : ""}</td>
       </tr>`;
@@ -2979,7 +3405,7 @@ function renderThresholdsModalBody() {
 
     <table style="width:100%;font-size:12px;margin-top:10px;border-collapse:collapse">
       <thead>
-        <tr style="color:#9aa5b8;border-bottom:1px solid #1c2740">
+        <tr style="color:#9aa5b8;border-bottom:1px solid #2a2a2a">
           <th style="text-align:left;padding:6px 10px;font-weight:600">維度 / Dimension</th>
           <th style="text-align:left;padding:6px 6px;font-weight:600;color:#f5b753">Warning ≥</th>
           <th style="text-align:left;padding:6px 6px;font-weight:600;color:#ff8a8a">Critical ≥</th>
@@ -2989,7 +3415,7 @@ function renderThresholdsModalBody() {
       <tbody>${rows}</tbody>
     </table>
 
-    <div style="background:#0e1a30;border:1px solid #1c2740;border-radius:4px;padding:10px 12px;margin-top:14px;font-size:11px;color:#9aa5b8;line-height:1.55">
+    <div style="background:#141414;border:1px solid #2a2a2a;border-radius:4px;padding:10px 12px;margin-top:14px;font-size:11px;color:#9aa5b8;line-height:1.55">
       <b style="color:#9ec5ff">觸發邏輯 / Trigger logic</b><br>
       ・<b>route</b>：max(目前 XTD, 歷史最大偏移) ≥ Safety Frame × 閾值<br>
       ・<b>speed</b>：|SOG − 計畫平均|/計畫平均 &gt; 閾值（另：航行中近乎停止永遠 warning）<br>
