@@ -418,7 +418,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
     </div>
 
-    <!-- Params -->
+    <!-- Params (v1.3: only 料件毛利率 remains global; 人力 / 日薪 改為 per-row 在安裝施工區) -->
     <div class="card" data-section="params">
       <div class="ch"><span class="ch-title">⚙️ <span id="l-params">計算參數</span></span></div>
       <div class="cb">
@@ -426,16 +426,17 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
           <div class="field">
             <label id="l-matm">料件毛利率 %</label>
             <input type="number" id="p-matm" value="60" min="0" max="999" class="mono" oninput="recalc()">
-            <span class="hint" id="h-matm">成本 × 1.6 = 報價</span>
+            <span class="hint" id="h-matm">成本 × (1 + 此%) = 報價</span>
           </div>
           <div class="field">
-            <label id="l-labm">人力加成率 %</label>
-            <input type="number" id="p-labm" value="100" min="0" max="999" class="mono" oninput="recalc()">
-            <span class="hint" id="h-labm">日薪 × 2 = 報價</span>
+            <label>安裝施工 — 預設加成 %</label>
+            <input type="number" value="100" min="0" max="999" class="mono" oninput="document.getElementById('p-labm').value=this.value">
+            <span class="hint">新增施工項目時的預設加成率</span>
           </div>
           <div class="field">
-            <label id="l-wage">每人日薪（元）</label>
-            <input type="number" id="p-wage" value="3000" min="0" step="500" class="mono" oninput="recalc()">
+            <label>安裝施工 — 預設日薪</label>
+            <input type="number" value="3000" min="0" step="500" class="mono" oninput="document.getElementById('p-wage').value=this.value">
+            <span class="hint">新增施工項目時的預設日薪</span>
           </div>
         </div>
       </div>
@@ -464,17 +465,32 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
     </div>
 
-    <!-- Install / Labor -->
+    <!-- Install / Labor (v1.3: now a multi-row table) -->
     <div class="card" data-section="install">
-      <div class="ch"><span class="ch-title"><span class="dot dot-lab"></span><span id="l-labor">安裝施工</span></span></div>
-      <div class="cb">
-        <div class="fg fg-4">
-          <div class="field"><label id="l-wk">人數</label><input type="number" id="p-wk" value="4" min="1" class="mono" oninput="recalc()"></div>
-          <div class="field"><label id="l-dy">天數</label><input type="number" id="p-dy" value="2" min="1" class="mono" oninput="recalc()"></div>
-          <div class="field"><label id="l-lc">直接成本</label><input type="text" id="d-lc" readonly></div>
-          <div class="field"><label id="l-lq">人工報價</label><input type="text" id="d-lq" readonly style="background:var(--green-l);color:var(--green);font-weight:700"></div>
-        </div>
+      <div class="ch">
+        <span class="ch-title"><span class="dot dot-lab"></span><span id="l-labor">安裝施工</span></span>
+        <button class="btn btn-sm btn-blue" onclick="addRow('install')">＋ 新增施工項目</button>
       </div>
+      <div style="padding:0 0 6px">
+        <table class="itbl" style="table-layout:fixed">
+          <colgroup><col style="width:21%"><col style="width:7%"><col style="width:7%"><col style="width:11%"><col style="width:8%"><col style="width:12%"><col style="width:12%"><col style="width:14%"><col style="width:8%"></colgroup>
+          <thead><tr>
+            <th>施工項目</th><th class="r">人數</th><th class="r">天數</th><th class="r">每人日薪</th><th class="r">加成%</th><th class="r">成本小計</th><th class="r">報價小計</th><th>備注</th><th></th>
+          </tr></thead>
+          <tbody id="install-body"></tbody>
+          <tfoot><tr class="itbl-sub">
+            <td colspan="5" style="text-align:right;font-size:12px;color:var(--ink3)">安裝施工小計</td>
+            <td class="r" style="font-family:var(--ffm);color:var(--ink3)" id="install-cost-sub">$0</td>
+            <td class="amtc r" id="install-sub">$0</td>
+            <td colspan="2"></td>
+          </tr></tfoot>
+        </table>
+      </div>
+      <!-- Hidden legacy inputs (kept so existing JS that reads p-wk/p-dy/p-labm/p-wage as defaults still works) -->
+      <input type="hidden" id="p-wk" value="0">
+      <input type="hidden" id="p-dy" value="0">
+      <input type="hidden" id="p-labm" value="100">
+      <input type="hidden" id="p-wage" value="3000">
     </div>
 
     <!-- Services -->
@@ -882,6 +898,8 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 // ══ State ══
 let lang='zh', curTypes=[];
 let matR=[], svcR=[], trvR=[];
+// v1.3 安裝施工 改為表格式（多列）— 取代舊的全域 wk/dy/wage/labm 單組
+let installR=[];     // [{ name, persons, days, wage, markup, note }]   cost = persons*days*wage; quote = cost*(1+markup/100)
 // v1.3 multi-category cost sections
 let softwareR=[];    // [{ name, role, days, dayRate, markup, note }]   cost = days*dayRate; quote = cost*(1+markup/100)
 let integrationR=[]; // [{ name, target, complexity, days, cost, quote, note }]
@@ -1246,7 +1264,7 @@ function newQuote(){
   if(!confirmDiscard()) return;
   // Clear all worksheet state
   matR=[];svcR=[];trvR=[];curTypes=[];
-  softwareR=[];integrationR=[];thirdR=[];maintR=[];recurringR=[];
+  installR=[];softwareR=[];integrationR=[];thirdR=[];maintR=[];recurringR=[];
   ['sw','hw','net','ship'].forEach(tp=>document.getElementById('tp-'+tp).classList.remove('on'));
   ['f-client','f-proj','f-terms','f-tax','f-phone','f-fax','f-addr','f-cp','f-cphone'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-no').value = genNo();
@@ -1302,6 +1320,14 @@ function loadIntoEditor(i){
   matR=JSON.parse(JSON.stringify(q.matR||[]));
   svcR=JSON.parse(JSON.stringify(q.svcR||[]));
   trvR=JSON.parse(JSON.stringify(q.trvR||[]));
+  // v1.3 安裝施工：從新 installR 還原；舊報價只有全域 wk/dy/wage/labm → 自動遷移成單筆
+  if(Array.isArray(q.installR)){
+    installR=JSON.parse(JSON.stringify(q.installR));
+  }else if(p.wk>0 && p.dy>0 && p.wage>0){
+    installR=[{ name:'安裝施工（舊資料遷移）', persons:p.wk, days:p.dy, wage:p.wage, markup:(p.labm!=null?p.labm:100), note:'' }];
+  }else{
+    installR=[];
+  }
   // v1.3 new sections — old quotes default to empty []
   softwareR=JSON.parse(JSON.stringify(q.softwareR||[]));
   integrationR=JSON.parse(JSON.stringify(q.integrationR||[]));
@@ -1337,6 +1363,15 @@ function addRow(kind){
   if(kind==='mat'){matR.push({name:'',qty:1,cost:0,note:''});}
   if(kind==='svc'){svcR.push({name:'',amount:0,note:''});}
   if(kind==='trv'){trvR.push({name:'',persons:1,times:1,unit:0,note:''});}
+  if(kind==='install'){
+    // Defaults from the (hidden) params 預設加成 / 預設日薪 controls
+    installR.push({
+      name:'', persons:1, days:1,
+      wage: num('p-wage')||3000,
+      markup: num('p-labm')||100,
+      note:''
+    });
+  }
   // v1.3 new cost sections:
   if(kind==='software'){softwareR.push({name:'',role:'PM',days:1,dayRate:8000,markup:30,note:''});}
   if(kind==='integration'){integrationR.push({name:'',target:'',complexity:'中',days:1,cost:0,quote:0,note:''});}
@@ -1349,6 +1384,7 @@ function delRow(k,i){
   if(k==='mat')matR.splice(i,1);
   if(k==='svc')svcR.splice(i,1);
   if(k==='trv')trvR.splice(i,1);
+  if(k==='install')installR.splice(i,1);
   if(k==='software')softwareR.splice(i,1);
   if(k==='integration')integrationR.splice(i,1);
   if(k==='third')thirdR.splice(i,1);
@@ -1390,6 +1426,24 @@ function renderAll(){
       <td class="calc-val r" style="color:var(--amber);font-weight:600">${fmt(sub)}</td>
       <td><input type="text" value="${esc(r.note)}" placeholder="${t('thTnt')}" oninput="trvR[${i}].note=this.value"></td>
       <td><button class="btn btn-ghost btn-xs" onclick="delRow('trv',${i})">✕</button></td>
+    </tr>`;
+  }).join('');
+
+  // === v1.3 安裝施工 (installR) — replaces single global wk/dy/wage row ===
+  const insBody = document.getElementById('install-body');
+  if(insBody) insBody.innerHTML = installR.map((r,i)=>{
+    const cost = (+r.persons||0)*(+r.days||0)*(+r.wage||0);
+    const quote = Math.round(cost*(1+(+r.markup||0)/100));
+    return`<tr>
+      <td><input type="text" value="${esc(r.name)}" placeholder="例：安裝、配線、設定、測試" oninput="installR[${i}].name=this.value"></td>
+      <td><input type="number" value="${r.persons}" min="1" style="width:50px" oninput="installR[${i}].persons=+this.value;recalc()"></td>
+      <td><input type="number" value="${r.days}" min="0" step="0.5" style="width:50px" oninput="installR[${i}].days=+this.value;recalc()"></td>
+      <td><input type="number" value="${r.wage}" min="0" step="500" style="width:80px" oninput="installR[${i}].wage=+this.value;recalc()"></td>
+      <td><input type="number" value="${r.markup}" min="0" max="500" style="width:54px" oninput="installR[${i}].markup=+this.value;recalc()"></td>
+      <td class="calc-val r">${fmt(cost)}</td>
+      <td class="calc-val hi r" style="color:var(--green);font-weight:600">${fmt(quote)}</td>
+      <td><input type="text" value="${esc(r.note)}" placeholder="備注" oninput="installR[${i}].note=this.value"></td>
+      <td><button class="btn btn-ghost btn-xs" onclick="delRow('install',${i})">✕</button></td>
     </tr>`;
   }).join('');
 
@@ -1488,14 +1542,14 @@ function recalc(){
   document.getElementById('mat-sub').textContent=fmt(t.matQ);
   document.getElementById('svc-sub').textContent=fmt(t.svcQ);
   document.getElementById('trv-sub').textContent=fmt(t.trvQ);
-  document.getElementById('d-lc').value=fmt(t.lC);
-  document.getElementById('d-lq').value=fmt(t.lQ);
   const setSub = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = fmt(v); };
-  setSub('software-sub', t.softwareQ);
-  setSub('integration-sub', t.integrationQ);
-  setSub('third-sub', t.thirdQ);
-  setSub('maint-sub', t.maintQ);
-  setSub('recurring-sub', t.recurringQ);
+  setSub('install-cost-sub', t.lC);
+  setSub('install-sub',      t.lQ);
+  setSub('software-sub',     t.softwareQ);
+  setSub('integration-sub',  t.integrationQ);
+  setSub('third-sub',        t.thirdQ);
+  setSub('maint-sub',        t.maintQ);
+  setSub('recurring-sub',    t.recurringQ);
 
   // Right summary panel
   document.getElementById('s-mat').textContent=fmt(t.matQ);
@@ -1521,10 +1575,15 @@ function genNo(){
   return`QT-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${String(quotes.length+1).padStart(3,'0')}`;
 }
 function calcTotals(){
-  const mm=num('p-matm')/100,lm=num('p-labm')/100;
-  const wage=num('p-wage'),wk=num('p-wk'),dy=num('p-dy');
+  const mm=num('p-matm')/100;
   let matC=0,matQ=0;matR.forEach(r=>{matC+=r.cost*r.qty;matQ+=Math.round(r.cost*(1+mm))*r.qty;});
-  const lC=wk*dy*wage,lQ=Math.round(lC*(1+lm));
+  // v1.3: 安裝施工改為 installR 多列；累加每列 cost 與 quote
+  let lC=0,lQ=0;
+  installR.forEach(r=>{
+    const c=(+r.persons||0)*(+r.days||0)*(+r.wage||0);
+    lC+=c;
+    lQ+=Math.round(c*(1+(+r.markup||0)/100));
+  });
   // Legacy 技術服務 (will be restructured in commit C) — for now amount is the quote, cost=0
   let svcC=0,svcQ=0;svcR.forEach(r=>{svcC+=(+r.cost||0);svcQ+=(+r.quote||+r.amount||0);});
   let trvQ=0;trvR.forEach(r=>trvQ+=r.persons*r.times*r.unit);
@@ -1575,6 +1634,7 @@ function saveQuote(){
     },
     params:{matm:num('p-matm'),labm:num('p-labm'),wage:num('p-wage'),wk:num('p-wk'),dy:num('p-dy')},
     matR:JSON.parse(JSON.stringify(matR)),
+    installR:JSON.parse(JSON.stringify(installR)),
     softwareR:JSON.parse(JSON.stringify(softwareR)),
     integrationR:JSON.parse(JSON.stringify(integrationR)),
     thirdR:JSON.parse(JSON.stringify(thirdR)),
@@ -1738,7 +1798,7 @@ function exportExcel(src){
 function clearForm(){
   if(!confirm(lang==='zh'?'確定清空？（包含報價單草稿）':'Clear all (including official draft)?'))return;
   matR=[];svcR=[];trvR=[];curTypes=[];
-  softwareR=[];integrationR=[];thirdR=[];maintR=[];recurringR=[];
+  installR=[];softwareR=[];integrationR=[];thirdR=[];maintR=[];recurringR=[];
   ['sw','hw','net','ship'].forEach(tp=>document.getElementById('tp-'+tp).classList.remove('on'));
   ['f-client','f-proj','f-terms','f-tax','f-phone','f-fax','f-addr','f-cp','f-cphone'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-no').value=genNo();
