@@ -206,6 +206,9 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 .b-won{background:var(--green-l);color:var(--green);}.b-won::before{background:var(--green);}
 .b-lost{background:var(--red-l);color:var(--red);}.b-lost::before{background:var(--red);}
 .tag{font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;}
+/* v1.5: 報價類型小徽章（取代舊 .tag-sw / .tag-hw / .tag-net / .tag-ship 在列表的顯示）*/
+.cat-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--blue-l);color:var(--blue2);white-space:nowrap;}
+.cat-tag.cat-tag-empty{background:var(--surf3);color:var(--ink4);font-weight:500;}
 .tag-sw{background:var(--blue-l);color:var(--blue2);}
 .tag-hw{background:var(--green-l);color:var(--green);}
 .tag-net{background:var(--teal-l);color:var(--teal);}
@@ -717,10 +720,12 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
       <select class="filter-sel" id="h-ftype" onchange="renderHist()">
         <option value="" id="fo-all">全部類型</option>
-        <option value="sw" id="fo-sw">軟體開發</option>
-        <option value="hw" id="fo-hw">硬體服務</option>
-        <option value="net" id="fo-net">系統整合</option>
-        <option value="ship" id="fo-ship">船舶工程</option>
+        <option value="hardware_sale">📦 硬體銷售</option>
+        <option value="hardware_install">🛠 硬體＋安裝施工</option>
+        <option value="software_dev">💻 軟體類</option>
+        <option value="integration">🔌 軟硬體整合</option>
+        <option value="subscription">☁️ 訂閱服務</option>
+        <option value="rental">📅 租賃服務</option>
       </select>
       <select class="filter-sel" id="h-fstat" onchange="renderHist()">
         <option value="" id="fs-all">全部狀態</option>
@@ -1191,7 +1196,7 @@ function applyLang(){
     ['l-qa','qa'],['qa-clr','qaClr'],
     ['l-amat','amat'],['l-asvc','asvc'],['l-atrv','atrv'],
     ['l-sw','sw'],['l-hw','hw'],['l-net','net'],['l-ship','ship'],
-    ['fo-all','foAll'],['fo-sw','foSw'],['fo-hw','foHw'],['fo-net','foNet'],['fo-ship','foShip'],
+    ['fo-all','foAll'],
     ['fs-all','fsAll'],['fs-dr','fsDr'],['fs-st','fsSt'],['fs-wn','fsWn'],['fs-ls','fsLs'],
   ];
   map.forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.textContent=t(k);});
@@ -1727,7 +1732,12 @@ function renderHist(){
   const fs=document.getElementById('h-fstat').value;
   const list=quotes.filter(q=>{
     if(s&&![(q.no||''),(q.client||''),(q.proj||'')].some(v=>v.toLowerCase().includes(s)))return false;
-    if(ft&&!(q.types||[]).includes(ft))return false;
+    // v1.5: filter by new category (q.types is legacy, no longer used here)
+    if(ft){
+      // Migrate maintenance → software_dev for legacy quotes
+      const qcat = q.category === 'maintenance' ? 'software_dev' : q.category;
+      if(qcat !== ft) return false;
+    }
     if(fs&&q.status!==fs)return false;
     return true;
   });
@@ -1738,7 +1748,13 @@ function renderHist(){
   }
   div.innerHTML=list.map(q=>{
     const i=quotes.indexOf(q);
-    const tags=(q.types||[]).map(tp=>`<span class="tag ${tagCls[tp]||''}">${typeText(tp)}</span>`).join('');
+    // v1.5: 顯示新類型徽章（取代舊 q.types tags）
+    let qcat = q.category;
+    if(qcat === 'maintenance') qcat = 'software_dev';  // legacy migration
+    const conf = qcat ? CATEGORY_CONFIG[qcat] : null;
+    const tags = conf
+      ? `<span class="cat-tag">${conf.icon} ${esc(conf.label)}</span>`
+      : `<span class="cat-tag cat-tag-empty">尚未分類</span>`;
     const statuses=['draft','sent','won','lost'];
     const statusOpts=statuses.map(s=>`<option value="${s}"${q.status===s?' selected':''}>${t(s)}</option>`).join('');
     return`<div class="qcard" onclick="loadIntoEditor(${i})">
