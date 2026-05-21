@@ -355,13 +355,12 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     <button class="btn btn-sm" id="btn-back" onclick="backToList()" style="display:none">← <span id="l-back">返回列表</span></button>
     <span class="topbar-title" id="topbar-title">報價單列表</span>
     <div class="edit-tabs" id="edit-tabs" style="display:none">
-      <button class="tab-btn" id="tab-new" onclick="switchEditTab('new')">✦ <span id="l-tab-new">工作表</span></button>
-      <button class="tab-btn" id="tab-official" onclick="switchEditTab('official')">📄 <span id="l-tab-off">官方報價單</span></button>
+      <button class="tab-btn" id="tab-new" onclick="switchEditTab('new')">✦ <span id="l-tab-new">成本評估</span></button>
+      <button class="tab-btn" id="tab-official" onclick="switchEditTab('official')">📄 <span id="l-tab-off">報價單</span></button>
     </div>
     <div class="btn-row" id="topbar-btns" style="display:none">
-      <button class="btn btn-sm" onclick="loadTemplate()" id="btn-tpl">📋 <span id="l-tpl">範本</span></button>
       <button class="btn btn-sm btn-green" onclick="saveQuote()" id="btn-save">💾 <span id="l-save">儲存</span></button>
-      <button class="btn btn-sm" onclick="exportExcel()" id="btn-exp">⬇ <span id="l-exp">內部工作表</span></button>
+      <button class="btn btn-sm" onclick="exportExcel()" id="btn-exp">⬇ <span id="l-exp">內部成本評估</span></button>
     </div>
   </div>
 
@@ -397,7 +396,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     <div class="card">
       <div class="ch">
         <span class="ch-title">🏢 <span id="l-cust">客戶完整資訊</span></span>
-        <span style="font-size:12px;color:var(--ink4)" id="l-cust-hint">用於官方報價單表頭</span>
+        <span style="font-size:12px;color:var(--ink4)" id="l-cust-hint">用於報價單表頭</span>
       </div>
       <div class="cb">
         <div class="fg fg-3">
@@ -555,7 +554,6 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
     <div class="card">
       <div class="ch"><span class="ch-title">⚡ <span id="l-qa">快速操作</span></span></div>
       <div class="cb qa-list">
-        <button class="btn qa-btn" onclick="loadTemplate()">📋 <span id="qa-tpl">船舶 CCTV 範本</span></button>
         <button class="btn qa-btn" onclick="clearForm()" style="color:var(--red)">↺ <span id="qa-clr">清空重填</span></button>
       </div>
     </div>
@@ -610,8 +608,8 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       <div class="official-layout">
       <!-- Left: worksheet snapshot (read-only, scrollable) -->
       <div class="worksheet-snap" id="ws-snap-wrap">
-        <h4>📊 工作表明細
-          <button class="btn btn-xs" onclick="switchEditTab('new')" title="編輯工作表">✎</button>
+        <h4>📊 成本評估明細
+          <button class="btn btn-xs" onclick="switchEditTab('new')" title="編輯成本評估">✎</button>
         </h4>
         <div id="ws-snapshot"></div>
       </div>
@@ -640,7 +638,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
             <span class="ch-title">📋 <span id="of2-items-hd">品項清單</span></span>
             <div style="display:flex;align-items:center;gap:10px">
               <span style="font-size:12px;color:var(--ink4)" id="of2-i-count">0 / 5</span>
-              <button class="btn btn-sm" onclick="ofReseedFromWorksheet()" title="重新從工作表彙整 1 個品項">↻ 從工作表彙整</button>
+              <button class="btn btn-sm" onclick="ofReseedFromWorksheet()" title="重新從成本評估彙整 1 個品項">↻ 從成本評估彙整</button>
             </div>
           </div>
           <div class="cb">
@@ -686,20 +684,20 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       <!-- Cost panel (sticky right) -->
       <div class="cost-panel">
         <div class="cost-card">
-          <h4 id="cp-hd1">工作表（成本）</h4>
+          <h4 id="cp-hd1">成本評估（成本）</h4>
           <div class="cost-row"><span class="cl">料件成本</span><span class="cv" id="cp-mat-c">$0</span></div>
           <div class="cost-row"><span class="cl">人工成本</span><span class="cv" id="cp-lab-c">$0</span></div>
           <div class="cost-row"><span class="cl">出差費</span><span class="cv" id="cp-trv">$0</span></div>
           <div class="cost-row hi"><span class="cl">總成本</span><span class="cv" id="cp-cost">$0</span></div>
         </div>
         <div class="cost-card">
-          <h4 id="cp-hd2">官方報價（5 槽合計）</h4>
+          <h4 id="cp-hd2">報價單合計</h4>
           <div id="cp-items"></div>
-          <div class="cost-row hi"><span class="cl">官方總計</span><span class="cv blue" id="cp-of-total">$0</span></div>
-          <div class="cost-row"><span class="cl">vs 工作表報價</span><span class="cv" id="cp-vs-ws">—</span></div>
+          <div class="cost-row hi"><span class="cl">報價單總計</span><span class="cv blue" id="cp-of-total">$0</span></div>
+          <div class="cost-row"><span class="cl">vs 成本評估報價</span><span class="cv" id="cp-vs-ws">—</span></div>
         </div>
         <div class="margin-hero">
-          <div class="mh-lbl">毛利率（官方總計 − 工作表成本）</div>
+          <div class="mh-lbl">毛利率（報價單總計 − 成本評估成本）</div>
           <div class="mh-val" id="cp-mpct">0%</div>
           <div class="mh-sub" id="cp-mamt">$0</div>
         </div>
@@ -779,10 +777,10 @@ const T={
   zh:{
     navNew:'新建報價',navHist:'歷史報價',navList:'報價單列表',
     listTitle:'📋 報價單列表',newQuoteBtn:'新增報價單',backToList:'返回列表',
-    tabNew:'工作表',tabOff:'官方報價單',
-    btnTpl:'範本',btnSave:'儲存',btnExp:'內部工作表',btnOff:'官方報價單',
+    tabNew:'成本評估',tabOff:'報價單',
+    btnSave:'儲存',btnExp:'內部成本評估',btnOff:'報價單',
     meta:'報價基本資料',client:'客戶名稱',proj:'工程名稱',no:'報價單號',date:'日期',
-    cust:'客戶完整資訊',custHint:'用於官方報價單表頭',
+    cust:'客戶完整資訊',custHint:'用於報價單表頭',
     tax:'統一編號',phone:'電話',fax:'傳真',addr:'地址',cp:'聯絡人',cphone:'聯絡人電話',
     params:'計算參數',matm:'料件毛利率 %',labm:'人力加成率 %',wage:'每人日薪（元）',
     hMatm:'成本 × 1.6 = 報價',hLabm:'日薪 × 2 = 報價',
@@ -795,7 +793,7 @@ const T={
     sum:'報價摘要',slMat:'料件',slLab:'人工',slSvc:'技術服務費',slTrv:'出差費',
     slCost:'總成本',slProfit:'總毛利',slTotal:'工程總報價',slMargin:'毛利率',
     slMpct:'料件',slLpct:'人工',slTpct:'出差',
-    qa:'快速操作',qaExp:'內部工作表 .xlsx',qaOff:'官方報價單編輯',qaTpl:'船舶 CCTV 範本',qaClr:'清空重填',
+    qa:'快速操作',qaExp:'內部成本評估 .xlsx',qaOff:'報價單編輯',qaClr:'清空重填',
     amat:'新增料件',asvc:'新增',atrv:'新增',
     sw:'軟體',hw:'硬體',net:'系統整合',ship:'船舶',
     foAll:'全部類型',foSw:'軟體開發',foHw:'硬體服務',foNet:'系統整合',foShip:'船舶工程',
@@ -804,22 +802,21 @@ const T={
     statTotal:'報價總數',statAmt:'報價總金額',statWon:'成交件數',statMargin:'平均毛利率',
     draft:'草稿',sent:'已發送',won:'成交',lost:'未成交',
     dmTitle:'報價詳情',dmCancel:'關閉',dmEdit:'載入編輯',dmExp:'匯出 Excel',
-    saved:'✓ 報價已儲存',exported:'✓ Excel 已匯出',officialDone:'✓ 官方報價單已產生',cleared:'已清空',
-    tplLoaded:'✓ 船舶CCTV範本已載入',
+    saved:'✓ 報價已儲存',exported:'✓ Excel 已匯出',officialDone:'✓ 報價單已產生',cleared:'已清空',
     noHist:'目前尚無報價記錄',
-    ofTitle:'📄 產生官方報價單',ofS1:'客戶資料',ofS2:'品項（最多 5 項）',ofS3:'備註與一般條件',
+    ofTitle:'📄 產生報價單',ofS1:'客戶資料',ofS2:'品項（最多 5 項）',ofS3:'備註與一般條件',
     navTm:'條件管理',tmListHd:'條件預設',tmAdd:'新增',
-    navOfficial:'官方報價單',
+    navOfficial:'報價單',
     of2Meta:'報價單表頭',of2ItemsHd:'品項清單',of2TermsHd:'備註與一般條件',
-    cpHd1:'工作表（成本）',cpHd2:'官方報價（5 槽合計）',
+    cpHd1:'成本評估（成本）',cpHd2:'報價單合計',
   },
   en:{
     navNew:'New Quote',navHist:'History',navList:'Quotes',
     listTitle:'📋 Quotes',newQuoteBtn:'New Quote',backToList:'Back to list',
-    tabNew:'Worksheet',tabOff:'Official Quote',
-    btnTpl:'Template',btnSave:'Save',btnExp:'Worksheet',btnOff:'Official Quote',
+    tabNew:'Cost Assessment',tabOff:'Quote',
+    btnSave:'Save',btnExp:'Cost Assessment',btnOff:'Quote',
     meta:'Quote Info',client:'Client',proj:'Project',no:'Quote No.',date:'Date',
-    cust:'Customer Detail',custHint:'For official quotation header',
+    cust:'Customer Detail',custHint:'For quote header',
     tax:'Tax ID',phone:'Phone',fax:'Fax',addr:'Address',cp:'Contact',cphone:'Contact Phone',
     params:'Parameters',matm:'Material Margin %',labm:'Labor Markup %',wage:'Daily Wage',
     hMatm:'Cost × 1.6 = Quote',hLabm:'Wage × 2 = Quote',
@@ -832,7 +829,7 @@ const T={
     sum:'Summary',slMat:'Materials',slLab:'Labor',slSvc:'Services',slTrv:'Travel',
     slCost:'Total Cost',slProfit:'Gross Profit',slTotal:'Total Quote',slMargin:'Margin',
     slMpct:'Mat.',slLpct:'Labor',slTpct:'Travel',
-    qa:'Quick Actions',qaExp:'Worksheet .xlsx',qaOff:'Official Quote Editor',qaTpl:'Ship CCTV Template',qaClr:'Clear',
+    qa:'Quick Actions',qaExp:'Cost Assessment .xlsx',qaOff:'Quote Editor',qaClr:'Clear',
     amat:'Add Item',asvc:'Add',atrv:'Add',
     sw:'Software',hw:'Hardware',net:'Systems',ship:'Marine',
     foAll:'All Types',foSw:'Software',foHw:'Hardware',foNet:'Systems',foShip:'Marine',
@@ -841,14 +838,13 @@ const T={
     statTotal:'Total Quotes',statAmt:'Total Amount',statWon:'Won',statMargin:'Avg Margin',
     draft:'Draft',sent:'Sent',won:'Won',lost:'Lost',
     dmTitle:'Quote Detail',dmCancel:'Close',dmEdit:'Load & Edit',dmExp:'Export Excel',
-    saved:'✓ Saved',exported:'✓ Excel exported',officialDone:'✓ Official quote generated',cleared:'Cleared',
-    tplLoaded:'✓ Template loaded',
+    saved:'✓ Saved',exported:'✓ Excel exported',officialDone:'✓ Quote generated',cleared:'Cleared',
     noHist:'No quotes yet',
-    ofTitle:'📄 Generate Official Quote',ofS1:'Customer',ofS2:'Items (max 5)',ofS3:'Notes & Terms',
+    ofTitle:'📄 Generate Quote',ofS1:'Customer',ofS2:'Items (max 5)',ofS3:'Notes & Terms',
     navTm:'Terms',tmListHd:'Presets',tmAdd:'Add',
-    navOfficial:'Official Quote',
+    navOfficial:'Quote',
     of2Meta:'Quote Header',of2ItemsHd:'Items',of2TermsHd:'Notes & Terms',
-    cpHd1:'Worksheet (cost)',cpHd2:'Official quote (5 slots)',
+    cpHd1:'Cost Assessment',cpHd2:'Quote total',
   }
 };
 const t=k=>(T[lang]||T.zh)[k]||k;
@@ -868,7 +864,7 @@ function applyLang(){
     ['tm-list-hd','tmListHd'],['tm-add','tmAdd'],
     ['of2-meta','of2Meta'],['of2-items-hd','of2ItemsHd'],['of2-terms-hd','of2TermsHd'],
     ['cp-hd1','cpHd1'],['cp-hd2','cpHd2'],
-    ['l-tpl','btnTpl'],['l-save','btnSave'],['l-exp','btnExp'],['l-off','btnOff'],
+    ['l-save','btnSave'],['l-exp','btnExp'],['l-off','btnOff'],
     ['l-meta','meta'],['l-client','client'],['l-proj','proj'],['l-no','no'],['l-date','date'],
     ['l-cust','cust'],['l-cust-hint','custHint'],
     ['l-tax','tax'],['l-phone','phone'],['l-fax','fax'],['l-addr','addr'],['l-cp','cp'],['l-cphone','cphone'],
@@ -883,7 +879,7 @@ function applyLang(){
     ['l-sum','sum'],['sl-mat','slMat'],['sl-lab','slLab'],['sl-svc','slSvc'],['sl-trv','slTrv'],
     ['sl-cost','slCost'],['sl-profit','slProfit'],['sl-total','slTotal'],['sl-margin','slMargin'],
     ['sl-mpct','slMpct'],['sl-lpct','slLpct'],['sl-tpct','slTpct'],
-    ['l-qa','qa'],['qa-tpl','qaTpl'],['qa-clr','qaClr'],
+    ['l-qa','qa'],['qa-clr','qaClr'],
     ['l-amat','amat'],['l-asvc','asvc'],['l-atrv','atrv'],
     ['l-sw','sw'],['l-hw','hw'],['l-net','net'],['l-ship','ship'],
     ['fo-all','foAll'],['fo-sw','foSw'],['fo-hw','foHw'],['fo-net','foNet'],['fo-ship','foShip'],
@@ -1247,7 +1243,7 @@ function renderHist(){
         <div class="qcard-margin">↑ ${q.mpct||0}% margin</div>
         <div class="qcard-actions" onclick="event.stopPropagation()">
           <select class="status-sel" onchange="setStatus(${i},this.value)">${statusOpts}</select>
-          <button class="btn btn-sm btn-ghost" onclick="exportExcel(quotes[${i}])" title="匯出內部工作表">⬇</button>
+          <button class="btn btn-sm btn-ghost" onclick="exportExcel(quotes[${i}])" title="匯出內部成本評估">⬇</button>
           <button class="btn btn-sm btn-ghost" onclick="deleteQuote(${i})" title="刪除">✕</button>
         </div>
       </div>
@@ -1310,7 +1306,7 @@ function exportExcel(src){
   if(terms)terms.split('\n').forEach(l=>rows.push([l]));
   const ws=XLSX.utils.aoa_to_sheet(rows);
   ws['!cols']=[{wch:36},{wch:9},{wch:13},{wch:13},{wch:14},{wch:22}];
-  XLSX.utils.book_append_sheet(wb,ws,lang==='zh'?'工作表':'Worksheet');
+  XLSX.utils.book_append_sheet(wb,ws,lang==='zh'?'成本評估':'Worksheet');
   const an=[
     [lang==='zh'?'成本分析':'Cost Analysis'],
     [lang==='zh'?'項目':'Item',lang==='zh'?'金額':'Amount'],
@@ -1322,40 +1318,13 @@ function exportExcel(src){
   ];
   const ws2=XLSX.utils.aoa_to_sheet(an);ws2['!cols']=[{wch:22},{wch:14}];
   XLSX.utils.book_append_sheet(wb,ws2,lang==='zh'?'成本分析':'Analysis');
-  XLSX.writeFile(wb,(proj||'Quote')+'_'+(no||'')+'_工作表.xlsx');
+  XLSX.writeFile(wb,(proj||'Quote')+'_'+(no||'')+'_成本評估.xlsx');
   toast(t('exported'));
-}
-
-// ── Template (ship CCTV) ──
-function loadTemplate(){
-  matR=[
-    {name:'NVR主機 16路',qty:1,cost:2200,note:''},
-    {name:'監控硬碟 8TB (WD紫標)',qty:1,cost:14500,note:''},
-    {name:'廣角槍型鏡頭',qty:14,cost:2600,note:''},
-    {name:'供電switch 8孔（辦公室）',qty:1,cost:2200,note:''},
-    {name:'供電switch 16孔（機艙）',qty:1,cost:3000,note:''},
-    {name:'網路線 cat5e 戶外UV黑皮',qty:2,cost:5300,note:'大同'},
-    {name:'船用電纜線 30米（DNVGL）',qty:1,cost:4500,note:'公司現有'},
-    {name:'五金另料（防水盒/壓條/束帶）',qty:1,cost:8000,note:''},
-  ];
-  svcR=[{name:'系統整合規劃費',amount:15000,note:'設計、配置、測試'},{name:'海事環境施工加給',amount:12000,note:'船舶危險作業津貼'}];
-  trvR=[
-    {name:'高鐵（高雄左營↔台北）',persons:4,times:2,unit:1490,note:'標準車廂全票'},
-    {name:'計程車（台北站↔台北港）',persons:1,times:2,unit:200,note:'共乘'},
-    {name:'住宿（台北）',persons:4,times:2,unit:2500,note:'較舒適等級'},
-  ];
-  curTypes=['ship'];
-  ['sw','hw','net','ship'].forEach(tp=>document.getElementById('tp-'+tp).classList.toggle('on',tp==='ship'));
-  document.getElementById('f-proj').value=lang==='zh'?'船舶CCTV監控系統安裝工程':'Ship CCTV Installation';
-  document.getElementById('p-matm').value=60;document.getElementById('p-labm').value=100;
-  document.getElementById('p-wage').value=3000;document.getElementById('p-wk').value=4;document.getElementById('p-dy').value=2;
-  document.getElementById('f-terms').value='內部備注：本案使用 WD 紫標硬碟、DNVGL 認證電纜，台北港兩日施工。';
-  renderAll();recalc();toast(t('tplLoaded'));
 }
 
 // ── Clear ──
 function clearForm(){
-  if(!confirm(lang==='zh'?'確定清空？（包含官方報價單草稿）':'Clear all (including official draft)?'))return;
+  if(!confirm(lang==='zh'?'確定清空？（包含報價單草稿）':'Clear all (including official draft)?'))return;
   matR=[];svcR=[];trvR=[];curTypes=[];
   ['sw','hw','net','ship'].forEach(tp=>document.getElementById('tp-'+tp).classList.remove('on'));
   ['f-client','f-proj','f-terms','f-tax','f-phone','f-fax','f-addr','f-cp','f-cphone'].forEach(id=>document.getElementById(id).value='');
@@ -1602,7 +1571,7 @@ function renderWorksheetSnapshot(){
   }
 
   if(!html){
-    html = `<div class="ws-empty">尚無工作表資料<br><button class="btn btn-xs" onclick="switchEditTab('new')" style="margin-top:10px">前往工作表填寫</button></div>`;
+    html = `<div class="ws-empty">尚無成本評估資料<br><button class="btn btn-xs" onclick="switchEditTab('new')" style="margin-top:10px">前往成本評估填寫</button></div>`;
   }
   wrap.innerHTML = html;
 }
@@ -1651,12 +1620,12 @@ function ofUpdateMeta(field, v){
 
 function ofReseedFromWorksheet(){
   if(ofState.items.length>0){
-    if(!confirm('將以工作表目前內容覆蓋第 1 個品項（其餘品項保留）。確定？')) return;
+    if(!confirm('將以成本評估目前內容覆蓋第 1 個品項（其餘品項保留）。確定？')) return;
   }
   const seed = ofMakeSeed();
   ofState.items[0] = seed[0];
   renderOfficialItems(); updateCostPanel(); ofPersist();
-  toast('已從工作表彙整至品項 1');
+  toast('已從成本評估彙整至品項 1');
 }
 
 function renderOfficialItems(){
@@ -1998,7 +1967,7 @@ async function generateOfficialXlsx(){
     toast(t('officialDone'));
   }catch(err){
     console.error(err);
-    alert('產生官方報價單時發生錯誤：\n'+err.message+'\n\n請確認 template.xlsx 與本頁面在同一資料夾。');
+    alert('產生報價單時發生錯誤：\n'+err.message+'\n\n請確認 template.xlsx 與本頁面在同一資料夾。');
   }
 }
 
@@ -2059,7 +2028,7 @@ function tmRenderEditor(){
           <textarea rows="16" oninput="tmUpdateField('general_terms',this.value)">${esc(p.general_terms||'')}</textarea>
         </div>
       </div>
-      <div style="margin-top:14px;font-size:12px;color:var(--ink4)">修改會自動儲存到瀏覽器，下次開啟「官方報價單」彈窗時可由下拉選單載入。</div>
+      <div style="margin-top:14px;font-size:12px;color:var(--ink4)">修改會自動儲存到瀏覽器，下次開啟「報價單」彈窗時可由下拉選單載入。</div>
     </div>`;
 }
 
