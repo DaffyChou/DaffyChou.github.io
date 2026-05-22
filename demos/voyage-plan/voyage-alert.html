@@ -798,23 +798,23 @@ table.alert-table td.cell-status .ais-status {
 .rz-popup { font-size: 14px; line-height: 1.5; max-width: 300px; }
 .rz-popup .rz-cat {
   display: inline-block; padding: 1px 8px; border-radius: 8px;
-  font-size: 14px; font-weight: 600; margin-bottom: 6px;
+  font-size: 12px; font-weight: 600; margin-bottom: 6px;
   letter-spacing: 0.3px;
 }
 .rz-popup .rz-name { font-weight: 600; color: #e4eaf2; font-size: 14px; margin-bottom: 2px; }
 .rz-popup .rz-name-en { color: #7c8a9e; font-size: 14px; margin-bottom: 4px; }
 .rz-popup .rz-type {
   display: inline-block;
-  font-size: 14px; color: #c4cdda;
+  font-size: 12px; color: #c4cdda;
   padding: 1px 6px; margin: 0 0 6px;
   background: rgba(255,255,255,0.06); border-radius: 3px;
 }
 .rz-popup .rz-desc { color: #c4cdda; margin-bottom: 4px; }
-.rz-popup .rz-desc-en { color: #7c8a9e; font-size: 14px; margin-bottom: 8px; font-style: italic; }
+.rz-popup .rz-desc-en { color: #7c8a9e; font-size: 12px; margin-bottom: 8px; font-style: italic; }
 .rz-popup .rz-meta {
   margin-top: 6px; padding-top: 6px;
   border-top: 1px solid #2a2a2a;
-  font-size: 14px; color: #9aa5b8;
+  font-size: 12px; color: #9aa5b8;
 }
 .rz-popup .rz-meta .rz-kv {
   display: grid; grid-template-columns: 74px 1fr;
@@ -964,6 +964,44 @@ table.alert-table td.cell-status .ais-status {
   padding: 6px 10px; font-size: 14px;
 }
 .note-item .note-head { color: #7c8a9e; font-size: 14px; margin-bottom: 2px; }
+
+/* Warning Mail event modal 內的信件列表 */
+.mail-list { display: flex; flex-direction: column; gap: 8px; }
+.mail-item {
+  background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px;
+  padding: 8px 12px;
+}
+.mail-item.mail-warning     { border-left: 3px solid #ff8a8a; }
+.mail-item.mail-information { border-left: 3px solid #7ec5ff; }
+.mail-item .mail-head {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 4px; font-size: 14px;
+}
+.mail-item .mail-badge {
+  font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 8px;
+  letter-spacing: 0.3px;
+}
+.mail-item .mail-badge.warning     { background: rgba(255,77,79,0.15); color: #ff8a8a; }
+.mail-item .mail-badge.information { background: rgba(74,158,255,0.15); color: #9ec5ff; }
+.mail-item .mail-code {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  background: #222222; color: #c4cdda; padding: 1px 6px; border-radius: 3px;
+}
+.mail-item .mail-time {
+  color: #7c8a9e; margin-left: auto;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+}
+.mail-item .mail-desc { color: #d8dee9; font-size: 14px; line-height: 1.55; }
+.mail-item .mail-comment {
+  margin-top: 6px; padding: 6px 10px;
+  background: rgba(255,77,79,0.08); border-left: 2px solid #ff8a8a;
+  border-radius: 3px;
+  font-size: 14px; color: #ffd9da; line-height: 1.5;
+}
+.mail-item .mail-meta {
+  margin-top: 4px; color: #5e6b80; font-size: 14px;
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
 .note-input {
   width: 100%; padding: 8px 10px;
   background: #1a1a1a; border: 1px solid #333333;
@@ -3267,6 +3305,49 @@ function renderEvents() {
 }
 
 /* 事件詳情 modal（含狀態轉換、備註、指派、歷史） */
+/* Warning Mail 事件 modal 用：列出該船所有 StormGeo 通知信件
+ *   - 依 warning_event_time DESC（最新在上）
+ *   - Information / Warning 兩種等級用左邊框與徽章顏色區分
+ *   - raw_body_excerpt 內若有 "Comment: ..."（T10 類）抽出來顯示成 callout */
+function renderEventMailList(vesselName) {
+  const vmails = MAILS.filter(m => m.vessel_name === vesselName);
+  if (!vmails.length) return "";
+  const sorted = vmails.slice().sort((a, b) =>
+    (b.warning_event_time || "").localeCompare(a.warning_event_time || ""));
+
+  const items = sorted.map(m => {
+    const lvl = m.warning_level === "Warning" ? "warning" : "information";
+    // raw_body_excerpt 抽 Comment（若有）
+    const cm = (m.raw_body_excerpt || "").match(/Comment:\s*(.+?)\s*$/m);
+    const commentHtml = cm
+      ? `<div class="mail-comment"><b>Comment:</b> ${escapeHtml(cm[1])}</div>`
+      : "";
+    const portInfo = m.matched_port_name
+      ? `<span title="${escapeHtml(m.matched_port_code || "")}">${escapeHtml(m.matched_port_name)}</span>`
+      : "";
+    return `
+      <div class="mail-item mail-${lvl}">
+        <div class="mail-head">
+          <span class="mail-badge ${lvl}">${escapeHtml(m.warning_level)}</span>
+          <span class="mail-code">${escapeHtml(m.warning_code)}</span>
+          <span class="mail-time">${escapeHtml(m.warning_event_time || "-")} UTC</span>
+        </div>
+        <div class="mail-desc">${escapeHtml(m.warning_description || "")}</div>
+        ${commentHtml}
+        <div class="mail-meta">
+          <span>收到 / Received: ${escapeHtml(m.received_time || "-")}</span>
+          ${portInfo ? `<span>港口 / Port: ${portInfo}</span>` : ""}
+          ${m.is_departure_event ? `<span style="color:#88d796">Departure</span>` : ""}
+          ${m.is_arrival_event ? `<span style="color:#f5b753">Arrival</span>` : ""}
+        </div>
+      </div>`;
+  }).join("");
+
+  return `
+    <h4>通知信件 / Mail Content (${sorted.length})</h4>
+    <div class="mail-list">${items}</div>`;
+}
+
 window.openEventModal = function(evId) {
   const e = _events.find(x => x.id === evId);
   if (!e) return;
@@ -3325,6 +3406,8 @@ window.openEventModal = function(evId) {
 
     <h4>警示內容 / Alert Description</h4>
     <div style="font-size:14px;color:#d8dee9;line-height:1.55;background:#1a1a1a;padding:10px 12px;border-radius:4px">${desc}</div>
+
+    ${e.dimension === "alert" ? renderEventMailList(e.vessel_name) : ""}
 
     <h4>狀態轉換 / Status Transition</h4>
     <div class="trans-buttons">${transBtns || '<span class="muted" style="font-size:14px">無可用轉換 / No transitions available</span>'}</div>
