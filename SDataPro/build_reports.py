@@ -191,6 +191,24 @@ def build_one(json_path, template_html_path, output_path, data, is_briefing=True
         html = re.sub(r'(範圍：)\d+( 艘待改善 \+ )\d+( 艘無資料)',
                       lambda m: m.group(1) + str(n_unqual) + m.group(2) + str(n_nodata) + m.group(3), html)
     
+    # ============ 7a) Full Report only: header data line ============
+    # 原模板硬寫死「資料日期：xxx ｜ 分析船舶：xx艘 ｜ 有效比對：xx艘 ｜ 無SDataPro資料：x艘<br>無資料船舶：...」
+    if not is_briefing:
+        n_nodata = len(cats['nodata'])
+        n_included = n_ships - n_nodata
+        new_header = (
+            f'<p>資料日期：{period_label} ｜ 分析船舶：{n_ships}艘（依MMSI清單）'
+            f' ｜ 有效比對：{n_included}艘 ｜ 無SDataPro資料：{n_nodata}艘'
+        )
+        if n_nodata > 0:
+            new_header += f'<br>\n  無資料船舶：{" / ".join(cats["nodata"])}'
+        new_header += '</p>'
+        html = re.sub(
+            r'<p>資料日期：.*?</p>',
+            lambda _m, h=new_header: h,
+            html, count=1, flags=re.DOTALL,
+        )
+
     # ============ 7) Full Report only: AI ships notice ============
     if not is_briefing and ai_ships:
         ai_html = []
@@ -217,7 +235,7 @@ def build_one(json_path, template_html_path, output_path, data, is_briefing=True
     # ============ 9) 寫出 ============
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html)
-    print(f"  ✓ {output_path}: {len(html):,} bytes")
+    print(f"  [OK] {output_path}: {len(html):,} bytes")
 
 
 def rebuild_tables(html, vessels, cats, ai_ships, is_briefing):
@@ -459,7 +477,7 @@ def main():
         build_one(jf, cb_tpl, cb_out, data, is_briefing=True)
         build_one(jf, fr_tpl, fr_out, data, is_briefing=False)
     
-    print("\n✓ 全部完成")
+    print("\n[OK] 全部完成")
 
 
 if __name__ == '__main__':

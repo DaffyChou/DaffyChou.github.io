@@ -228,6 +228,14 @@ footer a:hover{text-decoration:underline}
 .line-toggle-btn:not(.active) .line-color-dot{opacity:.35}
 .line-toggle-btn:not(.active){opacity:.85}
 .line-toggles-label{font-size:12px;color:#465a70;font-weight:600;margin-right:4px}
+
+/* 隱藏中：吻合度大表 5 個欄位（p95hdg / p95cog / p95sog / xyinv / sdinv）
+   要恢復顯示請刪除以下整段 CSS，並把上方 colTogglesFit 區塊裡對應的 <label> 取消註解 */
+#s4-fit [data-col="p95hdg"],
+#s4-fit [data-col="p95cog"],
+#s4-fit [data-col="p95sog"],
+#s4-fit [data-col="xyinv"],
+#s4-fit [data-col="sdinv"]{display:none !important}
 </style>
 </head>
 <body>
@@ -241,7 +249,7 @@ footer a:hover{text-decoration:underline}
 <nav class="nav">
   <a href="#s1">資料期間</a>
   <a href="#s2">分級分佈</a>
-  <a href="#s3-stability">收集穩定性</a>
+  <!-- <a href="#s3-stability">收集穩定性</a> -->
   <a href="#s4-fit">吻合度與合理性</a>
   <a href="#s3">軌跡地圖</a>
   <a href="#s4">可取代清單</a>
@@ -335,7 +343,7 @@ footer a:hover{text-decoration:underline}
   </div>
 </div>
 
-<!-- Section 3: SDataPro 收集穩定性 -->
+<!-- Section 3: SDataPro 收集穩定性 (隱藏中)
 <div class="section" id="s3-stability">
   <div class="section-head">📡 SDataPro 收集穩定性</div>
   <div class="section-body">
@@ -399,6 +407,7 @@ footer a:hover{text-decoration:underline}
     </div>
   </div>
 </div>
+-->
 
 <!-- Section 4: 兩家資料吻合度 + 合理性 -->
 <div class="section" id="s4-fit">
@@ -448,11 +457,14 @@ footer a:hover{text-decoration:underline}
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="sog" checked> 船速</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="navi" checked> 航行狀態</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="p95pos" checked> 位置 P95</label>
+        <!-- 隱藏中：要恢復顯示請取消註解，並移除下方 <style> 區塊中對應的 display:none 規則
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="p95hdg" checked> 艏向 P95</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="p95cog" checked> 航向 P95</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="p95sog" checked> 船速 P95</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="xyinv"> XY 不合法</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="sdinv"> SD 不合法</label>
+        -->
+        <!-- @hidden-toggles-end -->
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="score" checked> 綜合評分</label>
         <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" data-col-toggle="map" checked> 查看地圖</label>
       </div>

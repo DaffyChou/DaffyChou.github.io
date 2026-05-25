@@ -21,7 +21,7 @@ convert_xlsx_to_json.py
   pip install openpyxl
 """
 
-import argparse, json, os, sys, statistics
+import argparse, json, math, os, sys, statistics
 from collections import defaultdict
 from datetime import datetime
 
@@ -32,15 +32,123 @@ except ImportError:
     sys.exit(1)
 
 
+# =============================================================================
+# 演算法常數（v3 / 工程師 generate_briefing.py 一致）
+# =============================================================================
+# 一致性閾值（XY vs SD 在這個誤差內視為「一致」）
+ENG_POS_KM   = 5.0
+ENG_HDG_DEG  = 10.0
+ENG_COG_DEG  = 10.0
+ENG_SOG_KN   = 2.0
+
+# AIS 欄位有效範圍
+ENG_NAVI_RANGE = (0, 15)
+ENG_HDG_RANGE  = (0, 360)
+ENG_COG_RANGE  = (0, 360)
+ENG_SOG_RANGE  = (0, 102.3)
+ENG_ROT_RANGE  = (-128, 127)
+
+# 綜合分數加權（pos 主導，總和 1.0）
+ENG_W_POS, ENG_W_HDG, ENG_W_COG, ENG_W_SOG, ENG_W_NAVI = 0.60, 0.10, 0.10, 0.10, 0.10
+
+# 分級門檻（純分數帶）
+ENG_PARTIAL_RATIO = 0.70    # sd_valid_ratio 低於此 → "部分資料"
+ENG_QUAL_SCORE    = 90.0    # score >= → "A+B 可立即取代"
+ENG_NEAR_SCORE    = 78.0    # score >= → "C 接近"，否則 "D 待改善"
+
+
+def _haversine_km(lat1, lon1, lat2, lon2):
+    """球面距離（公里）。輸入皆為 float。"""
+    r = 6371.0088
+    la1, lo1, la2, lo2 = map(math.radians, (lat1, lon1, lat2, lon2))
+    dphi = la2 - la1
+    dl = lo2 - lo1
+    a = math.sin(dphi/2)**2 + math.cos(la1) * math.cos(la2) * math.sin(dl/2)**2
+    return 2 * r * math.asin(min(1.0, math.sqrt(max(0.0, a))))
+
+
+def _angular_diff(a, b):
+    """環狀角度差（度，0~180）。"""
+    x = abs(a - b) % 360
+    return x if x <= 180 else 360 - x
+
+
+def _in_range(x, lo, hi):
+    return isinstance(x, (int, float)) and (lo <= x <= hi)
+
+
+def _valid_lat(x):
+    return isinstance(x, (int, float)) and -90 <= x <= 90 and x != 0
+
+
+def _valid_lon(x):
+    return isinstance(x, (int, float)) and -180 <= x <= 180 and x != 0
+
+
 def detect_format(wb):
-    """偵測 xlsx 格式 v1 (舊) 或 v2 (新)"""
+    """偵測 xlsx 格式 v1 / v2 / v3
+    v3：只有 '資料源' + '狀態' 兩個工作表，所有統計都從 source 自算
+    """
     if '狀態' in wb.sheetnames and '資料缺失統計' in wb.sheetnames:
         return 'v2'
     if 'source' in wb.sheetnames and 'mmsi與船名一覽' in wb.sheetnames:
         return 'v1'
     if 'source' in wb.sheetnames and '船名列表' in wb.sheetnames:
         return 'v2'
+    if '資料源' in wb.sheetnames and '狀態' in wb.sheetnames:
+        return 'v3'
     return 'unknown'
+
+
+# 46 艘 YM 船 MMSI → (英文船名, 中文船名) 對照（用於 v3 等沒有船名表的格式）
+FLEET_MAPPING = {
+    416426000: ('YM HEIGHTS', '宇明輪'),
+    416427000: ('YM HARMONY', '鎮明輪'),
+    416428000: ('YM HORIZON', '環明輪'),
+    416429000: ('YM HAWK', '威明輪'),
+    416464000: ('YM UNICORN', '營明輪'),
+    416465000: ('YM UPSURGENCE', '運明輪'),
+    416466000: ('YM UNANIMITY', '續明輪'),
+    416467000: ('YM UBIQUITY', '恆明輪'),
+    416468000: ('YM UNIFORMITY', '結明輪'),
+    416486000: ('YM INTELLIGENT', '精明輪'),
+    416487000: ('YM INAUGURATION', '遠明輪'),
+    416488000: ('YM IDEALS', '英明輪'),
+    416490000: ('YM EVOLUTION', '創明輪'),
+    416491000: ('YM ESSENCE', '實明輪'),
+    416492000: ('YM IMMENSE', '雲明輪'),
+    563155200: ('YM TROPHY', '納明輪'),
+    563234400: ('YM CONTINUITY', '存明輪'),
+    563234700: ('YM CAPACITY', '川明輪'),
+    636012795: ('YM INCEPTION', '駿明輪'),
+    636012796: ('YM IMAGE', '業明輪'),
+    636012797: ('YM INITIATIVE', '暢明輪'),
+    636013118: ('YM INSTRUCTION', '近明輪'),
+    636013119: ('YM INTERACTION', '悅明輪'),
+    636013121: ('YM IMPROVEMENT', '來明輪'),
+    636013691: ('YM UPWARD', '常明輪'),
+    636013692: ('YM UTILITY', '安明輪'),
+    636013693: ('YM UNIFORM', '團明輪'),
+    636013698: ('YM EFFICIENCY', '發明輪'),
+    636013699: ('YM ETERNITY', '展明輪'),
+    636014996: ('YM MUTUALITY', '震明輪'),
+    636014997: ('YM MOBILITY', '動明輪'),
+    636015182: ('YM MILESTONE', '盛明輪'),
+    636015183: ('YM MASCULINITY', '鮮明輪'),
+    636016703: ('YM ENLIGHTENMENT', '維明輪'),
+    636016704: ('YM EXCELLENCE', '卓明輪'),
+    636016705: ('YM EXPRESS', '越明輪'),
+    636019893: ('YM CONTINENT', '洋明輪'),
+    636019894: ('YM CREDENTIAL', '聚明輪'),
+    636019895: ('YM CENTENNIAL', '百明輪'),
+    636019897: ('YM CERTAINTY', '好明輪'),
+    636019898: ('YM CREDIBILITY', '譽明輪'),
+    636019899: ('YM CONSTANCY', '永明輪'),
+    636019900: ('YM COOPERATION', '長明輪'),
+    636021244: ('YM TOGETHER', '賢明輪'),
+    636023581: ('YM WONDERLAND', '景明輪'),
+    636023582: ('YM WISDOM', '承明輪'),
+}
 
 
 def downsample(pts, target=300):
@@ -129,7 +237,14 @@ def process_v2(wb):
         if navi_same: c['navi_ok'] += 1
     
     # 軌跡 + 延遲（from source）
-    tracks_split = defaultdict(lambda: {'xy':[],'sd_normal':[],'sd_filled':[],'latencies':[],'xy_times':[],'sd_times':[]})
+    # 注意：source 工作表的列順序是按 MMSI 而非時間，所以收集成 (time, point) tuple，
+    # 後面再按時間排序，否則 polyline 會把點亂連成蜘蛛網。
+    tracks_split = defaultdict(lambda: {
+        'xy_pairs': [],          # list of (xy_t or None, [lat, lon])
+        'sd_pairs': [],          # list of (sd_t or None, [lat, lon], status)
+        'latencies': [],
+        'createtimes': [],
+    })
     for i, r in enumerate(wb['source'].iter_rows(values_only=True)):
         if i == 0: continue
         mmsi = r[0]
@@ -138,16 +253,31 @@ def process_v2(wb):
         sd_lat, sd_lon = r[11], r[12]
         sd_t = r[18]
         status = r[20]
+        createtime = r[21] if len(r) > 21 else None
         if xy_lat and xy_lon:
-            tracks_split[mmsi]['xy'].append([xy_lat, xy_lon])
-            if isinstance(xy_t, datetime): tracks_split[mmsi]['xy_times'].append(xy_t)
-        if sd_lat and sd_lon:
-            if status == 1: tracks_split[mmsi]['sd_normal'].append([sd_lat, sd_lon])
-            elif status == 2: tracks_split[mmsi]['sd_filled'].append([sd_lat, sd_lon])
-            if isinstance(sd_t, datetime): tracks_split[mmsi]['sd_times'].append(sd_t)
+            tracks_split[mmsi]['xy_pairs'].append(
+                (xy_t if isinstance(xy_t, datetime) else None, [xy_lat, xy_lon])
+            )
+        if sd_lat and sd_lon and status in (1, 2):
+            tracks_split[mmsi]['sd_pairs'].append(
+                (sd_t if isinstance(sd_t, datetime) else None, [sd_lat, sd_lon], status)
+            )
         if isinstance(xy_t, datetime) and isinstance(sd_t, datetime):
             tracks_split[mmsi]['latencies'].append(abs((xy_t - sd_t).total_seconds())/60)
-    
+        if isinstance(createtime, datetime):
+            tracks_split[mmsi]['createtimes'].append(createtime)
+
+    # 對每艘船的點按時間排序，然後展開成原本下游使用的 xy/sd_normal/sd_filled/xy_times/sd_times
+    _MAX_DT = datetime.max
+    for mmsi, t in tracks_split.items():
+        xy_sorted = sorted(t['xy_pairs'], key=lambda p: p[0] if p[0] is not None else _MAX_DT)
+        sd_sorted = sorted(t['sd_pairs'], key=lambda p: p[0] if p[0] is not None else _MAX_DT)
+        t['xy'] = [p[1] for p in xy_sorted]
+        t['xy_times'] = [p[0] for p in xy_sorted if p[0] is not None]
+        t['sd_normal'] = [p[1] for p in sd_sorted if p[2] == 1]
+        t['sd_filled'] = [p[1] for p in sd_sorted if p[2] == 2]
+        t['sd_times'] = [p[0] for p in sd_sorted if p[0] is not None]
+
     return ship_meta, miss_stats, invalid_stats, p95_stats, consistency, tracks_split
 
 
@@ -165,7 +295,11 @@ def process_v1(wb):
                                       'sd':{'navi':0,'hdg':0,'cog':0,'sog':0,'rot':0,'any':0,'n':0}})
     consistency = defaultdict(lambda: {'pos_ok':0,'hdg_ok':0,'cog_ok':0,'sog_ok':0,'navi_ok':0,'total':0})
     p95_collect = defaultdict(lambda: {'pos':[],'hdg':[],'cog':[],'sog':[]})
-    tracks_split = defaultdict(lambda: {'xy':[],'sd_normal':[],'sd_filled':[],'latencies':[],'xy_times':[],'sd_times':[]})
+    # 用 *_pairs 收集 (time, point) tuple，最後排序後再展開（修正 polyline 亂連的問題）
+    tracks_split = defaultdict(lambda: {
+        'xy_pairs': [], 'sd_pairs': [],
+        'xy':[],'sd_normal':[],'sd_filled':[],'latencies':[],'xy_times':[],'sd_times':[]
+    })
     
     for i, r in enumerate(wb['source'].iter_rows(values_only=True)):
         if i == 0: continue
@@ -226,13 +360,15 @@ def process_v1(wb):
             if isinstance(xy_sog, (int, float)) and isinstance(sd_sog, (int, float)): p95_collect[mmsi]['sog'].append(abs(xy_sog - sd_sog))
 
         
-        # 軌跡
+        # 軌跡（先存成 (time, point) tuple，迴圈外再排序）
         if xy_lat and xy_lon:
-            tracks_split[mmsi]['xy'].append([xy_lat, xy_lon])
-            if isinstance(xy_t, datetime): tracks_split[mmsi]['xy_times'].append(xy_t)
+            tracks_split[mmsi]['xy_pairs'].append(
+                (xy_t if isinstance(xy_t, datetime) else None, [xy_lat, xy_lon])
+            )
         if not sd_zero:
-            tracks_split[mmsi]['sd_normal'].append([sd_lat, sd_lon])
-            if isinstance(sd_t, datetime): tracks_split[mmsi]['sd_times'].append(sd_t)
+            tracks_split[mmsi]['sd_pairs'].append(
+                (sd_t if isinstance(sd_t, datetime) else None, [sd_lat, sd_lon], 1)
+            )
         if isinstance(xy_t, datetime) and isinstance(sd_t, datetime) and not sd_zero:
             tracks_split[mmsi]['latencies'].append(abs((xy_t - sd_t).total_seconds())/60)
     
@@ -260,7 +396,198 @@ def process_v1(wb):
             r['any'] = max(r.values())
             return r
         invalid_stats[mmsi] = {'xy_inv': pct_dict(c['xy']), 'sd_inv': pct_dict(c['sd']) if c['sd']['n'] > 0 else None}
-    
+
+    # v1 軌跡也按時間排序（修正 polyline 亂連）
+    _MAX_DT_V1 = datetime.max
+    for mmsi, t in tracks_split.items():
+        xy_sorted = sorted(t['xy_pairs'], key=lambda p: p[0] if p[0] is not None else _MAX_DT_V1)
+        sd_sorted = sorted(t['sd_pairs'], key=lambda p: p[0] if p[0] is not None else _MAX_DT_V1)
+        t['xy'] = [p[1] for p in xy_sorted]
+        t['xy_times'] = [p[0] for p in xy_sorted if p[0] is not None]
+        t['sd_normal'] = [p[1] for p in sd_sorted]  # v1 only has status 1 (no AI fill)
+        t['sd_times'] = [p[0] for p in sd_sorted if p[0] is not None]
+
+    return ship_meta, dict(miss_stats), invalid_stats, p95_stats, dict(consistency), dict(tracks_split)
+
+
+def process_v3(wb):
+    """處理 v3 格式：只有 '資料源' + '狀態' 兩個工作表。
+    演算法與工程師 generate_briefing.py 一致：
+      - 一致率以 haversine + angular_diff 計算
+      - 各欄位的分母為「雙邊皆有效」的列數（per-field denominator）
+      - 不合法率以 AIS 有效範圍判定
+      - sd_valid = 一列裡 7 個 SD 欄位 + 經緯度 全在有效範圍
+      - 軌跡按 createtime 排序
+
+    status: 1=都正常, 2=sd 異常但 slab 正常(AI 補點), 3=xy 異常 sd 正常,
+            4=xy/sd 都異常但 slab 正常, 5=全部都壞
+    """
+    ship_meta = {mmsi: {'en': en, 'zh': zh} for mmsi, (en, zh) in FLEET_MAPPING.items()}
+
+    miss_stats = defaultdict(lambda: {'n_total':0,'xy_missing':0,'sd_filled':0,'sd_failed':0,'sd_normal':0,'sd_valid':0})
+    inv_count = defaultdict(lambda: {'xy':{'navi':0,'hdg':0,'cog':0,'sog':0,'rot':0,'any':0,'n':0},
+                                      'sd':{'navi':0,'hdg':0,'cog':0,'sog':0,'rot':0,'any':0,'n':0}})
+    # 工程師版：每個欄位獨立分母（雙邊皆有效時才計入）
+    consistency = defaultdict(lambda: {
+        'pos_ok':0, 'pos_total':0,
+        'hdg_ok':0, 'hdg_total':0,
+        'cog_ok':0, 'cog_total':0,
+        'sog_ok':0, 'sog_total':0,
+        'navi_ok':0, 'navi_total':0,
+        'total':0,            # n_total（含全部列）
+    })
+    p95_collect = defaultdict(lambda: {'pos':[],'hdg':[],'cog':[],'sog':[]})
+    tracks_split = defaultdict(lambda: {
+        'xy_pairs': [], 'sd_pairs': [],
+        'xy':[],'sd_normal':[],'sd_filled':[],'latencies':[],'xy_times':[],'sd_times':[],
+        'createtimes': [],
+    })
+
+    for i, r in enumerate(wb['資料源'].iter_rows(values_only=True)):
+        if i == 0: continue
+        mmsi = r[0]
+        if mmsi is None: continue
+        ms = miss_stats[mmsi]
+        ms['n_total'] += 1
+        cs = consistency[mmsi]
+        cs['total'] += 1
+
+        # v2/v3 欄位佈局
+        xy_lat, xy_lon, xy_navi = r[2], r[3], r[4]
+        xy_hdg, xy_cog, xy_sog, xy_rot = r[5], r[6], r[7], r[8]
+        xy_t = r[9]
+        sd_lat, sd_lon, sd_navi = r[11], r[12], r[13]
+        sd_cog, sd_sog, sd_rot, sd_hdg = r[14], r[15], r[16], r[17]
+        sd_t = r[18]
+        status = r[20]
+        createtime = r[21] if len(r) > 21 else None
+
+        # 依 status 歸類 SD 資料來源（保留 AI 補點追蹤，用於 Full Report 顯示）
+        if status == 1:
+            ms['sd_normal'] += 1
+        elif status == 2:
+            ms['sd_filled'] += 1
+        elif status == 3:
+            ms['sd_normal'] += 1
+        elif status == 4:
+            ms['sd_filled'] += 1
+        else:
+            ms['sd_failed'] += 1
+
+        # 各欄位有效性
+        xy_lat_ok = _valid_lat(xy_lat); xy_lon_ok = _valid_lon(xy_lon)
+        sd_lat_ok = _valid_lat(sd_lat); sd_lon_ok = _valid_lon(sd_lon)
+        xy_pos_ok = xy_lat_ok and xy_lon_ok
+        sd_pos_ok = sd_lat_ok and sd_lon_ok
+        xy_navi_ok = _in_range(xy_navi, *ENG_NAVI_RANGE); sd_navi_ok = _in_range(sd_navi, *ENG_NAVI_RANGE)
+        xy_hdg_ok  = _in_range(xy_hdg,  *ENG_HDG_RANGE);  sd_hdg_ok  = _in_range(sd_hdg,  *ENG_HDG_RANGE)
+        xy_cog_ok  = _in_range(xy_cog,  *ENG_COG_RANGE);  sd_cog_ok  = _in_range(sd_cog,  *ENG_COG_RANGE)
+        xy_sog_ok  = _in_range(xy_sog,  *ENG_SOG_RANGE);  sd_sog_ok  = _in_range(sd_sog,  *ENG_SOG_RANGE)
+        xy_rot_ok  = _in_range(xy_rot,  *ENG_ROT_RANGE);  sd_rot_ok  = _in_range(sd_rot,  *ENG_ROT_RANGE)
+
+        # SD 整列有效（用於 sd_valid_ratio → partial 判定）
+        sd_all_valid = sd_pos_ok and sd_navi_ok and sd_hdg_ok and sd_cog_ok and sd_sog_ok and sd_rot_ok
+        if sd_all_valid:
+            ms['sd_valid'] += 1
+
+        # XY 不合法（依 AIS 有效範圍）
+        ix = inv_count[mmsi]['xy']
+        ix['n'] += 1
+        if not xy_navi_ok: ix['navi'] += 1
+        if not xy_hdg_ok:  ix['hdg']  += 1
+        if not xy_cog_ok:  ix['cog']  += 1
+        if not xy_sog_ok:  ix['sog']  += 1
+        if not xy_rot_ok:  ix['rot']  += 1
+
+        # SD 不合法（全列都算，不過濾零座標）
+        ix2 = inv_count[mmsi]['sd']
+        ix2['n'] += 1
+        if not sd_navi_ok: ix2['navi'] += 1
+        if not sd_hdg_ok:  ix2['hdg']  += 1
+        if not sd_cog_ok:  ix2['cog']  += 1
+        if not sd_sog_ok:  ix2['sog']  += 1
+        if not sd_rot_ok:  ix2['rot']  += 1
+
+        # 一致率（per-field 分母：雙邊皆有效時才計入）
+        if xy_pos_ok and sd_pos_ok:
+            cs['pos_total'] += 1
+            dist_km = _haversine_km(float(xy_lat), float(xy_lon), float(sd_lat), float(sd_lon))
+            if dist_km <= ENG_POS_KM: cs['pos_ok'] += 1
+            p95_collect[mmsi]['pos'].append(dist_km)
+        if xy_hdg_ok and sd_hdg_ok:
+            cs['hdg_total'] += 1
+            d = _angular_diff(float(xy_hdg), float(sd_hdg))
+            if d <= ENG_HDG_DEG: cs['hdg_ok'] += 1
+            p95_collect[mmsi]['hdg'].append(d)
+        if xy_cog_ok and sd_cog_ok:
+            cs['cog_total'] += 1
+            d = _angular_diff(float(xy_cog), float(sd_cog))
+            if d <= ENG_COG_DEG: cs['cog_ok'] += 1
+            p95_collect[mmsi]['cog'].append(d)
+        if xy_sog_ok and sd_sog_ok:
+            cs['sog_total'] += 1
+            d = abs(float(xy_sog) - float(sd_sog))
+            if d <= ENG_SOG_KN: cs['sog_ok'] += 1
+            p95_collect[mmsi]['sog'].append(d)
+        if xy_navi_ok and sd_navi_ok:
+            cs['navi_total'] += 1
+            if xy_navi == sd_navi: cs['navi_ok'] += 1
+
+        # 軌跡（status 1 → sd_normal, 2 → sd_filled；按 createtime 排序）
+        if xy_lat and xy_lon:
+            tracks_split[mmsi]['xy_pairs'].append(
+                (createtime if isinstance(createtime, datetime) else (xy_t if isinstance(xy_t, datetime) else None),
+                 [xy_lat, xy_lon])
+            )
+        if sd_lat and sd_lon and status in (1, 2):
+            tracks_split[mmsi]['sd_pairs'].append(
+                (createtime if isinstance(createtime, datetime) else (sd_t if isinstance(sd_t, datetime) else None),
+                 [sd_lat, sd_lon], status)
+            )
+        if isinstance(xy_t, datetime) and isinstance(sd_t, datetime):
+            tracks_split[mmsi]['latencies'].append(abs((xy_t - sd_t).total_seconds())/60)
+        if isinstance(createtime, datetime):
+            tracks_split[mmsi]['createtimes'].append(createtime)
+
+    # 按時間排序軌跡（修正 polyline 蜘蛛網）
+    _MAX_DT = datetime.max
+    for mmsi, t in tracks_split.items():
+        xy_sorted = sorted(t['xy_pairs'], key=lambda p: p[0] if p[0] is not None else _MAX_DT)
+        sd_sorted = sorted(t['sd_pairs'], key=lambda p: p[0] if p[0] is not None else _MAX_DT)
+        t['xy'] = [p[1] for p in xy_sorted]
+        t['xy_times'] = [p[0] for p in xy_sorted if p[0] is not None]
+        t['sd_normal'] = [p[1] for p in sd_sorted if p[2] == 1]
+        t['sd_filled'] = [p[1] for p in sd_sorted if p[2] == 2]
+        t['sd_times'] = [p[0] for p in sd_sorted if p[0] is not None]
+
+    # P95 計算
+    p95_stats = {}
+    for mmsi, pc in p95_collect.items():
+        def p95(arr):
+            if not arr: return 0
+            arr.sort()
+            return arr[min(len(arr)-1, int(len(arr)*0.95))]
+        p95_stats[mmsi] = {
+            'pos_p95_km': p95(pc['pos']),
+            'hdg_p95': p95(pc['hdg']),
+            'cog_p95': p95(pc['cog']),
+            'sog_p95': p95(pc['sog']),
+            'n_data': len(pc['pos']),
+        }
+
+    # 不合法率轉百分比
+    invalid_stats = {}
+    for mmsi, c in inv_count.items():
+        def pct_dict(d):
+            n = d['n'] or 1
+            r = {k: round(d[k]/n*100, 4) for k in ('navi','hdg','cog','sog','rot')}
+            r['any'] = round(max(r.values()), 4)
+            return r
+        invalid_stats[mmsi] = {
+            'xy_inv': pct_dict(c['xy']),
+            'sd_inv': pct_dict(c['sd']) if c['sd']['n'] > 0 else None,
+        }
+
     return ship_meta, dict(miss_stats), invalid_stats, p95_stats, dict(consistency), dict(tracks_split)
 
 
@@ -283,26 +610,30 @@ def build_vessels(ship_meta, miss_stats, invalid_stats, p95_stats, consistency, 
         sd_normal = ms.get('sd_normal', 0)
         sd_filled = ms.get('sd_filled', 0)
         sd_failed = ms.get('sd_failed', 0)
-        n_real = sd_normal + sd_filled
-        is_no_data = (sd_normal == 0 and sd_filled == 0)
-        has_partial = (n_real > 0) and (n_real < n_total) and not is_no_data
-        
+        sd_valid_status = sd_normal + sd_filled               # 依 status 分類的可用筆數（含 AI 補點）
+        sd_valid_eng = ms.get('sd_valid', sd_valid_status)    # 工程師演算法：所有 SD 欄位都在有效範圍的筆數
+
         inv = invalid_stats.get(mmsi, {'xy_inv': {'navi':0,'hdg':0,'cog':0,'sog':0,'rot':0,'any':0}, 'sd_inv': None})
         p95 = p95_stats.get(mmsi, {})
         cons = consistency.get(mmsi, {'total':0,'pos_ok':0,'hdg_ok':0,'cog_ok':0,'sog_ok':0,'navi_ok':0})
-        t = cons['total'] or 1
-        
-        if is_no_data:
-            comp = {'pos':0,'hdg':0,'cog':0,'sog':0,'navistat':0}
-            p95_out = {'pos':None,'hdg':None,'cog':None,'sog':None}
-            score = 0
-        else:
+
+        # 偵測是否為 v3（per-field 分母）；否則退回舊邏輯（共用 total 分母）
+        engineer_algo = 'pos_total' in cons
+
+        if engineer_algo:
+            # ── 工程師演算法 ──
+            sd_valid_ratio = sd_valid_eng / n_total if n_total > 0 else 0
+            is_no_data = sd_valid_ratio <= 0
+            has_partial = (not is_no_data) and (sd_valid_ratio < ENG_PARTIAL_RATIO)
+
+            def _rate(ok, denom):
+                return round(100 * ok / denom, 2) if denom > 0 else 0
             comp = {
-                'pos': round(100*cons['pos_ok']/t, 2),
-                'hdg': round(100*cons['hdg_ok']/t, 2),
-                'cog': round(100*cons['cog_ok']/t, 2),
-                'sog': round(100*cons['sog_ok']/t, 2),
-                'navistat': round(100*cons['navi_ok']/t, 2),
+                'pos':      _rate(cons['pos_ok'],  cons.get('pos_total', 0)),
+                'hdg':      _rate(cons['hdg_ok'],  cons.get('hdg_total', 0)),
+                'cog':      _rate(cons['cog_ok'],  cons.get('cog_total', 0)),
+                'sog':      _rate(cons['sog_ok'],  cons.get('sog_total', 0)),
+                'navistat': _rate(cons['navi_ok'], cons.get('navi_total', 0)),
             }
             p95_out = {
                 'pos': round(p95.get('pos_p95_km', 0), 3),
@@ -310,10 +641,38 @@ def build_vessels(ship_meta, miss_stats, invalid_stats, p95_stats, consistency, 
                 'cog': p95.get('cog_p95'),
                 'sog': round(p95.get('sog_p95', 0), 3),
             }
-            quality = comp['pos']*0.35 + comp['hdg']*0.20 + comp['cog']*0.10 + comp['sog']*0.20 + comp['navistat']*0.15
-            coverage = n_real / n_total if n_total > 0 else 0
-            score = round(quality * coverage, 2)
-        
+            quality = (comp['pos']*ENG_W_POS + comp['hdg']*ENG_W_HDG + comp['cog']*ENG_W_COG
+                       + comp['sog']*ENG_W_SOG + comp['navistat']*ENG_W_NAVI)
+            score = round(quality * sd_valid_ratio, 2)
+            n_real = sd_valid_status
+        else:
+            # ── 舊（v1/v2）演算法 ──
+            n_real = sd_valid_status
+            is_no_data = (sd_normal == 0 and sd_filled == 0)
+            has_partial = (n_real > 0) and (n_real < n_total) and not is_no_data
+            t = cons.get('total', 0) or 1
+            if is_no_data:
+                comp = {'pos':0,'hdg':0,'cog':0,'sog':0,'navistat':0}
+                p95_out = {'pos':None,'hdg':None,'cog':None,'sog':None}
+                score = 0
+            else:
+                comp = {
+                    'pos': round(100*cons['pos_ok']/t, 2),
+                    'hdg': round(100*cons['hdg_ok']/t, 2),
+                    'cog': round(100*cons['cog_ok']/t, 2),
+                    'sog': round(100*cons['sog_ok']/t, 2),
+                    'navistat': round(100*cons['navi_ok']/t, 2),
+                }
+                p95_out = {
+                    'pos': round(p95.get('pos_p95_km', 0), 3),
+                    'hdg': p95.get('hdg_p95'),
+                    'cog': p95.get('cog_p95'),
+                    'sog': round(p95.get('sog_p95', 0), 3),
+                }
+                quality = comp['pos']*0.35 + comp['hdg']*0.20 + comp['cog']*0.10 + comp['sog']*0.20 + comp['navistat']*0.15
+                coverage = n_real / n_total if n_total > 0 else 0
+                score = round(quality * coverage, 2)
+
         vessels.append({
             'en': meta['en'], 'zh': meta['zh'],
             'n_total': n_total, 'n_zero': sd_failed, 'n_real': n_real,
@@ -349,21 +708,25 @@ def build_tracks(tracks_split, ship_meta):
 
 
 def categorize(vessels):
+    """分級規則（與工程師 generate_briefing.py 一致）：
+      - 無資料：is_no_data
+      - 部分資料：has_partial（v3：sd_valid_ratio<0.70；v1/v2：n_real<n_total）
+      - A+B 可立即取代：score >= ENG_QUAL_SCORE (90)
+      - C 接近：score >= ENG_NEAR_SCORE (78)
+      - D 待改善：其餘
+    """
     qual, partial_s, near, unqual, no_data = [], [], [], [], []
     for v in vessels:
         if v['is_no_data']:
             no_data.append(v['en'])
         elif v['has_partial']:
             partial_s.append(v['en'])
+        elif v['score'] >= ENG_QUAL_SCORE:
+            qual.append(v['en'])
+        elif v['score'] >= ENG_NEAR_SCORE:
+            near.append(v['en'])
         else:
-            coverage = v['n_real']/v['n_total'] if v['n_total']>0 else 0
-            original = v['score']/coverage if coverage>0 else 0
-            if original >= 90 and v['comp']['pos'] >= 90:
-                qual.append(v['en'])
-            elif original >= 80:
-                near.append(v['en'])
-            else:
-                unqual.append(v['en'])
+            unqual.append(v['en'])
     return {'qual': qual, 'near': near, 'partial': partial_s, 'unqual': unqual, 'nodata': no_data}
 
 
@@ -427,6 +790,8 @@ def main():
     
     if fmt == 'v2':
         ship_meta, miss_stats, invalid_stats, p95_stats, consistency, tracks_split = process_v2(wb)
+    elif fmt == 'v3':
+        ship_meta, miss_stats, invalid_stats, p95_stats, consistency, tracks_split = process_v3(wb)
     else:
         ship_meta, miss_stats, invalid_stats, p95_stats, consistency, tracks_split = process_v1(wb)
     
@@ -443,10 +808,14 @@ def main():
             ai_ships.append({'en': v['en'], 'zh': v['zh'], 'fill_pct': fill_pct, 'count': v['sd_filled_count']})
     ai_ships.sort(key=lambda x: -x['fill_pct'])
     
-    # 時間範圍（用「實際連續資料區間」而非跨距）
+    # 時間範圍（優先使用 createtime = 真正的資料收集時間；無 createtime 則退回 xy_lasttime_fd）
     all_xy = []
     for t in tracks_split.values():
-        all_xy.extend(t.get('xy_times', []))
+        ct = t.get('createtimes', [])
+        if ct:
+            all_xy.extend(ct)
+        else:
+            all_xy.extend(t.get('xy_times', []))
     sparse_info = ""
     if all_xy:
         main_start, main_end, main_days, sparse = find_main_period(all_xy)
@@ -457,12 +826,13 @@ def main():
         # 找該主要區間內的真實時戳邊界
         in_main = [t for t in all_xy if main_start <= t.date() <= main_end]
         if in_main:
-            period_label = f"{min(in_main).strftime('%Y/%-m/%-d %H:%M')}-{max(in_main).strftime('%Y/%-m/%-d %H:%M')}"
+            _s, _e = min(in_main), max(in_main)
+            period_label = f"{_s.year}/{_s.month}/{_s.day} {_s:%H:%M}-{_e.year}/{_e.month}/{_e.day} {_e:%H:%M}"
         else:
             period_label = f"{period_start}-{period_end}"
         # 散落資料註記
         if sparse:
-            sparse_strs = [d.strftime('%-m/%-d') for d in sparse]
+            sparse_strs = [f"{d.month}/{d.day}" for d in sparse]
             sparse_info = f"另有 {sum(1 for t in all_xy if t.date() in sparse)} 筆零星資料分散於 {', '.join(sparse_strs)}（不計入主要區間）"
         # 總跨距資訊（含散落）
         total_span_start = min(all_xy).strftime('%Y/%m/%d').replace('/0', '/')
@@ -526,7 +896,7 @@ def main():
     with open(args.output, 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
     
-    print(f"✓ 完成！")
+    print("[OK] 完成！")
     print(f"  - 船舶數: {len(vessels)}")
     print(f"  - 期間: {period_start} ~ {period_end} ({period_days} 天)")
     print(f"  - 有效記錄: {n_valid:,}")
