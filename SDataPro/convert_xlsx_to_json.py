@@ -430,6 +430,7 @@ def process_v3(wb):
     # 工程師版：每個欄位獨立分母（雙邊皆有效時才計入）
     consistency = defaultdict(lambda: {
         'pos_ok':0, 'pos_total':0,
+        'pos_ok_adj':0,       # 延遲補償後的 pos_ok（扣除船訊網延遲導致的位置漂移）
         'hdg_ok':0, 'hdg_total':0,
         'cog_ok':0, 'cog_total':0,
         'sog_ok':0, 'sog_total':0,
@@ -514,6 +515,18 @@ def process_v3(wb):
             dist_km = _haversine_km(float(xy_lat), float(xy_lon), float(sd_lat), float(sd_lon))
             if dist_km <= ENG_POS_KM: cs['pos_ok'] += 1
             p95_collect[mmsi]['pos'].append(dist_km)
+            # 延遲補償：扣除「兩家系統時間差 × 船速」所造成的預期位置漂移
+            # 預期漂移 = |xy_t − sd_t| (min) × sog (knot) × 1.852/60 (km/min/knot)
+            # adjusted = max(0, actual − expected_drift) ≤ 5 km 即視為「真正一致」
+            adj_dist = dist_km
+            if isinstance(xy_t, datetime) and isinstance(sd_t, datetime):
+                delay_min = abs((xy_t - sd_t).total_seconds()) / 60.0
+                # 取 XY 與 SD 兩端 sog 平均當船速估計（兩家都應該記錄相同瞬時速度）
+                speeds = [s for s in (xy_sog, sd_sog) if _in_range(s, *ENG_SOG_RANGE)]
+                sog_kn = (sum(speeds) / len(speeds)) if speeds else 0.0
+                expected_drift_km = delay_min * sog_kn * (1.852 / 60.0)
+                adj_dist = max(0.0, dist_km - expected_drift_km)
+            if adj_dist <= ENG_POS_KM: cs['pos_ok_adj'] += 1
         if xy_hdg_ok and sd_hdg_ok:
             cs['hdg_total'] += 1
             d = _angular_diff(float(xy_hdg), float(sd_hdg))
@@ -630,6 +643,7 @@ def build_vessels(ship_meta, miss_stats, invalid_stats, p95_stats, consistency, 
                 return round(100 * ok / denom, 2) if denom > 0 else 0
             comp = {
                 'pos':      _rate(cons['pos_ok'],  cons.get('pos_total', 0)),
+                'pos_adj':  _rate(cons.get('pos_ok_adj', 0), cons.get('pos_total', 0)),
                 'hdg':      _rate(cons['hdg_ok'],  cons.get('hdg_total', 0)),
                 'cog':      _rate(cons['cog_ok'],  cons.get('cog_total', 0)),
                 'sog':      _rate(cons['sog_ok'],  cons.get('sog_total', 0)),
