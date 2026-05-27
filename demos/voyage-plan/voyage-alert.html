@@ -232,17 +232,37 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   max-width: calc(100% - 20px);
 }
 .map-overlay-toolbar label { font-size: 14px; color: #9aa5b8; }
-.map-overlay-toolbar select,
-.map-overlay-toolbar input {
-  /* input / select 高度一致：相同 padding + line-height + border + font-size */
-  height: 28px; box-sizing: border-box;
-  padding: 0 10px; font-size: 14px;
-  border: 1px solid #2a2a2a; border-radius: 4px;
-  background: #141414; color: #e4eaf2;
-  outline: none; line-height: 1;
-  font-family: inherit;
-}
 .map-overlay-toolbar input { min-width: 220px; }
+
+/* ── Unified form control style ───────────────────────────────────
+ * 所有 select、text input 都用相同的高度(36px)、padding、邊框、顏色 token，
+ * 讓 toolbar / events filter / threshold input wrap 視覺一致。
+ * th-input-wrap 是自訂的「input + stepper + unit」複合 widget，整個 wrap 也跟著 36px。
+ */
+.map-overlay-toolbar select,
+.map-overlay-toolbar input[type="search"],
+.map-overlay-toolbar input[type="text"],
+.toolbar select,
+.toolbar input[type="search"],
+.toolbar input[type="text"],
+select.ev-select {
+  height: 36px;
+  padding: 0 12px;
+  font-size: 14px;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #e4eaf2;
+  outline: none;
+  line-height: 1.2;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.map-overlay-toolbar select:focus,
+.map-overlay-toolbar input:focus,
+.toolbar select:focus,
+.toolbar input:focus,
+select.ev-select:focus { border-color: #4a9eff; }
 .map-overlay-toolbar .summary-pills { margin-left: 6px; }
 .map-overlay-toolbar .summary-pill { padding: 3px 9px; font-size: 14px; }
 
@@ -302,31 +322,35 @@ table.alert-table tr:hover td.cell-vessel { background: #1a1a1a; }
   line-height: 1.2;
   cursor: help;
 }
-.icon-header::after {
-  content: attr(data-tip);
-  position: absolute;
-  top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-  background: #0d0d0d; border: 1px solid #333333;
-  padding: 6px 10px; border-radius: 4px;
-  font-size: 14px; font-weight: 400; color: #d8dee9;
-  white-space: pre-line; text-transform: none; letter-spacing: 0;
-  text-align: left; line-height: 1.5;
-  min-width: 160px; max-width: 240px;
-  opacity: 0; pointer-events: none;
-  z-index: 10;
-  transition: opacity 0.12s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+/* tooltip 改用 JS portal 把 .icon-tip-portal 元素 append 到 body，避免被
+ * .alert-table-wrap 的 overflow:auto clip 掉。CSS 只負責 portal 樣式。
+ * 結構分標題 (.tip-title) + 說明 (.tip-body) 兩層。 */
+.icon-tip-portal {
+  position: fixed;
+  background: #0d0d0d;
+  border: 1px solid #333333;
+  padding: 8px 10px; border-radius: 4px;
+  text-align: left;
+  min-width: 180px; max-width: 320px;
+  z-index: 10000;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
-.icon-header::before {
-  /* tooltip 上方小箭頭 */
-  content: ""; position: absolute;
-  top: calc(100% + 1px); left: 50%; transform: translateX(-50%);
-  border: 5px solid transparent; border-bottom-color: #333333;
-  opacity: 0; transition: opacity 0.12s ease;
-  z-index: 11;
+.icon-tip-portal .tip-title {
+  font-size: 13px; font-weight: 600; color: #e4eaf2;
+  letter-spacing: 0.2px;
+  padding-bottom: 6px; margin-bottom: 6px;
+  border-bottom: 1px solid #2a2a2a;
 }
-.icon-header:hover::after,
-.icon-header:hover::before { opacity: 1; }
+.icon-tip-portal .tip-body {
+  font-size: 12px; font-weight: 400; color: #c4cdda;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+.icon-tip-portal.no-body .tip-title {
+  padding-bottom: 0; margin-bottom: 0;
+  border-bottom: none;
+}
 /* hover 時 icon stroke 變亮，明確提示這是可互動目標 */
 .icon-header:hover svg { stroke: #9ec5ff; }
 
@@ -410,6 +434,29 @@ table.alert-table td.cell-vessel a.vessel-link.is-active::before {
   color: #5e6b80; letter-spacing: 0.3px;
   text-transform: none;
 }
+/* tip 版本：用 .tip-i 小 i 圓圈表示有說明，緊貼中文後（biTh 模板放在中文與英文之間） */
+.bi-th-tip {
+  cursor: help;
+  outline: none;
+}
+.bi-th-tip .tip-i {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 10px; height: 10px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 8px; font-style: italic; font-weight: 700;
+  line-height: 1;
+  opacity: 0.45;
+  vertical-align: middle;
+  margin-left: 3px; margin-right: 2px;
+  text-transform: none;
+  flex: 0 0 10px;
+}
+.bi-th-tip:hover .tip-i,
+.bi-th-tip:focus .tip-i { opacity: 1; color: #9ec5ff; }
+.bi-th-tip:hover,
+.bi-th-tip:focus { color: #9ec5ff; }
 .bi-line { color: #9aa5b8; }
 .bi-line .en { color: #5e6b80; margin-left: 4px; font-size: 14px; }
 
@@ -443,7 +490,7 @@ table.alert-table td.cell-vessel a.vessel-link.is-active::before {
 }
 table.alert-table {
   width: 100%; border-collapse: collapse;
-  font-size: 14px; color: #d8dee9; min-width: 1620px;
+  font-size: 14px; color: #d8dee9; min-width: 1720px;
 }
 table.alert-table th {
   background: #0f0f0f; font-weight: 600;
@@ -556,25 +603,42 @@ table.alert-table tr:last-child td { border-bottom: none; }
   width: 7px; height: 7px; border-radius: 50%; background: #4a9eff;
 }
 
+/* 計畫來源 pill — 不同來源用不同顏色 token */
+.plan-source {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 3px;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.2px;
+  white-space: nowrap;
+  background: #1f1f1f; color: #c4cdda;
+  border: 1px solid #2a2a2a;
+}
+.plan-source-stormgeo { background: rgba(74,158,255,0.14); color: #9ec5ff; border-color: rgba(74,158,255,0.35); }
+.plan-source-wni      { background: rgba(108,180,108,0.14); color: #8fd49a; border-color: rgba(108,180,108,0.35); }
+
 .ais-status {
   display: inline-block; padding: 3px 10px; border-radius: 3px;
   font-size: 12px; font-weight: 500; letter-spacing: 0.3px;
   background: #222222; color: #c4cdda;
   cursor: help;
   white-space: nowrap;
+  line-height: 1.25;
 }
+/* 雙行顯示：中文簡稱（cn）放上、英文縮寫（en）放下；單行 hover title 仍有完整描述 */
+.ais-status .cn { display: block; font-size: 12px; }
+.ais-status .en { display: block; font-size: 10px; opacity: 0.7; letter-spacing: 0.5px; }
 .ais-status.moored  { background: #222222; color: #c4cdda; }
 .ais-status.under-way { background: rgba(80,160,80,0.18); color: #88d796; }
 .ais-status.anchored  { background: rgba(245,166,35,0.18); color: #f5b753; }
 .ais-status.unknown   { background: #1f1f1f; color: #7c8a9e; }
 
-/* AIS Status 表格欄固定 80px，文字以縮寫顯示，完整名稱在 hover title 內 */
+/* AIS Status 表格欄固定 90px，文字以雙行顯示（中文 + 英文），完整名稱在 hover title 內 */
 table.alert-table th.col-status,
 table.alert-table td.cell-status {
-  width: 80px; min-width: 80px; max-width: 80px;
+  width: 90px; min-width: 90px; max-width: 90px;
 }
 table.alert-table td.cell-status .ais-status {
-  padding: 3px 6px;  /* 80px 欄寬內收緊左右內距，文字仍居中 */
+  padding: 2px 6px;
+  text-align: center;
 }
 
 .mono { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 14px; color: #c4cdda; }
@@ -593,11 +657,7 @@ table.alert-table td.cell-status .ais-status {
   display: flex; gap: 10px; align-items: center;
   margin-bottom: 14px; flex-wrap: wrap;
 }
-.toolbar select, .toolbar input {
-  padding: 6px 10px; font-size: 14px;
-  border: 1px solid #333333; border-radius: 4px;
-  background: #1a1a1a; color: #d8dee9;
-}
+/* .toolbar select / input 樣式統一在上方 unified form control 規則處理 */
 .summary-pills { display: flex; gap: 10px; margin-left: auto; }
 .summary-pill {
   display: inline-flex; align-items: center; gap: 8px;
@@ -762,10 +822,18 @@ table.alert-table td.cell-status .ais-status {
 .risk-toggle .rt-title .en { color: #7c8a9e; font-weight: 400; margin-left: 4px; font-size: 14px; }
 .risk-toggle .rt-chev { color: #7c8a9e; transition: transform 0.18s ease; }
 .risk-toggle.open .rt-chev { transform: rotate(180deg); }
+.risk-toggle {
+  /* max-height 留 100px 給上方 toolbar(40-50px) + banner(30px) + 邊距，避免 panel
+   * 頂端 (rt-head) 被 z-index 600 的 toolbar 蓋住而無法點擊收合。
+   * 內容裝得下就不出現卷軸，裝不下時 .rt-body 自動出 scroll bar。 */
+  max-height: calc(100% - 100px);
+  display: flex; flex-direction: column;
+}
 .risk-toggle .rt-body {
   display: none;
   padding: 6px 10px 8px;
-  max-height: 280px; overflow-y: auto;
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto;       /* 內容超過 max-height 才顯示卷軸 */
 }
 .risk-toggle.open .rt-body { display: block; }
 .risk-toggle .rt-actions {
@@ -1020,11 +1088,7 @@ table.alert-table td.cell-status .ais-status {
 .history-item .h-by   { color: #9ec5ff; min-width: 80px; }
 .history-item .h-arrow { color: #5e6b80; }
 
-select.ev-select {
-  padding: 6px 10px; font-size: 14px;
-  border: 1px solid #333333; border-radius: 4px;
-  background: #1a1a1a; color: #d8dee9; font-family: inherit;
-}
+/* select.ev-select 樣式統一在上方 unified form control 規則處理 */
 
 /* 閾值設定獨立頁面 #/thresholds */
 .th-page-wrap {
@@ -1070,9 +1134,11 @@ table.th-table tbody tr:hover td { background: #1a1a1a; }
  */
 .th-input-wrap {
   display: inline-flex; align-items: stretch;
-  border: 1px solid #2a2a2a; border-radius: 4px;
+  border: 1px solid #2a2a2a; border-radius: 6px;
   overflow: hidden;
-  background: #141414;
+  background: #1a1a1a;
+  height: 36px;
+  box-sizing: border-box;
 }
 .th-input-wrap:focus-within { border-color: #4a9eff; }
 .th-input-wrap .th-input {
@@ -1092,7 +1158,7 @@ table.th-table tbody tr:hover td { background: #1a1a1a; }
 }
 /* 自訂上下調整按鈕 — 細條疊在 input 右側 */
 .th-stepper {
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: column;justify-content: center;
   border-left: 1px solid #2a2a2a;
   flex-shrink: 0;
 }
@@ -1172,6 +1238,659 @@ table.th-table tbody tr:hover td { background: #1a1a1a; }
   background: rgba(44,108,219,0.18); color: #9ec5ff;
   font-size: 14px; border-radius: 8px; margin-left: 6px;
 }
+
+/* 桌面預設：手機專屬控制元件不顯示。必須放在 @media 區段「之前」，
+ * 不然同特異性下會把 @media 內的 display:inline-flex 蓋掉。 */
+.filter-toggle, .view-toggle, .detail-view-toggle { display: none; }
+
+/* ─────────────────────────────────────────────────────────────────
+ * Mobile + Tablet portrait (≤ 1024px) — sidebar 變底部 tab、grid/table 變堆疊/卡片
+ *   斷點 1024px 包含 iPad Pro 12.9" portrait，較窄的桌面佈局會有 overlay 互相
+ *   擠壓的問題（layer-toggle 蓋到返回按鈕等），整段走手機卡片版面比較乾淨。
+ *   渲染分支由 JS 的 IS_MOBILE 決定（renderMatrixCards / renderEventsCards /
+ *   renderThresholdsCards 取代對應的表格版本）。
+ * ───────────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  body {
+    flex-direction: column-reverse;
+    height: 100dvh;
+  }
+
+  /* sidebar → 底部 tab bar */
+  .sidebar {
+    width: 100% !important;
+    flex-direction: row;
+    border-right: none;
+    border-top: 1px solid #2a2a2a;
+    padding-bottom: env(safe-area-inset-bottom);
+    overflow: visible;
+  }
+  .sidebar:hover, .sidebar.pinned { width: 100% !important; }
+  .sidebar .brand, .sidebar .sb-toggle { display: none; }
+  .sidebar nav {
+    flex-direction: row;
+    padding: 0;
+    width: 100%;
+  }
+  .sidebar nav a {
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 4px 6px;
+    border-left: none;
+    font-size: 11px;
+    text-align: center;
+    justify-content: center;
+    position: relative;
+    min-width: 0;
+  }
+  .sidebar nav a .sb-ico svg { width: 22px; height: 22px; }
+  .sidebar nav a .sb-label {
+    opacity: 1 !important;
+    font-size: 11px;
+    transition: none;
+  }
+  .sidebar nav a.active {
+    background: transparent;
+    color: #9ec5ff;
+    border-left: none;
+  }
+  .sidebar nav a.active::before {
+    content: ""; position: absolute; top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 32px; height: 2px; background: #4a9eff;
+    border-radius: 0 0 2px 2px;
+  }
+  /* v1 原型外連在底部 tab 上佔位太擠，手機隱藏 */
+  .sidebar nav a[href="index.html"] { display: none; }
+
+  main {
+    padding: 10px;
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+  /* fleet 頁滿版：移除 main 左右 padding，讓地圖延伸到螢幕邊緣；
+   * page-title 與 cards 自帶 padding 保持邊距。 */
+  main.fleet-mode {
+    padding-left: 0; padding-right: 0;
+    padding-bottom: 6px;
+  }
+  /* threshold 頁：取消 main padding-bottom 讓 sticky 的 th-actions 能貼齊 tab bar，
+   * 不留出 main padding-bottom 那 10px 縫隙 */
+  main.th-mode { padding-bottom: 0 !important; }
+
+  /* page-title 縮小、small 換行；fleet 頁需自己留水平 padding */
+  .page-title { font-size: 16px; margin-bottom: 10px; }
+  main.fleet-mode .page-title { padding: 0 12px; }
+  .page-title small {
+    display: block; margin-left: 0;
+    font-size: 12px; margin-top: 2px;
+  }
+
+  /* Fleet split：手機把地圖+overlay 改成「上 toolbar 下地圖」直向堆疊
+   * 桌面 overlay 是 position:absolute 浮在地圖上、手機螢幕太窄會把地圖吃掉，
+   * 全部改 position:static 用 flex order 排出來：toolbar(1) → banner(2) → risk(3) → 地圖(99) */
+  .fleet-map-wrap {
+    flex: 0 0 auto !important;
+    display: flex; flex-direction: column;
+    overflow: visible;
+  }
+  /* 地圖本體固定 240px、用 order 推到底 */
+  .fleet-map-wrap > #fleet-map {
+    order: 99;
+    flex: 0 0 240px;
+    height: 240px; min-height: 240px;
+  }
+  .fleet-list-wrap { flex: 1 1 auto; }
+
+  /* Overlay 全部從 absolute → static，按 order 排序在地圖上方 */
+  .map-overlay-toolbar {
+    position: static !important;
+    order: 1;
+    max-width: none; width: auto;
+    border-radius: 0; border: none;
+    border-bottom: 1px solid #2a2a2a;
+    background: #141414;
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    padding: 8px 10px;
+    flex-wrap: wrap; gap: 6px;
+  }
+  .map-overlay-toolbar label { font-size: 12px; }
+  .map-overlay-toolbar select { flex: 1 1 auto; }
+  .map-overlay-toolbar input { min-width: 0; flex: 1 1 100%; }
+  .map-overlay-toolbar .summary-pills {
+    margin-left: 0; width: 100%; gap: 6px;
+  }
+  .map-overlay-toolbar .summary-pill { padding: 2px 8px; font-size: 12px; }
+
+  .map-overlay-banner {
+    position: static !important;
+    order: 2;
+    max-width: none;
+    border-radius: 0; border: none;
+    border-bottom: 1px solid #c0392b;
+    padding: 6px 10px; font-size: 12px;
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
+  /* 手機不需要重新展開 icon，banner 本身就在頂端可直接×關掉 */
+  .map-overlay-banner-icon { display: none !important; }
+
+  .risk-toggle {
+    position: static !important;
+    order: 3;
+    max-width: none; width: auto;
+    border-radius: 0; border: none;
+    border-bottom: 1px solid #2a2a2a;
+    background: #141414;
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    box-shadow: none;
+    font-size: 12px;
+  }
+  /* 手機也不限制風險區 panel 高度，跟桌面一致直接全列 */
+
+  /* 單船 detail：fleet-map-wrap 改 flex column 統一管理所有元素的順序 */
+  .fleet-split.detail-mode .fleet-map-wrap {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden;
+    position: relative;
+  }
+  .fleet-split.detail-mode .fleet-list-wrap,
+  .fleet-split.detail-mode .list-handle { display: none; }
+
+  /* Detail header row（JS 包出來）：[← back] [圖層 ▾ chip] ... [≡⊟⊞] 三者同一排
+   * align-items: flex-start 讓 layer-toggle 展開時，back/view-toggle 仍在頂部，
+   * 不會被拉到垂直置中。 */
+  .detail-header-row {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-start;
+    background: #141414;
+    border-bottom: 1px solid #2a2a2a;
+    position: relative;
+  }
+  .detail-header-row > .fleet-detail-back {
+    position: static !important;
+    background: transparent !important;
+    border: none !important;
+    border-right: 1px solid #2a2a2a !important;
+    padding: 0 14px !important;
+    height: 38px;            /* 固定高度，跟 layer chip header 對齊 */
+    font-size: 16px; font-weight: 600;
+    color: #9ec5ff;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .detail-header-row > .fleet-detail-back .en,
+  .detail-header-row > .fleet-detail-back .back-label { display: none; }
+
+  .detail-header-row > .detail-view-toggle {
+    position: static !important;
+    margin: 4px 6px 0 auto;   /* 推到最右、頂部對齊 */
+    flex: 0 0 auto;
+  }
+
+  /* Grid 改 flex column：map 區先、panel 後 */
+  .fleet-split.detail-mode .fleet-detail-grid {
+    position: static !important;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-rows: none !important;
+    grid-template-columns: none !important;
+    overflow: hidden;
+  }
+
+  /* Map column：flex column 包 layer-toggle + risk-toggle + map */
+  .fleet-detail-grid > div:first-child {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    flex: 0 0 auto;
+    overflow: visible;
+    position: relative;
+  }
+
+  /* layer-toggle 在 header row 內：flex column，header 一直在頂部，labels 預設隱藏，
+   * .lt-open 時 labels 才往下展開，撐高整個 header-row 高度（map 一起被往下推）。 */
+  .detail-header-row > .layer-toggle {
+    position: static !important;
+    flex: 1 1 auto; min-width: 0;
+    max-width: none !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+    margin: 0;
+    top: auto; right: auto;
+    font-size: 12px;
+    display: flex; flex-direction: column;
+  }
+  /* header chip：固定 38px、文字 + ▾ */
+  .detail-header-row > .layer-toggle > div:first-child {
+    cursor: pointer; user-select: none;
+    height: 38px;
+    padding: 0 12px;
+    display: flex; align-items: center; gap: 6px;
+    color: #e4eaf2;
+    margin: 0 !important;
+    border: none !important;
+  }
+  .detail-header-row > .layer-toggle > div:first-child::after {
+    content: "▾";
+    color: #7c8a9e; font-size: 10px;
+    margin-left: 6px;
+    transition: transform 0.18s;
+  }
+  .detail-header-row > .layer-toggle.lt-open > div:first-child::after {
+    transform: rotate(180deg);
+  }
+  /* labels：預設不顯示；展開時自然落在 header chip 下方 */
+  .detail-header-row > .layer-toggle label { display: none; }
+  .detail-header-row > .layer-toggle.lt-open label {
+    display: flex;
+    align-items: center; gap: 8px;
+    padding: 6px 12px;
+    border-top: 1px solid #1a1a1a;
+    font-size: 12px;
+  }
+
+  /* risk-toggle → 靜態 strip 排在 layer-toggle 下方，跟 overview 一致 */
+  .fleet-detail-grid > div:first-child > .risk-toggle {
+    position: static !important;
+    order: 2;
+    max-width: none !important;
+    width: auto;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid #2a2a2a;
+    background: #141414;
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    box-shadow: none;
+    bottom: auto; left: auto;
+    font-size: 12px;
+  }
+
+  /* Map：split 模式 240px / map 模式撐滿 */
+  .fleet-detail-grid > div:first-child > #fleet-map {
+    order: 99;
+    flex: 0 0 240px;
+    height: 240px; min-height: 240px;
+  }
+
+  /* Detail panel：底部、可內部 scroll */
+  .fleet-split.detail-mode .fleet-detail-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    border-left: none;
+    border-top: 1px solid #2a2a2a;
+    padding: 12px 14px;
+    overflow-y: auto;
+  }
+
+  /* View mode 在 detail mode 下：list = 只看資料 / map = 只看地圖 / split = 都看 */
+  .fleet-split.detail-mode.view-map .fleet-detail-panel { display: none; }
+  .fleet-split.detail-mode.view-map .fleet-detail-grid > div:first-child {
+    flex: 1 1 auto;
+  }
+  .fleet-split.detail-mode.view-map .fleet-detail-grid > div:first-child > #fleet-map {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
+  .fleet-split.detail-mode.view-list .fleet-detail-grid > div:first-child {
+    display: none !important;
+  }
+
+  /* Detail mode 的 view-toggle：浮動在 fleet-map-wrap 右上角（在 grid 之外，
+   * view-list 模式隱藏 map 區時仍要看得到，才能切回 map / split） */
+  .fleet-split.detail-mode .detail-view-toggle {
+    position: absolute;
+    top: 6px; right: 8px;
+    z-index: 700;
+    display: inline-flex;
+  }
+
+  /* 單船 detail：grid → 上下堆疊（map 260px + 面板自帶 scroll） */
+  .fleet-detail-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 260px 1fr;
+  }
+  .fleet-detail-grid > div:first-child { position: relative; height: 260px; }
+  .fleet-detail-panel {
+    border-left: none;
+    border-top: 1px solid #2a2a2a;
+    padding: 12px 14px;
+    /* overflow-y: auto 從基底規則繼承，可內部 scroll */
+  }
+  .fleet-detail-back { top: 8px; left: 8px; padding: 4px 10px; font-size: 12px; }
+
+  /* 卡片容器自帶 scroll；list-handle 在手機沒作用（map 改固定高度），隱藏 */
+  .fleet-list-wrap .m-cards {
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 12px 14px;   /* 滿版 main 後 cards 需自帶水平 padding */
+  }
+  .list-handle { display: none; }
+
+  /* ── 篩選收合 / 檢視模式切換（行動裝置專屬控制元件）─────────── */
+  /* 篩選預設收合：toolbar 加 .collapsed 時隱藏 label/select/search/count
+   *   .map-overlay-toolbar — 船隊頁的浮動 toolbar
+   *   .toolbar             — 事件頁等的一般 toolbar */
+  .map-overlay-toolbar.collapsed > label,
+  .map-overlay-toolbar.collapsed > select,
+  .map-overlay-toolbar.collapsed > input[type="search"],
+  .map-overlay-toolbar.collapsed > .toolbar-count,
+  .toolbar.collapsed > label,
+  .toolbar.collapsed > select,
+  .toolbar.collapsed > input[type="search"] {
+    display: none;
+  }
+
+  /* 篩選 toggle：icon-only chip（漏斗 + 小箭頭）；dirty 狀態以邊框變藍呈現 */
+  .filter-toggle {
+    display: inline-flex; align-items: center; gap: 2px;
+    background: #1a1a1a; border: 1px solid #2a2a2a;
+    color: #c4cdda; border-radius: 6px;
+    padding: 5px 6px;
+    cursor: pointer; font-family: inherit;
+    flex: 0 0 auto;       /* 不被擠壓，保證留在第一排 */
+  }
+  .filter-toggle.active {
+    background: rgba(44,108,219,0.2);
+    border-color: #4a9eff; color: #9ec5ff;
+  }
+  .filter-toggle.dirty:not(.active) {
+    border-color: #4a9eff; color: #9ec5ff;     /* 有篩選條件時也用藍框提示 */
+  }
+  .filter-toggle .filter-ico { width: 16px; height: 16px;
+    stroke: currentColor; fill: none; stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .filter-toggle .chev { width: 10px; height: 10px;
+    stroke: currentColor; fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    transition: transform 0.18s;
+  }
+  .filter-toggle.active .chev { transform: rotate(180deg); }
+
+  /* summary-pills 在手機被推到第二排（讓 filter + view-toggle 留在第一排） */
+  .map-overlay-toolbar .summary-pills {
+    order: 99;
+    flex-basis: 100%;
+    margin: 0;
+  }
+
+  /* 三段檢視模式（list / split / map） */
+  .view-toggle {
+    display: inline-flex; align-items: stretch;
+    background: #1a1a1a; border: 1px solid #2a2a2a;
+    border-radius: 6px; overflow: hidden;
+    margin-left: auto;
+    flex: 0 0 auto;   /* 不被擠壓、保證留在第一排 */
+  }
+  .view-toggle button {
+    background: transparent; border: none;
+    color: #7c8a9e; padding: 4px 8px;
+    cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 32px;
+  }
+  .view-toggle button + button { border-left: 1px solid #2a2a2a; }
+  .view-toggle button.active {
+    background: rgba(44,108,219,0.25); color: #9ec5ff;
+  }
+  .view-toggle button svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; fill: none; stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* 檢視模式：僅地圖 — 列表隱藏、wrap 改 1 1 auto 撐大、map 跟著填滿
+   * 注意 .fleet-map-wrap 預設是 flex:0 0 auto !important，這裡需要同樣 !important
+   * 才能覆寫；否則 wrap 仍只 size by content，map 不會長大。 */
+  .fleet-split.view-map .fleet-list-wrap { display: none; }
+  .fleet-split.view-map .fleet-map-wrap { flex: 1 1 auto !important; }
+  .fleet-split.view-map .fleet-map-wrap > #fleet-map {
+    flex: 1 1 auto; height: auto; min-height: 0;
+  }
+  /* 檢視模式：僅列表 — 地圖隱藏、列表填滿；banner/risk-toggle 也收掉 */
+  .fleet-split.view-list .fleet-map-wrap > #fleet-map { display: none; }
+  .fleet-split.view-list .map-overlay-banner { display: none; }
+  .fleet-split.view-list .risk-toggle { display: none; }
+
+  /* 舊的「risk-toggle 絕對定位在 map 左下」rule 已移除 — 改用上方 static strip 版面，
+   * 跟 fleet overview 一致。 */
+
+  /* 完整 detail page：grid → 堆疊；高度交給 main 自己 scroll */
+  .detail-layout {
+    display: flex; flex-direction: column;
+    height: auto; gap: 10px;
+  }
+  #map { height: 280px; min-height: 280px; }
+  .side-panel { max-height: none; }
+
+  /* Modal → 底部 bottom-sheet */
+  .modal-mask { align-items: flex-end; }
+  .modal {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 12px 12px 0 0;
+    padding: 16px 16px max(16px, env(safe-area-inset-bottom));
+  }
+  .modal-close { top: 8px; right: 8px; }
+
+  /* Toolbar (events page) 縮窄、自然 wrap */
+  .toolbar { gap: 6px; }
+  .toolbar select, .toolbar input { font-size: 14px; padding: 6px 8px; }
+
+  /* event 統計 pill 縮窄 */
+  .ev-stat-pill { padding: 5px 10px; font-size: 12px; }
+  .ev-stat-pill .num { font-size: 14px; }
+
+  /* Timeline 縮減左留白 */
+  .timeline { padding-left: 22px; }
+  .timeline-item { padding: 8px 12px; }
+  .timeline-item .t-time { font-size: 12px; }
+
+  /* 閾值動作列：sticky 底部
+   * threshold 頁 main.th-mode 已移除 padding-bottom，sticky bottom:0 會貼齊 tab bar。
+   * 水平向用負 margin 抵消 main 的 10px padding，讓 strip 滿版到螢幕邊緣。 */
+  .th-actions {
+    position: sticky; bottom: 0;
+    background: #0d0d0d;
+    border-top: 1px solid #2a2a2a;
+    padding: 10px 12px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    margin: 0 -10px;
+    z-index: 5;
+    flex-wrap: nowrap;
+  }
+
+  /* ── Mobile-only 卡片渲染樣式（給 renderMatrixCards 等用）──── */
+  .m-cards { display: flex; flex-direction: column; gap: 8px; padding: 4px 0 14px; }
+
+  /* Fleet vessel card */
+  .m-vc {
+    background: #141414; border: 1px solid #2a2a2a;
+    border-radius: 8px; padding: 12px;
+    display: flex; flex-direction: column; gap: 8px;
+    cursor: pointer;
+  }
+  .m-vc:active { background: #1a1a1a; }
+  .m-vc.critical { border-left: 3px solid #ff4d4f; }
+  .m-vc.warning  { border-left: 3px solid #f5a623; }
+  .m-vc.normal   { border-left: 3px solid #2a2a2a; }
+  .m-vc.na       { border-left: 3px solid #444; }
+  .m-vc.is-active {
+    box-shadow: 0 0 0 2px rgba(74,158,255,0.4);
+    border-color: #4a9eff;
+  }
+  .m-vc-head { display: flex; align-items: center; gap: 8px; }
+  .m-vc-name {
+    flex: 1; min-width: 0;
+    font-size: 16px; font-weight: 600; color: #e4eaf2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .m-vc-risk {
+    font-size: 12px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .m-vc-risk.critical { background: rgba(255,77,79,0.18); color: #ff8a8a; }
+  .m-vc-risk.warning  { background: rgba(245,166,35,0.18); color: #f5b753; }
+  .m-vc-risk.normal   { background: rgba(108,122,145,0.15); color: #aab4c4; }
+  .m-vc-risk.na       { background: rgba(108,122,145,0.10); color: #7c8a9e; }
+  .m-vc-dims { display: flex; gap: 6px; flex-wrap: wrap; }
+  .m-vc-dim {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 6px; background: #1a1a1a;
+    border-radius: 4px; font-size: 12px; color: #9aa5b8;
+  }
+  .m-vc-dim.critical { background: rgba(255,77,79,0.12); color: #ff8a8a; }
+  .m-vc-dim.warning  { background: rgba(245,166,35,0.12); color: #f5b753; }
+  .m-vc-dim.normal   { background: #1a1a1a; color: #6c7a91; }
+  .m-vc-dim svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .m-vc-meta {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 4px 12px; font-size: 12px; color: #9aa5b8;
+  }
+  .m-vc-meta b { color: #c4cdda; font-weight: 500; }
+  .m-vc-progress {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #9aa5b8;
+  }
+  .m-vc-bar {
+    flex: 1; height: 4px; background: #1a1a1a;
+    border-radius: 2px; overflow: hidden;
+  }
+  .m-vc-bar > div { height: 100%; border-radius: 2px; }
+
+  /* Event card */
+  .m-evc {
+    background: #141414; border: 1px solid #2a2a2a;
+    border-radius: 8px; padding: 10px 12px;
+    cursor: pointer;
+  }
+  .m-evc:active { background: #1a1a1a; }
+  .m-evc.cleared { opacity: 0.55; }
+  .m-evc-head {
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 6px; flex-wrap: wrap;
+  }
+  .m-evc-dim {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 6px;
+    background: rgba(44,108,219,0.18); color: #9ec5ff;
+    border-radius: 4px; font-size: 12px; font-weight: 600;
+  }
+  .m-evc-dim svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .m-evc-vessel {
+    font-size: 14px; color: #e4eaf2; font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .m-evc-meta {
+    font-size: 12px; color: #7c8a9e;
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+
+  /* Threshold card */
+  .m-thc {
+    background: #141414; border: 1px solid #2a2a2a;
+    border-radius: 8px; padding: 12px; margin-bottom: 10px;
+  }
+  .m-thc-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+  }
+  .m-thc-head svg { width: 18px; height: 18px; fill: none; stroke: #9aa5b8; stroke-width: 1.8; }
+  .m-thc-head b { color: #e4eaf2; font-size: 14px; }
+  .m-thc-head .modified {
+    margin-left: auto;
+    color: #f5b753; font-size: 12px;
+    background: rgba(245,166,35,0.12);
+    padding: 1px 8px; border-radius: 8px;
+  }
+  .m-thc-sub { color: #7c8a9e; font-size: 12px; margin-bottom: 10px; }
+  .m-thc-fields {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .m-thc-field { display: flex; flex-direction: column; gap: 4px; }
+  .m-thc-label { font-size: 12px; font-weight: 600; }
+  .m-thc-label.warning  { color: #f5b753; }
+  .m-thc-label.critical { color: #ff8a8a; }
+  /* 重用既有 .th-input-wrap，但欄寬縮窄 */
+  .m-thc .th-input-wrap { height: 36px; }
+  .m-thc .th-input { width: auto; flex: 1; min-width: 0; }
+  .m-thc-default { color: #5e6b80; font-size: 12px; }
+
+  /* Toast 出現在 tabbar 上方 */
+  .m-toast {
+    position: fixed; left: 50%; bottom: 76px;
+    transform: translateX(-50%) translateY(20px);
+    background: #141414; border: 1px solid #2a2a2a;
+    color: #e4eaf2; font-size: 13px;
+    padding: 8px 14px; border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 1500;
+  }
+  .m-toast.show {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * Tablet portrait (≥ 600px 且 ≤ 1024px) — 在手機卡片版面之上額外加
+ *   1. 船隊/事件卡片排 2 欄（單欄在 iPad Pro 12.9 寬度太空）
+ *   2. 地圖固定高度加大（手機 240 → 平板 320）
+ *   3. page-title 字級調回桌面 18px
+ *   4. detail panel kv 兩欄 key 寬度加寬
+ * ───────────────────────────────────────────────────────────────── */
+@media (min-width: 600px) and (max-width: 1024px) {
+  .page-title { font-size: 18px; }
+
+  /* cards 排 2 欄 — fleet vessel cards + event cards 共用 .m-cards 容器 */
+  .m-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+  }
+  .fleet-list-wrap .m-cards {
+    padding: 10px 14px 16px;
+  }
+
+  /* fleet overview 地圖加高 */
+  .fleet-map-wrap > #fleet-map {
+    flex: 0 0 320px !important;
+    height: 320px !important; min-height: 320px !important;
+  }
+  /* 單船 detail 地圖加高 */
+  .fleet-detail-grid > div:first-child > #fleet-map {
+    flex: 0 0 320px !important;
+    height: 320px !important; min-height: 320px !important;
+  }
+
+  /* threshold 卡片排 2 欄 */
+  main .m-thc {
+    display: inline-block;
+    width: calc(50% - 6px);
+    vertical-align: top;
+    margin-right: 8px;
+  }
+  main .m-thc:nth-child(2n) { margin-right: 0; }
+
+  /* detail panel KV key 欄寬一點，較易讀 */
+  .fleet-detail-panel .kv {
+    grid-template-columns: 130px 1fr;
+  }
+}
 </style>
 </head>
 <body>
@@ -1225,6 +1944,16 @@ table.th-table tbody tr:hover td { background: #1a1a1a; }
  * ───────────────────────────────────────────────────────────────── */
 const VESSELS = window.MOCK_DATA.vessels;
 const MAILS   = window.MOCK_DATA.mails;
+
+/* RWD：≤ 768px 走卡片渲染分支，跨越斷點時重繪當前 route */
+const MOBILE_QUERY = matchMedia("(max-width: 1024px)");
+let IS_MOBILE = MOBILE_QUERY.matches;
+function _onBreakpointChange(e) {
+  IS_MOBILE = e.matches;
+  try { route(); } catch (err) {}
+}
+if (MOBILE_QUERY.addEventListener) MOBILE_QUERY.addEventListener("change", _onBreakpointChange);
+else if (MOBILE_QUERY.addListener) MOBILE_QUERY.addListener(_onBreakpointChange);
 
 const EARTH_M = 6371008.8, NM_M = 1852, D2R = Math.PI/180, R2D = 180/Math.PI;
 
@@ -1349,6 +2078,23 @@ function buildCorridor(latlngs, widthFnNm) {
     left .push(destination(latlngs[i], brAvg - Math.PI/2, widthM));
   }
   return right.concat(left.reverse());
+}
+
+/* AIS / 計畫資料的時間戳預設為 UTC（如 mockup-data.js 的 planned_track date
+ * 帶 "Z" 後綴），這裡轉為 UTC+8（台北時區）顯示，並補上年度。
+ * 輸入: "2026-04-20 05:16:00"（無時區，視為 UTC）
+ * 輸出: "2026/04/20 13:16" */
+function fmtAisTimeUtc8(ts) {
+  if (!ts) return "-";
+  const d = new Date(ts.replace(" ", "T") + "Z");
+  if (isNaN(d.getTime())) return ts;
+  const t = new Date(d.getTime() + 8 * 3600 * 1000);
+  const Y = t.getUTCFullYear();
+  const M = String(t.getUTCMonth() + 1).padStart(2, "0");
+  const D = String(t.getUTCDate()).padStart(2, "0");
+  const h = String(t.getUTCHours()).padStart(2, "0");
+  const m = String(t.getUTCMinutes()).padStart(2, "0");
+  return `${Y}/${M}/${D} ${h}:${m}`;
 }
 
 function fmt(v, d) {
@@ -1500,23 +2246,22 @@ function computeAlerts(v) {
   const T = _thresholds;
 
   // 1. 航線偏移：取目前 XTD 與歷史最大 deviation 的較嚴重者
+  //    監測類維度沒資料就視為 normal（不出現 N/A）— N/A 只保留給 alert 維度
   const xtd = parseFloat(v.cross_track_distance_nm);
   const sf  = parseFloat(v.safety_frame_nm) || 1.0;
   const track = v.ais_track || [];
   const maxDev = track.reduce((m, p) => Math.max(m, p.deviation_nm || 0), 0);
   const worstDev = Math.max(isNaN(xtd) ? 0 : xtd, maxDev);
-  const hasDevData = !isNaN(xtd) || track.length > 0;
-  if (!hasDevData)                            a.route = "na";
-  else if (worstDev >= sf * T.route.critical) a.route = "critical";
+  if (worstDev >= sf * T.route.critical)      a.route = "critical";
   else if (worstDev >= sf * T.route.warning)  a.route = "warning";
   else                                        a.route = "normal";
 
-  // 2. Speed anomaly (SOG vs planned avg)
-  if (v.sog === null || v.sog === undefined) a.speed = "na";
+  // 2. Speed anomaly (SOG vs planned avg) — 無 SOG / 無計畫均速時視為 normal
+  if (v.sog === null || v.sog === undefined) a.speed = "normal";
   else {
     const planSogs = (v.planned_track || []).filter(p => p.sog > 0).map(p => p.sog);
     const planAvg = planSogs.length ? planSogs.reduce((x,y)=>x+y,0)/planSogs.length : 0;
-    if (planAvg === 0) a.speed = "na";
+    if (planAvg === 0) a.speed = "normal";
     else {
       const delta = Math.abs(v.sog - planAvg) / planAvg;
       if (v.sog < 0.5 && planAvg > 5)         a.speed = "warning";  // 預期航行但近乎停止
@@ -1542,8 +2287,8 @@ function computeAlerts(v) {
   else if (hasInfo)        a.alert = "warning";
   else                     a.alert = "normal";
 
-  // 6. AIS comm freshness (mock)
-  if (!v.ais_timestamp) a.comm = "na";
+  // 6. AIS comm freshness (mock) — 無 AIS 時間戳視為 critical（訊號中斷）
+  if (!v.ais_timestamp) a.comm = "critical";
   else {
     const tsHash = (v.vessel_id * 7321 + 12345) % 100;
     if (tsHash > T.comm.critical)      a.comm = "critical";
@@ -1563,7 +2308,7 @@ function computeAlerts(v) {
   //    - 若 ETA hash 不利 → warning / critical
   const pct = (typeof v.progress_pct === "number") ? v.progress_pct : null;
   const portHash = (v.vessel_id * 5779 + 38461) % 100;
-  if (pct === null) a.port = "na";
+  if (pct === null) a.port = "normal";    // 無 progress 資料視為 normal
   else if (pct > 92 || pct < 5) {  // 進出港期間敏感
     if (portHash > T.port.critical)      a.port = "critical";  // ETA 嚴重延誤 / 偏離靠泊位
     else if (portHash > T.port.warning)  a.port = "warning";   // 進度落後 / 靠泊待命
@@ -1587,10 +2332,11 @@ function computeAlerts(v) {
   a._zone = za;  // 內部欄位：給 dimDescription / tooltip 顯示落點區名稱
 
   // Overall risk (composite)
+  //   只有 alert（信件）可能 N/A，其餘監測維度永遠是 normal/warning/critical
+  //   ⇒ 整體風險只需取最嚴重等級，不會有「全 N/A」情況
   const levels = DIM_KEYS.map(k => a[k]);
   if (levels.includes("critical"))      a.risk = "critical";
   else if (levels.includes("warning"))  a.risk = "warning";
-  else if (levels.every(l => l === "na")) a.risk = "na";
   else                                  a.risk = "normal";
 
   return a;
@@ -1619,24 +2365,55 @@ function levelTag(level) {
  *   - 表格內用縮寫顯示，避免長字串撐爆 120px AIS Status 欄
  *   - title 給滑鼠 hover 用，可看到完整中英文描述
  *   - label 維持顯示在欄位內、labelFull 給單船 detail 等空間較大的位置用 */
-/* AIS 導航狀態（ITU-R M.1371）：表格與單船 detail 都用 3-4 字母縮寫顯示，
- * 完整名稱與 SOG 條件在 hover title 內。 */
+/* AIS 導航狀態（ITU-R M.1371）：欄位內用「中文 + 英文縮寫」雙行顯示，
+ * 完整名稱與來源在 hover title 內。
+ *   labelCN — 中文簡稱（繫泊 / 拋錨 / 航行 / 不明）
+ *   labelEN — 英文縮寫（MOOR / ANC / U/W / UNK）
+ *   label   — 舊欄位，保留兼容（等於 labelEN）
+ *
+ * 取得優先順序：
+ *   1. AIS 訊號內的 navigation status code（v.nav_status，ITU-R M.1371）
+ *   2. 退而求其次，依 SOG 推算
+ */
+function aisStatus(v) {
+  // 1. 優先用 AIS 真實 nav_status
+  if (v && v.nav_status !== undefined && v.nav_status !== null && v.nav_status !== "") {
+    const ns = parseInt(v.nav_status, 10);
+    // ITU-R M.1371: 0=under way engine, 1=at anchor, 5=moored, 8=under way sailing
+    if (ns === 5) return {
+      key: "moored", labelCN: "繫泊", labelEN: "MOOR", label: "MOOR",
+      title: "繫泊 / Moored — 來自 AIS navigation status 5",
+    };
+    if (ns === 1) return {
+      key: "anchored", labelCN: "拋錨", labelEN: "ANC", label: "ANC",
+      title: "拋錨 / At anchor — 來自 AIS navigation status 1",
+    };
+    if (ns === 0 || ns === 8) return {
+      key: "under-way", labelCN: "航行", labelEN: "U/W", label: "U/W",
+      title: "航行中 / Under way — 來自 AIS navigation status " + ns,
+    };
+    // 其他特殊狀態（如 2 Not Under Command, 6 Aground 等）暫不細分，掛到 unknown
+  }
+  // 2. 退而求其次，依 SOG 推算
+  return aisStatusFromSog(v ? v.sog : null);
+}
+
 function aisStatusFromSog(sog) {
   if (sog === null || sog === undefined) return {
-    key: "unknown", label: "UNK",
-    title: "AIS 狀態不明 / Status unknown — 無 SOG 資料",
+    key: "unknown", labelCN: "不明", labelEN: "UNK", label: "UNK",
+    title: "AIS 狀態不明 / Status unknown — 無 SOG 資料、無 nav_status",
   };
   if (sog < 0.5) return {
-    key: "moored", label: "MOOR",
-    title: "繫泊 / Moored — 已靠泊（SOG < 0.5 kn）",
+    key: "moored", labelCN: "繫泊", labelEN: "MOOR", label: "MOOR",
+    title: "繫泊 / Moored — 依 SOG 推算（SOG < 0.5 kn）",
   };
   if (sog < 2) return {
-    key: "anchored", label: "ANC",
-    title: "拋錨 / At anchor — 錨泊中（0.5 ≤ SOG < 2 kn）",
+    key: "anchored", labelCN: "拋錨", labelEN: "ANC", label: "ANC",
+    title: "拋錨 / At anchor — 依 SOG 推算（0.5 ≤ SOG < 2 kn）",
   };
   return {
-    key: "under-way", label: "U/W",
-    title: "引擎航行中 / Under way using engine — 動力推進（SOG ≥ 2 kn）",
+    key: "under-way", labelCN: "航行", labelEN: "U/W", label: "U/W",
+    title: "航行中 / Under way — 依 SOG 推算（SOG ≥ 2 kn）",
   };
 }
 
@@ -1671,7 +2448,7 @@ function route() {
     setMainMode("");
     renderTimeline(); navHighlight("timeline");
   } else if (h === "#/thresholds") {
-    setMainMode("");
+    setMainMode("th-mode");
     renderThresholds(); navHighlight("thresholds");
   } else {
     setMainMode("fleet-mode");
@@ -1688,6 +2465,9 @@ let _fleetKeyword = "";       // 船名 / IMO 關鍵字搜尋（不分大小寫�
 let _selectedVessel = null;  // null = fleet overview；否則為被選中的 vessel_id（上方地圖切到該船 detail）
 let _fleetLayers = {};       // 上方地圖 detail 模式的 Leaflet layer groups（圖層切換用）
 let _listExpanded = false;   // 列表展開（50/50）vs 收合（70/30）— 跨 overview↔detail 重繪保留
+/* 手機專屬：地圖/列表顯示模式（split | map | list）與篩選展開狀態 */
+let _fleetMobileViewMode = sessionStorage.getItem("slab_va_mobile_view") || "split";
+let _fleetFilterOpen = sessionStorage.getItem("slab_va_filter_open") === "1";  // default false
 
 /* ─────────────────────────────────────────────────────────────────
  * Threshold config — Open Event 各維度觸發條件
@@ -1759,6 +2539,8 @@ const OPERATORS = ["Op-Alice", "Op-Bob", "Op-Carol", "Capt-Lee", "Capt-Chen"];
 
 let _events = [];
 let _eventFilter = { status: "ALL", level: "ALL", dim: "ALL", vessel: "ALL" };
+/* 手機事件頁篩選展開狀態（跟船隊頁分開管理，預設收合） */
+let _eventsFilterOpen = sessionStorage.getItem("slab_va_ev_filter_open") === "1";
 
 function loadEvents() {
   try {
@@ -1966,7 +2748,7 @@ function renderUpperArea(enriched) {
     return renderUpperArea(enriched);
   }
   const a = computeAlerts(v);
-  const status = aisStatusFromSog(v.sog);
+  const status = aisStatus(v);
   const sf  = v.safety_frame_nm || 1.0;
   const xtd = parseFloat(v.cross_track_distance_nm) || 0;
   const xtdPct = Math.min(100, (xtd / sf) * 100);
@@ -2060,7 +2842,7 @@ function renderUpperArea(enriched) {
   const mailCount = MAILS.filter(m => m.vessel_name === v.vessel_name && m.latitude !== null).length;
 
   return `<div class="fleet-map-wrap">
-    <button class="fleet-detail-back" id="fleet-detail-back">← 返回船隊 <span class="en">/ Back to fleet</span></button>
+    <button class="fleet-detail-back" id="fleet-detail-back">← <span class="back-label">返回船隊</span> <span class="en">/ Back to fleet</span></button>
     <div class="fleet-detail-grid">
       <div style="position:relative;height:100%">
         <div id="fleet-map" class="fleet-map"></div>
@@ -2076,7 +2858,7 @@ function renderUpperArea(enriched) {
       <aside class="fleet-detail-panel">
         <div class="detail-header">
           <span class="name">${escapeHtml(v.vessel_name)}</span>
-          <span class="ais-status ${status.key}" style="font-size:14px" title="${escapeHtml(status.title)}">${status.label}</span>
+          <span class="ais-status ${status.key}" style="font-size:14px" title="${escapeHtml(status.title)}">${status.labelCN} ${status.labelEN}</span>
           <span class="imo">IMO ${v.imo}</span>
         </div>
 
@@ -2123,8 +2905,8 @@ function renderUpperArea(enriched) {
           <span class="k">經度 / Lon</span><span class="v mono">${dms(v.longitude, "lon")}</span>
           <span class="k">航速 / SOG</span><span class="v mono">${fmt(v.sog,1)} kn</span>
           <span class="k">航向 / COG</span><span class="v mono">${fmt(v.cog,0)}°</span>
-          <span class="k">狀態 / Status</span><span class="v"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.label}</span></span>
-          <span class="k">時間 / Time</span><span class="v mono">${v.ais_timestamp || "-"}</span>
+          <span class="k">狀態 / Status</span><span class="v"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.labelCN} ${status.labelEN}</span></span>
+          <span class="k">時間 / Time</span><span class="v mono">${fmtAisTimeUtc8(v.ais_timestamp)} UTC+8</span>
         </div>
 
         <h3>計畫航線 <span style="color:#5e6b80;text-transform:none;font-weight:400">/ Planned Route</span></h3>
@@ -2190,7 +2972,7 @@ function renderFleet() {
     </h2>
 
     <div class="fleet-layout">
-      <div class="fleet-split" id="fleet-split">
+      <div class="fleet-split${_selectedVessel !== null ? " detail-mode" : ""}${IS_MOBILE ? " view-" + _fleetMobileViewMode : ""}" id="fleet-split">
         ${renderUpperArea(enriched)}
         <div class="fleet-list-wrap" id="fleet-list-wrap">
           <div class="list-handle" id="list-handle" role="button" tabindex="0" aria-label="展開/收合 列表">
@@ -2199,7 +2981,7 @@ function renderFleet() {
             <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></span>
             <span class="grip"></span>
           </div>
-          ${renderMatrixTable(filtered)}
+          ${IS_MOBILE ? renderMatrixCards(filtered) : renderMatrixTable(filtered)}
         </div>
       </div>
     </div>
@@ -2209,8 +2991,16 @@ function renderFleet() {
   const mapWrap = document.querySelector("#fleet-split .fleet-map-wrap");
   if (mapWrap && _selectedVessel === null) {
     const toolbar = document.createElement("div");
-    toolbar.className = "map-overlay-toolbar";
+    // 手機在 _fleetFilterOpen=false 時 collapse 隱藏 label/select/input/count
+    const isFilterDirty = _fleetFilter !== "ALL" || !!_fleetKeyword;
+    toolbar.className = "map-overlay-toolbar" + (IS_MOBILE && !_fleetFilterOpen ? " collapsed" : "");
     toolbar.innerHTML = `
+      <button class="filter-toggle${_fleetFilterOpen ? " active" : ""}${isFilterDirty ? " dirty" : ""}" id="filter-toggle"
+              title="${_fleetFilterOpen ? "收合篩選" : "展開篩選"}${isFilterDirty ? "（已套用條件）" : ""}"
+              aria-label="篩選">
+        <svg class="filter-ico" viewBox="0 0 24 24"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+        <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
       <label>篩選 / Filter：</label>
       <select id="fleet-filter">
         <option value="ALL">全部 (All)</option>
@@ -2220,11 +3010,22 @@ function renderFleet() {
         <option value="NORMAL">僅 Normal</option>
       </select>
       <input type="search" id="fleet-keyword" placeholder="搜尋船名或 IMO / Search vessel or IMO" value="${escapeHtml(_fleetKeyword)}">
-      <span style="font-size:14px;color:${_fleetKeyword || _fleetFilter !== "ALL" ? "#9ec5ff" : "#7c8a9e"}">列表/地圖：${filtered.length} / ${enriched.length}</span>
+      <span class="toolbar-count" style="font-size:14px;color:${isFilterDirty ? "#9ec5ff" : "#7c8a9e"}">列表/地圖：${filtered.length} / ${enriched.length}</span>
       <div class="summary-pills">
         <span class="summary-pill"><span class="dot critical"></span>C · <b>${counts.critical}</b></span>
         <span class="summary-pill"><span class="dot warning"></span>W · <b>${counts.warning}</b></span>
         <span class="summary-pill"><span class="dot normal"></span>N · <b>${counts.normal}</b></span>
+      </div>
+      <div class="view-toggle" id="view-toggle">
+        <button data-mode="list" class="${_fleetMobileViewMode==='list'?'active':''}" title="僅列表 / List only" aria-label="僅列表">
+          <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
+        <button data-mode="split" class="${_fleetMobileViewMode==='split'?'active':''}" title="分割顯示 / Split" aria-label="分割顯示">
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" rx="1"/><rect x="4" y="13" width="16" height="7" rx="1"/></svg>
+        </button>
+        <button data-mode="map" class="${_fleetMobileViewMode==='map'?'active':''}" title="僅地圖 / Map only" aria-label="僅地圖">
+          <svg viewBox="0 0 24 24"><polygon points="3 6 9 4 15 6 21 4 21 18 15 20 9 18 3 20" fill="none"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/></svg>
+        </button>
       </div>
     `;
     mapWrap.appendChild(toolbar);
@@ -2260,6 +3061,42 @@ function renderFleet() {
   }
 
   // 注意：detail 模式時 toolbar 不會注入，這兩個元素可能為 null
+
+  // 篩選 toggle：手機點擊展開/收合；不重繪整頁，只切 toolbar 的 .collapsed 類別
+  const filterTogBtn = document.getElementById("filter-toggle");
+  if (filterTogBtn) {
+    filterTogBtn.addEventListener("click", () => {
+      _fleetFilterOpen = !_fleetFilterOpen;
+      sessionStorage.setItem("slab_va_filter_open", _fleetFilterOpen ? "1" : "0");
+      const tb = document.querySelector(".map-overlay-toolbar");
+      if (tb) tb.classList.toggle("collapsed", !_fleetFilterOpen);
+      filterTogBtn.classList.toggle("active", _fleetFilterOpen);
+      filterTogBtn.title = _fleetFilterOpen ? "收合篩選" : "展開篩選";
+      // 地圖容器高度變化，invalidateSize 讓 Leaflet 跟著
+      setTimeout(() => _fleetMap && _fleetMap.invalidateSize(), 60);
+    });
+  }
+
+  // 檢視模式 toggle（list / split / map）：切 fleet-split 類別、invalidateSize
+  const viewTog = document.getElementById("view-toggle");
+  if (viewTog) {
+    viewTog.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const mode = btn.dataset.mode;
+        _fleetMobileViewMode = mode;
+        sessionStorage.setItem("slab_va_mobile_view", mode);
+        const sp = document.getElementById("fleet-split");
+        if (sp) {
+          sp.classList.remove("view-map", "view-list", "view-split");
+          sp.classList.add("view-" + mode);
+        }
+        viewTog.querySelectorAll("button").forEach(b =>
+          b.classList.toggle("active", b.dataset.mode === mode));
+        setTimeout(() => _fleetMap && _fleetMap.invalidateSize(), 60);
+      });
+    });
+  }
+
   const sel = document.getElementById("fleet-filter");
   if (sel) {
     sel.value = _fleetFilter;
@@ -2337,8 +3174,71 @@ function renderFleet() {
       });
     });
 
-    // 單船 detail 也保留全球風險區圖層面板（注入到 .fleet-map-wrap 內）
-    const detailWrap = document.querySelector("#fleet-split .fleet-map-wrap");
+    // 手機 detail mode：把 back / layer-toggle / view-toggle 包成一條 header row
+    //   row 1: [← back] [圖層 ▾ ........] [≡⊟⊞]
+    //   row 2: ⚠ 全球風險區 ▾                        (risk-toggle strip)
+    //   row 3: MAP
+    //   row 4: detail panel
+    if (IS_MOBILE) {
+      const wrap = document.querySelector("#fleet-split .fleet-map-wrap");
+      const back = wrap?.querySelector(":scope > .fleet-detail-back");
+      const mapCol = wrap?.querySelector(".fleet-detail-grid > div:first-child");
+      const layerEl = mapCol?.querySelector(".layer-toggle");
+
+      // 建立 view-toggle
+      const vt = document.createElement("div");
+      vt.className = "view-toggle detail-view-toggle";
+      vt.id = "detail-view-toggle";
+      vt.innerHTML = `
+        <button data-mode="list" class="${_fleetMobileViewMode==='list'?'active':''}" title="僅資料 / Data only" aria-label="僅資料">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
+        <button data-mode="split" class="${_fleetMobileViewMode==='split'?'active':''}" title="分割 / Split" aria-label="分割">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="7" rx="1"/><rect x="4" y="13" width="16" height="7" rx="1"/></svg>
+        </button>
+        <button data-mode="map" class="${_fleetMobileViewMode==='map'?'active':''}" title="僅地圖 / Map only" aria-label="僅地圖">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 4 15 6 21 4 21 18 15 20 9 18 3 20" fill="none"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/></svg>
+        </button>
+      `;
+
+      // 包成 header row：移動 back + layer-toggle 進來，加 view-toggle，插在 wrap 最前面
+      if (back && layerEl && wrap && !wrap.querySelector(".detail-header-row")) {
+        const headerRow = document.createElement("div");
+        headerRow.className = "detail-header-row";
+        headerRow.appendChild(back);
+        headerRow.appendChild(layerEl);
+        headerRow.appendChild(vt);
+        wrap.insertBefore(headerRow, wrap.firstChild);
+
+        // layer-toggle header 點擊摺疊
+        const layerHead = layerEl.firstElementChild;
+        if (layerHead) {
+          layerHead.addEventListener("click", () => layerEl.classList.toggle("lt-open"));
+        }
+        // view-toggle 點擊切換 view mode
+        vt.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const mode = btn.dataset.mode;
+            _fleetMobileViewMode = mode;
+            sessionStorage.setItem("slab_va_mobile_view", mode);
+            const sp = document.getElementById("fleet-split");
+            if (sp) {
+              sp.classList.remove("view-map", "view-list", "view-split");
+              sp.classList.add("view-" + mode);
+            }
+            vt.querySelectorAll("button").forEach(b =>
+              b.classList.toggle("active", b.dataset.mode === mode));
+            setTimeout(() => _fleetMap && _fleetMap.invalidateSize(), 60);
+          });
+        });
+      }
+    }
+
+    // 單船 detail 也保留全球風險區圖層面板
+    // 優先注入到 fleet-detail-grid 第一格（map 區），這樣手機上下堆疊時 panel 才會
+    // 在 map 區內絕對定位、不會跑到下方資訊面板下面。
+    const detailMapCol = document.querySelector("#fleet-split .fleet-detail-grid > div:first-child");
+    const detailWrap = detailMapCol || document.querySelector("#fleet-split .fleet-map-wrap");
     if (detailWrap) injectRiskTogglePanel(detailWrap);
   }
 }
@@ -2497,7 +3397,11 @@ function drawFleetDetailMap(v) {
       </div>`;
     L.marker([m.latitude, m.longitude], {
       icon: L.divIcon({ html, className: "", iconSize: [22,22], iconAnchor: [11,22] })
-    }).bindPopup(popupHtml, { maxWidth: 360 })
+    }).bindPopup(popupHtml, {
+      maxWidth: IS_MOBILE ? 280 : 360,
+      maxHeight: IS_MOBILE ? 180 : 380,   // 留空間給 × 關閉按鈕
+      autoPanPadding: L.point(16, 16),
+    })
       .bindTooltip(`${m.warning_level} (${m.warning_code}) — 點擊查看 / Click for detail`)
       .addTo(_fleetLayers.mails);
   });
@@ -2589,9 +3493,16 @@ function drawRiskZones(map) {
         dashArray: cat.key === "eca" || cat.key === "protected" ? "4 3" : null,
       }, `<b>${escapeHtml(z.name)}</b> <span style="color:#7c8a9e">/ ${escapeHtml(z.name_en)}</span><br><span style="color:${cat.color};font-size:14px">${escapeHtml(cat.label)}</span>`);
       // 每份 wrapped 副本都需要綁同一份 popup
+      //   maxHeight: 手機 180 / 桌面 360 — popup 太高時啟用內部 scroll，不會被 map
+      //              容器的 overflow:hidden 裁掉；240px 高小地圖能塞下 popup + tip。
+      //   autoPanPadding: 自動 pan 時保留 16px 邊距，避免 popup 緊貼邊緣。
       group.eachLayer(layer => {
         if (!layer._rzBound && layer instanceof L.Polygon) {
-          layer.bindPopup(popupHtml, { maxWidth: 320 });
+          layer.bindPopup(popupHtml, {
+            maxWidth: IS_MOBILE ? 280 : 320,
+            maxHeight: IS_MOBILE ? 180 : 360,
+            autoPanPadding: L.point(16, 16),
+          });
           layer._rzBound = true;
         }
       });
@@ -2618,7 +3529,8 @@ function injectRiskTogglePanel(mapWrap) {
   const buckets = {};
   (window.RISK_ZONES || []).forEach(z => { buckets[z.cat] = (buckets[z.cat] || 0) + 1; });
   // 預設展開；按過收合後在 session 內保留
-  const isOpen = (sessionStorage.getItem("slab_va_risk_panel_open") ?? "1") === "1";
+  // 手機預設摺疊；桌面預設展開
+  const isOpen = (sessionStorage.getItem("slab_va_risk_panel_open") ?? (IS_MOBILE ? "0" : "1")) === "1";
   const rows = window.RISK_ZONE_CATEGORIES.map(c => `
     <label>
       <input type="checkbox" data-rz="${c.key}" ${_riskLayerState[c.key] ? "checked" : ""}>
@@ -2690,7 +3602,7 @@ function drawFleetMap(enriched) {
   const points = [];
   enriched.forEach(({ v, a }) => {
     if (v.latitude === null) return;
-    const status = aisStatusFromSog(v.sog);
+    const status = aisStatus(v);
     const riskLabel = { critical: "Critical 危急", warning: "Warning 警示", normal: "Normal 正常", na: "N/A" }[a.risk] || "-";
     const tooltipHtml =
       `<b>${escapeHtml(v.vessel_name)}</b> · ${riskLabel}<br>` +
@@ -2729,7 +3641,149 @@ function drawFleetMap(enriched) {
 
 function biTh(cn, en, opts = {}) {
   const cls = opts.cls ? ` class="${opts.cls}"` : "";
+  if (opts.tip) {
+    // tip 版本：i 圖示放在中文後面、英文前面，視覺上跟中文是一組
+    return `<th${cls}><span class="bi-th bi-th-tip" data-tip="${escapeHtml(opts.tip)}" tabindex="0">${cn}<span class="tip-i">i</span><span class="en">${en}</span></span></th>`;
+  }
   return `<th${cls}><div class="bi-th">${cn}<span class="en">${en}</span></div></th>`;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * Mobile renderers — 取代表格的卡片版本
+ *   呼叫處：renderFleet / renderEvents / renderThresholds 依 IS_MOBILE 分支。
+ *   共用樣式定義在 CSS @media (max-width: 1024px) 區段（.m-vc / .m-evc / .m-thc）。
+ * ───────────────────────────────────────────────────────────────── */
+function renderMatrixCards(filtered) {
+  if (filtered.length === 0) {
+    return `<div style="padding:32px;text-align:center;color:#7c8a9e">無符合條件的船舶 / No matching vessels</div>`;
+  }
+  const cards = filtered.map(({ v, a }) => {
+    const status = aisStatus(v);
+    const dims = DIM_KEYS.filter(k => a[k] === "critical" || a[k] === "warning");
+    const dimChips = dims.length === 0
+      ? `<span class="m-vc-dim normal">✓ 全部正常</span>`
+      : dims.map(k => `
+          <span class="m-vc-dim ${a[k]}">
+            ${DIM_META[k].icon(a[k] === "critical" ? "#ff8a8a" : "#f5b753")}
+            ${DIM_META[k].label}
+          </span>`).join("");
+
+    const pct = v.progress_pct;
+    const progressColor = a.route === "critical" ? "#ff4d4f"
+                        : a.route === "warning"  ? "#f5a623"
+                        : "#4a9eff";
+    const sog = v.sog !== null && v.sog !== undefined ? v.sog.toFixed(1) : "-";
+    const cog = v.cog !== null && v.cog !== undefined ? Math.round(v.cog) : "-";
+    const sf  = v.safety_frame_nm || 1.0;
+    const xtd = parseFloat(v.cross_track_distance_nm);
+    const xtdStr = !isNaN(xtd) ? `${xtd.toFixed(2)} / ${sf.toFixed(2)}` : "-";
+    const isActive = _selectedVessel === v.vessel_id;
+    const riskLbl = a.risk === "na" ? "N/A" : a.risk;
+
+    return `
+      <div class="m-vc ${a.risk}${isActive ? " is-active" : ""}" onclick="selectVessel(${v.vessel_id})">
+        <div class="m-vc-head">
+          <span class="vessel-pill" title="IMO ${escapeHtml(v.imo)}">${escapeHtml(v.imo)}</span>
+          <span class="m-vc-name">${escapeHtml(v.vessel_name)}</span>
+          <span class="m-vc-risk ${a.risk}">${riskLbl}</span>
+        </div>
+        <div class="m-vc-dims">${dimChips}</div>
+        <div class="m-vc-meta">
+          <span><b>SOG</b> ${sog} kn</span>
+          <span><b>COG</b> ${cog}°</span>
+          <span><b>XTD</b> ${xtdStr} NM</span>
+          <span><b>AIS</b> <span class="ais-status ${status.key}" style="padding:1px 6px;font-size:11px" title="${escapeHtml(status.title)}">${status.labelCN} ${status.labelEN}</span></span>
+          <span><b>計畫</b> <span class="plan-source plan-source-${(v.plan_source||"").toLowerCase().replace(/[^a-z0-9]+/g,'-')}" style="font-size:11px;padding:1px 6px">${escapeHtml(v.plan_source || "-")}</span></span>
+        </div>
+        ${pct !== undefined ? `
+          <div class="m-vc-progress">
+            <span>進度</span>
+            <div class="m-vc-bar"><div style="width:${pct}%;background:${progressColor}"></div></div>
+            <span class="mono" style="font-size:12px">${pct}%</span>
+          </div>` : ""}
+      </div>`;
+  }).join("");
+  return `<div class="m-cards">${cards}</div>`;
+}
+
+function renderEventsCards(filtered) {
+  if (filtered.length === 0) {
+    return `<div style="padding:32px;text-align:center;color:#7c8a9e">無符合條件的事件 / No matching events</div>`;
+  }
+  const cards = filtered.map(e => {
+    const dim = DIM_META[e.dimension];
+    const v = VESSELS.find(x => x.vessel_id === e.vessel_id);
+    return `
+      <div class="m-evc${e.cleared ? " cleared" : ""}" onclick="openEventModal('${e.id}')">
+        <div class="m-evc-head">
+          <span class="m-evc-dim">${dim.icon()} ${dim.label}</span>
+          ${e.level === "critical"
+            ? `<span class="ev-status" style="background:rgba(255,77,79,0.18);color:#ff8a8a">Critical</span>`
+            : `<span class="ev-status" style="background:rgba(245,166,35,0.18);color:#f5b753">Warning</span>`}
+          ${statusBadge(e.status)}
+        </div>
+        <div class="m-evc-vessel">
+          ${escapeHtml(e.vessel_name)}
+          <span class="muted" style="font-weight:400;font-size:12px">IMO ${v?.imo || "-"}</span>
+        </div>
+        <div class="m-evc-meta">
+          <span>開立 ${e.opened_at.slice(5,16)}</span>
+          ${e.assignee ? `<span>· ${escapeHtml(e.assignee)}</span>` : '<span class="muted">· 未指派</span>'}
+          ${e.notes.length > 0 ? `<span>· 💬 ${e.notes.length}</span>` : ""}
+          ${e.cleared ? `<span class="muted">· cleared</span>` : ""}
+        </div>
+      </div>`;
+  }).join("");
+  return `<div class="m-cards">${cards}</div>`;
+}
+
+function renderThresholdsCards() {
+  return Object.keys(THRESHOLD_META).map(k => {
+    const m = THRESHOLD_META[k];
+    const cur = _thresholds[k];
+    const def = DEFAULT_THRESHOLDS[k];
+    const dirty = (cur.warning !== def.warning) || (cur.critical !== def.critical);
+    const stepperHtml = `
+      <div class="th-stepper">
+        <button type="button" class="th-step-up" tabindex="-1" aria-label="增加">
+          <svg viewBox="0 0 12 12"><path d="M2 8 L6 4 L10 8"/></svg>
+        </button>
+        <button type="button" class="th-step-down" tabindex="-1" aria-label="減少">
+          <svg viewBox="0 0 12 12"><path d="M2 4 L6 8 L10 4"/></svg>
+        </button>
+      </div>`;
+    return `
+      <div class="m-thc" data-k="${k}">
+        <div class="m-thc-head">
+          ${DIM_META[k]?.icon ? DIM_META[k].icon() : ""}
+          <b>${m.label}</b>
+          ${dirty ? '<span class="modified">已修改</span>' : ""}
+        </div>
+        <div class="m-thc-sub">${m.short} · ${m.unitShort} · 範圍 ${m.range} · 預設 W ${def.warning} / C ${def.critical}</div>
+        <div class="m-thc-fields">
+          <div class="m-thc-field">
+            <span class="m-thc-label warning">Warning ≥</span>
+            <div class="th-input-wrap">
+              <input type="number" class="th-input" data-k="${k}" data-lvl="warning"
+                     value="${cur.warning}" step="${m.step}" min="${m.min}" max="${m.max}"
+                     style="color:#f5b753">
+              ${stepperHtml}
+              <span class="th-unit" title="${escapeHtml(m.unit)} (${escapeHtml(m.range)})">${escapeHtml(m.unitShort)}</span>
+            </div>
+          </div>
+          <div class="m-thc-field">
+            <span class="m-thc-label critical">Critical ≥</span>
+            <div class="th-input-wrap">
+              <input type="number" class="th-input" data-k="${k}" data-lvl="critical"
+                     value="${cur.critical}" step="${m.step}" min="${m.min}" max="${m.max}"
+                     style="color:#ff8a8a">
+              ${stepperHtml}
+              <span class="th-unit" title="${escapeHtml(m.unit)} (${escapeHtml(m.range)})">${escapeHtml(m.unitShort)}</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join("");
 }
 
 function renderMatrixTable(filtered) {
@@ -2745,7 +3799,7 @@ function renderMatrixTable(filtered) {
   }).join("");
 
   const rows = filtered.map(({ v, a }) => {
-    const status = aisStatusFromSog(v.sog);
+    const status = aisStatus(v);
     const cells = DIM_KEYS.map(k => {
       let extra = "";
       if (k === "zone" && a._zone && a._zone.hits.length) {
@@ -2793,6 +3847,7 @@ function renderMatrixTable(filtered) {
       </td>
       <td>${riskDot(a.risk, "lg")}</td>
       ${cells}
+      <td class="cell-data"><span class="plan-source plan-source-${(v.plan_source||"").toLowerCase().replace(/[^a-z0-9]+/g,'-')}">${escapeHtml(v.plan_source || "-")}</span></td>
       <td class="cell-data">${countsCell}</td>
       <td class="cell-data" style="min-width:80px">${pct !== undefined ? `
         <div class="progress">
@@ -2800,8 +3855,8 @@ function renderMatrixTable(filtered) {
           <span class="progress-pct">${pct}%</span>
         </div>` : '<span class="muted">-</span>'}</td>
       <td class="cell-data">${devCell}</td>
-      <td class="cell-data mono">${v.ais_timestamp ? v.ais_timestamp.replace(/-/g,'/').slice(5,16) : "-"}</td>
-      <td class="cell-data cell-status"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.label}</span></td>
+      <td class="cell-data mono">${fmtAisTimeUtc8(v.ais_timestamp)}</td>
+      <td class="cell-data cell-status"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}"><span class="cn">${status.labelCN}</span><span class="en">${status.labelEN}</span></span></td>
       <td class="num mono">${v.sog !== null ? v.sog.toFixed(1) : "-"}</td>
       <td class="num mono">${v.cog !== null ? Math.round(v.cog) : "-"}</td>
       <td class="cell-data mono">${dms(v.latitude, "lat")}</td>
@@ -2809,26 +3864,27 @@ function renderMatrixTable(filtered) {
     </tr>`;
   }).join("");
 
-  // 船舶 + Risk + 8 維度 + Plan/AIS + Progress + Dev + AIS Time + Status + SOG + HDG + Lat + Lon = 19
-  const totalCols = DIM_KEYS.length + 11;
+  // 船舶 + Risk + 9 維度 + Plan Source + Plan/AIS + Progress + Dev + AIS Time + Status + SOG + HDG + Lat + Lon
+  const totalCols = DIM_KEYS.length + 12;
 
   return `
     <div class="alert-table-wrap">
       <table class="alert-table">
         <thead>
           <tr>
-            ${biTh("船舶", "Vessel", { cls: "col-vessel" })}
-            ${biTh("整體風險", "Risk", {})}
+            ${biTh("船舶", "Vessel", { cls: "col-vessel", tip: "船舶 / Vessel\n船名與 IMO 編號。點擊可開啟單船 detail 視圖（地圖 + XTD 即時讀值 + 各維度警示）。" })}
+            ${biTh("整體風險", "Risk", { tip: "整體風險 / Overall Risk\n從 9 個維度取最嚴重等級：\n・任一維度 = Critical → 整體 Critical\n・否則任一維度 = Warning → 整體 Warning\n・其餘 → Normal\n" })}
             ${headerCells}
-            ${biTh("計畫/AIS點數", "Plan/AIS Pts", { cls: "col-data" })}
-            ${biTh("航行進度", "Progress", { cls: "col-data" })}
-            ${biTh("偏移量 NM", "Dev / Max (Safety)", { cls: "col-data" })}
-            ${biTh("AIS 時間", "Latest AIS Time", { cls: "col-data" })}
-            ${biTh("AIS 狀態", "AIS Status", { cls: "col-data col-status" })}
-            ${biTh("速度", "SOG", { cls: "num" })}
-            ${biTh("航向", "HDG", { cls: "num" })}
-            ${biTh("緯度", "Lat", { cls: "col-data" })}
-            ${biTh("經度", "Lon", { cls: "col-data" })}
+            ${biTh("計畫來源", "Plan Source", { cls: "col-data", tip: "計畫來源 / Plan Source\n航行計畫的提供方：\n・StormGeo — 目前主要來源\n・WNI — 之後會接\n・其他來源未來可擴充" })}
+            ${biTh("計畫/AIS點數", "Plan/AIS Pts", { cls: "col-data", tip: "計畫 / AIS 點數 / Plan / AIS Pts\n計畫航線點數 / 已接收的 AIS 軌跡點數。\n若有偏移點會額外標示「Dev N」表示偏移點數。" })}
+            ${biTh("航行進度", "Progress", { cls: "col-data", tip: "航行進度 / Progress\n目前 AIS 位置投影到計畫航線上的完成度百分比（0%–100%）。\n\n進度條顏色（依航線偏移狀態）：\n・藍 — Normal：max(目前 XTD, 歷史最大) < Safety × Warning 閾值（預設 0.70）\n・橘 — Warning：≥ Safety × Warning 閾值\n・紅 — Critical：≥ Safety × Critical 閾值（預設 1.00）\n\n閾值可在「閾值設定」頁調整。" })}
+            ${biTh("偏移量 NM", "Dev / Max (Safety)", { cls: "col-data", tip: "偏移量 NM / Cross-Track Distance\n目前 XTD / 歷史最大偏移 (Safety Frame 寬度) — 單位：海浬 NM。\n航線偏移維度的判斷依據：取 max(目前 XTD, 歷史最大) 與 Safety Frame × 閾值比對。" })}
+            ${biTh("最近 AIS 時間 (UTC+8)", "Latest AIS Time (UTC+8)", { cls: "col-data", tip: "最近 AIS 時間 / Latest AIS Time\n最近一筆收到的 AIS 訊號時間戳，顯示為台北時區 UTC+8。\n原始資料為 UTC，此處已自動轉換。" })}
+            ${biTh("AIS 狀態", "AIS Status", { cls: "col-data col-status", tip: "AIS 狀態 / AIS Status\n優先取 AIS 訊號內的 navigation status code (ITU-R M.1371)；若無 nav_status 資料，再依 SOG 推算：\n\n・繫泊 MOOR — nav_status=5 或 SOG < 0.5 kn\n・拋錨 ANC — nav_status=1 或 0.5 ≤ SOG < 2 kn\n・航行 U/W — nav_status=0/8 或 SOG ≥ 2 kn\n・不明 UNK — 兩者皆無" })}
+            ${biTh("速度", "SOG", { cls: "num", tip: "速度 / Speed Over Ground\n對地航速，單位節（knots, kn）。從 AIS 訊號取得。" })}
+            ${biTh("航向", "HDG", { cls: "num", tip: "航向 / Course Over Ground\n對地航向，0–359 度（正北為 0°，順時針）。" })}
+            ${biTh("緯度", "Lat", { cls: "col-data", tip: "緯度 / Latitude\nAIS 最後回報位置的緯度，度分秒格式（DMS）。" })}
+            ${biTh("經度", "Lon", { cls: "col-data", tip: "經度 / Longitude\nAIS 最後回報位置的經度，度分秒格式（DMS）。" })}
           </tr>
         </thead>
         <tbody>${rows || `<tr><td colspan="${totalCols}" style="padding:32px;text-align:center;color:#7c8a9e">無符合條件的船舶 / No matching vessels</td></tr>`}</tbody>
@@ -2854,7 +3910,7 @@ function renderDetail(vesselId) {
     return;
   }
   const a = computeAlerts(v);
-  const status = aisStatusFromSog(v.sog);
+  const status = aisStatus(v);
   const vesselMails = MAILS.filter(m => m.vessel_name === v.vessel_name && m.latitude !== null);
   const deviatedCount = (v.ais_track || []).filter(p => p.is_deviated).length;
   const sf = v.safety_frame_nm || 1.0;
@@ -2980,8 +4036,8 @@ function renderDetail(vesselId) {
           <span class="k">Lon</span><span class="v mono">${dms(v.longitude, "lon")}</span>
           <span class="k">SOG</span><span class="v">${fmt(v.sog,1)} kn</span>
           <span class="k">COG</span><span class="v">${fmt(v.cog,0)}°</span>
-          <span class="k">AIS Status</span><span class="v"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.label}</span></span>
-          <span class="k">AIS Time</span><span class="v mono">${v.ais_timestamp || "-"}</span>
+          <span class="k">AIS Status</span><span class="v"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.labelCN} ${status.labelEN}</span></span>
+          <span class="k">AIS Time</span><span class="v mono">${fmtAisTimeUtc8(v.ais_timestamp)} UTC+8</span>
         </div>
 
         <h3>計畫航線</h3>
@@ -3155,7 +4211,11 @@ function drawMap(v, vesselMails) {
         <div style="margin:4px 0;font-weight:600">${m.warning_level} (${m.warning_code})</div>
         <div style="font-size:14px;color:#c4cdda">${escapeHtml(m.warning_description.substring(0,140))}${m.warning_description.length>140?'…':''}</div>
       </div>
-    `).addTo(_layers.mails);
+    `, {
+      maxWidth: IS_MOBILE ? 280 : 360,
+      maxHeight: IS_MOBILE ? 180 : 380,
+      autoPanPadding: L.point(16, 16),
+    }).addTo(_layers.mails);
   });
 
   Object.keys(_layers).forEach(k => {
@@ -3240,13 +4300,19 @@ function renderEvents() {
     </h2>
 
     <div class="ev-stats">
-      <span class="ev-stat-pill"><span style="background:#ff8a8a;width:10px;height:10px;border-radius:50%"></span>新立案 / New <span class="num">${counts.new}</span></span>
-      <span class="ev-stat-pill"><span style="background:#f5b753;width:10px;height:10px;border-radius:50%"></span>已認可 / Ack <span class="num">${counts.ack}</span></span>
-      <span class="ev-stat-pill"><span style="background:#7ec5ff;width:10px;height:10px;border-radius:50%"></span>處理中 / In Progress <span class="num">${counts.in_progress}</span></span>
-      <span class="ev-stat-pill"><span style="background:#6ee094;width:10px;height:10px;border-radius:50%"></span>已解決 / Resolved <span class="num">${counts.resolved}</span></span>
+      <span class="ev-stat-pill"><span style="background:#ff8a8a;width:10px;height:10px;border-radius:50%"></span>New <span class="num">${counts.new}</span></span>
+      <span class="ev-stat-pill"><span style="background:#f5b753;width:10px;height:10px;border-radius:50%"></span>Ack <span class="num">${counts.ack}</span></span>
+      <span class="ev-stat-pill"><span style="background:#7ec5ff;width:10px;height:10px;border-radius:50%"></span>In Progress <span class="num">${counts.in_progress}</span></span>
+      <span class="ev-stat-pill"><span style="background:#6ee094;width:10px;height:10px;border-radius:50%"></span>Resolved <span class="num">${counts.resolved}</span></span>
     </div>
 
-    <div class="toolbar">
+    <div class="toolbar${IS_MOBILE && !_eventsFilterOpen ? ' collapsed' : ''}">
+      <button class="filter-toggle${_eventsFilterOpen ? ' active' : ''}${(_eventFilter.status!=='ALL'||_eventFilter.level!=='ALL'||_eventFilter.dim!=='ALL'||_eventFilter.vessel!=='ALL') ? ' dirty' : ''}" id="ev-filter-toggle"
+              title="${_eventsFilterOpen ? '收合篩選' : '展開篩選'}"
+              aria-label="篩選">
+        <svg class="filter-ico" viewBox="0 0 24 24"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+        <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
       <label style="font-size:14px;color:#9aa5b8">狀態 / Status：</label>
       <select id="ef-status" class="ev-select">
         <option value="ALL">全部</option>
@@ -3273,24 +4339,26 @@ function renderEvents() {
       </select>
     </div>
 
-    <div class="alert-table-wrap">
-      <table class="alert-table" style="min-width:1100px">
-        <thead>
-          <tr>
-            ${biTh("事件 ID", "Event ID", { cls: "col-data" })}
-            ${biTh("船舶", "Vessel", { cls: "col-data" })}
-            ${biTh("維度", "Dimension", { cls: "col-data" })}
-            ${biTh("等級", "Level", {})}
-            ${biTh("開立時間", "Opened", { cls: "col-data" })}
-            ${biTh("狀態", "Status", {})}
-            ${biTh("指派", "Assignee", { cls: "col-data" })}
-            ${biTh("備註", "Notes", {})}
-            ${biTh("", "", { cls: "col-data" })}
-          </tr>
-        </thead>
-        <tbody>${rows || `<tr><td colspan="9" style="padding:32px;text-align:center;color:#7c8a9e">無符合條件的事件 / No matching events</td></tr>`}</tbody>
-      </table>
-    </div>
+    ${IS_MOBILE ? renderEventsCards(filtered) : `
+      <div class="alert-table-wrap">
+        <table class="alert-table" style="min-width:1100px">
+          <thead>
+            <tr>
+              ${biTh("事件 ID", "Event ID", { cls: "col-data", tip: "事件 ID / Event ID\n唯一識別碼，格式：船 ID + 維度 + 年月（YYYYMM）。\n同一船同一維度當月只會立一案，避免重覆。" })}
+              ${biTh("船舶", "Vessel", { cls: "col-data", tip: "船舶 / Vessel\n觸發此事件的船舶（IMO + 船名）。" })}
+              ${biTh("維度", "Dimension", { cls: "col-data", tip: "維度 / Dimension\n觸發此事件的警示維度。\n9 個維度：航線偏移、速度異常、海況/天候、Warning Mail、AIS 訊號、進行中事件、到港/離港、主機異常、區域警示。" })}
+              ${biTh("等級", "Level", { tip: "等級 / Level\n事件嚴重等級：Critical（紅）或 Warning（黃）。\n超過該維度 Critical 閾值 → Critical；超過 Warning 閾值 → Warning。" })}
+              ${biTh("開立時間", "Opened", { cls: "col-data", tip: "開立時間 / Opened\n事件首次被系統自動立案的時間戳。\n條件消失後事件不會自動關閉，需操作員手動處理（會標記 cleared）。" })}
+              ${biTh("狀態", "Status", { tip: "狀態 / Status\n事件處理流程：\n新立案（New）→ 已認可（Ack）→ 處理中（In Progress）→ 已解決（Resolved）。\n已解決可重新開啟回到處理中。" })}
+              ${biTh("指派", "Assignee", { cls: "col-data", tip: "指派 / Assignee\n目前負責處理此事件的操作員。\n可從 Op-Alice / Op-Bob / Op-Carol / Capt-Lee / Capt-Chen 等指派。" })}
+              ${biTh("備註", "Notes", { tip: "備註 / Notes\n處理過程中累積的備註數。\n點開事件 modal 可看完整內容與新增備註。" })}
+              ${biTh("", "", { cls: "col-data" })}
+            </tr>
+          </thead>
+          <tbody>${rows || `<tr><td colspan="9" style="padding:32px;text-align:center;color:#7c8a9e">無符合條件的事件 / No matching events</td></tr>`}</tbody>
+        </table>
+      </div>
+    `}
   `;
 
   ["status","level","dim","vessel"].forEach(k => {
@@ -3302,6 +4370,19 @@ function renderEvents() {
       renderEvents();
     });
   });
+
+  // 事件頁篩選 toggle（跟船隊頁同樣 collapse 邏輯）
+  const evFt = document.getElementById("ev-filter-toggle");
+  if (evFt) {
+    evFt.addEventListener("click", () => {
+      _eventsFilterOpen = !_eventsFilterOpen;
+      sessionStorage.setItem("slab_va_ev_filter_open", _eventsFilterOpen ? "1" : "0");
+      const tb = document.querySelector(".toolbar");
+      if (tb) tb.classList.toggle("collapsed", !_eventsFilterOpen);
+      evFt.classList.toggle("active", _eventsFilterOpen);
+      evFt.title = _eventsFilterOpen ? "收合篩選" : "展開篩選";
+    });
+  }
 }
 
 /* 事件詳情 modal（含狀態轉換、備註、指派、歷史） */
@@ -3603,19 +4684,21 @@ function renderThresholds() {
       調整各維度的 Warning / Critical 觸發點。儲存後立即重算所有船舶警示，並依新閾值補立事件、消失條件的事件會標記 cleared。
     </div>
 
-    <div class="th-page-wrap">
-      <table class="th-table">
-        <thead>
-          <tr>
-            <th>維度 / Dimension</th>
-            <th style="color:#f5b753">Warning ≥</th>
-            <th style="color:#ff8a8a">Critical ≥</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
+    ${IS_MOBILE ? renderThresholdsCards() : `
+      <div class="th-page-wrap">
+        <table class="th-table">
+          <thead>
+            <tr>
+              <th><span class="bi-th-tip" data-tip="維度 / Dimension&#10;9 個警示維度（與整體風險判斷對應）：&#10;・航線偏移、速度異常、海況/天候、Warning Mail、AIS 訊號、進行中事件、到港/離港、主機異常、區域警示。" tabindex="0">維度<span class="tip-i">i</span> / Dimension</span></th>
+              <th style="color:#f5b753"><span class="bi-th-tip" data-tip="Warning 閾值 / Warning Threshold&#10;當該維度的偵測指標 ≥ 此值時，會觸發 Warning 等級警示（橘色）。&#10;此值必須小於 Critical 閾值。" tabindex="0">Warning<span class="tip-i">i</span> ≥</span></th>
+              <th style="color:#ff8a8a"><span class="bi-th-tip" data-tip="Critical 閾值 / Critical Threshold&#10;當該維度的偵測指標 ≥ 此值時，會觸發 Critical 等級警示（紅色）。&#10;Critical 必須大於 Warning。" tabindex="0">Critical<span class="tip-i">i</span> ≥</span></th>
+              <th title="已修改標記 / Modified — 與預設值不同時顯示橘點"></th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `}
 
     <div class="th-trigger-info">
       <b style="color:#9ec5ff">觸發邏輯 / Trigger logic</b><br>
@@ -3627,8 +4710,8 @@ function renderThresholds() {
 
     <div class="th-actions">
       <span id="th-saved-tip" style="font-size:14px;color:#6ee094;flex:1"></span>
-      <button class="trans-btn secondary" id="th-reset">恢復預設 / Reset</button>
-      <button class="trans-btn" id="th-save">儲存並重算 / Save &amp; Re-evaluate</button>
+      <button class="trans-btn secondary" id="th-reset">Reset</button>
+      <button class="trans-btn" id="th-save">Save &amp; Re-evaluate</button>
     </div>
   `;
 
@@ -3701,6 +4784,59 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+/* ─────────────────────────────────────────────────────────────────
+ * Icon header tooltip (portal) — 把 tooltip element append 到 body，
+ *   位置用 getBoundingClientRect 計算。避開 .alert-table-wrap 的
+ *   overflow:auto 將絕對定位 tooltip clip 掉的問題。預設彈在 header
+ *   上方；上方空間不夠時 fallback 到下方。
+ * ───────────────────────────────────────────────────────────────── */
+let _iconTipEl = null;
+function _hideIconTip() {
+  if (_iconTipEl) { _iconTipEl.remove(); _iconTipEl = null; }
+}
+function _showIconTip(el) {
+  _hideIconTip();
+  const tip = el.dataset.tip;
+  if (!tip) return;
+  // 第一行為標題，第二行起為說明內容（保留換行）
+  const idx = tip.indexOf("\n");
+  const title = idx === -1 ? tip : tip.slice(0, idx);
+  const body  = idx === -1 ? "" : tip.slice(idx + 1).replace(/^\s+/, "");
+  _iconTipEl = document.createElement("div");
+  _iconTipEl.className = "icon-tip-portal" + (body ? "" : " no-body");
+  const titleEl = document.createElement("div");
+  titleEl.className = "tip-title";
+  titleEl.textContent = title;
+  _iconTipEl.appendChild(titleEl);
+  if (body) {
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "tip-body";
+    bodyEl.textContent = body;
+    _iconTipEl.appendChild(bodyEl);
+  }
+  document.body.appendChild(_iconTipEl);
+  const r = el.getBoundingClientRect();
+  const tr = _iconTipEl.getBoundingClientRect();
+  let top = r.top - tr.height - 10;
+  if (top < 8) top = r.bottom + 10;        // 上方擠不下就放下方
+  let left = r.left + r.width/2 - tr.width/2;
+  if (left < 8) left = 8;
+  if (left + tr.width > innerWidth - 8) left = innerWidth - tr.width - 8;
+  _iconTipEl.style.top = top + "px";
+  _iconTipEl.style.left = left + "px";
+}
+// 事件代理：每次 render 出新表頭都自動套用
+document.body.addEventListener("mouseover", e => {
+  const el = e.target.closest(".icon-header, .bi-th-tip");
+  if (el) _showIconTip(el);
+});
+document.body.addEventListener("mouseout", e => {
+  const el = e.target.closest(".icon-header, .bi-th-tip");
+  if (el && !el.contains(e.relatedTarget)) _hideIconTip();
+});
+document.addEventListener("scroll", _hideIconTip, true);
+window.addEventListener("resize", _hideIconTip);
 
 // 啟動：載入持久化閾值、事件 + 從目前警示同步新立案
 loadThresholds();

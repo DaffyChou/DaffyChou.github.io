@@ -322,31 +322,35 @@ select.ev-select:focus { border-color: #4a9eff; }
   line-height: 1.2;
   cursor: help;
 }
-.icon-header::after {
-  content: attr(data-tip);
-  position: absolute;
-  top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-  background: #0d0d0d; border: 1px solid #333333;
-  padding: 6px 10px; border-radius: 4px;
-  font-size: 14px; font-weight: 400; color: #d8dee9;
-  white-space: pre-line; text-transform: none; letter-spacing: 0;
-  text-align: left; line-height: 1.5;
-  min-width: 160px; max-width: 240px;
-  opacity: 0; pointer-events: none;
-  z-index: 10;
-  transition: opacity 0.12s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+/* tooltip 改用 JS portal 把 .icon-tip-portal 元素 append 到 body，避免被
+ * .alert-table-wrap 的 overflow:auto clip 掉。CSS 只負責 portal 樣式。
+ * 結構分標題 (.tip-title) + 說明 (.tip-body) 兩層。 */
+.icon-tip-portal {
+  position: fixed;
+  background: #0d0d0d;
+  border: 1px solid #333333;
+  padding: 8px 10px; border-radius: 4px;
+  text-align: left;
+  min-width: 180px; max-width: 320px;
+  z-index: 10000;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
-.icon-header::before {
-  /* tooltip 上方小箭頭 */
-  content: ""; position: absolute;
-  top: calc(100% + 1px); left: 50%; transform: translateX(-50%);
-  border: 5px solid transparent; border-bottom-color: #333333;
-  opacity: 0; transition: opacity 0.12s ease;
-  z-index: 11;
+.icon-tip-portal .tip-title {
+  font-size: 13px; font-weight: 600; color: #e4eaf2;
+  letter-spacing: 0.2px;
+  padding-bottom: 6px; margin-bottom: 6px;
+  border-bottom: 1px solid #2a2a2a;
 }
-.icon-header:hover::after,
-.icon-header:hover::before { opacity: 1; }
+.icon-tip-portal .tip-body {
+  font-size: 12px; font-weight: 400; color: #c4cdda;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+.icon-tip-portal.no-body .tip-title {
+  padding-bottom: 0; margin-bottom: 0;
+  border-bottom: none;
+}
 /* hover 時 icon stroke 變亮，明確提示這是可互動目標 */
 .icon-header:hover svg { stroke: #9ec5ff; }
 
@@ -430,6 +434,29 @@ table.alert-table td.cell-vessel a.vessel-link.is-active::before {
   color: #5e6b80; letter-spacing: 0.3px;
   text-transform: none;
 }
+/* tip 版本：用 .tip-i 小 i 圓圈表示有說明，緊貼中文後（biTh 模板放在中文與英文之間） */
+.bi-th-tip {
+  cursor: help;
+  outline: none;
+}
+.bi-th-tip .tip-i {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 10px; height: 10px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 8px; font-style: italic; font-weight: 700;
+  line-height: 1;
+  opacity: 0.45;
+  vertical-align: middle;
+  margin-left: 3px; margin-right: 2px;
+  text-transform: none;
+  flex: 0 0 10px;
+}
+.bi-th-tip:hover .tip-i,
+.bi-th-tip:focus .tip-i { opacity: 1; color: #9ec5ff; }
+.bi-th-tip:hover,
+.bi-th-tip:focus { color: #9ec5ff; }
 .bi-line { color: #9aa5b8; }
 .bi-line .en { color: #5e6b80; margin-left: 4px; font-size: 14px; }
 
@@ -463,7 +490,7 @@ table.alert-table td.cell-vessel a.vessel-link.is-active::before {
 }
 table.alert-table {
   width: 100%; border-collapse: collapse;
-  font-size: 14px; color: #d8dee9; min-width: 1620px;
+  font-size: 14px; color: #d8dee9; min-width: 1720px;
 }
 table.alert-table th {
   background: #0f0f0f; font-weight: 600;
@@ -576,25 +603,42 @@ table.alert-table tr:last-child td { border-bottom: none; }
   width: 7px; height: 7px; border-radius: 50%; background: #4a9eff;
 }
 
+/* 計畫來源 pill — 不同來源用不同顏色 token */
+.plan-source {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 3px;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.2px;
+  white-space: nowrap;
+  background: #1f1f1f; color: #c4cdda;
+  border: 1px solid #2a2a2a;
+}
+.plan-source-stormgeo { background: rgba(74,158,255,0.14); color: #9ec5ff; border-color: rgba(74,158,255,0.35); }
+.plan-source-wni      { background: rgba(108,180,108,0.14); color: #8fd49a; border-color: rgba(108,180,108,0.35); }
+
 .ais-status {
   display: inline-block; padding: 3px 10px; border-radius: 3px;
   font-size: 12px; font-weight: 500; letter-spacing: 0.3px;
   background: #222222; color: #c4cdda;
   cursor: help;
   white-space: nowrap;
+  line-height: 1.25;
 }
+/* 雙行顯示：中文簡稱（cn）放上、英文縮寫（en）放下；單行 hover title 仍有完整描述 */
+.ais-status .cn { display: block; font-size: 12px; }
+.ais-status .en { display: block; font-size: 10px; opacity: 0.7; letter-spacing: 0.5px; }
 .ais-status.moored  { background: #222222; color: #c4cdda; }
 .ais-status.under-way { background: rgba(80,160,80,0.18); color: #88d796; }
 .ais-status.anchored  { background: rgba(245,166,35,0.18); color: #f5b753; }
 .ais-status.unknown   { background: #1f1f1f; color: #7c8a9e; }
 
-/* AIS Status 表格欄固定 80px，文字以縮寫顯示，完整名稱在 hover title 內 */
+/* AIS Status 表格欄固定 90px，文字以雙行顯示（中文 + 英文），完整名稱在 hover title 內 */
 table.alert-table th.col-status,
 table.alert-table td.cell-status {
-  width: 80px; min-width: 80px; max-width: 80px;
+  width: 90px; min-width: 90px; max-width: 90px;
 }
 table.alert-table td.cell-status .ais-status {
-  padding: 3px 6px;  /* 80px 欄寬內收緊左右內距，文字仍居中 */
+  padding: 2px 6px;
+  text-align: center;
 }
 
 .mono { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 14px; color: #c4cdda; }
@@ -778,10 +822,18 @@ table.alert-table td.cell-status .ais-status {
 .risk-toggle .rt-title .en { color: #7c8a9e; font-weight: 400; margin-left: 4px; font-size: 14px; }
 .risk-toggle .rt-chev { color: #7c8a9e; transition: transform 0.18s ease; }
 .risk-toggle.open .rt-chev { transform: rotate(180deg); }
+.risk-toggle {
+  /* max-height 留 100px 給上方 toolbar(40-50px) + banner(30px) + 邊距，避免 panel
+   * 頂端 (rt-head) 被 z-index 600 的 toolbar 蓋住而無法點擊收合。
+   * 內容裝得下就不出現卷軸，裝不下時 .rt-body 自動出 scroll bar。 */
+  max-height: calc(100% - 100px);
+  display: flex; flex-direction: column;
+}
 .risk-toggle .rt-body {
   display: none;
   padding: 6px 10px 8px;
-  max-height: 280px; overflow-y: auto;
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto;       /* 內容超過 max-height 才顯示卷軸 */
 }
 .risk-toggle.open .rt-body { display: block; }
 .risk-toggle .rt-actions {
@@ -1334,7 +1386,7 @@ table.th-table tbody tr:hover td { background: #1a1a1a; }
     box-shadow: none;
     font-size: 12px;
   }
-  .risk-toggle .rt-body { max-height: 200px; }
+  /* 手機也不限制風險區 panel 高度，跟桌面一致直接全列 */
 
   /* 單船 detail：fleet-map-wrap 改 flex column 統一管理所有元素的順序 */
   .fleet-split.detail-mode .fleet-map-wrap {
@@ -2028,6 +2080,23 @@ function buildCorridor(latlngs, widthFnNm) {
   return right.concat(left.reverse());
 }
 
+/* AIS / 計畫資料的時間戳預設為 UTC（如 mockup-data.js 的 planned_track date
+ * 帶 "Z" 後綴），這裡轉為 UTC+8（台北時區）顯示，並補上年度。
+ * 輸入: "2026-04-20 05:16:00"（無時區，視為 UTC）
+ * 輸出: "2026/04/20 13:16" */
+function fmtAisTimeUtc8(ts) {
+  if (!ts) return "-";
+  const d = new Date(ts.replace(" ", "T") + "Z");
+  if (isNaN(d.getTime())) return ts;
+  const t = new Date(d.getTime() + 8 * 3600 * 1000);
+  const Y = t.getUTCFullYear();
+  const M = String(t.getUTCMonth() + 1).padStart(2, "0");
+  const D = String(t.getUTCDate()).padStart(2, "0");
+  const h = String(t.getUTCHours()).padStart(2, "0");
+  const m = String(t.getUTCMinutes()).padStart(2, "0");
+  return `${Y}/${M}/${D} ${h}:${m}`;
+}
+
 function fmt(v, d) {
   if (v === null || v === undefined || v === "") return "-";
   const n = parseFloat(v);
@@ -2177,23 +2246,22 @@ function computeAlerts(v) {
   const T = _thresholds;
 
   // 1. 航線偏移：取目前 XTD 與歷史最大 deviation 的較嚴重者
+  //    監測類維度沒資料就視為 normal（不出現 N/A）— N/A 只保留給 alert 維度
   const xtd = parseFloat(v.cross_track_distance_nm);
   const sf  = parseFloat(v.safety_frame_nm) || 1.0;
   const track = v.ais_track || [];
   const maxDev = track.reduce((m, p) => Math.max(m, p.deviation_nm || 0), 0);
   const worstDev = Math.max(isNaN(xtd) ? 0 : xtd, maxDev);
-  const hasDevData = !isNaN(xtd) || track.length > 0;
-  if (!hasDevData)                            a.route = "na";
-  else if (worstDev >= sf * T.route.critical) a.route = "critical";
+  if (worstDev >= sf * T.route.critical)      a.route = "critical";
   else if (worstDev >= sf * T.route.warning)  a.route = "warning";
   else                                        a.route = "normal";
 
-  // 2. Speed anomaly (SOG vs planned avg)
-  if (v.sog === null || v.sog === undefined) a.speed = "na";
+  // 2. Speed anomaly (SOG vs planned avg) — 無 SOG / 無計畫均速時視為 normal
+  if (v.sog === null || v.sog === undefined) a.speed = "normal";
   else {
     const planSogs = (v.planned_track || []).filter(p => p.sog > 0).map(p => p.sog);
     const planAvg = planSogs.length ? planSogs.reduce((x,y)=>x+y,0)/planSogs.length : 0;
-    if (planAvg === 0) a.speed = "na";
+    if (planAvg === 0) a.speed = "normal";
     else {
       const delta = Math.abs(v.sog - planAvg) / planAvg;
       if (v.sog < 0.5 && planAvg > 5)         a.speed = "warning";  // 預期航行但近乎停止
@@ -2219,8 +2287,8 @@ function computeAlerts(v) {
   else if (hasInfo)        a.alert = "warning";
   else                     a.alert = "normal";
 
-  // 6. AIS comm freshness (mock)
-  if (!v.ais_timestamp) a.comm = "na";
+  // 6. AIS comm freshness (mock) — 無 AIS 時間戳視為 critical（訊號中斷）
+  if (!v.ais_timestamp) a.comm = "critical";
   else {
     const tsHash = (v.vessel_id * 7321 + 12345) % 100;
     if (tsHash > T.comm.critical)      a.comm = "critical";
@@ -2240,7 +2308,7 @@ function computeAlerts(v) {
   //    - 若 ETA hash 不利 → warning / critical
   const pct = (typeof v.progress_pct === "number") ? v.progress_pct : null;
   const portHash = (v.vessel_id * 5779 + 38461) % 100;
-  if (pct === null) a.port = "na";
+  if (pct === null) a.port = "normal";    // 無 progress 資料視為 normal
   else if (pct > 92 || pct < 5) {  // 進出港期間敏感
     if (portHash > T.port.critical)      a.port = "critical";  // ETA 嚴重延誤 / 偏離靠泊位
     else if (portHash > T.port.warning)  a.port = "warning";   // 進度落後 / 靠泊待命
@@ -2264,10 +2332,11 @@ function computeAlerts(v) {
   a._zone = za;  // 內部欄位：給 dimDescription / tooltip 顯示落點區名稱
 
   // Overall risk (composite)
+  //   只有 alert（信件）可能 N/A，其餘監測維度永遠是 normal/warning/critical
+  //   ⇒ 整體風險只需取最嚴重等級，不會有「全 N/A」情況
   const levels = DIM_KEYS.map(k => a[k]);
   if (levels.includes("critical"))      a.risk = "critical";
   else if (levels.includes("warning"))  a.risk = "warning";
-  else if (levels.every(l => l === "na")) a.risk = "na";
   else                                  a.risk = "normal";
 
   return a;
@@ -2296,24 +2365,55 @@ function levelTag(level) {
  *   - 表格內用縮寫顯示，避免長字串撐爆 120px AIS Status 欄
  *   - title 給滑鼠 hover 用，可看到完整中英文描述
  *   - label 維持顯示在欄位內、labelFull 給單船 detail 等空間較大的位置用 */
-/* AIS 導航狀態（ITU-R M.1371）：表格與單船 detail 都用 3-4 字母縮寫顯示，
- * 完整名稱與 SOG 條件在 hover title 內。 */
+/* AIS 導航狀態（ITU-R M.1371）：欄位內用「中文 + 英文縮寫」雙行顯示，
+ * 完整名稱與來源在 hover title 內。
+ *   labelCN — 中文簡稱（繫泊 / 拋錨 / 航行 / 不明）
+ *   labelEN — 英文縮寫（MOOR / ANC / U/W / UNK）
+ *   label   — 舊欄位，保留兼容（等於 labelEN）
+ *
+ * 取得優先順序：
+ *   1. AIS 訊號內的 navigation status code（v.nav_status，ITU-R M.1371）
+ *   2. 退而求其次，依 SOG 推算
+ */
+function aisStatus(v) {
+  // 1. 優先用 AIS 真實 nav_status
+  if (v && v.nav_status !== undefined && v.nav_status !== null && v.nav_status !== "") {
+    const ns = parseInt(v.nav_status, 10);
+    // ITU-R M.1371: 0=under way engine, 1=at anchor, 5=moored, 8=under way sailing
+    if (ns === 5) return {
+      key: "moored", labelCN: "繫泊", labelEN: "MOOR", label: "MOOR",
+      title: "繫泊 / Moored — 來自 AIS navigation status 5",
+    };
+    if (ns === 1) return {
+      key: "anchored", labelCN: "拋錨", labelEN: "ANC", label: "ANC",
+      title: "拋錨 / At anchor — 來自 AIS navigation status 1",
+    };
+    if (ns === 0 || ns === 8) return {
+      key: "under-way", labelCN: "航行", labelEN: "U/W", label: "U/W",
+      title: "航行中 / Under way — 來自 AIS navigation status " + ns,
+    };
+    // 其他特殊狀態（如 2 Not Under Command, 6 Aground 等）暫不細分，掛到 unknown
+  }
+  // 2. 退而求其次，依 SOG 推算
+  return aisStatusFromSog(v ? v.sog : null);
+}
+
 function aisStatusFromSog(sog) {
   if (sog === null || sog === undefined) return {
-    key: "unknown", label: "UNK",
-    title: "AIS 狀態不明 / Status unknown — 無 SOG 資料",
+    key: "unknown", labelCN: "不明", labelEN: "UNK", label: "UNK",
+    title: "AIS 狀態不明 / Status unknown — 無 SOG 資料、無 nav_status",
   };
   if (sog < 0.5) return {
-    key: "moored", label: "MOOR",
-    title: "繫泊 / Moored — 已靠泊（SOG < 0.5 kn）",
+    key: "moored", labelCN: "繫泊", labelEN: "MOOR", label: "MOOR",
+    title: "繫泊 / Moored — 依 SOG 推算（SOG < 0.5 kn）",
   };
   if (sog < 2) return {
-    key: "anchored", label: "ANC",
-    title: "拋錨 / At anchor — 錨泊中（0.5 ≤ SOG < 2 kn）",
+    key: "anchored", labelCN: "拋錨", labelEN: "ANC", label: "ANC",
+    title: "拋錨 / At anchor — 依 SOG 推算（0.5 ≤ SOG < 2 kn）",
   };
   return {
-    key: "under-way", label: "U/W",
-    title: "引擎航行中 / Under way using engine — 動力推進（SOG ≥ 2 kn）",
+    key: "under-way", labelCN: "航行", labelEN: "U/W", label: "U/W",
+    title: "航行中 / Under way — 依 SOG 推算（SOG ≥ 2 kn）",
   };
 }
 
@@ -2648,7 +2748,7 @@ function renderUpperArea(enriched) {
     return renderUpperArea(enriched);
   }
   const a = computeAlerts(v);
-  const status = aisStatusFromSog(v.sog);
+  const status = aisStatus(v);
   const sf  = v.safety_frame_nm || 1.0;
   const xtd = parseFloat(v.cross_track_distance_nm) || 0;
   const xtdPct = Math.min(100, (xtd / sf) * 100);
@@ -2758,7 +2858,7 @@ function renderUpperArea(enriched) {
       <aside class="fleet-detail-panel">
         <div class="detail-header">
           <span class="name">${escapeHtml(v.vessel_name)}</span>
-          <span class="ais-status ${status.key}" style="font-size:14px" title="${escapeHtml(status.title)}">${status.label}</span>
+          <span class="ais-status ${status.key}" style="font-size:14px" title="${escapeHtml(status.title)}">${status.labelCN} ${status.labelEN}</span>
           <span class="imo">IMO ${v.imo}</span>
         </div>
 
@@ -2805,8 +2905,8 @@ function renderUpperArea(enriched) {
           <span class="k">經度 / Lon</span><span class="v mono">${dms(v.longitude, "lon")}</span>
           <span class="k">航速 / SOG</span><span class="v mono">${fmt(v.sog,1)} kn</span>
           <span class="k">航向 / COG</span><span class="v mono">${fmt(v.cog,0)}°</span>
-          <span class="k">狀態 / Status</span><span class="v"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.label}</span></span>
-          <span class="k">時間 / Time</span><span class="v mono">${v.ais_timestamp || "-"}</span>
+          <span class="k">狀態 / Status</span><span class="v"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.labelCN} ${status.labelEN}</span></span>
+          <span class="k">時間 / Time</span><span class="v mono">${fmtAisTimeUtc8(v.ais_timestamp)} UTC+8</span>
         </div>
 
         <h3>計畫航線 <span style="color:#5e6b80;text-transform:none;font-weight:400">/ Planned Route</span></h3>
@@ -3502,7 +3602,7 @@ function drawFleetMap(enriched) {
   const points = [];
   enriched.forEach(({ v, a }) => {
     if (v.latitude === null) return;
-    const status = aisStatusFromSog(v.sog);
+    const status = aisStatus(v);
     const riskLabel = { critical: "Critical 危急", warning: "Warning 警示", normal: "Normal 正常", na: "N/A" }[a.risk] || "-";
     const tooltipHtml =
       `<b>${escapeHtml(v.vessel_name)}</b> · ${riskLabel}<br>` +
@@ -3541,6 +3641,10 @@ function drawFleetMap(enriched) {
 
 function biTh(cn, en, opts = {}) {
   const cls = opts.cls ? ` class="${opts.cls}"` : "";
+  if (opts.tip) {
+    // tip 版本：i 圖示放在中文後面、英文前面，視覺上跟中文是一組
+    return `<th${cls}><span class="bi-th bi-th-tip" data-tip="${escapeHtml(opts.tip)}" tabindex="0">${cn}<span class="tip-i">i</span><span class="en">${en}</span></span></th>`;
+  }
   return `<th${cls}><div class="bi-th">${cn}<span class="en">${en}</span></div></th>`;
 }
 
@@ -3554,7 +3658,7 @@ function renderMatrixCards(filtered) {
     return `<div style="padding:32px;text-align:center;color:#7c8a9e">無符合條件的船舶 / No matching vessels</div>`;
   }
   const cards = filtered.map(({ v, a }) => {
-    const status = aisStatusFromSog(v.sog);
+    const status = aisStatus(v);
     const dims = DIM_KEYS.filter(k => a[k] === "critical" || a[k] === "warning");
     const dimChips = dims.length === 0
       ? `<span class="m-vc-dim normal">✓ 全部正常</span>`
@@ -3588,7 +3692,8 @@ function renderMatrixCards(filtered) {
           <span><b>SOG</b> ${sog} kn</span>
           <span><b>COG</b> ${cog}°</span>
           <span><b>XTD</b> ${xtdStr} NM</span>
-          <span><b>AIS</b> <span class="ais-status ${status.key}" style="padding:1px 6px;font-size:11px" title="${escapeHtml(status.title)}">${status.label}</span></span>
+          <span><b>AIS</b> <span class="ais-status ${status.key}" style="padding:1px 6px;font-size:11px" title="${escapeHtml(status.title)}">${status.labelCN} ${status.labelEN}</span></span>
+          <span><b>計畫</b> <span class="plan-source plan-source-${(v.plan_source||"").toLowerCase().replace(/[^a-z0-9]+/g,'-')}" style="font-size:11px;padding:1px 6px">${escapeHtml(v.plan_source || "-")}</span></span>
         </div>
         ${pct !== undefined ? `
           <div class="m-vc-progress">
@@ -3694,7 +3799,7 @@ function renderMatrixTable(filtered) {
   }).join("");
 
   const rows = filtered.map(({ v, a }) => {
-    const status = aisStatusFromSog(v.sog);
+    const status = aisStatus(v);
     const cells = DIM_KEYS.map(k => {
       let extra = "";
       if (k === "zone" && a._zone && a._zone.hits.length) {
@@ -3742,6 +3847,7 @@ function renderMatrixTable(filtered) {
       </td>
       <td>${riskDot(a.risk, "lg")}</td>
       ${cells}
+      <td class="cell-data"><span class="plan-source plan-source-${(v.plan_source||"").toLowerCase().replace(/[^a-z0-9]+/g,'-')}">${escapeHtml(v.plan_source || "-")}</span></td>
       <td class="cell-data">${countsCell}</td>
       <td class="cell-data" style="min-width:80px">${pct !== undefined ? `
         <div class="progress">
@@ -3749,8 +3855,8 @@ function renderMatrixTable(filtered) {
           <span class="progress-pct">${pct}%</span>
         </div>` : '<span class="muted">-</span>'}</td>
       <td class="cell-data">${devCell}</td>
-      <td class="cell-data mono">${v.ais_timestamp ? v.ais_timestamp.replace(/-/g,'/').slice(5,16) : "-"}</td>
-      <td class="cell-data cell-status"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.label}</span></td>
+      <td class="cell-data mono">${fmtAisTimeUtc8(v.ais_timestamp)}</td>
+      <td class="cell-data cell-status"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}"><span class="cn">${status.labelCN}</span><span class="en">${status.labelEN}</span></span></td>
       <td class="num mono">${v.sog !== null ? v.sog.toFixed(1) : "-"}</td>
       <td class="num mono">${v.cog !== null ? Math.round(v.cog) : "-"}</td>
       <td class="cell-data mono">${dms(v.latitude, "lat")}</td>
@@ -3758,26 +3864,27 @@ function renderMatrixTable(filtered) {
     </tr>`;
   }).join("");
 
-  // 船舶 + Risk + 8 維度 + Plan/AIS + Progress + Dev + AIS Time + Status + SOG + HDG + Lat + Lon = 19
-  const totalCols = DIM_KEYS.length + 11;
+  // 船舶 + Risk + 9 維度 + Plan Source + Plan/AIS + Progress + Dev + AIS Time + Status + SOG + HDG + Lat + Lon
+  const totalCols = DIM_KEYS.length + 12;
 
   return `
     <div class="alert-table-wrap">
       <table class="alert-table">
         <thead>
           <tr>
-            ${biTh("船舶", "Vessel", { cls: "col-vessel" })}
-            ${biTh("整體風險", "Risk", {})}
+            ${biTh("船舶", "Vessel", { cls: "col-vessel", tip: "船舶 / Vessel\n船名與 IMO 編號。點擊可開啟單船 detail 視圖（地圖 + XTD 即時讀值 + 各維度警示）。" })}
+            ${biTh("整體風險", "Risk", { tip: "整體風險 / Overall Risk\n從 9 個維度取最嚴重等級：\n・任一維度 = Critical → 整體 Critical\n・否則任一維度 = Warning → 整體 Warning\n・其餘 → Normal\n" })}
             ${headerCells}
-            ${biTh("計畫/AIS點數", "Plan/AIS Pts", { cls: "col-data" })}
-            ${biTh("航行進度", "Progress", { cls: "col-data" })}
-            ${biTh("偏移量 NM", "Dev / Max (Safety)", { cls: "col-data" })}
-            ${biTh("AIS 時間", "Latest AIS Time", { cls: "col-data" })}
-            ${biTh("AIS 狀態", "AIS Status", { cls: "col-data col-status" })}
-            ${biTh("速度", "SOG", { cls: "num" })}
-            ${biTh("航向", "HDG", { cls: "num" })}
-            ${biTh("緯度", "Lat", { cls: "col-data" })}
-            ${biTh("經度", "Lon", { cls: "col-data" })}
+            ${biTh("計畫來源", "Plan Source", { cls: "col-data", tip: "計畫來源 / Plan Source\n航行計畫的提供方：\n・StormGeo — 目前主要來源\n・WNI — 之後會接\n・其他來源未來可擴充" })}
+            ${biTh("計畫/AIS點數", "Plan/AIS Pts", { cls: "col-data", tip: "計畫 / AIS 點數 / Plan / AIS Pts\n計畫航線點數 / 已接收的 AIS 軌跡點數。\n若有偏移點會額外標示「Dev N」表示偏移點數。" })}
+            ${biTh("航行進度", "Progress", { cls: "col-data", tip: "航行進度 / Progress\n目前 AIS 位置投影到計畫航線上的完成度百分比（0%–100%）。\n\n進度條顏色（依航線偏移狀態）：\n・藍 — Normal：max(目前 XTD, 歷史最大) < Safety × Warning 閾值（預設 0.70）\n・橘 — Warning：≥ Safety × Warning 閾值\n・紅 — Critical：≥ Safety × Critical 閾值（預設 1.00）\n\n閾值可在「閾值設定」頁調整。" })}
+            ${biTh("偏移量 NM", "Dev / Max (Safety)", { cls: "col-data", tip: "偏移量 NM / Cross-Track Distance\n目前 XTD / 歷史最大偏移 (Safety Frame 寬度) — 單位：海浬 NM。\n航線偏移維度的判斷依據：取 max(目前 XTD, 歷史最大) 與 Safety Frame × 閾值比對。" })}
+            ${biTh("最近 AIS 時間 (UTC+8)", "Latest AIS Time (UTC+8)", { cls: "col-data", tip: "最近 AIS 時間 / Latest AIS Time\n最近一筆收到的 AIS 訊號時間戳，顯示為台北時區 UTC+8。\n原始資料為 UTC，此處已自動轉換。" })}
+            ${biTh("AIS 狀態", "AIS Status", { cls: "col-data col-status", tip: "AIS 狀態 / AIS Status\n優先取 AIS 訊號內的 navigation status code (ITU-R M.1371)；若無 nav_status 資料，再依 SOG 推算：\n\n・繫泊 MOOR — nav_status=5 或 SOG < 0.5 kn\n・拋錨 ANC — nav_status=1 或 0.5 ≤ SOG < 2 kn\n・航行 U/W — nav_status=0/8 或 SOG ≥ 2 kn\n・不明 UNK — 兩者皆無" })}
+            ${biTh("速度", "SOG", { cls: "num", tip: "速度 / Speed Over Ground\n對地航速，單位節（knots, kn）。從 AIS 訊號取得。" })}
+            ${biTh("航向", "HDG", { cls: "num", tip: "航向 / Course Over Ground\n對地航向，0–359 度（正北為 0°，順時針）。" })}
+            ${biTh("緯度", "Lat", { cls: "col-data", tip: "緯度 / Latitude\nAIS 最後回報位置的緯度，度分秒格式（DMS）。" })}
+            ${biTh("經度", "Lon", { cls: "col-data", tip: "經度 / Longitude\nAIS 最後回報位置的經度，度分秒格式（DMS）。" })}
           </tr>
         </thead>
         <tbody>${rows || `<tr><td colspan="${totalCols}" style="padding:32px;text-align:center;color:#7c8a9e">無符合條件的船舶 / No matching vessels</td></tr>`}</tbody>
@@ -3803,7 +3910,7 @@ function renderDetail(vesselId) {
     return;
   }
   const a = computeAlerts(v);
-  const status = aisStatusFromSog(v.sog);
+  const status = aisStatus(v);
   const vesselMails = MAILS.filter(m => m.vessel_name === v.vessel_name && m.latitude !== null);
   const deviatedCount = (v.ais_track || []).filter(p => p.is_deviated).length;
   const sf = v.safety_frame_nm || 1.0;
@@ -3929,8 +4036,8 @@ function renderDetail(vesselId) {
           <span class="k">Lon</span><span class="v mono">${dms(v.longitude, "lon")}</span>
           <span class="k">SOG</span><span class="v">${fmt(v.sog,1)} kn</span>
           <span class="k">COG</span><span class="v">${fmt(v.cog,0)}°</span>
-          <span class="k">AIS Status</span><span class="v"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.label}</span></span>
-          <span class="k">AIS Time</span><span class="v mono">${v.ais_timestamp || "-"}</span>
+          <span class="k">AIS Status</span><span class="v"><span class="ais-status ${status.key}" title="${escapeHtml(status.title)}">${status.labelCN} ${status.labelEN}</span></span>
+          <span class="k">AIS Time</span><span class="v mono">${fmtAisTimeUtc8(v.ais_timestamp)} UTC+8</span>
         </div>
 
         <h3>計畫航線</h3>
@@ -4237,14 +4344,14 @@ function renderEvents() {
         <table class="alert-table" style="min-width:1100px">
           <thead>
             <tr>
-              ${biTh("事件 ID", "Event ID", { cls: "col-data" })}
-              ${biTh("船舶", "Vessel", { cls: "col-data" })}
-              ${biTh("維度", "Dimension", { cls: "col-data" })}
-              ${biTh("等級", "Level", {})}
-              ${biTh("開立時間", "Opened", { cls: "col-data" })}
-              ${biTh("狀態", "Status", {})}
-              ${biTh("指派", "Assignee", { cls: "col-data" })}
-              ${biTh("備註", "Notes", {})}
+              ${biTh("事件 ID", "Event ID", { cls: "col-data", tip: "事件 ID / Event ID\n唯一識別碼，格式：船 ID + 維度 + 年月（YYYYMM）。\n同一船同一維度當月只會立一案，避免重覆。" })}
+              ${biTh("船舶", "Vessel", { cls: "col-data", tip: "船舶 / Vessel\n觸發此事件的船舶（IMO + 船名）。" })}
+              ${biTh("維度", "Dimension", { cls: "col-data", tip: "維度 / Dimension\n觸發此事件的警示維度。\n9 個維度：航線偏移、速度異常、海況/天候、Warning Mail、AIS 訊號、進行中事件、到港/離港、主機異常、區域警示。" })}
+              ${biTh("等級", "Level", { tip: "等級 / Level\n事件嚴重等級：Critical（紅）或 Warning（黃）。\n超過該維度 Critical 閾值 → Critical；超過 Warning 閾值 → Warning。" })}
+              ${biTh("開立時間", "Opened", { cls: "col-data", tip: "開立時間 / Opened\n事件首次被系統自動立案的時間戳。\n條件消失後事件不會自動關閉，需操作員手動處理（會標記 cleared）。" })}
+              ${biTh("狀態", "Status", { tip: "狀態 / Status\n事件處理流程：\n新立案（New）→ 已認可（Ack）→ 處理中（In Progress）→ 已解決（Resolved）。\n已解決可重新開啟回到處理中。" })}
+              ${biTh("指派", "Assignee", { cls: "col-data", tip: "指派 / Assignee\n目前負責處理此事件的操作員。\n可從 Op-Alice / Op-Bob / Op-Carol / Capt-Lee / Capt-Chen 等指派。" })}
+              ${biTh("備註", "Notes", { tip: "備註 / Notes\n處理過程中累積的備註數。\n點開事件 modal 可看完整內容與新增備註。" })}
               ${biTh("", "", { cls: "col-data" })}
             </tr>
           </thead>
@@ -4582,10 +4689,10 @@ function renderThresholds() {
         <table class="th-table">
           <thead>
             <tr>
-              <th>維度 / Dimension</th>
-              <th style="color:#f5b753">Warning ≥</th>
-              <th style="color:#ff8a8a">Critical ≥</th>
-              <th></th>
+              <th><span class="bi-th-tip" data-tip="維度 / Dimension&#10;9 個警示維度（與整體風險判斷對應）：&#10;・航線偏移、速度異常、海況/天候、Warning Mail、AIS 訊號、進行中事件、到港/離港、主機異常、區域警示。" tabindex="0">維度<span class="tip-i">i</span> / Dimension</span></th>
+              <th style="color:#f5b753"><span class="bi-th-tip" data-tip="Warning 閾值 / Warning Threshold&#10;當該維度的偵測指標 ≥ 此值時，會觸發 Warning 等級警示（橘色）。&#10;此值必須小於 Critical 閾值。" tabindex="0">Warning<span class="tip-i">i</span> ≥</span></th>
+              <th style="color:#ff8a8a"><span class="bi-th-tip" data-tip="Critical 閾值 / Critical Threshold&#10;當該維度的偵測指標 ≥ 此值時，會觸發 Critical 等級警示（紅色）。&#10;Critical 必須大於 Warning。" tabindex="0">Critical<span class="tip-i">i</span> ≥</span></th>
+              <th title="已修改標記 / Modified — 與預設值不同時顯示橘點"></th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -4677,6 +4784,59 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+/* ─────────────────────────────────────────────────────────────────
+ * Icon header tooltip (portal) — 把 tooltip element append 到 body，
+ *   位置用 getBoundingClientRect 計算。避開 .alert-table-wrap 的
+ *   overflow:auto 將絕對定位 tooltip clip 掉的問題。預設彈在 header
+ *   上方；上方空間不夠時 fallback 到下方。
+ * ───────────────────────────────────────────────────────────────── */
+let _iconTipEl = null;
+function _hideIconTip() {
+  if (_iconTipEl) { _iconTipEl.remove(); _iconTipEl = null; }
+}
+function _showIconTip(el) {
+  _hideIconTip();
+  const tip = el.dataset.tip;
+  if (!tip) return;
+  // 第一行為標題，第二行起為說明內容（保留換行）
+  const idx = tip.indexOf("\n");
+  const title = idx === -1 ? tip : tip.slice(0, idx);
+  const body  = idx === -1 ? "" : tip.slice(idx + 1).replace(/^\s+/, "");
+  _iconTipEl = document.createElement("div");
+  _iconTipEl.className = "icon-tip-portal" + (body ? "" : " no-body");
+  const titleEl = document.createElement("div");
+  titleEl.className = "tip-title";
+  titleEl.textContent = title;
+  _iconTipEl.appendChild(titleEl);
+  if (body) {
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "tip-body";
+    bodyEl.textContent = body;
+    _iconTipEl.appendChild(bodyEl);
+  }
+  document.body.appendChild(_iconTipEl);
+  const r = el.getBoundingClientRect();
+  const tr = _iconTipEl.getBoundingClientRect();
+  let top = r.top - tr.height - 10;
+  if (top < 8) top = r.bottom + 10;        // 上方擠不下就放下方
+  let left = r.left + r.width/2 - tr.width/2;
+  if (left < 8) left = 8;
+  if (left + tr.width > innerWidth - 8) left = innerWidth - tr.width - 8;
+  _iconTipEl.style.top = top + "px";
+  _iconTipEl.style.left = left + "px";
+}
+// 事件代理：每次 render 出新表頭都自動套用
+document.body.addEventListener("mouseover", e => {
+  const el = e.target.closest(".icon-header, .bi-th-tip");
+  if (el) _showIconTip(el);
+});
+document.body.addEventListener("mouseout", e => {
+  const el = e.target.closest(".icon-header, .bi-th-tip");
+  if (el && !el.contains(e.relatedTarget)) _hideIconTip();
+});
+document.addEventListener("scroll", _hideIconTip, true);
+window.addEventListener("resize", _hideIconTip);
 
 // 啟動：載入持久化閾值、事件 + 從目前警示同步新立案
 loadThresholds();
