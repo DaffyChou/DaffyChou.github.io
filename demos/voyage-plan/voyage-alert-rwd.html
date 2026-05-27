@@ -19,6 +19,24 @@ body {
   display: flex; flex-direction: row; height: 100vh;
 }
 
+/* ── 深色 scrollbar（搭配深底主題）─────────────────────────────
+ *   Firefox: scrollbar-width / scrollbar-color
+ *   Webkit (Chrome / Safari / Edge): ::-webkit-scrollbar 系列
+ *   thumb 用 #3a3a3a、hover 變 #4a4a4a；track 用 #141414 與背景融合 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3a #141414;
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: #141414; }
+*::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+  border-radius: 5px;
+  border: 2px solid #141414;
+}
+*::-webkit-scrollbar-thumb:hover { background: #4a4a4a; }
+*::-webkit-scrollbar-corner { background: #141414; }
+
 /* ── Sidebar：預設收合（56px），hover 暫時展開，pin 鎖定展開 ───── */
 .sidebar {
   background: #0d0d0d; color: #e4eaf2;
@@ -434,10 +452,16 @@ table.alert-table td.cell-vessel a.vessel-link.is-active::before {
   color: #5e6b80; letter-spacing: 0.3px;
   text-transform: none;
 }
-/* tip 版本：用 .tip-i 小 i 圓圈表示有說明，緊貼中文後（biTh 模板放在中文與英文之間） */
+/* tip 版本：用 .tip-i 小 i 圓圈表示有說明
+ * 結構：.bi-th (flex col) > .bi-th-cn-row (中文 + i) + .en (英文)
+ *   → 中文跟 i 同一行、英文獨立成下一行 */
 .bi-th-tip {
   cursor: help;
   outline: none;
+}
+.bi-th-tip .bi-th-cn-row {
+  display: inline-flex;
+  align-items: center;
 }
 .bi-th-tip .tip-i {
   display: inline-flex; align-items: center; justify-content: center;
@@ -3272,6 +3296,7 @@ function drawFleetDetailMap(v) {
   _fleetMap = map;
   L.control.zoom({ position: "bottomright" }).addTo(map);
   attachMapResize(map, document.getElementById("fleet-map"));
+  attachPopupDimOverlays(map);
   L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     subdomains: "abcd", maxZoom: 19,
@@ -3432,6 +3457,32 @@ function persistRiskLayerState() {
   try { sessionStorage.setItem("slab_va_risk_layers", JSON.stringify(_riskLayerState)); } catch (e) {}
 }
 
+/* popup 開啟時把地圖上的浮動 overlay（toolbar / banner / risk-toggle / layer-toggle）
+ * 暫時淡化，避免 z-index 600 的 toolbar 蓋住 leaflet popup-pane（後者在 leaflet-map-pane
+ * 的 z=400 stacking context 內，效能上贏不過外層 z=600 toolbar）。
+ * 只對「absolute 定位」的 overlay 套用 — 手機 RWD 把 overlay 改靜態 strip 時不會誤觸發。 */
+function attachPopupDimOverlays(map) {
+  if (!map) return;
+  const sel = ".map-overlay-toolbar, .map-overlay-banner, .map-overlay-banner-icon, .risk-toggle, .layer-toggle";
+  map.on("popupopen", () => {
+    document.querySelectorAll(sel).forEach(el => {
+      if (getComputedStyle(el).position !== "absolute") return;
+      el._dimSaved = { op: el.style.opacity, pe: el.style.pointerEvents };
+      el.style.opacity = "0.15";
+      el.style.pointerEvents = "none";
+      el.style.transition = "opacity 0.15s ease";
+    });
+  });
+  map.on("popupclose", () => {
+    document.querySelectorAll(sel).forEach(el => {
+      if (!el._dimSaved) return;
+      el.style.opacity = el._dimSaved.op;
+      el.style.pointerEvents = el._dimSaved.pe;
+      delete el._dimSaved;
+    });
+  });
+}
+
 function drawRiskZones(map) {
   _fleetRiskLayers = {};
   if (!window.RISK_ZONES || !window.RISK_ZONE_CATEGORIES) return;
@@ -3590,6 +3641,7 @@ function drawFleetMap(enriched) {
   const map = L.map("fleet-map", { zoomControl: false, worldCopyJump: true }).setView([20, 60], 2);
   _fleetMap = map;
   L.control.zoom({ position: "bottomright" }).addTo(map);
+  attachPopupDimOverlays(map);
   L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     subdomains: "abcd", maxZoom: 19,
@@ -3642,8 +3694,8 @@ function drawFleetMap(enriched) {
 function biTh(cn, en, opts = {}) {
   const cls = opts.cls ? ` class="${opts.cls}"` : "";
   if (opts.tip) {
-    // tip 版本：i 圖示放在中文後面、英文前面，視覺上跟中文是一組
-    return `<th${cls}><span class="bi-th bi-th-tip" data-tip="${escapeHtml(opts.tip)}" tabindex="0">${cn}<span class="tip-i">i</span><span class="en">${en}</span></span></th>`;
+    // tip 版本：中文+i 包在 .bi-th-cn-row 內當「一個 flex item」，英文獨立成下一行
+    return `<th${cls}><span class="bi-th bi-th-tip" data-tip="${escapeHtml(opts.tip)}" tabindex="0"><span class="bi-th-cn-row">${cn}<span class="tip-i">i</span></span><span class="en">${en}</span></span></th>`;
   }
   return `<th${cls}><div class="bi-th">${cn}<span class="en">${en}</span></div></th>`;
 }
@@ -4105,6 +4157,7 @@ function drawMap(v, vesselMails) {
   const map = L.map("map", { zoomControl: false, minZoom: 2 }).setView([22.3, 118.5], 4);
   L.control.zoom({ position: "bottomright" }).addTo(map);
   attachMapResize(map, document.getElementById("map"));
+  attachPopupDimOverlays(map);
   _mapInstance = map;
   L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
