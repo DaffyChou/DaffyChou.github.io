@@ -850,12 +850,15 @@ table.alert-table td.cell-status .ais-status {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
-/* 亮色底圖（seamap）模式下調整圓點與軌跡配色，避免深色 fill 在亮底圖難以辨識 */
+/* 亮色底圖（seamap）模式下調整圓點與軌跡配色，避免高飽和淺色在亮底圖難以辨識 */
 .leaflet-container.seamap-on path[fill="#0d0d0d"] {
-  fill: #f5f7fa;
+  fill: #2a2a2a;
 }
 .leaflet-container.seamap-on path[stroke="#4cd97a"] {
   stroke: #1a8a4a;
+}
+.leaflet-container.seamap-on path[fill="#4cd97a"] {
+  fill: #1a8a4a;
 }
 .leaflet-container.seamap-on path[fill="#4a9eff"] {
   fill: #1c5fb8;
@@ -2265,7 +2268,7 @@ function dms(coord, type) {
 const DIM_KEYS = ["route", "speed", "sea", "anchorage", "engine", "alert", "comm", "zone"];
 const DIM_META = {
   route:  { label: "航線偏移",   short: "Route Dev",  icon: iconRoute,
-            desc: "max(目前 XTD, 歷史最大偏移) ≥ Safety Frame × 閾值即觸發" },
+            desc: "max(目前 XTD, 歷史最大偏移) 達閾值即觸發；warning 1.5 NM、critical 3.0 NM（絕對距離）" },
   speed:  { label: "速度異常",   short: "Speed",      icon: iconSpeed,
             desc: "|SOG − 計畫平均|/計畫平均 超過閾值；航行中近乎停止也會 warning" },
   sea:    { label: "海況/天候",  short: "Sea State",  icon: iconSea,
@@ -2375,14 +2378,14 @@ function computeAlerts(v) {
 
   // 1. 航線偏移：取目前 XTD 與歷史最大 deviation 的較嚴重者
   //    監測類維度沒資料就視為 normal（不出現 N/A）— N/A 只保留給 alert 維度
+  //    閾值改為絕對海浬數（不再以 Safety Frame 比值計算）：warning 1.5 NM、critical 3.0 NM
   const xtd = parseFloat(v.cross_track_distance_nm);
-  const sf  = parseFloat(v.safety_frame_nm) || 1.0;
   const track = v.ais_track || [];
   const maxDev = track.reduce((m, p) => Math.max(m, p.deviation_nm || 0), 0);
   const worstDev = Math.max(isNaN(xtd) ? 0 : xtd, maxDev);
-  if (worstDev >= sf * T.route.critical)      a.route = "critical";
-  else if (worstDev >= sf * T.route.warning)  a.route = "warning";
-  else                                        a.route = "normal";
+  if (worstDev >= T.route.critical)      a.route = "critical";
+  else if (worstDev >= T.route.warning)  a.route = "warning";
+  else                                   a.route = "normal";
 
   // 2. Speed anomaly (SOG vs planned avg) — 無 SOG / 無計畫均速時視為 normal
   if (v.sog === null || v.sog === undefined) a.speed = "normal";
@@ -2641,7 +2644,7 @@ let _fleetFilterOpen = sessionStorage.getItem("slab_va_filter_open") === "1";  /
  * ───────────────────────────────────────────────────────────────── */
 const THRESHOLDS_STORAGE_KEY = "slab_va_thresholds_v1";
 const DEFAULT_THRESHOLDS = {
-  route:        { warning: 0.70, critical: 1.00 },   // XTD / Safety Frame 比值
+  route:        { warning: 1.5,  critical: 3.0 },    // 航線偏移絕對距離（海浬 NM）
   speed:        { warning: 0.20, critical: 0.40 },   // |SOG−plan|/plan
   sea:          { warning: 0.65, critical: 0.85 },   // 浪/風指數 0~1
   comm:         { warning: 75,   critical: 92  },    // AIS 延遲指標 0~100
@@ -2651,7 +2654,7 @@ const DEFAULT_THRESHOLDS = {
   driftAdrift:  { warning: 1000, critical: 1500 },   // 漂航 DRIFT 半徑（公尺）
 };
 const THRESHOLD_META = {
-  route:        { label: "航線偏移",       short: "Route Dev",   unit: "× Safety Frame", unitShort: "× SF",     range: "0 – 5",     step: 0.05, min: 0,  max: 5,   isPct: false },
+  route:        { label: "航線偏移",       short: "Route Dev",   unit: "海浬 NM",        unitShort: "NM",        range: "0 – 10",    step: 0.5,  min: 0,  max: 10,  isPct: false },
   speed:        { label: "速度異常",       short: "Speed Anom",  unit: "× 計畫平均速度", unitShort: "× planAvg", range: "0 – 2",     step: 0.05, min: 0,  max: 2,   isPct: false },
   sea:          { label: "海況/天候",      short: "Sea State",   unit: "海況指數",       unitShort: "score",     range: "0 – 1",     step: 0.05, min: 0,  max: 1,   isPct: false },
   comm:         { label: "AIS 訊號",       short: "AIS Comm",    unit: "通訊延遲分數",   unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
@@ -3596,7 +3599,7 @@ function drawFleetDetailMap(v) {
   v.planned_track.forEach(w => {
     addWrappedCircleMarker(_fleetLayers.planned, w.latitude, w.longitude, {
       pane: "plannedPane",
-      radius: 3, color: "#4a9eff", fillColor: "#0d0d0d", fillOpacity: 1, weight: 1.5
+      radius: 3, color: "#4a9eff", fillColor: "#4a9eff", fillOpacity: 1, weight: 1.5
     }, `#${w.index} · ${w.position_type}<br>${w.date || ""}`);
   });
 
@@ -3638,8 +3641,8 @@ function drawFleetDetailMap(v) {
         pane: "aisPane",
         radius: p.is_deviated ? 5 : 3,
         color: p.is_deviated ? "#ff6b6b" : "#4cd97a",
-        fillColor: p.is_deviated ? "#ff6b6b" : "#0d0d0d",
-        fillOpacity: p.is_deviated ? 0.8 : 1, weight: p.is_deviated ? 2 : 1,
+        fillColor: p.is_deviated ? "#ff6b6b" : "#4cd97a",
+        fillOpacity: 1, weight: p.is_deviated ? 2 : 1,
       }, `<b>AIS #${p.index}</b><br>${p.ais_timestamp}<br>SOG ${fmt(p.sog,1)} kn · COG ${fmt(p.cog,0)}°<br>偏移 ${fmt(p.deviation_nm,2)} NM`);
     });
   }
@@ -4410,8 +4413,8 @@ function renderMatrixTable(filtered) {
             ${headerCells}
             ${biTh("計畫來源", "Plan Source", { cls: "col-data", tip: "計畫來源 / Plan Source\n航行計畫的提供方：\n・StormGeo — 目前主要來源\n・WNI — 之後會接\n・其他來源未來可擴充" })}
             ${biTh("計畫/AIS點數", "Plan/AIS Pts", { cls: "col-data", tip: "計畫 / AIS 點數 / Plan / AIS Pts\n計畫航線點數 / 已接收的 AIS 軌跡點數。\n若有偏移點會額外標示「Dev N」表示偏移點數。" })}
-            ${biTh("航行進度", "Progress", { cls: "col-data", tip: "航行進度 / Progress\n目前 AIS 位置投影到計畫航線上的完成度百分比（0%–100%）。\n\n進度條顏色（依航線偏移狀態）：\n・藍 — Normal：max(目前 XTD, 歷史最大) < Safety × Warning 閾值（預設 0.70）\n・橘 — Warning：≥ Safety × Warning 閾值\n・紅 — Critical：≥ Safety × Critical 閾值（預設 1.00）\n\n閾值可在「閾值設定」頁調整。" })}
-            ${biTh("偏移量 NM", "Dev / Max (Safety)", { cls: "col-data", tip: "偏移量 NM / Cross-Track Distance\n目前 XTD / 歷史最大偏移 (Safety Frame 寬度) — 單位：海浬 NM。\n航線偏移維度的判斷依據：取 max(目前 XTD, 歷史最大) 與 Safety Frame × 閾值比對。" })}
+            ${biTh("航行進度", "Progress", { cls: "col-data", tip: "航行進度 / Progress\n目前 AIS 位置投影到計畫航線上的完成度百分比（0%–100%）。\n\n進度條顏色（依航線偏移狀態，絕對距離）：\n・藍 — Normal：max(目前 XTD, 歷史最大) < 1.5 NM\n・橘 — Warning：≥ 1.5 NM\n・紅 — Critical：≥ 3.0 NM\n\n閾值可在「閾值設定」頁調整。" })}
+            ${biTh("偏移量 NM", "Dev / Max (Safety)", { cls: "col-data", tip: "偏移量 NM / Cross-Track Distance\n目前 XTD / 歷史最大偏移 (Safety Frame 寬度) — 單位：海浬 NM。\n航線偏移維度判斷：取 max(目前 XTD, 歷史最大) 直接與絕對閾值比對（warning 1.5 NM、critical 3.0 NM）。" })}
             ${biTh("最近 AIS 時間 (UTC+8)", "Latest AIS Time (UTC+8)", { cls: "col-data", tip: "最近 AIS 時間 / Latest AIS Time\n最近一筆收到的 AIS 訊號時間戳，顯示為台北時區 UTC+8。\n原始資料為 UTC，此處已自動轉換。" })}
             ${biTh("AIS 狀態", "AIS Status", { cls: "col-data col-status", tip: "AIS 狀態 / AIS Status\n直接取 AIS 訊號 navigation status code (ITU-R M.1371)：\n\n・繫泊 MOOR — nav_status=5\n・拋錨 ANC — nav_status=1\n・漂航 NUC — nav_status=2 (Not Under Command)\n・航行 U/W — nav_status=0 或 8\n・不明 UNK — 無 nav_status 或其他代碼" })}
             ${biTh("速度", "SOG", { cls: "num", tip: "速度 / Speed Over Ground\n對地航速，單位節（knots, kn）。從 AIS 訊號取得。" })}
@@ -4731,7 +4734,7 @@ function drawMap(v, vesselMails) {
   v.planned_track.forEach(w => {
     addWrappedCircleMarker(_layers.planned, w.latitude, w.longitude, {
       pane: "plannedPane",
-      radius: 3, color: "#4a9eff", fillColor: "#0d0d0d",
+      radius: 3, color: "#4a9eff", fillColor: "#4a9eff",
       fillOpacity: 1, weight: 1.5
     }, `#${w.index} · ${w.position_type}<br>${w.date}`);
   });
@@ -4774,8 +4777,8 @@ function drawMap(v, vesselMails) {
         pane: "aisPane",
         radius: p.is_deviated ? 5 : 3,
         color: p.is_deviated ? "#ff6b6b" : "#4cd97a",
-        fillColor: p.is_deviated ? "#ff6b6b" : "#0d0d0d",
-        fillOpacity: p.is_deviated ? 0.8 : 1, weight: p.is_deviated ? 2 : 1,
+        fillColor: p.is_deviated ? "#ff6b6b" : "#4cd97a",
+        fillOpacity: 1, weight: p.is_deviated ? 2 : 1,
       }, `<b>AIS #${p.index}</b><br>${p.ais_timestamp}<br>SOG ${fmt(p.sog,1)} kn · COG ${fmt(p.cog,0)}°<br>偏移：<b style="color:${p.is_deviated?'#ff8a8a':'#6ee094'}">${fmt(p.deviation_nm,2)} NM</b>`);
     });
   }
@@ -5455,7 +5458,7 @@ function renderThresholds() {
 
     <div class="th-trigger-info">
       <b style="color:#9ec5ff">觸發邏輯 / Trigger logic</b><br>
-      ・<b>route</b>：max(目前 XTD, 歷史最大偏移) ≥ Safety Frame × 閾值<br>
+      ・<b>route</b>：max(目前 XTD, 歷史最大偏移) 直接與絕對閾值比對（warning 1.5 NM、critical 3.0 NM）<br>
       ・<b>speed</b>：|SOG − 計畫平均|/計畫平均 &gt; 閾值（另：航行中近乎停止永遠 warning）<br>
       ・<b>sea / comm / port / engine</b>：對應的偵測分數 &gt; 閾值<br>
       頁面載入時 <code>syncEventsFromAlerts()</code> 會根據新閾值自動立案；既有事件不會被刪除，但「條件已消失 / cleared」標記會更新。
