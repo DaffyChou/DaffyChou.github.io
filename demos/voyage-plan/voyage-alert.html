@@ -653,6 +653,7 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .ais-status.moored  { background: #222222; color: #c4cdda; }
 .ais-status.under-way { background: rgba(80,160,80,0.18); color: #88d796; }
 .ais-status.anchored  { background: rgba(245,166,35,0.18); color: #f5b753; }
+.ais-status.drifting  { background: rgba(177,116,255,0.18); color: #c4a3ff; }
 .ais-status.unknown   { background: #1f1f1f; color: #7c8a9e; }
 
 /* AIS Status 表格欄固定 90px，文字以雙行顯示（中文 + 英文），完整名稱在 hover title 內 */
@@ -781,7 +782,7 @@ table.alert-table td.cell-status .ais-status {
 }
 .alert-row {
   display: grid; grid-template-columns: 28px 1fr auto;
-  align-items: center; gap: 10px;
+  align-items: start; gap: 10px;
   padding: 8px 10px; background: #1a1a1a;
   border-radius: 4px; font-size: 14px;
 }
@@ -823,6 +824,20 @@ table.alert-table td.cell-status .ais-status {
   min-width: 200px;
 }
 .layer-toggle label { display: flex; align-items: center; gap: 6px; margin: 3px 0; cursor: pointer; }
+/* 摺疊：header 點擊切 .lt-open，labels 收合；mobile 模式有自己的 detail-header-row scoped 規則 */
+.layer-toggle > div:first-child {
+  cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.layer-toggle > div:first-child::after {
+  content: "▾";
+  color: #7c8a9e; font-size: 12px;
+  margin-left: auto;
+  transition: transform 0.18s ease;
+}
+.layer-toggle.lt-open > div:first-child::after { transform: rotate(180deg); }
+.layer-toggle:not(.lt-open) label { display: none; }
+.layer-toggle:not(.lt-open) > div:first-child { margin-bottom: 0 !important; }
 
 /* 風險區圖層控制：左下角浮動，預設摺疊；展開時顯示 8 類風險區勾選 */
 .risk-toggle {
@@ -834,6 +849,46 @@ table.alert-table td.cell-status .ais-status {
   box-shadow: 0 2px 8px rgba(0,0,0,0.5);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+}
+/* 亮色底圖（seamap）模式下調整圓點與軌跡配色，避免深色 fill 在亮底圖難以辨識 */
+.leaflet-container.seamap-on path[fill="#0d0d0d"] {
+  fill: #f5f7fa;
+}
+.leaflet-container.seamap-on path[stroke="#4cd97a"] {
+  stroke: #1a8a4a;
+}
+.leaflet-container.seamap-on path[fill="#4a9eff"] {
+  fill: #1c5fb8;
+}
+.leaflet-container.seamap-on path[stroke="#4a9eff"] {
+  stroke: #1c5fb8;
+}
+/* 海圖風格切換 — 小型浮動 icon 按鈕（右下角，zoom 控制上方） */
+.seamap-icon-btn {
+  position: absolute; right: 12px; bottom: 100px; z-index: 500;
+  width: 36px; height: 36px;
+  background: rgba(20, 20, 20, 0.92);
+  border: 1px solid #2a2a2a; border-radius: 6px;
+  color: #9ec5ff;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.seamap-icon-btn:hover { background: rgba(40, 50, 70, 0.95); border-color: #4a90e2; }
+.seamap-icon-btn.active { background: rgba(74, 144, 226, 0.25); border-color: #4a90e2; color: #cfe4ff; }
+.seamap-icon-btn svg { width: 18px; height: 18px; display: block; }
+/* 風險區面板內「錨地」單列以虛線分隔，視覺上區隔出非風險區性質的圖層 */
+.risk-toggle .rt-section-divider {
+  border-top: 1px dashed #2a2a2a;
+  margin: 6px 0 4px;
+  padding-top: 6px;
+  font-size: 11px;
+  color: #5e6b80;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .risk-toggle .rt-head {
   display: flex; align-items: center; justify-content: space-between;
@@ -978,13 +1033,33 @@ table.alert-table td.cell-status .ais-status {
   font-size: 12px; font-weight: 600; white-space: nowrap;
 }
 .ev-row {
-  display: grid; grid-template-columns: 1fr auto;
-  align-items: start; gap: 8px;
+  display: grid; grid-template-columns: 1fr auto auto;
+  align-items: center; gap: 6px;
   padding: 8px 10px; background: #1a1a1a;
   border-radius: 4px; font-size: 14px;
   cursor: pointer; transition: background 0.15s;
 }
 .ev-row:hover { background: #222222; }
+.alert-actions {
+  display: flex; flex-direction: column;
+  gap: 6px; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ev-pan, .ev-open, .ev-settings {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; padding: 0;
+  background: transparent; border: 1px solid #2e3a4d;
+  border-radius: 3px;
+  cursor: pointer; font-size: 14px; line-height: 1;
+  flex-shrink: 0;
+}
+.ev-pan { color: #9ec5ff; }
+.ev-pan:hover { background: rgba(74,144,226,0.15); border-color: #4a90e2; color: #cfe4ff; }
+.ev-open { color: #c4a3ff; }
+.ev-open:hover { background: rgba(177,116,255,0.15); border-color: #b174ff; color: #ddc6ff; }
+.ev-settings { color: #f5b753; }
+.ev-settings:hover { background: rgba(245,183,83,0.15); border-color: #f5a623; color: #ffd591; }
+.ev-pan svg, .ev-open svg, .ev-settings svg { width: 14px; height: 14px; display: block; }
 .ev-row .ev-title { color: #e4eaf2; font-weight: 500; }
 .ev-row .ev-meta  { color: #7c8a9e; font-size: 14px; margin-top: 2px; }
 .ev-row .ev-dim {
@@ -1117,7 +1192,7 @@ table.alert-table td.cell-status .ais-status {
 /* 閾值設定獨立頁面 #/thresholds */
 .th-page-wrap {
   background: #141414; border: 1px solid #2a2a2a;
-  border-radius: 8px; overflow: hidden;
+  border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.4);
   margin-bottom: 14px;
 }
@@ -1261,6 +1336,23 @@ table.th-table tbody tr:hover td { background: #1a1a1a; }
   display: inline-block; padding: 1px 8px;
   background: rgba(44,108,219,0.18); color: #9ec5ff;
   font-size: 14px; border-radius: 8px; margin-left: 6px;
+}
+/* 來源標籤 — StormGeo 信件 vs 系統偵測，視覺上分流 */
+.timeline-item .t-source {
+  display: inline-block; padding: 1px 8px;
+  font-size: 12px; font-weight: 600;
+  border-radius: 8px; margin-left: 6px;
+  letter-spacing: 0.3px;
+}
+.timeline-item .t-source-stormgeo {
+  background: rgba(192, 57, 43, 0.18);
+  color: #ff8a8a;
+  border: 1px solid rgba(192, 57, 43, 0.35);
+}
+.timeline-item .t-source-system {
+  background: rgba(108, 200, 150, 0.15);
+  color: #6ee094;
+  border: 1px solid rgba(108, 200, 150, 0.35);
 }
 
 /* 桌面預設：手機專屬控制元件不顯示。必須放在 @media 區段「之前」，
@@ -2170,7 +2262,7 @@ function dms(coord, type) {
  *     comm    - AIS 訊號新鮮度 (模擬)
  *     event   - 系統 Open Event
  * ───────────────────────────────────────────────────────────────── */
-const DIM_KEYS = ["route", "speed", "sea", "port", "engine", "alert", "comm", "event", "zone"];
+const DIM_KEYS = ["route", "speed", "sea", "anchorage", "engine", "alert", "comm", "zone"];
 const DIM_META = {
   route:  { label: "航線偏移",   short: "Route Dev",  icon: iconRoute,
             desc: "max(目前 XTD, 歷史最大偏移) ≥ Safety Frame × 閾值即觸發" },
@@ -2178,16 +2270,14 @@ const DIM_META = {
             desc: "|SOG − 計畫平均|/計畫平均 超過閾值；航行中近乎停止也會 warning" },
   sea:    { label: "海況/天候",  short: "Sea State",  icon: iconSea,
             desc: "浪/風指數 0~1 超過閾值（demo 為穩定雜湊，正式對接氣象 API）" },
-  port:   { label: "到港/離港",  short: "Port Ops",   icon: iconPort,
-            desc: "progress > 92% 或 < 5%（進出港敏感區段）+ 風險指標超過閾值" },
+  anchorage: { label: "港口錨地", short: "Anchorage", icon: iconPort,
+            desc: "船舶進入錨地或拋錨/漂航 → 建立漂航圈（warn / crit 雙半徑）；圈內 normal，逾 warn 觸 warning，逾 crit 觸 critical" },
   engine: { label: "主機異常",   short: "Main Engine",icon: iconEngine,
             desc: "RPM / 排氣溫 / 油壓 異常指標 0~100 超過閾值" },
   alert:  { label: "Warning Mail", short: "Mail",     icon: iconAlert,
             desc: "StormGeo 等通知信：Warning → critical、Information → warning" },
   comm:   { label: "AIS 訊號",   short: "Comms",      icon: iconComm,
             desc: "AIS 訊號延遲指標；超過閾值表示位置回報太久沒更新" },
-  event:  { label: "進行中偏移事件", short: "Open Deviation", icon: iconEvent,
-            desc: "對應 open_event：Warning level 視為 critical、其餘 warning" },
   zone:   { label: "區域警示",   short: "Zone Alert", icon: iconZone,
             desc: "船舶當前位置是否落入海盜 / 戰爭 / 制裁 / 軍演 / 氣象 / ECA / 保護區 / 壅塞 等風險區（critical+high→critical；medium+low+info→warning）" },
 };
@@ -2245,6 +2335,20 @@ function pointInPolygon(lat, lon, polygon) {
   return inside;
 }
 const ZONE_LEVEL_RANK = { critical: 4, high: 3, medium: 2, low: 1, info: 0 };
+/* 港口錨地命中：船舶當前位置是否落入任一 ANCHORAGE_AREAS 的多邊形內。
+ * 回傳命中的錨地物件（含 port_name / port_code / region），無命中回 null。 */
+function vesselInAnchorage(v) {
+  if (!v || v.latitude === null || v.latitude === undefined ||
+      v.longitude === null || v.longitude === undefined ||
+      !window.ANCHORAGE_AREAS) {
+    return null;
+  }
+  for (const a of window.ANCHORAGE_AREAS) {
+    if (pointInPolygon(v.latitude, v.longitude, a.coords)) return a;
+  }
+  return null;
+}
+
 function vesselZoneAlert(v) {
   if (v.latitude === null || v.latitude === undefined ||
       v.longitude === null || v.longitude === undefined ||
@@ -2320,26 +2424,75 @@ function computeAlerts(v) {
     else                               a.comm = "normal";
   }
 
-  // 7. Open event
-  if (v.open_event) {
-    a.event = v.open_event.event_level === "Warning" ? "critical" : "warning";
-  } else {
-    a.event = "normal";
-  }
+  // 7. (event 維度已移除：「進行中偏移事件」併入航線偏移 (route) 顯示)
 
-  // 8. 到港/離港 (mock): 依 progress_pct 與穩定雜湊判斷
-  //    - 接近抵港 (>92%) 或剛離港 (<5%) 屬高敏感區段
-  //    - 若 ETA hash 不利 → warning / critical
-  const pct = (typeof v.progress_pct === "number") ? v.progress_pct : null;
-  const portHash = (v.vessel_id * 5779 + 38461) % 100;
-  if (pct === null) a.port = "normal";    // 無 progress 資料視為 normal
-  else if (pct > 92 || pct < 5) {  // 進出港期間敏感
-    if (portHash > T.port.critical)      a.port = "critical";  // ETA 嚴重延誤 / 偏離靠泊位
-    else if (portHash > T.port.warning)  a.port = "warning";   // 進度落後 / 靠泊待命
-    else                                 a.port = "normal";
+  // 8. 港口錨地 (anchorage) — 監控漂航圈位置
+  //    觸發條件（OR）：
+  //      (a) 船舶位置在 ANCHORAGE_AREAS 任一錨地多邊形內，或
+  //      (b) AIS 狀態為 拋錨 / 漂航（大型貨輪不規劃繫泊漂航圈）
+  //    Drift Circle 邏輯（依設定半徑判斷）：
+  //      • 在 Warning 半徑內              → normal（不觸發，但圈圈顯示中表示監控中）
+  //      • 超過 Warning、未超 Critical    → warning（船偏移預警）
+  //      • 超過 Critical                  → critical（拖錨 / 越界）
+  //    另外，進入拋錨/漂航/錨地 是「狀態事件提醒」（蹦現在 tooltip / 通知欄）。
+  //    支援 per-vessel override（監管人員可為個別船舶設定專屬半徑）。
+  const ancHit = vesselInAnchorage(v);
+  const aisSt = aisStatus(v);
+  const isAnchorState = ["anchored", "drifting"].includes(aisSt.key);
+  if (!ancHit && !isAnchorState) {
+    a.anchorage = "normal";
   } else {
-    if (portHash > 95)      a.port = "warning";   // 航程中偶發異常
-    else                    a.port = "normal";
+    // 1) 決定使用哪一組漂航圈閾值（依當前 AIS 狀態，預設拋錨）
+    let driftKey = "driftAnchor", stateCN = "拋錨", stateEN = "Anchored";
+    if (aisSt.key === "drifting") { driftKey = "driftAdrift"; stateCN = "漂航"; stateEN = "Adrift"; }
+    // 2) 取得閾值（per-vessel override > global threshold）
+    const ovr = getDriftOverride(v.vessel_id, driftKey);
+    const warnR = (ovr && ovr.warning != null) ? ovr.warning : T[driftKey].warning;
+    const critR = (ovr && ovr.critical != null) ? ovr.critical : T[driftKey].critical;
+    const overridden = !!ovr;
+
+    // 3) 漂航圈中心：取 planned arrival（船「計畫拋錨」的位置 — 抵港點）。
+    //    正式版應記錄首次進入錨泊狀態的實際 AIS 位置；以 planned arrival 近似 demo 用。
+    let driftCenter = null;
+    if (v.planned_track && v.planned_track.length) {
+      const arr = v.planned_track[v.planned_track.length - 1];
+      if (arr.latitude != null && arr.longitude != null) driftCenter = [arr.latitude, arr.longitude];
+    }
+    if (!driftCenter && v.latitude != null && v.longitude != null) {
+      driftCenter = [v.latitude, v.longitude];
+    }
+
+    // 4) 當前船位 → 中心 真實距離（Haversine, 公尺）
+    let distMeters = 0;
+    if (driftCenter && v.latitude != null && v.longitude != null) {
+      const R = 6371000;
+      const toRad = d => d * Math.PI / 180;
+      const dLat = toRad(driftCenter[0] - v.latitude);
+      const dLon = toRad(driftCenter[1] - v.longitude);
+      const sa = Math.sin(dLat/2)**2 + Math.cos(toRad(v.latitude)) * Math.cos(toRad(driftCenter[0])) * Math.sin(dLon/2)**2;
+      distMeters = Math.round(2 * R * Math.asin(Math.sqrt(sa)));
+    }
+
+    // 5) 等級：3-tier
+    let lvl = "normal";
+    if (distMeters > critR)      lvl = "critical";
+    else if (distMeters > warnR) lvl = "warning";
+    a.anchorage = lvl;
+
+    // 6) 入境事件（status entries — 用於 tooltip / 通知列）
+    const entries = [];
+    if (ancHit)                    entries.push({ key: "enter-anchorage", cn: "進入錨地", en: "Entered anchorage", area: ancHit.name || ancHit.code });
+    if (aisSt.key === "anchored")  entries.push({ key: "state-anchored",  cn: "進入拋錨狀態", en: "Anchored" });
+    if (aisSt.key === "drifting")  entries.push({ key: "state-drifting", cn: "進入漂航狀態", en: "Drifting" });
+
+    a._anchorage = {
+      hit: ancHit,
+      stateCN, stateEN, statusKey: aisSt.key,
+      driftKey, driftCenter, distMeters, warnR, critR, overridden,
+      inWarn:  distMeters <= warnR,
+      inCrit:  distMeters <= critR,
+      entries,
+    };
   }
 
   // 9. 主機異常 (mock): 以穩定雜湊判斷 RPM / 排氣溫 / 油壓 是否在規格內
@@ -2389,55 +2542,40 @@ function levelTag(level) {
  *   - 表格內用縮寫顯示，避免長字串撐爆 120px AIS Status 欄
  *   - title 給滑鼠 hover 用，可看到完整中英文描述
  *   - label 維持顯示在欄位內、labelFull 給單船 detail 等空間較大的位置用 */
-/* AIS 導航狀態（ITU-R M.1371）：欄位內用「中文 + 英文縮寫」雙行顯示，
- * 完整名稱與來源在 hover title 內。
- *   labelCN — 中文簡稱（繫泊 / 拋錨 / 航行 / 不明）
- *   labelEN — 英文縮寫（MOOR / ANC / U/W / UNK）
+/* AIS 導航狀態（ITU-R M.1371）：直接取 v.nav_status，不再 SOG 推算。
+ * 欄位內顯示「中文 + 英文縮寫」雙行；完整名稱在 hover title。
+ *   labelCN — 中文簡稱（繫泊 / 拋錨 / 漂航 / 航行 / 不明）
+ *   labelEN — 英文縮寫（MOOR / ANC / NUC / U/W / UNK）
  *   label   — 舊欄位，保留兼容（等於 labelEN）
- *
- * 取得優先順序：
- *   1. AIS 訊號內的 navigation status code（v.nav_status，ITU-R M.1371）
- *   2. 退而求其次，依 SOG 推算
  */
 function aisStatus(v) {
-  // 1. 優先用 AIS 真實 nav_status
-  if (v && v.nav_status !== undefined && v.nav_status !== null && v.nav_status !== "") {
-    const ns = parseInt(v.nav_status, 10);
-    // ITU-R M.1371: 0=under way engine, 1=at anchor, 5=moored, 8=under way sailing
-    if (ns === 5) return {
-      key: "moored", labelCN: "繫泊", labelEN: "MOOR", label: "MOOR",
-      title: "繫泊 / Moored — 來自 AIS navigation status 5",
+  if (!v || v.nav_status === undefined || v.nav_status === null || v.nav_status === "") {
+    return {
+      key: "unknown", labelCN: "不明", labelEN: "UNK", label: "UNK",
+      title: "AIS 狀態不明 / Status unknown — 無 nav_status 資料",
     };
-    if (ns === 1) return {
-      key: "anchored", labelCN: "拋錨", labelEN: "ANC", label: "ANC",
-      title: "拋錨 / At anchor — 來自 AIS navigation status 1",
-    };
-    if (ns === 0 || ns === 8) return {
-      key: "under-way", labelCN: "航行", labelEN: "U/W", label: "U/W",
-      title: "航行中 / Under way — 來自 AIS navigation status " + ns,
-    };
-    // 其他特殊狀態（如 2 Not Under Command, 6 Aground 等）暫不細分，掛到 unknown
   }
-  // 2. 退而求其次，依 SOG 推算
-  return aisStatusFromSog(v ? v.sog : null);
-}
-
-function aisStatusFromSog(sog) {
-  if (sog === null || sog === undefined) return {
-    key: "unknown", labelCN: "不明", labelEN: "UNK", label: "UNK",
-    title: "AIS 狀態不明 / Status unknown — 無 SOG 資料、無 nav_status",
-  };
-  if (sog < 0.5) return {
+  const ns = parseInt(v.nav_status, 10);
+  // ITU-R M.1371: 0=under way engine, 1=at anchor, 2=NUC, 5=moored, 8=under way sailing
+  if (ns === 5) return {
     key: "moored", labelCN: "繫泊", labelEN: "MOOR", label: "MOOR",
-    title: "繫泊 / Moored — 依 SOG 推算（SOG < 0.5 kn）",
+    title: "繫泊 / Moored — AIS navigation status 5",
   };
-  if (sog < 2) return {
+  if (ns === 1) return {
     key: "anchored", labelCN: "拋錨", labelEN: "ANC", label: "ANC",
-    title: "拋錨 / At anchor — 依 SOG 推算（0.5 ≤ SOG < 2 kn）",
+    title: "拋錨 / At anchor — AIS navigation status 1",
+  };
+  if (ns === 2) return {
+    key: "drifting", labelCN: "漂航", labelEN: "NUC", label: "NUC",
+    title: "漂航 / Not Under Command — AIS navigation status 2",
+  };
+  if (ns === 0 || ns === 8) return {
+    key: "under-way", labelCN: "航行", labelEN: "U/W", label: "U/W",
+    title: "航行中 / Under way — AIS navigation status " + ns,
   };
   return {
-    key: "under-way", labelCN: "航行", labelEN: "U/W", label: "U/W",
-    title: "航行中 / Under way — 依 SOG 推算（SOG ≥ 2 kn）",
+    key: "unknown", labelCN: "不明", labelEN: "UNK", label: "UNK",
+    title: "AIS 狀態 / Status code " + ns + " — 暫不細分（如 3/4/6/7 等）",
   };
 }
 
@@ -2454,6 +2592,8 @@ function setMainMode(mode) {
   const m = document.getElementById("main");
   if (m) m.className = mode || "";
 }
+/* 重新渲染目前頁面（用於閥值 / 漂航圈 override 變更後立即反映） */
+function rerenderCurrentView() { try { route(); } catch (e) {} }
 function route() {
   const h = location.hash || "#/fleet";
   if (h.startsWith("#/vessel/")) {
@@ -2501,20 +2641,23 @@ let _fleetFilterOpen = sessionStorage.getItem("slab_va_filter_open") === "1";  /
  * ───────────────────────────────────────────────────────────────── */
 const THRESHOLDS_STORAGE_KEY = "slab_va_thresholds_v1";
 const DEFAULT_THRESHOLDS = {
-  route:  { warning: 0.70, critical: 1.00 },   // XTD / Safety Frame 比值
-  speed:  { warning: 0.20, critical: 0.40 },   // |SOG−plan|/plan
-  sea:    { warning: 0.65, critical: 0.85 },   // 浪/風指數 0~1
-  comm:   { warning: 75,   critical: 92  },    // AIS 延遲指標 0~100
-  port:   { warning: 65,   critical: 88  },    // 進出港敏感指標 0~100
-  engine: { warning: 78,   critical: 93  },    // 主機異常指標 0~100
+  route:        { warning: 0.70, critical: 1.00 },   // XTD / Safety Frame 比值
+  speed:        { warning: 0.20, critical: 0.40 },   // |SOG−plan|/plan
+  sea:          { warning: 0.65, critical: 0.85 },   // 浪/風指數 0~1
+  comm:         { warning: 75,   critical: 92  },    // AIS 延遲指標 0~100
+  engine:       { warning: 78,   critical: 93  },    // 主機異常指標 0~100
+  /* 港口錨地監控由「漂航圈半徑」掌握，依當前 AIS 狀態挑一組（大型貨輪不規劃繫泊圈） */
+  driftAnchor:  { warning: 500,  critical: 750 },    // 拋錨 ANC 半徑（公尺）
+  driftAdrift:  { warning: 1000, critical: 1500 },   // 漂航 DRIFT 半徑（公尺）
 };
 const THRESHOLD_META = {
-  route:  { label: "航線偏移",   short: "Route Dev",   unit: "× Safety Frame", unitShort: "× SF",     range: "0 – 5",     step: 0.05, min: 0,  max: 5,   isPct: false },
-  speed:  { label: "速度異常",   short: "Speed Anom",  unit: "× 計畫平均速度", unitShort: "× planAvg", range: "0 – 2",     step: 0.05, min: 0,  max: 2,   isPct: false },
-  sea:    { label: "海況/天候",  short: "Sea State",   unit: "海況指數",       unitShort: "score",     range: "0 – 1",     step: 0.05, min: 0,  max: 1,   isPct: false },
-  comm:   { label: "AIS 訊號",   short: "AIS Comm",    unit: "通訊延遲分數",   unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
-  port:   { label: "到港/離港",  short: "Port Phase",  unit: "進出港敏感分數", unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
-  engine: { label: "主機異常",   short: "Engine",      unit: "主機異常分數",   unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
+  route:        { label: "航線偏移",       short: "Route Dev",   unit: "× Safety Frame", unitShort: "× SF",     range: "0 – 5",     step: 0.05, min: 0,  max: 5,   isPct: false },
+  speed:        { label: "速度異常",       short: "Speed Anom",  unit: "× 計畫平均速度", unitShort: "× planAvg", range: "0 – 2",     step: 0.05, min: 0,  max: 2,   isPct: false },
+  sea:          { label: "海況/天候",      short: "Sea State",   unit: "海況指數",       unitShort: "score",     range: "0 – 1",     step: 0.05, min: 0,  max: 1,   isPct: false },
+  comm:         { label: "AIS 訊號",       short: "AIS Comm",    unit: "通訊延遲分數",   unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
+  engine:       { label: "主機異常",       short: "Engine",      unit: "主機異常分數",   unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
+  driftAnchor:  { label: "拋錨漂航圈半徑", short: "Drift / ANC", unit: "公尺",         unitShort: "m",         range: "50 – 2000", step: 50,   min: 50, max: 2000,isPct: false },
+  driftAdrift:  { label: "漂航漂航圈半徑", short: "Drift / DRIFT",unit: "公尺",        unitShort: "m",         range: "200 – 5000",step: 100,  min: 200,max: 5000,isPct: false },
 };
 let _thresholds = JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS));
 function loadThresholds() {
@@ -2536,6 +2679,107 @@ function loadThresholds() {
 function saveThresholds() {
   try { localStorage.setItem(THRESHOLDS_STORAGE_KEY, JSON.stringify(_thresholds)); } catch (e) {}
 }
+/* ── 漂航圈 per-vessel 半徑覆寫 ──────────────────────────────────────
+ *   監管人員可依不同船舶/錨地/作業情境，為個別 vessel_id 設定專屬半徑。
+ *   結構：{ [vessel_id]: { driftAnchor: {warning, critical}, driftAdrift: {...} } }
+ *   找不到 override 時 fallback 至 _thresholds（全域系統閾值）。 */
+const DRIFT_OVERRIDES_KEY = "slab_va_drift_overrides_v1";
+let _driftOverrides = {};
+function loadDriftOverrides() {
+  try {
+    const raw = localStorage.getItem(DRIFT_OVERRIDES_KEY);
+    _driftOverrides = raw ? (JSON.parse(raw) || {}) : {};
+  } catch (e) { _driftOverrides = {}; }
+}
+function saveDriftOverrides() {
+  try { localStorage.setItem(DRIFT_OVERRIDES_KEY, JSON.stringify(_driftOverrides)); } catch (e) {}
+}
+function getDriftOverride(vesselId, driftKey) {
+  const v = _driftOverrides[vesselId];
+  if (!v || !v[driftKey]) return null;
+  const o = v[driftKey];
+  if (o.warning == null && o.critical == null) return null;
+  return o;
+}
+function setDriftOverride(vesselId, driftKey, warn, crit) {
+  if (warn == null && crit == null) {
+    if (_driftOverrides[vesselId]) {
+      delete _driftOverrides[vesselId][driftKey];
+      if (Object.keys(_driftOverrides[vesselId]).length === 0) delete _driftOverrides[vesselId];
+    }
+  } else {
+    if (!_driftOverrides[vesselId]) _driftOverrides[vesselId] = {};
+    _driftOverrides[vesselId][driftKey] = {};
+    if (warn != null) _driftOverrides[vesselId][driftKey].warning = warn;
+    if (crit != null) _driftOverrides[vesselId][driftKey].critical = crit;
+  }
+  saveDriftOverrides();
+}
+loadDriftOverrides();
+
+/* 漂航圈半徑設定 modal — 從警示 row、地圖圓心都可以呼叫。
+ *   參數：vesselId、driftKey (driftAnchor / driftAdrift) */
+window.openDriftSettings = function(vesselId, driftKey) {
+  const v = VESSELS.find(x => x.vessel_id === Number(vesselId));
+  if (!v) return;
+  const def = DEFAULT_THRESHOLDS[driftKey];
+  if (!def) return;
+  const cur = getDriftOverride(vesselId, driftKey) || {};
+  const warnVal = cur.warning ?? def.warning;
+  const critVal = cur.critical ?? def.critical;
+  const overridden = !!(cur.warning != null || cur.critical != null);
+  const stateLabel = driftKey === "driftAnchor" ? "拋錨 / Anchored" : "漂航 / Drifting";
+
+  const mask = document.createElement("div");
+  mask.className = "modal-mask open";
+  mask.style.zIndex = "1100";
+  mask.innerHTML = `
+    <div class="modal" style="width:min(440px,92vw);position:relative">
+      <button type="button" class="modal-close">×</button>
+      <h3>⊙ 漂航圈半徑設定 <span style="color:#7c8a9e;font-weight:400;font-size:14px">/ Drift Radius</span></h3>
+      <div class="modal-sub">${escapeHtml(v.vessel_name)} · IMO ${escapeHtml(String(v.imo))} · ${stateLabel}</div>
+      <div style="color:#7c8a9e;font-size:13px;margin-bottom:10px;line-height:1.5">
+        系統預設 / Default: <b>${def.warning} m</b> / <b>${def.critical} m</b>
+        ${overridden ? `<br><span style="color:#f5a623">⚙ 目前使用自訂值 / Custom override active</span>` : ""}
+      </div>
+      <div style="display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:center;margin:12px 0">
+        <label style="color:#f5b753;font-weight:600">Warning (m)</label>
+        <input type="number" id="drift-modal-warn" min="50" max="6000" step="50" value="${warnVal}"
+               style="padding:6px 8px;background:#1a1f2a;border:1px solid #2e3a4d;border-radius:3px;color:#d8dee9;font-size:14px">
+        <label style="color:#ff8a8a;font-weight:600">Critical (m)</label>
+        <input type="number" id="drift-modal-crit" min="50" max="6000" step="50" value="${critVal}"
+               style="padding:6px 8px;background:#1a1f2a;border:1px solid #2e3a4d;border-radius:3px;color:#d8dee9;font-size:14px">
+      </div>
+      <div style="color:#7c8a9e;font-size:12px;margin-bottom:6px">Critical 必須大於 Warning。覆寫即生效，同船下次仍套用。</div>
+      <div class="modal-actions">
+        <button type="button" class="trans-btn danger drift-modal-reset">還原預設 / Reset</button>
+        <button type="button" class="trans-btn secondary drift-modal-cancel">取消 / Cancel</button>
+        <button type="button" class="trans-btn drift-modal-save">儲存 / Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(mask);
+  const close = () => mask.remove();
+  mask.addEventListener("click", e => { if (e.target === mask) close(); });
+  mask.querySelector(".modal-close").addEventListener("click", close);
+  mask.querySelector(".drift-modal-cancel").addEventListener("click", close);
+  mask.querySelector(".drift-modal-save").addEventListener("click", () => {
+    const w = parseFloat(mask.querySelector("#drift-modal-warn").value);
+    const c = parseFloat(mask.querySelector("#drift-modal-crit").value);
+    if (isNaN(w) || isNaN(c) || w <= 0 || c <= 0 || c <= w) {
+      alert("Critical 半徑需大於 Warning 半徑，且皆為正數");
+      return;
+    }
+    setDriftOverride(Number(vesselId), driftKey, w, c);
+    close();
+    rerenderCurrentView();
+  });
+  mask.querySelector(".drift-modal-reset").addEventListener("click", () => {
+    setDriftOverride(Number(vesselId), driftKey, null, null);
+    close();
+    rerenderCurrentView();
+  });
+};
+
 function resetThresholds() {
   _thresholds = JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS));
   saveThresholds();
@@ -2570,6 +2814,8 @@ function loadEvents() {
   try {
     const raw = localStorage.getItem(EVENT_STORAGE_KEY);
     _events = raw ? JSON.parse(raw) : [];
+    // 過濾掉已移除維度（早期 localStorage 留下的 dimension="event"）
+    _events = _events.filter(e => DIM_META[e.dimension]);
   } catch (e) { _events = []; }
 }
 function saveEvents() {
@@ -2591,6 +2837,11 @@ function syncEventsFromAlerts() {
       seen.add(id);
       const existing = _events.find(e => e.id === id);
       if (existing) {
+        // 若事件先前被標為 resolved，但對應警示又再次觸發 → 自動重開
+        if (existing.status === "resolved") {
+          existing.status = "new";
+          existing.history.push({ from: "resolved", to: "new", at: openedAt, by: "system", note: "alert resurfaced" });
+        }
         existing.level = lvl;
         delete existing.cleared;
       } else {
@@ -2696,25 +2947,19 @@ function dimDescription(v, k, a) {
       return `最新 AIS：${v.ais_timestamp} · ${note}`
            + `<br><span style="color:#5e6b80">Last fix ~${lagMin} min ago · ${lvl}</span>`;
     }
-    case "event":
-      if (!v.open_event) return "目前無未結案事件 / No open event";
-      return `Event #${v.open_event.id} · ${v.open_event.event_level} · 最大偏移 ${fmt(v.open_event.max_deviation_distance_nm,2)} NM`
-           + `<br><span style="color:#5e6b80">Start ${v.open_event.start_time} · Last ${v.open_event.last_detected_time}</span>`;
-    case "port": {
-      const pct = v.progress_pct;
-      if (pct === undefined || pct === null) return "無進度資料 / No progress data";
-      let phaseCN, phaseEN;
-      if (pct > 92)      { phaseCN = "進港相位"; phaseEN = "Arrival phase"; }
-      else if (pct < 5)  { phaseCN = "離港相位"; phaseEN = "Departure phase"; }
-      else               { phaseCN = "航行中";   phaseEN = "In transit"; }
-      const detail = lvl === "critical" ? "ETA 嚴重延誤 / 偏離靠泊位"
-                   : lvl === "warning"  ? "進度落後 / 靠泊待命"
-                   :                       "依計畫進行";
-      const detailEN = lvl === "critical" ? "ETA delay / off berth"
-                     : lvl === "warning"  ? "Progress lag / awaiting berth"
-                     :                       "On schedule";
-      return `${phaseCN} (進度 ${pct}%) · ${detail}`
-           + `<br><span style="color:#5e6b80">${phaseEN} (${pct}%) · ${detailEN}</span>`;
+    case "anchorage": {
+      const info = a._anchorage;
+      if (!info) return `未停留錨地、非錨泊狀態<br><span style="color:#5e6b80">Not in anchorage / not in anchor state</span>`;
+      const portCN = info.hit ? (info.hit.port_name_cn || info.hit.port_name) : "—";
+      const portEN = info.hit ? info.hit.port_name : "—";
+      const ovrTag = info.overridden ? "（自訂）" : "";
+      const driftMsg = info.inWarn
+        ? `<span style="color:#6ee094">✓ 在 ${info.warnR} m 漂航圈內${ovrTag}</span>`
+        : info.inCrit
+          ? `<span style="color:#f5b753">⚠ 偏移 ${info.distMeters} m</span>（超過 Warning ${info.warnR} m）`
+          : `<span style="color:#ff8a8a">⛔ 越界 ${info.distMeters} m</span>（超過 Critical ${info.critR} m）`;
+      return `${info.stateCN}（${portCN}）· ${driftMsg}`
+           + `<br><span style="color:#5e6b80">${info.stateEN} at ${portEN} · drift dist ${info.distMeters} m / W ${info.warnR} m / C ${info.critR} m</span>`;
     }
     case "engine": {
       const detail = lvl === "critical" ? "排氣溫度或油壓越線，建議立即檢修"
@@ -2814,19 +3059,17 @@ function renderUpperArea(enriched) {
     if (k === "comm") {
       return `最新 AIS 時間 / Latest AIS：${v.ais_timestamp || "-"}`;
     }
-    if (k === "event") {
-      if (v.open_event) {
-        return `Event #${v.open_event.id} · ${v.open_event.event_level} · 最大偏移 ${fmt(v.open_event.max_deviation_distance_nm,2)} NM`;
-      }
-      return "目前無 Open 事件 / No open event";
-    }
-    if (k === "port") {
-      const pct = v.progress_pct;
-      let phase = "航行中 / In transit";
-      if (pct >= 92)      phase = "進港相位 / Arrival phase";
-      else if (pct <= 8)  phase = "離港相位 / Departure phase";
-      const eta = v.planned_track[v.planned_track.length - 1]?.date || "-";
-      return `${phase} · 進度 ${pct !== undefined ? pct + "%" : "-"} · 預計 ETA ${eta.slice(0,16)}`;
+    if (k === "anchorage") {
+      const info = a._anchorage;
+      if (!info) return "未停留錨地、非錨泊狀態 / Not in anchor state";
+      const portCN = info.hit ? (info.hit.port_name_cn || info.hit.port_name) : "海上";
+      const portEN = info.hit ? info.hit.port_name : "open sea";
+      const driftMsg = info.inWarn
+        ? `圈內 ${info.distMeters} m / inside warn ${info.warnR} m`
+        : info.inCrit
+          ? `⚠ 偏移 ${info.distMeters} m / outside warn ${info.warnR} m`
+          : `⛔ 越界 ${info.distMeters} m / outside crit ${info.critR} m`;
+      return `${info.stateCN}（${portCN}）· ${driftMsg}`;
     }
     if (k === "engine") {
       return `RPM ${engRpm} · 排氣溫 ${engTemp}°C · 油壓 ${engOil} bar`;
@@ -2842,25 +3085,64 @@ function renderUpperArea(enriched) {
     return "";
   }
 
-  const alertRows = DIM_KEYS.map(k => {
-    const lvl = a[k];
-    const iconColor = lvl === "critical" ? "#ff8a8a"
-                    : lvl === "warning"  ? "#f5b753"
-                    : lvl === "na"       ? "#5e6b80"
-                    : "#9aa5b8";
-    return `
-      <div class="alert-row" style="grid-template-columns:24px 1fr auto;gap:8px;padding:8px 10px">
-        <div class="alert-icon">${DIM_META[k].icon(iconColor)}</div>
-        <div style="min-width:0">
-          <div style="font-size:14px">
-            <span class="alert-name">${DIM_META[k].label}</span>
-            <span style="color:#5e6b80;margin-left:4px;font-size:14px">${DIM_META[k].short}</span>
-          </div>
-          <div class="alert-meta" style="margin-top:3px;line-height:1.45">${dimDescription(v, k, a)}</div>
-        </div>
-        <div>${levelTag(lvl)}</div>
-      </div>`;
-  }).join("");
+  // 各維度警示 + 進行中事件 — 已合併：每個觸發維度直接帶事件狀態 + 跳轉 + 開啟 modal
+  const triggeredKeys = DIM_KEYS.filter(k => a[k] === "warning" || a[k] === "critical");
+  const vEventsMap = {};
+  eventsForVessel(v.vessel_id, false).forEach(ev => { vEventsMap[ev.dimension] = ev; });
+  const alertRows = triggeredKeys.length === 0
+    ? `<div style="padding:14px 10px;color:#6ee094;font-size:14px;text-align:center;line-height:1.5">
+         ✓ 全部維度正常、無進行中事件 <span style="color:#5e6b80">/ All normal · no open events</span>
+       </div>`
+    : triggeredKeys.map(k => {
+        const lvl = a[k];
+        const iconColor = lvl === "critical" ? "#ff8a8a" : "#f5b753";
+        const ev = vEventsMap[k];
+        const evMeta = ev ? `<div class="alert-meta" style="margin-top:4px;font-size:12px;color:#7c8a9e">
+            開立 ${ev.opened_at.slice(5,16)} · ${statusBadge(ev.status)}${ev.assignee ? ` · ${escapeHtml(ev.assignee)}` : ""}
+          </div>` : "";
+        const driftBtn = (k === "anchorage" && a._anchorage) ? `
+          <button type="button" class="ev-settings" title="設定漂航圈半徑 / Edit drift radius"
+                  onclick="openDriftSettings(${v.vessel_id}, '${a._anchorage.driftKey}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>` : "";
+        const btns = ev ? `
+          <div class="alert-actions">
+            <button type="button" class="ev-pan" title="跳到地圖事件位置 / Pan to event"
+                    onclick="panToEvent('${ev.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s-8-8-8-13a8 8 0 0 1 16 0c0 5-8 13-8 13z"/>
+                <circle cx="12" cy="9" r="2.5"/>
+              </svg>
+            </button>
+            ${driftBtn}
+            <button type="button" class="ev-open" title="開啟事件詳情 / Open event detail"
+                    onclick="openEventModal('${ev.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="13" x2="15" y2="13"/>
+                <line x1="9" y1="17" x2="13" y2="17"/>
+              </svg>
+            </button>
+          </div>` : "";
+        return `
+          <div class="alert-row" style="grid-template-columns:24px 1fr auto;gap:8px;padding:8px 10px">
+            <div class="alert-icon">${DIM_META[k].icon(iconColor)}</div>
+            <div style="min-width:0">
+              <div style="margin-bottom:4px">${levelTag(lvl)}</div>
+              <div style="font-size:14px">
+                <span class="alert-name">${DIM_META[k].label}</span>
+                <span style="color:#5e6b80;margin-left:4px;font-size:14px">${DIM_META[k].short}</span>
+              </div>
+              <div class="alert-meta" style="margin-top:3px;line-height:1.45">${dimDescription(v, k, a)}</div>
+              ${evMeta}
+            </div>
+            ${btns}
+          </div>`;
+      }).join("");
 
   const aisCount = (v.ais_track || []).length;
   const mailCount = MAILS.filter(m => m.vessel_name === v.vessel_name && m.latitude !== null).length;
@@ -2896,31 +3178,8 @@ function renderUpperArea(enriched) {
           <div class="xtd-foot"><span>歷史最大 / Max ${maxDev.toFixed(2)} NM</span><span>${devCnt > 0 ? `偏移 / Dev ${devCnt} 點` : "無偏移 / No deviation"}</span></div>
         </div>
 
-        <h3>各維度警示 <span style="color:#5e6b80;text-transform:none;font-weight:400">/ Alert Dimensions</span></h3>
+        <h3>警示與事件 <span style="color:#5e6b80;text-transform:none;font-weight:400">/ Alerts &amp; Open Events</span></h3>
         <div class="alert-list">${alertRows}</div>
-
-        ${(() => {
-          const vEvents = eventsForVessel(v.vessel_id, false);
-          if (vEvents.length === 0) return "";
-          const evRows = vEvents.slice(0, 6).map(e => `
-            <div class="ev-row" data-event-id="${e.id}" onclick="openEventModal('${e.id}')">
-              <div>
-                <div class="ev-title">
-                  <span class="ev-dim">${DIM_META[e.dimension].short}</span>
-                  ${levelTag(e.level)} · ${statusBadge(e.status)}
-                </div>
-                <div class="ev-meta">${DIM_META[e.dimension].label} · 開立 ${e.opened_at.slice(5,16)}${e.assignee ? ` · ${escapeHtml(e.assignee)}` : ""}</div>
-              </div>
-              <div style="color:#5e6b80;font-size:14px">›</div>
-            </div>`).join("");
-          const moreLink = vEvents.length > 6
-            ? `<a href="#/events" style="font-size:14px;color:#9ec5ff;text-decoration:none;display:block;margin-top:4px;text-align:right">查看全部 ${vEvents.length} 件 / View all →</a>`
-            : "";
-          return `
-            <h3>進行中事件 <span style="color:#5e6b80;text-transform:none;font-weight:400">/ Active Events (${vEvents.length})</span></h3>
-            <div class="alert-list" style="gap:4px">${evRows}</div>
-            ${moreLink}`;
-        })()}
 
         <h3>當前 AIS 位置 <span style="color:#5e6b80;text-transform:none;font-weight:400">/ Current AIS Position</span></h3>
         <div class="kv" style="font-size:14px">
@@ -3082,6 +3341,7 @@ function renderFleet() {
     }
 
     injectRiskTogglePanel(mapWrap);
+    injectExtraLayerPanel(mapWrap);
   }
 
   // 注意：detail 模式時 toolbar 不會注入，這兩個元素可能為 null
@@ -3198,6 +3458,18 @@ function renderFleet() {
       });
     });
 
+    // 圖層面板摺疊狀態（session 持久化，預設 desktop 展開、mobile 收合）
+    const ltPanel = document.querySelector(".layer-toggle");
+    if (ltPanel) {
+      const open = (sessionStorage.getItem("slab_va_layer_panel_open") ?? (IS_MOBILE ? "0" : "1")) === "1";
+      ltPanel.classList.toggle("lt-open", open);
+      const head = ltPanel.firstElementChild;
+      if (head) head.addEventListener("click", () => {
+        ltPanel.classList.toggle("lt-open");
+        sessionStorage.setItem("slab_va_layer_panel_open", ltPanel.classList.contains("lt-open") ? "1" : "0");
+      });
+    }
+
     // 手機 detail mode：把 back / layer-toggle / view-toggle 包成一條 header row
     //   row 1: [← back] [圖層 ▾ ........] [≡⊟⊞]
     //   row 2: ⚠ 全球風險區 ▾                        (risk-toggle strip)
@@ -3234,11 +3506,7 @@ function renderFleet() {
         headerRow.appendChild(vt);
         wrap.insertBefore(headerRow, wrap.firstChild);
 
-        // layer-toggle header 點擊摺疊
-        const layerHead = layerEl.firstElementChild;
-        if (layerHead) {
-          layerHead.addEventListener("click", () => layerEl.classList.toggle("lt-open"));
-        }
+        // layer-toggle 摺疊 click 已由上方統一 handler 處理（含 session 持久化）
         // view-toggle 點擊切換 view mode
         vt.querySelectorAll("button").forEach(btn => {
           btn.addEventListener("click", () => {
@@ -3263,7 +3531,7 @@ function renderFleet() {
     // 在 map 區內絕對定位、不會跑到下方資訊面板下面。
     const detailMapCol = document.querySelector("#fleet-split .fleet-detail-grid > div:first-child");
     const detailWrap = detailMapCol || document.querySelector("#fleet-split .fleet-map-wrap");
-    if (detailWrap) injectRiskTogglePanel(detailWrap);
+    if (detailWrap) { injectRiskTogglePanel(detailWrap); injectExtraLayerPanel(detailWrap); }
   }
 }
 
@@ -3297,13 +3565,11 @@ function drawFleetDetailMap(v) {
   L.control.zoom({ position: "bottomright" }).addTo(map);
   attachMapResize(map, document.getElementById("fleet-map"));
   attachPopupDimOverlays(map);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    subdomains: "abcd", maxZoom: 19,
-  }).addTo(map);
+  setupBaseTiles(map);
 
   // 單船 detail 視角也保留全球風險區圖層（依 _riskLayerState 顯示）
   drawRiskZones(map);
+  drawAnchorages(map);
 
   // 自訂 pane 控制疊放順序（值越大越上層）
   map.createPane("corridorPane").style.zIndex = 400;
@@ -3436,6 +3702,9 @@ function drawFleetDetailMap(v) {
     if (_layerState[k]) _fleetLayers[k].addTo(map);
   });
 
+  // 單船 detail：也畫漂航圈（若該船有 anchorage 觸發）
+  drawDriftCircles(map, [{ v, a: alerts }]);
+
   setTimeout(() => map.invalidateSize(), 80);
   const all = plannedLL.slice().concat(aisLL);
   if (all.length) map.fitBounds(L.latLngBounds(all).pad(0.15));
@@ -3452,6 +3721,7 @@ let _riskLayerState = (() => {
     piracy: true, war: true, military: true, congestion: true,
     sanction: false, weather: false, eca: false, protected: false,
   };
+  // 注意：港口錨地不在 RISK_ZONE_CATEGORIES 內，由獨立 _anchorageLayerOn 控制
 })();
 function persistRiskLayerState() {
   try { sessionStorage.setItem("slab_va_risk_layers", JSON.stringify(_riskLayerState)); } catch (e) {}
@@ -3461,6 +3731,116 @@ function persistRiskLayerState() {
  * 暫時淡化，避免 z-index 600 的 toolbar 蓋住 leaflet popup-pane（後者在 leaflet-map-pane
  * 的 z=400 stacking context 內，效能上贏不過外層 z=600 toolbar）。
  * 只對「absolute 定位」的 overlay 套用 — 手機 RWD 把 overlay 改靜態 strip 時不會誤觸發。 */
+/* 底圖管理（dark / light）+ OpenSeaMap 海圖標示
+ *   - 預設：CARTO Dark 暗色底圖
+ *   - 海圖風格 ON：切換到亮色 OSM 標準底圖（海圖標示 PNG 在白底上才清楚可讀）
+ *                  並疊上 OpenSeaMap 透明標示層
+ * 取代原本的 attachSeamapLayer + 各 draw 函式內 inline 加入的 CARTO Dark tile */
+let _seamapLayerOn = sessionStorage.getItem("slab_va_seamap_layer") === "1";
+const _mapTiles = new WeakMap();  // map → { dark, light, seamap }
+function setupBaseTiles(map) {
+  if (!map) return;
+  const dark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    subdomains: "abcd", maxZoom: 19,
+  });
+  const light = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19,
+  });
+  const seamap = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openseamap.org">OpenSeaMap</a>',
+    maxZoom: 19, opacity: 0.95,
+  });
+  _mapTiles.set(map, { dark, light, seamap });
+  if (_seamapLayerOn) { light.addTo(map); seamap.addTo(map); map.getContainer().classList.add("seamap-on"); }
+  else { dark.addTo(map); }
+}
+/* 向後相容：舊呼叫名稱保留 */
+function attachSeamapLayer(map) { /* no-op — setup is now in setupBaseTiles */ }
+/* 漂航圈圖層 (drift circles) — 對每艘觸發 anchorage 維度的船舶，畫一個圓圈：
+ * 圓心為 a._anchorage.driftCenter、半徑為 a._anchorage.warnR；
+ * 顏色依當前等級（warning=橘 / critical=紅）；
+ * 圓心 + 號標記；圓內額外畫紅色虛線連到船舶當前位置。 */
+let _driftLayer = null;
+/* 漂航圈圖層 — 對任何已建立漂航圈的船舶都顯示（normal / warning / critical 皆畫）。
+ * 雙環：內圈 = warning 半徑（橘色 / 圈內 normal、圈外觸 warning），
+ *      外圈 = critical 半徑（紅色 / 圈外才觸 critical）。
+ * 中心十字、ship → center 連線僅在 warning / critical 時繪製。 */
+function drawDriftCircles(map, vesselsWithAlerts) {
+  if (_driftLayer) { map.removeLayer(_driftLayer); _driftLayer = null; }
+  const grp = L.layerGroup();
+  vesselsWithAlerts.forEach(({ v, a }) => {
+    const info = a._anchorage;
+    if (!info || !info.driftCenter || v.latitude == null) return;
+    const lvl = a.anchorage;                                  // normal | warning | critical
+    const warnColor = "#f5a623";
+    const critColor = "#ff4d4f";
+    const ovrTag = info.overridden ? " · 自訂" : "";
+    // 內圈：warning radius
+    L.circle(info.driftCenter, {
+      radius: info.warnR,
+      color: warnColor, weight: 2, opacity: lvl === "normal" ? 0.55 : 0.9,
+      fillColor: warnColor, fillOpacity: lvl === "warning" ? 0.12 : 0.05,
+      dashArray: lvl === "warning" ? null : "6 4",
+    }).bindTooltip(
+      `<b>Warning 半徑</b><br>狀態 ${info.stateCN} / ${info.stateEN}${ovrTag}<br>` +
+      `${info.warnR} m · 當前距中心 ${info.distMeters} m`
+    ).addTo(grp);
+    // 外圈：critical radius
+    L.circle(info.driftCenter, {
+      radius: info.critR,
+      color: critColor, weight: 2, opacity: lvl === "critical" ? 0.95 : 0.55,
+      fillColor: critColor, fillOpacity: lvl === "critical" ? 0.10 : 0.02,
+      dashArray: lvl === "critical" ? null : "8 6",
+    }).bindTooltip(
+      `<b>Critical 半徑</b><br>${info.critR} m${ovrTag}<br>` +
+      `當前距中心 ${info.distMeters} m（${lvl === "critical" ? "⛔ 已越界" : "尚未越界"}）`
+    ).addTo(grp);
+    // 圓心十字（click → 開啟 openDriftSettings modal，與警示 row 齒輪按鈕共用同一表單）
+    const centerColor = lvl === "critical" ? critColor : (lvl === "warning" ? warnColor : "#8aa0bf");
+    const centerMarker = L.circleMarker(info.driftCenter, {
+      radius: 7, color: centerColor, weight: 2.5,
+      fillColor: "#0d0d0d", fillOpacity: 1,
+    });
+    centerMarker.bindTooltip("漂航圈中心 / Drift Center · 點擊調整半徑");
+    centerMarker.on("click", () => {
+      window.openDriftSettings(v.vessel_id, info.driftKey);
+    });
+    centerMarker.addTo(grp);
+    // 船 → 圓心 連線（離心時才畫，按 level 變色）
+    if (lvl !== "normal") {
+      L.polyline([[v.latitude, v.longitude], info.driftCenter], {
+        color: lvl === "critical" ? critColor : warnColor,
+        weight: 1.5, opacity: 0.85, dashArray: "4 4",
+      }).addTo(grp);
+    }
+  });
+  _driftLayer = grp;
+  grp.addTo(map);
+}
+
+function setSeamapLayer(enabled) {
+  _seamapLayerOn = enabled;
+  sessionStorage.setItem("slab_va_seamap_layer", enabled ? "1" : "0");
+  // 切換目前所有 map 的底圖：dark ↔ light + seamap overlay；同步切容器 class 讓 CSS 調整圓點配色
+  [_fleetMap, _mapInstance].forEach(map => {
+    if (!map) return;
+    map.getContainer().classList.toggle("seamap-on", enabled);
+    const t = _mapTiles.get(map);
+    if (!t) return;
+    if (enabled) {
+      if (map.hasLayer(t.dark)) map.removeLayer(t.dark);
+      if (!map.hasLayer(t.light)) t.light.addTo(map);
+      if (!map.hasLayer(t.seamap)) t.seamap.addTo(map);
+    } else {
+      if (map.hasLayer(t.seamap)) map.removeLayer(t.seamap);
+      if (map.hasLayer(t.light)) map.removeLayer(t.light);
+      if (!map.hasLayer(t.dark)) t.dark.addTo(map);
+    }
+  });
+}
+
 function attachPopupDimOverlays(map) {
   if (!map) return;
   const sel = ".map-overlay-toolbar, .map-overlay-banner, .map-overlay-banner-icon, .risk-toggle, .layer-toggle";
@@ -3483,9 +3863,17 @@ function attachPopupDimOverlays(map) {
   });
 }
 
+/* 每個 map 都需要自己的 layerGroup 副本（Leaflet 不允許一個 LayerGroup 同時 add 到兩個 map）。
+ * _riskLayersByMap : WeakMap<map, { [catKey]: layerGroup }> — 設定切換時針對每個 map 各自 add/remove。
+ * _fleetRiskLayers 保留為「最後一個畫的」reference，供舊呼叫處兼容。 */
+const _riskLayersByMap = new WeakMap();
 function drawRiskZones(map) {
-  _fleetRiskLayers = {};
-  if (!window.RISK_ZONES || !window.RISK_ZONE_CATEGORIES) return;
+  const layers = {};
+  if (!window.RISK_ZONES || !window.RISK_ZONE_CATEGORIES) {
+    _fleetRiskLayers = layers;
+    _riskLayersByMap.set(map, layers);
+    return;
+  }
 
   const catMap = {};
   window.RISK_ZONE_CATEGORIES.forEach(c => { catMap[c.key] = c; });
@@ -3558,16 +3946,68 @@ function drawRiskZones(map) {
         }
       });
     });
-    _fleetRiskLayers[cat.key] = group;
+    layers[cat.key] = group;
     if (_riskLayerState[cat.key]) group.addTo(map);
   });
+  _fleetRiskLayers = layers;
+  _riskLayersByMap.set(map, layers);
 }
 
 function setRiskLayer(key, enabled) {
-  const g = _fleetRiskLayers[key];
-  if (!g || !_fleetMap) return;
-  if (enabled) { if (!_fleetMap.hasLayer(g)) g.addTo(_fleetMap); }
-  else { if (_fleetMap.hasLayer(g)) _fleetMap.removeLayer(g); }
+  // 對目前活躍的兩個 map（fleet / 單船）各自 add/remove 其對應的 layerGroup
+  [_fleetMap, _mapInstance].forEach(map => {
+    if (!map) return;
+    const layers = _riskLayersByMap.get(map);
+    const g = layers && layers[key];
+    if (!g) return;
+    if (enabled) { if (!map.hasLayer(g)) g.addTo(map); }
+    else { if (map.hasLayer(g)) map.removeLayer(g); }
+  });
+}
+
+/* 港口錨地圖層 — 獨立於 RISK_ZONES，對應 anchorage 監控維度。
+ * 視覺：淺藍灰色淡填 + 細邊；點擊顯示港口資訊 popup。預設關閉。
+ * 跟 risk zones 一樣 per-map 儲存 — 每個 map 各自有一個 layerGroup 副本。 */
+let _anchorageLayer = null;  // 最後一個畫的 (相容舊呼叫)
+let _anchorageLayerOn = sessionStorage.getItem("slab_va_anchorage_layer") === "1";
+const _anchorageLayersByMap = new WeakMap();
+function drawAnchorages(map) {
+  if (!map || !window.ANCHORAGE_AREAS) return;
+  const grp = L.layerGroup();
+  window.ANCHORAGE_AREAS.forEach(a => {
+    const popupHtml = `
+      <div style="min-width:200px;font-size:12px">
+        <div style="font-weight:600;color:#9ec5ff;margin-bottom:3px">${escapeHtml(a.port_name_cn || a.port_name)} 錨地</div>
+        <div style="color:#c4cdda">${escapeHtml(a.port_name)} Anchorage</div>
+        <div style="color:#7c8a9e;margin-top:4px">港口代碼 / Port: <b style="color:#c4cdda">${escapeHtml(a.port_code)}</b></div>
+        <div style="color:#7c8a9e">區域 / Region: <span style="color:#c4cdda">${escapeHtml(a.region)}</span></div>
+      </div>`;
+    addWrappedPolygon(grp, a.coords, {
+      color: "#7c93b8", weight: 1, opacity: 0.7,
+      fillColor: "#7c93b8", fillOpacity: 0.15,
+      dashArray: "3 3",
+    }, `<b>${escapeHtml(a.port_name_cn || a.port_name)} 錨地</b> <span style="color:#7c8a9e">/ ${escapeHtml(a.port_name)} Anchorage</span>`);
+    grp.eachLayer(layer => {
+      if (!layer._ancBound && layer instanceof L.Polygon) {
+        layer.bindPopup(popupHtml, { maxWidth: 260 });
+        layer._ancBound = true;
+      }
+    });
+  });
+  _anchorageLayer = grp;
+  _anchorageLayersByMap.set(map, grp);
+  if (_anchorageLayerOn) grp.addTo(map);
+}
+function setAnchorageLayer(enabled) {
+  _anchorageLayerOn = enabled;
+  sessionStorage.setItem("slab_va_anchorage_layer", enabled ? "1" : "0");
+  [_fleetMap, _mapInstance].forEach(map => {
+    if (!map) return;
+    const g = _anchorageLayersByMap.get(map);
+    if (!g) return;
+    if (enabled) { if (!map.hasLayer(g)) g.addTo(map); }
+    else { if (map.hasLayer(g)) map.removeLayer(g); }
+  });
 }
 
 /* 在 mapWrap 內注入「全球風險區」摺疊面板，總覽與單船 detail 兩種模式共用 */
@@ -3579,7 +4019,7 @@ function injectRiskTogglePanel(mapWrap) {
 
   const buckets = {};
   (window.RISK_ZONES || []).forEach(z => { buckets[z.cat] = (buckets[z.cat] || 0) + 1; });
-  // 預設展開；按過收合後在 session 內保留
+  const ancCount = (window.ANCHORAGE_AREAS || []).length;
   // 手機預設摺疊；桌面預設展開
   const isOpen = (sessionStorage.getItem("slab_va_risk_panel_open") ?? (IS_MOBILE ? "0" : "1")) === "1";
   const rows = window.RISK_ZONE_CATEGORIES.map(c => `
@@ -3589,11 +4029,19 @@ function injectRiskTogglePanel(mapWrap) {
       <span>${escapeHtml(c.label)}<span style="color:#7c8a9e;font-size:14px;display:block">${escapeHtml(c.label_en)}</span></span>
       <span class="rt-cnt">${buckets[c.key] || 0}</span>
     </label>`).join("");
+  const anchorageRow = `
+    <div class="rt-section-divider">監控圖層 / Monitored</div>
+    <label>
+      <input type="checkbox" id="rt-anchorage" ${_anchorageLayerOn ? "checked" : ""}>
+      <span class="rt-swatch" style="background:#7c93b840;border-color:#7c93b8"></span>
+      <span>港口錨地<span style="color:#7c8a9e;font-size:14px;display:block">Anchorage Areas</span></span>
+      <span class="rt-cnt">${ancCount}</span>
+    </label>`;
   const panel = document.createElement("div");
   panel.className = "risk-toggle" + (isOpen ? " open" : "");
   panel.innerHTML = `
     <div class="rt-head">
-      <span class="rt-title">⚠ 全球風險區<span class="en">/ Risk Zones</span></span>
+      <span class="rt-title">⚠ 風險區與錨地<span class="en">/ Risk Zones &amp; Anchorages</span></span>
       <span class="rt-chev">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
       </span>
@@ -3604,6 +4052,7 @@ function injectRiskTogglePanel(mapWrap) {
         <button type="button" data-rt-act="none">全關 / All off</button>
       </div>
       ${rows}
+      ${anchorageRow}
     </div>`;
   mapWrap.appendChild(panel);
 
@@ -3621,7 +4070,10 @@ function injectRiskTogglePanel(mapWrap) {
       persistRiskLayerState();
     });
   });
-  // 全開／全關
+  // 錨地圖層 toggle
+  const ancCb = panel.querySelector("#rt-anchorage");
+  if (ancCb) ancCb.addEventListener("change", () => setAnchorageLayer(ancCb.checked));
+  // 全開／全關（含錨地）
   function bulkSet(on) {
     panel.querySelectorAll("input[data-rz]").forEach(cb => {
       cb.checked = on;
@@ -3629,10 +4081,38 @@ function injectRiskTogglePanel(mapWrap) {
       _riskLayerState[k] = on;
       setRiskLayer(k, on);
     });
+    if (ancCb) { ancCb.checked = on; setAnchorageLayer(on); }
     persistRiskLayerState();
   }
   panel.querySelector('[data-rt-act="all"]').addEventListener("click", () => bulkSet(true));
   panel.querySelector('[data-rt-act="none"]').addEventListener("click", () => bulkSet(false));
+}
+
+/* 海圖風格小型 icon 切換按鈕 — 點一下切換 OpenSeaMap 亮色底圖 + 海圖標示 */
+function injectExtraLayerPanel(mapWrap) {
+  if (!mapWrap) return;
+  const old = mapWrap.querySelector(".seamap-icon-btn");
+  if (old) old.remove();
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "seamap-icon-btn" + (_seamapLayerOn ? " active" : "");
+  btn.title = "海圖風格 / OpenSeaMap — 切換亮色底圖 + 海圖標示";
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2v6"/>
+      <path d="M9 5h6"/>
+      <path d="M12 8v9"/>
+      <path d="M5 17a3 3 0 0 0 3-3"/>
+      <path d="M19 17a3 3 0 0 1-3-3"/>
+      <path d="M2 21c2 0 3-1.5 5-1.5s3 1.5 5 1.5 3-1.5 5-1.5 3 1.5 5 1.5"/>
+    </svg>`;
+  btn.addEventListener("click", () => {
+    const on = !_seamapLayerOn;
+    setSeamapLayer(on);
+    btn.classList.toggle("active", on);
+  });
+  mapWrap.appendChild(btn);
 }
 
 function drawFleetMap(enriched) {
@@ -3642,14 +4122,12 @@ function drawFleetMap(enriched) {
   _fleetMap = map;
   L.control.zoom({ position: "bottomright" }).addTo(map);
   attachPopupDimOverlays(map);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    subdomains: "abcd", maxZoom: 19,
-  }).addTo(map);
+  setupBaseTiles(map);
   attachMapResize(map, document.getElementById("fleet-map"));
 
   // 全球風險區圖層：每類一個 layerGroup，依 _riskLayerState 決定是否掛上 map
   drawRiskZones(map);
+  drawAnchorages(map);
 
   const points = [];
   enriched.forEach(({ v, a }) => {
@@ -3677,6 +4155,9 @@ function drawFleetMap(enriched) {
     });
     points.push([v.latitude, v.longitude]);
   });
+
+  // 漂航圈：對所有觸發 anchorage 的船舶畫圓
+  drawDriftCircles(map, enriched);
 
   setTimeout(() => map.invalidateSize(), 80);
   if (points.length) {
@@ -3807,7 +4288,7 @@ function renderThresholdsCards() {
     return `
       <div class="m-thc" data-k="${k}">
         <div class="m-thc-head">
-          ${DIM_META[k]?.icon ? DIM_META[k].icon() : ""}
+          ${(() => { const ic = thresholdIcon(k); return ic ? ic() : ""; })()}
           <b>${m.label}</b>
           ${dirty ? '<span class="modified">已修改</span>' : ""}
         </div>
@@ -3932,7 +4413,7 @@ function renderMatrixTable(filtered) {
             ${biTh("航行進度", "Progress", { cls: "col-data", tip: "航行進度 / Progress\n目前 AIS 位置投影到計畫航線上的完成度百分比（0%–100%）。\n\n進度條顏色（依航線偏移狀態）：\n・藍 — Normal：max(目前 XTD, 歷史最大) < Safety × Warning 閾值（預設 0.70）\n・橘 — Warning：≥ Safety × Warning 閾值\n・紅 — Critical：≥ Safety × Critical 閾值（預設 1.00）\n\n閾值可在「閾值設定」頁調整。" })}
             ${biTh("偏移量 NM", "Dev / Max (Safety)", { cls: "col-data", tip: "偏移量 NM / Cross-Track Distance\n目前 XTD / 歷史最大偏移 (Safety Frame 寬度) — 單位：海浬 NM。\n航線偏移維度的判斷依據：取 max(目前 XTD, 歷史最大) 與 Safety Frame × 閾值比對。" })}
             ${biTh("最近 AIS 時間 (UTC+8)", "Latest AIS Time (UTC+8)", { cls: "col-data", tip: "最近 AIS 時間 / Latest AIS Time\n最近一筆收到的 AIS 訊號時間戳，顯示為台北時區 UTC+8。\n原始資料為 UTC，此處已自動轉換。" })}
-            ${biTh("AIS 狀態", "AIS Status", { cls: "col-data col-status", tip: "AIS 狀態 / AIS Status\n優先取 AIS 訊號內的 navigation status code (ITU-R M.1371)；若無 nav_status 資料，再依 SOG 推算：\n\n・繫泊 MOOR — nav_status=5 或 SOG < 0.5 kn\n・拋錨 ANC — nav_status=1 或 0.5 ≤ SOG < 2 kn\n・航行 U/W — nav_status=0/8 或 SOG ≥ 2 kn\n・不明 UNK — 兩者皆無" })}
+            ${biTh("AIS 狀態", "AIS Status", { cls: "col-data col-status", tip: "AIS 狀態 / AIS Status\n直接取 AIS 訊號 navigation status code (ITU-R M.1371)：\n\n・繫泊 MOOR — nav_status=5\n・拋錨 ANC — nav_status=1\n・漂航 NUC — nav_status=2 (Not Under Command)\n・航行 U/W — nav_status=0 或 8\n・不明 UNK — 無 nav_status 或其他代碼" })}
             ${biTh("速度", "SOG", { cls: "num", tip: "速度 / Speed Over Ground\n對地航速，單位節（knots, kn）。從 AIS 訊號取得。" })}
             ${biTh("航向", "HDG", { cls: "num", tip: "航向 / Course Over Ground\n對地航向，0–359 度（正北為 0°，順時針）。" })}
             ${biTh("緯度", "Lat", { cls: "col-data", tip: "緯度 / Latitude\nAIS 最後回報位置的緯度，度分秒格式（DMS）。" })}
@@ -3974,7 +4455,15 @@ function renderDetail(vesselId) {
   const criticalCount = DIM_KEYS.filter(k => a[k] === "critical").length;
   const warningCount  = DIM_KEYS.filter(k => a[k] === "warning").length;
 
-  const alertItems = DIM_KEYS.map(k => {
+  // 單船頁：各維度警示 + 進行中事件已合併，只列觸發的維度（warning / critical）
+  const triggeredKeys = DIM_KEYS.filter(k => a[k] === "warning" || a[k] === "critical");
+  const vEventsMap = {};
+  eventsForVessel(v.vessel_id, false).forEach(ev => { vEventsMap[ev.dimension] = ev; });
+  const alertItems = triggeredKeys.length === 0
+    ? `<div style="padding:14px 10px;color:#6ee094;font-size:14px;text-align:center;line-height:1.5">
+         ✓ 全部維度正常、無進行中事件 <span style="color:#5e6b80">/ All normal · no open events</span>
+       </div>`
+    : triggeredKeys.map(k => {
     const lvl = a[k];
     const meta = DIM_META[k];
     let metaText = "";
@@ -3999,28 +4488,65 @@ function renderDetail(vesselId) {
         : `共 ${total} 封通知 · Warning ${warns} · Information ${infos}`;
     } else if (k === "comm") {
       metaText = `最新 AIS：${v.ais_timestamp || "-"}`;
-    } else if (k === "event") {
-      metaText = v.open_event ? `Event #${v.open_event.id} · ${v.open_event.event_level}` : "目前無 Open 事件";
-    } else if (k === "port") {
-      const pct = v.progress_pct;
-      const phase = pct === undefined ? "未知" : pct > 92 ? "接近抵港 / Arriving" : pct < 5 ? "剛離港 / Departed" : `航行中 / In transit (${pct}%)`;
-      const portHash = (v.vessel_id * 5779 + 38461) % 100;
-      const etaDelta = (portHash - 50);  // 模擬 ETA 偏差 ±50 分鐘
-      metaText = `${phase}．ETA Δ ${etaDelta >= 0 ? "+" : ""}${etaDelta} min`;
+    } else if (k === "anchorage") {
+      const info = a._anchorage;
+      if (!info) metaText = "未停留錨地、非錨泊狀態";
+      else {
+        const portCN = info.hit ? (info.hit.port_name_cn || info.hit.port_name) : "海上";
+        metaText = info.inWarn
+          ? `${info.stateCN}（${portCN}）· 在 ${info.warnR} m 漂航圈內`
+          : info.inCrit
+            ? `${info.stateCN}（${portCN}）· ⚠ 偏移 ${info.distMeters} m`
+            : `${info.stateCN}（${portCN}）· ⛔ 越界 ${info.distMeters} m`;
+      }
     } else if (k === "engine") {
       const engHash = (v.vessel_id * 8419 + 7919) % 100;
       const rpm = 78 + Math.round(engHash * 0.4);
       const egt = 380 + Math.round(engHash * 1.2);
       metaText = `RPM ${rpm} · EGT ${egt}°C · 油壓 ${(3.5 + engHash/200).toFixed(2)} bar`;
     }
+    const ev = vEventsMap[k];
+    const evMeta = ev ? `<div class="alert-meta" style="margin-top:4px;font-size:12px;color:#7c8a9e">
+        開立 ${ev.opened_at.slice(5,16)} · ${statusBadge(ev.status)}${ev.assignee ? ` · ${escapeHtml(ev.assignee)}` : ""}
+      </div>` : "";
+    const driftBtn = (k === "anchorage" && a._anchorage) ? `
+      <button type="button" class="ev-settings" title="設定漂航圈半徑 / Edit drift radius"
+              onclick="openDriftSettings(${v.vessel_id}, '${a._anchorage.driftKey}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>` : "";
+    const btns = ev ? `
+      <div class="alert-actions">
+        <button type="button" class="ev-pan" title="跳到地圖事件位置 / Pan to event"
+                onclick="panToEvent('${ev.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s-8-8-8-13a8 8 0 0 1 16 0c0 5-8 13-8 13z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
+        </button>
+        ${driftBtn}
+        <button type="button" class="ev-open" title="開啟事件詳情 / Open event detail"
+                onclick="openEventModal('${ev.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="9" y1="13" x2="15" y2="13"/>
+            <line x1="9" y1="17" x2="13" y2="17"/>
+          </svg>
+        </button>
+      </div>` : "";
     return `
-      <div class="alert-row">
-        <div class="alert-icon">${meta.icon(lvl === "critical" ? "#ff8a8a" : lvl === "warning" ? "#f5b753" : "#9aa5b8")}</div>
+      <div class="alert-row" style="grid-template-columns:24px 1fr auto;gap:8px">
+        <div class="alert-icon">${meta.icon(lvl === "critical" ? "#ff8a8a" : "#f5b753")}</div>
         <div>
+          <div style="margin-bottom:4px">${levelTag(lvl)}</div>
           <div class="alert-name">${meta.label}</div>
           <div class="alert-meta">${escapeHtml(metaText)}</div>
+          ${evMeta}
         </div>
-        <div>${levelTag(lvl)}</div>
+        ${btns}
       </div>`;
   }).join("");
 
@@ -4077,7 +4603,7 @@ function renderDetail(vesselId) {
           </div>
         </div>
 
-        <h3>各維度警示</h3>
+        <h3>警示與事件 <span style="color:#5e6b80;text-transform:none;font-weight:400;font-size:14px">/ Alerts &amp; Open Events</span></h3>
         <div class="alert-list">${alertItems}</div>
 
         <h3>當前 AIS 位置</h3>
@@ -4124,6 +4650,18 @@ function renderDetail(vesselId) {
       setLayer(k, el.checked);
     });
   });
+
+  // 圖層面板摺疊狀態（session 持久化，預設 desktop 展開、mobile 收合）
+  const ltPanel = document.querySelector(".layer-toggle");
+  if (ltPanel) {
+    const open = (sessionStorage.getItem("slab_va_layer_panel_open") ?? (IS_MOBILE ? "0" : "1")) === "1";
+    ltPanel.classList.toggle("lt-open", open);
+    const head = ltPanel.firstElementChild;
+    if (head) head.addEventListener("click", () => {
+      ltPanel.classList.toggle("lt-open");
+      sessionStorage.setItem("slab_va_layer_panel_open", ltPanel.classList.contains("lt-open") ? "1" : "0");
+    });
+  }
 }
 
 function setLayer(key, enabled) {
@@ -4159,10 +4697,18 @@ function drawMap(v, vesselMails) {
   attachMapResize(map, document.getElementById("map"));
   attachPopupDimOverlays(map);
   _mapInstance = map;
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    subdomains: "abcd", maxZoom: 19,
-  }).addTo(map);
+  setupBaseTiles(map);
+
+  // 單船頁也帶上全球風險區 + 港口錨地圖層（per-map layerGroup 副本）
+  drawRiskZones(map);
+  drawAnchorages(map);
+
+  // 單船頁面 — 圖層面板（風險區 / 其他圖層 / 海圖風格）注入到地圖右上+左下
+  const detailMapWrap = document.getElementById("map")?.parentElement;
+  if (detailMapWrap) {
+    injectRiskTogglePanel(detailMapWrap);
+    injectExtraLayerPanel(detailMapWrap);
+  }
 
   map.createPane("corridorPane").style.zIndex = 400;
   map.createPane("plannedPane").style.zIndex = 410;
@@ -4274,6 +4820,9 @@ function drawMap(v, vesselMails) {
   Object.keys(_layers).forEach(k => {
     if (_layerState[k]) _layers[k].addTo(map);
   });
+
+  // 單船頁也畫漂航圈（若該船 anchorage 維度有觸發）
+  drawDriftCircles(map, [{ v, a: alerts }]);
 
   setTimeout(() => map.invalidateSize(), 80);
 
@@ -4482,6 +5031,54 @@ function renderEventMailList(vesselName) {
     <div class="mail-list">${items}</div>`;
 }
 
+/* 事件位置決定邏輯 —
+ *   anchorage：取漂航圈中心（planned arrival = 下錨計畫點）
+ *   route    ：取 AIS 中偏移最大那一點（最能反映事件發生位置）
+ *   alert    ：取該船最新一封 Warning mail 的位置
+ *   其餘維度：取船舶當前位置（事件正發生中） */
+function eventLocation(e) {
+  const v = VESSELS.find(x => x.vessel_id === e.vessel_id);
+  if (!v) return null;
+  if (e.dimension === "anchorage" && v.planned_track?.length) {
+    const arr = v.planned_track[v.planned_track.length - 1];
+    if (arr.latitude != null && arr.longitude != null) return [arr.latitude, arr.longitude];
+  }
+  if (e.dimension === "route" && Array.isArray(v.ais_track) && v.ais_track.length) {
+    let best = v.ais_track[v.ais_track.length - 1], maxDev = -1;
+    v.ais_track.forEach(p => {
+      const d = parseFloat(p.deviation_nm) || 0;
+      if (d > maxDev) { maxDev = d; best = p; }
+    });
+    if (best?.latitude != null) return [best.latitude, best.longitude];
+  }
+  if (e.dimension === "alert" && Array.isArray(MAILS)) {
+    const vmails = MAILS.filter(m =>
+      m.vessel_name === v.vessel_name &&
+      m.warning_level === "Warning" &&
+      m.latitude != null && m.longitude != null
+    );
+    if (vmails.length) {
+      const latest = vmails.slice().sort((a, b) =>
+        (b.warning_event_time || "").localeCompare(a.warning_event_time || ""))[0];
+      return [latest.latitude, latest.longitude];
+    }
+  }
+  if (v.latitude != null && v.longitude != null) return [v.latitude, v.longitude];
+  return null;
+}
+
+window.panToEvent = function(evId) {
+  const e = _events.find(x => x.id === evId);
+  if (!e) return;
+  const loc = eventLocation(e);
+  if (!loc) return;
+  // 優先用 fleet 詳細圖 (_fleetMap)；單船頁則用 _mapInstance
+  const map = (typeof _fleetMap !== "undefined" && _fleetMap) ? _fleetMap
+            : (typeof _mapInstance !== "undefined" ? _mapInstance : null);
+  if (!map) return;
+  map.flyTo(loc, Math.max(map.getZoom(), 12), { duration: 0.8 });
+};
+
 window.openEventModal = function(evId) {
   const e = _events.find(x => x.id === evId);
   if (!e) return;
@@ -4634,6 +5231,8 @@ function renderTimeline() {
       vessel: m.vessel_name,
       title: `${m.warning_level} · ${m.warning_code}`,
       body: m.warning_description.substring(0, 200) + (m.warning_description.length > 200 ? "…" : ""),
+      sourceKey: "stormgeo",
+      sourceLabel: "StormGeo Mail",
     });
   });
 
@@ -4645,6 +5244,8 @@ function renderTimeline() {
         vessel: v.vessel_name,
         title: `Open Event #${v.open_event.id} · ${v.open_event.event_level}`,
         body: `最大偏移 ${fmt(v.open_event.max_deviation_distance_nm,2)} NM，最後偵測 ${v.open_event.last_detected_time}`,
+        sourceKey: "system",
+        sourceLabel: "系統偵測 / System",
       });
     }
   });
@@ -4655,7 +5256,11 @@ function renderTimeline() {
     ? items.map(it => `
         <div class="timeline-item ${it.kind}">
           <div class="t-head">
-            <span class="t-title">${escapeHtml(it.title)}<span class="t-vessel">${escapeHtml(it.vessel)}</span></span>
+            <span class="t-title">
+              ${escapeHtml(it.title)}
+              ${it.sourceKey ? `<span class="t-source t-source-${it.sourceKey}">${escapeHtml(it.sourceLabel)}</span>` : ""}
+              <span class="t-vessel">${escapeHtml(it.vessel)}</span>
+            </span>
             <span class="t-time">${escapeHtml(it.time || "-")}</span>
           </div>
           <div class="t-body">${escapeHtml(it.body)}</div>
@@ -4673,6 +5278,99 @@ function renderTimeline() {
  * Threshold settings modal — 調整 Open Event 觸發條件
  * ───────────────────────────────────────────────────────────────── */
 /* 閾值設定：獨立 routed 頁面 #/thresholds，內容寫入 #main（非 modal） */
+/* 閾值維度 icon — driftAnchor / driftAdrift 屬於 anchorage 維度，用 anchorage 圖示 */
+function thresholdIcon(k) {
+  if (k === "driftAnchor" || k === "driftAdrift") return DIM_META.anchorage?.icon;
+  return DIM_META[k]?.icon;
+}
+
+/* 漂航圈 per-vessel overrides — 列出所有已設定自訂半徑的船舶，可單筆重置。
+ * 也支援從本頁直接新增覆寫（不必先打開單船地圖）。 */
+function renderDriftOverridesBlock() {
+  const rows = [];
+  Object.keys(_driftOverrides).forEach(vid => {
+    const v = VESSELS.find(x => String(x.vessel_id) === String(vid));
+    const vname = v ? v.vessel_name : `(unknown ${vid})`;
+    Object.keys(_driftOverrides[vid]).forEach(driftKey => {
+      const o = _driftOverrides[vid][driftKey];
+      const def = DEFAULT_THRESHOLDS[driftKey];
+      if (!def) return;
+      const km = THRESHOLD_META[driftKey];
+      rows.push(`
+        <tr data-vid="${vid}" data-key="${driftKey}">
+          <td style="padding:8px 12px;font-weight:600">${escapeHtml(vname)}
+              <div style="color:#7c8a9e;font-size:12px;font-weight:400">${km?.short || driftKey}</div></td>
+          <td style="padding:8px 8px;color:#f5b753">${o.warning ?? def.warning} m
+              <span style="color:#5e6b80;font-size:12px"> · 預設 ${def.warning}</span></td>
+          <td style="padding:8px 8px;color:#ff8a8a">${o.critical ?? def.critical} m
+              <span style="color:#5e6b80;font-size:12px"> · 預設 ${def.critical}</span></td>
+          <td style="padding:8px 8px;width:90px;text-align:right">
+            <button type="button" class="drift-ovr-reset" data-vid="${vid}" data-key="${driftKey}"
+                    style="padding:3px 9px;background:transparent;border:1px solid #4a5568;color:#a0aec0;border-radius:3px;cursor:pointer;font-size:12px">
+              重置預設
+            </button>
+          </td>
+        </tr>`);
+    });
+  });
+  const count = rows.length;
+
+  // 新增覆寫表單（船舶下拉 + 維度下拉 + warn / crit + 加入按鈕）
+  const vesselOpts = (VESSELS || []).map(v =>
+    `<option value="${v.vessel_id}">${escapeHtml(v.vessel_name)} · IMO ${v.imo}</option>`).join("");
+  const addForm = `
+    <div style="margin-top:10px;padding:10px;background:#1a2030;border:1px solid #2a3550;border-radius:4px">
+      <div style="font-size:12px;color:#9ec5ff;font-weight:600;margin-bottom:8px">＋ 新增覆寫 / Add per-vessel override</div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:6px;align-items:center;font-size:12px">
+        <select id="drift-add-vid" style="padding:5px;background:#0f1420;border:1px solid #2e3a4d;color:#d8dee9;border-radius:3px;font-size:12px">
+          ${vesselOpts}
+        </select>
+        <select id="drift-add-key" style="padding:5px;background:#0f1420;border:1px solid #2e3a4d;color:#d8dee9;border-radius:3px;font-size:12px">
+          <option value="driftAnchor">拋錨 / ANC</option>
+          <option value="driftAdrift">漂航 / DRIFT</option>
+        </select>
+        <input type="number" id="drift-add-warn" placeholder="Warn (m)" min="50" max="6000" step="50"
+               style="padding:5px;background:#0f1420;border:1px solid #2e3a4d;color:#f5b753;border-radius:3px;font-size:12px">
+        <input type="number" id="drift-add-crit" placeholder="Crit (m)" min="50" max="6000" step="50"
+               style="padding:5px;background:#0f1420;border:1px solid #2e3a4d;color:#ff8a8a;border-radius:3px;font-size:12px">
+        <button type="button" id="drift-add-btn"
+                style="padding:5px 12px;background:#4a90e2;border:1px solid #4a90e2;color:#fff;border-radius:3px;cursor:pointer;font-size:12px">
+          加入 / Add
+        </button>
+      </div>
+      <div style="color:#5e6b80;font-size:11px;margin-top:4px">系統預設：拋錨 W ${DEFAULT_THRESHOLDS.driftAnchor.warning} / C ${DEFAULT_THRESHOLDS.driftAnchor.critical} m · 漂航 W ${DEFAULT_THRESHOLDS.driftAdrift.warning} / C ${DEFAULT_THRESHOLDS.driftAdrift.critical} m</div>
+    </div>`;
+
+  if (count === 0) {
+    return `
+      <div class="th-trigger-info" style="border-color:#2a3550;background:#11161f">
+        <b style="color:#9ec5ff">漂航圈 Per-vessel 覆寫 / Per-Vessel Drift Overrides</b><br>
+        <span style="color:#7c8a9e;font-size:14px">
+          目前沒有船舶套用自訂半徑，所有船舶皆使用上方系統預設值。也可從單船地圖點擊漂航圈中心新增。
+        </span>
+        ${addForm}
+      </div>`;
+  }
+  return `
+    <div class="th-trigger-info" style="border-color:#2a3550;background:#11161f">
+      <b style="color:#9ec5ff">漂航圈 Per-vessel 覆寫 / Per-Vessel Drift Overrides</b>
+      <span style="color:#7c8a9e;font-size:14px"> · ${count} 筆覆寫</span><br>
+      <span style="color:#7c8a9e;font-size:12px">監管人員可為個別船舶設定專屬半徑；以下覆寫值優先於系統預設。</span>
+      <table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:14px">
+        <thead>
+          <tr style="color:#9ec5ff;border-bottom:1px solid #2a3550">
+            <th style="text-align:left;padding:6px 12px">船舶 / Vessel</th>
+            <th style="text-align:left;padding:6px 8px;color:#f5b753">Warning</th>
+            <th style="text-align:left;padding:6px 8px;color:#ff8a8a">Critical</th>
+            <th style="padding:6px 8px"></th>
+          </tr>
+        </thead>
+        <tbody>${rows.join("")}</tbody>
+      </table>
+      ${addForm}
+    </div>`;
+}
+
 function renderThresholds() {
   const rows = Object.keys(THRESHOLD_META).map(k => {
     const m = THRESHOLD_META[k];
@@ -4695,7 +5393,7 @@ function renderThresholds() {
     return `
       <tr data-k="${k}">
         <td style="padding:10px 12px">
-          <div style="font-weight:600;display:flex;align-items:center;gap:6px">${DIM_META[k]?.icon ? DIM_META[k].icon() : ""} ${m.label}</div>
+          <div style="font-weight:600;display:flex;align-items:center;gap:6px">${(() => { const ic = thresholdIcon(k); return ic ? ic() : ""; })()} ${m.label}</div>
           <div style="color:#7c8a9e;font-size:14px;margin-top:2px">${m.short} · ${m.unit}（${m.range}）</div>
         </td>
         <td style="padding:10px 8px">
@@ -4753,6 +5451,8 @@ function renderThresholds() {
       </div>
     `}
 
+    ${renderDriftOverridesBlock()}
+
     <div class="th-trigger-info">
       <b style="color:#9ec5ff">觸發邏輯 / Trigger logic</b><br>
       ・<b>route</b>：max(目前 XTD, 歷史最大偏移) ≥ Safety Frame × 閾值<br>
@@ -4784,6 +5484,36 @@ function renderThresholds() {
       input.dispatchEvent(new Event("input", { bubbles: true }));
     });
   });
+
+  // 漂航圈 per-vessel 覆寫 — 單筆重置
+  document.querySelectorAll("#main .drift-ovr-reset").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const vid = parseInt(btn.dataset.vid, 10);
+      const key = btn.dataset.key;
+      setDriftOverride(vid, key, null, null);
+      renderThresholds();
+    });
+  });
+
+  // 漂航圈 per-vessel 覆寫 — 新增表單送出
+  const addBtn = document.getElementById("drift-add-btn");
+  if (addBtn) {
+    addBtn.addEventListener("click", () => {
+      const vid = parseInt(document.getElementById("drift-add-vid").value, 10);
+      const key = document.getElementById("drift-add-key").value;
+      const def = DEFAULT_THRESHOLDS[key] || { warning: null, critical: null };
+      const wRaw = document.getElementById("drift-add-warn").value;
+      const cRaw = document.getElementById("drift-add-crit").value;
+      const w = wRaw === "" ? def.warning : parseFloat(wRaw);
+      const c = cRaw === "" ? def.critical : parseFloat(cRaw);
+      if (isNaN(vid) || !key || isNaN(w) || isNaN(c) || w <= 0 || c <= 0 || c <= w) {
+        alert("請選擇船舶 + 維度，並輸入正值半徑，Critical 必須大於 Warning。");
+        return;
+      }
+      setDriftOverride(vid, key, w, c);
+      renderThresholds();
+    });
+  }
 }
 
 function saveThresholdsFromPage() {
