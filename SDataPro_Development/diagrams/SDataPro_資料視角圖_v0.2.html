@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDataPro 同源資料多視角 v0.2</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: #000;
+  color: #e4eaf2;
+  font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+header {
+  background: #0d0d0d;
+  border-bottom: 1px solid #2a2a2a;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e4eaf2;
+}
+header h1 small {
+  font-size: 12px;
+  color: #7c8a9e;
+  font-weight: 400;
+  margin-left: 10px;
+}
+.intro {
+  background: rgba(245,166,35,0.08);
+  border: 1px solid #f5a623;
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #c4cdda;
+}
+.intro strong { color: #f5b753; }
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.tab {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #c4cdda;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+}
+.tab:hover { background: #1a1a1a; border-color: #3a3a3a; }
+.tab.active {
+  background: rgba(44,108,219,0.18);
+  border-color: #2c6cdb;
+  color: #9ec5ff;
+}
+main {
+  padding: 24px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+.section { display: none; }
+.section.active { display: block; }
+.section-header { margin-bottom: 16px; }
+.section-header h2 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #e4eaf2;
+  margin-bottom: 6px;
+}
+.section-header p {
+  font-size: 13px;
+  color: #9aa5b8;
+}
+.diagram-wrap {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
+}
+.diagram-wrap svg {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+.notes {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #c4cdda;
+}
+.notes h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9aa5b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.notes table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 13px;
+}
+.notes th, .notes td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #2a2a2a;
+  vertical-align: top;
+}
+.notes th {
+  background: #1a1a1a;
+  font-weight: 600;
+  color: #9ec5ff;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+}
+.notes .demo-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.notes .demo-1 { background: rgba(44,108,219,0.18); color: #9ec5ff; border: 1px solid #2c6cdb; }
+.notes .demo-2 { background: rgba(44,108,219,0.18); color: #9ec5ff; border: 1px solid #2c6cdb; }
+.notes .demo-3 { background: rgba(255,77,79,0.18); color: #ff8a8a; border: 1px solid #ff4d4f; }
+.notes .demo-4 { background: rgba(245,166,35,0.18); color: #f5b753; border: 1px solid #f5a623; }
+.notes .demo-5 { background: rgba(76,217,122,0.18); color: #6ee094; border: 1px solid #4cd97a; }
+.notes .demo-6 { background: rgba(155,89,182,0.20); color: #c39bd3; border: 1px solid #9b59b6; }
+.notes .demo-7 { background: rgba(154,165,184,0.18); color: #c4cdda; border: 1px solid #9aa5b8; }
+footer {
+  padding: 20px 24px;
+  border-top: 1px solid #2a2a2a;
+  margin-top: 40px;
+  text-align: center;
+  color: #7c8a9e;
+  font-size: 11px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SDataPro 同源資料多視角 v0.2 <small>2026-05-29 · SLAB</small></h1>
+  <div class="intro">
+    <strong>核心觀念修正</strong>：周圍監控（5 NM AIS 觀測）<strong>是底層資料</strong>，不是「一個 Demo 跳到另一個 Demo」的起點。
+    歷史、CPA、港口擁塞、ETA、SitRep、AIS 完整性 —— 全部是<strong>同一份周圍監控資料的不同視角 / 加工</strong>。
+    使用者不是在 Demo 之間「跳轉」，而是<strong>切換看同一份資料的方式</strong>。
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-target="v1">① 同源資料 × 多視角</button>
+    <button class="tab" data-target="v2">② 各視角的資料加工邏輯</button>
+    <button class="tab" data-target="v3">③ 問題導向：我想知道 X，就看哪個視角</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================= 視角 1 ============================= -->
+<section class="section active" id="v1">
+  <div class="section-header">
+    <h2>① 同源資料 × 多視角</h2>
+    <p>周圍監控是底層資料源；6 個衛星視角是不同的「資料加工 / 視覺化方式」</p>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1280 760" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1280" height="760" fill="#0d0d0d"/>
+<defs>
+<marker id="va" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#9aa5b8"/></marker>
+</defs>
+
+<text x="640" y="36" text-anchor="middle" font-size="18" font-weight="600" fill="#e4eaf2">同源資料 × 多視角：6 個 Demo 都是「周圍監控」的不同看法</text>
+<text x="640" y="56" text-anchor="middle" font-size="12" fill="#9aa5b8">中心 = 底層資料  ·  周圍 = 加工後的視角</text>
+
+<!-- 中心：周圍監控 -->
+<circle cx="640" cy="400" r="180" fill="rgba(44,108,219,0.22)" stroke="#2c6cdb" stroke-width="3"/>
+<text x="640" y="370" text-anchor="middle" font-size="20" font-weight="700" fill="#e4eaf2">周圍監控</text>
+<text x="640" y="392" text-anchor="middle" font-size="13" fill="#9ec5ff">底層資料源</text>
+<text x="640" y="416" text-anchor="middle" font-size="11" fill="#c4cdda">每艘自家船 5 NM 內</text>
+<text x="640" y="432" text-anchor="middle" font-size="11" fill="#c4cdda">連續接收的 AIS 觀測</text>
+<text x="640" y="455" text-anchor="middle" font-size="11" fill="#c4cdda">50 船 × 5–20 他船 × 連續時間</text>
+<text x="640" y="475" text-anchor="middle" font-size="10" fill="#9aa5b8">= 系統唯一原始資料</text>
+
+<!-- Top: 歷史 -->
+<g>
+<rect x="490" y="100" width="300" height="120" rx="8" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="640" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">Demo 2 歷史</text>
+<text x="640" y="148" text-anchor="middle" font-size="11" fill="#9ec5ff">＝ 周圍監控 + 時間累積</text>
+<text x="640" y="170" text-anchor="middle" font-size="10" fill="#c4cdda">把每一刻的觀測累積成軌跡</text>
+<text x="640" y="186" text-anchor="middle" font-size="10" fill="#c4cdda">本船航跡 + 同時段他船航跡</text>
+<text x="640" y="202" text-anchor="middle" font-size="10" fill="#c4cdda">「時間軸 + 倍速」=回到過去看現場</text>
+<line x1="640" y1="222" x2="640" y2="220" stroke="#9aa5b8" stroke-width="1.5"/>
+</g>
+<line x1="640" y1="225" x2="640" y2="220" stroke="#9aa5b8" stroke-width="1.5"/>
+<line x1="640" y1="225" x2="640" y2="220" stroke="#9aa5b8" stroke-width="1.5"/>
+<line x1="640" y1="223" x2="640" y2="220" stroke="#9aa5b8" stroke-width="1.5" marker-end="url(#va)"/>
+
+<!-- 上 → 中心 -->
+<line x1="640" y1="225" x2="640" y2="218" stroke="#9aa5b8" stroke-width="1.5"/>
+
+<!-- Right Top: CPA -->
+<g>
+<rect x="880" y="170" width="280" height="120" rx="8" fill="rgba(255,77,79,0.20)" stroke="#ff4d4f" stroke-width="2"/>
+<text x="1020" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">Demo 3 CPA</text>
+<text x="1020" y="218" text-anchor="middle" font-size="11" fill="#ff8a8a">＝ 周圍監控 + 風險計算</text>
+<text x="1020" y="240" text-anchor="middle" font-size="10" fill="#c4cdda">同樣看本船 + 周圍他船</text>
+<text x="1020" y="256" text-anchor="middle" font-size="10" fill="#c4cdda">＋ 計算 CPA / TCPA 數值</text>
+<text x="1020" y="272" text-anchor="middle" font-size="10" fill="#c4cdda">＋ 疊上 RED/AMBER 告警標籤</text>
+</g>
+
+<!-- Right: AIS 完整性 -->
+<g>
+<rect x="930" y="340" width="280" height="120" rx="8" fill="rgba(154,165,184,0.18)" stroke="#9aa5b8" stroke-width="2"/>
+<text x="1070" y="368" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">Demo 7 AIS 完整性</text>
+<text x="1070" y="388" text-anchor="middle" font-size="11" fill="#c4cdda">＝ 周圍監控 + 品質反觀</text>
+<text x="1070" y="410" text-anchor="middle" font-size="10" fill="#c4cdda">不看「船在哪」</text>
+<text x="1070" y="426" text-anchor="middle" font-size="10" fill="#c4cdda">而看「這份資料可信嗎」</text>
+<text x="1070" y="442" text-anchor="middle" font-size="10" fill="#c4cdda">6 偵測器評每艘 AIS 品質</text>
+</g>
+
+<!-- Right Bottom: SitRep -->
+<g>
+<rect x="880" y="510" width="280" height="120" rx="8" fill="rgba(155,89,182,0.22)" stroke="#9b59b6" stroke-width="2"/>
+<text x="1020" y="538" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">Demo 6 SitRep</text>
+<text x="1020" y="558" text-anchor="middle" font-size="11" fill="#c39bd3">＝ 多船周圍監控彙整</text>
+<text x="1020" y="580" text-anchor="middle" font-size="10" fill="#c4cdda">多艘自家船同時在目的港</text>
+<text x="1020" y="596" text-anchor="middle" font-size="10" fill="#c4cdda">把各船周圍觀測拼起來</text>
+<text x="1020" y="612" text-anchor="middle" font-size="10" fill="#c4cdda">＝ 港口現場全景報告</text>
+</g>
+
+<!-- Bottom: 港口擁塞 -->
+<g>
+<rect x="490" y="580" width="300" height="120" rx="8" fill="rgba(245,166,35,0.20)" stroke="#f5a623" stroke-width="2"/>
+<text x="640" y="608" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">Demo 4 港口擁塞</text>
+<text x="640" y="628" text-anchor="middle" font-size="11" fill="#f5b753">＝ 周圍監控 × 空間聚合</text>
+<text x="640" y="650" text-anchor="middle" font-size="10" fill="#c4cdda">把每艘自家船在港口附近的</text>
+<text x="640" y="666" text-anchor="middle" font-size="10" fill="#c4cdda">周圍觀測資料，按港口聚合</text>
+<text x="640" y="682" text-anchor="middle" font-size="10" fill="#c4cdda">＝ 看每個港口的船隻分布</text>
+</g>
+
+<!-- Left Bottom: ETA -->
+<g>
+<rect x="120" y="510" width="280" height="120" rx="8" fill="rgba(76,217,122,0.20)" stroke="#4cd97a" stroke-width="2"/>
+<text x="260" y="538" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">Demo 5 ETA 預測</text>
+<text x="260" y="558" text-anchor="middle" font-size="11" fill="#6ee094">＝ 港口擁塞 + 航行計畫 衍生</text>
+<text x="260" y="580" text-anchor="middle" font-size="10" fill="#c4cdda">自己的航行計畫 → 預估抵港</text>
+<text x="260" y="596" text-anchor="middle" font-size="10" fill="#c4cdda">＋ 港口擁塞 → 預估等候</text>
+<text x="260" y="612" text-anchor="middle" font-size="10" fill="#c4cdda">＝ 動態 ETA / Demurrage 風險</text>
+</g>
+
+<!-- Left: Demo 1 週邊監控 IS the center (label) -->
+<g>
+<rect x="70" y="340" width="280" height="120" rx="8" fill="rgba(44,108,219,0.30)" stroke="#2c6cdb" stroke-width="2.5"/>
+<text x="210" y="368" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">Demo 1 週邊態勢</text>
+<text x="210" y="388" text-anchor="middle" font-size="11" fill="#9ec5ff">＝ 周圍監控 即時視角</text>
+<text x="210" y="410" text-anchor="middle" font-size="10" fill="#c4cdda">不做加工，直接看當下狀況</text>
+<text x="210" y="426" text-anchor="middle" font-size="10" fill="#c4cdda">本船 + 5 NM 圓 + 他船 + 浮標</text>
+<text x="210" y="442" text-anchor="middle" font-size="10" fill="#c4cdda">＝ 最接近原始資料的呈現</text>
+</g>
+
+<!-- Lines: all satellites connect to center -->
+<line x1="640" y1="220" x2="640" y2="220" stroke="#2c6cdb" stroke-width="0"/>
+
+<!-- Demo 2 → 中心 -->
+<line x1="640" y1="220" x2="640" y2="222" stroke="#9aa5b8" stroke-width="1.5"/>
+<line x1="640" y1="220" x2="640" y2="222" stroke="#9aa5b8" stroke-width="1.5"/>
+<path d="M 640 220 L 640 222" stroke="#9aa5b8" stroke-width="1.5" marker-end="url(#va)"/>
+
+<!-- 連線：歷史 ← 中心 -->
+<line x1="640" y1="225" x2="640" y2="220" stroke="#9aa5b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#va)"/>
+
+<!-- CPA ← 中心 -->
+<line x1="784" y1="298" x2="876" y2="220" stroke="#9aa5b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#va)"/>
+
+<!-- AIS 完整性 ← 中心 -->
+<line x1="820" y1="400" x2="926" y2="400" stroke="#9aa5b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#va)"/>
+
+<!-- SitRep ← 中心 (代表多船彙整) -->
+<line x1="785" y1="503" x2="876" y2="560" stroke="#9aa5b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#va)"/>
+
+<!-- 港口擁塞 ← 中心 -->
+<line x1="640" y1="580" x2="640" y2="582" stroke="#9aa5b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#va)"/>
+
+<!-- ETA ← 港口擁塞 (衍生) -->
+<line x1="490" y1="650" x2="402" y2="590" stroke="#6ee094" stroke-width="2" marker-end="url(#va)"/>
+<text x="442" y="612" font-size="10" fill="#6ee094" font-weight="600">衍生</text>
+
+<!-- Demo 1 ← 中心 (其實 Demo 1 就是中心) -->
+<line x1="354" y1="400" x2="458" y2="400" stroke="#2c6cdb" stroke-width="2" stroke-dasharray="2 2" marker-end="url(#va)"/>
+<text x="395" y="392" font-size="10" fill="#9ec5ff" font-weight="600">＝</text>
+
+<!-- Labels on lines: 加工方式 -->
+<text x="660" y="270" font-size="10" fill="#9aa5b8">＋ 時間維度</text>
+<text x="820" y="265" font-size="10" fill="#9aa5b8">＋ 風險計算</text>
+<text x="855" y="395" font-size="10" fill="#9aa5b8">＋ 品質檢查</text>
+<text x="830" y="525" font-size="10" fill="#9aa5b8">＋ 多船彙整</text>
+<text x="660" y="565" font-size="10" fill="#9aa5b8">＋ 空間聚合</text>
+
+<!-- Bottom note -->
+<rect x="40" y="720" width="1200" height="32" rx="4" fill="rgba(44,108,219,0.10)" stroke="#2c6cdb" stroke-dasharray="3 2"/>
+<text x="60" y="740" font-size="11" font-weight="600" fill="#9ec5ff">設計意涵：</text>
+<text x="160" y="740" font-size="11" fill="#c4cdda">Demo 1 直接呈現底層；其他 5 個 Demo 是「對同一份資料做不同加工」；ETA 是「港口擁塞」的進階衍生。介面上不是跳轉，而是切換視角</text>
+</svg>
+  </div>
+  <div class="notes">
+    <h3>重點修正</h3>
+    <ul style="list-style:disc;padding-left:24px;">
+      <li><strong>Demo 1 週邊態勢 = 底層資料的直接視角</strong>，等於原始資料本身，沒有加工</li>
+      <li><strong>Demo 2 歷史</strong>：對底層資料「＋ 時間維度」，累積成軌跡線</li>
+      <li><strong>Demo 3 CPA</strong>：對底層資料「＋ 風險計算」，疊上 RED/AMBER 警示標籤</li>
+      <li><strong>Demo 4 港口擁塞</strong>：對底層資料「＋ 空間聚合」，按港口位置分組</li>
+      <li><strong>Demo 5 ETA</strong>：港口擁塞的「衍生」，再加入自船航行計畫</li>
+      <li><strong>Demo 6 SitRep</strong>：多艘自家船的周圍監控資料「彙整」成港口報告</li>
+      <li><strong>Demo 7 AIS 完整性</strong>：不看「船在哪」，而是反觀「這份資料可信嗎」</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================= 視角 2 ============================= -->
+<section class="section" id="v2">
+  <div class="section-header">
+    <h2>② 各視角的資料加工邏輯</h2>
+    <p>同一筆周圍監控資料，經過不同加工，產出 6 種不同的視覺呈現</p>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1280 760" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1280" height="760" fill="#0d0d0d"/>
+
+<text x="640" y="32" text-anchor="middle" font-size="18" font-weight="600" fill="#e4eaf2">各視角的資料加工邏輯</text>
+<text x="640" y="52" text-anchor="middle" font-size="12" fill="#9aa5b8">原始資料 → 加工方式 → 視覺呈現</text>
+
+<!-- Header bar -->
+<rect x="40" y="80" width="240" height="36" rx="4" fill="#1a1a1a" stroke="#2a2a2a"/>
+<text x="160" y="103" text-anchor="middle" font-size="12" font-weight="600" fill="#9ec5ff">Demo 視角</text>
+
+<rect x="290" y="80" width="280" height="36" rx="4" fill="#1a1a1a" stroke="#2a2a2a"/>
+<text x="430" y="103" text-anchor="middle" font-size="12" font-weight="600" fill="#9ec5ff">原始資料（周圍監控）</text>
+
+<rect x="580" y="80" width="280" height="36" rx="4" fill="#1a1a1a" stroke="#2a2a2a"/>
+<text x="720" y="103" text-anchor="middle" font-size="12" font-weight="600" fill="#9ec5ff">加工方式</text>
+
+<rect x="870" y="80" width="370" height="36" rx="4" fill="#1a1a1a" stroke="#2a2a2a"/>
+<text x="1055" y="103" text-anchor="middle" font-size="12" font-weight="600" fill="#9ec5ff">最終視覺呈現</text>
+
+<!-- Row 1: Demo 1 -->
+<rect x="40" y="126" width="240" height="80" rx="4" fill="rgba(44,108,219,0.30)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="160" y="152" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 1 週邊態勢</text>
+<text x="160" y="170" text-anchor="middle" font-size="10" fill="#9ec5ff">即時視角（底層）</text>
+<text x="160" y="190" text-anchor="middle" font-size="10" fill="#c4cdda">＝ 原始資料</text>
+
+<rect x="290" y="126" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="305" y="148" font-size="11" fill="#c4cdda">本船：位置 / 航速 / 航向</text>
+<text x="305" y="166" font-size="11" fill="#c4cdda">5 NM 內所有他船 AIS</text>
+<text x="305" y="184" font-size="11" fill="#c4cdda">非船舶物件（浮標 / 燈塔）</text>
+<text x="305" y="200" font-size="10" fill="#9aa5b8">最新一筆 / 持續更新</text>
+
+<rect x="580" y="126" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="595" y="148" font-size="11" font-weight="600" fill="#f5b753">＝ 不做加工</text>
+<text x="595" y="166" font-size="11" fill="#c4cdda">直接畫地圖 + 標記</text>
+<text x="595" y="184" font-size="11" fill="#c4cdda">右側列出接觸事件清單</text>
+<text x="595" y="200" font-size="10" fill="#9aa5b8">最接近原始資料的視角</text>
+
+<rect x="870" y="126" width="370" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="885" y="148" font-size="11" fill="#c4cdda">⊙ 5 NM 圓 + 本船 + 他船 marker</text>
+<text x="885" y="166" font-size="11" fill="#c4cdda">▸ 接觸事件清單（距離 / 狀態）</text>
+<text x="885" y="184" font-size="11" fill="#c4cdda">↻ 顯示「最後更新 X 分鐘前」</text>
+<text x="885" y="200" font-size="10" fill="#9aa5b8">使用者問：「現在周圍什麼狀況？」</text>
+
+<!-- Row 2: Demo 2 -->
+<rect x="40" y="216" width="240" height="80" rx="4" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb"/>
+<text x="160" y="242" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 2 歷史</text>
+<text x="160" y="260" text-anchor="middle" font-size="10" fill="#9ec5ff">時間維度的累積</text>
+
+<rect x="290" y="216" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="305" y="238" font-size="11" fill="#c4cdda">本船過去 N 小時所有位置</text>
+<text x="305" y="256" font-size="11" fill="#c4cdda">同時段 5 NM 他船所有位置</text>
+<text x="305" y="274" font-size="10" fill="#9aa5b8">＝ 周圍監控的時間切片堆疊</text>
+
+<rect x="580" y="216" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="595" y="238" font-size="11" font-weight="600" fill="#f5b753">＋ 時間維度</text>
+<text x="595" y="256" font-size="11" fill="#c4cdda">把連續位置點連成 polyline</text>
+<text x="595" y="274" font-size="11" fill="#c4cdda">＋ 時間軸控制（拖 / 播放）</text>
+
+<rect x="870" y="216" width="370" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="885" y="238" font-size="11" fill="#c4cdda">━ 本船軌跡線（藍）</text>
+<text x="885" y="256" font-size="11" fill="#c4cdda">━ 同時段他船軌跡線</text>
+<text x="885" y="274" font-size="11" fill="#c4cdda">▶ 時間軸 + 倍速</text>
+
+<!-- Row 3: Demo 3 -->
+<rect x="40" y="306" width="240" height="80" rx="4" fill="rgba(255,77,79,0.20)" stroke="#ff4d4f"/>
+<text x="160" y="332" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 3 CPA</text>
+<text x="160" y="350" text-anchor="middle" font-size="10" fill="#ff8a8a">＋ 警示說明</text>
+
+<rect x="290" y="306" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="305" y="328" font-size="11" fill="#c4cdda">本船位置 + 速度 + 航向</text>
+<text x="305" y="346" font-size="11" fill="#c4cdda">5 NM 他船位置 + 速度 + 航向</text>
+<text x="305" y="364" font-size="10" fill="#9aa5b8">＝ 周圍監控的當前狀態</text>
+
+<rect x="580" y="306" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="595" y="328" font-size="11" font-weight="600" fill="#f5b753">＋ CPA/TCPA 計算</text>
+<text x="595" y="346" font-size="11" fill="#c4cdda">幾何投影：兩船持續航行</text>
+<text x="595" y="364" font-size="11" fill="#c4cdda">→ 最近接近點 + 時間</text>
+
+<rect x="870" y="306" width="370" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="885" y="328" font-size="11" fill="#c4cdda">↗ 預測向量線 + CPA 點</text>
+<text x="885" y="346" font-size="11" fill="#c4cdda">⚠ RED/AMBER 告警 pulse</text>
+<text x="885" y="364" font-size="11" fill="#c4cdda">▤ 下方表格列出所有風險船對</text>
+
+<!-- Row 4: Demo 4 -->
+<rect x="40" y="396" width="240" height="80" rx="4" fill="rgba(245,166,35,0.20)" stroke="#f5a623"/>
+<text x="160" y="422" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 4 港口擁塞</text>
+<text x="160" y="440" text-anchor="middle" font-size="10" fill="#f5b753">＋ 空間聚合（按港口）</text>
+
+<rect x="290" y="396" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="305" y="418" font-size="11" fill="#c4cdda">多艘自家船在港口附近</text>
+<text x="305" y="436" font-size="11" fill="#c4cdda">收集到的所有周圍 AIS</text>
+<text x="305" y="454" font-size="10" fill="#9aa5b8">＝ 同一港口的觀測樣本池</text>
+
+<rect x="580" y="396" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="595" y="418" font-size="11" font-weight="600" fill="#f5b753">＋ 空間分群</text>
+<text x="595" y="436" font-size="11" fill="#c4cdda">DBSCAN 推估錨地 / 走廊 / 泊區</text>
+<text x="595" y="454" font-size="11" fill="#c4cdda">＋ 統計各區船數 + CI 計算</text>
+
+<rect x="870" y="396" width="370" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="885" y="418" font-size="11" fill="#c4cdda">▦ 港區海圖 + 錨地 / 走廊 polygon</text>
+<text x="885" y="436" font-size="11" fill="#c4cdda">▤ KPI：CI 指數 / 錨地船數 / 流量</text>
+<text x="885" y="454" font-size="11" fill="#c4cdda">▸ 自家船 / 外來船清單可點</text>
+
+<!-- Row 5: Demo 5 (衍生) -->
+<rect x="40" y="486" width="240" height="80" rx="4" fill="rgba(76,217,122,0.20)" stroke="#4cd97a"/>
+<text x="160" y="512" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 5 ETA</text>
+<text x="160" y="530" text-anchor="middle" font-size="10" fill="#6ee094">＝ 港口擁塞 + 航行計畫衍生</text>
+
+<rect x="290" y="486" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="305" y="508" font-size="11" fill="#c4cdda">自船航行計畫（StormGeo）</text>
+<text x="305" y="526" font-size="11" fill="#c4cdda">＋ 目的港擁塞狀態（Demo 4）</text>
+<text x="305" y="544" font-size="10" fill="#9aa5b8">＝ 不是周圍監控原始</text>
+
+<rect x="580" y="486" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="595" y="508" font-size="11" font-weight="600" fill="#f5b753">＋ 四段預測</text>
+<text x="595" y="526" font-size="11" fill="#c4cdda">T1 航行 + T2 等候 + T3 走廊 + T4 泊</text>
+<text x="595" y="544" font-size="11" fill="#c4cdda">＋ 不確定性 P25/P50/P75</text>
+
+<rect x="870" y="486" width="370" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="885" y="508" font-size="11" fill="#c4cdda">▬ 四色橫向進度條</text>
+<text x="885" y="526" font-size="11" fill="#c4cdda">⌐ P25/P50/P75 範圍指示</text>
+<text x="885" y="544" font-size="11" fill="#c4cdda">⚠ Demurrage 風險金額</text>
+
+<!-- Row 6: Demo 6 -->
+<rect x="40" y="576" width="240" height="80" rx="4" fill="rgba(155,89,182,0.22)" stroke="#9b59b6"/>
+<text x="160" y="602" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 6 SitRep</text>
+<text x="160" y="620" text-anchor="middle" font-size="10" fill="#c39bd3">＋ 多船彙整 + 報告化</text>
+
+<rect x="290" y="576" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="305" y="598" font-size="11" fill="#c4cdda">多艘自家船在目的港附近</text>
+<text x="305" y="616" font-size="11" fill="#c4cdda">各自 5 NM 內觀測到的他船</text>
+<text x="305" y="634" font-size="10" fill="#9aa5b8">＝ 多船周圍監控聯集</text>
+
+<rect x="580" y="576" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="595" y="598" font-size="11" font-weight="600" fill="#f5b753">＋ 彙整成報告</text>
+<text x="595" y="616" font-size="11" fill="#c4cdda">在場船清單 + 觀測時間</text>
+<text x="595" y="634" font-size="11" fill="#c4cdda">＋ 等候時間 / Demurrage 評估</text>
+
+<rect x="870" y="576" width="370" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="885" y="598" font-size="11" fill="#c4cdda">▣ 報告卡片（標題 + 品質 badge）</text>
+<text x="885" y="616" font-size="11" fill="#c4cdda">▸ 在場情資來源清單</text>
+<text x="885" y="634" font-size="11" fill="#c4cdda">▭ 港口事件時間線</text>
+
+<!-- Row 7: Demo 7 -->
+<rect x="40" y="666" width="240" height="80" rx="4" fill="rgba(154,165,184,0.20)" stroke="#9aa5b8"/>
+<text x="160" y="692" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 7 AIS 完整性</text>
+<text x="160" y="710" text-anchor="middle" font-size="10" fill="#c4cdda">＋ 品質反觀</text>
+
+<rect x="290" y="666" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="305" y="688" font-size="11" fill="#c4cdda">收到的所有 AIS 封包</text>
+<text x="305" y="706" font-size="11" fill="#c4cdda">含時間戳 / 欄位 / 序號 / 信心</text>
+<text x="305" y="724" font-size="10" fill="#9aa5b8">＝ 周圍監控的「資料本身」</text>
+
+<rect x="580" y="666" width="280" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="595" y="688" font-size="11" font-weight="600" fill="#f5b753">＋ 六偵測器評分</text>
+<text x="595" y="706" font-size="11" fill="#c4cdda">gap / kinematic / duplicate</text>
+<text x="595" y="724" font-size="11" fill="#c4cdda">static / destination / behavioral</text>
+
+<rect x="870" y="666" width="370" height="80" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="885" y="688" font-size="11" fill="#c4cdda">▦ 熱力矩陣（行 = 船 / 欄 = 偵測器）</text>
+<text x="885" y="706" font-size="11" fill="#c4cdda">▤ 綜合風險分 + 高風險項目</text>
+<text x="885" y="724" font-size="11" fill="#c4cdda">📄 查看稽核報告</text>
+</svg>
+  </div>
+</section>
+
+<!-- ============================= 視角 3 ============================= -->
+<section class="section" id="v3">
+  <div class="section-header">
+    <h2>③ 問題導向：我想知道什麼，就看哪個視角</h2>
+    <p>從使用者的「我想知道 X」出發，自然導向對應的 Demo 視角</p>
+  </div>
+  <div class="notes">
+    <table>
+      <thead>
+        <tr>
+          <th width="35%">使用者問題</th>
+          <th width="20%">該看的視角</th>
+          <th width="45%">為什麼是這個視角</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>「現在我船周圍什麼狀況？」</strong><br><span style="color:#9aa5b8">當下情境感知</span></td>
+          <td><span class="demo-tag demo-1">Demo 1 週邊態勢</span></td>
+          <td>原始周圍監控的直接呈現，最接近「現場」</td>
+        </tr>
+        <tr>
+          <td><strong>「這艘船過去 24 小時走了哪？」</strong><br><span style="color:#9aa5b8">或「事件發生時周圍有誰？」</span></td>
+          <td><span class="demo-tag demo-2">Demo 2 歷史</span></td>
+          <td>把周圍監控按時間累積成軌跡，可拖時間軸回到任一時刻</td>
+        </tr>
+        <tr>
+          <td><strong>「我跟周圍船會不會碰？」</strong><br><span style="color:#9aa5b8">接近風險評估</span></td>
+          <td><span class="demo-tag demo-3">Demo 3 CPA</span></td>
+          <td>同樣是周圍監控的當下狀況，但加上 CPA / TCPA 計算與警示標籤</td>
+        </tr>
+        <tr>
+          <td><strong>「目的港有多塞？」</strong><br><span style="color:#9aa5b8">港口狀態查詢</span></td>
+          <td><span class="demo-tag demo-4">Demo 4 港口擁塞</span></td>
+          <td>把多艘自家船的周圍監控按港口聚合，看每港的船隻分布與 CI 指數</td>
+        </tr>
+        <tr>
+          <td><strong>「我什麼時候會到目的港？」</strong><br><span style="color:#9aa5b8">動態 ETA 決策</span></td>
+          <td><span class="demo-tag demo-5">Demo 5 ETA</span></td>
+          <td>自船航行計畫 + 目的港擁塞狀態，推算四段預測（航行 + 等候 + 進港 + 靠泊）</td>
+        </tr>
+        <tr>
+          <td><strong>「目的港現場有誰？等候情況？」</strong><br><span style="color:#9aa5b8">距港前的情資彙整</span></td>
+          <td><span class="demo-tag demo-6">Demo 6 SitRep</span></td>
+          <td>多艘自家船在港的周圍監控資料彙整成報告，含在場情資來源</td>
+        </tr>
+        <tr>
+          <td><strong>「我收到的 AIS 資料可信嗎？」</strong><br><span style="color:#9aa5b8">資料品質查證</span></td>
+          <td><span class="demo-tag demo-7">Demo 7 AIS 完整性</span></td>
+          <td>不看「船在哪」，而是看「資料本身」是否有 gap / 跳點 / 重複等異常</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="notes" style="margin-top:20px;">
+    <h3>進階組合情境（多視角配合）</h3>
+    <table>
+      <thead>
+        <tr>
+          <th width="40%">複合情境</th>
+          <th>視角組合</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>看到 CPA 警示，想確認資料可信度</strong></td>
+          <td><span class="demo-tag demo-3">Demo 3</span> + <span class="demo-tag demo-7">Demo 7</span><br><span style="color:#9aa5b8">CPA 警示 + 對目標船的 AIS 品質檢查 → 是否該降級告警</span></td>
+        </tr>
+        <tr>
+          <td><strong>事件發生後查證來龍去脈</strong></td>
+          <td><span class="demo-tag demo-2">Demo 2</span> + <span class="demo-tag demo-3">Demo 3</span><br><span style="color:#9aa5b8">歷史回放 + CPA 數值疊圖 → 重現事件全程</span></td>
+        </tr>
+        <tr>
+          <td><strong>港口塞，要不要降速</strong></td>
+          <td><span class="demo-tag demo-4">Demo 4</span> + <span class="demo-tag demo-5">Demo 5</span> + <span class="demo-tag demo-6">Demo 6</span><br><span style="color:#9aa5b8">港口擁塞看狀況 → ETA 看延誤 → SitRep 看現場 → 決定是否採納降速建議</span></td>
+        </tr>
+        <tr>
+          <td><strong>看到 route 偏移告警</strong></td>
+          <td><span class="demo-tag demo-2">Demo 2</span> + 航行計畫管理<br><span style="color:#9aa5b8">歷史軌跡（看實際走哪）+ 對比 Active Plan（看計畫走哪）</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<footer>
+SDataPro 同源資料多視角 v0.2 · 2026-05-29 · 摯陞數位科技 SLAB · 取代 v0.1 流程圖
+</footer>
+
+<script>
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+</script>
+
+</body>
+</html>

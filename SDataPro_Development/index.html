@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDataPro 船隊監控原型 v0.1</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: #000;
+  color: #e4eaf2;
+  font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+  font-size: 14px;
+  height: 100vh;
+  overflow: hidden;
+}
+body { display: flex; }
+
+/* === Sidebar === */
+.sidebar {
+  width: 220px;
+  background: #0d0d0d;
+  border-right: 1px solid #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.brand {
+  padding: 16px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.brand-name { font-size: 15px; font-weight: 700; color: #e4eaf2; }
+.brand-sub { font-size: 10px; color: #7c8a9e; letter-spacing: 0.5px; margin-top: 2px; }
+
+.sb-group { margin-top: 14px; }
+.sb-group-title {
+  padding: 4px 16px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #7c8a9e;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  color: #c4cdda;
+  font-size: 13px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+.sb-item:hover { background: #141414; color: #e4eaf2; }
+.sb-item.active {
+  background: rgba(44,108,219,0.10);
+  border-left-color: #2c6cdb;
+  color: #9ec5ff;
+}
+.sb-item .ico { width: 16px; font-size: 13px; flex-shrink: 0; }
+.sb-item .badge {
+  margin-left: auto;
+  background: rgba(255,77,79,0.20);
+  color: #ff8a8a;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+/* === Main === */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.header {
+  background: #0d0d0d;
+  border-bottom: 1px solid #2a2a2a;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.header h1 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #e4eaf2;
+}
+.header .meta {
+  font-size: 12px;
+  color: #9aa5b8;
+  margin-top: 2px;
+}
+.header .actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.delay-tag {
+  padding: 4px 10px;
+  background: rgba(245,166,35,0.10);
+  border: 1px solid #f5a623;
+  border-radius: 3px;
+  color: #f5b753;
+  font-size: 11px;
+  cursor: help;
+}
+
+/* === Layout === */
+.workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1px;
+  overflow: hidden;
+}
+
+/* === Map === */
+.map-wrap {
+  position: relative;
+  background: #0a1220;
+  overflow: hidden;
+}
+#map { width: 100%; height: 100%; }
+
+/* Leaflet popup dark */
+.leaflet-popup-content-wrapper {
+  background: #141414;
+  color: #e4eaf2;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.leaflet-popup-tip { background: #141414; border: 1px solid #2a2a2a; }
+.leaflet-popup-content { margin: 12px 14px; font-size: 12px; min-width: 200px; }
+.leaflet-popup-content .pop-title {
+  font-size: 13px; font-weight: 700; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.leaflet-popup-content .pop-meta { color: #9aa5b8; line-height: 1.7; }
+.leaflet-popup-content .pop-mono { font-family: ui-monospace, "SF Mono", Consolas, monospace; }
+.leaflet-popup-content .pop-btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  background: rgba(44,108,219,0.18);
+  border: 1px solid #2c6cdb;
+  color: #9ec5ff;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+.leaflet-popup-content .pop-btn:hover { background: rgba(44,108,219,0.30); }
+
+.leaflet-control-zoom a {
+  background: #141414 !important;
+  color: #e4eaf2 !important;
+  border-color: #2a2a2a !important;
+}
+
+/* 浮動工具列 */
+.map-toolbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(13,13,13,0.92);
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  padding: 6px 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  z-index: 500;
+}
+.summary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.summary-pill .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+}
+.summary-pill.c { background: rgba(255,77,79,0.15); color: #ff8a8a; }
+.summary-pill.c .dot { background: #ff4d4f; }
+.summary-pill.w { background: rgba(245,166,35,0.15); color: #f5b753; }
+.summary-pill.w .dot { background: #f5a623; }
+.summary-pill.n { background: rgba(76,217,122,0.15); color: #6ee094; }
+.summary-pill.n .dot { background: #4cd97a; }
+
+/* 圖層 toggle */
+.layer-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(13,13,13,0.92);
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  z-index: 500;
+}
+.layer-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: #c4cdda;
+}
+.layer-toggle input { accent-color: #2c6cdb; }
+
+/* 圖層 OFF 提示 */
+.layer-off-banner {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background: rgba(245,166,35,0.10);
+  border: 1px solid #f5a623;
+  border-radius: 4px;
+  padding: 6px 12px;
+  color: #f5b753;
+  font-size: 11px;
+  z-index: 500;
+  display: none;
+}
+
+/* === Right panel === */
+.right-panel {
+  background: #0d0d0d;
+  border-left: 1px solid #2a2a2a;
+  overflow-y: auto;
+  padding: 16px;
+}
+.panel-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9aa5b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+/* 船隊列表 */
+.vessel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vessel-card {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-left: 3px solid #4cd97a;
+  border-radius: 4px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.vessel-card:hover {
+  background: #1a1a1a;
+  border-color: #3a3a3a;
+}
+.vessel-card.selected {
+  background: rgba(44,108,219,0.15);
+  border-color: #2c6cdb;
+  border-left-color: #2c6cdb;
+}
+.vessel-card.risk-critical { border-left-color: #ff4d4f; }
+.vessel-card.risk-warning { border-left-color: #f5a623; }
+.vessel-card.risk-normal { border-left-color: #4cd97a; }
+.vc-row1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.vc-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e4eaf2;
+}
+.vc-flag {
+  font-size: 12px;
+}
+.vc-row2 {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 11px;
+  color: #9aa5b8;
+}
+.vc-row3 {
+  font-size: 11px;
+  color: #c4cdda;
+  margin-top: 2px;
+}
+
+/* 船舶詳情 panel */
+.vessel-detail h3 {
+  font-size: 14px;
+  color: #e4eaf2;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vessel-detail .back-link {
+  font-size: 11px;
+  color: #9ec5ff;
+  cursor: pointer;
+  margin-bottom: 12px;
+  display: inline-block;
+}
+.vessel-detail .back-link:hover { text-decoration: underline; }
+.vd-grid {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 6px 10px;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+.vd-grid .k { color: #9aa5b8; }
+.vd-grid .v { color: #e4eaf2; font-family: ui-monospace, "SF Mono", Consolas, monospace; }
+
+.vd-section { margin-bottom: 16px; }
+.vd-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9aa5b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.surr-card {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 3px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+.surr-card .mmsi {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  color: #9ec5ff;
+  font-weight: 600;
+}
+.surr-card .meta {
+  color: #9aa5b8;
+  margin-top: 3px;
+}
+
+/* === 底部時間軸 === */
+.timeline-wrap {
+  background: #0d0d0d;
+  border-top: 1px solid #2a2a2a;
+  padding: 12px 24px;
+  display: none;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.timeline-wrap.show { display: flex; }
+.timeline-info {
+  font-size: 12px;
+  color: #c4cdda;
+  white-space: nowrap;
+  min-width: 200px;
+}
+.timeline-info b {
+  color: #e4eaf2;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+}
+input[type=range] {
+  flex: 1;
+  accent-color: #2c6cdb;
+  height: 6px;
+}
+
+/* Loading */
+.loading {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 16px 24px;
+  z-index: 2000;
+  color: #c4cdda;
+  display: none;
+}
+.loading.show { display: block; }
+
+/* 警告：file:// 模式 */
+.fs-warn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  background: #141414;
+  border: 1px solid #ff4d4f;
+  border-radius: 4px;
+  padding: 12px 16px;
+  color: #ff8a8a;
+  font-size: 12px;
+  max-width: 360px;
+  z-index: 2000;
+  display: none;
+}
+.fs-warn.show { display: block; }
+.fs-warn b { color: #ff4d4f; }
+.fs-warn code {
+  background: #0d0d0d;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="brand">
+    <div class="brand-name">SDataPro</div>
+    <div class="brand-sub">FLEET OCC · v0.1 原型</div>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-group-title">即時監看</div>
+    <div class="sb-item active"><span class="ico">📊</span>船隊監控<span class="badge" id="critCount">-</span></div>
+    <div class="sb-item"><span class="ico">🚢</span>船舶詳情</div>
+  </div>
+  <div class="sb-group">
+    <div class="sb-group-title">港口營運</div>
+    <div class="sb-item"><span class="ico">⚓</span>港口擁塞看板</div>
+    <div class="sb-item"><span class="ico">📋</span>港口情資 SitRep</div>
+  </div>
+  <div class="sb-group">
+    <div class="sb-group-title">事件管理</div>
+    <div class="sb-item"><span class="ico">⚠</span>事件處理</div>
+    <div class="sb-item"><span class="ico">🕐</span>警示時間線</div>
+  </div>
+  <div class="sb-group">
+    <div class="sb-group-title">系統管理</div>
+    <div class="sb-item"><span class="ico">⚙</span>閾值設定</div>
+    <div class="sb-item"><span class="ico">📄</span>稽核紀錄</div>
+    <div class="sb-item"><span class="ico">⬇</span>報表匯出</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="header">
+    <div>
+      <h1>船隊監控 / Fleet Monitoring</h1>
+      <div class="meta" id="fleetMeta">載入中...</div>
+    </div>
+    <div class="actions">
+      <div class="delay-tag" title="所有資料皆為事後紀錄，最新時間戳依各船而定">⓵ 資料延遲提醒</div>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <div class="map-wrap">
+      <div class="map-toolbar">
+        <span style="color:#9aa5b8;font-size:11px;">船隊風險：</span>
+        <span class="summary-pill c"><span class="dot"></span>C·<span id="cntCrit">0</span></span>
+        <span class="summary-pill w"><span class="dot"></span>W·<span id="cntWarn">0</span></span>
+        <span class="summary-pill n"><span class="dot"></span>N·<span id="cntNorm">0</span></span>
+      </div>
+
+      <div class="layer-toggle" id="layerToggle" style="display:none;">
+        <label><input type="checkbox" id="lyrTrack" checked> 軌跡</label>
+        <label><input type="checkbox" id="lyrCircle" checked> 5 NM 圓</label>
+        <label><input type="checkbox" id="lyrSurr" checked> 周邊船</label>
+      </div>
+
+      <div id="map"></div>
+    </div>
+
+    <div class="right-panel" id="rightPanel">
+      <div id="panelDefault">
+        <div class="panel-title">船隊列表（20 艘）</div>
+        <div class="vessel-list" id="vesselList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-wrap" id="timelineWrap">
+    <div class="timeline-info">
+      <span id="tlTime">--</span> · 周邊 <b id="tlSurr">-</b> 艘
+    </div>
+    <input type="range" id="tlSlider" min="0" max="100" value="0">
+    <div class="timeline-info" style="min-width:auto;">
+      <b id="tlIdx">0</b>/<b id="tlTotal">0</b> snapshot
+    </div>
+  </div>
+</div>
+
+<div class="loading" id="loading">載入中...</div>
+<div class="fs-warn" id="fsWarn">
+  <b>⚠ file:// 模式無法 fetch JSON</b><br>
+  請改用 VSCode + Live Server，或在本資料夾跑：<br>
+  <code>python -m http.server 8000</code><br>
+  然後開 <code>http://localhost:8000/</code>
+</div>
+
+<script>
+// ============================================================
+// 全域狀態
+// ============================================================
+const STATE = {
+  vessels: [],
+  selectedVessel: null,
+  currentTrack: null,
+  currentSnapshots: null,
+  currentSnapshotIdx: 0,
+
+  map: null,
+  layers: {
+    vesselMarkers: null,
+    trackLine: null,
+    nmCircle: null,
+    surroundingMarkers: null,
+  },
+};
+
+const COLORS = {
+  critical: '#ff4d4f',
+  warning: '#f5a623',
+  normal: '#4cd97a',
+  ownShip: '#2c6cdb',
+  surrounding: '#ffffff',
+  track: '#4a9eff',
+  nmCircle: '#4a9eff',
+};
+
+// 風險規則：5 NM 內最近船距離
+//   < 0.5 nm   = critical
+//   < 2 nm     = warning
+//   >= 2 nm    = normal
+//   no data    = normal
+function getRiskLevel(vessel) {
+  // Demo 規則：用 snapshot_count 與其他啟發
+  // 若無 snapshot 資料 → na
+  // 這裡先用一個簡單規則：vessel 周邊密度作為 proxy
+  if (vessel._currentRisk) return vessel._currentRisk;
+  return 'normal';
+}
+
+// ============================================================
+// 初始化
+// ============================================================
+async function init() {
+  setupMap();
+  await loadVessels();
+}
+
+function setupMap() {
+  STATE.map = L.map('map', {
+    center: [22, 121],     // 台灣周圍
+    zoom: 4,
+    zoomControl: true,
+    worldCopyJump: true,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CARTO',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(STATE.map);
+
+  STATE.layers.vesselMarkers = L.layerGroup().addTo(STATE.map);
+}
+
+async function loadVessels() {
+  const loading = document.getElementById('loading');
+  loading.classList.add('show');
+  loading.textContent = '載入船隊清單 (vessels.json)...';
+
+  try {
+    const res = await fetch('data/vessels.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    STATE.vessels = data.vessels;
+    const op = data.operator_summary || {};
+    const opStr = op['Yang Ming'] ? `Yang Ming ${op['Yang Ming']} 艘 · 其他 ${op['Other']} 艘` : '';
+    document.getElementById('fleetMeta').textContent =
+      `共 ${data.vessel_count} 艘 (${opStr}) · 資料區間 ${data.date_range[0]} ~ ${data.date_range[1]} · 取樣 ${data.downsample.track_minutes} 分鐘`;
+    loading.classList.remove('show');
+    renderFleet();
+  } catch (err) {
+    loading.classList.remove('show');
+    if (location.protocol === 'file:') {
+      document.getElementById('fsWarn').classList.add('show');
+    } else {
+      alert('載入失敗: ' + err.message);
+    }
+  }
+}
+
+// ============================================================
+// 船隊總覽呈現
+// ============================================================
+async function renderFleet() {
+  STATE.layers.vesselMarkers.clearLayers();
+
+  // 先載入每艘船的「最後位置」（從各 tracks/{src}.json 取最後一筆）
+  // 為效能：並行 fetch，但只取最後 point
+  const loading = document.getElementById('loading');
+  loading.classList.add('show');
+  loading.textContent = '載入 20 艘船最新位置...';
+
+  // 並行 fetch tracks（4.6 MB total）
+  const trackPromises = STATE.vessels.map(v =>
+    fetch(`data/${v.track_file}`)
+      .then(r => r.json())
+      .then(t => {
+        const last = t.track_points[t.track_points.length - 1];
+        v._lastPos = last;
+        v._track = t.track_points;
+        return v;
+      })
+      .catch(e => { v._loadError = e.message; return v; })
+  );
+  await Promise.all(trackPromises);
+  loading.classList.remove('show');
+
+  // 用最後一個快照的周邊船數作為「風險 proxy」
+  // critical: 周邊最近船 < 0.5 nm
+  // warning: < 2 nm
+  // normal: 否則
+
+  // 並行載入 snapshots 最後一筆來決定風險
+  const snapPromises = STATE.vessels.map(v =>
+    fetch(`data/${v.snapshot_file}`)
+      .then(r => r.json())
+      .then(s => {
+        const lastSnap = s.snapshots[s.snapshots.length - 1];
+        v._lastSnapshot = lastSnap;
+        // 計算最小距離
+        let minDist = Infinity;
+        for (const surr of lastSnap.surrounding) {
+          if (surr.dist_nm < minDist) minDist = surr.dist_nm;
+        }
+        v._minDistNm = minDist === Infinity ? null : minDist;
+        v._surroundCount = lastSnap.surrounding_count;
+        if (v._minDistNm !== null) {
+          if (v._minDistNm < 0.5) v._currentRisk = 'critical';
+          else if (v._minDistNm < 2) v._currentRisk = 'warning';
+          else v._currentRisk = 'normal';
+        } else {
+          v._currentRisk = 'normal';
+        }
+        return v;
+      })
+      .catch(e => { v._loadError = e.message; v._currentRisk = 'normal'; return v; })
+  );
+  await Promise.all(snapPromises);
+
+  // 統計
+  const counts = { critical: 0, warning: 0, normal: 0 };
+  STATE.vessels.forEach(v => counts[v._currentRisk] = (counts[v._currentRisk] || 0) + 1);
+  document.getElementById('cntCrit').textContent = counts.critical;
+  document.getElementById('cntWarn').textContent = counts.warning;
+  document.getElementById('cntNorm').textContent = counts.normal;
+  document.getElementById('critCount').textContent = counts.critical;
+
+  // 渲染地圖 markers
+  STATE.vessels.forEach(v => {
+    if (!v._lastPos) return;
+    const color = COLORS[v._currentRisk] || COLORS.normal;
+    const cog = v._lastPos.cog || 0;
+    const icon = L.divIcon({
+      className: 'fleet-marker',
+      html: `<svg width="22" height="22" viewBox="0 0 22 22" style="transform:rotate(${cog}deg);overflow:visible;">
+              <polygon points="11,2 5,18 17,18" fill="${color}" stroke="#000" stroke-width="0.5"/>
+            </svg>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 11],
+    });
+    const marker = L.marker([v._lastPos.lat, v._lastPos.lon], { icon }).addTo(STATE.layers.vesselMarkers);
+    marker.bindPopup(buildPopup(v));
+    marker.on('click', () => { selectVessel(v); });
+    v._marker = marker;
+  });
+
+  // 自動 fit 全船隊
+  if (STATE.vessels.some(v => v._lastPos)) {
+    const bounds = L.latLngBounds(STATE.vessels.filter(v => v._lastPos).map(v => [v._lastPos.lat, v._lastPos.lon]));
+    STATE.map.fitBounds(bounds, { padding: [50, 50] });
+  }
+
+  // 渲染右側清單
+  renderVesselList();
+}
+
+function buildPopup(v) {
+  const sizeStr = v.length_m ? `${v.length_m} × ${v.beam_m} m` : '-';
+  return `
+    <div class="pop-title">${v.flag_label} ${v.name || 'src ' + v.source_id}</div>
+    <div class="pop-meta">
+      <div>MMSI: <span class="pop-mono">${v.own_mmsi}</span> · IMO: <span class="pop-mono">${v.imo || '-'}</span></div>
+      <div>船型: ${v.type || '-'} · ${v.built ? v.built + ' 年造' : ''}</div>
+      <div>尺寸: ${sizeStr} · DWT ${v.dwt ? v.dwt.toLocaleString() : '-'}</div>
+      <div>區域: ${v.region}</div>
+      <div>位置: <span class="pop-mono">${v._lastPos.lat.toFixed(3)}, ${v._lastPos.lon.toFixed(3)}</span></div>
+      <div>速度: <span class="pop-mono">${v._lastPos.sog ?? '-'} kn</span> · 航向: <span class="pop-mono">${v._lastPos.cog ?? '-'}°</span></div>
+      <div>5 NM 內: <span class="pop-mono">${v._surroundCount ?? '-'}</span> 艘 · 最近: <span class="pop-mono">${v._minDistNm ? v._minDistNm.toFixed(2) + ' nm' : '-'}</span></div>
+    </div>
+    <span class="pop-btn" onclick="selectVessel(STATE.vessels.find(x=>x.source_id===${v.source_id}))">查看船舶詳情 →</span>
+  `;
+}
+
+function renderVesselList() {
+  const list = document.getElementById('vesselList');
+  // 依風險排序
+  const sorted = [...STATE.vessels].sort((a, b) => {
+    const order = { critical: 0, warning: 1, normal: 2 };
+    return order[a._currentRisk] - order[b._currentRisk];
+  });
+  list.innerHTML = sorted.map(v => `
+    <div class="vessel-card risk-${v._currentRisk}" data-src="${v.source_id}">
+      <div class="vc-row1">
+        <span class="vc-flag">${v.flag_label?.split(' ')[0] ?? v.flag}</span>
+        <span class="vc-name">${v.name || 'src ' + v.source_id}</span>
+        <span style="color:#7c8a9e;font-size:11px;margin-left:auto;">${v.region}</span>
+      </div>
+      <div class="vc-row2">${v.own_mmsi}${v.imo ? ' · IMO ' + v.imo : ''}</div>
+      <div class="vc-row3">
+        ${v.type ? v.type.replace(' Ship','') + ' · ' : ''}SOG ${v._lastPos?.sog ?? '-'} kn · 5NM ${v._surroundCount ?? '-'} 艘 ·
+        ${v._minDistNm ? '最近 ' + v._minDistNm.toFixed(2) + ' nm' : '-'}
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.vessel-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const src = parseInt(card.dataset.src);
+      const v = STATE.vessels.find(x => x.source_id === src);
+      selectVessel(v);
+    });
+  });
+}
+
+// ============================================================
+// 船舶詳情
+// ============================================================
+window.selectVessel = async function(v) {
+  STATE.selectedVessel = v;
+  STATE.currentTrack = v._track;
+
+  // 載入完整 snapshots
+  const loading = document.getElementById('loading');
+  loading.classList.add('show');
+  loading.textContent = `載入 ${v.region} 船舶詳情...`;
+  try {
+    const res = await fetch(`data/${v.snapshot_file}`);
+    const s = await res.json();
+    STATE.currentSnapshots = s.snapshots;
+    STATE.currentSnapshotIdx = s.snapshots.length - 1;
+    renderDetail();
+    drawDetailMap();
+    setupTimeline();
+  } catch (e) {
+    alert('載入失敗: ' + e.message);
+  }
+  loading.classList.remove('show');
+};
+
+function renderDetail() {
+  const v = STATE.selectedVessel;
+  const lastSnap = STATE.currentSnapshots[STATE.currentSnapshotIdx];
+  const html = `
+    <div class="vessel-detail">
+      <div class="back-link" onclick="exitDetail()">← 返回船隊清單</div>
+      <h3>${v.flag_label} ${v.name || 'src ' + v.source_id}</h3>
+      <div style="color:#9aa5b8;font-size:11px;margin-bottom:10px;">${v.region} · ${v.operator || ''}</div>
+
+      <div class="vd-grid">
+        <div class="k">MMSI</div><div class="v">${v.own_mmsi}</div>
+        <div class="k">IMO</div><div class="v">${v.imo || '-'}</div>
+        <div class="k">船型</div><div class="v">${v.type || '-'}</div>
+        <div class="k">建造年</div><div class="v">${v.built || '-'}</div>
+        <div class="k">尺寸</div><div class="v">${v.length_m ? v.length_m + ' × ' + v.beam_m + ' m' : '-'}</div>
+        <div class="k">GT / DWT</div><div class="v">${v.gt ? v.gt.toLocaleString() + ' / ' + v.dwt.toLocaleString() : '-'}</div>
+        <div class="k">資料區間</div><div class="v">${v.date_range[0].substring(0,10)} ~ ${v.date_range[1].substring(0,10)}</div>
+        <div class="k">軌跡點數</div><div class="v">${v.track_points}</div>
+        <div class="k">快照數</div><div class="v">${v.snapshot_count}</div>
+      </div>
+
+      <div class="vd-section">
+        <div class="vd-section-title">當前位置（最後快照）</div>
+        <div class="vd-grid">
+          <div class="k">時間</div><div class="v">${lastSnap.ts}</div>
+          <div class="k">座標</div><div class="v">${lastSnap.own_pos.lat.toFixed(4)}, ${lastSnap.own_pos.lon.toFixed(4)}</div>
+          <div class="k">周邊 5NM</div><div class="v">${lastSnap.surrounding_count} 艘</div>
+        </div>
+      </div>
+
+      <div class="vd-section">
+        <div class="vd-section-title">5 NM 內最近 10 艘船</div>
+        ${lastSnap.surrounding.slice(0, 10).sort((a,b)=>a.dist_nm-b.dist_nm).map(s => `
+          <div class="surr-card">
+            <div><span class="mmsi">${s.mmsi}</span> · ${s.cat || 'vessel'}</div>
+            <div class="meta">
+              ${s.dist_nm.toFixed(2)} nm · ${s.sog ?? '-'} kn · ${s.cog ?? '-'}°
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('rightPanel').innerHTML = html;
+}
+
+function drawDetailMap() {
+  // 清除船隊 markers
+  STATE.layers.vesselMarkers.clearLayers();
+
+  // 清除舊圖層
+  ['trackLine', 'nmCircle', 'surroundingMarkers'].forEach(k => {
+    if (STATE.layers[k]) STATE.map.removeLayer(STATE.layers[k]);
+  });
+
+  const v = STATE.selectedVessel;
+  const snap = STATE.currentSnapshots[STATE.currentSnapshotIdx];
+
+  // 1. 軌跡 polyline（全 8 天）
+  if (document.getElementById('lyrTrack').checked && v._track) {
+    const latlngs = v._track.map(p => [p.lat, p.lon]);
+    STATE.layers.trackLine = L.polyline(latlngs, {
+      color: COLORS.track,
+      weight: 2,
+      opacity: 0.5,
+    }).addTo(STATE.map);
+  }
+
+  // 2. 5 NM 圓
+  if (document.getElementById('lyrCircle').checked) {
+    STATE.layers.nmCircle = L.circle([snap.own_pos.lat, snap.own_pos.lon], {
+      radius: 5 * 1852,    // 5 NM in meters
+      fillColor: COLORS.nmCircle,
+      fillOpacity: 0.05,
+      color: COLORS.nmCircle,
+      weight: 1,
+      opacity: 0.4,
+      dashArray: '3 3',
+    }).addTo(STATE.map);
+  }
+
+  // 3. 本船 marker
+  const ownIcon = L.divIcon({
+    className: 'own-marker',
+    html: `<svg width="26" height="26" viewBox="0 0 26 26" style="overflow:visible;">
+            <circle cx="13" cy="13" r="12" fill="none" stroke="${COLORS.ownShip}" stroke-width="1" opacity="0.5"/>
+            <polygon points="13,3 6,21 20,21" fill="${COLORS.ownShip}" stroke="#000" stroke-width="0.5"/>
+           </svg>`,
+    iconSize: [26, 26],
+    iconAnchor: [13, 13],
+  });
+  L.marker([snap.own_pos.lat, snap.own_pos.lon], { icon: ownIcon })
+    .bindPopup(`<b>本船</b><br>${v.own_mmsi}<br>${snap.ts}`)
+    .addTo(STATE.layers.vesselMarkers);
+
+  // 4. 周邊 markers
+  if (document.getElementById('lyrSurr').checked) {
+    STATE.layers.surroundingMarkers = L.layerGroup().addTo(STATE.map);
+    snap.surrounding.forEach(s => {
+      const isClose = s.dist_nm < 1;
+      const color = isClose ? COLORS.critical : COLORS.surrounding;
+      const cog = s.cog || 0;
+      const icon = L.divIcon({
+        html: `<svg width="14" height="14" viewBox="0 0 14 14" style="transform:rotate(${cog}deg);overflow:visible;">
+                <polygon points="7,1 3,12 11,12" fill="${color}" stroke="#000" stroke-width="0.5"/>
+               </svg>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+        className: '',
+      });
+      L.marker([s.lat, s.lon], { icon })
+        .bindPopup(`<b class="pop-mono">${s.mmsi}</b><br>距 ${s.dist_nm.toFixed(2)} nm<br>${s.sog ?? '-'} kn @ ${s.cog ?? '-'}°`)
+        .addTo(STATE.layers.surroundingMarkers);
+    });
+  }
+
+  // 5. fit bounds
+  STATE.map.setView([snap.own_pos.lat, snap.own_pos.lon], 11);
+
+  // 顯示圖層 toggle
+  document.getElementById('layerToggle').style.display = 'flex';
+}
+
+function setupTimeline() {
+  const wrap = document.getElementById('timelineWrap');
+  wrap.classList.add('show');
+  const slider = document.getElementById('tlSlider');
+  slider.max = STATE.currentSnapshots.length - 1;
+  slider.value = STATE.currentSnapshotIdx;
+  updateTimelineInfo();
+  slider.oninput = (e) => {
+    STATE.currentSnapshotIdx = parseInt(e.target.value);
+    updateTimelineInfo();
+    drawDetailMap();
+    renderDetail();
+  };
+}
+
+function updateTimelineInfo() {
+  const snap = STATE.currentSnapshots[STATE.currentSnapshotIdx];
+  document.getElementById('tlTime').textContent = snap.ts.replace('T', ' ').replace('Z', '');
+  document.getElementById('tlSurr').textContent = snap.surrounding_count;
+  document.getElementById('tlIdx').textContent = STATE.currentSnapshotIdx + 1;
+  document.getElementById('tlTotal').textContent = STATE.currentSnapshots.length;
+}
+
+window.exitDetail = function() {
+  STATE.selectedVessel = null;
+  document.getElementById('timelineWrap').classList.remove('show');
+  document.getElementById('layerToggle').style.display = 'none';
+
+  ['trackLine', 'nmCircle', 'surroundingMarkers'].forEach(k => {
+    if (STATE.layers[k]) STATE.map.removeLayer(STATE.layers[k]);
+  });
+  STATE.layers.vesselMarkers.clearLayers();
+
+  // 重畫船隊
+  renderFleet();
+  document.getElementById('rightPanel').innerHTML = `
+    <div id="panelDefault">
+      <div class="panel-title">船隊列表（20 艘）</div>
+      <div class="vessel-list" id="vesselList"></div>
+    </div>
+  `;
+  renderVesselList();
+};
+
+// 圖層 toggle 即時更新
+['lyrTrack', 'lyrCircle', 'lyrSurr'].forEach(id => {
+  document.addEventListener('change', e => {
+    if (e.target.id === id && STATE.selectedVessel) {
+      drawDetailMap();
+    }
+  });
+});
+
+// Boot
+init();
+</script>
+
+</body>
+</html>

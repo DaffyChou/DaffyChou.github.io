@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDataPro 選單架構 v0.1</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: #000;
+  color: #e4eaf2;
+  font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+header {
+  background: #0d0d0d;
+  border-bottom: 1px solid #2a2a2a;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+header h1 { font-size: 18px; font-weight: 600; color: #e4eaf2; }
+header h1 small { font-size: 12px; color: #7c8a9e; font-weight: 400; margin-left: 10px; }
+.intro {
+  background: rgba(44,108,219,0.10);
+  border: 1px solid #2c6cdb;
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #c4cdda;
+}
+.intro strong { color: #9ec5ff; }
+
+main { padding: 24px; max-width: 1320px; margin: 0 auto; }
+.layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* === Sidebar 預覽 === */
+.sidebar-preview {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 16px 0;
+  position: sticky;
+  top: 100px;
+}
+.sb-brand {
+  padding: 0 16px 16px 16px;
+  border-bottom: 1px solid #2a2a2a;
+  margin-bottom: 14px;
+}
+.sb-brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e4eaf2;
+}
+.sb-brand-sub {
+  font-size: 10px;
+  color: #7c8a9e;
+  letter-spacing: 0.5px;
+}
+.sb-group { margin-bottom: 18px; }
+.sb-group-title {
+  padding: 6px 16px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #7c8a9e;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  color: #c4cdda;
+  font-size: 13px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+.sb-item:hover {
+  background: #141414;
+  color: #e4eaf2;
+}
+.sb-item.active {
+  background: rgba(44,108,219,0.10);
+  border-left-color: #2c6cdb;
+  color: #9ec5ff;
+}
+.sb-item .icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.sb-item .label { font-weight: 500; }
+.sb-item .badge {
+  margin-left: auto;
+  background: rgba(255,77,79,0.20);
+  color: #ff8a8a;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+/* === 說明區 === */
+.explain { display: flex; flex-direction: column; gap: 20px; }
+.explain-card {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 18px 22px;
+}
+.explain-card h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e4eaf2;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.explain-card h3 .pill {
+  background: rgba(44,108,219,0.18);
+  color: #9ec5ff;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+.explain-card .group-tag {
+  font-size: 11px;
+  color: #7c8a9e;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.explain-card .desc {
+  font-size: 13px;
+  color: #c4cdda;
+  margin-bottom: 12px;
+}
+.explain-card .mapping {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #c4cdda;
+}
+.explain-card .mapping-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9aa5b8;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+}
+.explain-card .mapping-row {
+  padding: 4px 0;
+  display: flex;
+  gap: 8px;
+}
+.explain-card .demo-tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.explain-card .d1 { background: rgba(44,108,219,0.18); color: #9ec5ff; border: 1px solid #2c6cdb; }
+.explain-card .d2 { background: rgba(44,108,219,0.18); color: #9ec5ff; border: 1px solid #2c6cdb; }
+.explain-card .d3 { background: rgba(255,77,79,0.18); color: #ff8a8a; border: 1px solid #ff4d4f; }
+.explain-card .d4 { background: rgba(245,166,35,0.18); color: #f5b753; border: 1px solid #f5a623; }
+.explain-card .d5 { background: rgba(76,217,122,0.18); color: #6ee094; border: 1px solid #4cd97a; }
+.explain-card .d6 { background: rgba(155,89,182,0.20); color: #c39bd3; border: 1px solid #9b59b6; }
+.explain-card .d7 { background: rgba(154,165,184,0.18); color: #c4cdda; border: 1px solid #9aa5b8; }
+
+.summary {
+  background: rgba(76,217,122,0.08);
+  border: 1px solid #4cd97a;
+  border-radius: 6px;
+  padding: 18px 22px;
+  margin-top: 24px;
+}
+.summary h3 { color: #6ee094; font-size: 14px; margin-bottom: 10px; }
+.summary table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+}
+.summary th, .summary td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.summary th {
+  background: #1a1a1a;
+  font-weight: 600;
+  color: #9ec5ff;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+footer { padding: 20px 24px; border-top: 1px solid #2a2a2a; margin-top: 40px; text-align: center; color: #7c8a9e; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SDataPro 選單架構 v0.1 <small>11 個項目 · 分 5 大群 · 2026-05-29 · SLAB</small></h1>
+  <div class="intro">
+    <strong>設計原則</strong>：
+    Demo 1（週邊態勢）/ Demo 3（CPA）/ Demo 2（歷史）/ Demo 7（AIS 完整性）<strong>合併為「周圍態勢」一項</strong>，內部用圖層 toggle 切換。
+    Demo 4（港口擁塞）/ Demo 5（ETA）/ Demo 6（SitRep）<strong>合併為「港口情資」一項</strong>，內部用分頁切換。
+    其他 4 項是既有 voyage-alert 已有的功能（事件、警示時間線、計畫管理、設定）。<strong>總共 11 個選單項目，分 5 大群</strong>。
+  </div>
+</header>
+
+<main>
+<div class="layout">
+
+  <!-- 左側 Sidebar 預覽 -->
+  <div class="sidebar-preview">
+    <div class="sb-brand">
+      <div class="sb-brand-name">SDataPro</div>
+      <div class="sb-brand-sub">FLEET OCC</div>
+    </div>
+
+    <div class="sb-group">
+      <div class="sb-group-title">即時監看</div>
+      <div class="sb-item active">
+        <span class="icon">📊</span><span class="label">船隊監控</span>
+        <span class="badge">8</span>
+      </div>
+      <div class="sb-item">
+        <span class="icon">🛰</span><span class="label">周圍態勢</span>
+      </div>
+    </div>
+
+    <div class="sb-group">
+      <div class="sb-group-title">港口營運</div>
+      <div class="sb-item">
+        <span class="icon">⚓</span><span class="label">港口擁塞看板</span>
+      </div>
+      <div class="sb-item">
+        <span class="icon">📋</span><span class="label">港口情資 SitRep</span>
+      </div>
+    </div>
+
+    <div class="sb-group">
+      <div class="sb-group-title">事件管理</div>
+      <div class="sb-item">
+        <span class="icon">⚠</span><span class="label">事件處理</span>
+        <span class="badge">3</span>
+      </div>
+      <div class="sb-item">
+        <span class="icon">🕐</span><span class="label">警示時間線</span>
+      </div>
+    </div>
+
+    <div class="sb-group">
+      <div class="sb-group-title">航行計畫</div>
+      <div class="sb-item">
+        <span class="icon">🗺</span><span class="label">計畫版本管理</span>
+      </div>
+      <div class="sb-item">
+        <span class="icon">💡</span><span class="label">智慧航線建議</span>
+      </div>
+    </div>
+
+    <div class="sb-group">
+      <div class="sb-group-title">系統管理</div>
+      <div class="sb-item">
+        <span class="icon">⚙</span><span class="label">閾值設定</span>
+      </div>
+      <div class="sb-item">
+        <span class="icon">📄</span><span class="label">稽核紀錄</span>
+      </div>
+      <div class="sb-item">
+        <span class="icon">⬇</span><span class="label">報表匯出</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右側 說明 -->
+  <div class="explain">
+
+    <!-- 即時監看 -->
+    <div class="explain-card">
+      <h3>📊 船隊監控 <span class="pill">系統首頁</span></h3>
+      <div class="group-tag">群組：即時監看</div>
+      <div class="desc">
+        50 艘自家船的<strong>全局俯瞰</strong>視角：每艘船一行，含 9 維度 dot 矩陣 + 整體風險等級 + 船舶狀態。<br>
+        每日上班的第一站，目的是「快速掃出哪幾艘船有狀況」，然後點船進入「周圍態勢」深入查看。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">沿用 Demo</div>
+        <div class="mapping-row">
+          沿用 voyage-alert-rwd.html 的 <code>#/fleet</code>，依 50 船擴增列表處理（sticky / 虛擬滾動 / 篩選）
+        </div>
+      </div>
+    </div>
+
+    <div class="explain-card">
+      <h3>🛰 周圍態勢 <span class="pill">合併 4 Demo</span></h3>
+      <div class="group-tag">群組：即時監看</div>
+      <div class="desc">
+        <strong>單船的多視角綜合介面</strong>。從船隊監控點任一船進入；地圖中央顯示該船 + 5 NM 圓 + 周邊他船。<br>
+        右上有<strong>圖層 toggle</strong>：CPA 警示 / 歷史軌跡 / 計畫航線 / 風險區 / AIS 品質——使用者自己決定要看什麼。<br>
+        右側 panel 列出周邊船清單，點任一艘可在 panel 內展開 AIS 完整性 / 立案告警，不離頁面。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">合併以下 Demo</div>
+        <div class="mapping-row">
+          <span class="demo-tag d1">Demo 1 週邊態勢</span>
+          <span>底層原始視角</span>
+        </div>
+        <div class="mapping-row">
+          <span class="demo-tag d3">Demo 3 CPA</span>
+          <span>＝ CPA 警示圖層</span>
+        </div>
+        <div class="mapping-row">
+          <span class="demo-tag d2">Demo 2 歷史回放</span>
+          <span>＝ 時間軸模式（subroute）</span>
+        </div>
+        <div class="mapping-row">
+          <span class="demo-tag d7">Demo 7 AIS 完整性</span>
+          <span>＝ 品質檢視圖層 / 點船展開</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 港口營運 -->
+    <div class="explain-card">
+      <h3>⚓ 港口擁塞看板 <span class="pill">跨船 / 跨港聚合</span></h3>
+      <div class="group-tag">群組：港口營運</div>
+      <div class="desc">
+        把多艘自家船的周圍監控資料<strong>按港口聚合</strong>，看每個港的擁塞程度。<br>
+        145 重點商港總覽 + 篩選 + 全球熱點地圖；點任一港口進入單港口頁面：港區海圖 + CI 指數 + 錨地 / 走廊 / 泊區 + 自家船 ETA 清單 + 外來船觀測。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">對應 Demo</div>
+        <div class="mapping-row">
+          <span class="demo-tag d4">Demo 4 港口擁塞</span>
+          <span>完整保留，含單港口詳情</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="explain-card">
+      <h3>📋 港口情資 SitRep <span class="pill">含 ETA 動態</span></h3>
+      <div class="group-tag">群組：港口營運</div>
+      <div class="desc">
+        以「自家船 → 目的港」為主體的<strong>情資彙整報告</strong>。距港 24 / 12 / 6 hr 自動觸發 SitRep。<br>
+        頁面內部分頁：<strong>動態 ETA</strong>（T1+T2+T3+T4 預測 + P25/P50/P75）/ <strong>SitRep 報告</strong>（在場船 + Demurrage 風險 + 航速建議）。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">合併以下 Demo</div>
+        <div class="mapping-row">
+          <span class="demo-tag d5">Demo 5 ETA 預測</span>
+          <span>＝ 子分頁 1「動態 ETA」</span>
+        </div>
+        <div class="mapping-row">
+          <span class="demo-tag d6">Demo 6 SitRep</span>
+          <span>＝ 子分頁 2「情資報告」</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 事件管理 -->
+    <div class="explain-card">
+      <h3>⚠ 事件處理 <span class="pill">既有強化</span></h3>
+      <div class="group-tag">群組：事件管理</div>
+      <div class="desc">
+        9 維度告警自動立案 + 操作員流程（New → Ack → In Progress → Resolved → Closed）。<br>
+        Modal 內含「查歷史回放」「查 AIS 品質」按鈕——但<strong>不會跳到別的 sidebar 選單</strong>，是用 modal 內 panel 展開或開新 tab 子視窗。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">沿用</div>
+        <div class="mapping-row">
+          沿用 voyage-alert-rwd.html 的 <code>#/events</code>，依 50 船 × 9 維度 = 450 監控點重新設計聚合策略
+        </div>
+      </div>
+    </div>
+
+    <div class="explain-card">
+      <h3>🕐 警示時間線 <span class="pill">既有保留</span></h3>
+      <div class="group-tag">群組：事件管理</div>
+      <div class="desc">
+        混合 Warning Mail + open_event 的時間軸 DESC 列表。<br>
+        提供「最近 24/72 hr 警示一覽」視角，與事件處理頁互補（事件處理頁是「待辦」視角，時間線是「歷史」視角）。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">沿用</div>
+        <div class="mapping-row">
+          沿用 voyage-alert-rwd.html 的 <code>#/timeline</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- 航行計畫 -->
+    <div class="explain-card">
+      <h3>🗺 計畫版本管理 <span class="pill">新功能</span></h3>
+      <div class="group-tag">群組：航行計畫</div>
+      <div class="desc">
+        每艘船的<strong>多版本航行計畫管理</strong>：Active / Superseded / Archived；新版來源（StormGeo / WNI）+ 差異比對地圖。<br>
+        是 M5 模組的核心，補上既有 Demo 缺的「版本歷史」功能。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">對應</div>
+        <div class="mapping-row">
+          全新功能；對應 Fleet War Room §5.2 「航行計畫資料版本管理」
+        </div>
+      </div>
+    </div>
+
+    <div class="explain-card">
+      <h3>💡 智慧航線建議 <span class="pill">Phase A 起步</span></h3>
+      <div class="group-tag">群組：航行計畫</div>
+      <div class="desc">
+        基於 1–2 年歷史 AIS 自動推薦航線（同港口對、同季節、平均速度、常見偏移區）。<br>
+        Phase A 只做歷史推薦；Phase B 加氣象；Phase C 動態優化。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">對應</div>
+        <div class="mapping-row">
+          全新功能；對應戰情室任務說明 §5「智慧航行計畫」
+        </div>
+      </div>
+    </div>
+
+    <!-- 系統管理 -->
+    <div class="explain-card">
+      <h3>⚙ 閾值設定 <span class="pill">既有強化</span></h3>
+      <div class="group-tag">群組：系統管理</div>
+      <div class="desc">
+        6 維度的 Warning / Critical 閾值調整，Save 後立即重算 9 維度告警。<br>
+        加入 CPA / AIS 完整性 / 港口擁塞 的閾值（新增約 9 個維度）。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">沿用 + 擴增</div>
+        <div class="mapping-row">
+          沿用 voyage-alert-rwd.html 的 <code>#/thresholds</code>，新增 CPA / AIS / 港口擁塞 閾值
+        </div>
+      </div>
+    </div>
+
+    <div class="explain-card">
+      <h3>📄 稽核紀錄 <span class="pill">新功能</span></h3>
+      <div class="group-tag">群組：系統管理</div>
+      <div class="desc">
+        全系統 audit log：actor + role + before/after + comment + timestamp。<br>
+        除了事件處理，CPA 確認 / 閾值變更 / 計畫版本切換 / 採納降速建議 都會寫入。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">對應</div>
+        <div class="mapping-row">
+          全新功能；對應 Fleet War Room §4.3「稽核紀錄」
+        </div>
+      </div>
+    </div>
+
+    <div class="explain-card">
+      <h3>⬇ 報表匯出 <span class="pill">新功能</span></h3>
+      <div class="group-tag">群組：系統管理</div>
+      <div class="desc">
+        事件統計 / CPA 熱點 / ETA 準確率 / 港口擁塞趨勢 等月度報表。<br>
+        匯出 Excel / PDF，給管理層、內外稽、客戶檢討。
+      </div>
+      <div class="mapping">
+        <div class="mapping-label">對應</div>
+        <div class="mapping-row">
+          全新功能；月度循環的最後一站
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="summary">
+  <h3>架構總覽</h3>
+  <table>
+    <thead>
+      <tr><th>群組</th><th>選單項目</th><th>數量</th><th>對應原 Demo</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>即時監看</td>
+        <td>船隊監控 / 周圍態勢</td>
+        <td>2 項</td>
+        <td>船隊監控（既有）+ 合併 Demo 1 / 2 / 3 / 7</td>
+      </tr>
+      <tr>
+        <td>港口營運</td>
+        <td>港口擁塞看板 / 港口情資 SitRep</td>
+        <td>2 項</td>
+        <td>Demo 4 / 合併 Demo 5 + Demo 6</td>
+      </tr>
+      <tr>
+        <td>事件管理</td>
+        <td>事件處理 / 警示時間線</td>
+        <td>2 項</td>
+        <td>既有強化（50 船聚合）</td>
+      </tr>
+      <tr>
+        <td>航行計畫</td>
+        <td>計畫版本管理 / 智慧航線建議</td>
+        <td>2 項</td>
+        <td>新功能（M5 模組）</td>
+      </tr>
+      <tr>
+        <td>系統管理</td>
+        <td>閾值設定 / 稽核紀錄 / 報表匯出</td>
+        <td>3 項</td>
+        <td>既有 + 新功能</td>
+      </tr>
+      <tr>
+        <td><strong>合計</strong></td>
+        <td>—</td>
+        <td><strong>11 項</strong></td>
+        <td>覆蓋 7 個 AIS Demo + voyage-alert 既有 4 頁 + 新增稽核 / 報表</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</main>
+
+<footer>
+SDataPro 選單架構 v0.1 · 2026-05-29 · 摯陞數位科技 SLAB
+</footer>
+
+</body>
+</html>

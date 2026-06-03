@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDataPro 產品流程圖 v0.1</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: #000;
+  color: #e4eaf2;
+  font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+header {
+  background: #0d0d0d;
+  border-bottom: 1px solid #2a2a2a;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e4eaf2;
+}
+header h1 small {
+  font-size: 12px;
+  color: #7c8a9e;
+  font-weight: 400;
+  margin-left: 10px;
+}
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.tab {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #c4cdda;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.tab:hover {
+  background: #1a1a1a;
+  border-color: #3a3a3a;
+}
+.tab.active {
+  background: rgba(44,108,219,0.18);
+  border-color: #2c6cdb;
+  color: #9ec5ff;
+}
+main {
+  padding: 24px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+.section { display: none; }
+.section.active { display: block; }
+.section-header {
+  margin-bottom: 16px;
+}
+.section-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e4eaf2;
+  margin-bottom: 6px;
+}
+.section-header p {
+  font-size: 12px;
+  color: #9aa5b8;
+}
+.diagram-wrap {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
+}
+.diagram-wrap svg {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+.notes {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #c4cdda;
+}
+.notes h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9aa5b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.notes ul { list-style: none; padding: 0; }
+.notes li {
+  padding: 6px 0;
+  padding-left: 18px;
+  position: relative;
+  border-bottom: 1px solid #1a1a1a;
+}
+.notes li:last-child { border-bottom: none; }
+.notes li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: #2c6cdb;
+}
+.notes .warn {
+  color: #f5b753;
+}
+.notes .danger {
+  color: #ff8a8a;
+}
+footer {
+  padding: 20px 24px;
+  border-top: 1px solid #2a2a2a;
+  margin-top: 40px;
+  text-align: center;
+  color: #7c8a9e;
+  font-size: 11px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SDataPro 產品流程圖 v0.1 <small>2026-05-29 · SLAB</small></h1>
+  <div class="tabs">
+    <button class="tab active" data-target="diagram-1">① 資料流主軸架構</button>
+    <button class="tab" data-target="diagram-2">② 岸端營運流程</button>
+    <button class="tab" data-target="diagram-3">③ 角色 × Demo 對應表</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ========== Diagram 1 ========== -->
+<section class="section active" id="diagram-1">
+  <div class="section-header">
+    <h2>① 資料流主軸架構</h2>
+    <p>5 海哩 AIS 收集 → 8 個岸端處理引擎 → 7 Demo + Voyage Alert 子系統</p>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1180 760" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1180" height="760" fill="#0d0d0d"/>
+<defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9aa5b8"/></marker>
+<marker id="a1b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ec5ff"/></marker>
+</defs>
+<text x="590" y="32" text-anchor="middle" font-size="18" font-weight="600" fill="#e4eaf2">SDataPro 資料流主軸 — 5 海哩 AIS 如何延伸到 7 Demo</text>
+<text x="590" y="52" text-anchor="middle" font-size="12" fill="#9aa5b8">L1 資料源 → L2 處理引擎 → L3 Demo 介面</text>
+<text x="30" y="110" font-size="11" font-weight="600" fill="#9aa5b8" letter-spacing="1">L1 資料源</text>
+<text x="30" y="290" font-size="11" font-weight="600" fill="#9aa5b8" letter-spacing="1">L2 處理引擎</text>
+<text x="30" y="500" font-size="11" font-weight="600" fill="#9aa5b8" letter-spacing="1">L3 Demo 介面</text>
+<line x1="120" y1="180" x2="1160" y2="180" stroke="#2a2a2a" stroke-dasharray="3 4"/>
+<line x1="120" y1="430" x2="1160" y2="430" stroke="#2a2a2a" stroke-dasharray="3 4"/>
+
+<rect x="140" y="80" width="280" height="90" rx="6" fill="rgba(44,108,219,0.22)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="280" y="105" text-anchor="middle" font-size="13" font-weight="600" fill="#e4eaf2">船端 SDataPro 收集器</text>
+<text x="280" y="124" text-anchor="middle" font-size="11" fill="#c4cdda">VDO 自船 AIS + VDM 周邊 5 NM AIS</text>
+<text x="280" y="142" text-anchor="middle" font-size="11" fill="#c4cdda">NMEA 0183 + 時間校正</text>
+<text x="280" y="160" text-anchor="middle" font-size="10" fill="#9ec5ff" font-weight="600">50+ 艘自家船 = 系統核心資料</text>
+
+<rect x="450" y="80" width="200" height="90" rx="6" fill="#141414" stroke="#2a2a2a"/>
+<text x="550" y="105" text-anchor="middle" font-size="13" font-weight="600" fill="#e4eaf2">StormGeo / WNI</text>
+<text x="550" y="124" text-anchor="middle" font-size="11" fill="#c4cdda">航行計畫 (Waypoints)</text>
+<text x="550" y="142" text-anchor="middle" font-size="11" fill="#c4cdda">Warning Mail (18 種)</text>
+
+<rect x="680" y="80" width="200" height="90" rx="6" fill="#141414" stroke="#2a2a2a"/>
+<text x="780" y="105" text-anchor="middle" font-size="13" font-weight="600" fill="#e4eaf2">外部風險源</text>
+<text x="780" y="124" text-anchor="middle" font-size="11" fill="#c4cdda">IMB / JWLA / OFAC</text>
+<text x="780" y="142" text-anchor="middle" font-size="11" fill="#c4cdda">NOAA / WMO / 氣象 API</text>
+
+<rect x="910" y="80" width="200" height="90" rx="6" fill="#141414" stroke="#2a2a2a"/>
+<text x="1010" y="105" text-anchor="middle" font-size="13" font-weight="600" fill="#e4eaf2">主檔資料</text>
+<text x="1010" y="124" text-anchor="middle" font-size="11" fill="#c4cdda">UN/LOCODE 10萬+ 港口</text>
+<text x="1010" y="142" text-anchor="middle" font-size="11" fill="#c4cdda">陸地 polygon (Natural Earth)</text>
+
+<rect x="140" y="210" width="160" height="70" rx="6" fill="#141414" stroke="#3a3a3a" stroke-width="1.5"/>
+<text x="220" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">NMEA 解析 +</text>
+<text x="220" y="250" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">時間校正</text>
+<text x="220" y="268" text-anchor="middle" font-size="10" fill="#c4cdda">tsrc / tconf / DR 推算</text>
+
+<rect x="320" y="210" width="160" height="70" rx="6" fill="#141414" stroke="#3a3a3a" stroke-width="1.5"/>
+<text x="400" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">AIS 完整性</text>
+<text x="400" y="250" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">六偵測器</text>
+<text x="400" y="268" text-anchor="middle" font-size="10" fill="#c4cdda">gap/kinematic/duplicate</text>
+
+<rect x="500" y="210" width="160" height="70" rx="6" fill="#141414" stroke="#3a3a3a" stroke-width="1.5"/>
+<text x="580" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">CPA / TCPA</text>
+<text x="580" y="250" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">計算引擎</text>
+<text x="580" y="268" text-anchor="middle" font-size="10" fill="#c4cdda">DR + 誤差圓 + 信心降級</text>
+
+<rect x="680" y="210" width="160" height="70" rx="6" fill="#141414" stroke="#3a3a3a" stroke-width="1.5"/>
+<text x="760" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">港口感知</text>
+<text x="760" y="250" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">+ 擁塞指數</text>
+<text x="760" y="268" text-anchor="middle" font-size="10" fill="#c4cdda">DBSCAN 錨地 / CI 計算</text>
+
+<rect x="860" y="210" width="160" height="70" rx="6" fill="#141414" stroke="#3a3a3a" stroke-width="1.5"/>
+<text x="940" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">ETA 四段預測</text>
+<text x="940" y="250" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">T1+T2+T3+T4</text>
+<text x="940" y="268" text-anchor="middle" font-size="10" fill="#c4cdda">P25/P50/P75 不確定性</text>
+
+<rect x="140" y="320" width="340" height="70" rx="6" fill="#141414" stroke="#3a3a3a" stroke-width="1.5"/>
+<text x="310" y="344" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">9 維度警示判定 + 全球風險區判定</text>
+<text x="310" y="360" text-anchor="middle" font-size="11" fill="#c4cdda">route / speed / sea / port / engine / alert / comm / event / zone</text>
+<text x="310" y="378" text-anchor="middle" font-size="10" fill="#9aa5b8">8 類 44 風險區 polygon</text>
+
+<rect x="500" y="320" width="160" height="70" rx="6" fill="#141414" stroke="#3a3a3a" stroke-width="1.5"/>
+<text x="580" y="344" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">船隊情資</text>
+<text x="580" y="360" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">SitRep 引擎</text>
+<text x="580" y="378" text-anchor="middle" font-size="10" fill="#c4cdda">多船情資彙整 24/12/6 hr</text>
+
+<rect x="680" y="320" width="160" height="70" rx="6" fill="#141414" stroke="#3a3a3a" stroke-width="1.5"/>
+<text x="760" y="344" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">航線版本管理</text>
+<text x="760" y="360" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">+ 智慧航線</text>
+<text x="760" y="378" text-anchor="middle" font-size="10" fill="#c4cdda">Active/Superseded + 歷史推薦</text>
+
+<rect x="860" y="320" width="160" height="70" rx="6" fill="rgba(245,166,35,0.18)" stroke="#f5a623" stroke-width="1.5"/>
+<text x="940" y="344" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">陸地遮擋</text>
+<text x="940" y="360" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">Land Mask</text>
+<text x="940" y="378" text-anchor="middle" font-size="10" fill="#f5b753">航線 / CPA / 5NM 不穿陸</text>
+
+<rect x="40" y="450" width="150" height="80" rx="6" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb"/>
+<text x="115" y="473" text-anchor="middle" font-size="11" font-weight="600" fill="#9ec5ff">Demo 1</text>
+<text x="115" y="490" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">週邊態勢監控</text>
+<text x="115" y="508" text-anchor="middle" font-size="10" fill="#c4cdda">本船 + 5 NM 圓</text>
+<text x="115" y="522" text-anchor="middle" font-size="10" fill="#c4cdda">他船 / 浮標</text>
+
+<rect x="200" y="450" width="150" height="80" rx="6" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb"/>
+<text x="275" y="473" text-anchor="middle" font-size="11" font-weight="600" fill="#9ec5ff">Demo 2</text>
+<text x="275" y="490" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">歷史軌跡回放</text>
+<text x="275" y="508" text-anchor="middle" font-size="10" fill="#c4cdda">時間軸 + 倍速</text>
+<text x="275" y="522" text-anchor="middle" font-size="10" fill="#c4cdda">事件回放</text>
+
+<rect x="360" y="450" width="150" height="80" rx="6" fill="rgba(255,77,79,0.20)" stroke="#ff4d4f"/>
+<text x="435" y="473" text-anchor="middle" font-size="11" font-weight="600" fill="#ff8a8a">Demo 3</text>
+<text x="435" y="490" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">CPA 避碰預警</text>
+<text x="435" y="508" text-anchor="middle" font-size="10" fill="#c4cdda">RED / AMBER</text>
+<text x="435" y="522" text-anchor="middle" font-size="10" fill="#c4cdda">50 船 Top N 分群</text>
+
+<rect x="520" y="450" width="150" height="80" rx="6" fill="rgba(245,166,35,0.18)" stroke="#f5a623"/>
+<text x="595" y="473" text-anchor="middle" font-size="11" font-weight="600" fill="#f5b753">Demo 4</text>
+<text x="595" y="490" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">港口擁塞感知</text>
+<text x="595" y="508" text-anchor="middle" font-size="10" fill="#c4cdda">CI 指數 + 145+10萬</text>
+<text x="595" y="522" text-anchor="middle" font-size="10" fill="#c4cdda">錨地/走廊/泊區</text>
+
+<rect x="680" y="450" width="150" height="80" rx="6" fill="rgba(76,217,122,0.18)" stroke="#4cd97a"/>
+<text x="755" y="473" text-anchor="middle" font-size="11" font-weight="600" fill="#6ee094">Demo 5</text>
+<text x="755" y="490" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">ETA 四段預測</text>
+<text x="755" y="508" text-anchor="middle" font-size="10" fill="#c4cdda">T1+T2+T3+T4</text>
+<text x="755" y="522" text-anchor="middle" font-size="10" fill="#c4cdda">P25/P50/P75</text>
+
+<rect x="840" y="450" width="150" height="80" rx="6" fill="rgba(155,89,182,0.20)" stroke="#9b59b6"/>
+<text x="915" y="473" text-anchor="middle" font-size="11" font-weight="600" fill="#c39bd3">Demo 6</text>
+<text x="915" y="490" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">SitRep 情資共享</text>
+<text x="915" y="508" text-anchor="middle" font-size="10" fill="#c4cdda">在場船報 + 模型</text>
+<text x="915" y="522" text-anchor="middle" font-size="10" fill="#c4cdda">Demurrage 風險</text>
+
+<rect x="1000" y="450" width="150" height="80" rx="6" fill="rgba(154,165,184,0.18)" stroke="#9aa5b8"/>
+<text x="1075" y="473" text-anchor="middle" font-size="11" font-weight="600" fill="#c4cdda">Demo 7</text>
+<text x="1075" y="490" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">AIS 完整性驗證</text>
+<text x="1075" y="508" text-anchor="middle" font-size="10" fill="#c4cdda">6 偵測器熱力</text>
+<text x="1075" y="522" text-anchor="middle" font-size="10" fill="#c4cdda">稽核報告</text>
+
+<rect x="40" y="560" width="1110" height="120" rx="6" fill="rgba(44,108,219,0.08)" stroke="#2c6cdb" stroke-dasharray="6 4"/>
+<text x="60" y="585" font-size="12" font-weight="600" fill="#9ec5ff">Voyage Alert 警示子系統（沿用 voyage-alert-rwd.html 設計語言 + 50 船擴充）</text>
+
+<rect x="60" y="600" width="150" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="135" y="622" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">船隊監控</text>
+<text x="135" y="640" text-anchor="middle" font-size="10" fill="#c4cdda">50 船總覽 + 篩選</text>
+<text x="135" y="655" text-anchor="middle" font-size="10" fill="#c4cdda">9 維度 dot 矩陣</text>
+
+<rect x="225" y="600" width="150" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="300" y="622" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">事件處理</text>
+<text x="300" y="640" text-anchor="middle" font-size="10" fill="#c4cdda">450 監控點聚合</text>
+<text x="300" y="655" text-anchor="middle" font-size="10" fill="#c4cdda">狀態機 + 備註</text>
+
+<rect x="390" y="600" width="150" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="465" y="622" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">警示時間線</text>
+<text x="465" y="640" text-anchor="middle" font-size="10" fill="#c4cdda">Mail + Open Event</text>
+<text x="465" y="655" text-anchor="middle" font-size="10" fill="#c4cdda">時間 DESC 混合</text>
+
+<rect x="555" y="600" width="150" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="630" y="622" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">閾值設定</text>
+<text x="630" y="640" text-anchor="middle" font-size="10" fill="#c4cdda">6 維度可調 W/C</text>
+<text x="630" y="655" text-anchor="middle" font-size="10" fill="#c4cdda">即時重評估</text>
+
+<rect x="720" y="600" width="150" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="795" y="622" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">航行計畫管理</text>
+<text x="795" y="640" text-anchor="middle" font-size="10" fill="#c4cdda">多版本 v1/v2/v3</text>
+<text x="795" y="655" text-anchor="middle" font-size="10" fill="#c4cdda">差異比對地圖</text>
+
+<rect x="885" y="600" width="150" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="960" y="622" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">智慧航線 PhA</text>
+<text x="960" y="640" text-anchor="middle" font-size="10" fill="#c4cdda">歷史 AIS 推薦</text>
+<text x="960" y="655" text-anchor="middle" font-size="10" fill="#c4cdda">季節 / 平均速度</text>
+
+<line x1="280" y1="170" x2="220" y2="210" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#a1b)"/>
+<line x1="280" y1="170" x2="400" y2="210" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#a1b)"/>
+<line x1="280" y1="170" x2="580" y2="210" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#a1b)"/>
+<line x1="280" y1="170" x2="760" y2="210" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#a1b)"/>
+<line x1="280" y1="170" x2="940" y2="210" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#a1b)"/>
+<line x1="280" y1="170" x2="580" y2="320" stroke="#9ec5ff" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.7"/>
+<line x1="550" y1="170" x2="310" y2="320" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="780" y1="170" x2="310" y2="320" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="1010" y1="170" x2="760" y2="320" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="1010" y1="170" x2="940" y2="320" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="220" y1="280" x2="115" y2="450" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="220" y1="280" x2="275" y2="450" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="400" y1="280" x2="1075" y2="450" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="580" y1="280" x2="435" y2="450" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="760" y1="280" x2="595" y2="450" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="940" y1="280" x2="755" y2="450" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="580" y1="390" x2="915" y2="450" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="310" y1="390" x2="465" y2="560" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="760" y1="390" x2="795" y2="560" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<line x1="860" y1="355" x2="115" y2="450" stroke="#f5a623" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+<line x1="860" y1="355" x2="275" y2="450" stroke="#f5a623" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+<line x1="860" y1="355" x2="435" y2="450" stroke="#f5a623" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+<line x1="860" y1="390" x2="795" y2="600" stroke="#f5a623" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+<line x1="860" y1="390" x2="960" y2="600" stroke="#f5a623" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+
+<rect x="40" y="700" width="1110" height="40" rx="4" fill="#0d0d0d" stroke="#2a2a2a"/>
+<circle cx="60" cy="720" r="5" fill="#2c6cdb"/>
+<text x="72" y="724" font-size="11" fill="#c4cdda">核心資料流（5 NM AIS 為主軸）</text>
+<line x1="260" y1="720" x2="285" y2="720" stroke="#9aa5b8" stroke-width="1" marker-end="url(#a1)"/>
+<text x="295" y="724" font-size="11" fill="#c4cdda">資料 / 處理結果流向</text>
+<line x1="445" y1="720" x2="475" y2="720" stroke="#f5a623" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="485" y="724" font-size="11" fill="#c4cdda">陸地遮擋 land mask 約束</text>
+<rect x="675" y="715" width="14" height="10" fill="rgba(44,108,219,0.08)" stroke="#2c6cdb" stroke-dasharray="3 2"/>
+<text x="695" y="724" font-size="11" fill="#c4cdda">Voyage Alert 子系統（沿用既有設計語言）</text>
+</svg>
+  </div>
+  <div class="notes">
+    <h3>本圖重點</h3>
+    <ul>
+      <li><strong>L1 資料源</strong>：船端 SDataPro 收集器是「核心」，其他都是輔助；50+ 艘船 × 5 NM 觀測 = 系統獨有資料</li>
+      <li><strong>L2 處理引擎</strong>：8 個引擎並行，9 維度警示判定整合所有引擎結果</li>
+      <li class="warn"><strong>L2 新增：陸地遮擋 Land Mask</strong>（橘色框）— 約束所有航線、CPA 向量、5 NM 圓的繪製</li>
+      <li><strong>L3 Demo 介面</strong>：7 個 AIS Demo + Voyage Alert 子系統（沿用既有設計）並存</li>
+      <li><strong>橘色虛線</strong>：陸地遮擋約束會作用到 Demo 1/2/3 + 航行計畫 + 智慧航線</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== Diagram 2 ========== -->
+<section class="section" id="diagram-2">
+  <div class="section-header">
+    <h2>② 岸端營運流程（4 階段 + 月度循環）</h2>
+    <p>每日監看 → 事件查證 → 營運優化 → 稽核報表 → 月度循環回到調整</p>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1180 780" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1180" height="780" fill="#0d0d0d"/>
+<defs>
+<marker id="b1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ec5ff"/></marker>
+<marker id="b2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f5a623"/></marker>
+</defs>
+<text x="590" y="30" text-anchor="middle" font-size="18" font-weight="600" fill="#e4eaf2">岸端監管 × 事後分析 × 營運優化 流程</text>
+<text x="590" y="50" text-anchor="middle" font-size="12" fill="#9aa5b8">SDataPro 非船端即時系統 · 資料有延遲性 · 以紀錄 / 稽核 / 優化營運為核心</text>
+
+<rect x="40" y="68" width="1100" height="32" rx="4" fill="rgba(245,166,35,0.12)" stroke="#f5a623" stroke-dasharray="3 2"/>
+<text x="55" y="88" font-size="11" fill="#f5b753" font-weight="600">⚠ 資料延遲提醒</text>
+<text x="155" y="88" font-size="11" fill="#c4cdda">AIS / 港口 / 氣象資料皆有 5–60 分鐘延遲。介面所有時間戳須顯示「最後更新 / 資料延遲」。CPA / 警示為「事後判讀 + 紀錄」非「船端避碰」。</text>
+
+<text x="190" y="135" text-anchor="middle" font-size="12" font-weight="600" fill="#9ec5ff" letter-spacing="1">① 每日 監看</text>
+<text x="190" y="151" text-anchor="middle" font-size="10" fill="#9aa5b8">DAILY MONITORING</text>
+<text x="490" y="135" text-anchor="middle" font-size="12" font-weight="600" fill="#ff8a8a" letter-spacing="1">② 事件 / 事後 查證</text>
+<text x="490" y="151" text-anchor="middle" font-size="10" fill="#9aa5b8">POST-EVENT REVIEW</text>
+<text x="790" y="135" text-anchor="middle" font-size="12" font-weight="600" fill="#6ee094" letter-spacing="1">③ 營運 優化 決策</text>
+<text x="790" y="151" text-anchor="middle" font-size="10" fill="#9aa5b8">OPERATIONAL DECISION</text>
+<text x="1050" y="135" text-anchor="middle" font-size="12" font-weight="600" fill="#c39bd3" letter-spacing="1">④ 稽核 / 報表</text>
+<text x="1050" y="151" text-anchor="middle" font-size="10" fill="#9aa5b8">AUDIT / REPORT</text>
+
+<line x1="340" y1="170" x2="340" y2="640" stroke="#2a2a2a" stroke-dasharray="3 4"/>
+<line x1="640" y1="170" x2="640" y2="640" stroke="#2a2a2a" stroke-dasharray="3 4"/>
+<line x1="940" y1="170" x2="940" y2="640" stroke="#2a2a2a" stroke-dasharray="3 4"/>
+
+<rect x="55" y="180" width="270" height="80" rx="6" fill="rgba(44,108,219,0.28)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="190" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">船隊監控（系統入口）</text>
+<text x="190" y="223" text-anchor="middle" font-size="10" fill="#9ec5ff">50 艘船 + 9 維度 dot 矩陣</text>
+<text x="190" y="238" text-anchor="middle" font-size="10" fill="#c4cdda">每日上班第一站</text>
+<text x="190" y="252" text-anchor="middle" font-size="10" fill="#c4cdda">列表顯示「最後更新 X 分鐘前」</text>
+
+<rect x="55" y="280" width="270" height="65" rx="6" fill="rgba(44,108,219,0.14)" stroke="#2c6cdb"/>
+<text x="190" y="302" text-anchor="middle" font-size="12" font-weight="600" fill="#9ec5ff">Demo 1 週邊態勢監控</text>
+<text x="190" y="319" text-anchor="middle" font-size="10" fill="#e4eaf2">本船 5 NM 周邊近期 AIS 樣本</text>
+<text x="190" y="334" text-anchor="middle" font-size="10" fill="#c4cdda">非即時 · 含延遲時間戳</text>
+
+<rect x="55" y="365" width="270" height="55" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="190" y="386" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">警示時間線</text>
+<text x="190" y="402" text-anchor="middle" font-size="10" fill="#c4cdda">過去 24 / 72 hr 警示 DESC</text>
+
+<rect x="55" y="440" width="270" height="55" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="190" y="461" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">事件處理（待認可）</text>
+<text x="190" y="477" text-anchor="middle" font-size="10" fill="#c4cdda">450 監控點聚合 → New 事件</text>
+
+<rect x="55" y="515" width="270" height="55" rx="4" fill="rgba(245,166,35,0.14)" stroke="#f5a623"/>
+<text x="190" y="536" text-anchor="middle" font-size="12" font-weight="600" fill="#f5b753">Demo 4 港口擁塞看板</text>
+<text x="190" y="552" text-anchor="middle" font-size="10" fill="#c4cdda">145 重點商港 + UN/LOCODE</text>
+
+<rect x="355" y="180" width="270" height="75" rx="6" fill="rgba(44,108,219,0.22)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="490" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 2 歷史軌跡回放</text>
+<text x="490" y="222" text-anchor="middle" font-size="10" fill="#9ec5ff">事後分析核心工具</text>
+<text x="490" y="237" text-anchor="middle" font-size="10" fill="#c4cdda">時間軸 + 倍速 + 同時段 5NM 他船</text>
+
+<rect x="355" y="275" width="270" height="75" rx="6" fill="rgba(255,77,79,0.20)" stroke="#ff4d4f" stroke-width="2"/>
+<text x="490" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 3 CPA 事件審查</text>
+<text x="490" y="316" text-anchor="middle" font-size="10" fill="#ff8a8a">不是即時避碰 · 是事後 RED/AMBER 紀錄</text>
+<text x="490" y="332" text-anchor="middle" font-size="10" fill="#c4cdda">含資料可信度降級提示</text>
+
+<rect x="355" y="370" width="270" height="65" rx="6" fill="rgba(154,165,184,0.18)" stroke="#9aa5b8" stroke-width="1.5"/>
+<text x="490" y="393" text-anchor="middle" font-size="12" font-weight="600" fill="#c4cdda">Demo 7 AIS 完整性稽核</text>
+<text x="490" y="410" text-anchor="middle" font-size="10" fill="#e4eaf2">查證資料可信度</text>
+<text x="490" y="425" text-anchor="middle" font-size="10" fill="#c4cdda">6 偵測器熱力矩陣</text>
+
+<rect x="355" y="455" width="270" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="490" y="478" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">事件處理 Modal</text>
+<text x="490" y="493" text-anchor="middle" font-size="10" fill="#c4cdda">指派 / 備註 / 狀態轉換</text>
+<text x="490" y="508" text-anchor="middle" font-size="10" fill="#c4cdda">每筆操作寫 audit log</text>
+
+<rect x="355" y="540" width="270" height="55" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="490" y="561" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">航行計畫版本管理</text>
+<text x="490" y="577" text-anchor="middle" font-size="10" fill="#c4cdda">Active/Superseded 差異比對</text>
+
+<rect x="655" y="180" width="270" height="75" rx="6" fill="rgba(76,217,122,0.22)" stroke="#4cd97a" stroke-width="2"/>
+<text x="790" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 5 ETA 預測（動態）</text>
+<text x="790" y="222" text-anchor="middle" font-size="10" fill="#6ee094">營運決策依據</text>
+<text x="790" y="237" text-anchor="middle" font-size="10" fill="#c4cdda">T1+T2+T3+T4 · P25/P50/P75</text>
+
+<rect x="655" y="275" width="270" height="75" rx="6" fill="rgba(155,89,182,0.24)" stroke="#9b59b6" stroke-width="2"/>
+<text x="790" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">Demo 6 SitRep 港口情資</text>
+<text x="790" y="316" text-anchor="middle" font-size="10" fill="#c39bd3">距港 24/12/6 hr 觸發</text>
+<text x="790" y="332" text-anchor="middle" font-size="10" fill="#c4cdda">在場船報告 + Demurrage 風險</text>
+
+<rect x="655" y="370" width="270" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="790" y="393" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">降速建議 / Just-in-Time 抵港</text>
+<text x="790" y="410" text-anchor="middle" font-size="10" fill="#c4cdda">減少錨地等候 + 節省燃油</text>
+<text x="790" y="425" text-anchor="middle" font-size="10" fill="#c4cdda">推送船長 / 海務</text>
+
+<rect x="655" y="455" width="270" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="790" y="478" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">智慧航線 Phase A</text>
+<text x="790" y="493" text-anchor="middle" font-size="10" fill="#c4cdda">歷史 AIS 推薦 · 季節 / 平均</text>
+<text x="790" y="508" text-anchor="middle" font-size="10" fill="#c4cdda">下一航次計畫參考</text>
+
+<rect x="655" y="540" width="270" height="55" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="790" y="561" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">通知通路</text>
+<text x="790" y="577" text-anchor="middle" font-size="10" fill="#c4cdda">Email / LINE / Webhook</text>
+
+<rect x="955" y="180" width="200" height="75" rx="6" fill="rgba(155,89,182,0.20)" stroke="#9b59b6" stroke-width="2"/>
+<text x="1055" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">全系統稽核紀錄</text>
+<text x="1055" y="222" text-anchor="middle" font-size="10" fill="#c39bd3">Audit Log</text>
+<text x="1055" y="237" text-anchor="middle" font-size="10" fill="#c4cdda">actor + role + before/after</text>
+
+<rect x="955" y="275" width="200" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="1055" y="296" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">事件統計報表</text>
+<text x="1055" y="312" text-anchor="middle" font-size="10" fill="#c4cdda">高風險海域 / 船舶 / 月度</text>
+
+<rect x="955" y="355" width="200" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="1055" y="376" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">CPA 熱點分析</text>
+<text x="1055" y="392" text-anchor="middle" font-size="10" fill="#c4cdda">高風險港 / 航段統計</text>
+
+<rect x="955" y="435" width="200" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="1055" y="456" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">ETA 準確率回顧</text>
+<text x="1055" y="472" text-anchor="middle" font-size="10" fill="#c4cdda">MAE / 月度趨勢</text>
+
+<rect x="955" y="515" width="200" height="65" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="1055" y="536" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">匯出 Excel / PDF</text>
+<text x="1055" y="552" text-anchor="middle" font-size="10" fill="#c4cdda">給管理層 / 內外稽</text>
+
+<line x1="325" y1="220" x2="355" y2="220" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="325" y1="392" x2="355" y2="310" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="325" y1="467" x2="355" y2="485" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="325" y1="542" x2="655" y2="312" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="325" y1="525" x2="655" y2="220" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="490" y1="255" x2="490" y2="275" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="490" y1="350" x2="490" y2="370" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="490" y1="435" x2="490" y2="455" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="625" y1="485" x2="955" y2="220" stroke="#9ec5ff" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#b1)"/>
+<line x1="790" y1="255" x2="790" y2="370" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="790" y1="350" x2="790" y2="540" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="790" y1="435" x2="790" y2="455" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="925" y1="220" x2="955" y2="220" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<line x1="925" y1="312" x2="955" y2="307" stroke="#9ec5ff" stroke-width="1.2" marker-end="url(#b1)" opacity="0.7"/>
+<line x1="925" y1="492" x2="955" y2="467" stroke="#9ec5ff" stroke-width="1.2" marker-end="url(#b1)" opacity="0.7"/>
+
+<path d="M 1055 590 Q 1055 660 600 660 Q 200 660 190 260" fill="none" stroke="#f5a623" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#b2)" opacity="0.9"/>
+<text x="600" y="678" text-anchor="middle" font-size="11" font-weight="600" fill="#f5b753">月度循環：報表 → 客戶檢討 → 調整閾值 → 回頭看船隊</text>
+
+<rect x="40" y="700" width="1100" height="48" rx="4" fill="#0d0d0d" stroke="#2a2a2a"/>
+<line x1="55" y1="717" x2="80" y2="717" stroke="#9ec5ff" stroke-width="1.5" marker-end="url(#b1)"/>
+<text x="92" y="721" font-size="11" fill="#c4cdda">事後分析跳轉</text>
+<line x1="190" y1="717" x2="215" y2="717" stroke="#9ec5ff" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#b1)"/>
+<text x="227" y="721" font-size="11" fill="#c4cdda">隱式寫入（log / 計算）</text>
+<line x1="370" y1="717" x2="405" y2="717" stroke="#f5a623" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#b2)"/>
+<text x="417" y="721" font-size="11" fill="#f5b753">營運循環（月度）</text>
+<text x="600" y="721" font-size="11" fill="#c4cdda">4 階段欄位代表岸端工作節奏：每日掃 → 出事就查 → 給營運決策 → 月底結案稽核</text>
+<text x="55" y="738" font-size="10" fill="#9aa5b8">⚠ 本系統定位非船端避碰、非即時導航；所有 Demo 都應顯示資料延遲與最後更新時間。</text>
+</svg>
+  </div>
+  <div class="notes">
+    <h3>本圖重點</h3>
+    <ul>
+      <li class="warn"><strong>資料延遲是系統定位</strong>：AIS / 港口 / 氣象都有 5–60 分鐘延遲，全系統都要顯示「最後更新」</li>
+      <li><strong>① 每日監看</strong>：船隊監控為入口，看 50 艘船 9 維度狀況、警示時間線、新事件、港口擁塞</li>
+      <li class="danger"><strong>② 事件查證</strong>（核心區）：Demo 2 歷史回放 + Demo 3 CPA 審查 + Demo 7 AIS 完整性，三者連動查證</li>
+      <li><strong>③ 營運優化</strong>：Demo 5 ETA + Demo 6 SitRep → 降速建議 / Just-in-Time / 智慧航線</li>
+      <li><strong>④ 稽核 / 報表</strong>：全系統 audit log + 4 類報表 + 匯出</li>
+      <li class="warn"><strong>橘色月度循環</strong>：報表回頭調整閾值、檢討高風險船舶——是這個系統最重要的「價值循環」</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== Diagram 3 ========== -->
+<section class="section" id="diagram-3">
+  <div class="section-header">
+    <h2>③ 角色 × Demo 對應表</h2>
+    <p>5 個船東公司岸端 OCC 典型角色 × 12 個頁面 / 工具的使用頻率</p>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1180 780" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1180" height="780" fill="#0d0d0d"/>
+<text x="590" y="30" text-anchor="middle" font-size="18" font-weight="600" fill="#e4eaf2">使用者角色 × Demo 使用對應表</text>
+<text x="590" y="50" text-anchor="middle" font-size="12" fill="#9aa5b8">船東公司岸端 OCC 5 個典型角色 × 12 個頁面 / 工具</text>
+
+<rect x="290" y="90" width="170" height="60" rx="6" fill="rgba(44,108,219,0.28)" stroke="#2c6cdb"/>
+<text x="375" y="113" text-anchor="middle" font-size="13" font-weight="600" fill="#e4eaf2">值班操作員</text>
+<text x="375" y="129" text-anchor="middle" font-size="11" fill="#9ec5ff">Operator</text>
+<text x="375" y="143" text-anchor="middle" font-size="10" fill="#c4cdda">每日 24/7 值班</text>
+
+<rect x="470" y="90" width="170" height="60" rx="6" fill="rgba(76,217,122,0.28)" stroke="#4cd97a"/>
+<text x="555" y="113" text-anchor="middle" font-size="13" font-weight="600" fill="#e4eaf2">海務 / 船長</text>
+<text x="555" y="129" text-anchor="middle" font-size="11" fill="#6ee094">Captain / Marine Officer</text>
+<text x="555" y="143" text-anchor="middle" font-size="10" fill="#c4cdda">查證 / 接案</text>
+
+<rect x="650" y="90" width="170" height="60" rx="6" fill="rgba(245,166,35,0.28)" stroke="#f5a623"/>
+<text x="735" y="113" text-anchor="middle" font-size="13" font-weight="600" fill="#e4eaf2">海務主管</text>
+<text x="735" y="129" text-anchor="middle" font-size="11" fill="#f5b753">Marine Manager</text>
+<text x="735" y="143" text-anchor="middle" font-size="10" fill="#c4cdda">營運決策 / 調度</text>
+
+<rect x="830" y="90" width="170" height="60" rx="6" fill="rgba(155,89,182,0.28)" stroke="#9b59b6"/>
+<text x="915" y="113" text-anchor="middle" font-size="13" font-weight="600" fill="#e4eaf2">系統管理員</text>
+<text x="915" y="129" text-anchor="middle" font-size="11" fill="#c39bd3">Supervisor / Admin</text>
+<text x="915" y="143" text-anchor="middle" font-size="10" fill="#c4cdda">閾值 / 稽核 / 報表</text>
+
+<rect x="1010" y="90" width="150" height="60" rx="6" fill="rgba(154,165,184,0.22)" stroke="#9aa5b8"/>
+<text x="1085" y="113" text-anchor="middle" font-size="13" font-weight="600" fill="#e4eaf2">業務 / 管理層</text>
+<text x="1085" y="129" text-anchor="middle" font-size="11" fill="#c4cdda">Executive</text>
+<text x="1085" y="143" text-anchor="middle" font-size="10" fill="#c4cdda">只看報表</text>
+
+<rect x="30" y="160" width="250" height="42" rx="3" fill="rgba(44,108,219,0.28)" stroke="#2c6cdb"/>
+<text x="45" y="180" font-size="12" font-weight="600" fill="#e4eaf2">船隊監控（首頁）</text>
+<text x="45" y="195" font-size="10" fill="#c4cdda">50 船 + 9 維度 dot</text>
+
+<rect x="30" y="207" width="250" height="42" rx="3" fill="#141414" stroke="#2a2a2a"/>
+<text x="45" y="227" font-size="12" font-weight="600" fill="#e4eaf2">警示時間線</text>
+<text x="45" y="242" font-size="10" fill="#c4cdda">混合 DESC 時間軸</text>
+
+<rect x="30" y="254" width="250" height="42" rx="3" fill="#141414" stroke="#2a2a2a"/>
+<text x="45" y="274" font-size="12" font-weight="600" fill="#e4eaf2">事件處理</text>
+<text x="45" y="289" font-size="10" fill="#c4cdda">立案 / 指派 / 備註</text>
+
+<rect x="30" y="301" width="250" height="42" rx="3" fill="rgba(44,108,219,0.14)" stroke="#2c6cdb"/>
+<text x="45" y="321" font-size="12" font-weight="600" fill="#9ec5ff">Demo 1 週邊態勢</text>
+<text x="45" y="336" font-size="10" fill="#c4cdda">本船 5 NM 周邊 AIS</text>
+
+<rect x="30" y="348" width="250" height="42" rx="3" fill="rgba(44,108,219,0.14)" stroke="#2c6cdb"/>
+<text x="45" y="368" font-size="12" font-weight="600" fill="#9ec5ff">Demo 2 歷史軌跡回放</text>
+<text x="45" y="383" font-size="10" fill="#c4cdda">時間軸 + 倍速</text>
+
+<rect x="30" y="395" width="250" height="42" rx="3" fill="rgba(255,77,79,0.18)" stroke="#ff4d4f"/>
+<text x="45" y="415" font-size="12" font-weight="600" fill="#ff8a8a">Demo 3 CPA 事件審查</text>
+<text x="45" y="430" font-size="10" fill="#c4cdda">事後判讀 + 紀錄</text>
+
+<rect x="30" y="442" width="250" height="42" rx="3" fill="rgba(245,166,35,0.18)" stroke="#f5a623"/>
+<text x="45" y="462" font-size="12" font-weight="600" fill="#f5b753">Demo 4 港口擁塞</text>
+<text x="45" y="477" font-size="10" fill="#c4cdda">CI 指數 + 145 商港</text>
+
+<rect x="30" y="489" width="250" height="42" rx="3" fill="rgba(76,217,122,0.18)" stroke="#4cd97a"/>
+<text x="45" y="509" font-size="12" font-weight="600" fill="#6ee094">Demo 5 ETA 預測</text>
+<text x="45" y="524" font-size="10" fill="#c4cdda">T1+T2+T3+T4 P25/50/75</text>
+
+<rect x="30" y="536" width="250" height="42" rx="3" fill="rgba(155,89,182,0.18)" stroke="#9b59b6"/>
+<text x="45" y="556" font-size="12" font-weight="600" fill="#c39bd3">Demo 6 SitRep 情資</text>
+<text x="45" y="571" font-size="10" fill="#c4cdda">距港 24/12/6 hr</text>
+
+<rect x="30" y="583" width="250" height="42" rx="3" fill="rgba(154,165,184,0.18)" stroke="#9aa5b8"/>
+<text x="45" y="603" font-size="12" font-weight="600" fill="#c4cdda">Demo 7 AIS 完整性</text>
+<text x="45" y="618" font-size="10" fill="#c4cdda">6 偵測器熱力矩陣</text>
+
+<rect x="30" y="630" width="250" height="42" rx="3" fill="#141414" stroke="#2a2a2a"/>
+<text x="45" y="650" font-size="12" font-weight="600" fill="#e4eaf2">航計畫管理 / 智慧航線</text>
+<text x="45" y="665" font-size="10" fill="#c4cdda">多版本 + Phase A</text>
+
+<rect x="30" y="677" width="250" height="42" rx="3" fill="#141414" stroke="#2a2a2a"/>
+<text x="45" y="697" font-size="12" font-weight="600" fill="#e4eaf2">閾值 / 稽核 / 報表</text>
+<text x="45" y="712" font-size="10" fill="#c4cdda">系統管理 + 匯出</text>
+
+<text x="375" y="187" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="555" y="187" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="735" y="187" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="915" y="187" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="1085" y="187" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+
+<text x="375" y="234" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="555" y="234" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="735" y="234" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="915" y="234" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="1085" y="234" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+
+<text x="375" y="281" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="555" y="281" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="735" y="281" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="915" y="281" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="1085" y="281" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+
+<text x="375" y="328" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="555" y="328" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="735" y="328" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="915" y="328" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+<text x="1085" y="328" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+
+<text x="375" y="375" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="555" y="375" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="735" y="375" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="915" y="375" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="1085" y="375" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+
+<text x="375" y="422" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="555" y="422" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="735" y="422" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="915" y="422" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="1085" y="422" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+
+<text x="375" y="469" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="555" y="469" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="735" y="469" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="915" y="469" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+<text x="1085" y="469" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+
+<text x="375" y="516" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="555" y="516" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="735" y="516" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="915" y="516" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+<text x="1085" y="516" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+
+<text x="375" y="563" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="555" y="563" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="735" y="563" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="915" y="563" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+<text x="1085" y="563" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+
+<text x="375" y="610" text-anchor="middle" font-size="22" fill="#f5a623">◐</text>
+<text x="555" y="610" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="735" y="610" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="915" y="610" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="1085" y="610" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+
+<text x="375" y="657" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="555" y="657" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="735" y="657" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="915" y="657" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="1085" y="657" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+
+<text x="375" y="704" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+<text x="555" y="704" text-anchor="middle" font-size="22" fill="#7c8a9e">—</text>
+<text x="735" y="704" text-anchor="middle" font-size="22" fill="#c4cdda">○</text>
+<text x="915" y="704" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+<text x="1085" y="704" text-anchor="middle" font-size="22" fill="#ff4d4f">●</text>
+
+<line x1="460" y1="160" x2="460" y2="720" stroke="#2a2a2a" stroke-dasharray="2 3"/>
+<line x1="640" y1="160" x2="640" y2="720" stroke="#2a2a2a" stroke-dasharray="2 3"/>
+<line x1="820" y1="160" x2="820" y2="720" stroke="#2a2a2a" stroke-dasharray="2 3"/>
+<line x1="1000" y1="160" x2="1000" y2="720" stroke="#2a2a2a" stroke-dasharray="2 3"/>
+
+<rect x="40" y="735" width="1100" height="36" rx="4" fill="#0d0d0d" stroke="#2a2a2a"/>
+<text x="55" y="757" font-size="22" fill="#ff4d4f">●</text>
+<text x="80" y="757" font-size="11" fill="#c4cdda">主要工具 · 每日用</text>
+<text x="220" y="757" font-size="22" fill="#f5a623">◐</text>
+<text x="245" y="757" font-size="11" fill="#c4cdda">經常用 · 每週 / 出事用</text>
+<text x="430" y="757" font-size="22" fill="#c4cdda">○</text>
+<text x="455" y="757" font-size="11" fill="#c4cdda">偶爾用 · 月度或特殊情境</text>
+<text x="650" y="757" font-size="22" fill="#7c8a9e">—</text>
+<text x="675" y="757" font-size="11" fill="#c4cdda">幾乎不用 · RBAC 可不開放</text>
+<text x="900" y="757" font-size="11" fill="#9aa5b8">用於設計 sidebar 預設項目與 RBAC 權限</text>
+</svg>
+  </div>
+  <div class="notes">
+    <h3>本圖重點</h3>
+    <ul>
+      <li><strong>Operator（值班操作員）</strong>主用：船隊監控、警示時間線、事件處理、Demo 3 CPA 審查 — 24/7 值班看新事件</li>
+      <li><strong>Captain / 海務</strong>主用：事件處理、Demo 1 週邊態勢、Demo 2 歷史回放、Demo 3 CPA、Demo 7 AIS 完整性、航行計畫 — 接案查證</li>
+      <li><strong>Marine Manager（海務主管）</strong>主用：船隊監控、Demo 3、Demo 4 港口擁塞、Demo 5 ETA、Demo 6 SitRep、航行計畫 — 營運決策</li>
+      <li><strong>Supervisor / Admin</strong>主用：Demo 7 AIS 完整性、閾值 / 稽核 / 報表 — 系統管理與內外稽</li>
+      <li><strong>Executive（業務 / 管理層）</strong>主用：閾值 / 稽核 / 報表（看報表為主）— 高層決策參考</li>
+      <li class="warn"><strong>用途</strong>：此表是 sidebar 預設項目、RBAC 權限分配、登入後預設首頁的設計依據</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+SDataPro 產品流程圖 v0.1 · 2026-05-29 · 摯陞數位科技 SLAB · 對應分析報告 SDataPro_產品分析報告_v0.1.md
+</footer>
+
+<script>
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+</script>
+
+</body>
+</html>

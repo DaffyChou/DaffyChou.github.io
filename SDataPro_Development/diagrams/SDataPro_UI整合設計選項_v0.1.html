@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDataPro UI 整合設計選項</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: #000;
+  color: #e4eaf2;
+  font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+header {
+  background: #0d0d0d;
+  border-bottom: 1px solid #2a2a2a;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+header h1 { font-size: 18px; font-weight: 600; color: #e4eaf2; }
+header h1 small { font-size: 12px; color: #7c8a9e; font-weight: 400; margin-left: 10px; }
+.intro {
+  background: rgba(245,166,35,0.10);
+  border: 1px solid #f5a623;
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #c4cdda;
+}
+.intro strong { color: #f5b753; }
+.tabs { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.tab {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #c4cdda;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+}
+.tab:hover { background: #1a1a1a; border-color: #3a3a3a; }
+.tab.active { background: rgba(44,108,219,0.18); border-color: #2c6cdb; color: #9ec5ff; }
+main { padding: 24px; max-width: 1320px; margin: 0 auto; }
+.section { display: none; }
+.section.active { display: block; }
+.section-header { margin-bottom: 16px; }
+.section-header h2 { font-size: 17px; font-weight: 600; color: #e4eaf2; margin-bottom: 6px; }
+.section-header p { font-size: 13px; color: #9aa5b8; }
+.diagram-wrap { background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 6px; padding: 12px; overflow-x: auto; }
+.diagram-wrap svg { width: 100%; height: auto; max-width: 100%; display: block; }
+.compare-table {
+  width: 100%;
+  margin-top: 18px;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.compare-table th, .compare-table td {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #2a2a2a;
+  vertical-align: top;
+}
+.compare-table th {
+  background: #1a1a1a;
+  font-weight: 600;
+  color: #9ec5ff;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.compare-table td:first-child {
+  font-weight: 600;
+  color: #c4cdda;
+  width: 18%;
+}
+.compare-table .good { color: #6ee094; }
+.compare-table .bad { color: #ff8a8a; }
+.compare-table .neutral { color: #c4cdda; }
+.rec-banner {
+  background: rgba(76,217,122,0.10);
+  border: 1px solid #4cd97a;
+  border-radius: 6px;
+  padding: 14px 20px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #c4cdda;
+}
+.rec-banner strong { color: #6ee094; }
+footer { padding: 20px 24px; border-top: 1px solid #2a2a2a; margin-top: 40px; text-align: center; color: #7c8a9e; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>UI 整合設計選項 <small>「週邊態勢」與「CPA」該不該分兩個介面？</small></h1>
+  <div class="intro">
+    <strong>問題</strong>：週邊態勢看「現在周圍有誰」，CPA 看「會不會碰」—— 兩者是同一份周圍監控資料，
+    只是 CPA 多了一層警示計算。<strong>答案：不該分兩個獨立介面，應為「一個介面 + 圖層切換」</strong>。
+    以下兩個選項都符合這個原則，差別在「整合的深度」。
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-target="o1">選項 A：完全合一（推薦）</button>
+    <button class="tab" data-target="o2">選項 B：主視角 + 子分頁</button>
+    <button class="tab" data-target="cmp">選項比較與建議</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================= 選項 A ============================= -->
+<section class="section active" id="o1">
+  <div class="section-header">
+    <h2>選項 A：完全合一 —— 一個介面，圖層 toggle 切換</h2>
+    <p>左側 Sidebar 只有「周圍態勢」一項；地圖上用圖層 toggle 顯示 / 隱藏 CPA 警示、歷史軌跡、計畫航線等</p>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1280" height="720" fill="#0d0d0d"/>
+
+<text x="640" y="30" text-anchor="middle" font-size="16" font-weight="600" fill="#e4eaf2">選項 A — 一個「周圍態勢」介面 + 多圖層 toggle</text>
+
+<!-- Sidebar -->
+<rect x="20" y="60" width="100" height="640" rx="6" fill="#0d0d0d" stroke="#2a2a2a"/>
+<text x="70" y="80" text-anchor="middle" font-size="10" font-weight="600" fill="#7c8a9e">SIDEBAR</text>
+
+<rect x="28" y="90" width="84" height="50" rx="4" fill="rgba(44,108,219,0.30)" stroke="#2c6cdb"/>
+<text x="70" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#9ec5ff">周圍態勢</text>
+<text x="70" y="125" text-anchor="middle" font-size="9" fill="#c4cdda">含 CPA / 歷史</text>
+
+<rect x="28" y="148" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="171" text-anchor="middle" font-size="10" fill="#c4cdda">港口擁塞</text>
+
+<rect x="28" y="196" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="219" text-anchor="middle" font-size="10" fill="#c4cdda">ETA 預測</text>
+
+<rect x="28" y="244" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="267" text-anchor="middle" font-size="10" fill="#c4cdda">SitRep 情資</text>
+
+<rect x="28" y="292" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="315" text-anchor="middle" font-size="10" fill="#c4cdda">AIS 完整性</text>
+
+<rect x="28" y="340" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="363" text-anchor="middle" font-size="10" fill="#c4cdda">事件處理</text>
+
+<rect x="28" y="388" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="411" text-anchor="middle" font-size="10" fill="#c4cdda">航線管理</text>
+
+<rect x="28" y="436" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="459" text-anchor="middle" font-size="10" fill="#c4cdda">設定 / 稽核</text>
+
+<text x="70" y="540" text-anchor="middle" font-size="9" font-weight="600" fill="#6ee094">✓ 一個項目</text>
+<text x="70" y="555" text-anchor="middle" font-size="9" fill="#c4cdda">不分週邊 / CPA</text>
+
+<!-- Main area -->
+<rect x="135" y="60" width="1125" height="640" rx="6" fill="#0d0d0d" stroke="#2a2a2a"/>
+
+<!-- Top bar with mode toggle -->
+<rect x="150" y="75" width="1095" height="50" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="165" y="105" font-size="13" font-weight="700" fill="#e4eaf2">周圍態勢監控</text>
+<text x="285" y="105" font-size="10" fill="#9aa5b8">最後更新 2 分鐘前</text>
+
+<!-- Layer toggles on top bar -->
+<text x="465" y="98" font-size="10" font-weight="600" fill="#9aa5b8">圖層</text>
+<rect x="465" y="103" width="115" height="22" rx="11" fill="rgba(255,77,79,0.20)" stroke="#ff4d4f"/>
+<circle cx="470" cy="114" r="4" fill="#ff4d4f"/>
+<text x="514" y="118" text-anchor="middle" font-size="10" font-weight="600" fill="#ff8a8a">CPA 警示 ON</text>
+
+<rect x="590" y="103" width="115" height="22" rx="11" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb"/>
+<circle cx="595" cy="114" r="4" fill="#2c6cdb"/>
+<text x="639" y="118" text-anchor="middle" font-size="10" font-weight="600" fill="#9ec5ff">歷史軌跡 ON</text>
+
+<rect x="715" y="103" width="105" height="22" rx="11" fill="#1a1a1a" stroke="#2a2a2a"/>
+<circle cx="720" cy="114" r="4" fill="#3a3a3a"/>
+<text x="763" y="118" text-anchor="middle" font-size="10" fill="#c4cdda">計畫航線 OFF</text>
+
+<rect x="830" y="103" width="105" height="22" rx="11" fill="#1a1a1a" stroke="#2a2a2a"/>
+<circle cx="835" cy="114" r="4" fill="#3a3a3a"/>
+<text x="878" y="118" text-anchor="middle" font-size="10" fill="#c4cdda">風險區 OFF</text>
+
+<rect x="945" y="103" width="120" height="22" rx="11" fill="#1a1a1a" stroke="#2a2a2a"/>
+<circle cx="950" cy="114" r="4" fill="#3a3a3a"/>
+<text x="998" y="118" text-anchor="middle" font-size="10" fill="#c4cdda">AIS 品質 OFF</text>
+
+<!-- View mode toggle -->
+<rect x="1100" y="103" width="135" height="22" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<rect x="1102" y="105" width="40" height="18" rx="3" fill="rgba(44,108,219,0.30)"/>
+<text x="1122" y="118" text-anchor="middle" font-size="9" font-weight="600" fill="#9ec5ff">即時</text>
+<text x="1162" y="118" text-anchor="middle" font-size="9" fill="#9aa5b8">回放</text>
+<text x="1208" y="118" text-anchor="middle" font-size="9" fill="#9aa5b8">分析</text>
+
+<!-- Map area -->
+<rect x="150" y="140" width="800" height="500" rx="4" fill="#0a1220" stroke="#2a2a2a"/>
+
+<!-- 5NM circle -->
+<circle cx="550" cy="390" r="200" fill="rgba(74,158,255,0.06)" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="3 3"/>
+<text x="550" y="200" text-anchor="middle" font-size="10" fill="#9aa5b8">5 NM 圓</text>
+
+<!-- 本船 -->
+<polygon points="550,390 540,408 560,408" fill="#f5a623"/>
+<circle cx="550" cy="395" r="14" fill="none" stroke="#f5a623" stroke-width="1.5" opacity="0.5"/>
+<text x="550" y="425" text-anchor="middle" font-size="10" fill="#f5b753">遠洋探索號</text>
+
+<!-- 他船 1 (CPA RED) -->
+<polygon points="480,330 472,344 488,344" fill="#ff4d4f" transform="rotate(35 480 337)"/>
+<circle cx="480" cy="337" r="11" fill="none" stroke="#ff4d4f" stroke-width="1.5" opacity="0.7"/>
+<text x="480" y="358" text-anchor="middle" font-size="9" fill="#ff8a8a">明德輪</text>
+<!-- CPA 預測向量線 -->
+<line x1="480" y1="337" x2="540" y2="383" stroke="#ff4d4f" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#oArrR)"/>
+<circle cx="540" cy="383" r="5" fill="none" stroke="#ff4d4f" stroke-width="2"/>
+<text x="525" y="370" font-size="9" fill="#ff8a8a">CPA 0.38</text>
+
+<!-- 他船 2 (CPA AMBER) -->
+<polygon points="640,440 632,454 648,454" fill="#f5a623" transform="rotate(200 640 447)"/>
+<circle cx="640" cy="447" r="10" fill="none" stroke="#f5a623" stroke-width="1.5" opacity="0.6"/>
+<text x="640" y="468" text-anchor="middle" font-size="9" fill="#f5b753">海洋先鋒</text>
+<line x1="640" y1="447" x2="585" y2="410" stroke="#f5a623" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="608" y="430" font-size="9" fill="#f5b753">CPA 0.72</text>
+
+<!-- 他船 3 (Normal) -->
+<polygon points="430,460 422,474 438,474" fill="#fff" opacity="0.7"/>
+<text x="430" y="488" text-anchor="middle" font-size="9" fill="#9aa5b8">台灣海峰</text>
+
+<!-- 歷史軌跡（本船） -->
+<polyline points="480,500 500,470 520,440 540,410 550,395" fill="none" stroke="#4a9eff" stroke-width="2" opacity="0.7"/>
+<polyline points="480,500 500,470 520,440 540,410 550,395" fill="none" stroke="#4a9eff" stroke-width="2" stroke-dasharray="2 2" opacity="0.3"/>
+
+<!-- 浮標 -->
+<polygon points="385,300 380,310 390,310" fill="#f5d04a"/>
+<text x="385" y="294" text-anchor="middle" font-size="8" fill="#f5d04a">KH-BUOY-01</text>
+
+<!-- Map overlay info -->
+<rect x="165" y="155" width="180" height="60" rx="4" fill="#141414" stroke="#ff4d4f"/>
+<text x="175" y="172" font-size="10" font-weight="600" fill="#ff8a8a">⚠ 1 RED · 1 AMBER</text>
+<text x="175" y="187" font-size="9" fill="#c4cdda">明德輪 CPA 0.38 / 18 min</text>
+<text x="175" y="201" font-size="9" fill="#c4cdda">海洋先鋒 CPA 0.72 / 42 min</text>
+
+<defs>
+<marker id="oArrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+<path d="M0,0 L10,5 L0,10 z" fill="#ff4d4f"/>
+</marker>
+</defs>
+
+<!-- Right panel -->
+<rect x="960" y="140" width="285" height="500" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="970" y="162" font-size="12" font-weight="700" fill="#e4eaf2">當前船舶清單</text>
+<text x="970" y="178" font-size="10" fill="#9aa5b8">本船 + 5 NM 內共 4 艘</text>
+
+<rect x="975" y="190" width="260" height="50" rx="3" fill="rgba(245,166,35,0.10)" stroke="#f5a623"/>
+<text x="985" y="208" font-size="11" font-weight="700" fill="#e4eaf2">▲ 遠洋探索號（本船）</text>
+<text x="985" y="223" font-size="9" fill="#c4cdda">12.3 kn / 045°</text>
+<text x="985" y="235" font-size="9" fill="#9aa5b8">最後更新 30 秒前</text>
+
+<rect x="975" y="248" width="260" height="60" rx="3" fill="rgba(255,77,79,0.15)" stroke="#ff4d4f"/>
+<text x="985" y="266" font-size="11" font-weight="700" fill="#ff8a8a">⚠ 明德輪</text>
+<text x="985" y="281" font-size="9" fill="#c4cdda">距離 0.38 nm · 14.1 kn</text>
+<text x="985" y="294" font-size="9" fill="#ff8a8a">CPA RED · TCPA 18 min</text>
+<text x="1100" y="302" font-size="9" fill="#9ec5ff">查 AIS 品質 ›</text>
+
+<rect x="975" y="316" width="260" height="60" rx="3" fill="rgba(245,166,35,0.12)" stroke="#f5a623"/>
+<text x="985" y="334" font-size="11" font-weight="700" fill="#f5b753">⚠ 海洋先鋒</text>
+<text x="985" y="349" font-size="9" fill="#c4cdda">距離 0.72 nm · 11.2 kn</text>
+<text x="985" y="362" font-size="9" fill="#f5b753">CPA AMBER · TCPA 42 min</text>
+<text x="1100" y="370" font-size="9" fill="#9ec5ff">查 AIS 品質 ›</text>
+
+<rect x="975" y="384" width="260" height="50" rx="3" fill="#1a1a1a" stroke="#2a2a2a"/>
+<text x="985" y="402" font-size="11" font-weight="600" fill="#c4cdda">台灣海峰</text>
+<text x="985" y="417" font-size="9" fill="#c4cdda">距離 1.45 nm · 8.5 kn</text>
+<text x="985" y="429" font-size="9" fill="#9aa5b8">無風險</text>
+
+<rect x="975" y="442" width="260" height="50" rx="3" fill="#1a1a1a" stroke="#2a2a2a"/>
+<text x="985" y="460" font-size="11" font-weight="600" fill="#c4cdda">非船舶 KH-BUOY-01</text>
+<text x="985" y="475" font-size="9" fill="#c4cdda">距離 0.85 nm · 黃色浮標</text>
+
+<!-- 點船後的詳細區 -->
+<rect x="975" y="505" width="260" height="125" rx="3" fill="#0d0d0d" stroke="#2a2a2a"/>
+<text x="985" y="525" font-size="11" font-weight="700" fill="#e4eaf2">點任一船可：</text>
+<text x="985" y="544" font-size="10" fill="#c4cdda">▸ 查歷史軌跡（彈出時間軸）</text>
+<text x="985" y="560" font-size="10" fill="#c4cdda">▸ 查 AIS 完整性</text>
+<text x="985" y="576" font-size="10" fill="#c4cdda">▸ 立案告警（→ 事件處理）</text>
+<text x="985" y="592" font-size="10" fill="#c4cdda">▸ 查與本船 CPA 細節</text>
+<text x="985" y="618" font-size="9" fill="#9aa5b8">→ 全在 panel 內展開，不離開頁面</text>
+</svg>
+  </div>
+  <div class="rec-banner">
+    <strong>選項 A 重點：</strong>Sidebar 只有「周圍態勢」一個項目；CPA / 歷史 / 計畫航線 / 風險區 / AIS 品質 都是<strong>圖層 toggle</strong>。
+    使用者在同一頁面切換看不同東西，<strong>視覺 context 永遠不丟</strong>（地圖位置、選的船、時間都保留）。
+    最右側 panel 列船清單，點任一艘可在 panel 內展開歷史 / AIS 品質 / 事件立案。
+  </div>
+</section>
+
+<!-- ============================= 選項 B ============================= -->
+<section class="section" id="o2">
+  <div class="section-header">
+    <h2>選項 B：主視角「周圍態勢」+ 子分頁切換</h2>
+    <p>Sidebar 仍只有「周圍態勢」一項，但頁面上方有<strong>視角分頁</strong>（即時 / 風險 / 歷史 / 品質），切換主視角；底層資料相同</p>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1280" height="720" fill="#0d0d0d"/>
+
+<text x="640" y="30" text-anchor="middle" font-size="16" font-weight="600" fill="#e4eaf2">選項 B — 一個「周圍態勢」介面 + 視角分頁</text>
+
+<!-- Sidebar (同 A) -->
+<rect x="20" y="60" width="100" height="640" rx="6" fill="#0d0d0d" stroke="#2a2a2a"/>
+<text x="70" y="80" text-anchor="middle" font-size="10" font-weight="600" fill="#7c8a9e">SIDEBAR</text>
+<rect x="28" y="90" width="84" height="50" rx="4" fill="rgba(44,108,219,0.30)" stroke="#2c6cdb"/>
+<text x="70" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#9ec5ff">周圍態勢</text>
+<text x="70" y="125" text-anchor="middle" font-size="9" fill="#c4cdda">含 4 種視角</text>
+
+<rect x="28" y="148" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="171" text-anchor="middle" font-size="10" fill="#c4cdda">港口擁塞</text>
+<rect x="28" y="196" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="219" text-anchor="middle" font-size="10" fill="#c4cdda">ETA 預測</text>
+<rect x="28" y="244" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="267" text-anchor="middle" font-size="10" fill="#c4cdda">SitRep 情資</text>
+<rect x="28" y="292" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="315" text-anchor="middle" font-size="10" fill="#c4cdda">事件處理</text>
+<rect x="28" y="340" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="363" text-anchor="middle" font-size="10" fill="#c4cdda">航線管理</text>
+<rect x="28" y="388" width="84" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="70" y="411" text-anchor="middle" font-size="10" fill="#c4cdda">設定 / 稽核</text>
+
+<!-- Main area -->
+<rect x="135" y="60" width="1125" height="640" rx="6" fill="#0d0d0d" stroke="#2a2a2a"/>
+
+<!-- Title -->
+<rect x="150" y="75" width="1095" height="40" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="165" y="100" font-size="13" font-weight="700" fill="#e4eaf2">周圍態勢監控</text>
+<text x="285" y="100" font-size="10" fill="#9aa5b8">最後更新 2 分鐘前 · 4 艘船 · 1 個浮標</text>
+
+<!-- 視角分頁 -->
+<rect x="150" y="125" width="1095" height="40" rx="4" fill="#0d0d0d" stroke="#2a2a2a"/>
+
+<rect x="160" y="132" width="160" height="26" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="240" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#c4cdda">📍 即時狀況</text>
+
+<rect x="330" y="132" width="160" height="26" rx="4" fill="rgba(255,77,79,0.20)" stroke="#ff4d4f"/>
+<text x="410" y="148" text-anchor="middle" font-size="11" font-weight="700" fill="#ff8a8a">⚠ 風險檢視（CPA）</text>
+
+<rect x="500" y="132" width="160" height="26" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="580" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#c4cdda">🕐 歷史回放</text>
+
+<rect x="670" y="132" width="160" height="26" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="750" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#c4cdda">📊 資料品質檢視</text>
+
+<text x="850" y="148" font-size="10" fill="#9aa5b8">← 同一筆資料的 4 種視角，切換不離頁</text>
+
+<!-- Map area (顯示風險檢視) -->
+<rect x="150" y="175" width="800" height="465" rx="4" fill="#0a1220" stroke="#2a2a2a"/>
+
+<text x="160" y="195" font-size="10" font-weight="600" fill="#ff8a8a">當前視角：⚠ 風險檢視（CPA）</text>
+<text x="160" y="212" font-size="9" fill="#9aa5b8">顯示：本船 + 5NM + 他船 + CPA 預測向量 + RED/AMBER 標籤</text>
+
+<!-- 5NM 圓 -->
+<circle cx="550" cy="390" r="180" fill="rgba(74,158,255,0.04)" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+<!-- 本船 -->
+<polygon points="550,390 540,408 560,408" fill="#f5a623"/>
+<circle cx="550" cy="395" r="14" fill="none" stroke="#f5a623" stroke-width="1.5" opacity="0.5"/>
+<text x="550" y="425" text-anchor="middle" font-size="10" fill="#f5b753">遠洋探索號</text>
+
+<!-- 他船 1 (CPA RED) -->
+<polygon points="480,330 472,344 488,344" fill="#ff4d4f"/>
+<circle cx="480" cy="337" r="11" fill="none" stroke="#ff4d4f" stroke-width="1.5" opacity="0.7"/>
+<text x="480" y="358" text-anchor="middle" font-size="9" fill="#ff8a8a">明德輪</text>
+<line x1="480" y1="337" x2="540" y2="383" stroke="#ff4d4f" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#bArrR)"/>
+<circle cx="540" cy="383" r="5" fill="none" stroke="#ff4d4f" stroke-width="2"/>
+<text x="525" y="370" font-size="9" fill="#ff8a8a">CPA 0.38</text>
+
+<!-- 他船 2 (CPA AMBER) -->
+<polygon points="640,440 632,454 648,454" fill="#f5a623"/>
+<circle cx="640" cy="447" r="10" fill="none" stroke="#f5a623" stroke-width="1.5" opacity="0.6"/>
+<text x="640" y="468" text-anchor="middle" font-size="9" fill="#f5b753">海洋先鋒</text>
+
+<!-- 他船 3 (Normal) -->
+<polygon points="430,460 422,474 438,474" fill="#fff" opacity="0.7"/>
+<text x="430" y="488" text-anchor="middle" font-size="9" fill="#9aa5b8">台灣海峰</text>
+
+<!-- 浮標 -->
+<polygon points="385,300 380,310 390,310" fill="#f5d04a"/>
+
+<defs>
+<marker id="bArrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+<path d="M0,0 L10,5 L0,10 z" fill="#ff4d4f"/>
+</marker>
+</defs>
+
+<rect x="165" y="600" width="280" height="32" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="175" y="620" font-size="10" font-weight="600" fill="#c4cdda">⚠ 切「即時狀況」分頁 → 同地圖移除 CPA 向量與紅色標籤</text>
+
+<!-- Right panel -->
+<rect x="960" y="175" width="285" height="465" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="970" y="197" font-size="12" font-weight="700" fill="#e4eaf2">風險船舶優先列表</text>
+<text x="970" y="213" font-size="10" fill="#9aa5b8">依 CPA 風險排序</text>
+
+<rect x="975" y="225" width="260" height="60" rx="3" fill="rgba(255,77,79,0.15)" stroke="#ff4d4f"/>
+<text x="985" y="243" font-size="11" font-weight="700" fill="#ff8a8a">⚠ 明德輪 (RED)</text>
+<text x="985" y="258" font-size="9" fill="#c4cdda">CPA 0.38 nm · TCPA 18 min</text>
+<text x="985" y="271" font-size="9" fill="#c4cdda">相對速度 12.4 kn · Crossing</text>
+<text x="985" y="283" font-size="9" fill="#9ec5ff">[確認告警]  [查 AIS 品質]</text>
+
+<rect x="975" y="293" width="260" height="60" rx="3" fill="rgba(245,166,35,0.12)" stroke="#f5a623"/>
+<text x="985" y="311" font-size="11" font-weight="700" fill="#f5b753">⚠ 海洋先鋒 (AMBER)</text>
+<text x="985" y="326" font-size="9" fill="#c4cdda">CPA 0.72 nm · TCPA 42 min</text>
+<text x="985" y="339" font-size="9" fill="#c4cdda">相對速度 9.8 kn · Crossing</text>
+<text x="985" y="351" font-size="9" fill="#9ec5ff">[確認告警]  [查 AIS 品質]</text>
+
+<rect x="975" y="361" width="260" height="40" rx="3" fill="#1a1a1a" stroke="#2a2a2a"/>
+<text x="985" y="379" font-size="10" font-weight="600" fill="#c4cdda">無風險：台灣海峰</text>
+<text x="985" y="392" font-size="9" fill="#9aa5b8">距離 1.45 nm · 已遠離</text>
+
+<text x="975" y="430" font-size="11" font-weight="700" fill="#c4cdda">統計</text>
+<text x="985" y="450" font-size="10" fill="#c4cdda">RED: 1 · AMBER: 1 · OK: 1</text>
+<text x="985" y="467" font-size="10" fill="#c4cdda">過去 24 hr 新事件：3</text>
+
+<rect x="975" y="490" width="260" height="140" rx="3" fill="#0d0d0d" stroke="#2a2a2a"/>
+<text x="985" y="510" font-size="11" font-weight="700" fill="#e4eaf2">說明</text>
+<text x="985" y="530" font-size="10" fill="#c4cdda">本視角僅顯示風險船舶</text>
+<text x="985" y="545" font-size="10" fill="#c4cdda">與 CPA 預測向量</text>
+<text x="985" y="565" font-size="10" fill="#9aa5b8">切「即時狀況」：</text>
+<text x="985" y="580" font-size="9" fill="#9aa5b8">  → 看全部船 + 浮標</text>
+<text x="985" y="595" font-size="10" fill="#9aa5b8">切「歷史回放」：</text>
+<text x="985" y="610" font-size="9" fill="#9aa5b8">  → 進時間軸模式</text>
+<text x="985" y="624" font-size="9" fill="#9aa5b8">  → 同樣的船，看過去軌跡</text>
+</svg>
+  </div>
+  <div class="rec-banner">
+    <strong>選項 B 重點：</strong>Sidebar 也只有「周圍態勢」一個項目；但頁面上方有<strong>4 個視角分頁</strong>（即時 / 風險 / 歷史 / 品質）。
+    比 A 更<strong>明確區分使用情境</strong>——「即時看周圍」「看風險」「回放歷史」「查資料品質」分別有自己的最佳呈現方式，
+    但底層資料 / 選的船 / 地圖位置都共享 context。
+  </div>
+</section>
+
+<!-- ============================= 比較 ============================= -->
+<section class="section" id="cmp">
+  <div class="section-header">
+    <h2>選項比較與建議</h2>
+    <p>兩者都符合「同一個介面 / 同一份資料」原則，差別在使用者切換視角的方式</p>
+  </div>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th width="20%">比較項目</th><th width="40%">選項 A：圖層 toggle</th><th width="40%">選項 B：視角分頁</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>切換方式</td>
+        <td class="neutral">右上多個 toggle 開關，同時看多個圖層</td>
+        <td class="neutral">頁面上方分頁，一次看一個視角</td>
+      </tr>
+      <tr>
+        <td>同時呈現多種資訊</td>
+        <td class="good">✓ 可同時看 CPA + 歷史軌跡 + 計畫航線（疊圖）</td>
+        <td class="bad">✗ 一次只看一個視角，要切換才能比對</td>
+      </tr>
+      <tr>
+        <td>視覺複雜度</td>
+        <td class="bad">⚠ 圖層全開時可能眼花，需考慮優先序</td>
+        <td class="good">✓ 每個視角專注一件事，乾淨</td>
+      </tr>
+      <tr>
+        <td>學習曲線</td>
+        <td class="bad">⚠ 新使用者需理解每個 toggle 的意義</td>
+        <td class="good">✓ 分頁標籤明確（即時 / 風險 / 歷史 / 品質）</td>
+      </tr>
+      <tr>
+        <td>切換成本</td>
+        <td class="good">✓ 點一下 toggle 立即看到 / 隱藏</td>
+        <td class="neutral">~ 切分頁需重繪畫面（雖然底層資料不換）</td>
+      </tr>
+      <tr>
+        <td>對應使用情境</td>
+        <td class="neutral">資深使用者「全圖層疊看」做綜合分析</td>
+        <td class="neutral">不同角色 / 任務各看自己視角</td>
+      </tr>
+      <tr>
+        <td>對齊既有設計</td>
+        <td class="good">✓ 沿用 voyage-alert 的 5 圖層 checkbox 模式</td>
+        <td class="neutral">~ 需新設計分頁元件</td>
+      </tr>
+      <tr>
+        <td>實作複雜度</td>
+        <td class="good">✓ 較簡單，圖層獨立開關即可</td>
+        <td class="neutral">~ 中等，各視角要設計 panel 內容</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="rec-banner">
+    <strong>建議：採用「選項 A 為主、選項 B 為輔」的混合設計</strong><br><br>
+    <strong>主介面（選項 A）</strong>：地圖 + 圖層 toggle（CPA / 歷史 / 計畫航線 / 風險區 / AIS 品質）—— 對應大部分操作員的日常使用。<br><br>
+    <strong>子模式（選項 B 元素）</strong>：當使用者要「進入歷史回放專屬模式」（需要時間軸控制、倍速）或「進入 AIS 品質專屬模式」（需要熱力矩陣表格），
+    再用「全螢幕 mode 切換」進入。<br><br>
+    <strong>關鍵原則</strong>：Sidebar 永遠只有「周圍態勢」一項，不論你切到哪個模式都還是同一個 context；「CPA」「歷史」「AIS 品質」<strong>從來不是 sidebar 上的獨立選單</strong>。
+  </div>
+</section>
+
+</main>
+
+<footer>
+SDataPro UI 整合設計選項 v0.1 · 2026-05-29 · 摯陞數位科技 SLAB
+</footer>
+
+<script>
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+</script>
+
+</body>
+</html>

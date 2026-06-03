@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDataPro 情境流程圖 v0.1</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: #000;
+  color: #e4eaf2;
+  font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+header {
+  background: #0d0d0d;
+  border-bottom: 1px solid #2a2a2a;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e4eaf2;
+}
+header h1 small {
+  font-size: 12px;
+  color: #7c8a9e;
+  font-weight: 400;
+  margin-left: 10px;
+}
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.tab {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #c4cdda;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.tab:hover {
+  background: #1a1a1a;
+  border-color: #3a3a3a;
+}
+.tab.active {
+  background: rgba(44,108,219,0.18);
+  border-color: #2c6cdb;
+  color: #9ec5ff;
+}
+main {
+  padding: 24px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+.section { display: none; }
+.section.active { display: block; }
+.section-header {
+  margin-bottom: 16px;
+}
+.section-header h2 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #e4eaf2;
+  margin-bottom: 6px;
+}
+.section-header p {
+  font-size: 13px;
+  color: #9aa5b8;
+}
+.section-header .badge {
+  display: inline-block;
+  background: rgba(245,166,35,0.15);
+  color: #f5b753;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  margin-left: 8px;
+}
+.diagram-wrap {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
+}
+.diagram-wrap svg {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+.notes {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #c4cdda;
+}
+.notes h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9aa5b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.notes table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 12px;
+}
+.notes th, .notes td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.notes th {
+  background: #1a1a1a;
+  font-weight: 600;
+  color: #9ec5ff;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+}
+.notes td .step-num {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  background: rgba(44,108,219,0.18);
+  color: #9ec5ff;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 12px;
+  margin-right: 6px;
+}
+.legend-mini {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #c4cdda;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.legend-mini span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-mini .key {
+  display: inline-block;
+  width: 28px;
+  height: 2px;
+}
+footer {
+  padding: 20px 24px;
+  border-top: 1px solid #2a2a2a;
+  margin-top: 40px;
+  text-align: center;
+  color: #7c8a9e;
+  font-size: 11px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SDataPro 情境流程圖 v0.1 <small>功能對功能的操作跳轉 · 2026-05-29 · SLAB</small></h1>
+  <div class="tabs">
+    <button class="tab active" data-target="s1">情境 1：週邊監控 → 查歷史</button>
+    <button class="tab" data-target="s2">情境 2：週邊監控 → 查 CPA</button>
+    <button class="tab" data-target="s3">情境 3：CPA 事件完整處理</button>
+    <button class="tab" data-target="s4">情境 4：港口擁塞 → ETA → SitRep</button>
+    <button class="tab" data-target="s5">情境 5：航線偏移 → 版本管理</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================= 情境 1 ============================= -->
+<section class="section active" id="s1">
+  <div class="section-header">
+    <h2>情境 1：從週邊監控查歷史軌跡 <span class="badge">最常見</span></h2>
+    <p>使用者在 Demo 1 看到本船與某他船曾接近過，想回放兩船過去的相對軌跡</p>
+  </div>
+  <div class="legend-mini">
+    <span><span class="key" style="background:#9ec5ff"></span>主要操作路徑</span>
+    <span><span class="key" style="background:#f5a623;background:repeating-linear-gradient(90deg,#f5a623 0 4px,transparent 4px 8px)"></span>返回路徑</span>
+    <span><span class="key" style="background:#6ee094"></span>傳遞 context</span>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1280 580" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1280" height="580" fill="#0d0d0d"/>
+<defs>
+<marker id="s1arr" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#9ec5ff"/></marker>
+<marker id="s1back" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#f5a623"/></marker>
+</defs>
+
+<!-- Step 1: Demo 1 週邊監控 -->
+<rect x="40" y="60" width="280" height="220" rx="8" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="180" y="88" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">① Demo 1 週邊態勢監控</text>
+<text x="180" y="106" text-anchor="middle" font-size="10" fill="#9ec5ff">起點</text>
+
+<!-- 地圖示意 -->
+<rect x="60" y="120" width="240" height="100" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<circle cx="180" cy="170" r="45" fill="none" stroke="#4a9eff" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="180" y="155" text-anchor="middle" font-size="10" fill="#9aa5b8">5 NM 圓</text>
+<polygon points="180,168 175,180 185,180" fill="#f5a623"/>
+<text x="180" y="195" text-anchor="middle" font-size="9" fill="#f5b753">本船</text>
+<polygon points="140,150 137,158 143,158" fill="#fff"/>
+<polygon points="220,180 217,188 223,188" fill="#fff"/>
+<polygon points="200,200 197,208 203,208" fill="#fff"/>
+
+<!-- 右側事件清單 -->
+<text x="60" y="245" font-size="11" font-weight="600" fill="#c4cdda">右側接觸事件清單：</text>
+<text x="60" y="261" font-size="11" fill="#e4eaf2">▸ 海洋先鋒  0.72 nm  ← 點此</text>
+<text x="60" y="275" font-size="11" fill="#9aa5b8">▸ 台灣海峰  1.45 nm</text>
+
+<!-- Arrow 1→2 -->
+<line x1="320" y1="170" x2="450" y2="170" stroke="#9ec5ff" stroke-width="2.5" marker-end="url(#s1arr)"/>
+<rect x="335" y="135" width="115" height="32" rx="4" fill="#0d0d0d" stroke="#9ec5ff"/>
+<text x="392" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#9ec5ff">點他船 / 事件</text>
+<text x="392" y="161" text-anchor="middle" font-size="10" fill="#c4cdda">或工具列「歷史模式」</text>
+
+<rect x="320" y="200" width="130" height="36" rx="4" fill="rgba(76,217,122,0.15)" stroke="#4cd97a" stroke-dasharray="3 2"/>
+<text x="385" y="215" text-anchor="middle" font-size="10" font-weight="600" fill="#6ee094">帶 context →</text>
+<text x="385" y="228" text-anchor="middle" font-size="9" fill="#c4cdda">本船 MMSI + 目標 MMSI</text>
+
+<!-- Step 2: 點選後 popup / context -->
+<rect x="460" y="60" width="320" height="220" rx="8" fill="rgba(155,89,182,0.16)" stroke="#9b59b6" stroke-width="2"/>
+<text x="620" y="88" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">② Popup / 跳轉確認</text>
+<text x="620" y="106" text-anchor="middle" font-size="10" fill="#c39bd3">中介互動</text>
+
+<rect x="480" y="120" width="280" height="148" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="495" y="142" font-size="11" font-weight="700" fill="#e4eaf2">海洋先鋒 MMSI 416003001</text>
+<text x="495" y="160" font-size="10" fill="#c4cdda">距本船：0.72 nm</text>
+<text x="495" y="175" font-size="10" fill="#c4cdda">首次觀測：14:23</text>
+<text x="495" y="190" font-size="10" fill="#c4cdda">最後觀測：15:08</text>
+<text x="495" y="205" font-size="10" fill="#c4cdda">觀測期間：45 分鐘</text>
+
+<rect x="495" y="220" width="120" height="30" rx="4" fill="rgba(44,108,219,0.28)" stroke="#2c6cdb"/>
+<text x="555" y="240" text-anchor="middle" font-size="11" font-weight="600" fill="#9ec5ff">查兩船歷史 →</text>
+
+<rect x="625" y="220" width="120" height="30" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="685" y="240" text-anchor="middle" font-size="11" fill="#c4cdda">查 CPA →</text>
+
+<!-- Arrow 2→3 -->
+<line x1="780" y1="170" x2="910" y2="170" stroke="#9ec5ff" stroke-width="2.5" marker-end="url(#s1arr)"/>
+<rect x="790" y="135" width="115" height="32" rx="4" fill="#0d0d0d" stroke="#9ec5ff"/>
+<text x="847" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#9ec5ff">點「查兩船歷史」</text>
+<text x="847" y="161" text-anchor="middle" font-size="10" fill="#c4cdda">系統判 url 路徑</text>
+
+<!-- Step 3: Demo 2 歷史回放 -->
+<rect x="920" y="60" width="320" height="220" rx="8" fill="rgba(44,108,219,0.22)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="1080" y="88" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">③ Demo 2 歷史軌跡回放</text>
+<text x="1080" y="106" text-anchor="middle" font-size="10" fill="#9ec5ff">終點</text>
+
+<rect x="940" y="120" width="280" height="100" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="950" y="138" font-size="10" fill="#9aa5b8">預設載入：最近 24 hr</text>
+<polyline points="960,180 990,170 1020,165 1050,160 1080,158 1110,160 1140,165 1170,170 1200,178" fill="none" stroke="#4a9eff" stroke-width="2"/>
+<polyline points="975,160 1005,158 1035,160 1065,163 1095,168 1125,170 1155,175 1185,178" fill="none" stroke="#ff8a8a" stroke-width="2"/>
+<polygon points="1080,156 1075,166 1085,166" fill="#f5a623"/>
+<polygon points="1095,166 1090,176 1100,176" fill="#fff"/>
+
+<text x="950" y="237" font-size="10" font-weight="600" fill="#c4cdda">底部時間軸：</text>
+<rect x="950" y="245" width="260" height="20" rx="2" fill="#141414" stroke="#2a2a2a"/>
+<rect x="950" y="245" width="135" height="20" fill="rgba(44,108,219,0.35)"/>
+<text x="1080" y="259" text-anchor="middle" font-size="10" fill="#e4eaf2">14:23 ─ 15:08</text>
+<text x="950" y="278" font-size="9" fill="#9aa5b8">▶ 自動 focus 兩船共同時段</text>
+
+<!-- Bottom: 終點可做的動作 -->
+<rect x="40" y="320" width="1200" height="170" rx="6" fill="#141414" stroke="#2a2a2a"/>
+<text x="55" y="345" font-size="13" font-weight="600" fill="#e4eaf2">終點頁面（Demo 2 歷史回放）可做的動作</text>
+
+<rect x="60" y="360" width="280" height="60" rx="4" fill="#0d0d0d" stroke="#2a2a2a"/>
+<text x="200" y="380" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">拖時間軸 / 倍速播放</text>
+<text x="200" y="397" text-anchor="middle" font-size="10" fill="#9aa5b8">0.5x / 1x / 2x / 5x / 10x</text>
+<text x="200" y="412" text-anchor="middle" font-size="10" fill="#c4cdda">回放兩船軌跡相對動態</text>
+
+<rect x="360" y="360" width="280" height="60" rx="4" fill="#0d0d0d" stroke="#2a2a2a"/>
+<text x="500" y="380" text-anchor="middle" font-size="12" font-weight="600" fill="#e4eaf2">看同時段其他 5 NM 他船</text>
+<text x="500" y="397" text-anchor="middle" font-size="10" fill="#9aa5b8">水道擁塞 / 交叉行為</text>
+<text x="500" y="412" text-anchor="middle" font-size="10" fill="#c4cdda">幫助理解當下背景</text>
+
+<rect x="660" y="360" width="280" height="60" rx="4" fill="rgba(255,77,79,0.15)" stroke="#ff4d4f"/>
+<text x="800" y="380" text-anchor="middle" font-size="12" font-weight="600" fill="#ff8a8a">點「轉去 CPA 審查」</text>
+<text x="800" y="397" text-anchor="middle" font-size="10" fill="#9aa5b8">帶兩船 + 時段</text>
+<text x="800" y="412" text-anchor="middle" font-size="10" fill="#c4cdda">跳 Demo 3 看 CPA 數值</text>
+
+<rect x="960" y="360" width="260" height="60" rx="4" fill="rgba(245,166,35,0.15)" stroke="#f5a623"/>
+<text x="1090" y="380" text-anchor="middle" font-size="12" font-weight="600" fill="#f5b753">截圖 / 匯出</text>
+<text x="1090" y="397" text-anchor="middle" font-size="10" fill="#9aa5b8">PNG / 報表附件</text>
+<text x="1090" y="412" text-anchor="middle" font-size="10" fill="#c4cdda">給管理層 / 內外稽</text>
+
+<text x="55" y="448" font-size="11" font-weight="600" fill="#9aa5b8">返回路徑：</text>
+<text x="135" y="448" font-size="11" fill="#c4cdda">點左上「← 返回週邊監控」</text>
+<text x="370" y="448" font-size="11" fill="#9aa5b8">|</text>
+<text x="390" y="448" font-size="11" fill="#c4cdda">或 Sidebar 切回 #/fleet</text>
+<text x="585" y="448" font-size="11" fill="#9aa5b8">|</text>
+<text x="605" y="448" font-size="11" fill="#c4cdda">瀏覽器返回鍵（沿用 hash routing 歷史）</text>
+
+<text x="55" y="475" font-size="11" font-weight="600" fill="#f5b753">⚠ 設計重點：</text>
+<text x="145" y="475" font-size="11" fill="#c4cdda">頁面右上需顯示「資料延遲 X 分鐘 / 最後更新 HH:MM」，避免使用者誤判即時性</text>
+
+<!-- 返回箭頭 -->
+<path d="M 1240 170 Q 1255 25 180 25 Q 165 25 165 60" fill="none" stroke="#f5a623" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#s1back)" opacity="0.85"/>
+<text x="640" y="18" text-anchor="middle" font-size="10" fill="#f5b753">返回起點（瀏覽器返回 / Sidebar 切換）</text>
+</svg>
+  </div>
+  <div class="notes">
+    <h3>步驟細節</h3>
+    <table>
+      <thead><tr><th width="60">步驟</th><th width="220">起點 / 終點</th><th>使用者動作</th><th width="280">傳遞的 context</th></tr></thead>
+      <tbody>
+        <tr><td><span class="step-num">1</span></td><td>Demo 1 週邊態勢監控</td><td>看到右側事件清單某他船與本船很接近，點該筆 / 點地圖 marker</td><td>無，本船是當前選定</td></tr>
+        <tr><td><span class="step-num">2</span></td><td>Popup 浮窗</td><td>顯示該他船 MMSI、距離、觀測時段；點「查兩船歷史」</td><td>本船 MMSI + 目標 MMSI</td></tr>
+        <tr><td><span class="step-num">3</span></td><td>Demo 2 歷史軌跡回放</td><td>系統自動載入兩船共同觀測時段，地圖預先 fit bounds</td><td>本船 MMSI + 目標 MMSI + 時段 [start, end]</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================= 情境 2 ============================= -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <h2>情境 2：從週邊監控看 CPA 風險 <span class="badge">即時告警延伸</span></h2>
+    <p>使用者在 Demo 1 看到本船與某他船有接近趨勢，想知道 CPA / TCPA 與風險等級</p>
+  </div>
+  <div class="legend-mini">
+    <span><span class="key" style="background:#9ec5ff"></span>主要操作路徑</span>
+    <span><span class="key" style="background:#6ee094"></span>傳遞 context</span>
+    <span><span class="key" style="background:#ff8a8a"></span>條件分支</span>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1280 620" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1280" height="620" fill="#0d0d0d"/>
+<defs>
+<marker id="s2arr" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#9ec5ff"/></marker>
+<marker id="s2red" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#ff8a8a"/></marker>
+</defs>
+
+<!-- Step 1: Demo 1 -->
+<rect x="40" y="60" width="280" height="200" rx="8" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="180" y="88" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">① Demo 1 週邊態勢監控</text>
+<text x="180" y="106" text-anchor="middle" font-size="10" fill="#9ec5ff">起點 · 看見接近趨勢</text>
+
+<rect x="60" y="120" width="240" height="125" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="75" y="138" font-size="11" font-weight="600" fill="#ff8a8a">⚠ 危險接近清單</text>
+<rect x="70" y="148" width="220" height="28" rx="3" fill="rgba(255,77,79,0.15)" stroke="#ff4d4f"/>
+<text x="80" y="166" font-size="10" font-weight="700" fill="#e4eaf2">明德輪 0.38 nm · 危險接近</text>
+<rect x="70" y="180" width="220" height="24" rx="3" fill="rgba(245,166,35,0.10)" stroke="#f5a623"/>
+<text x="80" y="196" font-size="10" font-weight="600" fill="#e4eaf2">海洋先鋒 0.72 nm · 注意</text>
+<text x="70" y="222" font-size="10" fill="#c4cdda">▸ 點任一筆 → 帶兩船 ID 跳 Demo 3</text>
+<text x="70" y="237" font-size="10" fill="#c4cdda">或工具列「CPA 模式」</text>
+
+<!-- Arrow 1→2 -->
+<line x1="320" y1="160" x2="440" y2="160" stroke="#9ec5ff" stroke-width="2.5" marker-end="url(#s2arr)"/>
+<rect x="325" y="125" width="115" height="32" rx="4" fill="#0d0d0d" stroke="#9ec5ff"/>
+<text x="382" y="138" text-anchor="middle" font-size="11" font-weight="600" fill="#9ec5ff">點「明德輪」</text>
+<text x="382" y="151" text-anchor="middle" font-size="10" fill="#c4cdda">帶兩船 MMSI</text>
+
+<!-- Step 2: Demo 3 CPA -->
+<rect x="450" y="60" width="380" height="200" rx="8" fill="rgba(255,77,79,0.18)" stroke="#ff4d4f" stroke-width="2"/>
+<text x="640" y="88" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">② Demo 3 CPA 事件審查</text>
+<text x="640" y="106" text-anchor="middle" font-size="10" fill="#ff8a8a">事後判讀 · 帶兩船 focus</text>
+
+<rect x="470" y="120" width="340" height="125" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="485" y="140" font-size="11" font-weight="700" fill="#e4eaf2">本船 ↔ 明德輪</text>
+<text x="485" y="158" font-size="10" fill="#c4cdda">CPA：</text>
+<text x="525" y="158" font-size="18" font-weight="700" fill="#ff8a8a">0.38 nm</text>
+<text x="615" y="158" font-size="10" fill="#c4cdda">TCPA：</text>
+<text x="655" y="158" font-size="18" font-weight="700" fill="#ff8a8a">18 min</text>
+<text x="485" y="180" font-size="10" fill="#c4cdda">相對速度：</text>
+<text x="555" y="180" font-size="12" font-weight="600" fill="#e4eaf2">12.4 kn</text>
+<text x="615" y="180" font-size="10" fill="#c4cdda">情境：</text>
+<text x="655" y="180" font-size="12" font-weight="600" fill="#e4eaf2">Crossing</text>
+<text x="485" y="200" font-size="10" fill="#c4cdda">信心：</text>
+<rect x="520" y="190" width="55" height="14" rx="2" fill="rgba(245,166,35,0.18)" stroke="#f5a623"/>
+<text x="547" y="201" text-anchor="middle" font-size="10" font-weight="600" fill="#f5b753">MED</text>
+<text x="585" y="200" font-size="10" fill="#c4cdda">告警：</text>
+<rect x="620" y="190" width="50" height="14" rx="2" fill="rgba(255,77,79,0.18)" stroke="#ff4d4f"/>
+<text x="645" y="201" text-anchor="middle" font-size="10" font-weight="600" fill="#ff8a8a">RED</text>
+
+<rect x="485" y="215" width="100" height="22" rx="3" fill="rgba(44,108,219,0.22)" stroke="#2c6cdb"/>
+<text x="535" y="231" text-anchor="middle" font-size="10" fill="#9ec5ff">查 AIS 完整性</text>
+<rect x="595" y="215" width="80" height="22" rx="3" fill="rgba(155,89,182,0.20)" stroke="#9b59b6"/>
+<text x="635" y="231" text-anchor="middle" font-size="10" fill="#c39bd3">回放軌跡</text>
+<rect x="685" y="215" width="110" height="22" rx="3" fill="rgba(76,217,122,0.18)" stroke="#4cd97a"/>
+<text x="740" y="231" text-anchor="middle" font-size="10" fill="#6ee094">立案 + 指派</text>
+
+<!-- Branch arrows -->
+<!-- 2→3a 信心 MED → 查 AIS 完整性 -->
+<line x1="535" y1="260" x2="200" y2="340" stroke="#9ec5ff" stroke-width="2" marker-end="url(#s2arr)"/>
+<text x="350" y="295" font-size="11" font-weight="600" fill="#9ec5ff">分支 A：信心 MED/LOW → 查證 AIS</text>
+
+<!-- 2→3b 回放軌跡 -->
+<line x1="635" y1="260" x2="635" y2="340" stroke="#9ec5ff" stroke-width="2" marker-end="url(#s2arr)"/>
+<text x="640" y="295" font-size="11" font-weight="600" fill="#9ec5ff">分支 B：看歷史軌跡</text>
+
+<!-- 2→3c 立案 -->
+<line x1="740" y1="260" x2="1080" y2="340" stroke="#9ec5ff" stroke-width="2" marker-end="url(#s2arr)"/>
+<text x="900" y="295" font-size="11" font-weight="600" fill="#9ec5ff">分支 C：立案後續處理</text>
+
+<!-- Step 3a: Demo 7 -->
+<rect x="40" y="350" width="320" height="180" rx="8" fill="rgba(154,165,184,0.18)" stroke="#9aa5b8" stroke-width="2"/>
+<text x="200" y="378" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">③A Demo 7 AIS 完整性</text>
+<text x="200" y="395" text-anchor="middle" font-size="10" fill="#c4cdda">查明德輪 AIS 是否異常</text>
+
+<rect x="60" y="410" width="280" height="100" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="75" y="430" font-size="10" font-weight="600" fill="#c4cdda">六偵測器熱力（明德輪 MMSI focus）</text>
+<g font-size="9" fill="#e4eaf2">
+<rect x="75" y="438" width="38" height="22" rx="2" fill="#4cd97a" opacity="0.4"/><text x="94" y="453" text-anchor="middle">gap</text>
+<rect x="118" y="438" width="38" height="22" rx="2" fill="#f5a623" opacity="0.5"/><text x="137" y="453" text-anchor="middle">kine</text>
+<rect x="161" y="438" width="38" height="22" rx="2" fill="#ff4d4f" opacity="0.5"/><text x="180" y="453" text-anchor="middle">dup</text>
+<rect x="204" y="438" width="38" height="22" rx="2" fill="#4cd97a" opacity="0.4"/><text x="223" y="453" text-anchor="middle">stat</text>
+<rect x="247" y="438" width="38" height="22" rx="2" fill="#f5a623" opacity="0.5"/><text x="266" y="453" text-anchor="middle">dest</text>
+<rect x="290" y="438" width="38" height="22" rx="2" fill="#4cd97a" opacity="0.4"/><text x="309" y="453" text-anchor="middle">beh</text>
+</g>
+<text x="75" y="480" font-size="10" fill="#ff8a8a">綜合風險分：0.61 (重複 MMSI 異常)</text>
+<text x="75" y="498" font-size="10" fill="#c4cdda">結論：CPA RED 應降級為 AMBER</text>
+
+<!-- Step 3b: Demo 2 -->
+<rect x="490" y="350" width="290" height="180" rx="8" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="635" y="378" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">③B Demo 2 歷史回放</text>
+<text x="635" y="395" text-anchor="middle" font-size="10" fill="#9ec5ff">回放接近過程</text>
+
+<rect x="510" y="410" width="250" height="100" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<polyline points="520,475 545,468 570,460 595,455 620,452 645,450 670,452 695,455 720,460 745,468" fill="none" stroke="#4a9eff" stroke-width="2"/>
+<polyline points="530,440 555,448 580,455 605,460 630,463 655,462 680,458 705,452 730,445 755,440" fill="none" stroke="#ff8a8a" stroke-width="2"/>
+<circle cx="635" cy="457" r="6" fill="none" stroke="#ff4d4f" stroke-width="2"/>
+<text x="635" y="498" text-anchor="middle" font-size="10" fill="#ff8a8a">CPA 最近點</text>
+
+<!-- Step 3c: 事件 Modal -->
+<rect x="910" y="350" width="320" height="180" rx="8" fill="rgba(76,217,122,0.16)" stroke="#4cd97a" stroke-width="2"/>
+<text x="1070" y="378" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">③C 立案 + 指派</text>
+<text x="1070" y="395" text-anchor="middle" font-size="10" fill="#6ee094">事件處理 Modal</text>
+
+<rect x="930" y="410" width="280" height="100" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="945" y="430" font-size="10" fill="#c4cdda">事件 ID: 1004-cpa-202605</text>
+<text x="945" y="448" font-size="10" fill="#c4cdda">狀態：</text>
+<rect x="985" y="438" width="60" height="14" rx="2" fill="rgba(255,77,79,0.18)"/>
+<text x="1015" y="449" text-anchor="middle" font-size="10" font-weight="600" fill="#ff8a8a">New</text>
+<text x="945" y="468" font-size="10" fill="#c4cdda">指派給：Op-Alice</text>
+<text x="945" y="486" font-size="10" fill="#c4cdda">備註：信心 MED · 已查 AIS 確認</text>
+<text x="945" y="502" font-size="10" fill="#c4cdda">下一步：Acknowledge → 處理中 → 解決</text>
+
+<!-- 終點區段 -->
+<rect x="40" y="560" width="1200" height="40" rx="4" fill="#0d0d0d" stroke="#2a2a2a"/>
+<text x="55" y="582" font-size="11" font-weight="600" fill="#f5b753">⚠ 設計重點：</text>
+<text x="145" y="582" font-size="11" fill="#c4cdda">三條分支非互斥；典型操作員會 ③A 查證 → ③B 確認情境 → ③C 立案結案，全程寫 audit log（每筆操作含 actor + role + before/after）</text>
+</svg>
+  </div>
+  <div class="notes">
+    <h3>步驟細節（含分支判斷）</h3>
+    <table>
+      <thead><tr><th width="60">步驟</th><th width="200">頁面</th><th>使用者動作</th><th width="260">傳遞的 context</th></tr></thead>
+      <tbody>
+        <tr><td><span class="step-num">1</span></td><td>Demo 1 週邊態勢</td><td>右側「危險接近清單」點明德輪</td><td>本船 MMSI + 目標 MMSI</td></tr>
+        <tr><td><span class="step-num">2</span></td><td>Demo 3 CPA 事件審查</td><td>看 CPA / TCPA / 信心 / 情境</td><td>+ CPA 數值 + 信心等級</td></tr>
+        <tr><td><span class="step-num">3A</span></td><td>Demo 7 AIS 完整性</td><td>信心 MED/LOW 時觸發；確認 AIS 資料是否異常導致信心降級</td><td>+ 目標 MMSI focus</td></tr>
+        <tr><td><span class="step-num">3B</span></td><td>Demo 2 歷史回放</td><td>看實際接近過程，理解情境</td><td>+ 時段 [t-30min, t+10min]</td></tr>
+        <tr><td><span class="step-num">3C</span></td><td>事件處理 Modal</td><td>立案 → 指派 → 處理中 → 解決，全程寫備註與狀態</td><td>+ 事件 ID + 處理人</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================= 情境 3 ============================= -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <h2>情境 3：CPA 事件完整處理流程 <span class="badge">最常被稽核</span></h2>
+    <p>從事件處理頁進入某筆 CPA 事件，完整跑完查證 → 結案 → 寫稽核</p>
+  </div>
+  <div class="legend-mini">
+    <span><span class="key" style="background:#9ec5ff"></span>主要路徑</span>
+    <span><span class="key" style="background:#c39bd3"></span>狀態轉換</span>
+    <span><span class="key" style="background:#6ee094"></span>結案</span>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1280" height="640" fill="#0d0d0d"/>
+<defs>
+<marker id="s3arr" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#9ec5ff"/></marker>
+<marker id="s3stt" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#c39bd3"/></marker>
+</defs>
+
+<!-- Step 1 -->
+<rect x="40" y="60" width="240" height="180" rx="8" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="160" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">① 事件處理 #/events</text>
+<text x="160" y="105" text-anchor="middle" font-size="10" fill="#9ec5ff">起點</text>
+<rect x="60" y="120" width="200" height="100" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="75" y="138" font-size="10" font-weight="600" fill="#ff8a8a">⚠ 新事件清單（New）</text>
+<text x="75" y="158" font-size="10" fill="#e4eaf2">▸ 1004-cpa-202605</text>
+<text x="75" y="172" font-size="10" fill="#c4cdda">  明德輪 CPA RED</text>
+<text x="75" y="186" font-size="10" fill="#c4cdda">  💬 0 · 未指派</text>
+<text x="75" y="208" font-size="10" fill="#9aa5b8">點此筆 → 開 Modal</text>
+
+<!-- Arrow 1→2 -->
+<line x1="280" y1="150" x2="370" y2="150" stroke="#9ec5ff" stroke-width="2.5" marker-end="url(#s3arr)"/>
+<text x="325" y="143" text-anchor="middle" font-size="10" font-weight="600" fill="#9ec5ff">點事件</text>
+
+<!-- Step 2 Modal -->
+<rect x="380" y="60" width="280" height="180" rx="8" fill="rgba(155,89,182,0.16)" stroke="#9b59b6" stroke-width="2"/>
+<text x="520" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">② Event Modal 開啟</text>
+<text x="520" y="105" text-anchor="middle" font-size="10" fill="#c39bd3">狀態：New</text>
+<rect x="400" y="120" width="240" height="100" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="412" y="138" font-size="10" font-weight="600" fill="#e4eaf2">CPA 事件詳情</text>
+<text x="412" y="155" font-size="10" fill="#c4cdda">CPA 0.38 / TCPA 18 / 信心 MED</text>
+<rect x="412" y="166" width="100" height="22" rx="3" fill="rgba(44,108,219,0.22)" stroke="#2c6cdb"/>
+<text x="462" y="182" text-anchor="middle" font-size="10" fill="#9ec5ff">查回放</text>
+<rect x="520" y="166" width="115" height="22" rx="3" fill="rgba(154,165,184,0.20)" stroke="#9aa5b8"/>
+<text x="577" y="182" text-anchor="middle" font-size="10" fill="#c4cdda">查 AIS 完整性</text>
+<text x="412" y="208" font-size="10" fill="#9aa5b8">▸ 兩按鈕分別跳 Demo 2 / Demo 7</text>
+
+<!-- Arrow 2→3a (查回放) -->
+<line x1="660" y1="120" x2="780" y2="80" stroke="#9ec5ff" stroke-width="2" marker-end="url(#s3arr)"/>
+<text x="720" y="92" font-size="10" font-weight="600" fill="#9ec5ff">查回放</text>
+
+<!-- Arrow 2→3b (查 AIS) -->
+<line x1="660" y1="180" x2="780" y2="220" stroke="#9ec5ff" stroke-width="2" marker-end="url(#s3arr)"/>
+<text x="720" y="215" font-size="10" font-weight="600" fill="#9ec5ff">查 AIS</text>
+
+<!-- Step 3a Demo 2 -->
+<rect x="790" y="50" width="220" height="100" rx="8" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb"/>
+<text x="900" y="75" text-anchor="middle" font-size="12" font-weight="700" fill="#e4eaf2">③A Demo 2 回放</text>
+<text x="900" y="92" text-anchor="middle" font-size="10" fill="#9ec5ff">看實際接近過程</text>
+<text x="900" y="110" text-anchor="middle" font-size="10" fill="#c4cdda">確認情境 Crossing</text>
+<text x="900" y="128" text-anchor="middle" font-size="10" fill="#c4cdda">回到 Modal 寫備註</text>
+
+<!-- Step 3b Demo 7 -->
+<rect x="790" y="170" width="220" height="100" rx="8" fill="rgba(154,165,184,0.18)" stroke="#9aa5b8"/>
+<text x="900" y="195" text-anchor="middle" font-size="12" font-weight="700" fill="#e4eaf2">③B Demo 7 AIS 完整性</text>
+<text x="900" y="212" text-anchor="middle" font-size="10" fill="#c4cdda">查目標船 AIS 異常</text>
+<text x="900" y="230" text-anchor="middle" font-size="10" fill="#c4cdda">重複 MMSI 0.61 → 確認</text>
+<text x="900" y="248" text-anchor="middle" font-size="10" fill="#c4cdda">回到 Modal 寫備註</text>
+
+<!-- Arrow back to Modal -->
+<line x1="790" y1="100" x2="660" y2="135" stroke="#f5a623" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+<line x1="790" y1="220" x2="660" y2="170" stroke="#f5a623" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+
+<!-- State machine (bottom) -->
+<text x="640" y="305" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">④ Modal 內狀態轉換 + 寫 audit log</text>
+
+<!-- State boxes -->
+<rect x="60" y="340" width="160" height="55" rx="6" fill="rgba(255,77,79,0.20)" stroke="#ff4d4f" stroke-width="2"/>
+<text x="140" y="362" text-anchor="middle" font-size="12" font-weight="700" fill="#e4eaf2">New</text>
+<text x="140" y="380" text-anchor="middle" font-size="10" fill="#ff8a8a">新立案</text>
+
+<rect x="290" y="340" width="160" height="55" rx="6" fill="rgba(245,166,35,0.20)" stroke="#f5a623" stroke-width="2"/>
+<text x="370" y="362" text-anchor="middle" font-size="12" font-weight="700" fill="#e4eaf2">Acknowledged</text>
+<text x="370" y="380" text-anchor="middle" font-size="10" fill="#f5b753">認可</text>
+
+<rect x="520" y="340" width="160" height="55" rx="6" fill="rgba(44,108,219,0.20)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="600" y="362" text-anchor="middle" font-size="12" font-weight="700" fill="#e4eaf2">In Progress</text>
+<text x="600" y="380" text-anchor="middle" font-size="10" fill="#9ec5ff">處理中</text>
+
+<rect x="750" y="340" width="160" height="55" rx="6" fill="rgba(76,217,122,0.20)" stroke="#4cd97a" stroke-width="2"/>
+<text x="830" y="362" text-anchor="middle" font-size="12" font-weight="700" fill="#e4eaf2">Resolved</text>
+<text x="830" y="380" text-anchor="middle" font-size="10" fill="#6ee094">已解決</text>
+
+<rect x="980" y="340" width="160" height="55" rx="6" fill="rgba(154,165,184,0.18)" stroke="#9aa5b8" stroke-width="2"/>
+<text x="1060" y="362" text-anchor="middle" font-size="12" font-weight="700" fill="#e4eaf2">Closed</text>
+<text x="1060" y="380" text-anchor="middle" font-size="10" fill="#c4cdda">關閉歸檔</text>
+
+<line x1="220" y1="367" x2="290" y2="367" stroke="#c39bd3" stroke-width="2" marker-end="url(#s3stt)"/>
+<text x="255" y="358" text-anchor="middle" font-size="9" font-weight="600" fill="#c39bd3">Acknowledge</text>
+
+<line x1="450" y1="367" x2="520" y2="367" stroke="#c39bd3" stroke-width="2" marker-end="url(#s3stt)"/>
+<text x="485" y="358" text-anchor="middle" font-size="9" font-weight="600" fill="#c39bd3">Start</text>
+
+<line x1="680" y1="367" x2="750" y2="367" stroke="#c39bd3" stroke-width="2" marker-end="url(#s3stt)"/>
+<text x="715" y="358" text-anchor="middle" font-size="9" font-weight="600" fill="#c39bd3">Resolve</text>
+
+<line x1="910" y1="367" x2="980" y2="367" stroke="#c39bd3" stroke-width="2" marker-end="url(#s3stt)"/>
+<text x="945" y="358" text-anchor="middle" font-size="9" font-weight="600" fill="#c39bd3">Close</text>
+
+<!-- Reverse arrows -->
+<path d="M 370 395 Q 370 415 255 415 Q 140 415 140 395" fill="none" stroke="#9aa5b8" stroke-width="1" stroke-dasharray="3 3" opacity="0.7"/>
+<text x="255" y="430" text-anchor="middle" font-size="9" fill="#9aa5b8">Reset 退回</text>
+
+<path d="M 600 395 Q 600 415 485 415 Q 370 415 370 395" fill="none" stroke="#9aa5b8" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"/>
+
+<path d="M 830 395 Q 830 415 715 415 Q 600 415 600 395" fill="none" stroke="#9aa5b8" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"/>
+<text x="715" y="430" text-anchor="middle" font-size="9" fill="#9aa5b8">Reopen 重開</text>
+
+<!-- Step 5: Audit log -->
+<rect x="40" y="465" width="1200" height="155" rx="6" fill="rgba(155,89,182,0.10)" stroke="#9b59b6" stroke-dasharray="6 4"/>
+<text x="60" y="490" font-size="14" font-weight="700" fill="#e4eaf2">⑤ 每筆狀態轉換 → 自動寫入全系統稽核紀錄（Audit Log）</text>
+
+<rect x="60" y="510" width="1160" height="100" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="75" y="530" font-size="10" font-weight="600" fill="#9aa5b8">時間（UTC+8）</text>
+<text x="195" y="530" font-size="10" font-weight="600" fill="#9aa5b8">操作者 / 角色</text>
+<text x="315" y="530" font-size="10" font-weight="600" fill="#9aa5b8">事件 ID</text>
+<text x="445" y="530" font-size="10" font-weight="600" fill="#9aa5b8">動作</text>
+<text x="555" y="530" font-size="10" font-weight="600" fill="#9aa5b8">前狀態 → 後狀態</text>
+<text x="725" y="530" font-size="10" font-weight="600" fill="#9aa5b8">備註</text>
+
+<text x="75" y="552" font-size="10" fill="#c4cdda">15:08:32</text>
+<text x="195" y="552" font-size="10" fill="#c4cdda">系統 / —</text>
+<text x="315" y="552" font-size="10" fill="#c4cdda">1004-cpa-202605</text>
+<text x="445" y="552" font-size="10" fill="#c4cdda">自動立案</text>
+<text x="555" y="552" font-size="10" fill="#c4cdda">— → New</text>
+<text x="725" y="552" font-size="10" fill="#9aa5b8">CPA 0.38 / TCPA 18 觸發</text>
+
+<text x="75" y="570" font-size="10" fill="#c4cdda">15:10:05</text>
+<text x="195" y="570" font-size="10" fill="#c4cdda">Op-Alice / Operator</text>
+<text x="315" y="570" font-size="10" fill="#c4cdda">1004-cpa-202605</text>
+<text x="445" y="570" font-size="10" fill="#c4cdda">Acknowledge</text>
+<text x="555" y="570" font-size="10" fill="#c4cdda">New → Ack</text>
+<text x="725" y="570" font-size="10" fill="#9aa5b8">已查回放與 AIS 完整性</text>
+
+<text x="75" y="588" font-size="10" fill="#c4cdda">15:11:22</text>
+<text x="195" y="588" font-size="10" fill="#c4cdda">Op-Alice / Operator</text>
+<text x="315" y="588" font-size="10" fill="#c4cdda">1004-cpa-202605</text>
+<text x="445" y="588" font-size="10" fill="#c4cdda">指派</text>
+<text x="555" y="588" font-size="10" fill="#c4cdda">assignee: null → Capt-Lee</text>
+<text x="725" y="588" font-size="10" fill="#9aa5b8">轉海務確認</text>
+
+<text x="75" y="606" font-size="10" fill="#c4cdda">15:42:08</text>
+<text x="195" y="606" font-size="10" fill="#c4cdda">Capt-Lee / Captain</text>
+<text x="315" y="606" font-size="10" fill="#c4cdda">1004-cpa-202605</text>
+<text x="445" y="606" font-size="10" fill="#c4cdda">Resolve</text>
+<text x="555" y="606" font-size="10" fill="#c4cdda">In Progress → Resolved</text>
+<text x="725" y="606" font-size="10" fill="#9aa5b8">已聯絡船端確認航向調整</text>
+</svg>
+  </div>
+  <div class="notes">
+    <h3>稽核重點</h3>
+    <table>
+      <thead><tr><th>步驟</th><th>必寫欄位</th><th>對應角色</th></tr></thead>
+      <tbody>
+        <tr><td>立案（自動）</td><td>時間 + 觸發條件 + 維度 + 等級</td><td>系統</td></tr>
+        <tr><td>查證（人工）</td><td>查回放 / 查 AIS / 查相關事件，每次點擊均記錄</td><td>Operator / Captain</td></tr>
+        <tr><td>狀態轉換</td><td>actor + role + 前狀態 + 後狀態 + 備註</td><td>對應角色</td></tr>
+        <tr><td>指派</td><td>assignee before/after + 指派理由</td><td>Operator / Manager</td></tr>
+        <tr><td>結案</td><td>必填結案備註 + 處理結果</td><td>Captain / Manager</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================= 情境 4 ============================= -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <h2>情境 4：港口擁塞 → 自家船 ETA → SitRep <span class="badge">營運鏈</span></h2>
+    <p>海務主管從港口擁塞看板發現目的港高度壅塞，要查自家船 ETA 與 SitRep 決定是否降速</p>
+  </div>
+  <div class="legend-mini">
+    <span><span class="key" style="background:#9ec5ff"></span>主要路徑</span>
+    <span><span class="key" style="background:#6ee094"></span>傳遞 context</span>
+    <span><span class="key" style="background:#f5a623"></span>決策動作</span>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1280 580" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1280" height="580" fill="#0d0d0d"/>
+<defs>
+<marker id="s4arr" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#9ec5ff"/></marker>
+</defs>
+
+<!-- Step 1: Demo 4 -->
+<rect x="40" y="60" width="280" height="220" rx="8" fill="rgba(245,166,35,0.18)" stroke="#f5a623" stroke-width="2"/>
+<text x="180" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">① Demo 4 港口擁塞</text>
+<text x="180" y="106" text-anchor="middle" font-size="10" fill="#f5b753">起點 · 看高度壅塞港</text>
+
+<rect x="60" y="120" width="240" height="140" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="75" y="138" font-size="11" font-weight="700" fill="#e4eaf2">上海港 / SHSHA</text>
+<text x="75" y="156" font-size="10" fill="#c4cdda">壅塞等級：</text>
+<rect x="135" y="146" width="60" height="14" rx="2" fill="rgba(255,77,79,0.20)" stroke="#ff4d4f"/>
+<text x="165" y="157" text-anchor="middle" font-size="10" font-weight="700" fill="#ff8a8a">高度</text>
+<text x="75" y="178" font-size="10" fill="#c4cdda">CI：0.82</text>
+<text x="75" y="195" font-size="10" fill="#c4cdda">錨地等候：18 艘</text>
+<text x="75" y="212" font-size="10" fill="#c4cdda">平均等待：14.5 hr</text>
+<text x="75" y="230" font-size="11" font-weight="600" fill="#9ec5ff">▸ 自家船 3 艘 [可點]</text>
+<text x="75" y="248" font-size="10" fill="#c4cdda">▸ 外來船觀測 24 艘</text>
+
+<!-- Arrow 1→2 -->
+<line x1="320" y1="160" x2="400" y2="160" stroke="#9ec5ff" stroke-width="2.5" marker-end="url(#s4arr)"/>
+<text x="360" y="153" text-anchor="middle" font-size="10" font-weight="600" fill="#9ec5ff">點「自家船 3 艘」</text>
+
+<!-- Step 2: 自家船清單 Modal -->
+<rect x="410" y="60" width="260" height="220" rx="8" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="540" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">② 自家船清單 Modal</text>
+<text x="540" y="106" text-anchor="middle" font-size="10" fill="#9ec5ff">列即將抵滬 3 艘</text>
+<rect x="430" y="120" width="220" height="140" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="445" y="140" font-size="10" font-weight="600" fill="#c4cdda">即將抵滬自家船：</text>
+<rect x="445" y="150" width="210" height="32" rx="3" fill="rgba(44,108,219,0.22)" stroke="#2c6cdb"/>
+<text x="455" y="166" font-size="10" font-weight="700" fill="#e4eaf2">遠洋探索號 KHH-SHA-042</text>
+<text x="455" y="178" font-size="10" fill="#9ec5ff">距港 12 hr → 點此查 ETA</text>
+<text x="455" y="200" font-size="10" fill="#c4cdda">▸ 海洋先鋒 KEE-SHA-019</text>
+<text x="455" y="214" font-size="9" fill="#9aa5b8">  距港 28 hr</text>
+<text x="455" y="232" font-size="10" fill="#c4cdda">▸ 福星貨運一號 TPE-SHA-105</text>
+<text x="455" y="246" font-size="9" fill="#9aa5b8">  距港 56 hr</text>
+
+<!-- Arrow 2→3 -->
+<line x1="670" y1="160" x2="760" y2="160" stroke="#9ec5ff" stroke-width="2.5" marker-end="url(#s4arr)"/>
+<text x="715" y="153" text-anchor="middle" font-size="10" font-weight="600" fill="#9ec5ff">點「遠洋探索號」</text>
+
+<!-- Step 3: Demo 5 ETA -->
+<rect x="770" y="60" width="320" height="220" rx="8" fill="rgba(76,217,122,0.18)" stroke="#4cd97a" stroke-width="2"/>
+<text x="930" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">③ Demo 5 ETA 預測（動態）</text>
+<text x="930" y="106" text-anchor="middle" font-size="10" fill="#6ee094">看四段預測 + 不確定性</text>
+
+<rect x="790" y="120" width="280" height="140" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="800" y="138" font-size="11" font-weight="600" fill="#c4cdda">遠洋探索號 → 上海港</text>
+<!-- 4-segment bar -->
+<rect x="800" y="148" width="120" height="20" fill="#4a9eff"/>
+<rect x="920" y="148" width="80" height="20" fill="#f5a623"/>
+<rect x="1000" y="148" width="30" height="20" fill="#4cd97a"/>
+<rect x="1030" y="148" width="40" height="20" fill="#9b59b6"/>
+<text x="860" y="162" text-anchor="middle" font-size="9" fill="#fff">T1 8.5h</text>
+<text x="960" y="162" text-anchor="middle" font-size="9" fill="#fff">T2 6.2h</text>
+<text x="1015" y="162" text-anchor="middle" font-size="9" fill="#fff">T3 2.1h</text>
+<text x="1050" y="162" text-anchor="middle" font-size="9" fill="#fff">T4 4.3h</text>
+
+<text x="800" y="190" font-size="10" fill="#c4cdda">原始 ETA：</text>
+<text x="870" y="190" font-size="11" font-weight="600" fill="#e4eaf2">06/15 21:00</text>
+<text x="800" y="208" font-size="10" fill="#c4cdda">動態 ETA：</text>
+<text x="870" y="208" font-size="11" font-weight="600" fill="#f5b753">06/16 03:15</text>
+<text x="800" y="226" font-size="10" fill="#c4cdda">P25 / 50 / 75：</text>
+<text x="880" y="226" font-size="10" fill="#c4cdda">19:30 / 21:00 / 23:15</text>
+<text x="800" y="248" font-size="10" fill="#ff8a8a">⚠ Demurrage 風險 1.8 hr</text>
+
+<!-- Arrow 3→4 -->
+<line x1="930" y1="280" x2="930" y2="340" stroke="#9ec5ff" stroke-width="2.5" marker-end="url(#s4arr)"/>
+<rect x="800" y="295" width="260" height="30" rx="4" fill="#0d0d0d" stroke="#9ec5ff"/>
+<text x="930" y="315" text-anchor="middle" font-size="11" font-weight="600" fill="#9ec5ff">點「查目的港 SitRep」按鈕</text>
+
+<!-- Step 4: Demo 6 -->
+<rect x="40" y="340" width="1200" height="170" rx="8" fill="rgba(155,89,182,0.18)" stroke="#9b59b6" stroke-width="2"/>
+<text x="640" y="368" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">④ Demo 6 SitRep 上海港情資</text>
+<text x="640" y="386" text-anchor="middle" font-size="10" fill="#c39bd3">距港 12 hr 觸發 · 含現場情資來源 + 模型推估</text>
+
+<!-- Left: 情資來源 -->
+<rect x="60" y="400" width="260" height="95" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="75" y="420" font-size="11" font-weight="600" fill="#c4cdda">在場情資來源（即時現場）</text>
+<text x="75" y="438" font-size="10" fill="#e4eaf2">▸ 海運興隆（在錨地 8 hr）</text>
+<text x="75" y="454" font-size="10" fill="#e4eaf2">▸ 福星貨運一號（進港中）</text>
+<text x="75" y="470" font-size="10" fill="#e4eaf2">▸ 台灣海峰（剛靠泊）</text>
+<rect x="75" y="478" width="80" height="14" rx="2" fill="rgba(76,217,122,0.18)" stroke="#4cd97a"/>
+<text x="115" y="489" text-anchor="middle" font-size="10" font-weight="600" fill="#6ee094">即時現場</text>
+
+<!-- Mid: SitRep 主報告 -->
+<rect x="340" y="400" width="500" height="95" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="355" y="420" font-size="11" font-weight="600" fill="#e4eaf2">SitRep 主報告</text>
+<text x="355" y="438" font-size="10" fill="#c4cdda">當前錨地船數：18 艘（歷史同期中位 6 艘）</text>
+<text x="355" y="454" font-size="10" fill="#c4cdda">擁塞指數 CI：0.82（高度）</text>
+<text x="355" y="470" font-size="10" fill="#c4cdda">預估等候 P50：6.2 hr</text>
+<text x="355" y="486" font-size="11" font-weight="700" fill="#f5b753">⚠ 航速建議：降速至 10 kn，預計節省 4 hr 等候</text>
+
+<!-- Right: 行動 -->
+<rect x="860" y="400" width="360" height="95" rx="4" fill="rgba(245,166,35,0.10)" stroke="#f5a623"/>
+<text x="875" y="420" font-size="11" font-weight="600" fill="#f5b753">⑤ 海務主管決策</text>
+<rect x="875" y="430" width="160" height="26" rx="3" fill="rgba(245,166,35,0.30)" stroke="#f5a623"/>
+<text x="955" y="447" text-anchor="middle" font-size="11" font-weight="700" fill="#e4eaf2">採納降速建議</text>
+<text x="875" y="473" font-size="10" fill="#c4cdda">→ 通知船長 / 寫 audit log</text>
+<text x="875" y="488" font-size="10" fill="#c4cdda">→ 動態 ETA 自動更新</text>
+
+<!-- Bottom note -->
+<rect x="40" y="525" width="1200" height="40" rx="4" fill="#0d0d0d" stroke="#2a2a2a"/>
+<text x="55" y="547" font-size="11" font-weight="600" fill="#f5b753">⚠ 設計重點：</text>
+<text x="145" y="547" font-size="11" fill="#c4cdda">SitRep 觸發機制需根據距港 24/12/6 hr 三段；港口 ETA 只算自家船，外來船僅做擁塞觀測樣本</text>
+</svg>
+  </div>
+  <div class="notes">
+    <h3>營運鏈價值</h3>
+    <table>
+      <thead><tr><th>步驟</th><th>頁面</th><th>使用者動作</th><th>產出價值</th></tr></thead>
+      <tbody>
+        <tr><td><span class="step-num">1</span></td><td>Demo 4 港口擁塞</td><td>每日掃 145 重點商港，發現上海高度壅塞</td><td>知道哪些港口需關注</td></tr>
+        <tr><td><span class="step-num">2</span></td><td>自家船清單 Modal</td><td>點「自家船 3 艘」展開即將抵滬船</td><td>定位受影響的自家船</td></tr>
+        <tr><td><span class="step-num">3</span></td><td>Demo 5 ETA 預測</td><td>看四段預測 + 動態 ETA + Demurrage 風險</td><td>知道延誤幅度與損失</td></tr>
+        <tr><td><span class="step-num">4</span></td><td>Demo 6 SitRep</td><td>看在場船報告 + 航速建議</td><td>得到具體行動建議</td></tr>
+        <tr><td><span class="step-num">5</span></td><td>採納 / 通知</td><td>採納降速建議 → 通知船長</td><td>實際營運優化 + audit log</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================= 情境 5 ============================= -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <h2>情境 5：航線偏移告警 → 查歷史 → 看版本管理 <span class="badge">M1↔M5 銜接</span></h2>
+    <p>船隊監控發現某船 route 維度 critical，要回查偏移歷史與航行計畫版本變更</p>
+  </div>
+  <div class="legend-mini">
+    <span><span class="key" style="background:#9ec5ff"></span>主要路徑</span>
+    <span><span class="key" style="background:#6ee094"></span>傳遞 context</span>
+    <span><span class="key" style="background:#f5a623"></span>橫向連動</span>
+  </div>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1280 560" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, -apple-system, 'Segoe UI', sans-serif">
+<rect x="0" y="0" width="1280" height="560" fill="#0d0d0d"/>
+<defs>
+<marker id="s5arr" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#9ec5ff"/></marker>
+<marker id="s5o" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#f5a623"/></marker>
+</defs>
+
+<!-- Step 1: 船隊監控 -->
+<rect x="40" y="60" width="280" height="180" rx="8" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="180" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">① 船隊監控 #/fleet</text>
+<text x="180" y="106" text-anchor="middle" font-size="10" fill="#9ec5ff">看到 route 維度紅燈</text>
+<rect x="60" y="120" width="240" height="105" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<text x="75" y="138" font-size="10" font-weight="600" fill="#c4cdda">遠洋探索號（9 維度 dot）</text>
+<g transform="translate(75, 148)">
+<circle cx="0" cy="0" r="6" fill="#ff4d4f"/><text x="0" y="20" text-anchor="middle" font-size="9" fill="#c4cdda">route</text>
+<circle cx="22" cy="0" r="6" fill="#4cd97a"/><text x="22" y="20" text-anchor="middle" font-size="9" fill="#c4cdda">speed</text>
+<circle cx="44" cy="0" r="6" fill="#4cd97a"/><text x="44" y="20" text-anchor="middle" font-size="9" fill="#c4cdda">sea</text>
+<circle cx="66" cy="0" r="6" fill="#f5a623"/><text x="66" y="20" text-anchor="middle" font-size="9" fill="#c4cdda">port</text>
+<circle cx="88" cy="0" r="6" fill="#4cd97a"/><text x="88" y="20" text-anchor="middle" font-size="9" fill="#c4cdda">eng</text>
+<circle cx="110" cy="0" r="6" fill="#4cd97a"/><text x="110" y="20" text-anchor="middle" font-size="9" fill="#c4cdda">alert</text>
+<circle cx="132" cy="0" r="6" fill="#4cd97a"/><text x="132" y="20" text-anchor="middle" font-size="9" fill="#c4cdda">comm</text>
+<circle cx="154" cy="0" r="6" fill="#4cd97a"/><text x="154" y="20" text-anchor="middle" font-size="9" fill="#c4cdda">event</text>
+<circle cx="176" cy="0" r="6" fill="#4cd97a"/><text x="176" y="20" text-anchor="middle" font-size="9" fill="#c4cdda">zone</text>
+</g>
+<text x="75" y="195" font-size="10" fill="#ff8a8a">XTD 5.2 NM / Safety Frame 5.0 NM</text>
+<text x="75" y="211" font-size="10" fill="#9aa5b8">▸ 點紅色 route dot → 立即跳</text>
+
+<!-- Arrow 1→2 -->
+<line x1="320" y1="150" x2="400" y2="150" stroke="#9ec5ff" stroke-width="2.5" marker-end="url(#s5arr)"/>
+<text x="360" y="143" text-anchor="middle" font-size="10" font-weight="600" fill="#9ec5ff">點 route dot</text>
+
+<!-- Step 2: 單船 detail + 航線地圖 -->
+<rect x="410" y="60" width="320" height="180" rx="8" fill="rgba(44,108,219,0.12)" stroke="#2c6cdb"/>
+<text x="570" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">② 單船 Detail + 航線地圖</text>
+<text x="570" y="106" text-anchor="middle" font-size="10" fill="#9ec5ff">Active Plan v3 + 實際軌跡</text>
+<rect x="430" y="120" width="280" height="105" rx="4" fill="#141414" stroke="#2a2a2a"/>
+<polyline points="445,180 480,170 515,160 550,155 585,158 620,168 655,180 690,185" fill="none" stroke="#4a9eff" stroke-width="2" stroke-dasharray="4 3"/>
+<polyline points="445,182 480,176 515,172 550,178 585,185 620,192 655,198 690,200" fill="none" stroke="#4cd97a" stroke-width="2"/>
+<circle cx="620" cy="192" r="4" fill="#ff4d4f"/>
+<text x="448" y="200" font-size="9" fill="#9ec5ff">計畫航線 v3</text>
+<text x="660" y="217" font-size="9" fill="#6ee094">實際軌跡</text>
+<text x="448" y="158" font-size="9" fill="#ff8a8a">偏移點</text>
+
+<!-- Arrow 2→3a (Demo 2 歷史) -->
+<line x1="730" y1="120" x2="820" y2="90" stroke="#9ec5ff" stroke-width="2" marker-end="url(#s5arr)"/>
+<text x="775" y="98" font-size="10" font-weight="600" fill="#9ec5ff">點偏移點看當時情境</text>
+
+<!-- Arrow 2→3b (航行計畫管理) -->
+<line x1="730" y1="200" x2="820" y2="230" stroke="#9ec5ff" stroke-width="2" marker-end="url(#s5arr)"/>
+<text x="775" y="247" font-size="10" font-weight="600" fill="#9ec5ff">點「查計畫版本」</text>
+
+<!-- Step 3a: Demo 2 歷史回放 -->
+<rect x="830" y="60" width="420" height="120" rx="8" fill="rgba(44,108,219,0.18)" stroke="#2c6cdb" stroke-width="2"/>
+<text x="1040" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">③A Demo 2 歷史回放</text>
+<text x="1040" y="106" text-anchor="middle" font-size="10" fill="#9ec5ff">看偏移當下情境（避颱？避碰？）</text>
+<text x="850" y="130" font-size="10" fill="#c4cdda">時間軸 focus 偏移開始時間</text>
+<text x="850" y="146" font-size="10" fill="#c4cdda">同時段顯示風暴 / 風險區 polygon</text>
+<text x="850" y="162" font-size="11" font-weight="600" fill="#f5b753">→ 推論偏移原因為避颱</text>
+
+<!-- Step 3b: 航行計畫管理 -->
+<rect x="830" y="200" width="420" height="120" rx="8" fill="rgba(155,89,182,0.16)" stroke="#9b59b6" stroke-width="2"/>
+<text x="1040" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#e4eaf2">③B 航行計畫版本管理</text>
+<text x="1040" y="243" text-anchor="middle" font-size="10" fill="#c39bd3">看 v1 → v2 → v3 差異</text>
+<rect x="850" y="252" width="380" height="58" rx="3" fill="#141414" stroke="#2a2a2a"/>
+<text x="860" y="270" font-size="10" fill="#c4cdda">v3 Active</text>
+<rect x="920" y="262" width="50" height="12" rx="2" fill="rgba(76,217,122,0.20)" stroke="#4cd97a"/>
+<text x="945" y="271" text-anchor="middle" font-size="9" font-weight="600" fill="#6ee094">Active</text>
+<text x="980" y="270" font-size="10" fill="#c4cdda">StormGeo · 06/13 08:00</text>
+<text x="860" y="288" font-size="10" fill="#c4cdda">v2 Superseded</text>
+<text x="980" y="288" font-size="10" fill="#c4cdda">StormGeo · 06/12 16:00（颱風來前）</text>
+<text x="860" y="303" font-size="10" fill="#c4cdda">v1 Archived</text>
+<text x="980" y="303" font-size="10" fill="#c4cdda">StormGeo · 06/11 02:00（初始）</text>
+
+<!-- Step 4: 結論 -->
+<rect x="40" y="340" width="1210" height="180" rx="8" fill="rgba(76,217,122,0.10)" stroke="#4cd97a" stroke-dasharray="6 4"/>
+<text x="640" y="365" text-anchor="middle" font-size="14" font-weight="700" fill="#e4eaf2">④ 綜合判斷 → 結案</text>
+
+<rect x="60" y="380" width="380" height="130" rx="6" fill="#141414" stroke="#2a2a2a"/>
+<text x="75" y="400" font-size="11" font-weight="600" fill="#c4cdda">判斷項目：</text>
+<text x="75" y="420" font-size="10" fill="#e4eaf2">▸ 偏移是因 StormGeo v2 → v3 計畫變更</text>
+<text x="75" y="436" font-size="10" fill="#e4eaf2">▸ 變更原因：颱風路徑修正</text>
+<text x="75" y="452" font-size="10" fill="#e4eaf2">▸ 船端依新計畫航行 → 對舊計畫看似偏移</text>
+<text x="75" y="468" font-size="11" font-weight="700" fill="#6ee094">→ 結論：合理偏移，非異常</text>
+<text x="75" y="488" font-size="10" fill="#9aa5b8">  事件可標記 cleared 並結案</text>
+
+<rect x="460" y="380" width="380" height="130" rx="6" fill="#141414" stroke="#2a2a2a"/>
+<text x="475" y="400" font-size="11" font-weight="600" fill="#c4cdda">寫入 audit log：</text>
+<text x="475" y="420" font-size="10" fill="#e4eaf2">▸ 事件 ID: 1001-route-202606</text>
+<text x="475" y="436" font-size="10" fill="#e4eaf2">▸ 操作者: Capt-Lee</text>
+<text x="475" y="452" font-size="10" fill="#e4eaf2">▸ 狀態：In Progress → Resolved</text>
+<text x="475" y="468" font-size="10" fill="#e4eaf2">▸ 備註：船端依 v3 計畫航行，</text>
+<text x="475" y="482" font-size="10" fill="#e4eaf2">　XTD 計算需更新對 active plan</text>
+<text x="475" y="500" font-size="10" fill="#f5b753">▸ 後續：通知 SLAB 修正 XTD 計算邏輯</text>
+
+<rect x="860" y="380" width="380" height="130" rx="6" fill="rgba(245,166,35,0.10)" stroke="#f5a623"/>
+<text x="875" y="400" font-size="11" font-weight="600" fill="#f5b753">⚠ 連動效應：</text>
+<text x="875" y="420" font-size="10" fill="#e4eaf2">▸ M1 警示子系統收到 M5 通知</text>
+<text x="875" y="436" font-size="10" fill="#e4eaf2">　計畫版本變更 → 重算所有 XTD</text>
+<text x="875" y="452" font-size="10" fill="#e4eaf2">▸ syncEventsFromAlerts() 自動觸發</text>
+<text x="875" y="468" font-size="10" fill="#e4eaf2">▸ 舊事件標 cleared，新計算結果寫入</text>
+<text x="875" y="488" font-size="11" font-weight="600" fill="#f5b753">→ M5 提供 Active Plan</text>
+<text x="875" y="503" font-size="11" font-weight="600" fill="#f5b753">→ M1 拿來算 route 維度告警</text>
+</svg>
+  </div>
+  <div class="notes">
+    <h3>M1 ↔ M5 銜接重點</h3>
+    <table>
+      <thead><tr><th>方向</th><th>觸發點</th><th>動作</th></tr></thead>
+      <tbody>
+        <tr><td>M1 → M5</td><td>route 告警出現</td><td>使用者查詢 → 跳 M5 看版本歷史</td></tr>
+        <tr><td>M5 → M1</td><td>計畫新版本 Active</td><td>自動觸發 M1 重算 9 維度（含 route）</td></tr>
+        <tr><td>M5 → M5</td><td>查 v2/v3 差異</td><td>地圖疊圖比對 + 變更摘要</td></tr>
+        <tr><td>M1/M5 → 稽核</td><td>每筆狀態變更</td><td>actor + role + before/after 寫 audit log</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<footer>
+SDataPro 情境流程圖 v0.1 · 2026-05-29 · 摯陞數位科技 SLAB · 對應分析報告 SDataPro_產品分析報告_v0.1.md
+</footer>
+
+<script>
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+</script>
+
+</body>
+</html>

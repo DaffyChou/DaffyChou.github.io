@@ -1,1 +1,7 @@
 .claude/worktrees/
+
+# SDataPro 開發中大檔（AIS surroundings / tracks JSON 約 32 MB）
+SDataPro_Development/data/
+
+# PPTX 簡報檔 binary，不入 git
+demos/voyage-plan/*.pptx
