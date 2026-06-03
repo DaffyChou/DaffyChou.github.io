@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>警報 Email 範本集 — 摯陞 SRP 系統</title>
+<style>
+  body { margin:0; padding:24px; background:#f0f2f5; font-family:"Microsoft JhengHei","PingFang TC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#1a1a1a; }
+  .page { max-width:760px; margin:0 auto; }
+  .page-header { margin-bottom:24px; }
+  .page-header h1 { margin:0 0 6px; font-size:22px; font-weight:600; color:#1a1a1a; }
+  .page-header p { margin:0; font-size:13px; color:#6a737d; }
+  .toc { background:#fff; border:1px solid #e1e4e8; border-radius:8px; padding:18px 22px; margin-bottom:24px; }
+  .toc h2 { margin:0 0 12px; font-size:14px; color:#586069; text-transform:uppercase; letter-spacing:0.06em; font-weight:600; }
+  .toc ol { margin:0; padding-left:20px; column-count:2; column-gap:24px; font-size:13px; line-height:1.9; }
+  .toc a { color:#0366d6; text-decoration:none; }
+  .toc a:hover { text-decoration:underline; }
+  .toc .group { font-weight:600; color:#24292e; column-span:all; margin-top:6px; padding-top:4px; }
+  .toc .group:first-child { margin-top:0; padding-top:0; }
+
+  /* 模擬 email 客戶端外觀 */
+  .email-card {
+    background:#fff;
+    border:1px solid #d1d5da;
+    border-radius:8px;
+    margin-bottom:32px;
+    overflow:hidden;
+    box-shadow:0 1px 3px rgba(0,0,0,0.04);
+  }
+  .email-meta {
+    background:#f6f8fa;
+    padding:14px 22px;
+    border-bottom:1px solid #e1e4e8;
+    font-size:12px;
+    color:#586069;
+  }
+  .email-meta .field { display:grid; grid-template-columns:60px 1fr; gap:8px; padding:2px 0; }
+  .email-meta .label { color:#959da5; }
+  .email-meta .value { color:#24292e; }
+  .email-meta .subject { font-size:15px; font-weight:600; color:#1a1a1a; margin-top:8px; padding-top:8px; border-top:1px dashed #e1e4e8; }
+
+  .email-body {
+    padding:24px 28px;
+    font-size:14px;
+    line-height:1.7;
+    color:#24292e;
+  }
+  .email-body p { margin:0 0 14px; }
+  .email-body .intro { font-size:14px; }
+  .email-body .section-title {
+    font-size:13px; font-weight:600; color:#1a1a1a;
+    margin:18px 0 10px;
+    padding-left:8px;
+    border-left:3px solid #4078c0;
+  }
+  .email-body ul { margin:0 0 14px; padding-left:22px; }
+  .email-body ul li { margin-bottom:4px; }
+  .email-body .checklist li { list-style:none; padding-left:2px; }
+  .email-body .checklist li::before { content:"☐ "; color:#586069; margin-right:4px; }
+
+  .data-table {
+    width:100%; border-collapse:collapse; margin:8px 0 14px;
+    font-size:13px;
+  }
+  .data-table th, .data-table td {
+    border:1px solid #e1e4e8;
+    padding:8px 12px;
+    text-align:left;
+  }
+  .data-table th { background:#f6f8fa; font-weight:600; color:#24292e; }
+  .data-table td { color:#1a1a1a; }
+  .data-table .num { text-align:right; font-variant-numeric:tabular-nums; }
+
+  .var { color:#d73a49; font-family:"SFMono-Regular",Consolas,monospace; font-size:0.92em; background:#fff5f5; padding:1px 4px; border-radius:3px; }
+
+  .badge {
+    display:inline-block; padding:2px 10px; border-radius:12px;
+    font-size:11px; font-weight:600;
+    margin-right:6px;
+  }
+  .badge-info { background:#dbedff; color:#0366d6; }
+  .badge-warn { background:#fff5b1; color:#735c0f; }
+  .badge-alert { background:#ffeef0; color:#d73a49; }
+  .badge-report { background:#dcffe4; color:#22863a; }
+
+  .email-footer {
+    background:#f6f8fa;
+    padding:14px 28px;
+    border-top:1px solid #e1e4e8;
+    font-size:11px;
+    color:#959da5;
+    line-height:1.6;
+  }
+  .email-footer .alert-meta { color:#586069; }
+
+  .category-header {
+    margin:36px 0 18px;
+    padding:14px 20px;
+    background:linear-gradient(135deg,#4078c0 0%,#2c5f9e 100%);
+    color:#fff;
+    border-radius:8px;
+    font-size:16px;
+    font-weight:600;
+  }
+  .category-header:first-of-type { margin-top:0; }
+  .category-header small { display:block; font-size:11px; opacity:0.85; font-weight:400; margin-top:2px; }
+
+  .anchor-target { scroll-margin-top:20px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="page-header">
+    <h1>警報 Email 範本集</h1>
+    <p>對應 <a href="alert_demo.html">alert_demo.html</a> — 4 類共 13 種警報的通知信件範本。所有 <span class="var">{{變數}}</span> 將由系統觸發時帶入實際數值。</p>
+  </div>
+
+  <div class="toc">
+    <h2>目錄</h2>
+    <ol>
+      <li class="group">航次警報</li>
+      <li><a href="#t1">1. 進／出港狀態</a></li>
+      <li><a href="#t2">2. 抵港時間 ETA</a></li>
+      <li><a href="#t3">3. 航線偏移</a></li>
+      <li><a href="#t4">4. 惡劣海況預警</a></li>
+      <li><a href="#t5">5. 船速異常下降</a></li>
+      <li><a href="#t6">6. 限制區域進入提醒</a></li>
+      <li class="group">CII 評等警報</li>
+      <li><a href="#t7">7. 本月目標降等</a></li>
+      <li><a href="#t8">8. 明年度預測降級</a></li>
+      <li class="group">Bunker 管理警報</li>
+      <li><a href="#t9">9. 最低庫存警示</a></li>
+      <li><a href="#t10">10. 油耗效能偏差</a></li>
+      <li class="group">船員管理警報</li>
+      <li><a href="#t11">11. 證書到期</a></li>
+      <li><a href="#t12">12. 船員年齡警示</a></li>
+      <li><a href="#t13">13. 任職累計時間</a></li>
+    </ol>
+  </div>
+
+  <!-- ============ 航次警報 ============ -->
+  <div class="category-header">航次警報 — Voyage Alerts<small>船舶位置、ETA、航線、海況、船速相關之即時警示</small></div>
+
+  <!-- 1. 進／出港狀態 -->
+  <div class="email-card anchor-target" id="t1">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【航次警報】<span class="var">{{shipName}}</span> 已<span class="var">{{dir}}</span>地理圍欄 — <span class="var">{{geofenceName}}</span></div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-info">航次警報</span><span class="badge badge-info">進／出港狀態</span></p>
+      <p class="intro">收件人您好，</p>
+      <p>船舶「<span class="var">{{shipName}}</span>」（IMO：<span class="var">{{imo}}</span>）已於 <span class="var">{{eventTimeUTC}}</span> (UTC) <span class="var">{{dir}}</span>預設地理圍欄「<span class="var">{{geofenceName}}</span>」。</p>
+
+      <div class="section-title">事件資訊</div>
+      <ul>
+        <li>位置：Lat <span class="var">{{lat}}</span> / Lon <span class="var">{{lon}}</span></li>
+        <li>SOG：<span class="var">{{sog}}</span> kn　Heading：<span class="var">{{heading}}</span>°</li>
+        <li>預計下一港：<span class="var">{{nextPort}}</span>（ETA <span class="var">{{eta}}</span>）</li>
+      </ul>
+
+      <div class="section-title">建議動作</div>
+      <ul>
+        <li>確認 Port Agent 已收到 NOR 通知</li>
+        <li>檢查靠泊／離泊作業排程</li>
+      </ul>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- 2. ETA -->
+  <div class="email-card anchor-target" id="t2">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【航次警報】<span class="var">{{shipName}}</span> ETA <span class="var">{{ba}}</span> <span class="var">{{n}}</span> 小時提醒</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-info">航次警報</span><span class="badge badge-info">ETA</span></p>
+      <p>船舶「<span class="var">{{shipName}}</span>」目前距預估抵達 <span class="var">{{destPort}}</span> 尚有 <span class="var">{{hoursToEta}}</span> 小時，已進入「ETA <span class="var">{{ba}}</span> <span class="var">{{n}}</span> 小時」之警示區間。</p>
+
+      <div class="section-title">航次資訊</div>
+      <ul>
+        <li>目的港：<span class="var">{{destPort}}</span></li>
+        <li>原訂 ETA：<span class="var">{{plannedEta}}</span></li>
+        <li>最新 ETA：<span class="var">{{currentEta}}</span>（變動 <span class="var">{{delta}}</span> 小時）</li>
+        <li>目前位置：Lat <span class="var">{{lat}}</span> / Lon <span class="var">{{lon}}</span>，SOG <span class="var">{{sog}}</span> kn</li>
+      </ul>
+
+      <div class="section-title">建議動作</div>
+      <ul>
+        <li>與 Port Agent 再次確認泊位安排</li>
+        <li>通知貨主／傭船人最新 ETA</li>
+      </ul>
+
+      <p style="font-size:12px;color:#6a737d;margin-top:18px;">本警報每 1 小時提醒一次，限制 3 次。</p>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- 3. 航線偏移 -->
+  <div class="email-card anchor-target" id="t3">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【航次警報】<span class="var">{{shipName}}</span> 偏離航線 <span class="var">{{deviation}}</span> 海浬</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-alert">航次警報</span><span class="badge badge-alert">航線偏移</span></p>
+      <p>船舶「<span class="var">{{shipName}}</span>」目前位置已偏離預計航線 <span class="var">{{deviation}}</span> 海浬（門檻 <span class="var">{{threshold}}</span> 海浬），請即時確認。</p>
+
+      <div class="section-title">位置資訊</div>
+      <ul>
+        <li>目前位置：Lat <span class="var">{{lat}}</span> / Lon <span class="var">{{lon}}</span></li>
+        <li>預計航點：Lat <span class="var">{{plannedLat}}</span> / Lon <span class="var">{{plannedLon}}</span></li>
+        <li>COG：<span class="var">{{cog}}</span>°　SOG：<span class="var">{{sog}}</span> kn</li>
+        <li>偏離時間：自 <span class="var">{{deviationStart}}</span> 起持續 <span class="var">{{durationMin}}</span> 分鐘</li>
+      </ul>
+
+      <div class="section-title">建議動作</div>
+      <ul>
+        <li>與船長確認偏航原因（避風／避碰／海流？）</li>
+        <li>評估燃油與 ETA 影響</li>
+      </ul>
+
+      <p style="font-size:12px;color:#6a737d;margin-top:18px;">本警報每 30 分鐘提醒一次，直到船舶回到航線。</p>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- 4. 惡劣海況 -->
+  <div class="email-card anchor-target" id="t4">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【航次警報】<span class="var">{{shipName}}</span> 前方海域氣象惡劣</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-warn">航次警報</span><span class="badge badge-warn">惡劣海況</span></p>
+      <p>船舶「<span class="var">{{shipName}}</span>」未來 <span class="var">{{forecastHours}}</span> 小時內航經海域，氣象條件已達警示門檻。</p>
+
+      <div class="section-title">氣象資訊</div>
+      <ul>
+        <li>預測浪高：<span class="var">{{wave}}</span> m（門檻 &gt; <span class="var">{{waveLimit}}</span> m）</li>
+        <li>預測風力：<span class="var">{{wind}}</span> 級（門檻 &gt; <span class="var">{{windLimit}}</span> 級）</li>
+        <li>預測時間／位置：<span class="var">{{forecastTime}}</span> @ Lat <span class="var">{{lat}}</span> / Lon <span class="var">{{lon}}</span></li>
+        <li>資料來源：<span class="var">{{weatherSource}}</span></li>
+      </ul>
+
+      <div class="section-title">建議動作</div>
+      <ul>
+        <li>通知船長加強瞭望與固縛</li>
+        <li>評估減速、繞航或避風方案</li>
+        <li>提前向傭船人／貨主預警可能延誤</li>
+      </ul>
+
+      <p style="font-size:12px;color:#6a737d;margin-top:18px;">條件持續存在時將再次發送。</p>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- 5. 船速異常 -->
+  <div class="email-card anchor-target" id="t5">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【航次警報】<span class="var">{{shipName}}</span> 船速異常下降 <span class="var">{{dropPct}}</span>%</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-warn">航次警報</span><span class="badge badge-warn">船速異常</span></p>
+      <p>船舶「<span class="var">{{shipName}}</span>」主機 RPM 維持正常，但對地速度（SOG）較預期下降 <span class="var">{{dropPct}}</span>%（門檻 <span class="var">{{threshold}}</span>%），疑似船體阻力異常。</p>
+
+      <div class="section-title">運轉資訊</div>
+      <ul>
+        <li>預期 SOG：<span class="var">{{expectedSog}}</span> kn</li>
+        <li>實際 SOG：<span class="var">{{actualSog}}</span> kn</li>
+        <li>主機 RPM：<span class="var">{{rpm}}</span>（變動 <span class="var">{{rpmDelta}}</span>%）</li>
+        <li>海流／風向：<span class="var">{{currentInfo}}</span></li>
+      </ul>
+
+      <div class="section-title">可能原因</div>
+      <ul>
+        <li>船底海生物附著</li>
+        <li>異常海流／逆風</li>
+        <li>主機效能下降</li>
+      </ul>
+
+      <div class="section-title">建議動作</div>
+      <ul>
+        <li>安排下次入塢清底評估</li>
+        <li>比對近 7 天能耗趨勢</li>
+      </ul>
+
+      <p style="font-size:12px;color:#6a737d;margin-top:18px;">本警報每 4 小時提醒一次，限制 3 次。</p>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- 6. 限制區域進入 -->
+  <div class="email-card anchor-target" id="t6">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【航次警報】<span class="var">{{shipName}}</span> 即將進入 <span class="var">{{areaName}}</span> — 距邊界 <span class="var">{{distance}}</span> 海浬</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-alert">航次警報</span><span class="badge badge-alert">區域進入</span></p>
+      <p>船舶「<span class="var">{{shipName}}</span>」距 <span class="var">{{areaName}}</span> 邊界僅 <span class="var">{{distance}}</span> 海浬（門檻 &lt; <span class="var">{{threshold}}</span> 海浬），請確認進入該區域所需準備事項。</p>
+
+      <div class="section-title">航行資訊</div>
+      <ul>
+        <li>目前位置：Lat <span class="var">{{lat}}</span> / Lon <span class="var">{{lon}}</span></li>
+        <li>航向／速度：<span class="var">{{cog}}</span>° / <span class="var">{{sog}}</span> kn</li>
+        <li>預估抵達區域：<span class="var">{{etaArea}}</span></li>
+        <li>目標區域：<span class="var">{{areaName}}</span></li>
+      </ul>
+
+      <div class="section-title">區域進入準備清單</div>
+      <ul>
+        <li>ECA：切換至 ≤ <span class="var">{{sLimit}}</span>% 低硫油、Oil Record Book 紀錄</li>
+        <li>HRA：部署反海盜措施（PCASP、Citadel 演練、加速通過）</li>
+        <li>JWLA 戰爭風險區：加保 War Risk 保險、評估替代航線</li>
+      </ul>
+
+      <p style="font-size:12px;color:#6a737d;margin-top:18px;">說明：本警報為位置型提醒。因油耗資料由船端午報（T+1）提供，系統無法即時驗證實際油料切換動作；合規執行須由船端 Oil Record Book、午報資料事後核對。</p>
+      <p style="font-size:12px;color:#6a737d;">本警報每 30 分鐘提醒一次。</p>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- ============ CII 評等警報 ============ -->
+  <div class="category-header">CII 評等警報 — CII Rating Alerts<small>船舶碳強度年度評等之月／年度檢視</small></div>
+
+  <!-- 7. 本月目標降等 -->
+  <div class="email-card anchor-target" id="t7">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【CII 月報】<span class="var">{{month}}</span> 月 — <span class="var">{{count}}</span> 艘船舶評等達 <span class="var">{{grade}}</span> 級以上</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-report">CII 評等</span><span class="badge badge-report">月報</span></p>
+      <p>依據本月航行資料計算，以下船舶 CII 評等已達或低於設定門檻（門檻：<span class="var">{{op}}</span> <span class="var">{{grade}}</span>），請相關單位檢視改善計畫。</p>
+
+      <div class="section-title">本月達標清單</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>船舶</th><th>評等</th><th class="num">AER 值</th><th class="num">較上月</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="var">{{ship1}}</span></td><td><span class="var">{{r1}}</span></td><td class="num"><span class="var">{{aer1}}</span></td><td class="num"><span class="var">{{d1}}</span></td></tr>
+          <tr><td><span class="var">{{ship2}}</span></td><td><span class="var">{{r2}}</span></td><td class="num"><span class="var">{{aer2}}</span></td><td class="num"><span class="var">{{d2}}</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-title">建議動作</div>
+      <ul>
+        <li>啟動 SEEMP Part III 改善措施</li>
+        <li>評估速度最佳化／路徑優化</li>
+        <li>必要時提交 Corrective Action Plan</li>
+      </ul>
+
+      <p>完整報表：<a href="#" style="color:#0366d6;"><span class="var">{{reportLink}}</span></a></p>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- 8. 明年度預測降級 -->
+  <div class="email-card anchor-target" id="t8">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【CII 月報】明年度（<span class="var">{{nextYear}}</span>）預測 — <span class="var">{{count}}</span> 艘船舶恐降至 <span class="var">{{grade}}</span> 級</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-report">CII 評等</span><span class="badge badge-report">年度預測</span></p>
+      <p>依目前航行軌跡推估，下列船舶於 <span class="var">{{nextYear}}</span> 年度 CII 評等預測將達到 <span class="var">{{op}}</span> <span class="var">{{grade}}</span>，建議提早規劃改善方案。</p>
+
+      <div class="section-title">預測降級清單</div>
+      <ul>
+        <li><span class="var">{{ship1}}</span>：<span class="var">{{currentRating}}</span> → 預測 <span class="var">{{predictedRating}}</span>（信心度 <span class="var">{{conf1}}</span>%）</li>
+        <li><span class="var">{{ship2}}</span>：<span class="var">{{currentRating}}</span> → 預測 <span class="var">{{predictedRating}}</span>（信心度 <span class="var">{{conf2}}</span>%）</li>
+      </ul>
+
+      <div class="section-title">建議改善方向</div>
+      <ul>
+        <li>加裝節能裝置（PBCF / ESD）</li>
+        <li>重新規劃航速曲線</li>
+        <li>啟用替代燃料試點</li>
+      </ul>
+
+      <p>完整模擬報表：<a href="#" style="color:#0366d6;"><span class="var">{{reportLink}}</span></a></p>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- ============ Bunker 管理警報 ============ -->
+  <div class="category-header">Bunker 管理警報 — Bunker Management<small>燃油庫存與效能偏差之即時／月度監控</small></div>
+
+  <!-- 9. 最低庫存 -->
+  <div class="email-card anchor-target" id="t9">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【Bunker】<span class="var">{{shipName}}</span> 油料 ROB 已低於安全庫存</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-alert">Bunker</span><span class="badge badge-alert">低庫存</span></p>
+      <p>船舶「<span class="var">{{shipName}}</span>」目前剩餘油量（ROB）已低於系統推估之動態安全庫存，請儘速規劃補油。</p>
+
+      <div class="section-title">庫存資訊</div>
+      <ul>
+        <li>油種：<span class="var">{{fuelType}}</span></li>
+        <li>目前 ROB：<span class="var">{{rob}}</span> MT</li>
+        <li>動態安全庫存：<span class="var">{{safetyStock}}</span> MT</li>
+        <li>預估可航行：<span class="var">{{daysRemaining}}</span> 天 / <span class="var">{{nmRemaining}}</span> nm</li>
+      </ul>
+
+      <div class="section-title">建議動作</div>
+      <ul>
+        <li>與 Bunker Trader 確認下次補油量</li>
+        <li>評估是否需就近補油</li>
+      </ul>
+
+      <p style="font-size:12px;color:#6a737d;margin-top:18px;">本警報每日提醒 1 次，直到 ROB 高於安全庫存。</p>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- 10. 油耗效能偏差 -->
+  <div class="email-card anchor-target" id="t10">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【Bunker 月報】<span class="var">{{month}}</span> 月 — <span class="var">{{count}}</span> 艘船舶油耗效能偏差</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-report">Bunker</span><span class="badge badge-report">月報</span></p>
+      <p>下列船舶上月實際油耗已超過本船性能曲線預期（門檻：&gt; <span class="var">{{n}}</span>%）。基準採 SOG-RPM-Draft 性能曲線並依 ISO 19030 對風浪做標準化修正，已排除航線與海況差異；偏差再拆解為 Hull / Propeller / Engine 三項貢獻度。</p>
+
+      <div class="section-title">效能偏差清單</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>船舶</th><th class="num">實際 g/kWh</th><th class="num">曲線預期</th><th class="num">偏差 %</th><th>主要貢獻</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="var">{{ship1}}</span></td><td class="num"><span class="var">{{c1}}</span></td><td class="num"><span class="var">{{e1}}</span></td><td class="num">+<span class="var">{{p1}}</span>%</td><td><span class="var">{{src1}}</span></td></tr>
+          <tr><td><span class="var">{{ship2}}</span></td><td class="num"><span class="var">{{c2}}</span></td><td class="num"><span class="var">{{e2}}</span></td><td class="num">+<span class="var">{{p2}}</span>%</td><td><span class="var">{{src2}}</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-title">建議排查項目（依貢獻度指向）</div>
+      <ul>
+        <li>Hull 偏差為主：安排下次入塢、船底清洗評估</li>
+        <li>Propeller 偏差為主：考慮螺槳清磨或拋光（polishing）</li>
+        <li>Engine 偏差為主：燃油噴射、增壓器、缸壓量測診斷</li>
+        <li>持續監測：對照近 6 個月 baseline 確認趨勢</li>
+      </ul>
+
+      <p>完整分析：<a href="#" style="color:#0366d6;"><span class="var">{{reportLink}}</span></a></p>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- ============ 船員管理警報 ============ -->
+  <div class="category-header">船員管理警報 — Crew Management<small>證書、年齡、任職時間之週期性彙整提醒</small></div>
+
+  <!-- 11. 證書到期 -->
+  <div class="email-card anchor-target" id="t11">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【船員週報】<span class="var">{{weekRange}}</span> — <span class="var">{{count}}</span> 位船員證書即將／已逾期</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-report">船員管理</span><span class="badge badge-report">週報</span></p>
+      <p>依據人事資料庫檢核，下列船員證書已落入「逾期<span class="var">{{ba}}</span> <span class="var">{{n}}</span> 天」之警示範圍，請人資與船員部門儘速處理換證／補件作業。</p>
+
+      <div class="section-title">名單</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>姓名</th><th>職位</th><th>證書類別</th><th>到期日</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="var">{{name1}}</span></td><td><span class="var">{{rank1}}</span></td><td><span class="var">{{cert1}}</span></td><td><span class="var">{{exp1}}</span></td></tr>
+          <tr><td><span class="var">{{name2}}</span></td><td><span class="var">{{rank2}}</span></td><td><span class="var">{{cert2}}</span></td><td><span class="var">{{exp2}}</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-title">建議動作</div>
+      <ul>
+        <li>安排換證所需訓練／體檢</li>
+        <li>評估替換船員調度方案</li>
+        <li>通知船長確認船上 STCW 合規</li>
+      </ul>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- 12. 年齡 -->
+  <div class="email-card anchor-target" id="t12">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【船員週報】<span class="var">{{weekRange}}</span> — <span class="var">{{count}}</span> 位船員年齡達 <span class="var">{{n}}</span> 歲</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-report">船員管理</span><span class="badge badge-report">週報</span></p>
+      <p>依生日計算，下列現役船員年齡已達警示門檻（≥ <span class="var">{{n}}</span> 歲），建議人資部門評估健康檢查、輪替或退休規劃。</p>
+
+      <div class="section-title">名單</div>
+      <ul>
+        <li><span class="var">{{name1}}</span>（<span class="var">{{age1}}</span> 歲，<span class="var">{{rank1}}</span>，現任船舶 <span class="var">{{ship1}}</span>）</li>
+        <li><span class="var">{{name2}}</span>（<span class="var">{{age2}}</span> 歲，<span class="var">{{rank2}}</span>，現任船舶 <span class="var">{{ship2}}</span>）</li>
+      </ul>
+
+      <div class="section-title">建議動作</div>
+      <ul>
+        <li>加強年度健康檢查項目</li>
+        <li>啟動接班人才培訓</li>
+        <li>確認保險條款承保範圍</li>
+      </ul>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+  <!-- 13. 任職累計 -->
+  <div class="email-card anchor-target" id="t13">
+    <div class="email-meta">
+      <div class="field"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="field"><span class="label">To:</span><span class="value"><span class="var">{{recipients}}</span></span></div>
+      <div class="subject">【船員週報】<span class="var">{{weekRange}}</span> — <span class="var">{{count}}</span> 位船員累計任職達 <span class="var">{{n}}</span> 天</div>
+    </div>
+    <div class="email-body">
+      <p><span class="badge badge-report">船員管理</span><span class="badge badge-report">週報</span></p>
+      <p>依 MLC 2006 規範及公司輪休政策，下列船員在船累計任職天數已達 <span class="var">{{n}}</span> 天，請安排換班作業。</p>
+
+      <div class="section-title">名單</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>姓名</th><th>職位</th><th class="num">累計天數</th><th>登船日</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="var">{{name1}}</span></td><td><span class="var">{{rank1}}</span></td><td class="num"><span class="var">{{d1}}</span></td><td><span class="var">{{onboard1}}</span></td></tr>
+          <tr><td><span class="var">{{name2}}</span></td><td><span class="var">{{rank2}}</span></td><td class="num"><span class="var">{{d2}}</span></td><td><span class="var">{{onboard2}}</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-title">建議動作</div>
+      <ul>
+        <li>排定下個港口換班計畫</li>
+        <li>通知替補船員提前報到</li>
+        <li>確認 MLC 工時／休息合規記錄</li>
+      </ul>
+    </div>
+    <div class="email-footer">
+      <div class="alert-meta">警報設定：<span class="var">{{alertName}}</span>　觸發時間：<span class="var">{{triggeredAt}}</span></div>
+      <div>本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生｜<a href="#" style="color:#0366d6;">管理介面</a></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>船隊營運空等下鑽分析 (Drill-down Analytics)</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/gantt.js"></script>
+    
+    <style>
+        .chart-container { height: 400px; width: 100%; }
+        .gantt-container { height: 250px; width: 100%; }
+        /* 隱藏 Highcharts 浮水印 */
+        .highcharts-credits { display: none !important; }
+        
+        /* 針對深色主題覆寫 DataTables 的預設樣式 */
+        table.dataTable tbody tr { background-color: #1f2937; color: #e5e7eb; }
+        table.dataTable tbody tr:hover { background-color: #374151; }
+        table.dataTable thead th { background-color: #111827; color: #93c5fd; border-bottom: 1px solid #374151; }
+        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, 
+        .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, 
+        .dataTables_wrapper .dataTables_paginate { color: #9ca3af; margin-bottom: 10px; margin-top: 10px;}
+        .dataTables_wrapper .dataTables_filter input { background-color: #374151; color: white; border: 1px solid #4b5563; border-radius: 4px; padding: 2px 6px;}
+        .dataTables_wrapper .dataTables_length select { background-color: #374151; color: white; border: 1px solid #4b5563; border-radius: 4px;}
+        table.dataTable.no-footer { border-bottom: 1px solid #374151; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 p-6 md:p-10 font-sans min-h-screen">
+
+    <div class="max-w-screen-2xl mx-auto">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white border-l-4 border-blue-500 pl-4 mb-2">船隊營運狀態下鑽分析 (Operations Drill-down)</h1>
+            <p class="text-gray-400 pl-5">點擊紅色區塊，即可查看該月份各船舶在何處發生異常等待。</p>
+        </div>
+
+        <div class="bg-gray-800 p-5 rounded-xl shadow-2xl border border-gray-700 mb-8 transition-all duration-500" id="overview-section">
+            <h2 class="text-xl font-semibold mb-1 text-blue-400">船隊營運狀態能耗佔比 (點擊紅色區塊下鑽)</h2>
+            <div id="stacked-column-chart" class="chart-container"></div>
+        </div>
+
+        <div id="drilldown-section" class="hidden bg-gray-800 p-5 rounded-xl shadow-2xl border border-gray-700 transition-all duration-500 opacity-0 transform translate-y-4">
+            
+            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+                <h2 class="text-2xl font-bold text-red-400" id="drilldown-title">某月份 港外錨泊空等明細</h2>
+                <button onclick="closeDrilldown()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded shadow transition-colors">
+                    ✕ 關閉明細，返回總覽
+                </button>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-200 mb-2">1. 船舶錨地等待時間軸 (Gantt Chart)</h3>
+                <div id="gantt-chart" class="gantt-container bg-gray-900 p-2 rounded"></div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold text-gray-200 mb-4">2. 航次空等與財務損失明細 (Data Table)</h3>
+                <table id="details-table" class="display w-full text-sm text-left">
+                    <thead>
+                        <tr>
+                            <th>船舶名稱</th>
+                            <th>航次編號</th>
+                            <th>航線 (起 ➔ 迄)</th>
+                            <th>抵達錨地 (EOSP)</th>
+                            <th>實際靠泊 (All Fast)</th>
+                            <th>等待時數</th>
+                            <th>估計耗油 (MT)</th>
+                            <th>預估財務損失 (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // 共用深色主題設定
+        Highcharts.theme = {
+            colors: ['#3b82f6', '#10b981', '#ef4444'],
+            chart: { backgroundColor: 'transparent', style: { fontFamily: 'sans-serif' } },
+            title: { text: null },
+            legend: { itemStyle: { color: '#cbd5e1' }, itemHoverStyle: { color: '#FFF' } },
+            xAxis: { gridLineColor: '#334155', labels: { style: { color: '#94a3b8' } }, lineColor: '#475569' },
+            yAxis: { gridLineColor: '#334155', labels: { style: { color: '#94a3b8' } }, lineColor: '#475569' },
+            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', style: { color: '#f8fafc' }, borderWidth: 1, borderColor: '#334155' }
+        };
+        Highcharts.setOptions(Highcharts.theme);
+
+        let detailsTable; // 宣告 DataTable 變數
+
+        // --- 1. 初始化上層總覽圖表 (Stacked Column) ---
+        const overviewChart = Highcharts.chart('stacked-column-chart', {
+            chart: { type: 'column' },
+            xAxis: { categories: ['1月', '2月', '3月', '4月', '5月', '6月'] },
+            yAxis: { min: 0, title: { text: '燃油消耗佔比 (%)' } },
+            plotOptions: {
+                column: {
+                    stacking: 'percent',
+                    cursor: 'pointer',
+                    events: {
+                        click: function (event) {
+                            // 只有點擊「紅色 (空等)」區塊才觸發下鑽
+                            if (this.name === '港外錨泊空等 (浪費)') {
+                                const monthName = event.point.category;
+                                openDrilldown(monthName);
+                            } else {
+                                alert('請點擊紅色的「港外錨泊空等」區塊來查看浪費明細！');
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: { pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y} MT)<br/>', shared: true },
+            series: [
+                { name: '港外錨泊空等 (浪費)', data: [150, 300, 450, 600, 800, 750], color: '#ef4444' }, // 紅色 (點擊觸發)
+                { name: '港內裝卸作業', data: [400, 420, 380, 410, 390, 400], color: '#3b82f6' },
+                { name: '海上航行 (創造營收)', data: [4500, 4200, 4000, 3800, 3500, 3600], color: '#10b981' }
+            ]
+        });
+
+        // --- 2. 模擬假資料 (針對 5月 的錨泊空等紀錄) ---
+        const mockDrilldownData = [
+            { vessel: '成功輪', voyage: 'V-202605A', route: '高雄(TWKHH) ➔ 黑德蘭(AUPHE)', start: Date.UTC(2026, 4, 12, 8, 0), end: Date.UTC(2026, 4, 16, 14, 0), waitHours: 102, fuel: 12.5, loss: 7500 },
+            { vessel: '奮進輪', voyage: 'V-202605B', route: '雅加達(IDJKT) ➔ 高雄(TWKHH)', start: Date.UTC(2026, 4, 3, 10, 0), end: Date.UTC(2026, 4, 5, 10, 0), waitHours: 48, fuel: 5.2, loss: 3120 },
+            { vessel: '光輝輪', voyage: 'V-202605C', route: '新加坡(SGSIN) ➔ 香港(HKHKG)', start: Date.UTC(2026, 4, 20, 6, 0), end: Date.UTC(2026, 4, 24, 18, 0), waitHours: 108, fuel: 14.1, loss: 8460 },
+            { vessel: '永續輪', voyage: 'V-202605D', route: '美灣(USG) ➔ 鹿特丹(NLRTM)', start: Date.UTC(2026, 4, 15, 12, 0), end: Date.UTC(2026, 4, 18, 12, 0), waitHours: 72, fuel: 9.8, loss: 5880 }
+        ];
+
+        // --- 3. 開啟下鑽視窗的邏輯 ---
+        function openDrilldown(month) {
+            const section = document.getElementById('drilldown-section');
+            document.getElementById('drilldown-title').innerText = `${month}份 港外錨泊空等與財務損失明細`;
+            
+            // 顯示並加入動畫效果
+            section.classList.remove('hidden');
+            setTimeout(() => {
+                section.classList.remove('opacity-0', 'translate-y-4');
+                section.classList.add('opacity-100', 'translate-y-0');
+                
+                // 滾動到明細區
+                section.scrollIntoView({ behavior: 'smooth' });
+                
+                // 渲染甘特圖與資料表
+                renderGanttChart();
+                renderDataTable();
+            }, 50);
+        }
+
+        // --- 4. 關閉下鑽視窗的邏輯 ---
+        function closeDrilldown() {
+            const section = document.getElementById('drilldown-section');
+            section.classList.remove('opacity-100', 'translate-y-0');
+            section.classList.add('opacity-0', 'translate-y-4');
+            setTimeout(() => { section.classList.add('hidden'); }, 500);
+            
+            // 滾動回總覽圖表
+            document.getElementById('overview-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- 5. 渲染甘特圖 ---
+        function renderGanttChart() {
+            // 將假資料轉換為 Gantt 所需格式
+            const ganttSeriesData = mockDrilldownData.map((data, index) => {
+                return {
+                    name: data.route,
+                    start: data.start,
+                    end: data.end,
+                    y: index,
+                    color: '#ef4444', // 紅色警示
+                    vessel: data.vessel
+                };
+            });
+
+            Highcharts.ganttChart('gantt-chart', {
+                chart: { backgroundColor: 'transparent' },
+                title: { text: null },
+                xAxis: { type: 'datetime', labels: { style: { color: '#9ca3af' } }, gridLineColor: '#374151' },
+                yAxis: { 
+                    categories: mockDrilldownData.map(d => d.vessel), 
+                    labels: { style: { color: '#e5e7eb', fontWeight: 'bold' } },
+                    gridLineColor: '#374151'
+                },
+                tooltip: {
+                    pointFormatter: function() {
+                        const start = Highcharts.dateFormat('%Y/%m/%d %H:%M', this.start);
+                        const end = Highcharts.dateFormat('%Y/%m/%d %H:%M', this.end);
+                        return `<b>${this.vessel}</b><br/>航線: ${this.name}<br/>抵達錨地: ${start}<br/>實際靠泊: ${end}`;
+                    }
+                },
+                series: [{
+                    name: '錨泊空等期間',
+                    data: ganttSeriesData,
+                    dataLabels: { enabled: true, format: '{point.name}', style: { color: '#fff', textOutline: 'none', fontWeight: 'normal', fontSize: '11px' } }
+                }]
+            });
+        }
+
+        // --- 6. 渲染 DataTables ---
+        function renderDataTable() {
+            // 格式化日期供表格顯示
+            const formatDate = (utcDate) => {
+                const d = new Date(utcDate);
+                return `${d.getUTCMonth()+1}/${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2,'0')}:00`;
+            };
+
+            // 如果表格已經初始化過，先銷毀並清空
+            if ($.fn.DataTable.isDataTable('#details-table')) {
+                $('#details-table').DataTable().destroy();
+            }
+            $('#details-table tbody').empty();
+
+            // 塞入資料
+            mockDrilldownData.forEach(d => {
+                $('#details-table tbody').append(`
+                    <tr>
+                        <td class="font-bold text-blue-300">${d.vessel}</td>
+                        <td>${d.voyage}</td>
+                        <td>${d.route}</td>
+                        <td>${formatDate(d.start)}</td>
+                        <td>${formatDate(d.end)}</td>
+                        <td class="text-red-400 font-bold">${d.waitHours} 小時</td>
+                        <td>${d.fuel} MT</td>
+                        <td class="text-yellow-400 font-bold">$${d.loss.toLocaleString()}</td>
+                    </tr>
+                `);
+            });
+
+            // 初始化 DataTable
+            detailsTable = $('#details-table').DataTable({
+                "language": {
+                    "search": "搜尋航線或船舶:",
+                    "lengthMenu": "每頁顯示 _MENU_ 筆",
+                    "info": "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                    "paginate": { "first": "首頁", "last": "末頁", "next": "下一頁", "previous": "上一頁" }
+                },
+                "order": [[ 5, "desc" ]], // 預設依「等待時數」降冪排序
+                "pageLength": 5,
+                "lengthChange": false
+            });
+        }
+    </script>
+</body>
+</html>

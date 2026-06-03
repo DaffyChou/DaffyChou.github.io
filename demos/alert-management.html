@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>警報管理 — 摯陞 SRP 系統</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Microsoft JhengHei","PingFang TC","Noto Sans TC",Arial,sans-serif;
+  font-size: 13px; background: #12141a; color: #d8d8d8;
+  height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+}
+
+/* ── Top nav ── */
+.topnav {
+  display: flex; align-items: center; padding: 0 20px;
+  background: #1a1d26; border-bottom: 1px solid #2a2d38;
+  height: 44px; flex-shrink: 0; gap: 0;
+}
+.topnav-logo { font-size:15px; font-weight:700; color:#fff; padding-right:20px; margin-right:4px; border-right:1px solid #333; }
+.topnav-tab {
+  padding: 0 16px; height: 44px; border: none; background: none;
+  color: #9aa0a6; cursor: pointer; font-size: 13px; font-family: inherit;
+  border-bottom: 2px solid transparent; display:inline-flex; align-items:center;
+}
+.topnav-tab:hover { color: #d8d8d8; }
+.topnav-tab.active { color: #5b9bd5; border-bottom-color: #5b9bd5; }
+.topnav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.demo-badge { font-size:10px; background:#2a1a40; color:#a080e0; border:1px solid #4a2a80; border-radius:3px; padding:2px 6px; }
+.role-switcher { display:flex; align-items:center; gap:8px; background:#20232f; border:1px solid #333640; border-radius:5px; padding:4px 10px; font-size:12px; }
+.role-switcher label { color:#6a7080; font-size:11px; }
+.role-switcher select { background:none; border:none; color:#d8d8d8; font-size:12px; font-family:inherit; cursor:pointer; outline:none; }
+.role-switcher select option { background:#20232f; }
+.user-avatar { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+
+/* ── KPI bar ── */
+.kpi-bar { display:flex; gap:1px; flex-shrink:0; background:#222530; border-bottom:1px solid #222530; }
+.kpi-card { background:#1a1d26; padding:10px 20px; flex:1; border-right:1px solid #222530; }
+.kpi-card:last-child { border-right:none; }
+.kpi-label { font-size:11px; color:#6a7080; margin-bottom:3px; }
+.kpi-value { font-size:22px; font-weight:700; color:#fff; line-height:1; }
+.kpi-sub { font-size:11px; color:#555f70; margin-top:3px; }
+.kpi-card.danger .kpi-value { color:#e05252; }
+.kpi-card.warn .kpi-value   { color:#e89c3a; }
+.kpi-card.ok .kpi-value     { color:#4caf7d; }
+.kpi-card.blue .kpi-value   { color:#5b9bd5; }
+
+/* ── Main layout ── */
+.main { display:grid; grid-template-columns:300px minmax(0,1fr); flex:1; overflow:hidden; }
+
+/* ── Left panel ── */
+.left-panel { background:#1a1d26; border-right:1px solid #222530; display:flex; flex-direction:column; overflow:hidden; }
+.left-scroll { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:14px; }
+.panel-section-title { font-size:11px; font-weight:600; color:#6a7080; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+
+/* User card */
+.user-card { background:#20232f; border:1px solid #2a2d3a; border-radius:5px; padding:12px; }
+.user-card-top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.uc-name { font-size:13px; font-weight:600; color:#fff; }
+.uc-role { font-size:11px; margin-top:2px; display:inline-block; padding:1px 7px; border-radius:3px; }
+.role-manager { background:#1c2840; color:#5b9bd5; border:1px solid #2a3860; }
+.role-member  { background:#1a2820; color:#4caf7d; border:1px solid #204030; }
+.user-card-dept { font-size:11px; color:#6a7080; margin-top:6px; }
+.dept-tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:3px; margin-top:4px; }
+.dept-ship { background:#152030; color:#5b9bd5; border:1px solid #1e3860; }
+.dept-crew { background:#20153a; color:#a080e0; border:1px solid #3a2060; }
+
+/* Scope chips */
+.scope-list { margin-top:8px; }
+.scope-list .sc-label { font-size:11px; color:#6a7080; margin-bottom:5px; }
+.chip { display:inline-block; background:#252830; border:1px solid #333640; border-radius:3px; padding:2px 8px; font-size:11px; color:#b0b8c8; margin:2px; cursor:pointer; }
+.chip:hover { border-color:#4078c0; color:#5b9bd5; }
+.chip.nat { border-color:#3a2060; color:#a080e0; }
+.chip.nat:hover { border-color:#a080e0; }
+
+/* Donut chart */
+.donut-wrap { position:relative; width:130px; height:130px; margin:0 auto; }
+.donut-wrap svg { width:130px; height:130px; transform:rotate(-90deg); }
+.donut-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; pointer-events:none; }
+.dc-val { font-size:20px; font-weight:700; color:#fff; line-height:1; }
+.dc-lbl { font-size:10px; color:#7a8090; }
+.legend { display:flex; flex-direction:column; gap:4px; margin-top:8px; }
+.legend-item { display:flex; align-items:center; gap:7px; font-size:12px; cursor:pointer; padding:3px 6px; border-radius:3px; }
+.legend-item:hover { background:#20232f; }
+.legend-dot { width:9px; height:9px; border-radius:2px; flex-shrink:0; }
+.legend-name { flex:1; color:#b0b8c8; }
+.legend-count { font-weight:600; color:#fff; font-size:11px; }
+
+/* Pill filters */
+.pill-group { display:flex; flex-direction:column; gap:5px; }
+.pill { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border-radius:4px; cursor:pointer; border:1px solid transparent; font-size:12px; }
+.pill:hover { border-color:#333640; }
+.pill.active { border-color:#4078c0; background:#1c2840; }
+.pill-left { display:flex; align-items:center; gap:7px; color:#b0b8c8; }
+.pill-dot  { width:8px; height:8px; border-radius:50%; }
+.pill-count { font-weight:700; font-size:12px; }
+
+/* ── Right panel ── */
+.right-panel { display:flex; flex-direction:column; overflow:hidden; }
+
+/* Filter bar */
+.filter-bar {
+  padding: 8px 14px; background: #1a1d26; border-bottom: 1px solid #222530;
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center; flex-shrink: 0;
+}
+.filter-bar select,
+.filter-bar input[type="text"] {
+  background: #20232f; border: 1px solid #333640; border-radius: 4px;
+  color: #d8d8d8; padding: 5px 9px; font-size: 12px; font-family: inherit; height: 30px;
+}
+.filter-bar select { min-width: 100px; }
+.filter-bar input[type="text"] { width: 160px; }
+/* Search buttons are NOT margin-left:auto — they sit right after keyword */
+.filter-search-group { display:flex; gap:5px; }
+/* Page size at far right */
+.filter-pagesize { margin-left:auto; display:flex; align-items:center; gap:6px; font-size:12px; color:#6a7080; }
+.filter-pagesize select { min-width:70px; }
+.btn-sm { height:30px; padding:0 14px; border-radius:4px; font-size:12px; font-family:inherit; cursor:pointer; border:1px solid; }
+.btn-sm.primary { background:#4078c0; border-color:#3568b0; color:#fff; }
+.btn-sm.primary:hover { background:#3568b0; }
+.btn-sm.default { background:#20232f; border-color:#333640; color:#9aa0a6; }
+.btn-sm.default:hover { border-color:#555; color:#d8d8d8; }
+
+/* Table */
+.table-wrap { flex:1; overflow-y:auto; }
+table.alert-table { width:100%; border-collapse:collapse; font-size:12px; }
+.alert-table thead tr { background:#20232f; position:sticky; top:0; z-index:10; }
+.alert-table thead th { padding:9px 10px; text-align:left; font-weight:600; color:#7a8090; border-bottom:1px solid #2a2d3a; white-space:nowrap; }
+.alert-table tbody tr { border-bottom:1px solid #1e2028; cursor:pointer; transition:background .1s; }
+.alert-table tbody tr:hover { background:#1e2130; }
+.alert-table tbody tr.unread td:first-child { border-left:3px solid #e05252; padding-left:7px; }
+.alert-table tbody td { padding:8px 10px; color:#b8c0cc; vertical-align:middle; }
+.alert-table tbody td.time { font-size:11px; color:#6a7080; white-space:nowrap; }
+.alert-table tbody td.content-cell { max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Badges */
+.badge { display:inline-block; padding:2px 8px; border-radius:3px; font-size:11px; font-weight:600; white-space:nowrap; }
+.badge-new     { background:#3a1a1a; color:#e05252; border:1px solid #5a2020; }
+.badge-process { background:#2a2010; color:#e89c3a; border:1px solid #5a4010; }
+.badge-done    { background:#142a1a; color:#4caf7d; border:1px solid #1e5030; }
+.badge-ship    { background:#152030; color:#5b9bd5; border:1px solid #1e3860; }
+.badge-crew    { background:#20153a; color:#a080e0; border:1px solid #3a2060; }
+.badge-nat     { background:#1a1520; color:#c090f0; border:1px solid #352060; font-size:10px; }
+
+/* Action buttons */
+.action-btns { display:flex; gap:4px; }
+.act-btn { padding:3px 9px; border-radius:3px; font-size:11px; font-family:inherit; cursor:pointer; border:1px solid; white-space:nowrap; background:transparent; }
+.act-btn.take   { border-color:#e89c3a; color:#e89c3a; }
+.act-btn.take:hover   { background:#e89c3a; color:#1a1d26; }
+.act-btn.assign { border-color:#5b9bd5; color:#5b9bd5; }
+.act-btn.assign:hover { background:#5b9bd5; color:#1a1d26; }
+.act-btn.close  { border-color:#4caf7d; color:#4caf7d; }
+.act-btn.close:hover  { background:#4caf7d; color:#1a1d26; }
+.act-btn.detail { border-color:#555f70; color:#7a8090; }
+.act-btn.detail:hover { background:#252830; color:#d8d8d8; }
+.act-btn.reopen { border-color:#444; color:#6a7080; }
+.act-btn.reopen:hover { background:#252830; color:#d8d8d8; }
+
+/* Table footer / pagination */
+.table-footer {
+  padding: 8px 14px; background: #1a1d26; border-top: 1px solid #222530;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: #6a7080; flex-shrink: 0;
+}
+.page-btns { display:flex; gap:4px; }
+.page-btn { padding:3px 10px; border-radius:3px; border:1px solid #333640; background:#20232f; color:#9aa0a6; font-size:12px; cursor:pointer; min-width:30px; text-align:center; }
+.page-btn:hover:not(:disabled) { background:#252830; color:#d8d8d8; }
+.page-btn.active { background:#4078c0; border-color:#4078c0; color:#fff; }
+.page-btn:disabled { opacity:.3; cursor:default; }
+
+/* ── Drawer ── */
+.drawer-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; }
+.drawer-overlay.open { display:block; }
+.drawer { position:fixed; top:0; right:-540px; width:540px; height:100vh; background:#1a1d26; border-left:1px solid #2a2d3a; display:flex; flex-direction:column; transition:right .22s ease; z-index:201; }
+.drawer.open { right:0; }
+.drawer-head { padding:14px 18px; border-bottom:1px solid #2a2d3a; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.drawer-head h3 { margin:0; font-size:15px; font-weight:600; color:#fff; flex:1; }
+.drawer-close { background:none; border:none; color:#6a7080; font-size:20px; cursor:pointer; line-height:1; padding:2px 6px; }
+.drawer-close:hover { color:#d8d8d8; }
+.drawer-body  { flex:1; overflow-y:auto; padding:16px 18px; }
+.drawer-footer { padding:12px 18px; border-top:1px solid #2a2d3a; display:flex; gap:8px; flex-shrink:0; }
+
+/* Detail grid */
+.detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+.detail-field { padding:8px 10px; background:#20232f; border-radius:4px; }
+.detail-field.full { grid-column:1/-1; }
+.df-label { font-size:10px; color:#6a7080; margin-bottom:3px; }
+.df-value { font-size:13px; color:#d8d8d8; font-weight:500; }
+.detail-sep { border:none; border-top:1px solid #2a2d3a; margin:14px 0; }
+
+/* Timeline */
+.tl-section-label { font-size:11px; font-weight:600; color:#6a7080; margin-bottom:10px; text-transform:uppercase; letter-spacing:.5px; }
+.timeline { display:flex; flex-direction:column; }
+.tl-item { display:flex; gap:12px; padding-bottom:16px; position:relative; }
+.tl-item:not(:last-child)::before { content:''; position:absolute; left:7px; top:18px; bottom:0; width:1px; background:#2a2d3a; }
+.tl-dot { width:15px; height:15px; border-radius:50%; flex-shrink:0; margin-top:2px; }
+.tl-dot.create { background:#222530; border:2px solid #555; }
+.tl-dot.take   { background:#2a2010; border:2px solid #e89c3a; }
+.tl-dot.assign { background:#152030; border:2px solid #5b9bd5; }
+.tl-dot.note   { background:#1a2030; border:2px solid #6a7080; }
+.tl-dot.close  { background:#142a1a; border:2px solid #4caf7d; }
+.tl-dot.reopen { background:#2a1010; border:2px solid #e05252; }
+.tl-title { font-size:12px; font-weight:600; color:#d8d8d8; }
+.tl-meta  { font-size:11px; color:#5a6070; margin-top:2px; }
+.tl-note  { font-size:12px; color:#a0a8b8; margin-top:5px; background:#20232f; padding:7px 9px; border-radius:3px; line-height:1.5; }
+.tl-record { display:grid; grid-template-columns:repeat(2,1fr); gap:5px; margin-top:6px; background:#20232f; padding:8px; border-radius:3px; }
+.tl-record-cell .trc-label { font-size:10px; color:#5a6070; margin-bottom:2px; }
+.tl-record-cell .trc-value { font-size:12px; color:#c0c8d8; }
+
+/* Note input */
+.note-input { width:100%; background:#20232f; border:1px solid #333640; border-radius:4px; color:#d8d8d8; padding:8px 10px; font-size:12px; font-family:inherit; resize:vertical; min-height:68px; margin-top:6px; }
+.note-input:focus { outline:none; border-color:#4078c0; }
+
+/* Locked note banner */
+.note-locked {
+  display:flex; align-items:center; gap:10px; margin-top:10px;
+  background:#1e2028; border:1px solid #2a2d3a; border-radius:4px;
+  padding:10px 14px; font-size:12px; color:#6a7080;
+}
+.note-locked svg { flex-shrink:0; color:#555f70; }
+.note-locked strong { color:#9aa0a6; }
+
+/* Role / dept extra badges */
+.role-admin { background:#2a1020; color:#e060a0; border:1px solid #501030; }
+.dept-admin { background:#1e0f28; color:#e060a0; border:1px solid #401040; }
+
+/* Buttons */
+.btn { padding:7px 16px; border-radius:4px; font-size:13px; font-family:inherit; cursor:pointer; border:1px solid; }
+.btn.primary   { background:#4078c0; border-color:#3568b0; color:#fff; }
+.btn.primary:hover   { background:#3568b0; }
+.btn.secondary { background:transparent; border-color:#333640; color:#9aa0a6; }
+.btn.secondary:hover { border-color:#555; color:#d8d8d8; }
+.btn.success   { background:transparent; border-color:#2a6040; color:#4caf7d; }
+.btn.success:hover   { background:#1a3020; }
+
+/* ── Modals ── */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:300; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#1e2130; border:1px solid #2a2d3a; border-radius:6px; width:460px; max-height:90vh; display:flex; flex-direction:column; }
+.modal-head { padding:14px 18px; border-bottom:1px solid #2a2d3a; display:flex; align-items:center; }
+.modal-head h4 { margin:0; font-size:15px; font-weight:600; color:#fff; flex:1; }
+.modal-head .modal-close { background:none; border:none; color:#6a7080; font-size:18px; cursor:pointer; }
+.modal-body { padding:18px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:12px; }
+.modal-footer { padding:12px 18px; border-top:1px solid #2a2d3a; display:flex; gap:8px; justify-content:flex-end; }
+.form-row { display:flex; flex-direction:column; gap:4px; }
+.form-label { font-size:11px; color:#7a8090; font-weight:600; }
+.form-label .req { color:#e05252; margin-left:2px; }
+.form-input, .form-select, .form-textarea { background:#252830; border:1px solid #333640; border-radius:4px; color:#d8d8d8; padding:7px 10px; font-size:13px; font-family:inherit; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { outline:none; border-color:#4078c0; }
+.form-textarea { resize:vertical; min-height:80px; }
+.form-select option { background:#252830; }
+.form-readonly { background:#1a1d26; border:1px solid #252830; color:#9aa0a6; padding:7px 10px; border-radius:4px; font-size:13px; }
+.form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.err-msg { font-size:11px; color:#e05252; margin-top:3px; display:none; }
+.err-msg.show { display:block; }
+</style>
+</head>
+<body>
+
+<!-- ── Top nav ── -->
+<div class="topnav">
+  <div class="topnav-logo">SRP</div>
+  <button class="topnav-tab">儀表板</button>
+  <button class="topnav-tab active">警報管理</button>
+  <button class="topnav-tab">航次管理</button>
+  <button class="topnav-tab">CII 監控</button>
+  <button class="topnav-tab">船員管理</button>
+  <button class="topnav-tab">報表</button>
+  <div class="topnav-right">
+    <span class="demo-badge">Demo</span>
+    <div class="role-switcher">
+      <label>切換身分：</label>
+      <select id="role-select" onchange="switchUser(this.value)">
+        <optgroup label="管理層">
+          <option value="u0">管理員（總管理者）</option>
+        </optgroup>
+        <optgroup label="船務部">
+          <option value="u1">王小明（組經理 · 僅船舶警報）</option>
+          <option value="u2">陳大偉（組員 · 5艘）</option>
+          <option value="u3">林怡君（組員 · 5艘）</option>
+          <option value="u4">張志明（組員 · 2艘）</option>
+        </optgroup>
+        <optgroup label="船員管理部">
+          <option value="u5">李雅玲（組經理）</option>
+          <option value="u6">吳建宏（組員 · 台灣籍）</option>
+          <option value="u7">蔡美惠（組員 · 菲律賓/印尼籍）</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="user-avatar" id="nav-avatar" style="background:#4078c0;">王</div>
+  </div>
+</div>
+
+<!-- ── KPI bar ── -->
+<div class="kpi-bar">
+  <div class="kpi-card danger">
+    <div class="kpi-label">警報總數</div>
+    <div class="kpi-value" id="kpi-total">—</div>
+    <div class="kpi-sub">可見範圍</div>
+  </div>
+  <div class="kpi-card warn">
+    <div class="kpi-label">新進 / 未處理</div>
+    <div class="kpi-value" id="kpi-new">—</div>
+    <div class="kpi-sub">待接手</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">處理中</div>
+    <div class="kpi-value" id="kpi-proc">—</div>
+    <div class="kpi-sub">進行中</div>
+  </div>
+  <div class="kpi-card ok">
+    <div class="kpi-label">已結案</div>
+    <div class="kpi-value" id="kpi-done">—</div>
+    <div class="kpi-sub" id="kpi-rate">—</div>
+  </div>
+  <div class="kpi-card blue">
+    <div class="kpi-label">船舶警報</div>
+    <div class="kpi-value" id="kpi-ship">—</div>
+    <div class="kpi-sub">來源：船舶</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">船員警報</div>
+    <div class="kpi-value" id="kpi-crew" style="color:#a080e0;">—</div>
+    <div class="kpi-sub">來源：船員</div>
+  </div>
+</div>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Left panel -->
+  <div class="left-panel">
+    <div class="left-scroll">
+
+      <!-- User card -->
+      <div>
+        <div class="panel-section-title">目前身分</div>
+        <div class="user-card">
+          <div class="user-card-top">
+            <div class="user-avatar" id="left-avatar" style="background:#4078c0;">王</div>
+            <div>
+              <div class="uc-name" id="left-name">王小明</div>
+              <div class="uc-role role-manager" id="left-role">組經理</div>
+            </div>
+          </div>
+          <div class="user-card-dept" id="left-dept-desc">船務部 — 可查看部門全部船舶</div>
+          <span class="dept-tag dept-ship" id="left-dept-tag">船務部</span>
+          <div class="scope-list" id="left-scope"></div>
+        </div>
+      </div>
+
+      <!-- Type chart -->
+      <div>
+        <div class="panel-section-title">警報類型分佈</div>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#4078c0" stroke-width="15" stroke-dasharray="109 180" stroke-dashoffset="0"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#e89c3a" stroke-width="15" stroke-dasharray="66 180" stroke-dashoffset="-109"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#e05252" stroke-width="15" stroke-dasharray="55 180" stroke-dashoffset="-175"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#a080e0" stroke-width="15" stroke-dasharray="37 180" stroke-dashoffset="-230"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#555f70" stroke-width="15" stroke-dasharray="13 180" stroke-dashoffset="-267"/>
+          </svg>
+          <div class="donut-center">
+            <div class="dc-val" id="donut-total">—</div>
+            <div class="dc-lbl">警報</div>
+          </div>
+        </div>
+        <div class="legend" id="type-legend"></div>
+      </div>
+
+      <!-- Source filter -->
+      <div>
+        <div class="panel-section-title">依來源篩選</div>
+        <div class="pill-group" id="source-pills">
+          <div class="pill active" onclick="filterSource('all',this)">
+            <span class="pill-left"><span class="pill-dot" style="background:#7a8090"></span>全部來源</span>
+            <span class="pill-count" style="color:#fff" id="src-all-cnt">—</span>
+          </div>
+          <div class="pill" onclick="filterSource('船舶',this)">
+            <span class="pill-left"><span class="pill-dot" style="background:#5b9bd5"></span>船舶警報</span>
+            <span class="pill-count" style="color:#5b9bd5" id="src-ship-cnt">—</span>
+          </div>
+          <div class="pill" onclick="filterSource('船員',this)">
+            <span class="pill-left"><span class="pill-dot" style="background:#a080e0"></span>船員警報</span>
+            <span class="pill-count" style="color:#a080e0" id="src-crew-cnt">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status filter -->
+      <div>
+        <div class="panel-section-title">依狀態篩選</div>
+        <div class="pill-group" id="status-pills">
+          <div class="pill active" onclick="filterStatus('all',this)">
+            <span class="pill-left"><span class="pill-dot" style="background:#7a8090"></span>全部狀態</span>
+            <span class="pill-count" style="color:#fff" id="st-all-cnt">—</span>
+          </div>
+          <div class="pill" onclick="filterStatus('新進',this)">
+            <span class="pill-left"><span class="pill-dot" style="background:#e05252"></span>新進</span>
+            <span class="pill-count" style="color:#e05252" id="st-new-cnt">—</span>
+          </div>
+          <div class="pill" onclick="filterStatus('處理中',this)">
+            <span class="pill-left"><span class="pill-dot" style="background:#e89c3a"></span>處理中</span>
+            <span class="pill-count" style="color:#e89c3a" id="st-proc-cnt">—</span>
+          </div>
+          <div class="pill" onclick="filterStatus('已結案',this)">
+            <span class="pill-left"><span class="pill-dot" style="background:#4caf7d"></span>已結案</span>
+            <span class="pill-count" style="color:#4caf7d" id="st-done-cnt">—</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="right-panel">
+
+    <!-- Filter bar：搜尋按鈕緊靠篩選條件 -->
+    <div class="filter-bar">
+      <select id="f-ship"><option value="">全部船隻</option></select>
+      <select id="f-source">
+        <option value="">全部來源</option>
+        <option>船舶</option><option>船員</option>
+      </select>
+      <select id="f-type">
+        <option value="">全部類型</option>
+        <option>航次警報</option><option>CII 超標</option>
+        <option>Bunker 異常</option><option>船員管理</option><option>其他</option>
+      </select>
+      <select id="f-status2">
+        <option value="">全部狀態</option>
+        <option>新進</option><option>處理中</option><option>已結案</option>
+      </select>
+      <select id="f-assignee"><option value="">全部負責人</option></select>
+      <input type="text" id="f-keyword" placeholder="搜尋內容、船名、船員…" onkeydown="if(event.key==='Enter')applyFilters()"/>
+      <!-- 搜尋按鈕緊靠關鍵字輸入框 -->
+      <div class="filter-search-group">
+        <button class="btn-sm default" onclick="resetFilters()">重置</button>
+        <button class="btn-sm primary" onclick="applyFilters()">搜尋</button>
+      </div>
+      <!-- 分頁設定在最右 -->
+      <div class="filter-pagesize">
+        每頁顯示
+        <select id="page-size-select" onchange="changePageSize(this.value)">
+          <option value="10" selected>10 筆</option>
+          <option value="20">20 筆</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="alert-table">
+        <thead>
+          <tr>
+            <th style="width:10px;"></th>
+            <th>建立時間</th>
+            <th>來源</th>
+            <th>船名 / 人員</th>
+            <th>警報類型</th>
+            <th>警報內容</th>
+            <th>負責人</th>
+            <th>狀態</th>
+            <th>動作</th>
+          </tr>
+        </thead>
+        <tbody id="alert-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Pagination footer -->
+    <div class="table-footer">
+      <span id="tbl-info">載入中…</span>
+      <div class="page-btns" id="page-btns"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Detail drawer ── -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3 id="drawer-title">警報詳情</h3>
+    <div id="drawer-badges" style="display:flex;gap:6px;"></div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+  <div class="drawer-footer" id="drawer-footer"></div>
+</div>
+
+<!-- ── 接手 Modal ── -->
+<div class="modal-overlay" id="modal-take">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h4>接手處理</h4>
+      <button class="modal-close" onclick="closeModal('modal-take')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="form-row">
+          <div class="form-label">接手人</div>
+          <div class="form-readonly" id="take-handler">—</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label">接手時間</div>
+          <div class="form-readonly" id="take-time">—</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">處理狀態<span class="req">*</span></div>
+        <select class="form-select" id="take-status">
+          <option value="處理中">處理中 — 已開始調查</option>
+          <option value="待確認">待確認 — 需進一步資訊</option>
+          <option value="已升級">已升級 — 轉由上級處理</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-label">處理說明<span class="req">*</span></div>
+        <textarea class="form-textarea" id="take-note" placeholder="說明接手原因、初步判斷或後續動作…"></textarea>
+        <div class="err-msg" id="take-note-err">請填寫處理說明</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary" onclick="closeModal('modal-take')">取消</button>
+      <button class="btn primary" onclick="confirmTake()">確認接手</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 指派 Modal ── -->
+<div class="modal-overlay" id="modal-assign">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h4>指派處理人員</h4>
+      <button class="modal-close" onclick="closeModal('modal-assign')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-label">目前負責人</div>
+        <div class="form-readonly" id="assign-current">—</div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">指派給<span class="req">*</span></div>
+        <select class="form-select" id="assign-target"></select>
+        <div class="err-msg" id="assign-err">請選擇指派對象</div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">指派說明</div>
+        <textarea class="form-textarea" id="assign-note" placeholder="說明指派原因或處理重點…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary" onclick="closeModal('modal-assign')">取消</button>
+      <button class="btn primary" onclick="confirmAssign()">確認指派</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 結案 Modal ── -->
+<div class="modal-overlay" id="modal-close">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h4>確認結案</h4>
+      <button class="modal-close" onclick="closeModal('modal-close')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-label">處理結果<span class="req">*</span></div>
+        <select class="form-select" id="close-result">
+          <option value="已解決">已解決 — 問題確認排除</option>
+          <option value="無需處理">無需處理 — 誤報或不需行動</option>
+          <option value="轉交處理">轉交處理 — 已由其他單位跟進</option>
+          <option value="持續監控">持續監控 — 暫無立即風險</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-label">結案說明<span class="req">*</span></div>
+        <textarea class="form-textarea" id="close-note" placeholder="說明最終處理結果與措施…"></textarea>
+        <div class="err-msg" id="close-note-err">請填寫結案說明</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary" onclick="closeModal('modal-close')">取消</button>
+      <button class="btn success" onclick="confirmClose()">確認結案</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 備註 Modal ── -->
+<div class="modal-overlay" id="modal-note">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h4>新增備註</h4>
+      <button class="modal-close" onclick="closeModal('modal-note')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="form-row">
+          <div class="form-label">記錄人</div>
+          <div class="form-readonly" id="note-user">—</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label">記錄時間</div>
+          <div class="form-readonly" id="note-time">—</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">備註內容<span class="req">*</span></div>
+        <textarea class="form-textarea" id="note-content" placeholder="輸入處理說明或追蹤備註…"></textarea>
+        <div class="err-msg" id="note-err">請填寫備註內容</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary" onclick="closeModal('modal-note')">取消</button>
+      <button class="btn primary" onclick="confirmNote()">儲存備註</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   使用者 / 部門 / 權限
+   deptType: 'ship' | 'crew' | 'admin'
+   assignedShips: 'all' | string[]   (船務部)
+   assignedNats:  'all' | string[]   (船員管理部)
+═══════════════════════════════════════════════════════ */
+const NAT_FLAG = { '台灣':'🇹🇼', '菲律賓':'🇵🇭', '印尼':'🇮🇩', '緬甸':'🇲🇲', '越南':'🇻🇳', '中國':'🇨🇳' };
+const natLabel = nat => nat ? `${NAT_FLAG[nat]||'🏳'} ${nat}` : '—';
+
+const DEPT_USERS = [
+  /* 管理層 */
+  { id:'u0', name:'管理員', role:'總管理者', dept:'管理層', deptType:'admin', avatarBg:'#b03060', avatar:'管' },
+  /* 船務部 */
+  { id:'u1', name:'王小明', role:'組經理', dept:'船務部', deptType:'ship', avatarBg:'#4078c0', avatar:'王',
+    assignedShips:'all' },
+  { id:'u2', name:'陳大偉', role:'組員',   dept:'船務部', deptType:'ship', avatarBg:'#3a7060', avatar:'陳',
+    assignedShips:['慶豐輪','大洋號','福星輪','海洋之星','太平洋號'] },
+  { id:'u3', name:'林怡君', role:'組員',   dept:'船務部', deptType:'ship', avatarBg:'#3a4a80', avatar:'林',
+    assignedShips:['北極星','南方之鷹','亞洲橋','寶島輪','明日之星'] },
+  { id:'u4', name:'張志明', role:'組員',   dept:'船務部', deptType:'ship', avatarBg:'#605030', avatar:'張',
+    assignedShips:['遠航者','海上明珠'] },
+  /* 船員管理部 */
+  { id:'u5', name:'李雅玲', role:'組經理', dept:'船員管理部', deptType:'crew', avatarBg:'#703090', avatar:'李',
+    assignedNats:'all' },
+  { id:'u6', name:'吳建宏', role:'組員',   dept:'船員管理部', deptType:'crew', avatarBg:'#305080', avatar:'吳',
+    assignedNats:['台灣'] },
+  { id:'u7', name:'蔡美惠', role:'組員',   dept:'船員管理部', deptType:'crew', avatarBg:'#403060', avatar:'蔡',
+    assignedNats:['菲律賓','印尼'] },
+];
+let CUR = DEPT_USERS[0];
+
+/* ═══════════════════════════════════════════════════════
+   警報資料
+   source:   '船舶' | '船員'
+   ship:     船名 (船員警報可為 null ＝ 岸上)
+   crewName / crewRank / crewNat: 船員警報專用
+   history:  append-only 歷程陣列
+═══════════════════════════════════════════════════════ */
+const ALERTS = [
+  /* ─ 新進 ─ */
+  { id:'A001', time:'2026-04-21 08:42', source:'船員', ship:'福星輪',
+    crewName:'林宗憲', crewRank:'輪機長', crewNat:'台灣',
+    type:'船員管理', content:'STCW 適任證書今日到期，尚未更新，船舶可能面臨滯港風險',
+    assignee:null, status:'新進', history:[] },
+
+  { id:'A002', time:'2026-04-21 07:15', source:'船舶', ship:'福星輪',
+    type:'CII 超標', content:'本月累計 CII 值 1.22，超出 E 級閾值，需立即啟動改善計畫',
+    assignee:null, status:'新進', history:[] },
+
+  { id:'A003', time:'2026-04-21 06:20', source:'船舶', ship:'海洋之星',
+    type:'Bunker 異常', content:'上海→釜山航段油耗較計畫高出 28.9%，疑似機艙洩漏',
+    assignee:null, status:'新進', history:[] },
+
+  { id:'A004', time:'2026-04-21 05:55', source:'船員', ship:null,
+    crewName:'陳志豪', crewRank:'大副', crewNat:'台灣',
+    type:'船員管理', content:'合約今日到期，目前岸上休假，接替安排尚未確認',
+    assignee:null, status:'新進', history:[] },
+
+  { id:'A005', time:'2026-04-20 23:10', source:'船舶', ship:'寶島輪',
+    type:'航次警報', content:'偏航距離 32 nm，超出允許範圍 15 nm，已通報但未確認',
+    assignee:null, status:'新進', history:[] },
+
+  { id:'A006', time:'2026-04-20 19:45', source:'船員', ship:'海洋之星',
+    crewName:'王建民', crewRank:'水手長', crewNat:'台灣',
+    type:'船員管理', content:'合約 04-30 到期，接替人員待確認，在船天數已達 105 天',
+    assignee:null, status:'新進', history:[] },
+
+  { id:'A007', time:'2026-04-20 16:30', source:'船舶', ship:'太平洋號',
+    type:'Bunker 異常', content:'釜山港補給量與實際耗量差異達 18%，請確認計量紀錄',
+    assignee:null, status:'新進', history:[] },
+
+  { id:'A008', time:'2026-04-20 14:10', source:'船員', ship:null,
+    crewName:'楊孟儒', crewRank:'二管輪', crewNat:'台灣',
+    type:'船員管理', content:'合約 04-27 到期，在船 108 天，岸上候補接替未安排',
+    assignee:null, status:'新進', history:[] },
+
+  /* 菲律賓籍 – 新進 */
+  { id:'A021', time:'2026-04-21 09:10', source:'船員', ship:'慶豐輪',
+    crewName:'Juan Reyes', crewRank:'水手長', crewNat:'菲律賓',
+    type:'船員管理', content:'救生艇操作訓練證書 05-03 到期，靠港期間需安排複訓',
+    assignee:null, status:'新進', history:[] },
+
+  { id:'A022', time:'2026-04-21 08:05', source:'船員', ship:null,
+    crewName:'Carlo Santos', crewRank:'水手', crewNat:'菲律賓',
+    type:'船員管理', content:'合約 05-01 到期，目前岸上待派，接任船舶尚未確認',
+    assignee:null, status:'新進', history:[] },
+
+  /* 印尼籍 – 新進 */
+  { id:'A023', time:'2026-04-20 18:00', source:'船員', ship:'大洋號',
+    crewName:'Budi Santoso', crewRank:'機匠', crewNat:'印尼',
+    type:'船員管理', content:'年度健康檢查到期，需在下次靠港時安排體檢',
+    assignee:null, status:'新進', history:[] },
+
+  /* ─ 處理中 ─ */
+  { id:'A009', time:'2026-04-21 03:30', source:'船舶', ship:'慶豐輪',
+    type:'航次警報', content:'到港時間超差 14 小時，ETA 大幅延遲，代理行已接獲通知',
+    assignee:'陳大偉', status:'處理中', history:[
+      { type:'create', time:'2026-04-21 03:30', user:'系統',   note:'警報建立' },
+      { type:'take',   time:'2026-04-21 04:05', user:'陳大偉',
+        procStatus:'處理中', note:'已聯繫船長，確認因逆風導致延誤，預計 04-22 14:00 入港，通知代理行' },
+    ]},
+
+  { id:'A010', time:'2026-04-20 22:00', source:'船舶', ship:'福星輪',
+    type:'航次警報', content:'航速持續低於計畫值（9.8 kn，計畫 11.5 kn），燃油效率下降',
+    assignee:'陳大偉', status:'處理中', history:[
+      { type:'create', time:'2026-04-20 22:00', user:'系統',   note:'警報建立' },
+      { type:'take',   time:'2026-04-20 22:40', user:'陳大偉',
+        procStatus:'待確認', note:'聯繫輪機長確認引擎狀況，等待回覆中' },
+      { type:'note',   time:'2026-04-21 06:10', user:'陳大偉',
+        note:'輪機長回報：#2 引擎效率下降，已降速保護機器，預計 4/22 進廠檢修' },
+    ]},
+
+  { id:'A011', time:'2026-04-20 18:20', source:'船員', ship:'海洋之星',
+    crewName:'黃國彥', crewRank:'輪機員', crewNat:'台灣',
+    type:'船員管理', content:'消防安全訓練證書已逾期，影響船舶 PSC 檢查合規性',
+    assignee:'吳建宏', status:'處理中', history:[
+      { type:'create', time:'2026-04-20 18:20', user:'系統',   note:'警報建立' },
+      { type:'assign', time:'2026-04-20 19:00', user:'李雅玲',
+        assignedTo:'吳建宏', note:'台灣籍船員合規問題，請吳建宏優先跟進' },
+      { type:'take',   time:'2026-04-20 19:15', user:'吳建宏',
+        procStatus:'處理中', note:'已聯繫培訓機構查詢最近課程，預計 04-25 安排補訓' },
+    ]},
+
+  { id:'A012', time:'2026-04-20 11:30', source:'船舶', ship:'大洋號',
+    type:'CII 超標', content:'本週 CII 均值 0.95，接近 B/C 邊界，建議採取節能措施',
+    assignee:'陳大偉', status:'處理中', history:[
+      { type:'create', time:'2026-04-20 11:30', user:'系統',   note:'警報建立' },
+      { type:'take',   time:'2026-04-20 12:00', user:'陳大偉',
+        procStatus:'處理中', note:'已發送節能操作建議給船長，並調整後續航次計畫降低負荷' },
+    ]},
+
+  { id:'A024', time:'2026-04-20 10:00', source:'船員', ship:'南方之鷹',
+    crewName:'Pedro Villanueva', crewRank:'水手', crewNat:'菲律賓',
+    type:'船員管理', content:'在船天數已達 95 天，接近公司 100 天換班上限',
+    assignee:'蔡美惠', status:'處理中', history:[
+      { type:'create', time:'2026-04-20 10:00', user:'系統',   note:'警報建立' },
+      { type:'assign', time:'2026-04-20 10:30', user:'李雅玲',
+        assignedTo:'蔡美惠', note:'菲律賓籍船員換班規劃，請蔡美惠處理' },
+      { type:'take',   time:'2026-04-20 10:45', user:'蔡美惠',
+        procStatus:'處理中', note:'已確認新加坡靠港時安排換班，接替人員 Rommel Cruz 待機中' },
+    ]},
+
+  /* ─ 已結案 ─ */
+  { id:'A013', time:'2026-04-19 20:00', source:'船員', ship:'太平洋號',
+    crewName:'吳俊達', crewRank:'二副', crewNat:'台灣',
+    type:'船員管理', content:'在船天數已達 112 天，超過公司規定上限，需立即安排換班',
+    assignee:'吳建宏', status:'已結案', history:[
+      { type:'create', time:'2026-04-19 20:00', user:'系統',   note:'警報建立' },
+      { type:'assign', time:'2026-04-19 20:30', user:'李雅玲',
+        assignedTo:'吳建宏', note:'請安排接替，下一靠港釜山時執行換班' },
+      { type:'take',   time:'2026-04-19 20:45', user:'吳建宏',
+        procStatus:'處理中', note:'接替人員趙冠宇已確認，預計 04-24 釜山換班，已通知雙方' },
+      { type:'close',  time:'2026-04-24 15:00', user:'吳建宏',
+        procResult:'已解決', note:'吳俊達已於釜山港順利換班，趙冠宇正式接任，文件完備' },
+    ]},
+
+  { id:'A014', time:'2026-04-19 14:20', source:'船舶', ship:'大洋號',
+    type:'航次警報', content:'ETA 較計畫延後 2.5 小時，輕微延誤',
+    assignee:'陳大偉', status:'已結案', history:[
+      { type:'create', time:'2026-04-19 14:20', user:'系統',   note:'警報建立' },
+      { type:'take',   time:'2026-04-19 14:45', user:'陳大偉',
+        procStatus:'處理中', note:'延誤因素：港口交通管制，預計 2 小時後解除' },
+      { type:'close',  time:'2026-04-19 17:10', user:'陳大偉',
+        procResult:'已解決', note:'船舶已正常入港，延誤 2.1 小時，代理行已知悉，無後續影響' },
+    ]},
+
+  { id:'A015', time:'2026-04-19 10:00', source:'船舶', ship:'南方之鷹',
+    type:'航次警報', content:'航速偏低，10.1 kn（計畫 11 kn），ETA 輕微影響',
+    assignee:'林怡君', status:'已結案', history:[
+      { type:'create', time:'2026-04-19 10:00', user:'系統',   note:'警報建立' },
+      { type:'take',   time:'2026-04-19 10:30', user:'林怡君',
+        procStatus:'處理中', note:'與船長確認：因新加坡水域交通管制限速，屬正常狀況' },
+      { type:'close',  time:'2026-04-19 12:00', user:'林怡君',
+        procResult:'無需處理', note:'已確認為管制區限速所致，非機械問題，結案處理' },
+    ]},
+
+  { id:'A016', time:'2026-04-18 22:30', source:'船員', ship:'慶豐輪',
+    crewName:'蔡明道', crewRank:'三副', crewNat:'台灣',
+    type:'船員管理', content:'急救訓練證書 05-01 到期，需在港期間安排更新',
+    assignee:'吳建宏', status:'已結案', history:[
+      { type:'create', time:'2026-04-18 22:30', user:'系統',   note:'警報建立' },
+      { type:'take',   time:'2026-04-18 23:00', user:'吳建宏',
+        procStatus:'處理中', note:'確認東京靠港期間安排培訓機構複訓' },
+      { type:'close',  time:'2026-04-20 16:00', user:'吳建宏',
+        procResult:'已解決', note:'蔡明道已完成急救複訓，新證書效期至 2028-04-20，文件已上傳系統' },
+    ]},
+
+  { id:'A017', time:'2026-04-18 09:00', source:'船員', ship:'大洋號',
+    crewName:'謝志偉', crewRank:'電機員', crewNat:'台灣',
+    type:'船員管理', content:'無線電通訊證書 05-12 到期，建議本次靠港安排更新',
+    assignee:'吳建宏', status:'已結案', history:[
+      { type:'create', time:'2026-04-18 09:00', user:'系統',   note:'警報建立' },
+      { type:'take',   time:'2026-04-18 09:30', user:'吳建宏',
+        procStatus:'處理中', note:'已安排釜山靠港期間辦理證書更新' },
+      { type:'close',  time:'2026-04-19 14:00', user:'吳建宏',
+        procResult:'已解決', note:'證書已更新完成，效期至 2029-05-12，電子版本已存檔' },
+    ]},
+
+  { id:'A018', time:'2026-04-17 20:00', source:'船舶', ship:'遠航者',
+    type:'Bunker 異常', content:'基隆→廈門航段燃油消耗偏低 22%，疑似流量計異常',
+    assignee:'張志明', status:'已結案', history:[
+      { type:'create', time:'2026-04-17 20:00', user:'系統',   note:'警報建立' },
+      { type:'take',   time:'2026-04-17 20:40', user:'張志明',
+        procStatus:'待確認', note:'請輪機長確認流量計讀值是否正常' },
+      { type:'note',   time:'2026-04-18 06:00', user:'張志明',
+        note:'輪機長確認：流量計 B 路線感應器故障，已切換至備用感應器，讀值恢復正常' },
+      { type:'close',  time:'2026-04-18 08:00', user:'張志明',
+        procResult:'已解決', note:'備用感應器運作正常，原感應器已申請備料，下次進廠更換' },
+    ]},
+
+  { id:'A025', time:'2026-04-17 14:00', source:'船員', ship:'亞洲橋',
+    crewName:'Ahmad Ridwan', crewRank:'機匠', crewNat:'印尼',
+    type:'船員管理', content:'工作簽證 05-10 到期，需協助辦理更新或換船安排',
+    assignee:'蔡美惠', status:'已結案', history:[
+      { type:'create', time:'2026-04-17 14:00', user:'系統',   note:'警報建立' },
+      { type:'take',   time:'2026-04-17 14:30', user:'蔡美惠',
+        procStatus:'處理中', note:'已聯繫印尼辦事處協助辦理簽證延期' },
+      { type:'close',  time:'2026-04-20 11:00', user:'蔡美惠',
+        procResult:'已解決', note:'簽證已完成延期，效期至 2027-05-09，文件已存檔至系統' },
+    ]},
+];
+
+/* ═══════════════════════════════════════════════════════
+   Pagination state
+═══════════════════════════════════════════════════════ */
+let currentPage = 1;
+let pageSize    = 10;  // 預設 10 筆
+
+/* ═══════════════════════════════════════════════════════
+   Filters state
+═══════════════════════════════════════════════════════ */
+let activeFilters = { source:'', status:'', type:'', ship:'', assignee:'', keyword:'' };
+let currentDrawerId = null;
+let pendingActionId = null;
+
+/* ═══════════════════════════════════════════════════════
+   Permission
+═══════════════════════════════════════════════════════ */
+function canSee(a) {
+  /* 總管理者：查看全部 */
+  if (CUR.role === '總管理者') return true;
+
+  if (CUR.deptType === 'ship') {
+    /* 船務部只看船舶來源警報 */
+    if (a.source !== '船舶') return false;
+    /* 組經理：負責範圍內全部船舶警報 */
+    if (CUR.role === '組經理') return CUR.assignedShips === 'all' || CUR.assignedShips.includes(a.ship);
+    /* 組員：負責船舶 OR 已指派給本人 */
+    if (CUR.assignedShips === 'all') return true;
+    if (CUR.assignedShips.includes(a.ship)) return true;
+    if (a.assignee === CUR.name) return true;
+    return false;
+  }
+
+  if (CUR.deptType === 'crew') {
+    /* 船員管理部只看船員來源警報 */
+    if (a.source !== '船員') return false;
+    /* 組經理：負責範圍內全部國籍警報 */
+    if (CUR.role === '組經理') return CUR.assignedNats === 'all' || CUR.assignedNats.includes(a.crewNat);
+    /* 組員：負責國籍 OR 已指派給本人 */
+    if (CUR.assignedNats === 'all') return true;
+    if (CUR.assignedNats.includes(a.crewNat)) return true;
+    if (a.assignee === CUR.name) return true;
+    return false;
+  }
+
+  return false;
+}
+const visibleAlerts  = () => ALERTS.filter(canSee);
+const filteredAlerts = () => visibleAlerts().filter(a => {
+  const f = activeFilters;
+  return (!f.source   || a.source   === f.source) &&
+         (!f.status   || a.status   === f.status) &&
+         (!f.type     || a.type     === f.type)   &&
+         (!f.ship     || a.ship     === f.ship)   &&
+         (!f.assignee || a.assignee === f.assignee) &&
+         (!f.keyword  || a.content.includes(f.keyword) ||
+           (a.ship      && a.ship.includes(f.keyword)) ||
+           (a.crewName  && a.crewName.includes(f.keyword)));
+});
+
+/* ═══════════════════════════════════════════════════════
+   Helpers
+═══════════════════════════════════════════════════════ */
+function nowStr() {
+  return new Date().toLocaleString('sv').replace('T',' ').slice(0,16);
+}
+const STATUS_BADGE = {
+  '新進':   '<span class="badge badge-new">新進</span>',
+  '處理中': '<span class="badge badge-process">處理中</span>',
+  '已結案': '<span class="badge badge-done">已結案</span>',
+};
+const SRC_BADGE = {
+  '船舶': '<span class="badge badge-ship">船舶</span>',
+  '船員': '<span class="badge badge-crew">船員</span>',
+};
+const TYPE_COLORS = {
+  '航次警報':'#4078c0','CII 超標':'#e89c3a',
+  'Bunker 異常':'#e05252','船員管理':'#a080e0','其他':'#555f70'
+};
+
+/* ═══════════════════════════════════════════════════════
+   Switch user
+═══════════════════════════════════════════════════════ */
+function switchUser(uid) {
+  CUR = DEPT_USERS.find(u => u.id === uid);
+  currentPage = 1;
+  activeFilters = { source:'', status:'', type:'', ship:'', assignee:'', keyword:'' };
+  ['f-source','f-status2','f-type','f-ship','f-assignee'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-keyword').value = '';
+  document.querySelectorAll('#source-pills .pill, #status-pills .pill').forEach((p,i) => p.classList.toggle('active', i===0));
+  updateUserUI();
+  updateFilterOptions();
+  updateKPI();
+  renderTable();
+}
+
+function updateUserUI() {
+  const bg = CUR.avatarBg || '#4078c0';
+  document.getElementById('nav-avatar').textContent = CUR.avatar;
+  document.getElementById('nav-avatar').style.background = bg;
+  document.getElementById('left-avatar').textContent = CUR.avatar;
+  document.getElementById('left-avatar').style.background = bg;
+  document.getElementById('left-name').textContent = CUR.name;
+  const roleEl = document.getElementById('left-role');
+  roleEl.textContent = CUR.role;
+  roleEl.className = 'uc-role ' + (CUR.role==='總管理者'?'role-admin':CUR.role==='組經理'?'role-manager':'role-member');
+
+  const deptTag = document.getElementById('left-dept-tag');
+  deptTag.textContent = CUR.dept;
+  deptTag.className = 'dept-tag ' + (CUR.deptType==='admin'?'dept-admin':CUR.deptType==='crew'?'dept-crew':'dept-ship');
+
+  const deptDesc = document.getElementById('left-dept-desc');
+  if (CUR.deptType === 'admin') {
+    deptDesc.textContent = '管理層 — 可查看全部警報資料（總管理者權限）';
+  } else if (CUR.deptType === 'ship') {
+    deptDesc.textContent = CUR.role==='組經理'
+      ? '船務部組經理 — 僅可查看船舶來源警報'
+      : '船務部 — 僅可查看負責船舶之船舶警報';
+  } else {
+    deptDesc.textContent = CUR.role==='組經理'
+      ? '船員管理部組經理 — 可查看全部國籍船員警報'
+      : `船員管理部 — 負責：${CUR.assignedNats.join('、')}籍`;
+  }
+
+  const scopeEl = document.getElementById('left-scope');
+  if (CUR.deptType === 'ship' && CUR.assignedShips !== 'all') {
+    scopeEl.innerHTML = `<div class="sc-label" style="font-size:11px;color:#6a7080;margin-bottom:5px;">負責船舶（${CUR.assignedShips.length}艘）</div>` +
+      CUR.assignedShips.map(s=>`<span class="chip" onclick="quickFilterShip('${s}')">${s}</span>`).join('');
+  } else if (CUR.deptType === 'crew' && CUR.assignedNats !== 'all') {
+    scopeEl.innerHTML = `<div class="sc-label" style="font-size:11px;color:#6a7080;margin-bottom:5px;">負責國籍</div>` +
+      CUR.assignedNats.map(n=>`<span class="chip nat">${NAT_FLAG[n]||''} ${n}籍</span>`).join('');
+  } else {
+    scopeEl.innerHTML = '';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   KPI + left panel counts
+═══════════════════════════════════════════════════════ */
+function updateKPI() {
+  const va = visibleAlerts();
+  const total  = va.length;
+  const newCnt = va.filter(a=>a.status==='新進').length;
+  const proc   = va.filter(a=>a.status==='處理中').length;
+  const done   = va.filter(a=>a.status==='已結案').length;
+  const ship   = va.filter(a=>a.source==='船舶').length;
+  const crew   = va.filter(a=>a.source==='船員').length;
+  const rate   = total ? Math.round(done/total*100) : 0;
+
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-new').textContent   = newCnt;
+  document.getElementById('kpi-proc').textContent  = proc;
+  document.getElementById('kpi-done').textContent  = done;
+  document.getElementById('kpi-rate').textContent  = `結案率 ${rate}%`;
+  document.getElementById('kpi-ship').textContent  = ship;
+  document.getElementById('kpi-crew').textContent  = crew;
+  document.getElementById('donut-total').textContent = total;
+
+  document.getElementById('src-all-cnt').textContent  = total;
+  document.getElementById('src-ship-cnt').textContent = ship;
+  document.getElementById('src-crew-cnt').textContent = crew;
+  document.getElementById('st-all-cnt').textContent   = total;
+  document.getElementById('st-new-cnt').textContent   = newCnt;
+  document.getElementById('st-proc-cnt').textContent  = proc;
+  document.getElementById('st-done-cnt').textContent  = done;
+
+  const typeCounts = {};
+  va.forEach(a => typeCounts[a.type] = (typeCounts[a.type]||0)+1);
+  document.getElementById('type-legend').innerHTML = Object.entries(typeCounts)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([t,c])=>`
+      <div class="legend-item" onclick="quickFilterType('${t}')">
+        <div class="legend-dot" style="background:${TYPE_COLORS[t]||'#555'}"></div>
+        <span class="legend-name">${t}</span>
+        <span class="legend-count">${c}</span>
+      </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   Filter options
+═══════════════════════════════════════════════════════ */
+function updateFilterOptions() {
+  const va = visibleAlerts();
+  const ships = [...new Set(va.filter(a=>a.ship).map(a=>a.ship))].sort();
+  document.getElementById('f-ship').innerHTML =
+    '<option value="">全部船隻</option>' + ships.map(s=>`<option>${s}</option>`).join('');
+
+  /* 指派人選項：顯示同部門人員 */
+  const sameDept = DEPT_USERS.filter(u => u.dept === CUR.dept);
+  document.getElementById('f-assignee').innerHTML =
+    '<option value="">全部負責人</option>' +
+    sameDept.map(u=>`<option>${u.name}</option>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   Render table + pagination
+═══════════════════════════════════════════════════════ */
+function renderTable() {
+  const data  = filteredAlerts();
+  const total = data.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  const start  = (currentPage - 1) * pageSize;
+  const paged  = data.slice(start, start + Math.min(pageSize, total));
+
+  const tbody = document.getElementById('alert-tbody');
+  tbody.innerHTML = paged.map(a => {
+    const unread = a.status==='新進' ? 'unread' : '';
+    let subject;
+    if (a.source === '船員') {
+      subject = `<strong style="color:#d8d8d8;">${a.crewName}</strong>
+        <span style="color:#6a7080;font-size:11px;"> ${a.crewRank}</span>
+        <span class="badge badge-nat" style="margin-left:4px;">${NAT_FLAG[a.crewNat]||''} ${a.crewNat}籍</span>
+        <br><span style="font-size:11px;color:#5a6070;">${a.ship||'（岸上）'}</span>`;
+    } else {
+      subject = `<strong style="color:#d8d8d8;">${a.ship}</strong>`;
+    }
+    const assDisp = a.assignee
+      ? `<span style="color:#9aa0a6;">${a.assignee}</span>`
+      : `<span style="color:#333640;">未指派</span>`;
+
+    let actions = '';
+    if (a.status === '新進') {
+      actions = `<button class="act-btn take"  onclick="openTake(event,'${a.id}')">接手</button>
+                 <button class="act-btn assign" onclick="openAssign(event,'${a.id}')">指派</button>
+                 <button class="act-btn detail" onclick="openDrawer(event,'${a.id}')">詳情</button>`;
+    } else if (a.status === '處理中') {
+      actions = `<button class="act-btn close"  onclick="openClose(event,'${a.id}')">結案</button>
+                 <button class="act-btn assign"  onclick="openAssign(event,'${a.id}')">轉派</button>
+                 <button class="act-btn detail"  onclick="openDrawer(event,'${a.id}')">詳情</button>`;
+    } else {
+      actions = `<button class="act-btn reopen" onclick="doReopen(event,'${a.id}')">重開</button>
+                 <button class="act-btn detail"  onclick="openDrawer(event,'${a.id}')">詳情</button>`;
+    }
+
+    return `<tr class="${unread}" onclick="openDrawer(event,'${a.id}')">
+      <td></td>
+      <td class="time">${a.time}</td>
+      <td>${SRC_BADGE[a.source]}</td>
+      <td>${subject}</td>
+      <td>${a.type}</td>
+      <td class="content-cell" title="${a.content}">${a.content}</td>
+      <td>${assDisp}</td>
+      <td>${STATUS_BADGE[a.status]}</td>
+      <td onclick="event.stopPropagation()">${actions}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="9" style="text-align:center;padding:40px;color:#333640;">無符合條件的警報紀錄</td></tr>`;
+
+  /* info */
+  const endRow = Math.min(start + pageSize, total);
+  document.getElementById('tbl-info').innerHTML =
+    total > 0
+      ? `顯示第 ${start+1}–${endRow} 筆，共 <strong>${total}</strong> 筆（可見範圍 ${visibleAlerts().length} 筆）`
+      : `共 <strong>0</strong> 筆`;
+
+  /* pagination buttons */
+  renderPagination(totalPages);
+}
+
+function renderPagination(totalPages) {
+  const btns = document.getElementById('page-btns');
+  let html = `<button class="page-btn" onclick="gotoPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+
+  /* show at most 5 page buttons */
+  let start = Math.max(1, currentPage - 2);
+  let end   = Math.min(totalPages, start + 4);
+  if (end - start < 4) start = Math.max(1, end - 4);
+
+  for (let p = start; p <= end; p++) {
+    html += `<button class="page-btn${p===currentPage?' active':''}" onclick="gotoPage(${p})">${p}</button>`;
+  }
+  html += `<button class="page-btn" onclick="gotoPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+  btns.innerHTML = html;
+}
+
+function gotoPage(p) {
+  const total = filteredAlerts().length;
+  const max   = Math.max(1, Math.ceil(total / pageSize));
+  currentPage = Math.max(1, Math.min(p, max));
+  renderTable();
+}
+
+function changePageSize(val) {
+  pageSize = parseInt(val, 10);
+  currentPage = 1;
+  renderTable();
+}
+
+/* ═══════════════════════════════════════════════════════
+   Filters
+═══════════════════════════════════════════════════════ */
+function setActivePill(groupId, el) {
+  document.querySelectorAll(`#${groupId} .pill`).forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+}
+function filterSource(val, el) {
+  setActivePill('source-pills', el);
+  document.getElementById('f-source').value = val==='all'?'':val;
+  activeFilters.source = val==='all'?'':val;
+  currentPage = 1; renderTable();
+}
+function filterStatus(val, el) {
+  setActivePill('status-pills', el);
+  document.getElementById('f-status2').value = val==='all'?'':val;
+  activeFilters.status = val==='all'?'':val;
+  currentPage = 1; renderTable();
+}
+function quickFilterType(type) {
+  document.getElementById('f-type').value = type;
+  activeFilters.type = type; currentPage = 1; renderTable();
+}
+function quickFilterShip(ship) {
+  document.getElementById('f-ship').value = ship;
+  activeFilters.ship = ship; currentPage = 1; renderTable();
+}
+function applyFilters() {
+  activeFilters = {
+    source:   document.getElementById('f-source').value,
+    status:   document.getElementById('f-status2').value,
+    type:     document.getElementById('f-type').value,
+    ship:     document.getElementById('f-ship').value,
+    assignee: document.getElementById('f-assignee').value,
+    keyword:  document.getElementById('f-keyword').value.trim(),
+  };
+  currentPage = 1; renderTable();
+}
+function resetFilters() {
+  activeFilters = { source:'', status:'', type:'', ship:'', assignee:'', keyword:'' };
+  ['f-source','f-status2','f-type','f-ship','f-assignee'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-keyword').value = '';
+  document.querySelectorAll('#source-pills .pill, #status-pills .pill').forEach((p,i)=>p.classList.toggle('active',i===0));
+  currentPage = 1; renderTable();
+}
+
+/* ═══════════════════════════════════════════════════════
+   Detail Drawer
+═══════════════════════════════════════════════════════ */
+function openDrawer(e, id) {
+  if (e) e.stopPropagation();
+  const a = ALERTS.find(r=>r.id===id);
+  if (!a) return;
+  currentDrawerId = id;
+  const isClosed = a.status === '已結案';
+
+  document.getElementById('drawer-title').textContent =
+    a.source==='船員' ? `${a.crewName}（${a.crewRank}）— ${a.type}` : `${a.ship} — ${a.type}`;
+  document.getElementById('drawer-badges').innerHTML =
+    SRC_BADGE[a.source] + ' ' + STATUS_BADGE[a.status];
+
+  const infoRows = a.source==='船員' ? `
+    <div class="detail-field"><div class="df-label">船員姓名</div><div class="df-value">${a.crewName}</div></div>
+    <div class="detail-field"><div class="df-label">職位</div><div class="df-value">${a.crewRank}</div></div>
+    <div class="detail-field"><div class="df-label">國籍</div><div class="df-value">${natLabel(a.crewNat)}</div></div>
+    <div class="detail-field"><div class="df-label">關聯船舶</div><div class="df-value">${a.ship||'岸上（無在船）'}</div></div>
+    <div class="detail-field"><div class="df-label">警報類型</div><div class="df-value">${a.type}</div></div>
+    <div class="detail-field"><div class="df-label">負責人</div><div class="df-value">${a.assignee||'未指派'}</div></div>
+  ` : `
+    <div class="detail-field"><div class="df-label">船名</div><div class="df-value">${a.ship}</div></div>
+    <div class="detail-field"><div class="df-label">警報類型</div><div class="df-value">${a.type}</div></div>
+    <div class="detail-field"><div class="df-label">負責人</div><div class="df-value">${a.assignee||'未指派'}</div></div>
+    <div class="detail-field"><div class="df-label">建立時間</div><div class="df-value" style="font-size:12px;">${a.time}</div></div>
+  `;
+
+  const history = a.history.length
+    ? a.history
+    : [{ type:'create', time:a.time, user:'系統', note:'警報建立' }];
+
+  const TL_LABELS = { create:'警報建立', take:'接手處理', assign:'指派異動', note:'新增備註', close:'結案', reopen:'重新開啟' };
+  const tlHtml = history.map(h => {
+    let detail = '';
+    if (h.type==='take') {
+      detail = `<div class="tl-record">
+        <div class="tl-record-cell"><div class="trc-label">接手人</div><div class="trc-value">${h.user}</div></div>
+        <div class="tl-record-cell"><div class="trc-label">接手時間</div><div class="trc-value">${h.time}</div></div>
+        <div class="tl-record-cell"><div class="trc-label">處理狀態</div><div class="trc-value">${h.procStatus||'—'}</div></div>
+        <div class="tl-record-cell"><div class="trc-label">處理說明</div><div class="trc-value">${h.note}</div></div>
+      </div>`;
+    } else if (h.type==='assign') {
+      detail = `<div class="tl-note">指派給：<strong>${h.assignedTo}</strong>${h.note?'<br>'+h.note:''}</div>`;
+    } else if (h.type==='close') {
+      detail = `<div class="tl-record">
+        <div class="tl-record-cell"><div class="trc-label">結案人</div><div class="trc-value">${h.user}</div></div>
+        <div class="tl-record-cell"><div class="trc-label">處理結果</div><div class="trc-value">${h.procResult||'—'}</div></div>
+        <div class="tl-record-cell" style="grid-column:1/-1"><div class="trc-label">結案說明</div><div class="trc-value">${h.note}</div></div>
+      </div>`;
+    } else if (h.note) {
+      detail = `<div class="tl-note">${h.note}</div>`;
+    }
+    return `<div class="tl-item">
+      <div class="tl-dot ${h.type}"></div>
+      <div style="flex:1;">
+        <div class="tl-title">${TL_LABELS[h.type]||h.type} — ${h.user}</div>
+        <div class="tl-meta">${h.time}</div>${detail}
+      </div>
+    </div>`;
+  }).join('');
+
+  /* 結案後備註鎖定；其他狀態顯示輸入區 */
+  const noteSection = isClosed
+    ? `<hr class="detail-sep">
+       <div class="note-locked">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <div><strong>備註已鎖定</strong><br>案件結案後不可新增備註。如需補充說明，請先將案件重新開啟。</div>
+      </div>`
+    : `<hr class="detail-sep">
+       <div class="tl-section-label">新增備註</div>
+       <textarea class="note-input" id="drawer-note" placeholder="輸入處理說明或追蹤備註…"></textarea>
+       <div style="margin-top:6px;display:flex;justify-content:flex-end;">
+         <button class="btn-sm primary" onclick="saveDrawerNote('${a.id}')">儲存備註</button>
+       </div>`;
+
+  document.getElementById('drawer-body').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-field"><div class="df-label">警報 ID</div><div class="df-value" style="font-size:11px;color:#5a6070;">${a.id}</div></div>
+      <div class="detail-field"><div class="df-label">建立時間</div><div class="df-value" style="font-size:12px;">${a.time}</div></div>
+      ${infoRows}
+      <div class="detail-field full"><div class="df-label">警報內容</div><div class="df-value">${a.content}</div></div>
+    </div>
+    <hr class="detail-sep">
+    <div class="tl-section-label">處理歷程</div>
+    <div class="timeline">${tlHtml}</div>
+    ${noteSection}`;
+
+  /* footer */
+  let footer = `<button class="btn secondary" onclick="closeDrawer()">關閉</button>`;
+  if (a.status==='新進') {
+    footer = `<button class="btn primary"   onclick="openTake(null,'${a.id}')">接手處理</button>
+              <button class="btn secondary" onclick="openAssign(null,'${a.id}')">指派人員</button>${footer}`;
+  } else if (a.status==='處理中') {
+    footer = `<button class="btn success"   onclick="openClose(null,'${a.id}')">結案</button>
+              <button class="btn secondary" onclick="openAssign(null,'${a.id}')">轉派</button>${footer}`;
+  } else {
+    /* 結案：只能重開，不可加備註 */
+    footer = `<button class="btn secondary" style="border-color:#e89c3a;color:#e89c3a;" onclick="doReopen(null,'${a.id}')">重新開啟</button>${footer}`;
+  }
+  document.getElementById('drawer-footer').innerHTML = footer;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  currentDrawerId = null;
+}
+
+function saveDrawerNote(id) {
+  const a = ALERTS.find(r=>r.id===id);
+  if (a.status==='已結案') return;
+  const note = (document.getElementById('drawer-note')||{}).value?.trim();
+  if (!note) return;
+  a.history.push({ type:'note', time:nowStr(), user:CUR.name, note });
+  openDrawer(null, id);
+  renderTable(); updateKPI();
+}
+
+function openNote(e, id) {
+  if (e) e.stopPropagation();
+  pendingActionId = id;
+  document.getElementById('note-user').textContent = CUR.name;
+  document.getElementById('note-time').textContent = nowStr();
+  document.getElementById('note-content').value = '';
+  document.getElementById('note-err').classList.remove('show');
+  document.getElementById('modal-note').classList.add('open');
+}
+function confirmNote() {
+  const note = document.getElementById('note-content').value.trim();
+  if (!note) { document.getElementById('note-err').classList.add('show'); return; }
+  const a = ALERTS.find(r=>r.id===pendingActionId);
+  if (a.status==='已結案') return;
+  a.history.push({ type:'note', time:nowStr(), user:CUR.name, note });
+  closeModal('modal-note');
+  renderTable(); updateKPI();
+  if (currentDrawerId===pendingActionId) openDrawer(null, pendingActionId);
+}
+
+/* ═══════════════════════════════════════════════════════
+   接手 Modal
+═══════════════════════════════════════════════════════ */
+function openTake(e, id) {
+  if (e) e.stopPropagation();
+  pendingActionId = id;
+  document.getElementById('take-handler').textContent = CUR.name;
+  document.getElementById('take-time').textContent    = nowStr();
+  document.getElementById('take-note').value = '';
+  document.getElementById('take-note-err').classList.remove('show');
+  document.getElementById('modal-take').classList.add('open');
+}
+function confirmTake() {
+  const note = document.getElementById('take-note').value.trim();
+  if (!note) { document.getElementById('take-note-err').classList.add('show'); return; }
+  const procStatus = document.getElementById('take-status').value;
+  const a = ALERTS.find(r=>r.id===pendingActionId);
+  a.status   = '處理中';
+  a.assignee = CUR.name;
+  a.history.push({ type:'take', time:nowStr(), user:CUR.name, procStatus, note });
+  closeModal('modal-take');
+  renderTable(); updateKPI();
+  if (currentDrawerId===pendingActionId) openDrawer(null, pendingActionId);
+}
+
+/* ═══════════════════════════════════════════════════════
+   指派 Modal
+═══════════════════════════════════════════════════════ */
+function openAssign(e, id) {
+  if (e) e.stopPropagation();
+  pendingActionId = id;
+  const a = ALERTS.find(r=>r.id===id);
+  document.getElementById('assign-current').textContent = a.assignee||'未指派';
+  document.getElementById('assign-note').value = '';
+  document.getElementById('assign-err').classList.remove('show');
+
+  /* 同部門人員 */
+  const sameDept = DEPT_USERS.filter(u => u.dept===CUR.dept);
+  document.getElementById('assign-target').innerHTML =
+    '<option value="">請選擇人員…</option>' +
+    sameDept.map(u=>`<option value="${u.name}">${u.name}（${u.role}）</option>`).join('');
+  document.getElementById('modal-assign').classList.add('open');
+}
+function confirmAssign() {
+  const target = document.getElementById('assign-target').value;
+  if (!target) { document.getElementById('assign-err').classList.add('show'); return; }
+  const note = document.getElementById('assign-note').value.trim();
+  const a = ALERTS.find(r=>r.id===pendingActionId);
+  a.assignee = target;
+  a.history.push({ type:'assign', time:nowStr(), user:CUR.name, assignedTo:target, note });
+  closeModal('modal-assign');
+  renderTable(); updateKPI();
+  if (currentDrawerId===pendingActionId) openDrawer(null, pendingActionId);
+}
+
+/* ═══════════════════════════════════════════════════════
+   結案 Modal
+═══════════════════════════════════════════════════════ */
+function openClose(e, id) {
+  if (e) e.stopPropagation();
+  pendingActionId = id;
+  document.getElementById('close-note').value = '';
+  document.getElementById('close-note-err').classList.remove('show');
+  document.getElementById('modal-close').classList.add('open');
+}
+function confirmClose() {
+  const note = document.getElementById('close-note').value.trim();
+  if (!note) { document.getElementById('close-note-err').classList.add('show'); return; }
+  const procResult = document.getElementById('close-result').value;
+  const a = ALERTS.find(r=>r.id===pendingActionId);
+  a.status = '已結案';
+  a.history.push({ type:'close', time:nowStr(), user:CUR.name, procResult, note });
+  closeModal('modal-close');
+  renderTable(); updateKPI();
+  if (currentDrawerId===pendingActionId) openDrawer(null, pendingActionId);
+}
+
+/* ═══════════════════════════════════════════════════════
+   重開
+═══════════════════════════════════════════════════════ */
+function doReopen(e, id) {
+  if (e) e.stopPropagation();
+  const a = ALERTS.find(r=>r.id===id);
+  a.status = '新進';
+  a.history.push({ type:'reopen', time:nowStr(), user:CUR.name, note:'案件重新開啟，備註鎖定已解除' });
+  renderTable(); updateKPI();
+  if (currentDrawerId===id) openDrawer(null, id);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Modal helpers
+═══════════════════════════════════════════════════════ */
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  pendingActionId = null;
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', function(e){ if (e.target===this) closeModal(this.id); });
+});
+
+/* ═══════════════════════════════════════════════════════
+   Init
+═══════════════════════════════════════════════════════ */
+updateUserUI();
+updateFilterOptions();
+updateKPI();
+renderTable();
+</script>
+</body>
+</html>

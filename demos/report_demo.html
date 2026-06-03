@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>報表 Demo — 摯陞 SRP 系統</title>
+<style>
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", Arial, sans-serif;
+  font-size: 13px;
+  background: #f0f2f5;
+  color: #1a1a1a;
+}
+
+/* ── Screen toolbar ── */
+.screen-toolbar {
+  background: #fff;
+  border-bottom: 1px solid #d9d9d9;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.screen-toolbar h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  flex: 1;
+}
+.toolbar-btn {
+  padding: 6px 16px;
+  border-radius: 4px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  color: #333;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.12s;
+}
+.toolbar-btn:hover { background: #f5f5f5; }
+.toolbar-btn.primary {
+  background: #4078c0;
+  border-color: #3568b0;
+  color: #fff;
+}
+.toolbar-btn.primary:hover { background: #3568b0; }
+
+/* ── Report shell ── */
+.report-wrapper {
+  max-width: 1050px;
+  margin: 24px auto;
+  padding: 0 20px 60px;
+}
+
+/* ── Report page (printable unit) ── */
+.report-page {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  padding: 32px 36px;
+  margin-bottom: 32px;
+}
+
+/* ── Report header ── */
+.report-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding-bottom: 18px;
+  border-bottom: 2px solid #1a3a6b;
+  margin-bottom: 20px;
+}
+.report-header .logo {
+  width: 54px;
+  height: 54px;
+  background: #1a3a6b;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.report-header .titles { flex: 1; }
+.report-header .company {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 2px;
+}
+.report-header h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a3a6b;
+  letter-spacing: .5px;
+}
+.report-header .subtitle {
+  font-size: 12px;
+  color: #888;
+}
+.report-header .meta {
+  text-align: right;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.7;
+}
+
+/* ── Filter summary bar ── */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.filter-tag {
+  background: #f0f5ff;
+  border: 1px solid #c8d8f8;
+  border-radius: 3px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: #1a3a6b;
+}
+.filter-tag strong { font-weight: 600; }
+
+/* ── KPI summary cards ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 5px;
+  padding: 14px 16px;
+  text-align: center;
+}
+.kpi-card .kpi-label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+}
+.kpi-card .kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.kpi-card .kpi-unit { font-size: 12px; color: #999; }
+.kpi-card.danger .kpi-value { color: #d93025; }
+.kpi-card.warn .kpi-value { color: #e67e22; }
+.kpi-card.ok .kpi-value { color: #27ae60; }
+
+/* ── Section heading ── */
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a3a6b;
+  border-left: 3px solid #4078c0;
+  padding-left: 8px;
+  margin: 0 0 10px;
+}
+
+/* ── Table ── */
+.rpt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 24px;
+}
+.rpt-table thead tr {
+  background: #1a3a6b;
+  color: #fff;
+}
+.rpt-table thead th {
+  padding: 9px 10px;
+  text-align: left;
+  font-weight: 600;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.rpt-table thead th.num { text-align: right; }
+.rpt-table tbody tr { border-bottom: 1px solid #e8e8e8; }
+.rpt-table tbody tr:nth-child(even) { background: #f8f9fc; }
+.rpt-table tbody tr:hover { background: #eef3fb; }
+.rpt-table tbody td {
+  padding: 8px 10px;
+  vertical-align: middle;
+  color: #333;
+}
+.rpt-table tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.rpt-table tfoot tr { border-top: 2px solid #1a3a6b; }
+.rpt-table tfoot td {
+  padding: 8px 10px;
+  font-weight: 700;
+  font-size: 12px;
+  color: #1a3a6b;
+  background: #f0f5ff;
+}
+.rpt-table tfoot td.num { text-align: right; }
+
+/* ── Status badges ── */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-danger { background: #fde8e7; color: #c0392b; }
+.badge-warn   { background: #fef3e2; color: #d35400; }
+.badge-info   { background: #e8f0fe; color: #1a3a6b; }
+.badge-ok     { background: #e8f5e9; color: #1e7e34; }
+.badge-gray   { background: #f0f0f0; color: #666; }
+
+/* ── Page footer ── */
+.report-footer {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* ── Section separator ── */
+.section-sep { border: none; border-top: 1px dashed #e0e0e0; margin: 20px 0; }
+
+/* ── Report type tabs (screen) ── */
+.rpt-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #d9d9d9;
+}
+.rpt-tab {
+  padding: 8px 18px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  color: #888;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.rpt-tab.active { color: #4078c0; border-bottom-color: #4078c0; font-weight: 600; }
+.rpt-tab:hover:not(.active) { color: #333; }
+
+/* ── Section visibility ── */
+.rpt-section { display: none; }
+.rpt-section.active { display: block; }
+
+/* ── Crew view selector ── */
+.crew-selector {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.crew-selector label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+}
+.crew-sel-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.crew-sel-btn {
+  padding: 4px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  background: #fff;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  color: #444;
+  transition: all 0.12s;
+}
+.crew-sel-btn:hover { background: #f0f5ff; border-color: #4078c0; color: #4078c0; }
+.crew-sel-btn.active { background: #4078c0; border-color: #4078c0; color: #fff; font-weight: 600; }
+
+/* ── Ship info bar (per-ship report) ── */
+.ship-info-bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: #d0d0d0;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  font-size: 12px;
+}
+.ship-info-cell {
+  background: #f8f9fc;
+  padding: 8px 12px;
+}
+.ship-info-cell .sic-label { color: #888; font-size: 12px; margin-bottom: 2px; }
+.ship-info-cell .sic-value { color: #1a1a1a; font-weight: 600; }
+
+/* ═══════════════════════════════════════
+   PRINT STYLES
+═══════════════════════════════════════ */
+@media print {
+  body { background: #fff; font-size: 12px; }
+  .screen-toolbar, .rpt-tabs, .crew-selector { display: none !important; }
+  .report-wrapper { margin: 0; padding: 0; max-width: 100%; }
+  /* 列印單船報表時隱藏全船隊頁 */
+  body.print-ship #page-crew-1,
+  body.print-ship #page-crew-2 { display: none !important; }
+  /* 列印全船隊時隱藏單船報表 */
+  body.print-fleet #crew-ship-report { display: none !important; }
+  .report-page {
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 20px 28px;
+    page-break-after: always;
+  }
+  .report-page:last-child { page-break-after: auto; }
+  .rpt-section { display: block !important; }
+  .kpi-card:hover, .rpt-table tbody tr:hover { background: inherit !important; }
+
+  @page {
+    size: A4;
+    margin: 15mm 12mm;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Screen toolbar ── -->
+<div class="screen-toolbar">
+  <h1>報表 Demo（簡化版）— 摯陞 SRP 系統</h1>
+  <div class="rpt-tabs" style="margin:0;border:none;">
+    <button class="rpt-tab active" onclick="switchTab('cii')">CII 報表</button>
+    <button class="rpt-tab" onclick="switchTab('bunker')">Bunker 報表</button>
+    <button class="rpt-tab" onclick="switchTab('crew')">船員週報</button>
+  </div>
+  <button class="toolbar-btn" onclick="window.print()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    列印
+  </button>
+</div>
+
+<div class="report-wrapper">
+
+  <!-- ════════════════════════════════════════
+       CII 報表
+  ════════════════════════════════════════ -->
+  <div id="sec-cii" class="rpt-section active">
+    <div class="report-page">
+
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>CII 碳排效率報表</h2>
+          <div class="subtitle">Carbon Intensity Indicator (CII) Report</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-14<br>
+          查詢區間：2026-01-01 ~ 2026-03-31<br>
+          製表人：系統自動產生
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="filter-tag"><strong>年度：</strong>2026</span>
+        <span class="filter-tag"><strong>季度：</strong>Q1</span>
+        <span class="filter-tag"><strong>評級標準：</strong>IMO CII 2024</span>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-card ok"><div class="kpi-label">評級 A/B 船隻</div><div class="kpi-value">7</div><div class="kpi-unit">艘 (58%)</div></div>
+        <div class="kpi-card warn"><div class="kpi-label">評級 C/D 船隻</div><div class="kpi-value">3</div><div class="kpi-unit">艘 (25%)</div></div>
+        <div class="kpi-card danger"><div class="kpi-label">評級 E 船隻</div><div class="kpi-value">2</div><div class="kpi-unit">艘 (17%)</div></div>
+        <div class="kpi-card"><div class="kpi-label">艦隊平均 CII</div><div class="kpi-value">0.97</div><div class="kpi-unit">gCO₂/dwt·nm</div></div>
+      </div>
+
+      <p class="section-title">各船 CII 評級詳情</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>船名</th>
+            <th>船型</th>
+            <th class="num">DWT</th>
+            <th class="num">Q1 CII 值</th>
+            <th class="num">基準值</th>
+            <th>評級</th>
+            <th class="num">警報次數</th>
+            <th>年度預測</th>
+          </tr>
+        </thead>
+        <tbody id="cii-tbody"></tbody>
+      </table>
+
+      <hr class="section-sep">
+
+      <p class="section-title">月度 CII 趨勢 (2026 Q1)</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>船名</th>
+            <th class="num">1月</th>
+            <th class="num">2月</th>
+            <th class="num">3月</th>
+            <th class="num">Q1 均值</th>
+            <th>走勢</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>慶豐輪</td><td class="num">0.84</td><td class="num">0.80</td><td class="num">0.82</td><td class="num">0.82</td><td>↗ 改善中</td></tr>
+          <tr><td>大洋號</td><td class="num">0.95</td><td class="num">0.93</td><td class="num">0.91</td><td class="num">0.93</td><td>↗ 改善中</td></tr>
+          <tr><td>福星輪</td><td class="num">1.08</td><td class="num">1.12</td><td class="num">1.15</td><td class="num">1.12</td><td>↘ 惡化中</td></tr>
+          <tr><td>海洋之星</td><td class="num">1.18</td><td class="num">1.20</td><td class="num">1.22</td><td class="num">1.20</td><td>↘ 持續惡化</td></tr>
+          <tr><td>太平洋號</td><td class="num">0.97</td><td class="num">0.94</td><td class="num">0.95</td><td class="num">0.95</td><td>→ 持平</td></tr>
+        </tbody>
+      </table>
+
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 1 頁，共 1 頁</span>
+        <span>列印時間：2026-04-14 09:30</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       Bunker 報表
+  ════════════════════════════════════════ -->
+  <div id="sec-bunker" class="rpt-section">
+    <div class="report-page">
+
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>Bunker 燃油異常報表</h2>
+          <div class="subtitle">Bunker Consumption Alert Report</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-14<br>
+          查詢區間：2026-03-01 ~ 2026-03-31<br>
+          製表人：系統自動產生
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="filter-tag"><strong>船名：</strong>全船隊</span>
+        <span class="filter-tag"><strong>燃油種類：</strong>全部</span>
+        <span class="filter-tag"><strong>異常類型：</strong>全部</span>
+        <span class="filter-tag"><strong>共 26 筆</strong></span>
+      </div>
+
+      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
+        <div class="kpi-card danger"><div class="kpi-label">高耗量異常</div><div class="kpi-value">11</div><div class="kpi-unit">件</div></div>
+        <div class="kpi-card warn"><div class="kpi-label">低耗量異常</div><div class="kpi-value">6</div><div class="kpi-unit">件 (可能洩漏)</div></div>
+        <div class="kpi-card info"><div class="kpi-label">補給量偏差</div><div class="kpi-value">5</div><div class="kpi-unit">件</div></div>
+        <div class="kpi-card"><div class="kpi-label">月總消耗</div><div class="kpi-value">4,823</div><div class="kpi-unit">MT</div></div>
+        <div class="kpi-card"><div class="kpi-label">異常佔比</div><div class="kpi-value">18%</div><div class="kpi-unit">航段</div></div>
+      </div>
+
+      <p class="section-title">Bunker 異常明細</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>日期</th>
+            <th>船名</th>
+            <th>航段</th>
+            <th>燃油種類</th>
+            <th>異常類型</th>
+            <th class="num">實際耗量 (MT)</th>
+          </tr>
+        </thead>
+        <tbody id="bunker-tbody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="6">合計</td>
+            <td class="num">1,247</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 1 頁，共 2 頁</span>
+        <span>列印時間：2026-04-14 09:30</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       船員週報
+  ════════════════════════════════════════ -->
+  <div id="sec-crew" class="rpt-section">
+
+    <!-- 船隊 / 單船 選擇器 -->
+    <div class="crew-selector">
+      <label>選擇報表範圍：</label>
+      <div class="crew-sel-btns" id="crew-sel-btns">
+        <button class="crew-sel-btn active" onclick="switchCrewView('fleet')">全船隊</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('慶豐輪')">慶豐輪</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('大洋號')">大洋號</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('福星輪')">福星輪</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('海洋之星')">海洋之星</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('太平洋號')">太平洋號</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('北極星')">北極星</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('南方之鷹')">南方之鷹</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('亞洲橋')">亞洲橋</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('寶島輪')">寶島輪</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('明日之星')">明日之星</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('遠航者')">遠航者</button>
+        <button class="crew-sel-btn" onclick="switchCrewView('海上明珠')">海上明珠</button>
+      </div>
+    </div>
+
+    <!-- 單船報表（動態產生） -->
+    <div id="crew-ship-report" style="display:none;"></div>
+
+    <div class="report-page" id="page-crew-1">
+
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>船員管理週報</h2>
+          <div class="subtitle">Crew Management Weekly Report</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-14<br>
+          報告週期：2026-04-07 ~ 2026-04-13<br>
+          第 15 週 (W15)<br>
+          製表人：系統自動產生
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="filter-tag"><strong>船隊：</strong>全船隊</span>
+        <span class="filter-tag"><strong>船員總人數：</strong>148 人</span>
+        <span class="filter-tag"><strong>在船中：</strong>132 人</span>
+        <span class="filter-tag"><strong>休假中：</strong>16 人</span>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
+        <div class="kpi-card danger">
+          <div class="kpi-label">本週警報件數</div>
+          <div class="kpi-value">12</div>
+          <div class="kpi-unit">件　▲ vs 上週</div>
+        </div>
+        <div class="kpi-card warn">
+          <div class="kpi-label">證書即將到期</div>
+          <div class="kpi-value">8</div>
+          <div class="kpi-unit">人　30 天內</div>
+        </div>
+        <div class="kpi-card warn">
+          <div class="kpi-label">合約即將到期</div>
+          <div class="kpi-value">5</div>
+          <div class="kpi-unit">人　本月內</div>
+        </div>
+        <div class="kpi-card ok">
+          <div class="kpi-label">本週換班人次</div>
+          <div class="kpi-value">14</div>
+          <div class="kpi-unit">人次</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">平均在船天數</div>
+          <div class="kpi-value">87</div>
+          <div class="kpi-unit">天</div>
+        </div>
+      </div>
+
+      <!-- 各船人員概況 -->
+      <p class="section-title">各船人員概況</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>船名</th>
+            <th class="num">編制人數</th>
+            <th class="num">在船人數</th>
+            <th class="num">本週上船</th>
+            <th class="num">本週離船</th>
+            <th class="num">平均在船天</th>
+            <th class="num">證書到期預警</th>
+            <th class="num">合約到期預警</th>
+          </tr>
+        </thead>
+        <tbody id="crew-ship-tbody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">合計</td>
+            <td class="num">148</td>
+            <td class="num">132</td>
+            <td class="num">7</td>
+            <td class="num">7</td>
+            <td class="num">87</td>
+            <td class="num">8</td>
+            <td class="num">5</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <hr class="section-sep">
+
+      <!-- 警報明細 -->
+      <p class="section-title">本週船員警報明細</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>警報時間</th>
+            <th>船名</th>
+            <th>姓名</th>
+            <th>職位</th>
+            <th>警報類型</th>
+          </tr>
+        </thead>
+        <tbody id="crew-alert-tbody"></tbody>
+      </table>
+
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 1 頁，共 2 頁</span>
+        <span>列印時間：2026-04-14 09:30</span>
+      </div>
+    </div>
+
+    <!-- 第 2 頁：證書 / 合約到期預警 + 換班紀錄 -->
+    <div class="report-page" id="page-crew-2">
+
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>船員管理週報 — 證書與換班明細</h2>
+          <div class="subtitle">Crew Management Weekly Report — Certificates &amp; Sign-on/off</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-14<br>
+          報告週期：2026-04-07 ~ 2026-04-13<br>
+          第 15 週 (W15)
+        </div>
+      </div>
+
+      <!-- 證書到期預警 -->
+      <p class="section-title">證書到期預警 (30 天內)</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>姓名</th>
+            <th>船名</th>
+            <th>職位</th>
+            <th>證書類型</th>
+            <th>到期日</th>
+            <th class="num">剩餘天數</th>
+          </tr>
+        </thead>
+        <tbody id="cert-tbody"></tbody>
+      </table>
+
+      <hr class="section-sep">
+
+      <!-- 合約到期預警 -->
+      <p class="section-title">合約到期預警 (本月內)</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>姓名</th>
+            <th>船名</th>
+            <th>職位</th>
+            <th>合約到期日</th>
+            <th class="num">在船天數</th>
+            <th class="num">剩餘天數</th>
+          </tr>
+        </thead>
+        <tbody id="contract-tbody"></tbody>
+      </table>
+
+      <hr class="section-sep">
+
+      <!-- 本週換班紀錄 -->
+      <p class="section-title">本週換班紀錄</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>換班日期</th>
+            <th>船名</th>
+            <th>港口</th>
+            <th>上船人員</th>
+            <th>職位</th>
+            <th>離船人員</th>
+            <th>職位</th>
+            <th>在船天數</th>
+          </tr>
+        </thead>
+        <tbody id="signon-tbody"></tbody>
+      </table>
+
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 2 頁，共 2 頁</span>
+        <span>列印時間：2026-04-14 09:30</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .report-wrapper -->
+
+<script>
+/* ── Tab switching ── */
+function switchTab(name) {
+  document.querySelectorAll('.rpt-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.rpt-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+/* ── Level badge map (for crew alerts in single-ship view, kept for compatibility) ── */
+const lvlMap = {
+  danger: '<span class="badge badge-danger">嚴重</span>',
+  warn:   '<span class="badge badge-warn">警告</span>',
+  info:   '<span class="badge badge-info">一般</span>',
+};
+
+/* ── CII table ── */
+const CII_DATA = [
+  { name:'慶豐輪',    type:'散貨船', dwt:35000, cii:0.82, base:0.95, grade:'A', alerts:1, forecast:'A' },
+  { name:'大洋號',    type:'散貨船', dwt:28000, cii:0.91, base:0.97, grade:'B', alerts:2, forecast:'B' },
+  { name:'福星輪',    type:'油輪',   dwt:52000, cii:1.15, base:1.02, grade:'D', alerts:5, forecast:'D' },
+  { name:'海洋之星',  type:'油輪',   dwt:48000, cii:1.22, base:1.00, grade:'E', alerts:8, forecast:'E' },
+  { name:'太平洋號',  type:'貨櫃船', dwt:40000, cii:0.95, base:0.98, grade:'B', alerts:3, forecast:'C' },
+  { name:'北極星',    type:'散貨船', dwt:30000, cii:0.89, base:0.96, grade:'B', alerts:1, forecast:'B' },
+  { name:'南方之鷹',  type:'貨櫃船', dwt:45000, cii:1.01, base:0.99, grade:'C', alerts:3, forecast:'C' },
+  { name:'亞洲橋',    type:'散貨船', dwt:32000, cii:0.87, base:0.95, grade:'A', alerts:0, forecast:'A' },
+  { name:'寶島輪',    type:'油輪',   dwt:44000, cii:1.05, base:1.01, grade:'C', alerts:2, forecast:'C' },
+  { name:'明日之星',  type:'貨櫃船', dwt:38000, cii:0.92, base:0.98, grade:'B', alerts:0, forecast:'B' },
+  { name:'遠航者',    type:'散貨船', dwt:27000, cii:0.96, base:0.97, grade:'B', alerts:1, forecast:'B' },
+  { name:'海上明珠',  type:'油輪',   dwt:50000, cii:1.08, base:1.02, grade:'C', alerts:1, forecast:'C' },
+];
+const gradeClass = { A:'badge-ok', B:'badge-ok', C:'badge-info', D:'badge-warn', E:'badge-danger' };
+const ciiTbody = document.getElementById('cii-tbody');
+CII_DATA.forEach((r, i) => {
+  ciiTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${r.name}</td><td>${r.type}</td>
+      <td class="num">${r.dwt.toLocaleString()}</td>
+      <td class="num">${r.cii}</td>
+      <td class="num">${r.base}</td>
+      <td><span class="badge ${gradeClass[r.grade]}">${r.grade}</span></td>
+      <td class="num">${r.alerts > 4 ? `<span style="color:#d93025;font-weight:600">${r.alerts}</span>` : r.alerts}</td>
+      <td><span class="badge ${gradeClass[r.forecast]}">${r.forecast}</span></td>
+    </tr>`;
+});
+
+/* ── Bunker table ── */
+const BUNKER_DATA = [
+  { date:'04-13', ship:'太平洋號', seg:'基隆→高雄', fuel:'VLSFO', type:'高耗量', actual:187, plan:145 },
+  { date:'04-13', ship:'福星輪',   seg:'高雄→廈門', fuel:'LSMGO', type:'高耗量', actual:94,  plan:72  },
+  { date:'04-12', ship:'慶豐輪',   seg:'基隆→東京', fuel:'VLSFO', type:'補給偏差', actual:320, plan:290 },
+  { date:'04-12', ship:'海洋之星', seg:'上海→釜山', fuel:'VLSFO', type:'高耗量', actual:210, plan:168 },
+  { date:'04-11', ship:'大洋號',   seg:'釜山→東京', fuel:'LSMGO', type:'高耗量', actual:78,  plan:61  },
+  { date:'04-11', ship:'寶島輪',   seg:'廈門→香港', fuel:'VLSFO', type:'低耗量', actual:52,  plan:85  },
+  { date:'04-10', ship:'南方之鷹', seg:'新加坡→馬尼拉', fuel:'VLSFO', type:'高耗量', actual:144, plan:115 },
+  { date:'04-09', ship:'福星輪',   seg:'馬尼拉→基隆', fuel:'LSMGO', type:'低耗量', actual:38,  plan:65  },
+  { date:'04-09', ship:'北極星',   seg:'基隆→廈門', fuel:'VLSFO', type:'補給偏差', actual:95,  plan:82  },
+  { date:'04-08', ship:'慶豐輪',   seg:'東京→釜山', fuel:'VLSFO', type:'高耗量', actual:129, plan:99  },
+];
+const typeClass = { '高耗量':'badge-danger', '低耗量':'badge-warn', '補給偏差':'badge-info' };
+const bTbody = document.getElementById('bunker-tbody');
+BUNKER_DATA.forEach((r, i) => {
+  bTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${r.date}</td><td>${r.ship}</td>
+      <td>${r.seg}</td><td>${r.fuel}</td>
+      <td><span class="badge ${typeClass[r.type]}">${r.type}</span></td>
+      <td class="num">${r.actual}</td>
+    </tr>`;
+});
+
+/* ════════════════════════════════════════
+   船員週報資料
+════════════════════════════════════════ */
+const CREW_SHIPS = [
+  { name:'慶豐輪',   quota:14, onboard:13, signOn:1, signOff:1, avgDays:102, certWarn:2, contractWarn:1 },
+  { name:'大洋號',   quota:12, onboard:12, signOn:2, signOff:2, avgDays:78,  certWarn:1, contractWarn:0 },
+  { name:'福星輪',   quota:14, onboard:13, signOn:1, signOff:1, avgDays:95,  certWarn:2, contractWarn:1 },
+  { name:'海洋之星', quota:13, onboard:11, signOn:0, signOff:2, avgDays:88,  certWarn:1, contractWarn:2 },
+  { name:'太平洋號', quota:13, onboard:13, signOn:2, signOff:0, avgDays:71,  certWarn:1, contractWarn:0 },
+  { name:'北極星',   quota:12, onboard:12, signOn:0, signOff:0, avgDays:84,  certWarn:0, contractWarn:0 },
+  { name:'南方之鷹', quota:12, onboard:11, signOn:1, signOff:1, avgDays:92,  certWarn:1, contractWarn:1 },
+  { name:'亞洲橋',   quota:12, onboard:12, signOn:0, signOff:0, avgDays:80,  certWarn:0, contractWarn:0 },
+  { name:'寶島輪',   quota:11, onboard:11, signOn:0, signOff:0, avgDays:73,  certWarn:0, contractWarn:0 },
+  { name:'明日之星', quota:11, onboard:10, signOn:0, signOff:1, avgDays:90,  certWarn:0, contractWarn:0 },
+  { name:'遠航者',   quota:11, onboard:11, signOn:0, signOff:0, avgDays:85,  certWarn:0, contractWarn:0 },
+  { name:'海上明珠', quota:11, onboard:11, signOn:0, signOff:0, avgDays:88,  certWarn:0, contractWarn:0 },
+];
+
+const crewShipTbody = document.getElementById('crew-ship-tbody');
+CREW_SHIPS.forEach((s, i) => {
+  const underStaffed = s.onboard < s.quota;
+  crewShipTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${s.name}</td>
+      <td class="num">${s.quota}</td>
+      <td class="num">${underStaffed ? `<span style="color:#e67e22;font-weight:600">${s.onboard}</span>` : s.onboard}</td>
+      <td class="num">${s.signOn > 0 ? `<span style="color:#27ae60">${s.signOn}</span>` : s.signOn}</td>
+      <td class="num">${s.signOff}</td>
+      <td class="num">${s.avgDays > 100 ? `<span style="color:#e67e22">${s.avgDays}</span>` : s.avgDays}</td>
+      <td class="num">${s.certWarn > 0 ? `<span style="color:#d93025;font-weight:600">${s.certWarn}</span>` : s.certWarn}</td>
+      <td class="num">${s.contractWarn > 0 ? `<span style="color:#e67e22;font-weight:600">${s.contractWarn}</span>` : s.contractWarn}</td>
+    </tr>`;
+});
+
+/* 船員警報明細 */
+const CREW_ALERTS = [
+  { time:'04-13 08:15', ship:'海洋之星', name:'陳志豪', rank:'大副',   type:'合約到期', lvl:'warn',   desc:'合約 04-28 到期，尚未安排接替' },
+  { time:'04-13 08:15', ship:'海洋之星', name:'王建民', rank:'水手長', type:'合約到期', lvl:'warn',   desc:'合約 04-30 到期，接替人員待確認' },
+  { time:'04-12 09:00', ship:'福星輪',   name:'林宗憲', rank:'輪機長', type:'證書到期', lvl:'danger', desc:'STCW 適任證書 04-20 到期' },
+  { time:'04-12 09:00', ship:'慶豐輪',   name:'張偉誠', rank:'船長',   type:'證書到期', lvl:'warn',   desc:'油污染防治證書 05-05 到期' },
+  { time:'04-11 14:30', ship:'福星輪',   name:'許雅文', rank:'大廚',   type:'健康檢查', lvl:'warn',   desc:'年度健康檢查逾期未補件' },
+  { time:'04-10 10:20', ship:'慶豐輪',   name:'蔡明道', rank:'三副',   type:'證書到期', lvl:'warn',   desc:'急救訓練證書 05-01 到期' },
+  { time:'04-09 16:45', ship:'大洋號',   name:'謝志偉', rank:'電機員', type:'證書到期', lvl:'info',   desc:'無線電通訊證書 05-12 到期' },
+  { time:'04-09 16:45', ship:'南方之鷹', name:'邱雅婷', rank:'事務長', type:'合約到期', lvl:'info',   desc:'合約 05-10 到期，已安排接替' },
+  { time:'04-08 11:00', ship:'太平洋號', name:'吳俊達', rank:'二副',   type:'在船天數', lvl:'info',   desc:'累計在船 112 天，建議安排換班' },
+  { time:'04-07 09:30', ship:'海洋之星', name:'黃國彥', rank:'輪機員', type:'訓練逾期', lvl:'warn',   desc:'消防安全訓練證書逾期' },
+  { time:'04-07 09:30', ship:'福星輪',   name:'鄭文翔', rank:'水手',   type:'訓練逾期', lvl:'info',   desc:'救生艇操作訓練需更新' },
+  { time:'04-07 08:00', ship:'慶豐輪',   name:'楊孟儒', rank:'二管輪', type:'在船天數', lvl:'warn',   desc:'累計在船 108 天，需安排換班' },
+];
+
+const crewAlertTbody = document.getElementById('crew-alert-tbody');
+CREW_ALERTS.forEach((r, i) => {
+  crewAlertTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${r.time}</td><td>${r.ship}</td>
+      <td>${r.name}</td><td>${r.rank}</td>
+      <td>${r.type}</td>
+    </tr>`;
+});
+
+/* 證書到期預警 */
+const CERT_DATA = [
+  { name:'林宗憲', ship:'福星輪',   rank:'輪機長', cert:'STCW 適任證書',      exp:'2026-04-20', days:6  },
+  { name:'張偉誠', ship:'慶豐輪',   rank:'船長',   cert:'油污染防治證書',      exp:'2026-05-05', days:21 },
+  { name:'蔡明道', ship:'慶豐輪',   rank:'三副',   cert:'急救訓練證書',        exp:'2026-05-01', days:17 },
+  { name:'許雅文', ship:'福星輪',   rank:'大廚',   cert:'健康檢查合格證',      exp:'2026-04-25', days:11 },
+  { name:'謝志偉', ship:'大洋號',   rank:'電機員', cert:'無線電通訊證書',      exp:'2026-05-12', days:28 },
+  { name:'吳俊達', ship:'太平洋號', rank:'二副',   cert:'高級消防訓練證書',    exp:'2026-05-08', days:24 },
+  { name:'黃國彥', ship:'海洋之星', rank:'輪機員', cert:'消防安全訓練證書',    exp:'2026-04-22', days:8  },
+  { name:'鄭文翔', ship:'福星輪',   rank:'水手',   cert:'救生艇操作人員訓練', exp:'2026-05-03', days:19 },
+];
+
+const certTbody = document.getElementById('cert-tbody');
+CERT_DATA.forEach((r, i) => {
+  const daysStyle = r.days <= 10 ? 'color:#d93025;font-weight:600' : r.days <= 20 ? 'color:#e67e22;font-weight:600' : '';
+  certTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${r.name}</td><td>${r.ship}</td>
+      <td>${r.rank}</td><td>${r.cert}</td><td>${r.exp}</td>
+      <td class="num" style="${daysStyle}">${r.days}</td>
+    </tr>`;
+});
+
+/* 合約到期預警（已過濾掉已安排接替的） */
+const CONTRACT_DATA_FULL = [
+  { name:'陳志豪', ship:'海洋之星', rank:'大副',   exp:'2026-04-28', days:14, onboardDays:98,  relief:'待確認', status:'warn' },
+  { name:'王建民', ship:'海洋之星', rank:'水手長', exp:'2026-04-30', days:16, onboardDays:105, relief:'待確認', status:'warn' },
+  { name:'邱雅婷', ship:'南方之鷹', rank:'事務長', exp:'2026-05-10', days:26, onboardDays:87,  relief:'李佳穎', status:'ok' },
+  { name:'楊孟儒', ship:'慶豐輪',   rank:'二管輪', exp:'2026-04-27', days:13, onboardDays:108, relief:'待確認', status:'danger' },
+  { name:'吳俊達', ship:'太平洋號', rank:'二副',   exp:'2026-05-02', days:18, onboardDays:112, relief:'趙冠宇', status:'ok' },
+];
+// 已安排接替的不列入預警
+const CONTRACT_DATA = CONTRACT_DATA_FULL.filter(r => r.status !== 'ok');
+
+const contractTbody = document.getElementById('contract-tbody');
+CONTRACT_DATA.forEach((r, i) => {
+  const daysStyle = r.days <= 15 ? 'color:#d93025;font-weight:600' : 'color:#e67e22';
+  contractTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${r.name}</td><td>${r.ship}</td>
+      <td>${r.rank}</td><td>${r.exp}</td>
+      <td class="num">${r.onboardDays > 100 ? `<span style="color:#e67e22">${r.onboardDays}</span>` : r.onboardDays}</td>
+      <td class="num" style="${daysStyle}">${r.days}</td>
+    </tr>`;
+});
+
+/* 換班紀錄 */
+const SIGNON_DATA = [
+  { date:'04-13', ship:'慶豐輪',   port:'基隆', onName:'黃嘉豪', onRank:'水手',   offName:'蔡文龍', offRank:'水手',   offDays:91 },
+  { date:'04-13', ship:'大洋號',   port:'高雄', onName:'林雅如', onRank:'事務員', offName:'陳淑婷', offRank:'事務員', offDays:78 },
+  { date:'04-12', ship:'大洋號',   port:'高雄', onName:'周志明', onRank:'二管輪', offName:'吳敬和', offRank:'二管輪', offDays:84 },
+  { date:'04-12', ship:'福星輪',   port:'廈門', onName:'陳俊宏', onRank:'三副',   offName:'謝文傑', offRank:'三副',   offDays:97 },
+  { date:'04-11', ship:'海洋之星', port:'上海', onName:'李冠志', onRank:'水手',   offName:'王朝勇', offRank:'水手',   offDays:88 },
+  { date:'04-11', ship:'海洋之星', port:'上海', onName:'張育維', onRank:'機匠',   offName:'劉政宏', offRank:'機匠',   offDays:75 },
+  { date:'04-10', ship:'太平洋號', port:'釜山', onName:'蔡佳妮', onRank:'事務長', offName:'吳秀珠', offRank:'事務長', offDays:102 },
+  { date:'04-10', ship:'太平洋號', port:'釜山', onName:'許建宇', onRank:'水手',   offName:'鄭士賢', offRank:'水手',   offDays:89 },
+  { date:'04-08', ship:'南方之鷹', port:'新加坡', onName:'盧勝文', onRank:'二副', offName:'游文昌', offRank:'二副',   offDays:93 },
+  { date:'04-08', ship:'慶豐輪',   port:'東京', onName:'彭詩涵', onRank:'電機員', offName:'江俊傑', offRank:'電機員', offDays:87 },
+  { date:'04-07', ship:'大洋號',   port:'高雄', onName:'洪翊展', onRank:'水手',   offName:'廖文達', offRank:'水手',   offDays:82 },
+  { date:'04-07', ship:'福星輪',   port:'香港', onName:'賴彥廷', onRank:'輪機員', offName:'朱裕成', offRank:'輪機員', offDays:91 },
+  { date:'04-07', ship:'大洋號',   port:'高雄', onName:'蕭佳穎', onRank:'事務員', offName:'葉美珍', offRank:'事務員', offDays:76 },
+  { date:'04-07', ship:'太平洋號', port:'釜山', onName:'鄭嘉誠', onRank:'水手',   offName:'盧建志', offRank:'水手',   offDays:84 },
+];
+
+/* ════════════════════════════════════════
+   單船船員名冊資料
+════════════════════════════════════════ */
+const SHIP_META = {
+  '慶豐輪':   { flag:'台灣', type:'散貨船', imo:'9876543', captain:'陳建志', location:'東京港', voyage:'V2604-01', quota:14 },
+  '大洋號':   { flag:'台灣', type:'散貨船', imo:'9765432', captain:'林德勝', location:'釜山港', voyage:'V2604-02', quota:12 },
+  '福星輪':   { flag:'巴拿馬', type:'油輪', imo:'9654321', captain:'吳國良', location:'廈門→香港', voyage:'V2604-04', quota:14 },
+  '海洋之星': { flag:'賴比瑞亞', type:'油輪', imo:'9543210', captain:'黃文彬', location:'上海港', voyage:'V2604-03', quota:13 },
+  '太平洋號': { flag:'馬紹爾群島', type:'貨櫃船', imo:'9432109', captain:'鄭家榮', location:'釜山→東京', voyage:'V2604-06', quota:13 },
+  '北極星':   { flag:'台灣', type:'散貨船', imo:'9321098', captain:'劉志豪', location:'基隆港', voyage:'V2604-08', quota:12 },
+  '南方之鷹': { flag:'巴拿馬', type:'貨櫃船', imo:'9210987', captain:'謝明宏', location:'新加坡', voyage:'V2604-05', quota:12 },
+  '亞洲橋':   { flag:'賴比瑞亞', type:'散貨船', imo:'9109876', captain:'柯志遠', location:'高雄港', voyage:'V2604-09', quota:12 },
+  '寶島輪':   { flag:'台灣', type:'油輪', imo:'9098765', captain:'許文德', location:'基隆→廈門', voyage:'V2604-07', quota:11 },
+  '明日之星': { flag:'馬紹爾群島', type:'貨櫃船', imo:'8987654', captain:'蔡忠義', location:'馬尼拉港', voyage:'V2603-10', quota:11 },
+  '遠航者':   { flag:'巴拿馬', type:'散貨船', imo:'8876543', captain:'楊世昌', location:'基隆港', voyage:'V2603-11', quota:11 },
+  '海上明珠': { flag:'賴比瑞亞', type:'油輪', imo:'8765432', captain:'羅建華', location:'高雄→廈門', voyage:'V2603-12', quota:11 },
+};
+
+/* 各船船員名冊 */
+const SHIP_ROSTER = {
+  '慶豐輪': [
+    { name:'陳建志', rank:'船長',   nat:'台灣', days:45,  contractExp:'2026-07-10', certOk:true,  status:'onboard' },
+    { name:'張偉誠', rank:'大副',   nat:'台灣', days:78,  contractExp:'2026-05-05', certOk:false, status:'onboard', certNote:'油污染防治證書 05-05 到期' },
+    { name:'蔡明道', rank:'三副',   nat:'台灣', days:82,  contractExp:'2026-06-01', certOk:false, status:'onboard', certNote:'急救訓練證書 05-01 到期' },
+    { name:'楊孟儒', rank:'二管輪', nat:'台灣', days:108, contractExp:'2026-04-27', certOk:true,  status:'onboard', contractWarn:true },
+    { name:'彭詩涵', rank:'電機員', nat:'台灣', days:14,  contractExp:'2026-10-14', certOk:true,  status:'onboard' },
+    { name:'王俊凱', rank:'輪機長', nat:'台灣', days:56,  contractExp:'2026-08-20', certOk:true,  status:'onboard' },
+    { name:'林志恩', rank:'二副',   nat:'台灣', days:63,  contractExp:'2026-07-25', certOk:true,  status:'onboard' },
+    { name:'陳美華', rank:'事務長', nat:'台灣', days:70,  contractExp:'2026-06-30', certOk:true,  status:'onboard' },
+    { name:'李俊賢', rank:'水手長', nat:'菲律賓', days:91, contractExp:'2026-06-15', certOk:true, status:'onboard' },
+    { name:'黃嘉豪', rank:'水手',   nat:'台灣', days:7,   contractExp:'2026-10-07', certOk:true,  status:'onboard' },
+    { name:'鄭宗翰', rank:'水手',   nat:'菲律賓', days:55, contractExp:'2026-07-01', certOk:true, status:'onboard' },
+    { name:'陳淑真', rank:'事務員', nat:'台灣', days:48,  contractExp:'2026-08-10', certOk:true,  status:'onboard' },
+    { name:'游文傑', rank:'機匠',   nat:'印尼',  days:72,  contractExp:'2026-06-22', certOk:true,  status:'onboard' },
+    { name:'蔡文龍', rank:'水手',   nat:'台灣', days:91,  contractExp:'2026-07-08', certOk:true,  status:'leave', leaveEnd:'2026-04-28' },
+  ],
+  '大洋號': [
+    { name:'林德勝', rank:'船長',   nat:'台灣', days:38,  contractExp:'2026-08-01', certOk:true,  status:'onboard' },
+    { name:'周志明', rank:'二管輪', nat:'台灣', days:7,   contractExp:'2026-10-10', certOk:true,  status:'onboard' },
+    { name:'謝志偉', rank:'電機員', nat:'台灣', days:62,  contractExp:'2026-06-20', certOk:false, status:'onboard', certNote:'無線電通訊證書 05-12 到期' },
+    { name:'洪翊展', rank:'水手',   nat:'菲律賓', days:7, contractExp:'2026-10-07', certOk:true,  status:'onboard' },
+    { name:'蕭佳穎', rank:'事務員', nat:'台灣', days:7,   contractExp:'2026-10-07', certOk:true,  status:'onboard' },
+    { name:'張宗偉', rank:'大副',   nat:'台灣', days:55,  contractExp:'2026-07-15', certOk:true,  status:'onboard' },
+    { name:'吳明哲', rank:'輪機長', nat:'台灣', days:43,  contractExp:'2026-08-10', certOk:true,  status:'onboard' },
+    { name:'陳宏志', rank:'三副',   nat:'台灣', days:68,  contractExp:'2026-06-28', certOk:true,  status:'onboard' },
+    { name:'李美麗', rank:'事務長', nat:'台灣', days:51,  contractExp:'2026-07-30', certOk:true,  status:'onboard' },
+    { name:'劉威廷', rank:'水手長', nat:'菲律賓', days:77, contractExp:'2026-05-25', certOk:true, status:'onboard' },
+    { name:'黃俊傑', rank:'水手',   nat:'菲律賓', days:84, contractExp:'2026-06-10', certOk:true, status:'onboard' },
+    { name:'廖文達', rank:'水手',   nat:'台灣', days:78,  contractExp:'2026-07-12', certOk:true,  status:'leave', leaveEnd:'2026-04-21' },
+  ],
+  '福星輪': [
+    { name:'吳國良', rank:'船長',   nat:'台灣', days:52,  contractExp:'2026-07-20', certOk:true,  status:'onboard' },
+    { name:'林宗憲', rank:'輪機長', nat:'台灣', days:91,  contractExp:'2026-06-05', certOk:false, status:'onboard', certNote:'STCW 適任證書 04-20 到期 ⚠️' },
+    { name:'許雅文', rank:'大廚',   nat:'台灣', days:74,  contractExp:'2026-07-01', certOk:false, status:'onboard', certNote:'健康檢查合格證逾期' },
+    { name:'陳俊宏', rank:'三副',   nat:'台灣', days:7,   contractExp:'2026-10-12', certOk:true,  status:'onboard' },
+    { name:'賴彥廷', rank:'輪機員', nat:'台灣', days:7,   contractExp:'2026-10-07', certOk:true,  status:'onboard' },
+    { name:'鄭文翔', rank:'水手',   nat:'台灣', days:58,  contractExp:'2026-06-15', certOk:false, status:'onboard', certNote:'救生艇操作訓練需更新' },
+    { name:'方志遠', rank:'大副',   nat:'台灣', days:44,  contractExp:'2026-08-22', certOk:true,  status:'onboard' },
+    { name:'游佳穎', rank:'事務長', nat:'台灣', days:61,  contractExp:'2026-07-10', certOk:true,  status:'onboard' },
+    { name:'周俊賢', rank:'水手長', nat:'菲律賓', days:88, contractExp:'2026-05-30', certOk:true, status:'onboard' },
+    { name:'陳文正', rank:'二副',   nat:'台灣', days:36,  contractExp:'2026-09-01', certOk:true,  status:'onboard' },
+    { name:'吳怡君', rank:'事務員', nat:'台灣', days:50,  contractExp:'2026-08-05', certOk:true,  status:'onboard' },
+    { name:'黃建軍', rank:'機匠',   nat:'印尼',  days:66,  contractExp:'2026-06-20', certOk:true,  status:'onboard' },
+    { name:'謝文傑', rank:'三副',   nat:'台灣', days:97,  contractExp:'2026-07-20', certOk:true,  status:'leave', leaveEnd:'2026-04-25' },
+    { name:'朱裕成', rank:'輪機員', nat:'台灣', days:91,  contractExp:'2026-07-07', certOk:true,  status:'leave', leaveEnd:'2026-04-28' },
+  ],
+  '海洋之星': [
+    { name:'黃文彬', rank:'船長',   nat:'台灣', days:60,  contractExp:'2026-07-05', certOk:true,  status:'onboard' },
+    { name:'陳志豪', rank:'大副',   nat:'台灣', days:98,  contractExp:'2026-04-28', certOk:true,  status:'onboard', contractWarn:true },
+    { name:'王建民', rank:'水手長', nat:'台灣', days:105, contractExp:'2026-04-30', certOk:true,  status:'onboard', contractWarn:true },
+    { name:'黃國彥', rank:'輪機員', nat:'台灣', days:75,  contractExp:'2026-06-18', certOk:false, status:'onboard', certNote:'消防安全訓練證書逾期' },
+    { name:'張育維', rank:'機匠',   nat:'印尼',  days:7,   contractExp:'2026-10-14', certOk:true,  status:'onboard' },
+    { name:'李冠志', rank:'水手',   nat:'菲律賓', days:7, contractExp:'2026-10-11', certOk:true,  status:'onboard' },
+    { name:'林宏達', rank:'輪機長', nat:'台灣', days:48,  contractExp:'2026-08-12', certOk:true,  status:'onboard' },
+    { name:'陳雅琪', rank:'事務長', nat:'台灣', days:53,  contractExp:'2026-07-28', certOk:true,  status:'onboard' },
+    { name:'蔡志明', rank:'二副',   nat:'台灣', days:41,  contractExp:'2026-08-05', certOk:true,  status:'onboard' },
+    { name:'許文賢', rank:'三副',   nat:'台灣', days:62,  contractExp:'2026-06-30', certOk:true,  status:'onboard' },
+    { name:'王朝勇', rank:'水手',   nat:'菲律賓', days:88, contractExp:'2026-06-08', certOk:true, status:'leave', leaveEnd:'2026-04-20' },
+    { name:'劉政宏', rank:'機匠',   nat:'印尼',  days:75,  contractExp:'2026-07-01', certOk:true,  status:'leave', leaveEnd:'2026-04-24' },
+  ],
+  '太平洋號': [
+    { name:'鄭家榮', rank:'船長',   nat:'台灣', days:33,  contractExp:'2026-08-15', certOk:true,  status:'onboard' },
+    { name:'吳俊達', rank:'二副',   nat:'台灣', days:112, contractExp:'2026-05-02', certOk:false, status:'onboard', contractWarn:true, certNote:'高級消防訓練證書 05-08 到期' },
+    { name:'許建宇', rank:'水手',   nat:'台灣', days:7,   contractExp:'2026-10-10', certOk:true,  status:'onboard' },
+    { name:'蔡佳妮', rank:'事務長', nat:'台灣', days:7,   contractExp:'2026-10-10', certOk:true,  status:'onboard' },
+    { name:'鄭嘉誠', rank:'水手',   nat:'菲律賓', days:7, contractExp:'2026-10-07', certOk:true,  status:'onboard' },
+    { name:'林重志', rank:'大副',   nat:'台灣', days:58,  contractExp:'2026-07-01', certOk:true,  status:'onboard' },
+    { name:'陳俊輝', rank:'輪機長', nat:'台灣', days:46,  contractExp:'2026-08-20', certOk:true,  status:'onboard' },
+    { name:'王雅文', rank:'事務員', nat:'台灣', days:65,  contractExp:'2026-07-10', certOk:true,  status:'onboard' },
+    { name:'周浩然', rank:'三副',   nat:'台灣', days:44,  contractExp:'2026-08-05', certOk:true,  status:'onboard' },
+    { name:'陳水生', rank:'水手長', nat:'菲律賓', days:82, contractExp:'2026-06-01', certOk:true, status:'onboard' },
+    { name:'楊志明', rank:'機匠',   nat:'印尼',  days:71,  contractExp:'2026-06-25', certOk:true,  status:'onboard' },
+    { name:'吳秀珠', rank:'事務長', nat:'台灣', days:102, contractExp:'2026-07-20', certOk:true,  status:'leave', leaveEnd:'2026-04-21' },
+    { name:'盧建志', rank:'水手',   nat:'菲律賓', days:84, contractExp:'2026-07-07', certOk:true, status:'leave', leaveEnd:'2026-04-22' },
+  ],
+  '北極星': [
+    { name:'劉志豪', rank:'船長',   nat:'台灣', days:42,  contractExp:'2026-07-25', certOk:true, status:'onboard' },
+    { name:'蔡俊男', rank:'大副',   nat:'台灣', days:68,  contractExp:'2026-06-10', certOk:true, status:'onboard' },
+    { name:'陳文龍', rank:'輪機長', nat:'台灣', days:55,  contractExp:'2026-07-15', certOk:true, status:'onboard' },
+    { name:'林佳穎', rank:'事務長', nat:'台灣', days:49,  contractExp:'2026-08-01', certOk:true, status:'onboard' },
+    { name:'黃志成', rank:'二副',   nat:'台灣', days:73,  contractExp:'2026-06-20', certOk:true, status:'onboard' },
+    { name:'吳明達', rank:'三副',   nat:'台灣', days:38,  contractExp:'2026-09-05', certOk:true, status:'onboard' },
+    { name:'王志豪', rank:'水手長', nat:'菲律賓', days:90, contractExp:'2026-05-20', certOk:true, status:'onboard' },
+    { name:'張文賢', rank:'電機員', nat:'台灣', days:61,  contractExp:'2026-07-08', certOk:true, status:'onboard' },
+    { name:'許雅婷', rank:'事務員', nat:'台灣', days:44,  contractExp:'2026-08-15', certOk:true, status:'onboard' },
+    { name:'李建志', rank:'水手',   nat:'菲律賓', days:76, contractExp:'2026-06-05', certOk:true, status:'onboard' },
+    { name:'陳俊彥', rank:'水手',   nat:'印尼',  days:52,  contractExp:'2026-07-20', certOk:true, status:'onboard' },
+    { name:'謝志偉', rank:'機匠',   nat:'印尼',  days:64,  contractExp:'2026-07-01', certOk:true, status:'onboard' },
+  ],
+  '南方之鷹': [
+    { name:'謝明宏', rank:'船長',   nat:'台灣', days:47,  contractExp:'2026-07-30', certOk:true, status:'onboard' },
+    { name:'盧勝文', rank:'二副',   nat:'台灣', days:7,   contractExp:'2026-10-08', certOk:true, status:'onboard' },
+    { name:'邱雅婷', rank:'事務長', nat:'台灣', days:87,  contractExp:'2026-05-10', certOk:true, status:'onboard', contractWarn:true },
+    { name:'陳志明', rank:'大副',   nat:'台灣', days:62,  contractExp:'2026-06-25', certOk:true, status:'onboard' },
+    { name:'林建成', rank:'輪機長', nat:'台灣', days:54,  contractExp:'2026-07-18', certOk:true, status:'onboard' },
+    { name:'吳俊宏', rank:'三副',   nat:'台灣', days:41,  contractExp:'2026-08-10', certOk:true, status:'onboard' },
+    { name:'王美玲', rank:'事務員', nat:'台灣', days:58,  contractExp:'2026-07-05', certOk:true, status:'onboard' },
+    { name:'周志豪', rank:'水手長', nat:'菲律賓', days:85, contractExp:'2026-05-28', certOk:true, status:'onboard' },
+    { name:'張明義', rank:'電機員', nat:'台灣', days:45,  contractExp:'2026-08-20', certOk:true, status:'onboard' },
+    { name:'陳文傑', rank:'水手',   nat:'菲律賓', days:72, contractExp:'2026-06-15', certOk:true, status:'onboard' },
+    { name:'游文昌', rank:'二副',   nat:'台灣', days:93,  contractExp:'2026-07-05', certOk:true, status:'leave', leaveEnd:'2026-04-28' },
+  ],
+  '亞洲橋': [
+    { name:'柯志遠', rank:'船長',   nat:'台灣', days:39,  contractExp:'2026-08-05', certOk:true, status:'onboard' },
+    { name:'林文賢', rank:'大副',   nat:'台灣', days:65,  contractExp:'2026-06-18', certOk:true, status:'onboard' },
+    { name:'陳建成', rank:'輪機長', nat:'台灣', days:52,  contractExp:'2026-07-22', certOk:true, status:'onboard' },
+    { name:'黃雅婷', rank:'事務長', nat:'台灣', days:47,  contractExp:'2026-08-01', certOk:true, status:'onboard' },
+    { name:'吳志豪', rank:'二副',   nat:'台灣', days:71,  contractExp:'2026-06-10', certOk:true, status:'onboard' },
+    { name:'張俊傑', rank:'三副',   nat:'台灣', days:36,  contractExp:'2026-09-10', certOk:true, status:'onboard' },
+    { name:'王建志', rank:'電機員', nat:'台灣', days:58,  contractExp:'2026-07-15', certOk:true, status:'onboard' },
+    { name:'李文傑', rank:'水手長', nat:'菲律賓', days:83, contractExp:'2026-05-22', certOk:true, status:'onboard' },
+    { name:'陳美鳳', rank:'事務員', nat:'台灣', days:44,  contractExp:'2026-08-18', certOk:true, status:'onboard' },
+    { name:'謝建宏', rank:'水手',   nat:'菲律賓', days:68, contractExp:'2026-06-08', certOk:true, status:'onboard' },
+    { name:'林俊男', rank:'機匠',   nat:'印尼',  days:55,  contractExp:'2026-07-01', certOk:true, status:'onboard' },
+    { name:'鄭志遠', rank:'水手',   nat:'印尼',  days:61,  contractExp:'2026-07-10', certOk:true, status:'onboard' },
+  ],
+  '寶島輪': [
+    { name:'許文德', rank:'船長',   nat:'台灣', days:44,  contractExp:'2026-08-10', certOk:true, status:'onboard' },
+    { name:'林俊宏', rank:'大副',   nat:'台灣', days:67,  contractExp:'2026-06-22', certOk:true, status:'onboard' },
+    { name:'陳志強', rank:'輪機長', nat:'台灣', days:54,  contractExp:'2026-07-28', certOk:true, status:'onboard' },
+    { name:'吳雅琳', rank:'事務長', nat:'台灣', days:49,  contractExp:'2026-07-15', certOk:true, status:'onboard' },
+    { name:'黃建宏', rank:'二副',   nat:'台灣', days:72,  contractExp:'2026-06-05', certOk:true, status:'onboard' },
+    { name:'張文明', rank:'電機員', nat:'台灣', days:38,  contractExp:'2026-09-01', certOk:true, status:'onboard' },
+    { name:'王俊達', rank:'三副',   nat:'台灣', days:46,  contractExp:'2026-08-22', certOk:true, status:'onboard' },
+    { name:'陳俊志', rank:'水手長', nat:'菲律賓', days:88, contractExp:'2026-05-18', certOk:true, status:'onboard' },
+    { name:'林建志', rank:'水手',   nat:'菲律賓', days:74, contractExp:'2026-06-12', certOk:true, status:'onboard' },
+    { name:'謝美玲', rank:'事務員', nat:'台灣', days:55,  contractExp:'2026-07-20', certOk:true, status:'onboard' },
+    { name:'陳威廷', rank:'機匠',   nat:'印尼',  days:62,  contractExp:'2026-07-05', certOk:true, status:'onboard' },
+  ],
+  '明日之星': [
+    { name:'蔡忠義', rank:'船長',   nat:'台灣', days:41,  contractExp:'2026-08-18', certOk:true, status:'onboard' },
+    { name:'林雅婷', rank:'大副',   nat:'台灣', days:63,  contractExp:'2026-06-28', certOk:true, status:'onboard' },
+    { name:'陳建勇', rank:'輪機長', nat:'台灣', days:51,  contractExp:'2026-07-20', certOk:true, status:'onboard' },
+    { name:'黃文賢', rank:'二副',   nat:'台灣', days:68,  contractExp:'2026-06-15', certOk:true, status:'onboard' },
+    { name:'吳志成', rank:'三副',   nat:'台灣', days:44,  contractExp:'2026-08-08', certOk:true, status:'onboard' },
+    { name:'王美雯', rank:'事務長', nat:'台灣', days:57,  contractExp:'2026-07-10', certOk:true, status:'onboard' },
+    { name:'張建宏', rank:'電機員', nat:'台灣', days:35,  contractExp:'2026-09-15', certOk:true, status:'onboard' },
+    { name:'李志豪', rank:'水手長', nat:'菲律賓', days:82, contractExp:'2026-05-25', certOk:true, status:'onboard' },
+    { name:'陳雅芳', rank:'事務員', nat:'台灣', days:48,  contractExp:'2026-08-01', certOk:true, status:'onboard' },
+    { name:'謝俊達', rank:'水手',   nat:'菲律賓', days:70, contractExp:'2026-06-10', certOk:true, status:'onboard' },
+    { name:'林建志', rank:'水手',   nat:'印尼',  days:56,  contractExp:'2026-07-15', certOk:true, status:'leave', leaveEnd:'2026-04-21' },
+  ],
+  '遠航者': [
+    { name:'楊世昌', rank:'船長',   nat:'台灣', days:38,  contractExp:'2026-08-22', certOk:true, status:'onboard' },
+    { name:'陳志源', rank:'大副',   nat:'台灣', days:60,  contractExp:'2026-06-30', certOk:true, status:'onboard' },
+    { name:'吳建志', rank:'輪機長', nat:'台灣', days:49,  contractExp:'2026-07-25', certOk:true, status:'onboard' },
+    { name:'林俊宏', rank:'二副',   nat:'台灣', days:65,  contractExp:'2026-06-18', certOk:true, status:'onboard' },
+    { name:'黃雅玲', rank:'事務長', nat:'台灣', days:53,  contractExp:'2026-07-12', certOk:true, status:'onboard' },
+    { name:'張建文', rank:'三副',   nat:'台灣', days:41,  contractExp:'2026-08-15', certOk:true, status:'onboard' },
+    { name:'王志明', rank:'電機員', nat:'台灣', days:57,  contractExp:'2026-07-08', certOk:true, status:'onboard' },
+    { name:'陳建成', rank:'水手長', nat:'菲律賓', days:80, contractExp:'2026-05-28', certOk:true, status:'onboard' },
+    { name:'許美珠', rank:'事務員', nat:'台灣', days:44,  contractExp:'2026-08-20', certOk:true, status:'onboard' },
+    { name:'林志遠', rank:'水手',   nat:'菲律賓', days:67, contractExp:'2026-06-08', certOk:true, status:'onboard' },
+    { name:'謝建宏', rank:'機匠',   nat:'印尼',  days:58,  contractExp:'2026-07-05', certOk:true, status:'onboard' },
+  ],
+  '海上明珠': [
+    { name:'羅建華', rank:'船長',   nat:'台灣', days:43,  contractExp:'2026-08-08', certOk:true, status:'onboard' },
+    { name:'陳文傑', rank:'大副',   nat:'台灣', days:62,  contractExp:'2026-06-25', certOk:true, status:'onboard' },
+    { name:'林建宏', rank:'輪機長', nat:'台灣', days:50,  contractExp:'2026-07-20', certOk:true, status:'onboard' },
+    { name:'吳雅琪', rank:'事務長', nat:'台灣', days:55,  contractExp:'2026-07-15', certOk:true, status:'onboard' },
+    { name:'黃志豪', rank:'二副',   nat:'台灣', days:70,  contractExp:'2026-06-12', certOk:true, status:'onboard' },
+    { name:'張美玲', rank:'電機員', nat:'台灣', days:38,  contractExp:'2026-09-01', certOk:true, status:'onboard' },
+    { name:'王建文', rank:'三副',   nat:'台灣', days:46,  contractExp:'2026-08-18', certOk:true, status:'onboard' },
+    { name:'陳志強', rank:'水手長', nat:'菲律賓', days:86, contractExp:'2026-05-20', certOk:true, status:'onboard' },
+    { name:'林俊志', rank:'水手',   nat:'菲律賓', days:73, contractExp:'2026-06-05', certOk:true, status:'onboard' },
+    { name:'謝雅婷', rank:'事務員', nat:'台灣', days:48,  contractExp:'2026-08-10', certOk:true, status:'onboard' },
+    { name:'許建志', rank:'機匠',   nat:'印尼',  days:60,  contractExp:'2026-07-08', certOk:true, status:'onboard' },
+  ],
+};
+
+/* ── 切換全船隊 / 單船 ── */
+function switchCrewView(target) {
+  document.querySelectorAll('.crew-sel-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const fleetPages = [document.getElementById('page-crew-1'), document.getElementById('page-crew-2')];
+  const shipReport = document.getElementById('crew-ship-report');
+
+  if (target === 'fleet') {
+    shipReport.style.display = 'none';
+    shipReport.innerHTML = '';
+    fleetPages.forEach(p => p.style.display = '');
+    document.body.classList.remove('print-ship');
+    document.body.classList.add('print-fleet');
+  } else {
+    fleetPages.forEach(p => p.style.display = 'none');
+    shipReport.style.display = 'block';
+    renderShipReport(target);
+    document.body.classList.remove('print-fleet');
+    document.body.classList.add('print-ship');
+  }
+}
+
+function renderShipReport(shipName) {
+  const meta   = SHIP_META[shipName] || {};
+  // 單船報表僅顯示在船人員，不顯示休假中
+  const roster = (SHIP_ROSTER[shipName] || []).filter(c => c.status === 'onboard');
+  const alerts = CREW_ALERTS.filter(a => a.ship === shipName);
+  const certs  = CERT_DATA.filter(c => c.ship === shipName);
+  const contracts = CONTRACT_DATA.filter(c => c.ship === shipName);
+  const signons   = SIGNON_DATA.filter(s => s.ship === shipName);
+
+  const certWarns = roster.filter(c => !c.certOk).length;
+  const contractWarns = roster.filter(c => c.contractWarn).length;
+
+  const rosterRows = roster.map((c, i) => {
+    const certBadge = !c.certOk
+      ? `<span class="badge badge-danger" title="${c.certNote || ''}">預警</span>`
+      : `<span class="badge badge-ok">正常</span>`;
+    const contractBadge = c.contractWarn
+      ? `<span class="badge badge-warn">${c.contractExp}</span>`
+      : c.contractExp;
+    const daysStyle = c.days > 100 ? 'color:#e67e22;font-weight:600' : '';
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${c.name}</strong></td>
+      <td>${c.rank}</td>
+      <td>${c.nat}</td>
+      <td class="num" style="${daysStyle}">${c.days}</td>
+      <td>${contractBadge}</td>
+      <td>${certBadge}${!c.certOk ? `<br><span style="font-size:12px;color:#888;">${c.certNote||''}</span>` : ''}</td>
+    </tr>`;
+  }).join('');
+
+  const alertRows = alerts.length
+    ? alerts.map((r, i) => `<tr>
+        <td>${i+1}</td><td>${r.time}</td><td>${r.name}</td><td>${r.rank}</td>
+        <td>${r.type}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px;">本週無警報</td></tr>`;
+
+  const certRows = certs.length
+    ? certs.map((r, i) => {
+        const ds = r.days<=10?'color:#d93025;font-weight:600':r.days<=20?'color:#e67e22;font-weight:600':'';
+        return `<tr>
+          <td>${i+1}</td><td>${r.name}</td><td>${r.rank}</td>
+          <td>${r.cert}</td><td>${r.exp}</td>
+          <td class="num" style="${ds}">${r.days}</td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="6" style="text-align:center;color:#aaa;padding:16px;">30 天內無證書到期</td></tr>`;
+
+  const contractRows = contracts.length
+    ? contracts.map((r, i) => {
+        const ds = r.days<=15?'color:#d93025;font-weight:600':'color:#e67e22';
+        return `<tr>
+          <td>${i+1}</td><td>${r.name}</td><td>${r.rank}</td><td>${r.exp}</td>
+          <td class="num">${r.onboardDays>100?`<span style="color:#e67e22">${r.onboardDays}</span>`:r.onboardDays}</td>
+          <td class="num" style="${ds}">${r.days}</td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="6" style="text-align:center;color:#aaa;padding:16px;">本月內無合約到期</td></tr>`;
+
+  const signonRows = signons.length
+    ? signons.map((r, i) => `<tr>
+        <td>${i+1}</td><td>${r.date}</td><td>${r.port}</td>
+        <td>${r.onName}</td><td>${r.onRank}</td>
+        <td>${r.offName}</td><td>${r.offRank}</td>
+        <td class="num">${r.offDays>100?`<span style="color:#e67e22">${r.offDays}</span>`:r.offDays}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="8" style="text-align:center;color:#aaa;padding:16px;">本週無換班紀錄</td></tr>`;
+
+  document.getElementById('crew-ship-report').innerHTML = `
+    <!-- 單船第 1 頁 -->
+    <div class="report-page">
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>${shipName} — 船員週報</h2>
+          <div class="subtitle">Crew Weekly Report — ${shipName}</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-14<br>
+          報告週期：2026-04-07 ~ 2026-04-13<br>
+          第 15 週 (W15)
+        </div>
+      </div>
+
+      <div class="ship-info-bar">
+        <div class="ship-info-cell"><div class="sic-label">船旗</div><div class="sic-value">${meta.flag||'—'}</div></div>
+        <div class="ship-info-cell"><div class="sic-label">船型</div><div class="sic-value">${meta.type||'—'}</div></div>
+        <div class="ship-info-cell"><div class="sic-label">船長</div><div class="sic-value">${meta.captain||'—'}</div></div>
+        <div class="ship-info-cell"><div class="sic-label">目前位置 / 航次</div><div class="sic-value">${meta.location||'—'} / ${meta.voyage||'—'}</div></div>
+        <div class="ship-info-cell"><div class="sic-label">IMO 編號</div><div class="sic-value">${meta.imo||'—'}</div></div>
+      </div>
+
+      <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+        <div class="kpi-card"><div class="kpi-label">編制人數</div><div class="kpi-value">${meta.quota}</div><div class="kpi-unit">人</div></div>
+        <div class="kpi-card ok"><div class="kpi-label">在船人數</div><div class="kpi-value">${roster.length}</div><div class="kpi-unit">人</div></div>
+        <div class="kpi-card${certWarns>0?' danger':''}"><div class="kpi-label">證書預警</div><div class="kpi-value">${certWarns}</div><div class="kpi-unit">人</div></div>
+        <div class="kpi-card${contractWarns>0?' warn':''}"><div class="kpi-label">合約預警</div><div class="kpi-value">${contractWarns}</div><div class="kpi-unit">人</div></div>
+      </div>
+
+      <p class="section-title">船員名冊</p>
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>#</th><th>姓名</th><th>職位</th><th>國籍</th>
+            <th class="num">在船天數</th><th>合約到期日</th><th>證書狀態</th>
+          </tr>
+        </thead>
+        <tbody>${rosterRows}</tbody>
+      </table>
+
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 1 頁，共 2 頁</span>
+        <span>列印時間：2026-04-14 09:30</span>
+      </div>
+    </div>
+
+    <!-- 單船第 2 頁 -->
+    <div class="report-page">
+      <div class="report-header">
+        <div class="logo">SRP</div>
+        <div class="titles">
+          <p class="company">摯陞海運管理系統 / SRP Maritime System</p>
+          <h2>${shipName} — 船員週報（警報 / 證書 / 換班）</h2>
+          <div class="subtitle">Crew Weekly Report — Alerts / Certificates / Sign-on/off</div>
+        </div>
+        <div class="meta">
+          報告日期：2026-04-14<br>
+          報告週期：2026-04-07 ~ 2026-04-13
+        </div>
+      </div>
+
+      <p class="section-title">本週警報明細</p>
+      <table class="rpt-table">
+        <thead>
+          <tr><th>#</th><th>警報時間</th><th>姓名</th><th>職位</th><th>警報類型</th></tr>
+        </thead>
+        <tbody>${alertRows}</tbody>
+      </table>
+
+      <hr class="section-sep">
+
+      <p class="section-title">證書到期預警 (30 天內)</p>
+      <table class="rpt-table">
+        <thead>
+          <tr><th>#</th><th>姓名</th><th>職位</th><th>證書類型</th><th>到期日</th><th class="num">剩餘天數</th></tr>
+        </thead>
+        <tbody>${certRows}</tbody>
+      </table>
+
+      <hr class="section-sep">
+
+      <p class="section-title">合約到期預警 (本月內)</p>
+      <table class="rpt-table">
+        <thead>
+          <tr><th>#</th><th>姓名</th><th>職位</th><th>合約到期日</th><th class="num">在船天數</th><th class="num">剩餘天數</th></tr>
+        </thead>
+        <tbody>${contractRows}</tbody>
+      </table>
+
+      <hr class="section-sep">
+
+      <p class="section-title">本週換班紀錄</p>
+      <table class="rpt-table">
+        <thead>
+          <tr><th>#</th><th>日期</th><th>港口</th><th>上船人員</th><th>職位</th><th>離船人員</th><th>職位</th><th class="num">離船在船天</th></tr>
+        </thead>
+        <tbody>${signonRows}</tbody>
+      </table>
+
+      <div class="report-footer">
+        <span>摯陞海運管理系統 SRP v3.2 — 自動產生</span>
+        <span>第 2 頁，共 2 頁</span>
+        <span>列印時間：2026-04-14 09:30</span>
+      </div>
+    </div>`;
+}
+
+/* 初始化：預設全船隊列印模式 */
+document.body.classList.add('print-fleet');
+
+const signOnTbody = document.getElementById('signon-tbody');
+SIGNON_DATA.forEach((r, i) => {
+  signOnTbody.innerHTML += `
+    <tr>
+      <td>${i+1}</td><td>${r.date}</td><td>${r.ship}</td>
+      <td>${r.port}</td>
+      <td>${r.onName}</td><td>${r.onRank}</td>
+      <td>${r.offName}</td><td>${r.offRank}</td>
+      <td class="num">${r.offDays > 100 ? `<span style="color:#e67e22">${r.offDays}</span>` : r.offDays}</td>
+    </tr>`;
+});
+</script>
+</body>
+</html>

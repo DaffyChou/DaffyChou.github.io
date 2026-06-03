@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_27ed28dcb50a9f55511d99bf8cafa1c4 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_27ed28dcb50a9f55511d99bf8cafa1c4" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_27ed28dcb50a9f55511d99bf8cafa1c4 = L.map(
+                "map_27ed28dcb50a9f55511d99bf8cafa1c4",
+                {
+                    center: [22.733492629629627, 119.69148044444445],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 5,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_7f935b80ca187682616cfd722844ae8d = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u00a9 OpenStreetMap contributors \u00a9 CARTO",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_7f935b80ca187682616cfd722844ae8d.addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+            var circle_a9d22a12f7a8d523cedb785a9beee2a2 = L.circle(
+                [25.155692, 121.389911],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_aa563e4cfed37174acf2570e982d27a7 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_3d44f78f1ceb9c2a9db20c436c9f0442 = $(`<div id="html_3d44f78f1ceb9c2a9db20c436c9f0442" style="width: 100.0%; height: 100.0%;">TWTPE<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_aa563e4cfed37174acf2570e982d27a7.setContent(html_3d44f78f1ceb9c2a9db20c436c9f0442);
+            
+        
+
+        circle_a9d22a12f7a8d523cedb785a9beee2a2.bindPopup(popup_aa563e4cfed37174acf2570e982d27a7)
+        ;
+
+        
+    
+    
+            circle_a9d22a12f7a8d523cedb785a9beee2a2.bindTooltip(
+                `<div>
+                     TWTPE / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_70692433b7c2fc47862ce2e19439a862 = L.marker(
+                [25.155692, 121.389911],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_5e5a4f385800703d775346c9a339d5c1 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_65254af78f675eaece4158b37015358c = $(`<div id="html_65254af78f675eaece4158b37015358c" style="width: 100.0%; height: 100.0%;">PortCode: TWTPE<br>Lat: 25.155692<br>Long: 121.389911</div>`)[0];
+                popup_5e5a4f385800703d775346c9a339d5c1.setContent(html_65254af78f675eaece4158b37015358c);
+            
+        
+
+        marker_70692433b7c2fc47862ce2e19439a862.bindPopup(popup_5e5a4f385800703d775346c9a339d5c1)
+        ;
+
+        
+    
+    
+            marker_70692433b7c2fc47862ce2e19439a862.bindTooltip(
+                `<div>
+                     TWTPE
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_c155237f799f041547d67b953ceb5812 = L.circle(
+                [26.00829, 119.480247],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_b58cf8561fdf4ff89310543614fea5cf = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_a2eb307ed5340d15fca85e1ec3a22505 = $(`<div id="html_a2eb307ed5340d15fca85e1ec3a22505" style="width: 100.0%; height: 100.0%;">CNFOC<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_b58cf8561fdf4ff89310543614fea5cf.setContent(html_a2eb307ed5340d15fca85e1ec3a22505);
+            
+        
+
+        circle_c155237f799f041547d67b953ceb5812.bindPopup(popup_b58cf8561fdf4ff89310543614fea5cf)
+        ;
+
+        
+    
+    
+            circle_c155237f799f041547d67b953ceb5812.bindTooltip(
+                `<div>
+                     CNFOC / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e6f2ab7d8bd18ed9fd85f59e369ccae5 = L.marker(
+                [26.00829, 119.480247],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_9db8c7526a7298593d8330267d98b286 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_40b635b212279eacb5ddccdd3b9d3067 = $(`<div id="html_40b635b212279eacb5ddccdd3b9d3067" style="width: 100.0%; height: 100.0%;">PortCode: CNFOC<br>Lat: 26.00829<br>Long: 119.480247</div>`)[0];
+                popup_9db8c7526a7298593d8330267d98b286.setContent(html_40b635b212279eacb5ddccdd3b9d3067);
+            
+        
+
+        marker_e6f2ab7d8bd18ed9fd85f59e369ccae5.bindPopup(popup_9db8c7526a7298593d8330267d98b286)
+        ;
+
+        
+    
+    
+            marker_e6f2ab7d8bd18ed9fd85f59e369ccae5.bindTooltip(
+                `<div>
+                     CNFOC
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_c552cb6607bdc6d2ed2a576abeb92003 = L.circle(
+                [26.458608, 119.698726],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_499b43d19b39907b61aeea2a855c65e3 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_15b8e264513d7e325fc2a22e3a7af17c = $(`<div id="html_15b8e264513d7e325fc2a22e3a7af17c" style="width: 100.0%; height: 100.0%;">CNLYA<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_499b43d19b39907b61aeea2a855c65e3.setContent(html_15b8e264513d7e325fc2a22e3a7af17c);
+            
+        
+
+        circle_c552cb6607bdc6d2ed2a576abeb92003.bindPopup(popup_499b43d19b39907b61aeea2a855c65e3)
+        ;
+
+        
+    
+    
+            circle_c552cb6607bdc6d2ed2a576abeb92003.bindTooltip(
+                `<div>
+                     CNLYA / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_fb2c25a24f718199f4bbb36ea67ab89b = L.marker(
+                [26.458608, 119.698726],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_725d4b665aa534ad73c2879e9fe2c0cb = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_68ec284b27f5e1baeae06271475d9054 = $(`<div id="html_68ec284b27f5e1baeae06271475d9054" style="width: 100.0%; height: 100.0%;">PortCode: CNLYA<br>Lat: 26.458608<br>Long: 119.698726</div>`)[0];
+                popup_725d4b665aa534ad73c2879e9fe2c0cb.setContent(html_68ec284b27f5e1baeae06271475d9054);
+            
+        
+
+        marker_fb2c25a24f718199f4bbb36ea67ab89b.bindPopup(popup_725d4b665aa534ad73c2879e9fe2c0cb)
+        ;
+
+        
+    
+    
+            marker_fb2c25a24f718199f4bbb36ea67ab89b.bindTooltip(
+                `<div>
+                     CNLYA
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_91f6a7e84065ba007ed4c4591b2ee6a7 = L.circle(
+                [34.236457, 135.10802],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_9e2aa08f690da0ab8b501ac2b8e6bcf6 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_64603d5162afb04835e105b4d27b54b3 = $(`<div id="html_64603d5162afb04835e105b4d27b54b3" style="width: 100.0%; height: 100.0%;">JPWAK<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_9e2aa08f690da0ab8b501ac2b8e6bcf6.setContent(html_64603d5162afb04835e105b4d27b54b3);
+            
+        
+
+        circle_91f6a7e84065ba007ed4c4591b2ee6a7.bindPopup(popup_9e2aa08f690da0ab8b501ac2b8e6bcf6)
+        ;
+
+        
+    
+    
+            circle_91f6a7e84065ba007ed4c4591b2ee6a7.bindTooltip(
+                `<div>
+                     JPWAK / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_6d9c6868b086d782d7e8e49e4db75648 = L.marker(
+                [34.236457, 135.10802],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_f6053d1747816d9aeb255433f1fbad19 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_383ac28f0e3e6fe44a0402c3c4ab10b4 = $(`<div id="html_383ac28f0e3e6fe44a0402c3c4ab10b4" style="width: 100.0%; height: 100.0%;">PortCode: JPWAK<br>Lat: 34.236457<br>Long: 135.10802</div>`)[0];
+                popup_f6053d1747816d9aeb255433f1fbad19.setContent(html_383ac28f0e3e6fe44a0402c3c4ab10b4);
+            
+        
+
+        marker_6d9c6868b086d782d7e8e49e4db75648.bindPopup(popup_f6053d1747816d9aeb255433f1fbad19)
+        ;
+
+        
+    
+    
+            marker_6d9c6868b086d782d7e8e49e4db75648.bindTooltip(
+                `<div>
+                     JPWAK
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_df4e309fdcec5ba799de73d008149f89 = L.circle(
+                [26.746008, 119.635858],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_ef505444c0ef8c9d7f2d420ad6c7e2e9 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_047e69a975a7684bab85551e6ab0df74 = $(`<div id="html_047e69a975a7684bab85551e6ab0df74" style="width: 100.0%; height: 100.0%;">CNNDE<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_ef505444c0ef8c9d7f2d420ad6c7e2e9.setContent(html_047e69a975a7684bab85551e6ab0df74);
+            
+        
+
+        circle_df4e309fdcec5ba799de73d008149f89.bindPopup(popup_ef505444c0ef8c9d7f2d420ad6c7e2e9)
+        ;
+
+        
+    
+    
+            circle_df4e309fdcec5ba799de73d008149f89.bindTooltip(
+                `<div>
+                     CNNDE / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_0465daf1583cc7250b68086952116e61 = L.marker(
+                [26.746008, 119.635858],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_5746c018976e1619b30caff39e5a5d98 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_d6bf083a4c11fd91d8c823903ba00435 = $(`<div id="html_d6bf083a4c11fd91d8c823903ba00435" style="width: 100.0%; height: 100.0%;">PortCode: CNNDE<br>Lat: 26.746008<br>Long: 119.635858</div>`)[0];
+                popup_5746c018976e1619b30caff39e5a5d98.setContent(html_d6bf083a4c11fd91d8c823903ba00435);
+            
+        
+
+        marker_0465daf1583cc7250b68086952116e61.bindPopup(popup_5746c018976e1619b30caff39e5a5d98)
+        ;
+
+        
+    
+    
+            marker_0465daf1583cc7250b68086952116e61.bindTooltip(
+                `<div>
+                     CNNDE
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_1e22c640c551a1f7a117652e914390e3 = L.circle(
+                [25.137464, 121.743644],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_6c094f8aa160466949eee51c33b2b24b = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_5f2da799c97984f24cedd67080d4341d = $(`<div id="html_5f2da799c97984f24cedd67080d4341d" style="width: 100.0%; height: 100.0%;">TWKEL<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_6c094f8aa160466949eee51c33b2b24b.setContent(html_5f2da799c97984f24cedd67080d4341d);
+            
+        
+
+        circle_1e22c640c551a1f7a117652e914390e3.bindPopup(popup_6c094f8aa160466949eee51c33b2b24b)
+        ;
+
+        
+    
+    
+            circle_1e22c640c551a1f7a117652e914390e3.bindTooltip(
+                `<div>
+                     TWKEL / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_75cb2b314c02b7434bc85748fb2bd97c = L.marker(
+                [25.137464, 121.743644],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_542239508dd6df75038dfca9e3a8cda7 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_ddeed56b245b788bcfd7e57f3a8a18a2 = $(`<div id="html_ddeed56b245b788bcfd7e57f3a8a18a2" style="width: 100.0%; height: 100.0%;">PortCode: TWKEL<br>Lat: 25.137464<br>Long: 121.743644</div>`)[0];
+                popup_542239508dd6df75038dfca9e3a8cda7.setContent(html_ddeed56b245b788bcfd7e57f3a8a18a2);
+            
+        
+
+        marker_75cb2b314c02b7434bc85748fb2bd97c.bindPopup(popup_542239508dd6df75038dfca9e3a8cda7)
+        ;
+
+        
+    
+    
+            marker_75cb2b314c02b7434bc85748fb2bd97c.bindTooltip(
+                `<div>
+                     TWKEL
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_750bc147856f6a90ab72f01d5aabaa99 = L.circle(
+                [35.033204, 136.862508],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_0a4840b4f8b99146e5be738a1d5823f0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_1ad3819f7395846ec443d7708e0417a1 = $(`<div id="html_1ad3819f7395846ec443d7708e0417a1" style="width: 100.0%; height: 100.0%;">JPNGO<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_0a4840b4f8b99146e5be738a1d5823f0.setContent(html_1ad3819f7395846ec443d7708e0417a1);
+            
+        
+
+        circle_750bc147856f6a90ab72f01d5aabaa99.bindPopup(popup_0a4840b4f8b99146e5be738a1d5823f0)
+        ;
+
+        
+    
+    
+            circle_750bc147856f6a90ab72f01d5aabaa99.bindTooltip(
+                `<div>
+                     JPNGO / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_a2061b7beefedd7d45f1a97d45d9928b = L.marker(
+                [35.033204, 136.862508],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_5b19fe3310e9620d9a02325fdc498d8f = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_2d188430fff53a94490b80c4710ae2e2 = $(`<div id="html_2d188430fff53a94490b80c4710ae2e2" style="width: 100.0%; height: 100.0%;">PortCode: JPNGO<br>Lat: 35.033204<br>Long: 136.862508</div>`)[0];
+                popup_5b19fe3310e9620d9a02325fdc498d8f.setContent(html_2d188430fff53a94490b80c4710ae2e2);
+            
+        
+
+        marker_a2061b7beefedd7d45f1a97d45d9928b.bindPopup(popup_5b19fe3310e9620d9a02325fdc498d8f)
+        ;
+
+        
+    
+    
+            marker_a2061b7beefedd7d45f1a97d45d9928b.bindTooltip(
+                `<div>
+                     JPNGO
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_8385ca2af26223a0d040927df28b39f6 = L.circle(
+                [23.98262, 121.627289],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_075b2d9f430ce6abdb504b13e0d2cfc7 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_80c45dc6237ed35ec21c75d20c26bbac = $(`<div id="html_80c45dc6237ed35ec21c75d20c26bbac" style="width: 100.0%; height: 100.0%;">TWHUN<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_075b2d9f430ce6abdb504b13e0d2cfc7.setContent(html_80c45dc6237ed35ec21c75d20c26bbac);
+            
+        
+
+        circle_8385ca2af26223a0d040927df28b39f6.bindPopup(popup_075b2d9f430ce6abdb504b13e0d2cfc7)
+        ;
+
+        
+    
+    
+            circle_8385ca2af26223a0d040927df28b39f6.bindTooltip(
+                `<div>
+                     TWHUN / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_c2a6c58c20d36a941b0728e9e838d3fb = L.marker(
+                [23.98262, 121.627289],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_80c07370b724d8f2e984ff5749a07998 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_198a54183a686c67ad008ae5661b4628 = $(`<div id="html_198a54183a686c67ad008ae5661b4628" style="width: 100.0%; height: 100.0%;">PortCode: TWHUN<br>Lat: 23.98262<br>Long: 121.627289</div>`)[0];
+                popup_80c07370b724d8f2e984ff5749a07998.setContent(html_198a54183a686c67ad008ae5661b4628);
+            
+        
+
+        marker_c2a6c58c20d36a941b0728e9e838d3fb.bindPopup(popup_80c07370b724d8f2e984ff5749a07998)
+        ;
+
+        
+    
+    
+            marker_c2a6c58c20d36a941b0728e9e838d3fb.bindTooltip(
+                `<div>
+                     TWHUN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_bcf91fa7bded2128d2ee2f278aa4eed3 = L.circle(
+                [16.786718, 96.118894],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_857354fad20dbc7e7d42f036863c9609 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_29f7f0f5767138e822255dca04b4c7dd = $(`<div id="html_29f7f0f5767138e822255dca04b4c7dd" style="width: 100.0%; height: 100.0%;">MMRGN<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_857354fad20dbc7e7d42f036863c9609.setContent(html_29f7f0f5767138e822255dca04b4c7dd);
+            
+        
+
+        circle_bcf91fa7bded2128d2ee2f278aa4eed3.bindPopup(popup_857354fad20dbc7e7d42f036863c9609)
+        ;
+
+        
+    
+    
+            circle_bcf91fa7bded2128d2ee2f278aa4eed3.bindTooltip(
+                `<div>
+                     MMRGN / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_3b813d6dc346ca351412dfd4f07c35ab = L.marker(
+                [16.786718, 96.118894],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_6ebeefec87099bd1ff91c5963b84efa5 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_c2eda3decbce8064dc8b2ced75c371ee = $(`<div id="html_c2eda3decbce8064dc8b2ced75c371ee" style="width: 100.0%; height: 100.0%;">PortCode: MMRGN<br>Lat: 16.786718<br>Long: 96.118894</div>`)[0];
+                popup_6ebeefec87099bd1ff91c5963b84efa5.setContent(html_c2eda3decbce8064dc8b2ced75c371ee);
+            
+        
+
+        marker_3b813d6dc346ca351412dfd4f07c35ab.bindPopup(popup_6ebeefec87099bd1ff91c5963b84efa5)
+        ;
+
+        
+    
+    
+            marker_3b813d6dc346ca351412dfd4f07c35ab.bindTooltip(
+                `<div>
+                     MMRGN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_99b3b8c9a1f2b2df9ca906324c2015a9 = L.circle(
+                [24.273536, 120.522632],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_df67f81615bd9709d939b8553aa071d2 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_5f622b0a538673ef9645d3fef59c4b13 = $(`<div id="html_5f622b0a538673ef9645d3fef59c4b13" style="width: 100.0%; height: 100.0%;">TWTXG<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_df67f81615bd9709d939b8553aa071d2.setContent(html_5f622b0a538673ef9645d3fef59c4b13);
+            
+        
+
+        circle_99b3b8c9a1f2b2df9ca906324c2015a9.bindPopup(popup_df67f81615bd9709d939b8553aa071d2)
+        ;
+
+        
+    
+    
+            circle_99b3b8c9a1f2b2df9ca906324c2015a9.bindTooltip(
+                `<div>
+                     TWTXG / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_4c05d52f1815dc92202f403adb053f00 = L.marker(
+                [24.273536, 120.522632],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_5be848bf113f92c06dac6310e00d035f = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_f68e621c3cc41e2860ad2619b515968e = $(`<div id="html_f68e621c3cc41e2860ad2619b515968e" style="width: 100.0%; height: 100.0%;">PortCode: TWTXG<br>Lat: 24.273536<br>Long: 120.522632</div>`)[0];
+                popup_5be848bf113f92c06dac6310e00d035f.setContent(html_f68e621c3cc41e2860ad2619b515968e);
+            
+        
+
+        marker_4c05d52f1815dc92202f403adb053f00.bindPopup(popup_5be848bf113f92c06dac6310e00d035f)
+        ;
+
+        
+    
+    
+            marker_4c05d52f1815dc92202f403adb053f00.bindTooltip(
+                `<div>
+                     TWTXG
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_2f71ac521edfbf945dd6b5cdaa9ac1e1 = L.circle(
+                [34.043652, 131.790452],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_860218036cf3ebddcda63a19ee59dc84 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_5eda27f854f35db40799bc964cb6d537 = $(`<div id="html_5eda27f854f35db40799bc964cb6d537" style="width: 100.0%; height: 100.0%;">JPTXD<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_860218036cf3ebddcda63a19ee59dc84.setContent(html_5eda27f854f35db40799bc964cb6d537);
+            
+        
+
+        circle_2f71ac521edfbf945dd6b5cdaa9ac1e1.bindPopup(popup_860218036cf3ebddcda63a19ee59dc84)
+        ;
+
+        
+    
+    
+            circle_2f71ac521edfbf945dd6b5cdaa9ac1e1.bindTooltip(
+                `<div>
+                     JPTXD / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_0cf6c37448d02b6aae41bea7da899b59 = L.marker(
+                [34.043652, 131.790452],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_73ed5733e7d27782108899fa34753ec9 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_51437bb0b562da47bb94edf0cab2c3aa = $(`<div id="html_51437bb0b562da47bb94edf0cab2c3aa" style="width: 100.0%; height: 100.0%;">PortCode: JPTXD<br>Lat: 34.043652<br>Long: 131.790452</div>`)[0];
+                popup_73ed5733e7d27782108899fa34753ec9.setContent(html_51437bb0b562da47bb94edf0cab2c3aa);
+            
+        
+
+        marker_0cf6c37448d02b6aae41bea7da899b59.bindPopup(popup_73ed5733e7d27782108899fa34753ec9)
+        ;
+
+        
+    
+    
+            marker_0cf6c37448d02b6aae41bea7da899b59.bindTooltip(
+                `<div>
+                     JPTXD
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_c90b2c3e8948cf06878053d18e4b6fea = L.circle(
+                [16.631226, 96.263179],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_dec757faeb6780146338705d1981f25a = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_bacff487c8b2984836ee36261e692e57 = $(`<div id="html_bacff487c8b2984836ee36261e692e57" style="width: 100.0%; height: 100.0%;">MMTLA<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_dec757faeb6780146338705d1981f25a.setContent(html_bacff487c8b2984836ee36261e692e57);
+            
+        
+
+        circle_c90b2c3e8948cf06878053d18e4b6fea.bindPopup(popup_dec757faeb6780146338705d1981f25a)
+        ;
+
+        
+    
+    
+            circle_c90b2c3e8948cf06878053d18e4b6fea.bindTooltip(
+                `<div>
+                     MMTLA / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_2017ab0eb7e2a03b1c9e9185a8f88abc = L.marker(
+                [16.631226, 96.263179],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_103e5abb9824d727081bbebfd0900520 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_390fc1d6198e41e1102e41cb381756c0 = $(`<div id="html_390fc1d6198e41e1102e41cb381756c0" style="width: 100.0%; height: 100.0%;">PortCode: MMTLA<br>Lat: 16.631226<br>Long: 96.263179</div>`)[0];
+                popup_103e5abb9824d727081bbebfd0900520.setContent(html_390fc1d6198e41e1102e41cb381756c0);
+            
+        
+
+        marker_2017ab0eb7e2a03b1c9e9185a8f88abc.bindPopup(popup_103e5abb9824d727081bbebfd0900520)
+        ;
+
+        
+    
+    
+            marker_2017ab0eb7e2a03b1c9e9185a8f88abc.bindTooltip(
+                `<div>
+                     MMTLA
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_3b9fdd7c40c53e12933ed4f0a8becdc8 = L.circle(
+                [-7.197906, 112.723812],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_f62f7a3ef4261875021781967ab63270 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_94a806c8f148bd22e67e6760de97203e = $(`<div id="html_94a806c8f148bd22e67e6760de97203e" style="width: 100.0%; height: 100.0%;">IDSUB<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_f62f7a3ef4261875021781967ab63270.setContent(html_94a806c8f148bd22e67e6760de97203e);
+            
+        
+
+        circle_3b9fdd7c40c53e12933ed4f0a8becdc8.bindPopup(popup_f62f7a3ef4261875021781967ab63270)
+        ;
+
+        
+    
+    
+            circle_3b9fdd7c40c53e12933ed4f0a8becdc8.bindTooltip(
+                `<div>
+                     IDSUB / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_236e59ec49fb2805d495d518699f4a00 = L.marker(
+                [-7.197906, 112.723812],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_ebd36e521e9ad6457ca21d95e4ae540d = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_28bbdf089019267586f55ef2fe137e72 = $(`<div id="html_28bbdf089019267586f55ef2fe137e72" style="width: 100.0%; height: 100.0%;">PortCode: IDSUB<br>Lat: -7.197906<br>Long: 112.723812</div>`)[0];
+                popup_ebd36e521e9ad6457ca21d95e4ae540d.setContent(html_28bbdf089019267586f55ef2fe137e72);
+            
+        
+
+        marker_236e59ec49fb2805d495d518699f4a00.bindPopup(popup_ebd36e521e9ad6457ca21d95e4ae540d)
+        ;
+
+        
+    
+    
+            marker_236e59ec49fb2805d495d518699f4a00.bindTooltip(
+                `<div>
+                     IDSUB
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_95f508a4dddea15ca17f72b5f2544439 = L.circle(
+                [-2.812365, 122.161929],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_c47a64b17b3e2ad76e843fc8e73e53e5 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_8666107ca834c20cd3275808a91bc004 = $(`<div id="html_8666107ca834c20cd3275808a91bc004" style="width: 100.0%; height: 100.0%;">IDBAH<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_c47a64b17b3e2ad76e843fc8e73e53e5.setContent(html_8666107ca834c20cd3275808a91bc004);
+            
+        
+
+        circle_95f508a4dddea15ca17f72b5f2544439.bindPopup(popup_c47a64b17b3e2ad76e843fc8e73e53e5)
+        ;
+
+        
+    
+    
+            circle_95f508a4dddea15ca17f72b5f2544439.bindTooltip(
+                `<div>
+                     IDBAH / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_1685c9eebd1a676906b91d7fbf84eab7 = L.marker(
+                [-2.812365, 122.161929],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_8deb554c217819f328bb1972f62a6bbf = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_4ad2eec5b243e363aad14d563c613fbe = $(`<div id="html_4ad2eec5b243e363aad14d563c613fbe" style="width: 100.0%; height: 100.0%;">PortCode: IDBAH<br>Lat: -2.812365<br>Long: 122.161929</div>`)[0];
+                popup_8deb554c217819f328bb1972f62a6bbf.setContent(html_4ad2eec5b243e363aad14d563c613fbe);
+            
+        
+
+        marker_1685c9eebd1a676906b91d7fbf84eab7.bindPopup(popup_8deb554c217819f328bb1972f62a6bbf)
+        ;
+
+        
+    
+    
+            marker_1685c9eebd1a676906b91d7fbf84eab7.bindTooltip(
+                `<div>
+                     IDBAH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_7d8d634fe8a71e8a88fda2e6559d0e87 = L.circle(
+                [22.311275, 91.806288],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_b89992ea2c49f7198aff0a13343489c1 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_797cadf2ca63e7eea04e3e69547a10e3 = $(`<div id="html_797cadf2ca63e7eea04e3e69547a10e3" style="width: 100.0%; height: 100.0%;">BDCGP<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_b89992ea2c49f7198aff0a13343489c1.setContent(html_797cadf2ca63e7eea04e3e69547a10e3);
+            
+        
+
+        circle_7d8d634fe8a71e8a88fda2e6559d0e87.bindPopup(popup_b89992ea2c49f7198aff0a13343489c1)
+        ;
+
+        
+    
+    
+            circle_7d8d634fe8a71e8a88fda2e6559d0e87.bindTooltip(
+                `<div>
+                     BDCGP / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_fd9965ed468f9155d4d22e3fb7ed2cce = L.marker(
+                [22.311275, 91.806288],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_307c86cab11cbb317f333c8f38d9c193 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_a39c58e26710c2aae0d38dafbec2cf51 = $(`<div id="html_a39c58e26710c2aae0d38dafbec2cf51" style="width: 100.0%; height: 100.0%;">PortCode: BDCGP<br>Lat: 22.311275<br>Long: 91.806288</div>`)[0];
+                popup_307c86cab11cbb317f333c8f38d9c193.setContent(html_a39c58e26710c2aae0d38dafbec2cf51);
+            
+        
+
+        marker_fd9965ed468f9155d4d22e3fb7ed2cce.bindPopup(popup_307c86cab11cbb317f333c8f38d9c193)
+        ;
+
+        
+    
+    
+            marker_fd9965ed468f9155d4d22e3fb7ed2cce.bindTooltip(
+                `<div>
+                     BDCGP
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_01fefad12b3f775074857f9e1b6fa6ae = L.circle(
+                [16.959919, 82.281125],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_fa099b3a497f2efeeb01bc4b4825f2a0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_ddc84dcc5b5cadb1a3de0b37917ee21c = $(`<div id="html_ddc84dcc5b5cadb1a3de0b37917ee21c" style="width: 100.0%; height: 100.0%;">INKAK<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_fa099b3a497f2efeeb01bc4b4825f2a0.setContent(html_ddc84dcc5b5cadb1a3de0b37917ee21c);
+            
+        
+
+        circle_01fefad12b3f775074857f9e1b6fa6ae.bindPopup(popup_fa099b3a497f2efeeb01bc4b4825f2a0)
+        ;
+
+        
+    
+    
+            circle_01fefad12b3f775074857f9e1b6fa6ae.bindTooltip(
+                `<div>
+                     INKAK / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_4e7053fc47dcc6b0b132159acce147ec = L.marker(
+                [16.959919, 82.281125],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_6d45d7b831814ec4ff2f2983e08b5b78 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_763a4dd4b02284645747adfa9272f215 = $(`<div id="html_763a4dd4b02284645747adfa9272f215" style="width: 100.0%; height: 100.0%;">PortCode: INKAK<br>Lat: 16.959919<br>Long: 82.281125</div>`)[0];
+                popup_6d45d7b831814ec4ff2f2983e08b5b78.setContent(html_763a4dd4b02284645747adfa9272f215);
+            
+        
+
+        marker_4e7053fc47dcc6b0b132159acce147ec.bindPopup(popup_6d45d7b831814ec4ff2f2983e08b5b78)
+        ;
+
+        
+    
+    
+            marker_4e7053fc47dcc6b0b132159acce147ec.bindTooltip(
+                `<div>
+                     INKAK
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_87645e4486f6f8040d0dad67d674bc95 = L.circle(
+                [25.212881, 118.988519],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_7aa94ef6a62d9453befa90e5072e8d7f = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_fd8bdf06cd896255d64bb11ddf1f4b13 = $(`<div id="html_fd8bdf06cd896255d64bb11ddf1f4b13" style="width: 100.0%; height: 100.0%;">CNXIU<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_7aa94ef6a62d9453befa90e5072e8d7f.setContent(html_fd8bdf06cd896255d64bb11ddf1f4b13);
+            
+        
+
+        circle_87645e4486f6f8040d0dad67d674bc95.bindPopup(popup_7aa94ef6a62d9453befa90e5072e8d7f)
+        ;
+
+        
+    
+    
+            circle_87645e4486f6f8040d0dad67d674bc95.bindTooltip(
+                `<div>
+                     CNXIU / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b8c29d51d2ec0c78ee62a915b70f69ce = L.marker(
+                [25.212881, 118.988519],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_baf91c006d8d403cd044dd65f2e45c24 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_14deed212f33b8e65f9e95b33ffa4513 = $(`<div id="html_14deed212f33b8e65f9e95b33ffa4513" style="width: 100.0%; height: 100.0%;">PortCode: CNXIU<br>Lat: 25.212881<br>Long: 118.988519</div>`)[0];
+                popup_baf91c006d8d403cd044dd65f2e45c24.setContent(html_14deed212f33b8e65f9e95b33ffa4513);
+            
+        
+
+        marker_b8c29d51d2ec0c78ee62a915b70f69ce.bindPopup(popup_baf91c006d8d403cd044dd65f2e45c24)
+        ;
+
+        
+    
+    
+            marker_b8c29d51d2ec0c78ee62a915b70f69ce.bindTooltip(
+                `<div>
+                     CNXIU
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_b2cbef17d4e2114b3814cfba3bfafba5 = L.circle(
+                [34.893788, 127.761875],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_4d55f4bf05ef0691a95658d024376607 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_9f18c9cf3e28945e3c49f58c3e08770a = $(`<div id="html_9f18c9cf3e28945e3c49f58c3e08770a" style="width: 100.0%; height: 100.0%;">KRKAN<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_4d55f4bf05ef0691a95658d024376607.setContent(html_9f18c9cf3e28945e3c49f58c3e08770a);
+            
+        
+
+        circle_b2cbef17d4e2114b3814cfba3bfafba5.bindPopup(popup_4d55f4bf05ef0691a95658d024376607)
+        ;
+
+        
+    
+    
+            circle_b2cbef17d4e2114b3814cfba3bfafba5.bindTooltip(
+                `<div>
+                     KRKAN / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_c89ad14542127101bb76a9d2b899f881 = L.marker(
+                [34.893788, 127.761875],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_81cbdc6dac82b9998e92d528ec503659 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_35a881fb6c944897615407d9072d71df = $(`<div id="html_35a881fb6c944897615407d9072d71df" style="width: 100.0%; height: 100.0%;">PortCode: KRKAN<br>Lat: 34.893788<br>Long: 127.761875</div>`)[0];
+                popup_81cbdc6dac82b9998e92d528ec503659.setContent(html_35a881fb6c944897615407d9072d71df);
+            
+        
+
+        marker_c89ad14542127101bb76a9d2b899f881.bindPopup(popup_81cbdc6dac82b9998e92d528ec503659)
+        ;
+
+        
+    
+    
+            marker_c89ad14542127101bb76a9d2b899f881.bindTooltip(
+                `<div>
+                     KRKAN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_a0ef417d9df7711397505cf5ce726875 = L.circle(
+                [22.60124, 120.294627],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_fe5ff8173d4dc7415e993046f7344ee3 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_3dcaefef6bb0fd52ea5145df84f5336d = $(`<div id="html_3dcaefef6bb0fd52ea5145df84f5336d" style="width: 100.0%; height: 100.0%;">TWKHH<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_fe5ff8173d4dc7415e993046f7344ee3.setContent(html_3dcaefef6bb0fd52ea5145df84f5336d);
+            
+        
+
+        circle_a0ef417d9df7711397505cf5ce726875.bindPopup(popup_fe5ff8173d4dc7415e993046f7344ee3)
+        ;
+
+        
+    
+    
+            circle_a0ef417d9df7711397505cf5ce726875.bindTooltip(
+                `<div>
+                     TWKHH / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_6605c799654b08f198fcb384061bc032 = L.marker(
+                [22.60124, 120.294627],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_8bc465d59cf2e33221c393a24e97cf0c = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_d7b65572a32aae3d8c1b9ebd1d48d412 = $(`<div id="html_d7b65572a32aae3d8c1b9ebd1d48d412" style="width: 100.0%; height: 100.0%;">PortCode: TWKHH<br>Lat: 22.60124<br>Long: 120.294627</div>`)[0];
+                popup_8bc465d59cf2e33221c393a24e97cf0c.setContent(html_d7b65572a32aae3d8c1b9ebd1d48d412);
+            
+        
+
+        marker_6605c799654b08f198fcb384061bc032.bindPopup(popup_8bc465d59cf2e33221c393a24e97cf0c)
+        ;
+
+        
+    
+    
+            marker_6605c799654b08f198fcb384061bc032.bindTooltip(
+                `<div>
+                     TWKHH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_78a3dd553abda1468ede61894990cce4 = L.circle(
+                [-4.830421, 136.8428],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_e14a9c1b9ea83a299bcb4b6f8c789f03 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_df551b7446fff13e1119627c06836e69 = $(`<div id="html_df551b7446fff13e1119627c06836e69" style="width: 100.0%; height: 100.0%;">IDAMA<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_e14a9c1b9ea83a299bcb4b6f8c789f03.setContent(html_df551b7446fff13e1119627c06836e69);
+            
+        
+
+        circle_78a3dd553abda1468ede61894990cce4.bindPopup(popup_e14a9c1b9ea83a299bcb4b6f8c789f03)
+        ;
+
+        
+    
+    
+            circle_78a3dd553abda1468ede61894990cce4.bindTooltip(
+                `<div>
+                     IDAMA / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_3303cbaf5c11bde99753c0e8d831c95f = L.marker(
+                [-4.830421, 136.8428],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_b807a775b33f34314539dcc46b83d61f = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_168ee66a570e327f65bacbf506ad3d88 = $(`<div id="html_168ee66a570e327f65bacbf506ad3d88" style="width: 100.0%; height: 100.0%;">PortCode: IDAMA<br>Lat: -4.830421<br>Long: 136.8428</div>`)[0];
+                popup_b807a775b33f34314539dcc46b83d61f.setContent(html_168ee66a570e327f65bacbf506ad3d88);
+            
+        
+
+        marker_3303cbaf5c11bde99753c0e8d831c95f.bindPopup(popup_b807a775b33f34314539dcc46b83d61f)
+        ;
+
+        
+    
+    
+            marker_3303cbaf5c11bde99753c0e8d831c95f.bindTooltip(
+                `<div>
+                     IDAMA
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_bacabccc8f9822903195a3596e9ee889 = L.circle(
+                [36.9396, 140.894846],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_3bfe48a27802dea130cc68dd2d753f3b = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_ab07b1892d2908c07b9052e634cc799f = $(`<div id="html_ab07b1892d2908c07b9052e634cc799f" style="width: 100.0%; height: 100.0%;">JPONA<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_3bfe48a27802dea130cc68dd2d753f3b.setContent(html_ab07b1892d2908c07b9052e634cc799f);
+            
+        
+
+        circle_bacabccc8f9822903195a3596e9ee889.bindPopup(popup_3bfe48a27802dea130cc68dd2d753f3b)
+        ;
+
+        
+    
+    
+            circle_bacabccc8f9822903195a3596e9ee889.bindTooltip(
+                `<div>
+                     JPONA / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_678cb6ce10c7130a02066ef0d40f8e74 = L.marker(
+                [36.9396, 140.894846],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_926bf9f2dd04cfae400527851bd0a3ed = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_139bc92f96a75c6df1a3b5453397c2d4 = $(`<div id="html_139bc92f96a75c6df1a3b5453397c2d4" style="width: 100.0%; height: 100.0%;">PortCode: JPONA<br>Lat: 36.9396<br>Long: 140.894846</div>`)[0];
+                popup_926bf9f2dd04cfae400527851bd0a3ed.setContent(html_139bc92f96a75c6df1a3b5453397c2d4);
+            
+        
+
+        marker_678cb6ce10c7130a02066ef0d40f8e74.bindPopup(popup_926bf9f2dd04cfae400527851bd0a3ed)
+        ;
+
+        
+    
+    
+            marker_678cb6ce10c7130a02066ef0d40f8e74.bindTooltip(
+                `<div>
+                     JPONA
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_c17d1ca205d28c021572d284357a52ab = L.circle(
+                [34.611908, 135.40425],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_ca1c4f4fd2cbfce00e3b963ec3963423 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_4a326e2ae15b4a6e0ce74fefa8742af0 = $(`<div id="html_4a326e2ae15b4a6e0ce74fefa8742af0" style="width: 100.0%; height: 100.0%;">JPOSA<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_ca1c4f4fd2cbfce00e3b963ec3963423.setContent(html_4a326e2ae15b4a6e0ce74fefa8742af0);
+            
+        
+
+        circle_c17d1ca205d28c021572d284357a52ab.bindPopup(popup_ca1c4f4fd2cbfce00e3b963ec3963423)
+        ;
+
+        
+    
+    
+            circle_c17d1ca205d28c021572d284357a52ab.bindTooltip(
+                `<div>
+                     JPOSA / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_c8e0decae355eb1c30a1e4161090baff = L.marker(
+                [34.611908, 135.40425],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_32fa6d6ee7b1b0ae1c2a777fcdab19ec = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_7e68e9ae8196a2b0516c467a4961f515 = $(`<div id="html_7e68e9ae8196a2b0516c467a4961f515" style="width: 100.0%; height: 100.0%;">PortCode: JPOSA<br>Lat: 34.611908<br>Long: 135.40425</div>`)[0];
+                popup_32fa6d6ee7b1b0ae1c2a777fcdab19ec.setContent(html_7e68e9ae8196a2b0516c467a4961f515);
+            
+        
+
+        marker_c8e0decae355eb1c30a1e4161090baff.bindPopup(popup_32fa6d6ee7b1b0ae1c2a777fcdab19ec)
+        ;
+
+        
+    
+    
+            marker_c8e0decae355eb1c30a1e4161090baff.bindTooltip(
+                `<div>
+                     JPOSA
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_49eaa3226da9d3524d29f6add387b0ac = L.circle(
+                [-6.096164, 106.882809],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_8290ce598b82b1b1c6f9126f78eedcef = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_38c7cce73725f45692a1ebcabce61d98 = $(`<div id="html_38c7cce73725f45692a1ebcabce61d98" style="width: 100.0%; height: 100.0%;">IDJKT<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_8290ce598b82b1b1c6f9126f78eedcef.setContent(html_38c7cce73725f45692a1ebcabce61d98);
+            
+        
+
+        circle_49eaa3226da9d3524d29f6add387b0ac.bindPopup(popup_8290ce598b82b1b1c6f9126f78eedcef)
+        ;
+
+        
+    
+    
+            circle_49eaa3226da9d3524d29f6add387b0ac.bindTooltip(
+                `<div>
+                     IDJKT / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_f6e61eb21f904574cf5632e1f1cbbecd = L.marker(
+                [-6.096164, 106.882809],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_9709324d69370378938df41eda312789 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_12c4a231e79a1ceb29d23df20a411e56 = $(`<div id="html_12c4a231e79a1ceb29d23df20a411e56" style="width: 100.0%; height: 100.0%;">PortCode: IDJKT<br>Lat: -6.096164<br>Long: 106.882809</div>`)[0];
+                popup_9709324d69370378938df41eda312789.setContent(html_12c4a231e79a1ceb29d23df20a411e56);
+            
+        
+
+        marker_f6e61eb21f904574cf5632e1f1cbbecd.bindPopup(popup_9709324d69370378938df41eda312789)
+        ;
+
+        
+    
+    
+            marker_f6e61eb21f904574cf5632e1f1cbbecd.bindTooltip(
+                `<div>
+                     IDJKT
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_23e1bcdca4597a7e9b210db40d784019 = L.circle(
+                [24.531209, 118.228618],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_d2b40b3885176e2009badd38e0c8f399 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_a2b266b8468a2222deddc19e7666c089 = $(`<div id="html_a2b266b8468a2222deddc19e7666c089" style="width: 100.0%; height: 100.0%;">TWKNH<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_d2b40b3885176e2009badd38e0c8f399.setContent(html_a2b266b8468a2222deddc19e7666c089);
+            
+        
+
+        circle_23e1bcdca4597a7e9b210db40d784019.bindPopup(popup_d2b40b3885176e2009badd38e0c8f399)
+        ;
+
+        
+    
+    
+            circle_23e1bcdca4597a7e9b210db40d784019.bindTooltip(
+                `<div>
+                     TWKNH / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7a891a3809db401eccd8c309ebe2a846 = L.marker(
+                [24.531209, 118.228618],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_5e5f0e3615f85c1b929095078a0b3b4c = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_51a0b6dde01f18c7893bff0ca0f3d45e = $(`<div id="html_51a0b6dde01f18c7893bff0ca0f3d45e" style="width: 100.0%; height: 100.0%;">PortCode: TWKNH<br>Lat: 24.531209<br>Long: 118.228618</div>`)[0];
+                popup_5e5f0e3615f85c1b929095078a0b3b4c.setContent(html_51a0b6dde01f18c7893bff0ca0f3d45e);
+            
+        
+
+        marker_7a891a3809db401eccd8c309ebe2a846.bindPopup(popup_5e5f0e3615f85c1b929095078a0b3b4c)
+        ;
+
+        
+    
+    
+            marker_7a891a3809db401eccd8c309ebe2a846.bindTooltip(
+                `<div>
+                     TWKNH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_177c3992ca41107223c198034508f35e = L.circle(
+                [33.380191, 133.283382],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_5205b82a5c4591595c3d73c1e177487e = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_b4ca88bfeb24a77c651bfb5d6eb504cf = $(`<div id="html_b4ca88bfeb24a77c651bfb5d6eb504cf" style="width: 100.0%; height: 100.0%;">JPSUZ<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_5205b82a5c4591595c3d73c1e177487e.setContent(html_b4ca88bfeb24a77c651bfb5d6eb504cf);
+            
+        
+
+        circle_177c3992ca41107223c198034508f35e.bindPopup(popup_5205b82a5c4591595c3d73c1e177487e)
+        ;
+
+        
+    
+    
+            circle_177c3992ca41107223c198034508f35e.bindTooltip(
+                `<div>
+                     JPSUZ / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e9fa102de9fd6af5821980f7efb2cc9d = L.marker(
+                [33.380191, 133.283382],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_65c479481a3e1402aba685dc1fd2cda5 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_4a2cdefc7b3147dbd22d51423d9b377d = $(`<div id="html_4a2cdefc7b3147dbd22d51423d9b377d" style="width: 100.0%; height: 100.0%;">PortCode: JPSUZ<br>Lat: 33.380191<br>Long: 133.283382</div>`)[0];
+                popup_65c479481a3e1402aba685dc1fd2cda5.setContent(html_4a2cdefc7b3147dbd22d51423d9b377d);
+            
+        
+
+        marker_e9fa102de9fd6af5821980f7efb2cc9d.bindPopup(popup_65c479481a3e1402aba685dc1fd2cda5)
+        ;
+
+        
+    
+    
+            marker_e9fa102de9fd6af5821980f7efb2cc9d.bindTooltip(
+                `<div>
+                     JPSUZ
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_6afc18fb71252a8f649c6140a742f79e = L.circle(
+                [39.011582, 121.750482],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_2e9e18a6b84c9ac55d09d2936c390ca8 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_277f55ad41cebf05b7699df147e565b4 = $(`<div id="html_277f55ad41cebf05b7699df147e565b4" style="width: 100.0%; height: 100.0%;">CNDLC<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_2e9e18a6b84c9ac55d09d2936c390ca8.setContent(html_277f55ad41cebf05b7699df147e565b4);
+            
+        
+
+        circle_6afc18fb71252a8f649c6140a742f79e.bindPopup(popup_2e9e18a6b84c9ac55d09d2936c390ca8)
+        ;
+
+        
+    
+    
+            circle_6afc18fb71252a8f649c6140a742f79e.bindTooltip(
+                `<div>
+                     CNDLC / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_cc207c321003992e62958acc3afe872f = L.marker(
+                [39.011582, 121.750482],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_415e698605dcb77ed749163cd64a9bf9 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_f990833704124dbc67b33473b665e33b = $(`<div id="html_f990833704124dbc67b33473b665e33b" style="width: 100.0%; height: 100.0%;">PortCode: CNDLC<br>Lat: 39.011582<br>Long: 121.750482</div>`)[0];
+                popup_415e698605dcb77ed749163cd64a9bf9.setContent(html_f990833704124dbc67b33473b665e33b);
+            
+        
+
+        marker_cc207c321003992e62958acc3afe872f.bindPopup(popup_415e698605dcb77ed749163cd64a9bf9)
+        ;
+
+        
+    
+    
+            marker_cc207c321003992e62958acc3afe872f.bindTooltip(
+                `<div>
+                     CNDLC
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_19db68cdf22fb2933efe9761ff39113a = L.circle(
+                [29.794089, 122.12325],
+                {"bubblingMouseEvents": true, "color": "#3388ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3388ff", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20000, "stroke": true, "weight": 2}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_54b2d56db84510c8e7d1277d6882991e = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_ccd915cff52f0b9bbaa503626e515e45 = $(`<div id="html_ccd915cff52f0b9bbaa503626e515e45" style="width: 100.0%; height: 100.0%;">CNLHE<br>氣象影響半徑: 20 km</div>`)[0];
+                popup_54b2d56db84510c8e7d1277d6882991e.setContent(html_ccd915cff52f0b9bbaa503626e515e45);
+            
+        
+
+        circle_19db68cdf22fb2933efe9761ff39113a.bindPopup(popup_54b2d56db84510c8e7d1277d6882991e)
+        ;
+
+        
+    
+    
+            circle_19db68cdf22fb2933efe9761ff39113a.bindTooltip(
+                `<div>
+                     CNLHE / 20 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_08586d4218d852308c5deb3be4893bcc = L.marker(
+                [29.794089, 122.12325],
+                {
+}
+            ).addTo(map_27ed28dcb50a9f55511d99bf8cafa1c4);
+        
+    
+        var popup_7a75d29eaced15d10d5e01a545292d7f = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_3b2b86b6af99a322f8fb6ea26ccf3e94 = $(`<div id="html_3b2b86b6af99a322f8fb6ea26ccf3e94" style="width: 100.0%; height: 100.0%;">PortCode: CNLHE<br>Lat: 29.794089<br>Long: 122.12325</div>`)[0];
+                popup_7a75d29eaced15d10d5e01a545292d7f.setContent(html_3b2b86b6af99a322f8fb6ea26ccf3e94);
+            
+        
+
+        marker_08586d4218d852308c5deb3be4893bcc.bindPopup(popup_7a75d29eaced15d10d5e01a545292d7f)
+        ;
+
+        
+    
+    
+            marker_08586d4218d852308c5deb3be4893bcc.bindTooltip(
+                `<div>
+                     CNLHE
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+</script>
+</html>

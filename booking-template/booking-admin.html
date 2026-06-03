@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>預約系統 — 管理後台</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif;
+            background: #f0f2f5; min-height: 100vh; padding: 20px 16px; color: #222;
+        }
+        .wrap { max-width: 960px; margin: 0 auto; }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg,#667eea,#764ba2);
+            border-radius: 16px; padding: 20px 24px; color: #fff;
+            margin-bottom: 14px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header h1 { font-size: 18px; font-weight: 700; }
+        .header p  { font-size: 12px; opacity: .75; margin-top: 2px; }
+        .logout-btn {
+            background: rgba(255,255,255,.18); color: #fff; border: none;
+            padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+        }
+        .logout-btn:hover { background: rgba(255,255,255,.28); }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex; gap: 4px; background: #fff; border-radius: 12px;
+            padding: 5px; margin-bottom: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
+        }
+        .tab {
+            flex: 1; padding: 9px; border: none; border-radius: 9px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            background: transparent; color: #999; font-family: inherit; transition: all .2s;
+        }
+        .tab.active { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── Card ── */
+        .card {
+            background: #fff; border-radius: 14px; padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07); margin-bottom: 12px;
+        }
+        .card-title {
+            font-size: 12px; font-weight: 700; color: #666;
+            text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* ── Login ── */
+        #login-wrap { max-width: 320px; margin: 80px auto 0; }
+        #login-wrap .card { text-align: center; padding: 32px 24px; }
+        #login-wrap h2 { font-size: 19px; margin-bottom: 5px; }
+        #login-wrap p  { font-size: 13px; color: #999; margin-bottom: 20px; }
+
+        /* ── Form ── */
+        .field { margin-bottom: 10px; }
+        label {
+            display: block; font-size: 11px; font-weight: 700;
+            color: #888; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px;
+        }
+        input[type=text], input[type=password], input[type=search] {
+            width: 100%; padding: 9px 12px;
+            border: 1.5px solid #e2e8f0; border-radius: 8px;
+            font-size: 14px; color: #333; background: #f8fafc; font-family: inherit;
+            transition: border-color .2s;
+        }
+        input:focus { outline: none; border-color: #667eea; background: #fff; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+            padding: 8px 14px; border: none; border-radius: 8px;
+            font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .15s;
+        }
+        .btn-primary { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
+        .btn-primary:hover { opacity: .88; }
+        .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+        .btn-full { width: 100%; padding: 12px; font-size: 14px; }
+        .btn-sm   { padding: 4px 10px; font-size: 11px; }
+        .btn-ghost { background: #f1f5f9; color: #555; }
+        .btn-ghost:hover { background: #e2e8f0; }
+        .btn-success { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+        .btn-success:hover { background: #c6f6d5; }
+        .btn-danger  { background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; }
+        .btn-danger:hover  { background: #fed7d7; }
+        .btn-warn    { background: #fffbeb; color: #d97706; }
+        .btn-warn:hover    { background: #fef3c7; }
+        .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+        /* ── Stats ── */
+        .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
+        .stat { background: #fff; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 5px rgba(0,0,0,.06); }
+        .stat-num { font-size: 26px; font-weight: 800; color: #1a1a2e; }
+        .stat-label { font-size: 11px; color: #aaa; margin-top: 2px; font-weight: 600; text-transform: uppercase; }
+
+        /* ── Search & Filter bar ── */
+        .toolbar {
+            display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;
+        }
+        .search-wrap { position: relative; flex: 1; min-width: 180px; }
+        .search-wrap input { padding-left: 34px; }
+        .search-icon {
+            position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+            color: #aaa; font-size: 14px; pointer-events: none;
+        }
+        .filter-btn {
+            padding: 7px 13px; border: 1.5px solid #e2e8f0; border-radius: 20px;
+            font-size: 12px; font-weight: 600; cursor: pointer; background: #fff;
+            color: #888; font-family: inherit; transition: all .15s; white-space: nowrap;
+        }
+        .filter-btn.active { border-color: #667eea; color: #667eea; background: #eef2ff; }
+
+        /* ── Table ── */
+        .table-wrap { overflow-x: auto; }
+        table {
+            width: 100%; border-collapse: collapse; font-size: 13px;
+        }
+        thead th {
+            padding: 9px 12px; text-align: left;
+            font-size: 11px; font-weight: 700; color: #888;
+            text-transform: uppercase; letter-spacing: .4px;
+            border-bottom: 2px solid #f0f0f0; background: #fafafa;
+            white-space: nowrap;
+        }
+        thead th:first-child { border-radius: 8px 0 0 0; }
+        thead th:last-child  { border-radius: 0 8px 0 0; }
+        tbody tr { border-bottom: 1px solid #f5f5f5; transition: background .12s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #fafbff; }
+        tbody td { padding: 11px 12px; vertical-align: middle; }
+        td.name-cell { font-weight: 700; color: #1a1a2e; }
+        td.purpose-cell {
+            max-width: 200px; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap; color: #555;
+        }
+        td.contact-cell { color: #777; font-size: 12px; white-space: nowrap; }
+        td.action-cell { white-space: nowrap; }
+        td.action-cell .btn + .btn { margin-left: 4px; }
+
+        /* ── Badge ── */
+        .badge {
+            display: inline-block; font-size: 10px; font-weight: 700;
+            padding: 3px 8px; border-radius: 999px; white-space: nowrap;
+        }
+        .badge-pending  { background: #fef3c7; color: #92400e; }
+        .badge-approved { background: #c6f6d5; color: #276749; }
+        .badge-rejected { background: #e2e8f0; color: #718096; }
+
+        /* ── Pagination ── */
+        .pagination {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-top: 14px; border-top: 1px solid #f0f0f0; margin-top: 4px;
+            flex-wrap: wrap; gap: 8px;
+        }
+        .page-info { font-size: 12px; color: #999; }
+        .page-btns { display: flex; gap: 4px; }
+        .page-btn {
+            width: 30px; height: 30px; border: 1.5px solid #e2e8f0; border-radius: 7px;
+            background: #fff; color: #555; font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: inherit; transition: all .15s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .page-btn:hover:not(:disabled) { border-color: #667eea; color: #667eea; }
+        .page-btn.active { background: #667eea; border-color: #667eea; color: #fff; }
+        .page-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+        /* ── Contact list ── */
+        .contact-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 0; border-bottom: 1px solid #f5f5f5;
+        }
+        .contact-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg,#667eea,#764ba2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;
+        }
+        .avatar.disabled { background: #cbd5e0; }
+        .info { flex: 1; min-width: 0; }
+        .info-name { font-weight: 700; font-size: 14px; color: #1a1a2e; display: flex; align-items: center; gap: 7px; }
+        .info-sub { font-size: 12px; color: #999; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .passphrase-tag {
+            display: inline-block; background: #eef2ff; color: #4c51bf;
+            font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px;
+            font-family: monospace; letter-spacing: .5px; margin-right: 4px;
+        }
+        .c-actions { display: flex; gap: 5px; flex-shrink: 0; }
+        .edit-row {
+            display: none; padding: 12px; background: #f8fafc;
+            border-radius: 10px; margin-top: 8px;
+        }
+        .edit-row.open { display: block; }
+
+        /* ── Alert ── */
+        .alert {
+            display: none; font-size: 13px; padding: 9px 13px;
+            border-radius: 8px; margin-bottom: 10px;
+        }
+        .alert-err { background: #fff5f5; color: #c53030; border-left: 3px solid #fc8181; }
+        .alert-ok  { background: #f0fff4; color: #276749; border-left: 3px solid #68d391; }
+
+        /* ── Misc ── */
+        .empty { text-align: center; padding: 32px; color: #ccc; font-size: 14px; }
+        .spin {
+            display: inline-block; width: 15px; height: 15px;
+            border: 2px solid #ddd; border-top-color: #667eea;
+            border-radius: 50%; animation: spin .6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .badge-on  { background: #c6f6d5; color: #276749; }
+        .badge-off { background: #e2e8f0; color: #718096; }
+    </style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div id="login-wrap">
+    <div class="card">
+        <h2>管理後台</h2>
+        <p>請輸入管理密碼</p>
+        <div class="field">
+            <input type="password" id="admin-pw" placeholder="管理密碼" autocomplete="off" />
+        </div>
+        <div class="alert alert-err" id="login-err"></div>
+        <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()" style="margin-top:6px">登入</button>
+    </div>
+</div>
+
+<!-- ── Main ── -->
+<div class="wrap" id="main-wrap" style="display:none">
+
+    <div class="header">
+        <div class="header-left">
+            <div style="font-size:26px">🗓</div>
+            <div><h1>預約管理後台</h1><p>達菲的預約系統</p></div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()">登出</button>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" id="tab-bookings" onclick="switchTab('bookings')">預約紀錄</button>
+        <button class="tab"        id="tab-contacts" onclick="switchTab('contacts')">朋友管理</button>
+    </div>
+
+    <!-- ══ Tab: Bookings ══ -->
+    <div class="tab-panel active" id="panel-bookings">
+
+        <div class="stats">
+            <div class="stat"><div class="stat-num" id="stat-pending">-</div><div class="stat-label">待審核</div></div>
+            <div class="stat"><div class="stat-num" id="stat-approved">-</div><div class="stat-label">已確認</div></div>
+            <div class="stat"><div class="stat-num" id="stat-rejected">-</div><div class="stat-label">已婉拒</div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <span>預約紀錄</span>
+                <button class="btn btn-sm btn-ghost" onclick="loadBookings()">重新整理</button>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="search" id="search-input" placeholder="搜尋姓名、目的、電話、LINE..." oninput="onSearch()" />
+                </div>
+                <button class="filter-btn active" onclick="setFilter('all',this)">全部</button>
+                <button class="filter-btn" onclick="setFilter('pending',this)">待審核</button>
+                <button class="filter-btn" onclick="setFilter('approved',this)">已確認</button>
+                <button class="filter-btn" onclick="setFilter('rejected',this)">已婉拒</button>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>日期時間</th>
+                            <th>聯絡方式</th>
+                            <th>預約目的</th>
+                            <th>狀態</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booking-tbody">
+                        <tr><td colspan="6" class="empty"><span class="spin"></span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <div class="page-info" id="page-info"></div>
+                <div class="page-btns" id="page-btns"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ Tab: Contacts ══ -->
+    <div class="tab-panel" id="panel-contacts">
+
+        <div class="card">
+            <div class="card-title">新增朋友</div>
+            <div class="alert alert-err" id="add-err"></div>
+            <div class="alert alert-ok"  id="add-ok"></div>
+            <div class="row2">
+                <div class="field"><label>名字 *</label>
+                    <input type="text" id="add-name" placeholder="朋友的名字" /></div>
+                <div class="field"><label>通關密語 *</label>
+                    <input type="text" id="add-pass" placeholder="自訂密語" autocomplete="off" /></div>
+            </div>
+            <div class="row2">
+                <div class="field"><label>電話</label>
+                    <input type="text" id="add-phone" placeholder="0912-345-678（選填）" /></div>
+                <div class="field"><label>LINE ID</label>
+                    <input type="text" id="add-line" placeholder="LINE ID（選填）" /></div>
+            </div>
+            <button class="btn btn-primary" id="add-btn" onclick="doAdd()">新增</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <span>朋友列表</span>
+                <span id="list-count" style="font-size:12px;color:#bbb;font-weight:400"></span>
+            </div>
+            <div id="contact-list"><div class="empty"><span class="spin"></span></div></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 先載入設定 -->
+<script src="config.js"></script>
+<script>
+const SCRIPT_URL = APP_CONFIG.SCRIPT_URL;
+const PAGE_SIZE  = 15;
+
+let ADMIN_PW   = '';
+let contacts   = [];
+let bookings   = [];
+let curFilter  = 'all';
+let curSearch  = '';
+let curPage    = 1;
+
+/* ══════════════════════════════════════
+   Login / Logout
+══════════════════════════════════════ */
+async function doLogin() {
+    const pw    = document.getElementById('admin-pw').value.trim();
+    const errEl = document.getElementById('login-err');
+    const btn   = document.getElementById('login-btn');
+    if (!pw) return;
+    errEl.style.display = 'none';
+    btn.disabled = true; btn.textContent = '驗證中...';
+    try {
+        const res = await api({ action: 'listContacts', adminpw: pw });
+        if (!res.ok) {
+            errEl.textContent = res.error || '密碼錯誤';
+            errEl.style.display = 'block';
+            btn.disabled = false; btn.textContent = '登入';
+            return;
+        }
+        ADMIN_PW = pw;
+        contacts = res.contacts || [];
+        document.getElementById('login-wrap').style.display = 'none';
+        document.getElementById('main-wrap').style.display  = 'block';
+        renderContacts();
+        loadBookings();
+    } catch (e) {
+        errEl.textContent = '連線失敗：' + (e.message || '請確認 GAS 已重新部署');
+        errEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = '登入';
+    }
+}
+document.getElementById('admin-pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function doLogout() {
+    ADMIN_PW = ''; contacts = []; bookings = [];
+    document.getElementById('admin-pw').value = '';
+    document.getElementById('main-wrap').style.display  = 'none';
+    document.getElementById('login-wrap').style.display = 'block';
+}
+
+/* ══════════════════════════════════════
+   Tabs
+══════════════════════════════════════ */
+function switchTab(name) {
+    ['bookings','contacts'].forEach(t => {
+        document.getElementById('tab-' + t).classList.toggle('active', t === name);
+        document.getElementById('panel-' + t).classList.toggle('active', t === name);
+    });
+}
+
+/* ══════════════════════════════════════
+   Bookings
+══════════════════════════════════════ */
+async function loadBookings() {
+    document.getElementById('booking-tbody').innerHTML =
+        '<tr><td colspan="6" class="empty"><span class="spin"></span></td></tr>';
+    try {
+        const res = await api({ action: 'listBookings', adminpw: ADMIN_PW });
+        if (!res.ok) { showTbError(res.error); return; }
+        bookings = res.bookings || [];
+        updateStats();
+        curPage = 1;
+        renderTable();
+    } catch (e) { showTbError(e.message); }
+}
+
+function showTbError(msg) {
+    document.getElementById('booking-tbody').innerHTML =
+        '<tr><td colspan="6" class="empty" style="color:#e53e3e">載入失敗：' + esc(msg || '') + '</td></tr>';
+}
+
+function updateStats() {
+    document.getElementById('stat-pending').textContent  = bookings.filter(b => b.status === 'pending').length;
+    document.getElementById('stat-approved').textContent = bookings.filter(b => b.status === 'approved').length;
+    document.getElementById('stat-rejected').textContent = bookings.filter(b => b.status === 'rejected').length;
+}
+
+function setFilter(f, el) {
+    curFilter = f; curPage = 1;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderTable();
+}
+
+function onSearch() {
+    curSearch = document.getElementById('search-input').value.toLowerCase();
+    curPage = 1;
+    renderTable();
+}
+
+function getFiltered() {
+    return bookings.filter(b => {
+        if (curFilter !== 'all' && b.status !== curFilter) return false;
+        if (!curSearch) return true;
+        return [b.name, b.purpose, b.phone, b.line, b.notes, b.date]
+            .some(v => String(v || '').toLowerCase().includes(curSearch));
+    });
+}
+
+function renderTable() {
+    const filtered = getFiltered();
+    const total    = filtered.length;
+    const pages    = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    if (curPage > pages) curPage = pages;
+
+    const slice = filtered.slice((curPage - 1) * PAGE_SIZE, curPage * PAGE_SIZE);
+    const tbody = document.getElementById('booking-tbody');
+
+    if (!slice.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">沒有符合的預約紀錄</td></tr>';
+        document.getElementById('page-info').textContent = '';
+        document.getElementById('page-btns').innerHTML  = '';
+        return;
+    }
+
+    tbody.innerHTML = slice.map(b => {
+        const isPending = b.status === 'pending';
+        const contact   = [b.phone ? b.phone : '', b.line ? 'LINE:' + b.line : '']
+                            .filter(Boolean).join(' / ') || '—';
+        return `<tr>
+            <td class="name-cell">${esc(b.name)}</td>
+            <td style="white-space:nowrap;color:#555">${esc(b.date)}<br><span style="color:#aaa;font-size:11px">${esc(b.time)}</span></td>
+            <td class="contact-cell">${esc(contact)}</td>
+            <td class="purpose-cell" title="${esc(b.purpose)}">${esc(b.purpose)}${b.notes ? '<br><span style="color:#bbb;font-size:11px">' + esc(b.notes) + '</span>' : ''}</td>
+            <td><span class="badge badge-${b.status}">${statusLabel(b.status)}</span></td>
+            <td class="action-cell">
+                ${isPending ? `
+                    <button class="btn btn-sm btn-success" onclick="doApprove('${b.id}','${b.token}',this)">確認</button>
+                    <button class="btn btn-sm btn-warn"    onclick="doReject('${b.id}','${b.token}',this)">婉拒</button>
+                ` : ''}
+                <button class="btn btn-sm btn-danger" onclick="doDeleteBooking('${b.id}',this)">刪除</button>
+            </td>
+        </tr>`;
+    }).join('');
+
+    // Pagination info
+    const from = (curPage - 1) * PAGE_SIZE + 1;
+    const to   = Math.min(curPage * PAGE_SIZE, total);
+    document.getElementById('page-info').textContent = `共 ${total} 筆，第 ${from}–${to} 筆`;
+
+    // Page buttons
+    const btnWrap = document.getElementById('page-btns');
+    let html = `<button class="page-btn" onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>‹</button>`;
+    const range = pageRange(curPage, pages);
+    range.forEach(p => {
+        if (p === '…') { html += `<button class="page-btn" disabled>…</button>`; return; }
+        html += `<button class="page-btn ${p===curPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+    });
+    html += `<button class="page-btn" onclick="goPage(${curPage+1})" ${curPage===pages?'disabled':''}>›</button>`;
+    btnWrap.innerHTML = html;
+}
+
+function pageRange(cur, total) {
+    if (total <= 7) return Array.from({length: total}, (_,i) => i+1);
+    const pages = [1];
+    if (cur > 3)       pages.push('…');
+    for (let p = Math.max(2, cur-1); p <= Math.min(total-1, cur+1); p++) pages.push(p);
+    if (cur < total-2) pages.push('…');
+    pages.push(total);
+    return pages;
+}
+
+function goPage(p) { curPage = p; renderTable(); }
+
+function statusLabel(s) {
+    return { pending: '待審核', approved: '已確認', rejected: '已婉拒' }[s] || s;
+}
+
+async function doApprove(id, token, btn) {
+    btn.disabled = true; btn.textContent = '處理中...';
+    try {
+        const res = await api({ action: 'approveBookingApi', adminpw: ADMIN_PW, id, token });
+        if (!res.ok) { alert('失敗：' + (res.error || '未知錯誤')); btn.disabled = false; btn.textContent = '確認'; return; }
+        await loadBookings();
+    } catch (e) { alert('連線失敗：' + e.message); btn.disabled = false; btn.textContent = '確認'; }
+}
+
+async function doReject(id, token, btn) {
+    if (!confirm('確定婉拒此預約？')) return;
+    btn.disabled = true; btn.textContent = '處理中...';
+    try {
+        const res = await api({ action: 'rejectBookingApi', adminpw: ADMIN_PW, id, token });
+        if (!res.ok) { alert('失敗：' + (res.error || '未知錯誤')); btn.disabled = false; btn.textContent = '婉拒'; return; }
+        await loadBookings();
+    } catch (e) { alert('連線失敗：' + e.message); btn.disabled = false; btn.textContent = '婉拒'; }
+}
+
+async function doDeleteBooking(id, btn) {
+    if (!confirm('確定刪除此筆預約紀錄？此操作無法復原。')) return;
+    btn.disabled = true; btn.textContent = '刪除中...';
+    try {
+        const res = await api({ action: 'deleteBooking', adminpw: ADMIN_PW, id });
+        if (!res.ok) { alert('失敗：' + (res.error || '未知錯誤')); btn.disabled = false; btn.textContent = '刪除'; return; }
+        await loadBookings();
+    } catch (e) { alert('連線失敗：' + e.message); btn.disabled = false; btn.textContent = '刪除'; }
+}
+
+/* ══════════════════════════════════════
+   Contacts
+══════════════════════════════════════ */
+function renderContacts() {
+    const el = document.getElementById('contact-list');
+    document.getElementById('list-count').textContent = contacts.length + ' 人';
+    if (!contacts.length) { el.innerHTML = '<div class="empty">還沒有朋友，從上方新增吧！</div>'; return; }
+    el.innerHTML = contacts.map(c => `
+        <div class="contact-item" id="ci-${c.id}">
+            <div class="avatar ${c.enabled?'':'disabled'}">${esc(c.name[0])}</div>
+            <div class="info">
+                <div class="info-name">
+                    ${esc(c.name)}
+                    <span class="badge ${c.enabled?'badge-on':'badge-off'}">${c.enabled?'啟用':'停用'}</span>
+                </div>
+                <div class="info-sub">
+                    <span class="passphrase-tag">${esc(c.passphrase)}</span>
+                    ${c.phone ? '📞 '+esc(c.phone) : ''}
+                    ${c.line  ? '　LINE '+esc(c.line) : ''}
+                    ${!c.phone&&!c.line ? '（未留聯絡方式）' : ''}
+                </div>
+            </div>
+            <div class="c-actions">
+                <button class="btn btn-sm btn-ghost"  onclick="openEdit('${c.id}')">編輯</button>
+                <button class="btn btn-sm btn-warn"   onclick="doToggle('${c.id}')">${c.enabled?'停用':'啟用'}</button>
+                <button class="btn btn-sm btn-danger" onclick="doDelete('${c.id}','${esc(c.name)}')">刪除</button>
+            </div>
+        </div>
+        <div class="edit-row" id="er-${c.id}">
+            <div class="row2">
+                <div class="field"><label>名字</label>
+                    <input type="text" id="en-${c.id}" value="${esc(c.name)}" /></div>
+                <div class="field"><label>通關密語</label>
+                    <input type="text" id="ep-${c.id}" value="${esc(c.passphrase)}" autocomplete="off" /></div>
+            </div>
+            <div class="row2">
+                <div class="field"><label>電話</label>
+                    <input type="text" id="ephone-${c.id}" value="${esc(c.phone||'')}" /></div>
+                <div class="field"><label>LINE ID</label>
+                    <input type="text" id="eline-${c.id}" value="${esc(c.line||'')}" /></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:6px">
+                <button class="btn btn-sm btn-primary" onclick="doUpdate('${c.id}')">儲存</button>
+                <button class="btn btn-sm btn-ghost"   onclick="closeEdit('${c.id}')">取消</button>
+            </div>
+            <div class="alert alert-err" id="ee-${c.id}" style="margin-top:8px"></div>
+        </div>
+    `).join('');
+}
+
+function openEdit(id) {
+    document.querySelectorAll('.edit-row').forEach(el => el.classList.remove('open'));
+    document.getElementById('er-' + id).classList.add('open');
+}
+function closeEdit(id) { document.getElementById('er-' + id).classList.remove('open'); }
+
+async function doAdd() {
+    const name  = document.getElementById('add-name').value.trim();
+    const pass  = document.getElementById('add-pass').value.trim();
+    const phone = document.getElementById('add-phone').value.trim();
+    const line  = document.getElementById('add-line').value.trim();
+    const errEl = document.getElementById('add-err');
+    const okEl  = document.getElementById('add-ok');
+    errEl.style.display = 'none'; okEl.style.display = 'none';
+    if (!name||!pass) { errEl.textContent='名字和通關密語為必填'; errEl.style.display='block'; return; }
+    const btn = document.getElementById('add-btn');
+    btn.disabled = true; btn.textContent = '新增中...';
+    const res = await api({ action:'addContact', adminpw:ADMIN_PW, name, passphrase:pass, phone, line });
+    btn.disabled = false; btn.textContent = '新增';
+    if (!res.ok) { errEl.textContent=res.error||'新增失敗'; errEl.style.display='block'; return; }
+    okEl.textContent = name+' 已新增！'; okEl.style.display='block';
+    ['add-name','add-pass','add-phone','add-line'].forEach(id => document.getElementById(id).value='');
+    setTimeout(() => okEl.style.display='none', 2500);
+    await reloadContacts();
+}
+
+async function doUpdate(id) {
+    const name  = document.getElementById('en-'+id).value.trim();
+    const pass  = document.getElementById('ep-'+id).value.trim();
+    const phone = document.getElementById('ephone-'+id).value.trim();
+    const line  = document.getElementById('eline-'+id).value.trim();
+    const errEl = document.getElementById('ee-'+id);
+    errEl.style.display='none';
+    if (!name||!pass) { errEl.textContent='名字和密語不能空白'; errEl.style.display='block'; return; }
+    const res = await api({ action:'updateContact', adminpw:ADMIN_PW, id, name, passphrase:pass, phone, line });
+    if (!res.ok) { errEl.textContent=res.error||'更新失敗'; errEl.style.display='block'; return; }
+    closeEdit(id);
+    await reloadContacts();
+}
+
+async function doToggle(id) {
+    await api({ action:'toggleContact', adminpw:ADMIN_PW, id });
+    await reloadContacts();
+}
+
+async function doDelete(id, name) {
+    if (!confirm('確定要刪除「'+name+'」？')) return;
+    await api({ action:'deleteContact', adminpw:ADMIN_PW, id });
+    await reloadContacts();
+}
+
+async function reloadContacts() {
+    const res = await api({ action:'listContacts', adminpw:ADMIN_PW });
+    contacts = res.contacts || [];
+    renderContacts();
+}
+
+/* ══════════════════════════════════════
+   Helpers
+══════════════════════════════════════ */
+async function api(params) {
+    const url  = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+    const res  = await fetch(url, { redirect:'follow' });
+    const text = await res.text();
+    try { return JSON.parse(text); }
+    catch (_) { throw new Error('回應格式錯誤，請確認 GAS 已重新部署。(' + text.slice(0,60) + ')'); }
+}
+
+function esc(s) {
+    return String(s||'')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧船舶架構圖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#0a1f3d;
+    --navy-800:#102a52;
+    --navy-700:#1a3a6e;
+    --navy-600:#234785;
+    --navy-500:#2c5aa0;
+    --blue-400:#4a7cc7;
+    --blue-300:#7aa3d9;
+    --blue-100:#dbe7f5;
+    --blue-50:#eef4fb;
+    --teal-500:#1aa39e;
+    --teal-400:#2ec4be;
+    --amber-500:#d97706;
+    --amber-100:#fef3c7;
+    --bg:#f0f5fb;
+    --white:#ffffff;
+    --ink:#0a1f3d;
+    --muted:#5b6b86;
+    --line:#cfdcef;
+    --shadow-sm:0 2px 6px rgba(16,42,82,.06);
+    --shadow-md:0 6px 20px rgba(16,42,82,.10);
+    --shadow-lg:0 12px 40px rgba(16,42,82,.14);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{font-family:'Noto Sans TC','Outfit',sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
+  body{
+    min-height:100vh;
+    padding:32px 24px;
+    background:
+      radial-gradient(ellipse at top left, rgba(74,124,199,.08), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(26,163,158,.06), transparent 50%),
+      var(--bg);
+  }
+
+  .container{max-width:1800px;margin:0 auto}
+
+  /* Header */
+  .header{
+    text-align:center;
+    margin-bottom:32px;
+    padding:24px 0;
+  }
+  .header h1{
+    font-size:28px;
+    font-weight:900;
+    letter-spacing:.12em;
+    color:var(--navy-900);
+    margin-bottom:8px;
+  }
+  .header h1 .accent{color:var(--teal-500)}
+  .header p{
+    font-size:14px;
+    color:var(--muted);
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    font-family:'Outfit',sans-serif;
+  }
+  .header .divider{
+    width:80px;height:3px;
+    background:linear-gradient(90deg,var(--navy-700),var(--teal-500));
+    margin:16px auto;
+    border-radius:2px;
+  }
+
+  /* Main grid */
+  .grid{
+    display:grid;
+    grid-template-columns: 120px 300px 230px 230px 1fr;
+    gap:26px;
+    align-items:start;
+  }
+
+  /* Column header */
+  .col-header{
+    text-align:center;
+    color:#fff;
+    font-weight:700;
+    font-size:20px;
+    letter-spacing:.08em;
+    padding: 6px;
+    border-radius:10px;
+    margin-bottom:14px;
+    box-shadow:var(--shadow-md);
+  }
+  .col-header.dark{background:linear-gradient(135deg,var(--navy-800),var(--navy-600))}
+  .col-header.teal{background:linear-gradient(135deg,var(--teal-500),#0e8b86)}
+  .col-header.navy{background:linear-gradient(135deg,var(--navy-900),var(--navy-700))}
+
+  /* Column 1: Ships */
+  .ships-col{display:flex;flex-direction:column;align-items:center;gap:50px;padding-top:10px}
+  .ship-item{display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:99}
+  .ship-item .flow-arrow{
+    display: none;
+    position:absolute;
+    right:-46px;top:50%;
+    transform:translateY(-50%);
+    pointer-events:none;
+    z-index:99;
+  }
+  .ship-svg{width:84px;height:64px}
+  .dots{
+    display:flex;flex-direction:column;gap:4px;height:20px;justify-content:center;
+  }
+  .dots span{width:5px;height:5px;border-radius:50%;background:var(--navy-500);opacity:.6}
+
+  /* Column 2: 七大系統 */
+  .systems-stack{display:flex;flex-direction:column;gap:10px}
+  .sys-card{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:20.5px 14px;
+    box-shadow:var(--shadow-sm);
+    transition:transform .25s ease, box-shadow .25s ease;
+    position:relative;
+    min-height:92px;
+  }
+  .sys-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+  .sys-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .sys-num{
+    width:24px;height:24px;border-radius:50%;
+    background:var(--navy-700);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;font-weight:700;font-family:'Outfit',sans-serif;
+    flex-shrink:0;
+  }
+  .sys-title{font-size:16px;font-weight:700;color:var(--navy-900)}
+  .sys-icons{
+    display:flex;gap:14px;justify-content:flex-start;padding-left:34px;
+    color:var(--navy-600);
+  }
+  .sys-icons svg{width:35px;height:35px;flex-shrink:0}
+
+  /* Column 3 & 4 generic cards */
+  .step-stack{display:flex;flex-direction:column;gap:10px}
+  .step-card{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 12px;
+    box-shadow:var(--shadow-sm);
+    display:flex;align-items:center;gap:10px;
+    transition:transform .2s ease;
+    min-height:110.5px;
+  }
+  .step-card:hover{transform:translateX(2px)}
+  .step-card .ico{
+    width:32px;height:32px;border-radius:8px;
+    background:var(--blue-50);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--navy-700);flex-shrink:0;
+  }
+  .step-card.teal-ico .ico{background:#e6f7f6;color:var(--teal-500)}
+  .step-card .ico svg{width:26px;height:26px}
+  .step-body{flex:1;min-width:0}
+  .step-title{font-size:16px;font-weight:700;color:var(--navy-900);line-height:1.3}
+  .step-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+
+  /* Column 5: 岸端平臺 */
+  .platform{display:flex;flex-direction:column;gap:14px}
+  .control-room{
+    width:100%;height:170px;border-radius:14px;
+    background:linear-gradient(135deg,#0a1f3d 0%, #1a3a6e 50%, #0a1f3d 100%);
+    position:relative;overflow:hidden;
+    border:1px solid var(--navy-700);
+    box-shadow:var(--shadow-lg);
+  }
+  .control-room img{
+    width:100%;height:100%;
+    object-fit:cover;display:block;
+  }
+
+  .feature-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .feature-box{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    box-shadow:var(--shadow-sm);
+  }
+  .feature-title{
+    text-align:center;font-size:18px;font-weight:700;
+    color:#fff;background:linear-gradient(135deg,var(--navy-700),var(--navy-500));
+    padding:6px;border-radius:8px;margin-bottom:12px;letter-spacing:.05em;
+  }
+  .feature-items{display:flex;flex-direction:column;gap:10px}
+  .feature-item{display:flex;align-items:flex-start;gap:10px}
+  .feature-item .fi-ico{
+    width:32px;height:32px;border-radius:8px;
+    background:var(--blue-50);color:var(--navy-700);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .feature-item .fi-ico svg{width:18px;height:18px}
+  .feature-item .fi-body{flex:1}
+  .feature-item .fi-title{font-size:16px;font-weight:700;color:var(--navy-900);line-height:1.3}
+  .feature-item .fi-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+
+  /* visual feature grid (right side - 即時監控 etc) */
+  .viz-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 6px}
+  .viz-item{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+  .viz-item .vi-ico{
+    width:42px;height:42px;border-radius:10px;
+    background:var(--blue-50);color:var(--navy-700);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .viz-item .vi-ico svg{width:26px;height:26px}
+  .viz-item .vi-label{font-size:16px;font-weight:700;color:var(--navy-900)}
+  .viz-item .vi-desc{font-size:12px;color:var(--muted);margin-top:-2px;line-height:1.4;text-align:center;padding:0 4px}
+
+  /* Mission scheduling */
+  .mission-box{
+    background:var(--white);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;box-shadow:var(--shadow-sm);
+  }
+  .mission-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .mission-cell{
+    display:flex;align-items:center;gap:8px;
+    padding:20px 10px;background:var(--blue-50);border-radius:8px;
+    transition:background .2s ease;
+  }
+  .mission-cell:hover{background:#e0ecf9}
+  .mission-cell svg{width:26px;height:26px;color:var(--navy-700);flex-shrink:0}
+  .mission-cell span{font-size:16px;font-weight:600;color:var(--navy-900)}
+
+  /* Right column lower section: mission + challenge */
+  .lower-row{display:grid;grid-template-columns:1fr 220px;gap:14px}
+
+  .challenge-box{
+    background:#fffbeb;border:1px solid #fde68a;border-radius:12px;
+    padding:14px 16px;box-shadow:var(--shadow-sm);
+  }
+  .challenge-title{
+    text-align:center;font-size:16px;font-weight:700;color:#92400e;
+    background:#fef3c7;padding:6px 10px;border-radius:6px;margin-bottom:10px;
+    letter-spacing:.05em;
+  }
+  .challenge-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+  .challenge-list li{
+    font-size:14px;color:#78350f;padding-left:16px;position:relative;
+  }
+  .challenge-list li::before{
+    content:"";position:absolute;left:0;top:8px;width:5px;height:5px;
+    border-radius:50%;background:var(--amber-500);
+  }
+
+  .governance-box{
+    background:linear-gradient(135deg,var(--navy-800),var(--navy-600));
+    color:#fff;border-radius:12px;padding:14px 18px;box-shadow:var(--shadow-md);
+  }
+  .gov-title{font-size:16px;font-weight:700;letter-spacing:.08em;margin-bottom:6px;text-align:center}
+  .gov-desc{font-size:14px;opacity:.9;text-align:center;line-height:1.6}
+
+  /* Footer bands */
+  .pillar-band{
+    margin-top:12px;display:grid;grid-template-columns:repeat(5,1fr);gap:0;
+    background:var(--white);border:1px solid var(--line);border-radius:12px;
+    overflow:hidden;box-shadow:var(--shadow-sm);
+  }
+  .pillar{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    padding:16px 12px;border-right:1px solid var(--line);
+  }
+  .pillar:last-child{border-right:none}
+  .pillar svg{width:24px;height:24px;color:var(--navy-700)}
+  .pillar span{font-size:16px;font-weight:700;color:var(--navy-900);letter-spacing:.05em}
+
+  .goal-banner{
+    margin-top:16px;
+    background:linear-gradient(135deg,#eef4fb 0%, #dbe7f5 100%);
+    border:1px solid var(--blue-100);border-radius:14px;
+    padding:10px;display:flex;align-items:center;gap:22px;
+    box-shadow:var(--shadow-sm);
+  }
+  .goal-icon{
+    width:54px;height:54px;border-radius:50%;
+    background:var(--white);border:2px solid var(--navy-500);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    color:var(--navy-700);
+  }
+  .goal-icon svg{width:28px;height:28px}
+  .goal-text{font-size:14px;color:var(--navy-900);line-height:1.8;font-weight:500}
+
+  /* Arrows / flow indicators between columns */
+  .arrow{
+    display:flex;align-items:center;justify-content:center;
+    color:var(--navy-500);font-size:20px;
+  }
+  .grid > div{position:relative}
+  .col-arrow{
+    position:absolute;
+    top:320px;right:-28px;
+    transform:translateY(-50%);
+    z-index:99;pointer-events:none;
+  }
+  .col-arrow svg{display:block;overflow:visible}
+  .col-arrow .ah-fill{fill:var(--navy-500)}
+  .col-arrow .ah-stroke{stroke:var(--navy-500);stroke-width:2.5;stroke-linecap:round;fill:none}
+  /* Flow arrow (船舶 → 系統)：純藍色 */
+  .flow-arrow .fh{fill:var(--navy-500)}
+  .flow-arrow .fd{fill:var(--blue-400);animation:dotFlow 1.4s linear infinite}
+  .flow-arrow .fd1{animation-delay:0s}
+  .flow-arrow .fd2{animation-delay:.2s}
+  .flow-arrow .fd3{animation-delay:.4s}
+  .flow-arrow .fd4{animation-delay:.6s}
+  @keyframes dotFlow{
+    0%,100%{opacity:.2}
+    50%{opacity:1}
+  }
+
+  /* Responsive */
+  @media (max-width:1400px){
+    .grid{grid-template-columns:90px 280px 200px 230px 1fr;gap:14px}
+    .header h1{font-size:24px}
+  }
+  @media (max-width:1100px){
+    .grid{grid-template-columns:1fr;}
+    .ships-col{flex-direction:row;justify-content:space-around;padding-top:0;flex-wrap:wrap}
+    .feature-row,.viz-grid,.mission-grid,.lower-row{grid-template-columns:1fr 1fr}
+    .pillar-band{grid-template-columns:repeat(2,1fr)}
+  }
+
+  /* fade-in animation */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .grid > * {animation:fadeUp .6s ease both}
+  .grid > *:nth-child(1){animation-delay:.05s}
+  .grid > *:nth-child(2){animation-delay:.15s}
+  .grid > *:nth-child(3){animation-delay:.25s}
+  .grid > *:nth-child(4){animation-delay:.35s}
+  .grid > *:nth-child(5){animation-delay:.45s}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header class="header">
+    <h1>智慧船舶 <span class="accent">整合架構圖</span></h1>
+    <div class="divider"></div>
+    <p>Smart Ship Integrated Operations Architecture</p>
+  </header>
+
+  <!-- Main grid -->
+  <div class="grid">
+
+    <!-- Column 1: 船舶本體 -->
+    <div>
+      <div class="col-header dark">船舶本體</div>
+      <div class="ships-col">
+        <div class="ship-item">
+          <svg class="ship-svg" viewBox="0 0 120 80" fill="none">
+            <path d="M10 55 L110 55 L100 70 L20 70 Z" fill="#1a3a6e"/>
+            <rect x="40" y="35" width="40" height="20" fill="#234785"/>
+            <rect x="45" y="20" width="10" height="15" fill="#2c5aa0"/>
+            <line x1="58" y1="5" x2="58" y2="20" stroke="#1a3a6e" stroke-width="2"/>
+            <path d="M5 65 Q15 60 25 65 T 45 65 T 65 65 T 85 65 T 115 65" stroke="#7aa3d9" stroke-width="2" fill="none"/>
+          </svg>
+          <svg class="flow-arrow" width="42" height="14" viewBox="0 0 42 14" aria-hidden="true">
+            <circle class="fd fd1" cx="3" cy="7" r="1.8"/>
+            <circle class="fd fd2" cx="10" cy="7" r="1.8"/>
+            <circle class="fd fd3" cx="17" cy="7" r="1.8"/>
+            <circle class="fd fd4" cx="24" cy="7" r="1.8"/>
+            <polygon class="fh" points="30,2 40,7 30,12"/>
+          </svg>
+        </div>
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="ship-item">
+          <svg class="ship-svg" viewBox="0 0 120 80" fill="none">
+            <path d="M10 55 L110 55 L100 70 L20 70 Z" fill="#1a3a6e"/>
+            <rect x="40" y="35" width="40" height="20" fill="#234785"/>
+            <rect x="45" y="20" width="10" height="15" fill="#2c5aa0"/>
+            <line x1="58" y1="5" x2="58" y2="20" stroke="#1a3a6e" stroke-width="2"/>
+            <path d="M5 65 Q15 60 25 65 T 45 65 T 65 65 T 85 65 T 115 65" stroke="#7aa3d9" stroke-width="2" fill="none"/>
+          </svg>
+          <svg class="flow-arrow" width="42" height="14" viewBox="0 0 42 14" aria-hidden="true">
+            <circle class="fd fd1" cx="3" cy="7" r="1.8"/>
+            <circle class="fd fd2" cx="10" cy="7" r="1.8"/>
+            <circle class="fd fd3" cx="17" cy="7" r="1.8"/>
+            <circle class="fd fd4" cx="24" cy="7" r="1.8"/>
+            <polygon class="fh" points="30,2 40,7 30,12"/>
+          </svg>
+        </div>
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="ship-item">
+          <svg class="ship-svg" viewBox="0 0 120 80" fill="none">
+            <path d="M10 55 L110 55 L100 70 L20 70 Z" fill="#1a3a6e"/>
+            <rect x="40" y="35" width="40" height="20" fill="#234785"/>
+            <rect x="45" y="20" width="10" height="15" fill="#2c5aa0"/>
+            <line x1="58" y1="5" x2="58" y2="20" stroke="#1a3a6e" stroke-width="2"/>
+            <path d="M5 65 Q15 60 25 65 T 45 65 T 65 65 T 85 65 T 115 65" stroke="#7aa3d9" stroke-width="2" fill="none"/>
+          </svg>
+          <svg class="flow-arrow" width="42" height="14" viewBox="0 0 42 14" aria-hidden="true">
+            <circle class="fd fd1" cx="3" cy="7" r="1.8"/>
+            <circle class="fd fd2" cx="10" cy="7" r="1.8"/>
+            <circle class="fd fd3" cx="17" cy="7" r="1.8"/>
+            <circle class="fd fd4" cx="24" cy="7" r="1.8"/>
+            <polygon class="fh" points="30,2 40,7 30,12"/>
+          </svg>
+        </div>
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="ship-item">
+          <svg class="ship-svg" viewBox="0 0 120 80" fill="none">
+            <path d="M10 55 L110 55 L100 70 L20 70 Z" fill="#1a3a6e"/>
+            <rect x="40" y="35" width="40" height="20" fill="#234785"/>
+            <rect x="45" y="20" width="10" height="15" fill="#2c5aa0"/>
+            <line x1="58" y1="5" x2="58" y2="20" stroke="#1a3a6e" stroke-width="2"/>
+            <path d="M5 65 Q15 60 25 65 T 45 65 T 65 65 T 85 65 T 115 65" stroke="#7aa3d9" stroke-width="2" fill="none"/>
+          </svg>
+          <svg class="flow-arrow" width="42" height="14" viewBox="0 0 42 14" aria-hidden="true">
+            <circle class="fd fd1" cx="3" cy="7" r="1.8"/>
+            <circle class="fd fd2" cx="10" cy="7" r="1.8"/>
+            <circle class="fd fd3" cx="17" cy="7" r="1.8"/>
+            <circle class="fd fd4" cx="24" cy="7" r="1.8"/>
+            <polygon class="fh" points="30,2 40,7 30,12"/>
+          </svg>
+        </div>
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="ship-item">
+          <svg class="ship-svg" viewBox="0 0 120 80" fill="none">
+            <path d="M10 55 L110 55 L100 70 L20 70 Z" fill="#1a3a6e"/>
+            <rect x="40" y="35" width="40" height="20" fill="#234785"/>
+            <rect x="45" y="20" width="10" height="15" fill="#2c5aa0"/>
+            <line x1="58" y1="5" x2="58" y2="20" stroke="#1a3a6e" stroke-width="2"/>
+            <path d="M5 65 Q15 60 25 65 T 45 65 T 65 65 T 85 65 T 115 65" stroke="#7aa3d9" stroke-width="2" fill="none"/>
+          </svg>
+          <svg class="flow-arrow" width="42" height="14" viewBox="0 0 42 14" aria-hidden="true">
+            <circle class="fd fd1" cx="3" cy="7" r="1.8"/>
+            <circle class="fd fd2" cx="10" cy="7" r="1.8"/>
+            <circle class="fd fd3" cx="17" cy="7" r="1.8"/>
+            <circle class="fd fd4" cx="24" cy="7" r="1.8"/>
+            <polygon class="fh" points="30,2 40,7 30,12"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 2: 船上七大基本系統 -->
+    <div>
+      <div class="col-header dark">船上七大基本系統</div>
+      <!-- <div class="col-arrow single-arrow"><svg width="30" height="20" viewBox="0 0 22 10" aria-hidden="true"><line class="ah-stroke" x1="2" y1="5" x2="16" y2="5"/><polygon class="ah-fill" points="15,1 21,5 15,9"/></svg></div> -->
+      <div class="systems-stack">
+
+        <div class="sys-card">
+          <div class="sys-head"><div class="sys-num">1</div><div class="sys-title">感知系統</div></div>
+          <div class="sys-icons">
+            <!-- gauge -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 12 L16 8"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+            <!-- water level -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 14c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0"/><path d="M3 18c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0"/><line x1="4" y1="4" x2="4" y2="14"/></svg>
+            <!-- wind/anemometer -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M12 10 L12 4 M14 12 L20 12 M12 14 L12 20 M10 12 L4 12"/></svg>
+            <!-- camera/dome -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="11" r="6"/><circle cx="12" cy="11" r="2.5" fill="currentColor"/><path d="M6 17 L18 17 L17 21 L7 21 Z"/></svg>
+          </div>
+        </div>
+
+        <div class="sys-card">
+          <div class="sys-head"><div class="sys-num">2</div><div class="sys-title">導航系統</div></div>
+          <div class="sys-icons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2 L12 6 M12 18 L12 22 M2 12 L6 12 M18 12 L22 12 M5 5 L8 8 M16 16 L19 19 M5 19 L8 16 M16 8 L19 5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 18 L12 22 M8 14 Q12 10 16 14 M5 11 Q12 4 19 11 M2 8 Q12 -2 22 8"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22 C7 17 4 13 4 10 a8 8 0 0 1 16 0 c0 3-3 7-8 12 z"/><circle cx="12" cy="10" r="3"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 L4 14 L11 14 L10 22 L20 10 L13 10 Z"/></svg>
+          </div>
+        </div>
+
+        <div class="sys-card">
+          <div class="sys-head"><div class="sys-num">3</div><div class="sys-title">控制系統</div></div>
+          <div class="sys-icons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="14" height="10" rx="1"/><path d="M17 11 L21 11 L21 15 L17 15"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/><line x1="7" y1="5" x2="7" y2="8"/><line x1="13" y1="5" x2="13" y2="8"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2.5"/><path d="M12 9.5 L12 3 M12 14.5 L12 21 M9.5 12 L3 12 M14.5 12 L21 12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="6.3" y1="6.3" x2="17.7" y2="17.7"/><line x1="17.7" y1="6.3" x2="6.3" y2="17.7"/></svg>
+          </div>
+        </div>
+
+        <div class="sys-card">
+          <div class="sys-head"><div class="sys-num">4</div><div class="sys-title">通訊系統</div></div>
+          <div class="sys-icons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18 L9 12 L13 16 L21 8"/><circle cx="9" cy="12" r="1.5" fill="currentColor"/><line x1="3" y1="18" x2="3" y2="21"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12 Q12 5 19 12 M8 14 Q12 10 16 14"/><circle cx="12" cy="17" r="1.5" fill="currentColor"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2 L15 2 L13 20 L11 20 Z"/><path d="M5 8 Q12 4 19 8 M3 12 Q12 6 21 12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="14" width="3" height="6"/><rect x="8" y="11" width="3" height="9"/><rect x="13" y="8" width="3" height="12"/><rect x="18" y="4" width="3" height="16"/></svg>
+          </div>
+        </div>
+
+        <div class="sys-card">
+          <div class="sys-head"><div class="sys-num">5</div><div class="sys-title">能源系統</div></div>
+          <div class="sys-icons">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 L4 14 L11 14 L10 22 L20 10 L13 10 Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="10" height="16" rx="1"/><path d="M14 10 L17 10 L17 18 Q17 20 19 20 Q21 20 21 18 L21 8 L18 5"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 C12 6 8 8 8 14 a4 4 0 0 0 8 0 c0-2-1-3-2-4 c0 2-1 3-2 3 C12 10 14 8 12 2 Z"/></svg>
+          </div>
+        </div>
+
+        <div class="sys-card">
+          <div class="sys-head"><div class="sys-num">6</div><div class="sys-title">資安系統</div></div>
+          <div class="sys-icons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L20 6 L20 12 C20 17 16 20 12 22 C8 20 4 17 4 12 L4 6 Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6 L4 12 Q4 15 12 15 Q20 15 20 12 L20 6"/><path d="M4 12 L4 18 Q4 21 12 21 Q20 21 20 18 L20 12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11 L8 7 a4 4 0 0 1 8 0 L16 11"/></svg>
+          </div>
+        </div>
+
+        <div class="sys-card">
+          <div class="sys-head"><div class="sys-num">7</div><div class="sys-title">任務系統</div></div>
+          <div class="sys-icons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="7" r="2"/><circle cx="18" cy="7" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 8 L11 17 M17 8 L13 17 M8 7 L16 7"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z"/><path d="M3 7 L12 12 L21 7 M12 12 L12 22"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="6.3" y1="6.3" x2="17.7" y2="17.7"/><line x1="17.7" y1="6.3" x2="6.3" y2="17.7"/></svg>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Column 3: 標準化整合與處理 -->
+    <div>
+      <div class="col-header dark">標準化整合與處理</div>
+      <!-- <div class="col-arrow double-arrow"><svg width="28" height="10" viewBox="0 0 28 10" aria-hidden="true"><polygon class="ah-fill" points="1,5 7,1 7,9"/><line class="ah-stroke" x1="6" y1="5" x2="22" y2="5"/><polygon class="ah-fill" points="21,1 27,5 21,9"/></svg></div> -->
+      <div class="step-stack">
+        <div class="step-card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6 L4 18 L20 18 L20 6 Z"/><path d="M4 6 L12 13 L20 6"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">資料標準化</div>
+            <div class="step-desc">統一格式、欄位對齊</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M6 6 L18 18 M18 6 L6 18"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">資料清理與驗證</div>
+            <div class="step-desc">去除雜訊、完整性檢查</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3 L12 6 M12 18 L12 21 M3 12 L6 12 M18 12 L21 12 M5.6 5.6 L7.7 7.7 M16.3 16.3 L18.4 18.4 M16.3 7.7 L18.4 5.6 M5.6 18.4 L7.7 16.3"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">資料整合與融合</div>
+            <div class="step-desc">跨來源比對與補強</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7 L12 12 L16 14"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">即時處理與事件生成</div>
+            <div class="step-desc">流式分析、觸發事件</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6 L4 18 L20 18 L20 6 Z M4 6 L12 13 L20 6"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">資料封裝與傳輸準備</div>
+            <div class="step-desc">壓縮、加密、批次封包</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 C12 6 8 8 8 14 a4 4 0 0 0 8 0 c0-2-1-3-2-4 c0 2-1 3-2 3 C12 10 14 8 12 2 Z"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">本地快取與緩衝</div>
+            <div class="step-desc">暫存累積、斷網續傳</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L20 6 L20 12 C20 17 16 20 12 22 C8 20 4 17 4 12 L4 6 Z"/><path d="M10 11 L10 9 a2 2 0 0 1 4 0 L14 11 M9 11 L15 11 L15 16 L9 16 Z"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">資料安全防護</div>
+            <div class="step-desc">加密簽章、權限管控</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 4: 多通道網路資源 -->
+    <div>
+      <div class="col-header teal">多通道網路資源</div>
+      <!-- <div class="col-arrow double-arrow"><svg width="28" height="10" viewBox="0 0 28 10" aria-hidden="true"><polygon class="ah-fill" points="1,5 7,1 7,9"/><line class="ah-stroke" x1="6" y1="5" x2="22" y2="5"/><polygon class="ah-fill" points="21,1 27,5 21,9"/></svg></div> -->
+      <div class="step-stack">
+        <div class="step-card teal-ico">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="10" rx="1"/><path d="M7 9 L7 5 L17 5 L17 9"/><circle cx="8" cy="14" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/><circle cx="16" cy="14" r="1" fill="currentColor"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">多網路整合</div>
+            <div class="step-desc">衛星 / 5G / 4G / 微波</div>
+          </div>
+        </div>
+
+        <div class="step-card teal-ico">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="6" r="2.5"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M12 8.5 L12 14 M12 14 L5.5 15.5 M12 14 L18.5 15.5"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">邊緣節點</div>
+            <div class="step-desc">就近處理、降低延遲</div>
+          </div>
+        </div>
+
+        <div class="step-card teal-ico">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">自我修復</div>
+            <div class="step-desc">故障感知、路徑重建</div>
+          </div>
+        </div>
+
+        <div class="step-card teal-ico">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="6.3" y1="6.3" x2="17.7" y2="17.7"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">動態優化</div>
+            <div class="step-desc">頻寬調度、QoS 保證</div>
+          </div>
+        </div>
+
+        <div class="step-card teal-ico">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11 L8 7 a4 4 0 0 1 8 0 L16 11"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">安全加密</div>
+            <div class="step-desc">端到端加密、身分認證</div>
+          </div>
+        </div>
+
+        <div class="step-card teal-ico">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4 L15 4 L19 8 L19 20 L5 20 Z"/><path d="M15 4 L15 8 L19 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="16" y2="16"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">高可靠傳輸</div>
+            <div class="step-desc">斷線重連、資料續傳</div>
+          </div>
+        </div>
+
+        <div class="step-card teal-ico">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 7 L10 10 M17 7 L14 10 M7 17 L10 14 M17 17 L14 14"/></svg></div>
+          <div class="step-body">
+            <div class="step-title">自主網路</div>
+            <div class="step-desc">自組織、自適應路由</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Column 5: 岸端監控與管理平臺 -->
+    <div>
+      <div class="col-header navy">岸端監控與管理平臺</div>
+      <div class="platform">
+
+        <!-- Control room visual -->
+        <div class="control-room">
+          <img src="assets/control-room.png" alt="岸端監控中心">
+        </div>
+
+        <!-- Two feature boxes -->
+        <div class="feature-row">
+
+          <div class="feature-box">
+            <div class="feature-title">智慧彙整與分析能力</div>
+            <div class="viz-grid" style="grid-template-columns:repeat(2,1fr);gap:18px 12px">
+              <div class="viz-item">
+                <div class="vi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="1"/><circle cx="12" cy="12" r="3"/><rect x="9" y="3" width="6" height="3" rx="1"/></svg></div>
+                <div class="vi-label">影像識別</div>
+                <div class="vi-desc">目標偵測、行為識別、異常識別</div>
+              </div>
+              <div class="viz-item">
+                <div class="vi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 19 a5 5 0 0 1 0-10 a7 7 0 0 1 13 2 a4 4 0 0 1 -1 8 z"/></svg></div>
+                <div class="vi-label">第三方資料來源</div>
+                <div class="vi-desc">氣象、海象、AIS、海圖、港口資訊</div>
+              </div>
+              <div class="viz-item">
+                <div class="vi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4 L12 20 M4 12 L20 12"/></svg></div>
+                <div class="vi-label">數據訓練</div>
+                <div class="vi-desc">模型訓練、模式學習、預測優化</div>
+              </div>
+              <div class="viz-item">
+                <div class="vi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="3"/><path d="M6 21 L6 17 a6 6 0 0 1 12 0 L18 21"/></svg></div>
+                <div class="vi-label">專家經驗風險評估</div>
+                <div class="vi-desc">規則引擎、情境推理、風險評分</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-title">資料彙整與可視化</div>
+            <div class="viz-grid">
+              <div class="viz-item">
+                <div class="vi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17 L7 17 L9 14 L15 14 L17 17 L21 17 L21 19 L3 19 Z"/><rect x="9" y="9" width="6" height="5"/><rect x="11" y="5" width="2" height="4"/></svg></div>
+                <div class="vi-label">即時監控</div>
+                <div class="vi-desc">船況、位置、設備狀態</div>
+              </div>
+              <div class="viz-item">
+                <div class="vi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20 L21 20 M5 20 L5 14 M10 20 L10 9 M15 20 L15 12 M20 20 L20 5"/><path d="M5 14 L10 9 L15 12 L20 5"/><path d="M17 5 L20 5 L20 8"/></svg></div>
+                <div class="vi-label">趨勢分析</div>
+                <div class="vi-desc">歷史走勢、KPI 比較</div>
+              </div>
+              <div class="viz-item">
+                <div class="vi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 L22 20 L2 20 Z"/><line x1="12" y1="10" x2="12" y2="15"/><circle cx="12" cy="17.5" r=".8" fill="currentColor"/></svg></div>
+                <div class="vi-label">智能告警</div>
+                <div class="vi-desc">異常通知、分級告警</div>
+              </div>
+              <div class="viz-item">
+                <div class="vi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="6.3" y1="6.3" x2="17.7" y2="17.7"/><line x1="17.7" y1="6.3" x2="6.3" y2="17.7"/></svg></div>
+                <div class="vi-label">決策支援</div>
+                <div class="vi-desc">情境模擬、行動建議</div>
+              </div>
+              <div class="viz-item">
+                <div class="vi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4 L15 4 L19 8 L19 20 L5 20 Z"/><path d="M15 4 L15 8 L19 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div>
+                <div class="vi-label">報表與匯出</div>
+                <div class="vi-desc">自動報表、多格式輸出</div>
+              </div>
+              <div class="viz-item">
+                <div class="vi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+                <div class="vi-label">多維度視圖</div>
+                <div class="vi-desc">地圖、時間、設備視角</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Mission scheduling + Challenge -->
+        <div class="lower-row">
+
+          <div class="mission-box">
+            <div class="feature-title">任務排程</div>
+            <div class="mission-grid">
+              <div class="mission-cell">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M6 20 L6 17 a6 6 0 0 1 12 0 L18 20"/></svg>
+                <span>換班管理</span>
+              </div>
+              <div class="mission-cell">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 7 L11 17 M17 7 L13 17 M8 6 L16 6"/></svg>
+                <span>群控管理</span>
+              </div>
+              <div class="mission-cell">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20 L3 17 a6 6 0 0 1 12 0 L15 20 M16 20 L16 18 a4 4 0 0 1 5 0 L21 20"/></svg>
+                <span>隊伍管理</span>
+              </div>
+              <div class="mission-cell">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+                <span>目標管理</span>
+              </div>
+              <div class="mission-cell">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 L22 20 L2 20 Z"/><line x1="12" y1="10" x2="12" y2="15"/><circle cx="12" cy="17.5" r=".8" fill="currentColor"/></svg>
+                <span>例外處理</span>
+              </div>
+              <div class="mission-cell">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L20 6 L20 12 C20 17 16 20 12 22 C8 20 4 17 4 12 L4 6 Z"/><path d="M9 12 L11 14 L15 10"/></svg>
+                <span>資訊安全</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="challenge-box">
+            <div class="challenge-title">異質整合挑戰</div>
+            <ul class="challenge-list">
+              <li>資料格式差異</li>
+              <li>流程與制度差異</li>
+              <li>系統介面差異</li>
+              <li>企業文化差異</li>
+              <li>資料語意差異</li>
+              <li>遠端更新</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- 統一資料模型 -->
+        <div class="governance-box">
+          <div class="gov-title">統一資料模型與治理</div>
+          <div class="gov-desc">資料標準、主數據管理、權限控管、資料血緣、品質管理</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom pillars -->
+  <div class="pillar-band">
+    <div class="pillar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L20 6 L20 12 C20 17 16 20 12 22 C8 20 4 17 4 12 L4 6 Z"/></svg>
+      <span>資安防護</span>
+    </div>
+    <div class="pillar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3 L14 3 L14 7 L18 7 L18 11 L14 11 L14 15 L10 15 L10 11 L6 11 L6 7 L10 7 Z"/><path d="M14 15 L14 17 a2 2 0 0 0 2 2 L21 19"/></svg>
+      <span>系統整合</span>
+    </div>
+    <div class="pillar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 19 a5 5 0 0 1 0-10 a7 7 0 0 1 13 2 a4 4 0 0 1 -1 8 z"/></svg>
+      <span>雲端部署</span>
+    </div>
+    <div class="pillar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6 L4 12 Q4 15 12 15 Q20 15 20 12 L20 6"/><path d="M4 12 L4 18 Q4 21 12 21 Q20 21 20 18 L20 12"/></svg>
+      <span>資料治理</span>
+    </div>
+    <div class="pillar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L20 6 L20 12 C20 17 16 20 12 22 C8 20 4 17 4 12 L4 6 Z"/><path d="M9 12 L11 14 L15 10"/></svg>
+      <span>合規與標準</span>
+    </div>
+  </div>
+
+  <!-- Goal banner -->
+  <div class="goal-banner">
+    <div class="goal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+    </div>
+    <div class="goal-text">
+      透過船端資料、外部資訊與企業內部系統的深度整合,克服異質性差異,建立完整、智慧、可持續的智慧船舶中心<br>
+      因應不同企業流程、管理模式與文化,提供彈性化、客製化的智慧營運決策支援
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
