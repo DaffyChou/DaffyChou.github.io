@@ -138,7 +138,8 @@
       "Bash(git ls-tree *)",
       "Bash(git reset *)",
       "Bash(rm .git/HEAD.lock && git reset && echo \"--- after reset ---\" && git status --short | head -20)",
-      "Bash(git read-tree *)"
+      "Bash(git read-tree *)",
+      "Bash(node demos/voyage-plan/_fix_risk_zones.js)"
     ],
     "additionalDirectories": [
       "D:\\公司內部\\DaffyChou.github.io\\.git"
