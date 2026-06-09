@@ -164,11 +164,103 @@ body { display: flex; }
   border-color: #2a2a2a !important;
 }
 
-/* 浮動工具列 */
+/* 海圖底圖：降亮度 + 微藍偏色，貼近企業 OCC 風格 */
+.sea-chart-base {
+  filter: brightness(0.85) saturate(1.1) hue-rotate(-5deg);
+}
+
+/* 底圖切換按鈕組 */
+.base-switcher {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(13,13,13,0.92);
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  padding: 4px;
+  display: flex;
+  gap: 2px;
+  z-index: 500;
+  font-size: 11px;
+}
+.base-btn {
+  height: 22px;
+  padding: 0 10px;
+  background: transparent;
+  color: #c4cdda;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  transition: background 0.12s, color 0.12s;
+}
+.base-btn:hover { background: #1c1c1c; color: #e4eaf2; }
+.base-btn.active {
+  background: rgba(44,108,219,0.25);
+  color: #9ec5ff;
+}
+
+/* AIS 圖例 */
+.ais-legend {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(13,13,13,0.92);
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  padding: 10px 12px;
+  z-index: 500;
+  font-size: 11px;
+  color: #c4cdda;
+  min-width: 150px;
+}
+.legend-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9aa5b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+  font-size: 11px;
+}
+.legend-icon {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+.legend-divider {
+  border-top: 1px dashed #2a2a2a;
+  margin: 6px 0;
+}
+
+/* 經緯度顯示 */
+.coord-display {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 11px;
+  color: #c4cdda;
+}
+.coord-display .lat::before { content: "Lat "; color: #7c8a9e; }
+.coord-display .lon::before { content: "Lon "; color: #7c8a9e; }
+
+/* 浮動工具列 — 避開 Leaflet zoom 控制 (左上角預設 ~50px) */
 .map-toolbar {
   position: absolute;
   top: 12px;
-  left: 12px;
+  left: 60px;
   background: rgba(13,13,13,0.92);
   border: 1px solid #2a2a2a;
   border-radius: 4px;
@@ -187,7 +279,12 @@ body { display: flex; }
   border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 0.15s, transform 0.1s;
 }
+.summary-pill:hover { transform: translateY(-1px); }
+.summary-pill.active { border-color: currentColor; box-shadow: 0 0 0 1px currentColor inset; }
 .summary-pill .dot {
   width: 7px; height: 7px; border-radius: 50%;
 }
@@ -197,6 +294,59 @@ body { display: flex; }
 .summary-pill.w .dot { background: #f5a623; }
 .summary-pill.n { background: rgba(76,217,122,0.15); color: #6ee094; }
 .summary-pill.n .dot { background: #4cd97a; }
+
+/* 風險詳情彈出面板 */
+.risk-popover {
+  position: absolute;
+  top: 52px;
+  left: 60px;
+  background: rgba(13,13,13,0.96);
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  padding: 10px 12px;
+  z-index: 600;
+  min-width: 280px;
+  max-width: 380px;
+  max-height: 60vh;
+  overflow-y: auto;
+  display: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.risk-popover.show { display: block; }
+.risk-popover .rp-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.risk-popover .rp-close {
+  cursor: pointer;
+  color: #6a7689;
+  font-size: 14px;
+  line-height: 1;
+}
+.risk-popover .rp-close:hover { color: #fff; }
+.risk-popover .rp-item {
+  padding: 6px 8px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  border-left: 3px solid transparent;
+  transition: background 0.1s;
+}
+.risk-popover .rp-item:hover { background: #1a1a1a; }
+.risk-popover .rp-item .name { color: #e4eaf2; font-weight: 600; font-size: 12px; }
+.risk-popover .rp-item .meta { color: #9aa5b8; font-size: 10px; margin-top: 2px; font-family: ui-monospace, "SF Mono", Consolas, monospace; }
+.risk-popover .rp-item.c { border-left-color: #ff4d4f; }
+.risk-popover .rp-item.w { border-left-color: #f5a623; }
+.risk-popover .rp-item.n { border-left-color: #4cd97a; }
 
 /* 圖層 toggle */
 .layer-toggle {
@@ -341,6 +491,133 @@ body { display: flex; }
   margin-bottom: 8px;
 }
 
+/* 港口擁塞看板 */
+.port-dash-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e4eaf2;
+  margin-bottom: 4px;
+  padding: 12px 14px 4px;
+}
+.port-dash-sub {
+  font-size: 11px;
+  color: #9aa5b8;
+  padding: 0 14px 12px;
+  border-bottom: 1px solid #2a2a2a;
+  margin-bottom: 8px;
+}
+.port-summary-bar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 11px;
+}
+.port-summary-bar > div {
+  flex: 1;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 3px;
+  padding: 5px 8px;
+  text-align: center;
+}
+.port-summary-bar .lbl { color: #9aa5b8; font-size: 10px; }
+.port-summary-bar .val { color: #e4eaf2; font-size: 16px; font-weight: 700; font-family: ui-monospace, monospace; }
+.port-card {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-left: 4px solid #4cd97a;
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin: 0 14px 8px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.port-card:hover { background: #1c1c1c; }
+.port-card.cong-critical { border-left-color: #ff4d4f; }
+.port-card.cong-high     { border-left-color: #f5a623; }
+.port-card.cong-medium   { border-left-color: #f5d04a; }
+.port-card.cong-low      { border-left-color: #4cd97a; }
+.port-card .pc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.port-card .pc-name { font-size: 13px; font-weight: 700; color: #e4eaf2; }
+.port-card .pc-flag { font-size: 10px; color: #9aa5b8; }
+.port-card .pc-cong-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.cong-critical .pc-cong-badge { background: rgba(255,77,79,0.2); color: #ff8a8a; }
+.cong-high     .pc-cong-badge { background: rgba(245,166,35,0.2); color: #f5b753; }
+.cong-medium   .pc-cong-badge { background: rgba(245,208,74,0.2); color: #f5d04a; }
+.cong-low      .pc-cong-badge { background: rgba(76,217,122,0.2); color: #6ee094; }
+.port-card .pc-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+  font-size: 10px;
+  margin-top: 6px;
+}
+.port-card .pc-metric { background: #0d0d0d; border-radius: 2px; padding: 3px 6px; }
+.port-card .pc-metric .k { color: #7c8a9e; font-size: 9px; }
+.port-card .pc-metric .v { color: #c4cdda; font-family: ui-monospace, monospace; font-size: 11px; font-weight: 600; }
+.port-card .pc-ymships {
+  font-size: 10px;
+  color: #9ec5ff;
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px dashed #2a2a2a;
+}
+
+/* 收合區塊（船舶詳情用） */
+.vd-collapse {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.vd-collapse > summary {
+  cursor: pointer;
+  padding: 7px 10px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9aa5b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+  transition: background 0.15s;
+}
+.vd-collapse > summary::-webkit-details-marker { display: none; }
+.vd-collapse > summary:hover { background: #141414; color: #c4cdda; }
+.vd-collapse[open] > summary {
+  background: rgba(44,108,219,0.08);
+  color: #9ec5ff;
+  border-bottom: 1px solid #2a2a2a;
+}
+.vd-collapse > summary::after {
+  content: "▼";
+  font-size: 9px;
+  color: #6a7689;
+  transition: transform 0.15s;
+}
+.vd-collapse[open] > summary::after {
+  transform: rotate(180deg);
+  color: #9ec5ff;
+}
+.vd-collapse > .vd-collapse-body {
+  padding: 10px 12px 4px;
+}
+.vd-collapse > .vd-collapse-body .vd-grid { margin-bottom: 4px; }
+
 .surr-card {
   background: #141414;
   border: 1px solid #2a2a2a;
@@ -363,18 +640,22 @@ body { display: flex; }
 .timeline-wrap {
   background: #0d0d0d;
   border-top: 1px solid #2a2a2a;
-  padding: 12px 24px;
+  padding: 10px 24px 12px;
   display: none;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  gap: 8px;
   flex-shrink: 0;
 }
 .timeline-wrap.show { display: flex; }
+.timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 .timeline-info {
   font-size: 12px;
   color: #c4cdda;
   white-space: nowrap;
-  min-width: 200px;
 }
 .timeline-info b {
   color: #e4eaf2;
@@ -385,6 +666,296 @@ input[type=range] {
   accent-color: #2c6cdb;
   height: 6px;
 }
+/* 閾值設定 Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-card {
+  background: #0d0d0d;
+  border: 1px solid #2c6cdb;
+  border-radius: 8px;
+  width: 440px;
+  max-width: 92vw;
+  box-shadow: 0 10px 60px rgba(44,108,219,0.25);
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #9ec5ff;
+  border-bottom: 1px solid #2a2a2a;
+}
+.modal-close { cursor: pointer; color: #6a7689; font-size: 16px; }
+.modal-close:hover { color: #fff; }
+.modal-body { padding: 16px; }
+
+.thr-row {
+  margin-bottom: 14px;
+}
+.thr-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #9aa5b8;
+  margin-bottom: 6px;
+}
+.thr-label b {
+  color: #e4eaf2;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+}
+.thr-row { display: grid; grid-template-columns: 1fr 60px; column-gap: 8px; align-items: center; }
+.thr-row .thr-label { grid-column: 1 / -1; }
+.thr-slider {
+  width: 100%;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #2a2a2a;
+  border-radius: 3px;
+  outline: none;
+}
+.thr-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2c6cdb;
+  cursor: pointer;
+  border: 2px solid #0d0d0d;
+}
+.thr-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2c6cdb;
+  cursor: pointer;
+  border: 2px solid #0d0d0d;
+}
+.thr-num {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 3px;
+  padding: 4px 6px;
+  color: #e4eaf2;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  text-align: center;
+}
+.thr-num:focus { outline: none; border-color: #2c6cdb; }
+.thr-preview {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #2a2a2a;
+}
+.thr-preview-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #7c8a9e;
+  margin-bottom: 6px;
+}
+.thr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.thr-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #141414;
+  border-left: 3px solid;
+  padding: 6px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #c4cdda;
+}
+.thr-cell.c  { border-color: #ff4d4f; }
+.thr-cell.w  { border-color: #f5a623; }
+.thr-cell.ca { border-color: #f5d04a; }
+.thr-cell.s  { border-color: #4cd97a; }
+.thr-tag {
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+.thr-cell.c  .thr-tag { color: #ff8a8a; }
+.thr-cell.w  .thr-tag { color: #f5b753; }
+.thr-cell.ca .thr-tag { color: #f5d04a; }
+.thr-cell.s  .thr-tag { color: #6ee094; }
+.thr-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #2a2a2a;
+}
+
+/* tl-btn 套用統一規範 (md 尺寸) */
+.tl-btn {
+  height: 26px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #c4cdda;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.tl-btn:hover { background: #1c1c1c; border-color: #3a3a3a; color: #e4eaf2; }
+.tl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.tl-btn.play-btn {
+  background: rgba(44,108,219,0.20);
+  border-color: #2c6cdb;
+  color: #9ec5ff;
+  padding: 0 16px;
+}
+.tl-btn.play-btn:hover {
+  background: rgba(44,108,219,0.32);
+  color: #fff;
+}
+.tl-btn.play-btn.playing {
+  background: rgba(245,166,35,0.20);
+  border-color: #f5a623;
+  color: #f5b753;
+}
+.tl-select {
+  height: 26px;
+  padding: 0 8px;
+  font-size: 11px;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #c4cdda;
+  border-radius: 3px;
+  font-family: inherit;
+  cursor: pointer;
+  color-scheme: dark;
+}
+.tl-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #c4cdda;
+  cursor: pointer;
+}
+.tl-checkbox input { accent-color: #2c6cdb; }
+
+/* ─────────────────────────────────────────
+   全站按鈕統一規範
+   ───────────────────────────────────────── */
+:root {
+  --btn-h-sm: 22px;
+  --btn-h-md: 26px;
+  --btn-h-lg: 32px;
+  --btn-fs-xs: 10px;
+  --btn-fs-sm: 11px;
+  --btn-fs-md: 12px;
+  --btn-fs-lg: 13px;
+  --btn-pad-sm: 0 8px;
+  --btn-pad-md: 0 12px;
+  --btn-pad-lg: 0 16px;
+  --btn-radius: 3px;
+}
+
+/* 標準按鈕（預設 md 尺寸）*/
+.btn-std {
+  height: var(--btn-h-md);
+  padding: var(--btn-pad-md);
+  font-size: var(--btn-fs-sm);
+  font-weight: 600;
+  background: #141414;
+  color: #c4cdda;
+  border: 1px solid #2a2a2a;
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  white-space: nowrap;
+  line-height: 1;
+}
+.btn-std:hover  { background: #1c1c1c; border-color: #3a3a3a; color: #e4eaf2; }
+.btn-std:active { background: #0a0a0a; }
+.btn-std:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Primary（藍色強調）*/
+.btn-std.btn-primary {
+  background: rgba(44,108,219,0.18);
+  border-color: #2c6cdb;
+  color: #9ec5ff;
+}
+.btn-std.btn-primary:hover {
+  background: rgba(44,108,219,0.32);
+  border-color: #4d85e8;
+  color: #fff;
+}
+
+/* Danger（紅色）*/
+.btn-std.btn-danger {
+  background: rgba(255,77,79,0.15);
+  border-color: #ff4d4f;
+  color: #ff8a8a;
+}
+.btn-std.btn-danger:hover {
+  background: rgba(255,77,79,0.28);
+  color: #fff;
+}
+
+/* 尺寸變體 */
+.btn-std.btn-sm { height: var(--btn-h-sm); padding: var(--btn-pad-sm); font-size: var(--btn-fs-xs); }
+.btn-std.btn-lg { height: var(--btn-h-lg); padding: var(--btn-pad-lg); font-size: var(--btn-fs-md); }
+.btn-std.btn-block { width: 100%; }
+.btn-std.btn-active {
+  background: rgba(44,108,219,0.28);
+  border-color: #2c6cdb;
+  color: #9ec5ff;
+}
+
+/* 時間區間 input */
+.tl-range-row {
+  font-size: var(--btn-fs-sm);
+  color: #9aa5b8;
+  flex-wrap: wrap;
+}
+.tl-range-label { font-weight: 600; color: #c4cdda; font-size: var(--btn-fs-sm); }
+.tl-range-sep   { color: #6a7689; }
+.tl-range-input {
+  height: var(--btn-h-md);
+  background: #0d0d0d;
+  color: #e4eaf2;
+  border: 1px solid #2a2a2a;
+  border-radius: var(--btn-radius);
+  padding: 0 8px;
+  font-size: var(--btn-fs-sm);
+  font-family: ui-monospace, monospace;
+  color-scheme: dark;
+}
+.tl-range-input:focus { outline: none; border-color: #2c6cdb; }
+.tl-range-status { color: #7c8a9e; font-size: var(--btn-fs-xs); margin-left: 8px; }
 
 /* Loading */
 .loading {
@@ -437,12 +1008,12 @@ input[type=range] {
   <div class="sb-group">
     <div class="sb-group-title">即時監看</div>
     <div class="sb-item active"><span class="ico">📊</span>船隊監控<span class="badge" id="critCount">-</span></div>
-    <div class="sb-item"><span class="ico">🚢</span>船舶詳情</div>
+    <!-- <div class="sb-item"><span class="ico">🚢</span>船舶詳情</div> -->
   </div>
   <div class="sb-group">
     <div class="sb-group-title">港口營運</div>
-    <div class="sb-item"><span class="ico">⚓</span>港口擁塞看板</div>
-    <div class="sb-item"><span class="ico">📋</span>港口情資 SitRep</div>
+    <div class="sb-item" onclick="showPortCongestion()"><span class="ico">⚓</span>港口擁塞看板</div>
+    <!-- <div class="sb-item"><span class="ico">📋</span>港口情資 SitRep</div> -->
   </div>
   <div class="sb-group">
     <div class="sb-group-title">事件管理</div>
@@ -451,7 +1022,7 @@ input[type=range] {
   </div>
   <div class="sb-group">
     <div class="sb-group-title">系統管理</div>
-    <div class="sb-item"><span class="ico">⚙</span>閾值設定</div>
+    <div class="sb-item" onclick="showThresholdSettings()"><span class="ico">⚙</span>閾值設定</div>
     <div class="sb-item"><span class="ico">📄</span>稽核紀錄</div>
     <div class="sb-item"><span class="ico">⬇</span>報表匯出</div>
   </div>
@@ -472,18 +1043,48 @@ input[type=range] {
     <div class="map-wrap">
       <div class="map-toolbar">
         <span style="color:#9aa5b8;font-size:11px;">船隊風險：</span>
-        <span class="summary-pill c"><span class="dot"></span>C·<span id="cntCrit">0</span></span>
-        <span class="summary-pill w"><span class="dot"></span>W·<span id="cntWarn">0</span></span>
-        <span class="summary-pill n"><span class="dot"></span>N·<span id="cntNorm">0</span></span>
+        <span class="summary-pill c" id="pillCrit" onclick="toggleRiskPopover('critical')" title="點擊查看 Critical 風險船隊"><span class="dot"></span>C·<span id="cntCrit">0</span></span>
+        <span class="summary-pill w" id="pillWarn" onclick="toggleRiskPopover('warning')" title="點擊查看 Warning 風險船隊"><span class="dot"></span>W·<span id="cntWarn">0</span></span>
+        <span style="color:#6a7689;font-size:11px;">· 一般 <span id="cntNorm">0</span> 艘</span>
+      </div>
+
+      <div class="risk-popover" id="riskPopover">
+        <div class="rp-title">
+          <span id="rpTitle">船隊風險明細</span>
+          <span class="rp-close" onclick="closeRiskPopover()">✕</span>
+        </div>
+        <div id="rpBody"></div>
       </div>
 
       <div class="layer-toggle" id="layerToggle" style="display:none;">
         <label><input type="checkbox" id="lyrTrack" checked> 軌跡</label>
         <label><input type="checkbox" id="lyrCircle" checked> 5 NM 圓</label>
-        <label><input type="checkbox" id="lyrSurr" checked> 周邊船</label>
       </div>
 
       <div id="map"></div>
+
+      <div class="base-switcher">
+        <button class="base-btn" data-layer="seaChart" onclick="switchBaseLayer('seaChart')">海圖</button>
+        <button class="base-btn active" data-layer="darkMap" onclick="switchBaseLayer('darkMap')">深色</button>
+        <button class="base-btn" data-layer="satelliteMap" onclick="switchBaseLayer('satelliteMap')">衛星</button>
+      </div>
+
+      <div class="ais-legend" id="aisLegend" style="display:none;">
+        <div class="legend-title" id="aisLegendHeader" onclick="toggleAisLegend()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:0;padding-bottom:0;border-bottom:none;">
+          <span>AIS 目標分類</span>
+          <span id="aisLegendArrow" style="font-size:9px;color:#9ec5ff;transition:transform 0.15s;">▼</span>
+        </div>
+        <div id="aisLegendBody" style="display:none;margin-top:6px;padding-top:6px;border-top:1px solid #2a2a2a;">
+          <div class="legend-row"><span class="legend-icon" style="background:#ffd700;clip-path:polygon(50% 10%, 15% 90%, 85% 90%);"></span>陽明同船隊</div>
+          <div class="legend-row"><span class="legend-icon" style="background:#9ec5ff;clip-path:polygon(50% 10%, 15% 90%, 85% 90%);"></span>已識別外來船</div>
+          <div class="legend-row"><span class="legend-icon" style="background:#ffffff;clip-path:polygon(50% 10%, 15% 90%, 85% 90%);"></span>一般船舶</div>
+          <div class="legend-divider"></div>
+          <div class="legend-row"><span class="legend-icon" style="background:#f5d04a;clip-path:polygon(50% 10%, 90% 50%, 50% 90%, 10% 50%);"></span>AtoN 浮標 / 燈塔</div>
+          <div class="legend-row"><span class="legend-icon" style="background:#9b59b6;width:10px;height:10px;border-radius:0;"></span>AIS 基地台</div>
+          <div class="legend-row"><span class="legend-icon" style="background:#4cd97a;clip-path:polygon(50% 0%, 60% 35%, 100% 50%, 60% 65%, 50% 100%, 40% 65%, 0% 50%, 40% 35%);"></span>搜救飛機</div>
+          <div class="legend-row"><span class="legend-icon" style="background:#ff4d4f;clip-path:polygon(50% 0%, 60% 35%, 100% 50%, 60% 65%, 50% 100%, 40% 65%, 0% 50%, 40% 35%);"></span>緊急信標</div>
+        </div>
+      </div>
     </div>
 
     <div class="right-panel" id="rightPanel">
@@ -495,12 +1096,78 @@ input[type=range] {
   </div>
 
   <div class="timeline-wrap" id="timelineWrap">
-    <div class="timeline-info">
-      <span id="tlTime">--</span> · 周邊 <b id="tlSurr">-</b> 艘
+    <div class="timeline-row">
+      <button class="tl-btn" id="tlStepBack" title="上一格 (←)">上一格</button>
+      <button class="tl-btn play-btn" id="tlPlay" title="播放 / 暫停 (空白鍵)">▶ 播放</button>
+      <button class="tl-btn" id="tlStepFwd" title="下一格 (→)">下一格</button>
+
+      <select class="tl-select" id="tlSpeed" title="播放倍速">
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="2">2x</option>
+        <option value="5">5x</option>
+        <option value="10">10x</option>
+        <option value="20">20x</option>
+      </select>
+
+      <label class="tl-checkbox"><input type="checkbox" id="tlLoop"> 循環</label>
+      <label class="tl-checkbox" title="播放時略過右側 panel 重繪以提升流暢度"><input type="checkbox" id="tlLite" checked> 流暢模式</label>
+      <label class="tl-checkbox" title="播放/拖時間軸時，地圖自動跟隨本船位置（保留縮放）"><input type="checkbox" id="tlFollow" checked> 跟隨本船</label>
+      <button class="tl-btn" onclick="recenterOnOwnShip()" title="立即回到本船位置（不重設縮放）">回中</button>
+
+      <div class="timeline-info" style="margin-left:auto;font-family:ui-monospace;font-size:11px;">
+        <span id="tlTime">--</span> · 周邊 <b id="tlSurr">-</b> 艘 · <b id="tlIdx">0</b>/<b id="tlTotal">0</b>
+      </div>
     </div>
-    <input type="range" id="tlSlider" min="0" max="100" value="0">
-    <div class="timeline-info" style="min-width:auto;">
-      <b id="tlIdx">0</b>/<b id="tlTotal">0</b> snapshot
+    <div class="timeline-row">
+      <input type="range" id="tlSlider" min="0" max="100" value="0">
+    </div>
+    <div class="timeline-row tl-range-row">
+      <span class="tl-range-label">歷史回放區間：</span>
+      <input type="datetime-local" id="tlRangeFrom" class="tl-range-input" title="起始時間">
+      <span class="tl-range-sep">→</span>
+      <input type="datetime-local" id="tlRangeTo" class="tl-range-input" title="結束時間">
+      <button class="btn-std btn-primary" id="tlApplyRange" title="只回放此區間">套用區間</button>
+      <button class="btn-std" id="tlResetRange" title="回到完整資料區間">重設</button>
+      <span id="tlRangeStatus" class="tl-range-status"></span>
+    </div>
+  </div>
+</div>
+
+<!-- 閾值設定 Modal -->
+<div class="modal-overlay" id="thresholdModal" onclick="closeThresholdSettings(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <span>⚙ 警報門檻設定</span>
+      <span class="modal-close" onclick="closeThresholdSettings()">✕</span>
+    </div>
+    <div class="modal-body">
+      <p style="color:#9aa5b8;font-size:11px;margin:0 0 12px;">調整 CPA / TCPA 警示門檻。Critical 自動為 Warning 的 50%。</p>
+
+      <div class="thr-row">
+        <label class="thr-label">CPA 安全距離 <b><span id="thrCpaVal">0.7</span> NM</b></label>
+        <input type="range" id="thrCpaSlider" class="thr-slider" min="0.1" max="3.0" step="0.1" value="0.7">
+        <input type="number" id="thrCpaNum" class="thr-num" min="0.1" max="3.0" step="0.1" value="0.7">
+      </div>
+      <div class="thr-row">
+        <label class="thr-label">TCPA 預警時間 <b><span id="thrTcpaVal">20</span> min</b></label>
+        <input type="range" id="thrTcpaSlider" class="thr-slider" min="3" max="60" step="1" value="20">
+        <input type="number" id="thrTcpaNum" class="thr-num" min="3" max="60" step="1" value="20">
+      </div>
+
+      <div class="thr-preview">
+        <div class="thr-preview-title">套用後等級門檻</div>
+        <div class="thr-grid">
+          <div class="thr-cell c"><span class="thr-tag">Critical</span><span id="prevCrit">CPA &lt; 0.35 nm · TCPA &lt; 10 min</span></div>
+          <div class="thr-cell w"><span class="thr-tag">Warning</span><span id="prevWarn">CPA &lt; 0.70 nm · TCPA &lt; 20 min</span></div>
+          <div class="thr-cell s"><span class="thr-tag">Safe</span><span>其餘狀況</span></div>
+        </div>
+      </div>
+
+      <div class="thr-btns">
+        <button class="btn-std" onclick="resetThresholdSettings()">重設預設</button>
+        <button class="btn-std btn-primary" onclick="applyThresholdSettings()">套用</button>
+      </div>
     </div>
   </div>
 </div>
@@ -519,10 +1186,31 @@ input[type=range] {
 // ============================================================
 const STATE = {
   vessels: [],
+  fleetDb: {},          // MMSI → {name_zh, name_en, imo} 陽明
+  externalDb: {},       // MMSI → {name, operator, type, imo} 外來船
+  detectionStats: {},   // MMSI → {c, f, l, n, d, b} 全域偵測統計（保留供分類用）
+  perSourceDetectionStats: {}, // MMSI → {first,last,obs,durH,coverage,gaps} 本船視角統計
   selectedVessel: null,
   currentTrack: null,
   currentSnapshots: null,
   currentSnapshotIdx: 0,
+
+  // 時間軸播放
+  playing: false,
+  playSpeed: 1,
+  playTimer: null,
+  detailViewInitialized: false,  // 首次進 detail 才 setView，後續保持使用者縮放
+
+  // CPA 門檻（可在 UI 調整）
+  cpaThresholds: {
+    critical: { cpa: 0.3, tcpa: 10 },
+    warning:  { cpa: 0.7, tcpa: 20 },
+  },
+
+  // 陸地多邊形（Natural Earth 50m / 10m）
+  landPolygons: null,
+  // OSM 海岸線（高解析線段，含港口填海、防波堤）
+  coastlines: null,
 
   map: null,
   layers: {
@@ -530,8 +1218,925 @@ const STATE = {
     trackLine: null,
     nmCircle: null,
     surroundingMarkers: null,
+    landDebug: null,
+    externalTracks: null,  // 外來船軌跡（layerGroup）
+  },
+  shownExternalTracks: new Set(),  // 已顯示軌跡的 MMSI
+
+  // 顯示篩選
+  filters: {
+    showFleet: true,         // 陽明同船隊
+    showExternal: true,      // 已識別外來船（external_vessels.json）
+    showGeneric: true,       // 一般船舶（未識別）
+    showAton: true,          // AtoN 浮標 / 燈塔
+    showBaseStation: true,   // 基地台
+    showSAR: true,           // 搜救飛機 + 緊急信標
+    showCritical: true,      // CPA 風險：Critical
+    showWarning: true,       // CPA 風險：Warning
+    showOther: true,         // 其他（Safe / 無風險資料）
+    selectedMmsi: new Set(), // 已選取的 MMSI（會自動顯示軌跡）
+    searchQuery: '',         // MMSI 搜尋字串
   },
 };
+
+// 依「類別顯示」篩選（不含選取模式邏輯，列表與圖層共用）
+function passesCategoryFilter(s) {
+  const f = STATE.filters;
+  const kind = classifyAis(s.mmsi, s.cat);
+  if (kind === 'fleet_vessel') return f.showFleet;
+  if (kind === 'ext_vessel')   return f.showExternal;
+  if (kind === 'vessel')       return f.showGeneric;
+  if (kind === 'aton')         return f.showAton;
+  if (kind === 'base_station') return f.showBaseStation;
+  if (kind === 'sar_aircraft' || kind === 'sart' || kind === 'epirb' || kind === 'mob') return f.showSAR;
+  return true;
+}
+
+// 依 CPA 風險等級篩選（Critical / Warning / 其他）
+function passesRiskFilter(s) {
+  const f = STATE.filters;
+  const lvl = (s._risk && s._risk.level) || 'safe';
+  if (lvl === 'critical') return f.showCritical;
+  if (lvl === 'warning')  return f.showWarning;
+  return f.showOther; // safe / unknown / 無資料
+}
+
+// 判斷某 surrounding entry 是否依篩選條件可顯示（圖層用）
+function passesFilter(s) {
+  const f = STATE.filters;
+  // 選取模式：只看清單內的 MMSI
+  if (f.selectedMmsi.size > 0) {
+    return f.selectedMmsi.has(s.mmsi);
+  }
+  return passesCategoryFilter(s) && passesRiskFilter(s);
+}
+
+// UI 操作
+window.setCategoryFilter = function(key, value) {
+  STATE.filters[key] = value;
+  if (STATE.selectedVessel) { drawDetailMap(); renderDetail(); }
+};
+
+// 選取（連動軌跡顯示）
+window.toggleSelect = function(mmsi) {
+  if (STATE.filters.selectedMmsi.has(mmsi)) {
+    // 取消選取：移除選取 + 隱藏軌跡
+    STATE.filters.selectedMmsi.delete(mmsi);
+    hideExternalTrack(mmsi);
+  } else {
+    // 新增選取：加入清單 + 自動顯示軌跡
+    STATE.filters.selectedMmsi.add(mmsi);
+    showExternalTrack(mmsi);
+  }
+  if (STATE.selectedVessel) { drawDetailMap(); renderDetail(); }
+};
+
+window.clearSelected = function() {
+  // 清空選取 + 同步清掉軌跡
+  STATE.filters.selectedMmsi.forEach(m => hideExternalTrack(m));
+  STATE.filters.selectedMmsi.clear();
+  if (STATE.selectedVessel) { drawDetailMap(); renderDetail(); }
+};
+
+window.clearAllFilters = function() {
+  STATE.filters.showFleet = true;
+  STATE.filters.showExternal = true;
+  STATE.filters.showGeneric = true;
+  STATE.filters.showAton = true;
+  STATE.filters.showBaseStation = true;
+  STATE.filters.showSAR = true;
+  STATE.filters.showCritical = true;
+  STATE.filters.showWarning = true;
+  STATE.filters.showOther = true;
+  STATE.filters.selectedMmsi.forEach(m => hideExternalTrack(m));
+  STATE.filters.selectedMmsi.clear();
+  STATE.filters.searchQuery = '';
+  if (STATE.selectedVessel) { drawDetailMap(); renderDetail(); }
+};
+
+// MMSI 搜尋
+window.setMmsiSearch = function(q) {
+  STATE.filters.searchQuery = q.trim();
+  if (STATE.selectedVessel) renderDetail();
+};
+
+// 查詢周邊船是否為陽明同船隊
+function lookupFleet(mmsi) {
+  return STATE.fleetDb[mmsi] || null;
+}
+// 查詢外來船資料庫（競爭者 / 已知船舶）
+function lookupExternal(mmsi) {
+  return STATE.externalDb[mmsi] || null;
+}
+// 查詢外來 AIS 偵測起迄統計（compute_detection_stats.py 產出 / 跨自船全域）
+function lookupDetectionStat(mmsi) {
+  return (STATE.detectionStats && STATE.detectionStats[mmsi]) || null;
+}
+// 查詢「本船」視角的偵測統計（首/末/連續度/中斷次數）
+function lookupPerSourceStat(mmsi) {
+  return (STATE.perSourceDetectionStats && STATE.perSourceDetectionStats[mmsi]) || null;
+}
+// 計算本船全部快照內每個 MMSI 的偵測統計
+// 快照間隔 30 分鐘 (snapshot_interval_min)
+// 中斷判定: 相鄰兩個觀測時刻間隔 > 60 分鐘 (含一次以上漏觀測)
+// 連續度: 實際觀測時刻數 / 預期最大觀測時刻數 (依首末時間跨度)
+const SNAP_INTERVAL_MIN = 30;
+const GAP_THRESHOLD_MIN = 60;
+function computePerSourceMmsiStats(snapshots) {
+  const map = {};
+  for (const snap of snapshots) {
+    const ts = snap.ts;
+    for (const s of snap.surrounding) {
+      if (!map[s.mmsi]) map[s.mmsi] = { tsList: [] };
+      map[s.mmsi].tsList.push(ts);
+    }
+  }
+  const out = {};
+  for (const m in map) {
+    const tsList = map[m].tsList.sort();
+    const first = tsList[0];
+    const last  = tsList[tsList.length - 1];
+    const obs   = tsList.length;
+    const durMs = new Date(last) - new Date(first);
+    const durH  = durMs / 3600000;
+    // 預期最大觀測筆數 = 跨距 / 快照間隔 + 1
+    const expected = Math.floor(durMs / (SNAP_INTERVAL_MIN * 60000)) + 1;
+    const coverage = expected > 0 ? Math.min(1, obs / expected) : 1;
+    // 中斷次數: 相鄰時刻差 > 60min 計一次中斷
+    let gaps = 0;
+    for (let i = 1; i < tsList.length; i++) {
+      const gapMin = (new Date(tsList[i]) - new Date(tsList[i-1])) / 60000;
+      if (gapMin > GAP_THRESHOLD_MIN) gaps++;
+    }
+    out[m] = { first, last, obs, durH, coverage, gaps };
+  }
+  return out;
+}
+// ISO timestamp → 簡短格式 (MM/DD HH:mm)
+function formatDetTs(ts) {
+  if (!ts) return '-';
+  // "2026-05-25T14:00:00Z" → "05/25 14:00"
+  return ts.substring(5,7) + '/' + ts.substring(8,10) + ' ' + ts.substring(11,16);
+}
+// 時長 (小時) → 人話 "8天4h" / "12h" / "45min"
+function formatDuration(h) {
+  if (h == null) return '';
+  if (h < 1) return `${Math.round(h*60)} 分`;
+  if (h < 48) return `${h.toFixed(1)} 小時`;
+  const days = Math.floor(h/24); const remH = Math.round(h - days*24);
+  return remH > 0 ? `${days}天${remH}h` : `${days} 天`;
+}
+// MMSI 國家前綴 → 國旗（MID code → ITU-R M.585 對照）
+const MMSI_FLAG = {
+  "201":"🇦🇱 阿爾巴尼亞","210":"🇨🇾 賽普勒斯","211":"🇩🇪 德國","215":"🇲🇹 馬爾他",
+  "219":"🇩🇰 丹麥","220":"🇩🇰 丹麥","224":"🇪🇸 西班牙","227":"🇫🇷 法國",
+  "229":"🇲🇹 馬爾他","232":"🇬🇧 英國","235":"🇬🇧 英國","236":"🇬🇮 直布羅陀",
+  "247":"🇮🇹 義大利","248":"🇲🇹 馬爾他","249":"🇲🇹 馬爾他","256":"🇲🇹 馬爾他",
+  "261":"🇵🇱 波蘭","265":"🇸🇪 瑞典","266":"🇸🇪 瑞典","270":"🇱🇹 立陶宛",
+  "271":"🇹🇷 土耳其","273":"🇷🇺 俄羅斯","275":"🇱🇻 拉脫維亞","303":"🇺🇸 阿拉斯加",
+  "311":"🇧🇸 巴哈馬","316":"🇨🇦 加拿大","319":"🇰🇾 開曼群島","338":"🇺🇸 美國",
+  "352":"🇵🇦 巴拿馬","353":"🇵🇦 巴拿馬","354":"🇵🇦 巴拿馬","355":"🇵🇦 巴拿馬",
+  "356":"🇵🇦 巴拿馬","357":"🇵🇦 巴拿馬","366":"🇺🇸 美國","367":"🇺🇸 美國",
+  "368":"🇺🇸 美國","369":"🇺🇸 美國","370":"🇵🇦 巴拿馬","371":"🇵🇦 巴拿馬",
+  "374":"🇵🇦 巴拿馬","376":"🇻🇨 聖文森","412":"🇨🇳 中國","413":"🇨🇳 中國",
+  "414":"🇨🇳 中國","416":"🇹🇼 台灣","422":"🇮🇷 伊朗","431":"🇯🇵 日本",
+  "432":"🇯🇵 日本","440":"🇰🇷 韓國","441":"🇰🇷 韓國","450":"🇰🇵 北韓",
+  "457":"🇲🇲 緬甸","477":"🇭🇰 香港","525":"🇮🇩 印尼","533":"🇲🇾 馬來西亞",
+  "538":"🇲🇭 馬紹爾群島","539":"🇲🇭 馬紹爾群島","563":"🇸🇬 新加坡","564":"🇸🇬 新加坡",
+  "565":"🇸🇬 新加坡","566":"🇸🇬 新加坡","567":"🇹🇭 泰國","574":"🇻🇳 越南",
+  "577":"🇻🇺 萬那杜","636":"🇱🇷 賴比瑞亞","637":"🇱🇷 賴比瑞亞","657":"🇳🇬 奈及利亞",
+};
+function getFlagByMmsi(mmsi) {
+  if (!mmsi) return "❓ 未知";
+  const m = String(mmsi);
+  // AtoN 識別
+  if (m.startsWith("99")) return "AtoN 導航標";
+  if (m.startsWith("970")) return "SART 求救信標";
+  if (m.startsWith("972")) return "MOB 落水信標";
+  if (m.startsWith("974")) return "EPIRB 緊急信標";
+  // 一般船舶 MID
+  const prefix = m.substring(0, 3);
+  return MMSI_FLAG[prefix] || `❓ (${prefix})`;
+}
+// 從船名前綴推導船公司
+function inferOperator(name) {
+  if (!name) return null;
+  const u = name.toUpperCase();
+  if (u.startsWith("MSC ")) return { op: "MSC", full: "Mediterranean Shipping Company", flag: "🇨🇭 瑞士" };
+  if (u.startsWith("MAERSK ") || u.startsWith("MAERSK_")) return { op: "Maersk", full: "A.P. Moller-Maersk", flag: "🇩🇰 丹麥" };
+  if (u.startsWith("EVER ")) return { op: "Evergreen", full: "長榮海運", flag: "🇹🇼 台灣" };
+  if (u.startsWith("CMA CGM ")) return { op: "CMA CGM", full: "CMA CGM Group", flag: "🇫🇷 法國" };
+  if (u.startsWith("COSCO ")) return { op: "COSCO", full: "中遠海運集團", flag: "🇨🇳 中國" };
+  if (u.startsWith("OOCL ")) return { op: "OOCL", full: "東方海外", flag: "🇭🇰 香港" };
+  if (u.startsWith("HMM ")) return { op: "HMM", full: "現代商船", flag: "🇰🇷 韓國" };
+  if (u.startsWith("ONE ")) return { op: "ONE", full: "海洋網聯船務", flag: "🇯🇵 日本" };
+  if (u.startsWith("WAN HAI ")) return { op: "Wan Hai", full: "萬海航運", flag: "🇹🇼 台灣" };
+  if (u.startsWith("ZIM ")) return { op: "ZIM", full: "ZIM Integrated Shipping", flag: "🇮🇱 以色列" };
+  if (u.startsWith("YM ")) return { op: "Yang Ming", full: "陽明海運", flag: "🇹🇼 台灣" };
+  if (u.startsWith("HAPAG ") || u.startsWith("HAPAG-LLOYD")) return { op: "Hapag-Lloyd", full: "Hapag-Lloyd AG", flag: "🇩🇪 德國" };
+  return null;
+}
+// 格式化 SOG/COG（缺漏時顯示說明而非 "-"）
+function fmtMotion(sog, cog) {
+  const sogStr = (sog === null || sog === undefined) ? '<span style="color:#f5b753;" title="AIS Type 5/24 靜態訊息、訊號弱或欄位缺漏">資料缺漏</span>' : `${sog} kn`;
+  const cogStr = (cog === null || cog === undefined) ? '<span style="color:#f5b753;">—</span>' : `${cog}°`;
+  return `${sogStr} · 航向 ${cogStr}`;
+}
+
+// ============================================================
+// CPA / TCPA 計算引擎（4 級風險判定）
+// ============================================================
+function toRad(deg) { return deg * Math.PI / 180; }
+
+// CPA 預測 horizon (分鐘) + 掃描步長 (分鐘)
+const CPA_HORIZON_MIN = 45;
+const CPA_SWEEP_STEP_MIN = 0.25;
+
+// 沿軌跡查本船未來位置：以 currentMs 為基準 (毫秒)，往後推 tauMin 分鐘
+// 使用快取的 _ms + 二分查找 → 每次 O(log n)
+function predictOwnAlongTrack(currentMs, currentPos, ownSog, ownCog, tauMin) {
+  const track = STATE.currentTrack;
+  if (!track || track.length === 0 || currentMs == null) {
+    return linearExtrap(currentPos, ownSog, ownCog, tauMin);
+  }
+  const targetMs = currentMs + tauMin * 60000;
+  // 二分查找 i：first index where track[i]._ms > targetMs
+  let lo = 0, hi = track.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (track[mid]._ms <= targetMs) lo = mid + 1;
+    else hi = mid;
+  }
+  const i = lo;
+  if (i === 0) return { lat: track[0].lat, lon: track[0].lon };
+  if (i >= track.length) {
+    const last = track[track.length - 1];
+    const extraMin = (targetMs - last._ms) / 60000;
+    if (extraMin <= 0 || last.sog == null || last.cog == null) {
+      return { lat: last.lat, lon: last.lon };
+    }
+    return linearExtrap({ lat: last.lat, lon: last.lon }, last.sog, last.cog, extraMin);
+  }
+  const p0 = track[i-1], p1 = track[i];
+  const dt = p1._ms - p0._ms;
+  const f = dt === 0 ? 0 : (targetMs - p0._ms) / dt;
+  return {
+    lat: p0.lat + (p1.lat - p0.lat) * f,
+    lon: p0.lon + (p1.lon - p0.lon) * f,
+  };
+}
+
+// 線性外推：以 sog (kn) cog (°) 往前推 tauMin 分鐘
+function linearExtrap(pos, sog, cog, tauMin) {
+  if (sog == null || cog == null || tauMin <= 0) return { lat: pos.lat, lon: pos.lon };
+  const meanLatRad = toRad(pos.lat);
+  // sog kn → 度/min: vx = sog/60 * sin(cog) [NM/min] → 經度度 = NM / (60·cos(lat))
+  const vx_nm = (sog / 60) * Math.sin(toRad(cog));  // 經度向 NM/min
+  const vy_nm = (sog / 60) * Math.cos(toRad(cog));  // 緯度向 NM/min
+  return {
+    lat: pos.lat + (vy_nm * tauMin) / 60,
+    lon: pos.lon + (vx_nm * tauMin) / (60 * Math.cos(meanLatRad)),
+  };
+}
+
+// 兩經緯度間距離 (NM, equirectangular，近距離夠精準)
+function distNm(lat1, lon1, lat2, lon2) {
+  const meanLatRad = toRad((lat1 + lat2) / 2);
+  const dx = (lon2 - lon1) * 60 * Math.cos(meanLatRad);
+  const dy = (lat2 - lat1) * 60;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+// 新版 CPA：時間掃描 + 本船沿軌跡預測 (源自 cpa_tcpa_multiship_demo.html 參考)
+// currentTs 與 mode 為可選；若 currentTs 提供且 STATE.currentTrack 存在 → 自動「沿軌跡」
+// mode = 'route' (沿軌跡) | 'line' (傳統直線假設)
+function calculateCPA(ownPos, ownSog, ownCog, targetLat, targetLon, targetSog, targetCog, currentTs, mode) {
+  const missingOwn = (ownSog == null || ownCog == null);
+  const missingTgt = (targetSog == null || targetCog == null);
+  if (missingOwn || missingTgt) {
+    return {
+      cpa_nm: null, tcpa_min: null, confidence: 'LOW',
+      confidence_reason: missingOwn ? '本船 SOG/COG 缺漏' : '目標 SOG/COG 缺漏',
+      relative_speed: null, encounter: null, method: 'unknown',
+    };
+  }
+
+  // 相對速度 + 遭遇類型 (僅供標籤用)
+  const vx_own_line = (ownSog / 60) * Math.sin(toRad(ownCog));
+  const vy_own_line = (ownSog / 60) * Math.cos(toRad(ownCog));
+  const vx_tgt = (targetSog / 60) * Math.sin(toRad(targetCog));
+  const vy_tgt = (targetSog / 60) * Math.cos(toRad(targetCog));
+  const vrx = vx_tgt - vx_own_line, vry = vy_tgt - vy_own_line;
+  const relSpeed_kn = Math.sqrt(vrx * vrx + vry * vry) * 60;
+  let angleDiff = Math.abs(targetCog - ownCog) % 360;
+  if (angleDiff > 180) angleDiff = 360 - angleDiff;
+  const encounter = angleDiff < 22.5 ? 'Overtaking 追越'
+                  : angleDiff < 135  ? 'Crossing 交叉'
+                                     : 'Head-on 對遇';
+
+  // currentTs 可以是 ISO 字串或 _ms (毫秒)，統一轉成毫秒
+  const currentMs = typeof currentTs === 'number' ? currentTs
+                  : currentTs ? Date.parse(currentTs) : null;
+  // 預設模式：有 currentMs + 軌跡 → 沿軌跡；否則退回直線
+  const useRoute = (mode !== 'line') && currentMs != null && STATE.currentTrack && STATE.currentTrack.length > 0;
+
+  // 時間掃描 0 ~ CPA_HORIZON_MIN，步長 0.25 min
+  let bestCpa = Infinity, bestTau = 0, bestOwn = null, bestTgt = null;
+  const currDist = distNm(ownPos.lat, ownPos.lon, targetLat, targetLon);
+
+  for (let tau = 0; tau <= CPA_HORIZON_MIN; tau += CPA_SWEEP_STEP_MIN) {
+    const ownAt = useRoute
+      ? predictOwnAlongTrack(currentMs, ownPos, ownSog, ownCog, tau)
+      : linearExtrap(ownPos, ownSog, ownCog, tau);
+    const tgtAt = linearExtrap({ lat: targetLat, lon: targetLon }, targetSog, targetCog, tau);
+    const d = distNm(ownAt.lat, ownAt.lon, tgtAt.lat, tgtAt.lon);
+    if (d < bestCpa) {
+      bestCpa = d; bestTau = tau; bestOwn = ownAt; bestTgt = tgtAt;
+    }
+  }
+
+  // 若最佳 tau = 0 → 已是當下最接近（之後就遠離）
+  if (bestTau === 0) {
+    return {
+      cpa_nm: currDist, tcpa_min: 0, confidence: 'HIGH',
+      confidence_reason: useRoute ? '已遠離中 (沿軌跡)' : '已遠離中',
+      relative_speed: relSpeed_kn, encounter: 'Diverging 遠離',
+      method: useRoute ? 'route_sweep' : 'line_sweep',
+    };
+  }
+
+  return {
+    cpa_nm: bestCpa, tcpa_min: bestTau, confidence: 'HIGH',
+    confidence_reason: useRoute ? '時間掃描 + 沿軌跡預測' : '時間掃描 + 直線假設',
+    relative_speed: relSpeed_kn, encounter,
+    own_at_cpa: { lat: bestOwn.lat, lon: bestOwn.lon },
+    tgt_at_cpa: { lat: bestTgt.lat, lon: bestTgt.lon },
+    method: useRoute ? 'route_sweep' : 'line_sweep',
+  };
+}
+
+// 本船停泊判定門檻 (kn)，低於此值視為錨泊/靠泊 → CPA 風險降級
+const OWN_ANCHORED_SOG_KN = 1.0;
+function classifyCpaRisk(cpa, ownSog) {
+  if (cpa.cpa_nm == null) return { level: 'unknown', label: '無法判斷', color: '#7c8a9e' };
+  if (cpa.tcpa_min === 0) return { level: 'safe', label: '🟢 已遠離', color: '#4cd97a' };
+  const cpaNm = cpa.cpa_nm, tcpa = cpa.tcpa_min;
+  const T = STATE.cpaThresholds;
+  let lvl;
+  if (cpaNm < T.critical.cpa && tcpa != null && tcpa < T.critical.tcpa) lvl = 'critical';
+  else if (cpaNm < T.warning.cpa  && tcpa != null && tcpa < T.warning.tcpa)  lvl = 'warning';
+  else lvl = 'safe';
+  // 信心 LOW → 自動降一級 (3 級制：critical → warning → safe)
+  if (cpa.confidence === 'LOW') {
+    const dn = { critical: 'warning', warning: 'safe', safe: 'safe' };
+    lvl = dn[lvl];
+  }
+  // 本船停泊 (sog < 1 kn) → 港勤船 / 拖船 / 引水船的靠近視為作業互動，降一級
+  const ownAnchored = (ownSog != null && ownSog < OWN_ANCHORED_SOG_KN);
+  if (ownAnchored) {
+    const dn = { critical: 'warning', warning: 'safe', safe: 'safe' };
+    lvl = dn[lvl];
+  }
+  const meta = {
+    critical: { label: '🔴 Critical 危險', color: '#ff4d4f' },
+    warning:  { label: '🟠 Warning 警示',  color: '#f5a623' },
+    safe:     { label: '🟢 Safe 安全',     color: '#4cd97a' },
+  };
+  const out = { level: lvl, ...meta[lvl] };
+  if (ownAnchored) out.note = '本船停泊 → 降一級';
+  return out;
+}
+
+// ============================================================
+// 陸地遮罩（Natural Earth 50m Land Polygons）
+// ============================================================
+async function loadLandPolygons() {
+  // 優先載入本地檔（執行 preprocess/download_land_polygons.py 產出）
+  // fallback：嘗試 CDN（可能 timeout）
+  const candidates = [
+    { name: '本地檔 data/land_polygons.json', url: 'data/land_polygons.json', size_kb: '?', isLocal: true },
+    { name: 'Natural Earth 10m (jsdelivr)', url: 'https://cdn.jsdelivr.net/gh/martynafford/natural-earth-geojson@master/10m/physical/ne_10m_land.json', size_kb: 6000 },
+    { name: 'Natural Earth 10m (raw)',      url: 'https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/10m/physical/ne_10m_land.json', size_kb: 6000 },
+    { name: 'Natural Earth 50m (jsdelivr)', url: 'https://cdn.jsdelivr.net/gh/martynafford/natural-earth-geojson@master/50m/physical/ne_50m_land.json', size_kb: 200 },
+  ];
+
+  // UI 狀態指示器
+  const statusEl = document.getElementById('landMaskStatus');
+  if (statusEl) statusEl.textContent = '⏳ 載入陸地資料中...';
+
+  let gj = null, loadedFrom = null;
+  for (const c of candidates) {
+    try {
+      console.log(`⏳ 嘗試載入 ${c.name}${c.isLocal ? '' : ' (~' + c.size_kb + ' KB)'}...`);
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), c.isLocal ? 3000 : 30000);
+      const r = await fetch(c.url, { signal: ctrl.signal });
+      clearTimeout(tid);
+      if (r.ok) {
+        gj = await r.json();
+        loadedFrom = c.name;
+        break;
+      }
+    } catch(e) { console.log(`   ⚠ ${e.message}`); }
+  }
+  if (!gj) {
+    console.warn('⚠ 陸地遮罩載入失敗。請執行：cd preprocess && python download_land_polygons.py');
+    STATE.landPolygons = [];
+    if (statusEl) statusEl.innerHTML = '<span style="color:#ff8a8a;">❌ 陸地資料未載入 · CPA 預測線不檢查穿陸</span><br><span style="color:#9aa5b8;font-size:10px;">執行 preprocess/download_land_polygons.py 解決</span>';
+    return;
+  }
+
+  STATE.landPolygons = [];
+  for (const feat of gj.features) {
+    const g = feat.geometry;
+    if (g.type === 'Polygon') {
+      STATE.landPolygons.push(g.coordinates[0]);
+    } else if (g.type === 'MultiPolygon') {
+      for (const poly of g.coordinates) STATE.landPolygons.push(poly[0]);
+    }
+  }
+  console.log(`✅ 載入陸地多邊形: ${STATE.landPolygons.length} 個（${loadedFrom}）`);
+  if (statusEl) statusEl.textContent = `✅ 陸地遮罩：${STATE.landPolygons.length} 個多邊形`;
+}
+
+// Ray-casting 點在多邊形內判定
+function pointInPolygon(lon, lat, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i][0], yi = polygon[i][1];
+    const xj = polygon[j][0], yj = polygon[j][1];
+    if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function isOnLand(lat, lon) {
+  if (!STATE.landPolygons || STATE.landPolygons.length === 0) return false;
+  for (const poly of STATE.landPolygons) {
+    if (pointInPolygon(lon, lat, poly)) return true;
+  }
+  return false;
+}
+
+// 線是否穿陸（OSM 海岸線優先 + 多邊形 fallback）
+function lineIntersectsLand(lat1, lon1, lat2, lon2) {
+  // 1) OSM 海岸線：線段交叉（最精準，含港口填海、防波堤）
+  const osmResult = lineIntersectsCoastline(lat1, lon1, lat2, lon2);
+  if (osmResult === true) return true;
+  if (osmResult === false) {
+    // OSM 有資料且回報未穿陸 → 但起點 / 終點 / 中點可能位於 OSM 圈起來的陸地內
+    // 這時用多邊形補強檢查
+  }
+  // 2) Natural Earth 多邊形：點在多邊形內判定（fallback / 補強）
+  if (!STATE.landPolygons || STATE.landPolygons.length === 0) {
+    return osmResult === true; // 沒多邊形時依 OSM 結果（可能是 null）
+  }
+  const meanLat = (lat1 + lat2) / 2;
+  const dx = (lon2 - lon1) * 60 * Math.cos(meanLat * Math.PI / 180);
+  const dy = (lat2 - lat1) * 60;
+  const lineLen = Math.sqrt(dx*dx + dy*dy);
+  const samples = Math.min(100, Math.max(10, Math.ceil(lineLen / 0.05)));
+  for (let i = 0; i <= samples; i++) {
+    const t = i / samples;
+    const lat = lat1 + t * (lat2 - lat1);
+    const lon = lon1 + t * (lon2 - lon1);
+    if (isOnLand(lat, lon)) return true;
+  }
+  return false;
+}
+
+// ============================================================
+// 外來船軌跡重建（從 snapshot 觀測點連起來）
+// ============================================================
+// 取得「本船」5 NM 範圍內對該 MMSI 的觀測歷程 + 對應本船位置 (供 CPA 重算)
+function buildExternalTrack(mmsi) {
+  if (!STATE.currentSnapshots) return null;
+  const points = [];
+  for (const snap of STATE.currentSnapshots) {
+    for (const s of snap.surrounding) {
+      if (s.mmsi === mmsi) {
+        points.push({
+          ts: snap.ts, lat: s.lat, lon: s.lon,
+          sog: s.sog, cog: s.cog, dist_nm: s.dist_nm,
+          own_pos: snap.own_pos,
+        });
+        break;
+      }
+    }
+  }
+  return points;
+}
+
+function getTrackColor(mmsi) {
+  if (STATE.fleetDb[mmsi]) return '#ffd700';      // 同船隊金色
+  if (STATE.externalDb[mmsi]) return '#9ec5ff';   // 已識別藍色
+  return '#c4cdda';                                // 未識別白灰
+}
+
+window.toggleExternalTrack = function(mmsi) {
+  if (STATE.shownExternalTracks.has(mmsi)) {
+    hideExternalTrack(mmsi);
+  } else {
+    showExternalTrack(mmsi);
+  }
+  // 重繪右側清單顯示新狀態（不重繪地圖避免閃爍）
+  if (STATE.selectedVessel) renderDetail();
+};
+
+window.showExternalTrack = function(mmsi) {
+  if (!STATE.layers.externalTracks) {
+    STATE.layers.externalTracks = L.layerGroup().addTo(STATE.map);
+  }
+  if (STATE.shownExternalTracks.has(mmsi)) {
+    hideExternalTrack(mmsi);
+    return;
+  }
+  const points = buildExternalTrack(mmsi);
+  if (!points || points.length < 1) {
+    console.log(`MMSI ${mmsi} 在本船觀測中無資料`);
+    return;
+  }
+  const color = getTrackColor(mmsi);
+  const ownName = STATE.selectedVessel?.name || '本船';
+
+  // 分段：本船觀測中斷 > 60 分鐘 → 該外來船曾離開 5 NM
+  const GAP_MINUTES = 60;
+  const segments = [];
+  let cur = [points[0]];
+  for (let i = 1; i < points.length; i++) {
+    const gapMin = (new Date(points[i].ts) - new Date(points[i-1].ts)) / 60000;
+    if (gapMin > GAP_MINUTES) {
+      if (cur.length >= 1) segments.push(cur);
+      cur = [];
+    }
+    cur.push(points[i]);
+  }
+  if (cur.length >= 1) segments.push(cur);
+
+  const allLayers = [];
+
+  // 為每個觀測點重算 CPA (使用本船在該 ts 的位置/速度)
+  for (const p of points) {
+    const ownPt = findOwnPointAt(p.ts);
+    if (ownPt) {
+      p._cpa = calculateCPA(p.own_pos, ownPt.sog, ownPt.cog, p.lat, p.lon, p.sog, p.cog, p.ts);
+      p._risk = classifyCpaRisk(p._cpa, ownPt.sog);
+      p._ownSog = ownPt.sog; p._ownCog = ownPt.cog;
+    }
+  }
+
+  // 段內：實線；段間距離若 < 5 nm 直接連，否則跳開
+  for (const seg of segments) {
+    if (seg.length >= 2) {
+      allLayers.push(L.polyline(seg.map(p => [p.lat, p.lon]), {
+        color, weight: 2.5, opacity: 0.85,
+      }));
+    }
+    for (const p of seg) {
+      // 觀測點：依風險變色 (Warning 以上 → 紅/橘)
+      const risk = p._risk;
+      const ptColor = (risk && (risk.level === 'critical' || risk.level === 'warning')) ? risk.color : color;
+      const ptRadius = (risk && (risk.level === 'critical' || risk.level === 'warning')) ? 5 : 2.5;
+      const marker = L.circleMarker([p.lat, p.lon], {
+        radius: ptRadius, color: ptColor, weight: 1.5,
+        fillColor: ptColor, fillOpacity: 0.6,
+      });
+      // 構造 popup 內容
+      const tsHuman = p.ts.substring(5,16).replace('T',' ');
+      let cpaSection = '';
+      if (p._cpa && p._risk && p._cpa.cpa_nm != null) {
+        const c = p._cpa, r = p._risk;
+        const confColor = c.confidence === 'HIGH' ? '#6ee094' : c.confidence === 'MED' ? '#f5b753' : '#ff8a8a';
+        cpaSection = `
+          <div style="margin-top:6px;padding:5px 7px;background:${r.color}1a;border-left:3px solid ${r.color};border-radius:2px;">
+            <div style="color:${r.color};font-weight:600;font-size:11px;margin-bottom:2px;">${r.label}</div>
+            <div style="font-size:10px;color:#c4cdda;">
+              <b>CPA</b> ${c.cpa_nm.toFixed(2)} nm · <b>TCPA</b> ${c.tcpa_min != null ? c.tcpa_min.toFixed(0) + ' min' : '—'}<br>
+              當下距離 ${p.dist_nm != null ? p.dist_nm.toFixed(2) + ' nm' : '—'} · 相對速度 ${c.relative_speed != null ? c.relative_speed.toFixed(1) + ' kn' : '—'}<br>
+              <span style="color:#7c8a9e;">情境</span> ${c.encounter || '—'}<br>
+              <span style="color:#7c8a9e;">信心</span> <span style="color:${confColor};font-weight:600;">${c.confidence}</span> · <span style="color:#9aa5b8;">${c.confidence_reason || '—'}</span>
+            </div>
+            ${r.level === 'warning' || r.level === 'critical' ? `
+              <div style="font-size:10px;color:#9aa5b8;margin-top:4px;border-top:1px dashed ${r.color}66;padding-top:3px;">
+                ⚠ ${c.tcpa_min ? c.tcpa_min.toFixed(0) : '—'} 分鐘後預計最近距離 ${c.cpa_nm.toFixed(2)} nm<br>
+                本船 ${p._ownSog} kn @ ${p._ownCog}° · 目標 ${p.sog} kn @ ${p.cog}°
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+      const popupHtml = `
+        <div style="font-size:11px;min-width:200px;">
+          <div style="font-weight:600;color:#e4eaf2;">MMSI ${mmsi}</div>
+          <div style="color:#9aa5b8;font-size:10px;">${tsHuman} · 距 ${ownName} ${p.dist_nm != null ? p.dist_nm.toFixed(2) + ' nm' : '—'}</div>
+          <div style="color:#c4cdda;font-size:10px;margin-top:2px;">目標 ${p.sog!=null?p.sog+' kn':'—'} @ ${p.cog!=null?p.cog+'°':'—'}</div>
+          ${cpaSection}
+        </div>
+      `;
+      marker.bindPopup(popupHtml);
+      marker.bindTooltip(`${tsHuman}${risk && (risk.level==='warning'||risk.level==='critical') ? ' · ' + risk.label.replace(/^[🔴🟠🟡🟢]\s*/,'') : ''}`,
+        {direction:'top', offset:[0,-2]});
+
+      // 風險點：再畫一個透明大圓 CPA 投影
+      if (p._cpa && p._risk && (p._risk.level === 'warning' || p._risk.level === 'critical') &&
+          p._cpa.cpa_nm != null && p._cpa.tcpa_min != null && p._cpa.tcpa_min > 0) {
+        const cpaPt = p._cpa.tgt_at_cpa;
+        const ownCpaPt = p._cpa.own_at_cpa;
+        if (cpaPt && ownCpaPt) {
+          // 1. 目標投影線 (觀測點 → 預計 CPA 點)
+          allLayers.push(L.polyline([[p.lat, p.lon], [cpaPt.lat, cpaPt.lon]], {
+            color: p._risk.color, weight: 2, opacity: 0.75, dashArray: '4 4',
+          }).bindTooltip(`📐 目標推估航線：${p._cpa.tcpa_min.toFixed(0)} 分鐘後到達 CPA 點`, {direction:'center'}));
+          // 2. 本船投影線 (本船觀測位置 → 本船預計 CPA 點)
+          allLayers.push(L.polyline([[p.own_pos.lat, p.own_pos.lon], [ownCpaPt.lat, ownCpaPt.lon]], {
+            color: '#ffd700', weight: 2, opacity: 0.65, dashArray: '4 4',
+          }).bindTooltip(`📐 本船推估航線：${p._cpa.tcpa_min.toFixed(0)} 分鐘後到達 CPA 點`, {direction:'center'}));
+          // 3. CPA 點 (兩船最接近時刻位置)
+          allLayers.push(L.polyline([[ownCpaPt.lat, ownCpaPt.lon], [cpaPt.lat, cpaPt.lon]], {
+            color: p._risk.color, weight: 2, opacity: 0.85,
+          }).bindTooltip(`📏 CPA 最近距離 ${p._cpa.cpa_nm.toFixed(2)} nm`, {direction:'top'}));
+          allLayers.push(L.circleMarker([cpaPt.lat, cpaPt.lon], {
+            radius: 4, color: p._risk.color, weight: 2, fillColor: '#000', fillOpacity: 0.7,
+          }).bindTooltip(`目標於 ${p._cpa.tcpa_min.toFixed(0)} min 後在此 (CPA 距 ${p._cpa.cpa_nm.toFixed(2)} nm)`, {direction:'top'}));
+          allLayers.push(L.circleMarker([ownCpaPt.lat, ownCpaPt.lon], {
+            radius: 4, color: '#ffd700', weight: 2, fillColor: '#000', fillOpacity: 0.7,
+          }).bindTooltip(`本船於 ${p._cpa.tcpa_min.toFixed(0)} min 後在此`, {direction:'top'}));
+        }
+      }
+      allLayers.push(marker);
+    }
+  }
+
+  // 段間（離開 5 NM 偵測範圍）— 不畫線，只在 console 標註
+  for (let i = 1; i < segments.length; i++) {
+    const prevEnd = segments[i-1][segments[i-1].length - 1];
+    const nextStart = segments[i][0];
+    const gapH = (new Date(nextStart.ts) - new Date(prevEnd.ts)) / 3600000;
+    console.log(`  ↪ ${mmsi} 段 ${i} 與段 ${i+1} 中斷 ${gapH.toFixed(1)} h (離開 ${ownName} 5 NM 範圍)`);
+  }
+
+  // 起點 / 終點 (全軌跡)
+  if (points.length > 0) {
+    const s = points[0], e = points[points.length - 1];
+    allLayers.push(L.circleMarker([s.lat, s.lon], {
+      radius: 5, color, weight: 2, fillColor: '#000', fillOpacity: 0.85,
+    }).bindTooltip(`🟢 ${ownName} 5 NM 內首次見：${s.ts.substring(5,16).replace('T',' ')}`, {direction:'top'}));
+    if (points.length > 1) {
+      allLayers.push(L.circleMarker([e.lat, e.lon], {
+        radius: 7, color, weight: 2, fillColor: color, fillOpacity: 0.7,
+      }).bindTooltip(`🔴 ${ownName} 5 NM 內末次見：${e.ts.substring(5,16).replace('T',' ')}`, {direction:'top'}));
+    }
+  }
+
+  const group = L.layerGroup(allLayers).addTo(STATE.layers.externalTracks);
+  STATE.shownExternalTracks.add(mmsi);
+  STATE.shownExternalTracks._layers = STATE.shownExternalTracks._layers || {};
+  STATE.shownExternalTracks._layers[mmsi] = group;
+  console.log(` 顯示 ${mmsi} 於 ${ownName} 視角的軌跡：${points.length} 個觀測點，${segments.length} 段`);
+};
+
+// 建立細時間軸：以軌跡點 (~5 分鐘) 為單位，surrounding 取自最近的原始快照
+// 這讓 timeline slider 解析度從 30 min → 5 min（6x 細）
+// 本船位置每 5 分鐘更新，周邊船清單每 30 分鐘換一次（標記 isPrimary）
+function buildDenseTimeline(rawSnapshots, track) {
+  if (!rawSnapshots || rawSnapshots.length === 0) return [];
+  if (!track || track.length === 0) return rawSnapshots;
+  // 預先快取快照 _ms (毫秒)
+  const snapTimes = new Float64Array(rawSnapshots.length);
+  for (let i = 0; i < rawSnapshots.length; i++) snapTimes[i] = Date.parse(rawSnapshots[i].ts);
+  // 確保 track 也有 _ms
+  for (const p of track) if (p._ms == null) p._ms = Date.parse(p.ts);
+  const dense = [];
+  for (const pt of track) {
+    const ptMs = pt._ms;
+    // 二分搜尋找包夾快照
+    let lo = 0, hi = snapTimes.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (snapTimes[mid] <= ptMs) lo = mid + 1;
+      else hi = mid;
+    }
+    // i = lo 是第一個 > ptMs 的；最近 = i-1 或 i
+    let bestIdx;
+    if (lo === 0) bestIdx = 0;
+    else if (lo >= snapTimes.length) bestIdx = snapTimes.length - 1;
+    else bestIdx = (Math.abs(snapTimes[lo-1] - ptMs) <= Math.abs(snapTimes[lo] - ptMs)) ? lo-1 : lo;
+    const srcSnap = rawSnapshots[bestIdx];
+    dense.push({
+      ts: pt.ts,
+      _ms: ptMs,
+      own_pos: { lat: pt.lat, lon: pt.lon },
+      surrounding: srcSnap.surrounding,
+      surrounding_count: srcSnap.surrounding_count,
+      _isPrimarySnapshot: (snapTimes[bestIdx] === ptMs),
+      _srcSnapshotIdx: bestIdx,
+    });
+  }
+  console.log(`📏 細時間軸: ${rawSnapshots.length} 個原始快照 → ${dense.length} 個 5 分鐘 ticks`);
+  return dense;
+}
+
+// 從本船 track 找最接近某 ts 的點 (用於重算 CPA)
+function findOwnPointAt(ts) {
+  if (!STATE.currentTrack) return null;
+  const targetMs = new Date(ts).getTime();
+  let best = null, bestDiff = Infinity;
+  for (const p of STATE.currentTrack) {
+    const diff = Math.abs(new Date(p.ts) - targetMs);
+    if (diff < bestDiff) { bestDiff = diff; best = p; }
+  }
+  return best;
+}
+
+window.hideExternalTrack = function(mmsi) {
+  if (!STATE.shownExternalTracks._layers?.[mmsi]) return;
+  STATE.layers.externalTracks.removeLayer(STATE.shownExternalTracks._layers[mmsi]);
+  delete STATE.shownExternalTracks._layers[mmsi];
+  STATE.shownExternalTracks.delete(mmsi);
+};
+
+window.clearAllExternalTracks = function() {
+  if (STATE.layers.externalTracks) {
+    STATE.layers.externalTracks.clearLayers();
+  }
+  STATE.shownExternalTracks.clear();
+  if (STATE.shownExternalTracks._layers) STATE.shownExternalTracks._layers = {};
+};
+
+// 計算軌跡距離（用作觀測統計）
+function trackDistanceNm(points) {
+  let total = 0;
+  for (let i = 1; i < points.length; i++) {
+    const p1 = points[i-1], p2 = points[i];
+    const meanLat = (p1.lat + p2.lat) / 2 * Math.PI / 180;
+    const dx = (p2.lon - p1.lon) * 60 * Math.cos(meanLat);
+    const dy = (p2.lat - p1.lat) * 60;
+    total += Math.sqrt(dx*dx + dy*dy);
+  }
+  return total;
+}
+
+// 從 currentTrack 找與快照時間最接近的本船 motion 資料
+function getOwnMotionAtTime(snapTs) {
+  if (!STATE.currentTrack || STATE.currentTrack.length === 0) return null;
+  const t = new Date(snapTs).getTime();
+  let best = null, bestIdx = -1, minDiff = Infinity;
+  for (let i = 0; i < STATE.currentTrack.length; i++) {
+    const p = STATE.currentTrack[i];
+    const d = Math.abs(new Date(p.ts).getTime() - t);
+    if (d < minDiff) { minDiff = d; best = p; bestIdx = i; }
+  }
+  if (best) best._idx = bestIdx;
+  return best;
+}
+
+// 從軌跡計算實際方位角（從當前點往「下一個有顯著位移的點」）
+// 若是錨泊不動或在軌跡尾端，fallback 用前一段已知方向，再不行才用 AIS COG
+function bearingFromTrack(currentIdx) {
+  if (!STATE.currentTrack || currentIdx < 0) return null;
+  const cur = STATE.currentTrack[currentIdx];
+  if (!cur) return null;
+
+  const MIN_DELTA_DEG = 0.00005; // ~5m
+
+  // (a) 向後找有顯著位移的點
+  for (let i = currentIdx + 1; i < Math.min(STATE.currentTrack.length, currentIdx + 30); i++) {
+    const next = STATE.currentTrack[i];
+    if (!next) continue;
+    const dlat = next.lat - cur.lat;
+    const dlon = next.lon - cur.lon;
+    if (Math.abs(dlat) > MIN_DELTA_DEG || Math.abs(dlon) > MIN_DELTA_DEG) {
+      const meanLat = (cur.lat + next.lat) / 2 * Math.PI / 180;
+      const dx = dlon * Math.cos(meanLat);
+      const dy = dlat;
+      const bearing = Math.atan2(dx, dy) * 180 / Math.PI;
+      return (bearing + 360) % 360;
+    }
+  }
+
+  // (b) 向前找已經走過的方向（軌跡尾端 / 錨泊）
+  for (let i = currentIdx - 1; i >= Math.max(0, currentIdx - 30); i--) {
+    const prev = STATE.currentTrack[i];
+    if (!prev) continue;
+    const dlat = cur.lat - prev.lat;
+    const dlon = cur.lon - prev.lon;
+    if (Math.abs(dlat) > MIN_DELTA_DEG || Math.abs(dlon) > MIN_DELTA_DEG) {
+      const meanLat = (cur.lat + prev.lat) / 2 * Math.PI / 180;
+      const dx = dlon * Math.cos(meanLat);
+      const dy = dlat;
+      const bearing = Math.atan2(dx, dy) * 180 / Math.PI;
+      return (bearing + 360) % 360;
+    }
+  }
+
+  // (c) 都沒位移就回傳 null（讓上層用 AIS COG）
+  return null;
+}
+
+// ============================================================
+// AIS 目標分類（船舶 vs 非船舶）
+// 依 MMSI 前綴 + target_category 綜合判斷
+// ============================================================
+const AIS_KIND = {
+  vessel:       { label: "船舶",          color: "#ffffff", iconType: "triangle" },
+  fleet_vessel: { label: "陽明船隊",      color: "#ffd700", iconType: "triangle_fleet" },
+  ext_vessel:   { label: "已識別外來船",  color: "#9ec5ff", iconType: "triangle_ext" },
+  aton:         { label: "AtoN 導航標",   color: "#f5d04a", iconType: "diamond" },
+  base_station: { label: "基地台",        color: "#9b59b6", iconType: "tower" },
+  sar_aircraft: { label: "搜救飛機 SAR",  color: "#4cd97a", iconType: "plane" },
+  sart:         { label: "🆘 SART 求救",  color: "#ff4d4f", iconType: "starburst" },
+  epirb:        { label: "🆘 EPIRB 信標", color: "#ff4d4f", iconType: "starburst" },
+  mob:          { label: "🚨 MOB 落水",   color: "#ff4d4f", iconType: "starburst" },
+  unknown:      { label: "未分類目標",    color: "#7c8a9e", iconType: "circle" },
+};
+
+function classifyAis(mmsi, cat) {
+  if (!mmsi) return "unknown";
+  const m = String(mmsi);
+  // 緊急信標
+  if (m.startsWith("970")) return "sart";
+  if (m.startsWith("972")) return "mob";
+  if (m.startsWith("974")) return "epirb";
+  // AtoN 浮標 / 燈塔
+  if (m.startsWith("99")) return "aton";
+  // SAR 飛機
+  if (m.startsWith("111")) return "sar_aircraft";
+  // target_category 來源資料
+  if (cat === "aton") return "aton";
+  if (cat === "base_station") return "base_station";
+  if (cat === "sar_aircraft") return "sar_aircraft";
+  // 7 位數 MMSI 通常為基地台
+  if (m.length === 7) return "base_station";
+  // 陽明同船隊
+  if (STATE.fleetDb[m]) return "fleet_vessel";
+  // 已識別外來船
+  if (STATE.externalDb[m]) return "ext_vessel";
+  // 預設：船舶
+  return "vessel";
+}
+
+// 產出各類 SVG icon
+function buildAisIcon(kind, cog, isClose) {
+  const meta = AIS_KIND[kind];
+  const color = meta.color;
+  const strokeC = (kind === "fleet_vessel") ? "#2c6cdb" : "#000";
+  const rot = (cog != null) ? cog : 0;
+  const baseSize = (kind === "fleet_vessel") ? 18 : (kind.startsWith("triangle") ? 14 : 16);
+  const sz = baseSize;
+  let svg;
+  switch (meta.iconType) {
+    case "triangle":
+    case "triangle_ext":
+      svg = `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" style="transform:rotate(${rot}deg);overflow:visible;">
+        <polygon points="${sz/2},1 ${sz*0.2},${sz-2} ${sz*0.8},${sz-2}" fill="${isClose ? '#ff4d4f' : color}" stroke="${strokeC}" stroke-width="0.7"/>
+      </svg>`;
+      break;
+    case "triangle_fleet":
+      svg = `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" style="transform:rotate(${rot}deg);overflow:visible;">
+        <polygon points="${sz/2},1 ${sz*0.2},${sz-2} ${sz*0.8},${sz-2}" fill="${color}" stroke="${strokeC}" stroke-width="1.2"/>
+      </svg>`;
+      break;
+    case "diamond":
+      // AtoN 浮標：菱形（黃色，固定方向）
+      svg = `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" style="overflow:visible;">
+        <polygon points="${sz/2},1 ${sz-1},${sz/2} ${sz/2},${sz-1} 1,${sz/2}" fill="${color}" stroke="#000" stroke-width="0.7"/>
+        <circle cx="${sz/2}" cy="${sz/2}" r="2" fill="#000"/>
+      </svg>`;
+      break;
+    case "tower":
+      // 基地台：方形 + 訊號波紋
+      svg = `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" style="overflow:visible;">
+        <rect x="${sz/2-3}" y="${sz/2-3}" width="6" height="6" fill="${color}" stroke="#000" stroke-width="0.5"/>
+        <path d="M ${sz/2-7} ${sz/2-7} A 10 10 0 0 1 ${sz/2+7} ${sz/2-7}" fill="none" stroke="${color}" stroke-width="1" opacity="0.7"/>
+        <path d="M ${sz/2-4} ${sz/2-4} A 6 6 0 0 1 ${sz/2+4} ${sz/2-4}" fill="none" stroke="${color}" stroke-width="1" opacity="0.5"/>
+      </svg>`;
+      break;
+    case "plane":
+      // 搜救飛機：飛機形（依航向旋轉）
+      svg = `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" style="transform:rotate(${rot}deg);overflow:visible;">
+        <path d="M ${sz/2} 1 L ${sz/2-1} ${sz/2-2} L 1 ${sz/2+1} L 1 ${sz/2+3} L ${sz/2-1} ${sz/2+2} L ${sz/2-0.5} ${sz-3} L ${sz/2-2} ${sz-1} L ${sz/2+2} ${sz-1} L ${sz/2+0.5} ${sz-3} L ${sz/2+1} ${sz/2+2} L ${sz-1} ${sz/2+3} L ${sz-1} ${sz/2+1} L ${sz/2+1} ${sz/2-2} Z" fill="${color}" stroke="#000" stroke-width="0.5"/>
+      </svg>`;
+      break;
+    case "starburst":
+      // 緊急信標：紅色星爆形（脈動）
+      svg = `<svg width="${sz+4}" height="${sz+4}" viewBox="0 0 ${sz+4} ${sz+4}" style="overflow:visible;">
+        <circle cx="${(sz+4)/2}" cy="${(sz+4)/2}" r="${sz/2+1}" fill="none" stroke="${color}" stroke-width="1" opacity="0.4">
+          <animate attributeName="r" values="${sz/2};${sz/2+5};${sz/2}" dur="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0.1;0.6" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <polygon points="${(sz+4)/2},2 ${(sz+4)/2+2},${(sz+4)/2-2} ${sz+2},${(sz+4)/2} ${(sz+4)/2+2},${(sz+4)/2+2} ${(sz+4)/2},${sz+2} ${(sz+4)/2-2},${(sz+4)/2+2} 2,${(sz+4)/2} ${(sz+4)/2-2},${(sz+4)/2-2}" fill="${color}" stroke="#000" stroke-width="0.5"/>
+      </svg>`;
+      break;
+    case "circle":
+    default:
+      svg = `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" style="overflow:visible;">
+        <circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-1}" fill="${color}" fill-opacity="0.6" stroke="#000" stroke-width="0.5"/>
+      </svg>`;
+  }
+  return { svg, sz, color, meta };
+}
 
 const COLORS = {
   critical: '#ff4d4f',
@@ -564,33 +2169,158 @@ async function init() {
   await loadVessels();
 }
 
+// ============================================================
+// 載入 OSM 海岸線（高解析，含港口填海、防波堤）
+// 優先於 Natural Earth 多邊形使用
+// ============================================================
+async function loadOsmCoastlines() {
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 5000);
+    const r = await fetch('data/osm_coastlines.json', { signal: ctrl.signal });
+    clearTimeout(tid);
+    if (!r.ok) throw new Error('not found');
+    const gj = await r.json();
+
+    STATE.coastlines = [];
+    for (const feat of gj.features) {
+      if (feat.geometry && feat.geometry.type === 'LineString') {
+        STATE.coastlines.push(feat.geometry.coordinates);
+      }
+    }
+    console.log(`✅ 載入 OSM 海岸線: ${STATE.coastlines.length} 條線段（${gj.source || 'local'}）`);
+    const statusEl = document.getElementById('landMaskStatus');
+    if (statusEl) statusEl.innerHTML = `✅ <b>OSM 海岸線</b>：${STATE.coastlines.length} 條線段（含港口填海）`;
+  } catch (e) {
+    console.log(`ℹ️ OSM 海岸線檔不存在 (${e.message}) → fallback 使用 Natural Earth 多邊形`);
+    STATE.coastlines = [];
+  }
+}
+
+// 線段交叉演算法（CCW 法）
+function ccw(a, b, c) {
+  return (c[1] - a[1]) * (b[0] - a[0]) > (b[1] - a[1]) * (c[0] - a[0]);
+}
+function segmentsIntersect(p1, p2, p3, p4) {
+  return ccw(p1, p3, p4) !== ccw(p2, p3, p4) &&
+         ccw(p1, p2, p3) !== ccw(p1, p2, p4);
+}
+
+// 線是否穿過 OSM 海岸線（含港口填海）
+function lineIntersectsCoastline(lat1, lon1, lat2, lon2) {
+  if (!STATE.coastlines || STATE.coastlines.length === 0) return null; // null = 無資料
+  const p1 = [lon1, lat1], p2 = [lon2, lat2];
+  // 預先用 bbox 過濾不可能交叉的海岸線（效能優化）
+  const minLat = Math.min(lat1, lat2) - 0.01;
+  const maxLat = Math.max(lat1, lat2) + 0.01;
+  const minLon = Math.min(lon1, lon2) - 0.01;
+  const maxLon = Math.max(lon1, lon2) + 0.01;
+
+  for (const line of STATE.coastlines) {
+    // 快速 bbox 拒絕
+    let inBbox = false;
+    for (const pt of line) {
+      if (pt[0] >= minLon && pt[0] <= maxLon && pt[1] >= minLat && pt[1] <= maxLat) {
+        inBbox = true; break;
+      }
+    }
+    if (!inBbox) continue;
+    for (let i = 0; i < line.length - 1; i++) {
+      if (segmentsIntersect(p1, p2, line[i], line[i + 1])) return true;
+    }
+  }
+  return false;
+}
+
 function setupMap() {
   STATE.map = L.map('map', {
-    center: [22, 121],     // 台灣周圍
+    center: [22, 121],
     zoom: 4,
     zoomControl: true,
     worldCopyJump: true,
   });
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  // 三個底圖：海圖、深色、衛星
+  const seaChartBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19,
+    className: 'sea-chart-base',  // CSS 濾鏡降亮度，避免太刺眼
+  });
+  const seaChartMarks = L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+    attribution: '© OpenSeaMap',
+    maxZoom: 18,
+    opacity: 0.95,
+  });
+  const seaChart = L.layerGroup([seaChartBase, seaChartMarks]);
+
+  const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap © CARTO',
     subdomains: 'abcd',
     maxZoom: 19,
-  }).addTo(STATE.map);
+  });
+
+  const satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri World Imagery',
+    maxZoom: 19,
+  });
+
+  // 預設使用深色（軌跡/5NM 圈比較顯眼）
+  darkMap.addTo(STATE.map);
+  STATE.baseLayer = 'dark';
+  STATE.baseLayers = { seaChart, darkMap, satelliteMap };
 
   STATE.layers.vesselMarkers = L.layerGroup().addTo(STATE.map);
 }
 
+// 切換底圖
+window.switchBaseLayer = function(name) {
+  Object.values(STATE.baseLayers).forEach(l => STATE.map.removeLayer(l));
+  STATE.baseLayers[name].addTo(STATE.map);
+  STATE.baseLayer = name === 'seaChart' ? 'sea' : (name === 'darkMap' ? 'dark' : 'sat');
+  document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.base-btn[data-layer="${name}"]`)?.classList.add('active');
+};
+
 async function loadVessels() {
   const loading = document.getElementById('loading');
   loading.classList.add('show');
-  loading.textContent = '載入船隊清單 (vessels.json)...';
+  loading.textContent = '載入船隊清單 + 陽明船隊資料庫...';
 
   try {
-    const res = await fetch('data/vessels.json');
+    // 並行載入 vessels.json + fleet db
+    const [res, resFleet] = await Promise.all([
+      fetch('data/vessels.json'),
+      fetch('data/yang_ming_fleet.json'),
+    ]);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     STATE.vessels = data.vessels;
+
+    if (resFleet.ok) {
+      const fleetData = await resFleet.json();
+      STATE.fleetDb = fleetData.fleet || {};
+      console.log(`✅ 載入陽明 ${Object.keys(STATE.fleetDb).length} 艘船隊資料庫`);
+    }
+    // 嘗試載入外來船資料庫（可選）
+    try {
+      const resExt = await fetch('data/external_vessels.json');
+      if (resExt.ok) {
+        const ext = await resExt.json();
+        STATE.externalDb = ext.vessels || {};
+        console.log(`✅ 載入 ${Object.keys(STATE.externalDb).length} 艘已識別外來船`);
+      }
+    } catch(e) { /* 沒有此檔案也沒關係 */ }
+
+    // 嘗試載入外來 AIS 偵測起迄統計（可選；由 preprocess/compute_detection_stats.py 產生）
+    try {
+      const resStat = await fetch('data/external_detection_stats.json');
+      if (resStat.ok) {
+        const stat = await resStat.json();
+        STATE.detectionStats = stat.stats || {};
+        console.log(`✅ 載入偵測統計 ${Object.keys(STATE.detectionStats).length} 個 MMSI · 分類 ${JSON.stringify(stat.by_cat)}`);
+      }
+    } catch(e) { /* 沒有此檔案也沒關係 */ }
+
     const op = data.operator_summary || {};
     const opStr = op['Yang Ming'] ? `Yang Ming ${op['Yang Ming']} 艘 · 其他 ${op['Other']} 艘` : '';
     document.getElementById('fleetMeta').textContent =
@@ -610,6 +2340,53 @@ async function loadVessels() {
 // ============================================================
 // 船隊總覽呈現
 // ============================================================
+// 對單艘自船評估風險：取「最後快照」周邊所有船的最差 CPA 風險
+function evaluateVesselRisk(v) {
+  const lastSnap = v._lastSnapshot;
+  if (!lastSnap || !lastSnap.surrounding || lastSnap.surrounding.length === 0) {
+    v._currentRisk = 'safe';
+    v._minDistNm = null;
+    v._worstCpa = null;
+    return;
+  }
+  const ownSog = v._lastPos?.sog;
+  const ownCog = v._lastPos?.cog;
+  let worstLevel = 'safe', worstCpa = null;
+  let minDist = Infinity;
+  const ORDER = { critical: 0, warning: 1, safe: 2, unknown: 3 };
+  for (const surr of lastSnap.surrounding) {
+    if (surr.dist_nm < minDist) minDist = surr.dist_nm;
+    // 過濾非船舶 AIS (浮標 / 基地台等)
+    if (surr.cat && surr.cat !== 'vessel') continue;
+    const cpa = calculateCPA(
+      lastSnap.own_pos, ownSog, ownCog,
+      surr.lat, surr.lon, surr.sog, surr.cog,
+      lastSnap.ts
+    );
+    const risk = classifyCpaRisk(cpa, ownSog);
+    if (ORDER[risk.level] < ORDER[worstLevel]) {
+      worstLevel = risk.level;
+      worstCpa = cpa;
+    }
+  }
+  v._currentRisk = worstLevel === 'safe' || worstLevel === 'unknown' ? 'normal' : worstLevel;
+  v._minDistNm = minDist === Infinity ? null : minDist;
+  v._worstCpa = worstCpa;
+}
+
+// 套用閾值變化後重算全船隊風險
+function evaluateFleetRisk() {
+  STATE.vessels.forEach(v => evaluateVesselRisk(v));
+  // 更新 KPI
+  const counts = { critical: 0, warning: 0, normal: 0 };
+  STATE.vessels.forEach(v => counts[v._currentRisk] = (counts[v._currentRisk] || 0) + 1);
+  document.getElementById('cntCrit').textContent = counts.critical;
+  document.getElementById('cntWarn').textContent = counts.warning;
+  document.getElementById('cntNorm').textContent = counts.normal;
+  const critBadge = document.getElementById('critCount');
+  if (critBadge) critBadge.textContent = counts.critical;
+}
+
 async function renderFleet() {
   STATE.layers.vesselMarkers.clearLayers();
 
@@ -624,6 +2401,8 @@ async function renderFleet() {
     fetch(`data/${v.track_file}`)
       .then(r => r.json())
       .then(t => {
+        // 預先快取 ts → _ms (毫秒)，避免後續 CPA 計算重複 Date 解析
+        for (const p of t.track_points) p._ms = Date.parse(p.ts);
         const last = t.track_points[t.track_points.length - 1];
         v._lastPos = last;
         v._track = t.track_points;
@@ -634,45 +2413,25 @@ async function renderFleet() {
   await Promise.all(trackPromises);
   loading.classList.remove('show');
 
-  // 用最後一個快照的周邊船數作為「風險 proxy」
-  // critical: 周邊最近船 < 0.5 nm
-  // warning: < 2 nm
-  // normal: 否則
-
-  // 並行載入 snapshots 最後一筆來決定風險
+  // 風險判定：對每艘船的「最後一筆快照」中所有周邊船算 CPA，取最差等級
+  // 套用 STATE.cpaThresholds (使用者可調)
   const snapPromises = STATE.vessels.map(v =>
     fetch(`data/${v.snapshot_file}`)
       .then(r => r.json())
       .then(s => {
         const lastSnap = s.snapshots[s.snapshots.length - 1];
         v._lastSnapshot = lastSnap;
-        // 計算最小距離
-        let minDist = Infinity;
-        for (const surr of lastSnap.surrounding) {
-          if (surr.dist_nm < minDist) minDist = surr.dist_nm;
-        }
-        v._minDistNm = minDist === Infinity ? null : minDist;
         v._surroundCount = lastSnap.surrounding_count;
-        if (v._minDistNm !== null) {
-          if (v._minDistNm < 0.5) v._currentRisk = 'critical';
-          else if (v._minDistNm < 2) v._currentRisk = 'warning';
-          else v._currentRisk = 'normal';
-        } else {
-          v._currentRisk = 'normal';
-        }
+        v._lastSnapshotsForRisk = s.snapshots;  // 留著供 evaluateFleetRisk 重算用
+        evaluateVesselRisk(v);
         return v;
       })
-      .catch(e => { v._loadError = e.message; v._currentRisk = 'normal'; return v; })
+      .catch(e => { v._loadError = e.message; v._currentRisk = 'safe'; return v; })
   );
   await Promise.all(snapPromises);
 
-  // 統計
-  const counts = { critical: 0, warning: 0, normal: 0 };
-  STATE.vessels.forEach(v => counts[v._currentRisk] = (counts[v._currentRisk] || 0) + 1);
-  document.getElementById('cntCrit').textContent = counts.critical;
-  document.getElementById('cntWarn').textContent = counts.warning;
-  document.getElementById('cntNorm').textContent = counts.normal;
-  document.getElementById('critCount').textContent = counts.critical;
+  // 統計 KPI (使用統一 helper，閾值變動時亦會重算)
+  evaluateFleetRisk();
 
   // 渲染地圖 markers
   STATE.vessels.forEach(v => {
@@ -711,7 +2470,6 @@ function buildPopup(v) {
       <div>MMSI: <span class="pop-mono">${v.own_mmsi}</span> · IMO: <span class="pop-mono">${v.imo || '-'}</span></div>
       <div>船型: ${v.type || '-'} · ${v.built ? v.built + ' 年造' : ''}</div>
       <div>尺寸: ${sizeStr} · DWT ${v.dwt ? v.dwt.toLocaleString() : '-'}</div>
-      <div>區域: ${v.region}</div>
       <div>位置: <span class="pop-mono">${v._lastPos.lat.toFixed(3)}, ${v._lastPos.lon.toFixed(3)}</span></div>
       <div>速度: <span class="pop-mono">${v._lastPos.sog ?? '-'} kn</span> · 航向: <span class="pop-mono">${v._lastPos.cog ?? '-'}°</span></div>
       <div>5 NM 內: <span class="pop-mono">${v._surroundCount ?? '-'}</span> 艘 · 最近: <span class="pop-mono">${v._minDistNm ? v._minDistNm.toFixed(2) + ' nm' : '-'}</span></div>
@@ -732,7 +2490,6 @@ function renderVesselList() {
       <div class="vc-row1">
         <span class="vc-flag">${v.flag_label?.split(' ')[0] ?? v.flag}</span>
         <span class="vc-name">${v.name || 'src ' + v.source_id}</span>
-        <span style="color:#7c8a9e;font-size:11px;margin-left:auto;">${v.region}</span>
       </div>
       <div class="vc-row2">${v.own_mmsi}${v.imo ? ' · IMO ' + v.imo : ''}</div>
       <div class="vc-row3">
@@ -757,16 +2514,22 @@ function renderVesselList() {
 window.selectVessel = async function(v) {
   STATE.selectedVessel = v;
   STATE.currentTrack = v._track;
+  STATE.detailViewInitialized = false;  // 新選船 → 重設視角一次
+  clearAllExternalTracks();             // 清掉前一艘的外來船軌跡
 
   // 載入完整 snapshots
   const loading = document.getElementById('loading');
   loading.classList.add('show');
-  loading.textContent = `載入 ${v.region} 船舶詳情...`;
+  loading.textContent = `載入 ${v.name || 'src ' + v.source_id} 船舶詳情...`;
   try {
     const res = await fetch(`data/${v.snapshot_file}`);
     const s = await res.json();
-    STATE.currentSnapshots = s.snapshots;
-    STATE.currentSnapshotIdx = s.snapshots.length - 1;
+    const rawSnapshots = s.snapshots;
+    // 用 5 分鐘軌跡點插值出細時間軸（surrounding 跟隨最近快照，本船位置每 5 分鐘更新）
+    STATE.currentSnapshots = buildDenseTimeline(rawSnapshots, v._track);
+    STATE.currentSnapshotIdx = STATE.currentSnapshots.length - 1;
+    // 計算「本船」視角的每個 MMSI 偵測統計（用原始 30 分鐘快照避免重複計數）
+    STATE.perSourceDetectionStats = computePerSourceMmsiStats(rawSnapshots);
     renderDetail();
     drawDetailMap();
     setupTimeline();
@@ -779,44 +2542,275 @@ window.selectVessel = async function(v) {
 function renderDetail() {
   const v = STATE.selectedVessel;
   const lastSnap = STATE.currentSnapshots[STATE.currentSnapshotIdx];
+  // 風險篩選用的即時數量（依目前快照周邊船，套用「類別顯示」後依 CPA 風險分級）
+  const _riskCounts = (() => {
+    const c = { critical: 0, warning: 0, other: 0 };
+    const om = getOwnMotionAtTime(lastSnap.ts);
+    const osog = om && om.sog, ocog = om && om.cog;
+    (lastSnap.surrounding || []).forEach(s => {
+      if (!passesCategoryFilter(s)) return;
+      const kind = classifyAis(s.mmsi, s.cat);
+      const isVesselKind = (kind === 'vessel' || kind === 'fleet_vessel' || kind === 'ext_vessel');
+      let lvl = 'safe';
+      if (isVesselKind) {
+        const cpa = calculateCPA(lastSnap.own_pos, osog, ocog, s.lat, s.lon, s.sog, s.cog, lastSnap._ms || lastSnap.ts);
+        const r = classifyCpaRisk(cpa, osog);
+        lvl = (r && r.level) || 'safe';
+      }
+      if (lvl === 'critical') c.critical++;
+      else if (lvl === 'warning') c.warning++;
+      else c.other++;
+    });
+    return c;
+  })();
   const html = `
     <div class="vessel-detail">
       <div class="back-link" onclick="exitDetail()">← 返回船隊清單</div>
       <h3>${v.flag_label} ${v.name || 'src ' + v.source_id}</h3>
-      <div style="color:#9aa5b8;font-size:11px;margin-bottom:10px;">${v.region} · ${v.operator || ''}</div>
-
-      <div class="vd-grid">
-        <div class="k">MMSI</div><div class="v">${v.own_mmsi}</div>
+      <div class="vd-grid" style="margin-bottom:10px;">
         <div class="k">IMO</div><div class="v">${v.imo || '-'}</div>
-        <div class="k">船型</div><div class="v">${v.type || '-'}</div>
-        <div class="k">建造年</div><div class="v">${v.built || '-'}</div>
-        <div class="k">尺寸</div><div class="v">${v.length_m ? v.length_m + ' × ' + v.beam_m + ' m' : '-'}</div>
-        <div class="k">GT / DWT</div><div class="v">${v.gt ? v.gt.toLocaleString() + ' / ' + v.dwt.toLocaleString() : '-'}</div>
-        <div class="k">資料區間</div><div class="v">${v.date_range[0].substring(0,10)} ~ ${v.date_range[1].substring(0,10)}</div>
-        <div class="k">軌跡點數</div><div class="v">${v.track_points}</div>
-        <div class="k">快照數</div><div class="v">${v.snapshot_count}</div>
       </div>
 
-      <div class="vd-section">
-        <div class="vd-section-title">當前位置（最後快照）</div>
-        <div class="vd-grid">
-          <div class="k">時間</div><div class="v">${lastSnap.ts}</div>
-          <div class="k">座標</div><div class="v">${lastSnap.own_pos.lat.toFixed(4)}, ${lastSnap.own_pos.lon.toFixed(4)}</div>
-          <div class="k">周邊 5NM</div><div class="v">${lastSnap.surrounding_count} 艘</div>
-        </div>
-      </div>
-
-      <div class="vd-section">
-        <div class="vd-section-title">5 NM 內最近 10 艘船</div>
-        ${lastSnap.surrounding.slice(0, 10).sort((a,b)=>a.dist_nm-b.dist_nm).map(s => `
-          <div class="surr-card">
-            <div><span class="mmsi">${s.mmsi}</span> · ${s.cat || 'vessel'}</div>
-            <div class="meta">
-              ${s.dist_nm.toFixed(2)} nm · ${s.sog ?? '-'} kn · ${s.cog ?? '-'}°
-            </div>
+      <details class="vd-collapse">
+        <summary>詳細資料</summary>
+        <div class="vd-collapse-body">
+          <div class="vd-grid">
+            <div class="k">MMSI</div><div class="v">${v.own_mmsi}</div>
+            <div class="k">船型</div><div class="v">${v.type || '-'}</div>
+            <div class="k">建造年</div><div class="v">${v.built || '-'}</div>
+            <div class="k">尺寸</div><div class="v">${v.length_m ? v.length_m + ' × ' + v.beam_m + ' m' : '-'}</div>
+            <div class="k">GT / DWT</div><div class="v">${v.gt ? v.gt.toLocaleString() + ' / ' + v.dwt.toLocaleString() : '-'}</div>
+            <div class="k">船公司</div><div class="v">${v.operator || '-'}</div>
+            <div class="k">資料區間</div><div class="v">${v.date_range[0].substring(0,10)} ~ ${v.date_range[1].substring(0,10)}</div>
+            <div class="k">軌跡點數</div><div class="v">${v.track_points}</div>
+            <div class="k">快照數</div><div class="v">${v.snapshot_count}</div>
           </div>
-        `).join('')}
+        </div>
+      </details>
+
+      <details class="vd-collapse">
+        <summary>當前位置（最後快照）</summary>
+        <div class="vd-collapse-body">
+          <div class="vd-grid">
+            <div class="k">時間</div><div class="v">${lastSnap.ts}</div>
+            <div class="k">緯度</div><div class="v">${lastSnap.own_pos.lat.toFixed(5)}°</div>
+            <div class="k">經度</div><div class="v">${lastSnap.own_pos.lon.toFixed(5)}°</div>
+            <div class="k">周邊 5NM</div><div class="v">${lastSnap.surrounding_count} 艘</div>
+          </div>
+        </div>
+      </details>
+
+      ${(() => {
+        // 本船全資料區間共偵測到的 AIS 統計 (cross-source aggregation)
+        const seen = new Set();
+        const cat = { vessel:0, aton:0, base_station:0, sar_aircraft:0, other:0 };
+        let earliestSnap = null, latestSnap = null;
+        for (const sn of STATE.currentSnapshots) {
+          if (!earliestSnap || sn.ts < earliestSnap) earliestSnap = sn.ts;
+          if (!latestSnap   || sn.ts > latestSnap)   latestSnap   = sn.ts;
+          for (const s of sn.surrounding) seen.add(s.mmsi);
+        }
+        // 用全域偵測統計分類
+        for (const m of seen) {
+          const ds = lookupDetectionStat(m);
+          const c = ds ? ds.c : 'vessel';
+          if (c in cat) cat[c]++; else cat.other++;
+        }
+        return `
+          <details class="vd-collapse">
+            <summary>外來 AIS 偵測統計</summary>
+            <div class="vd-collapse-body">
+              <div class="vd-grid">
+                <div class="k">資料區間</div><div class="v">${formatDetTs(earliestSnap)} → ${formatDetTs(latestSnap)}</div>
+                <div class="k">總獨立 MMSI</div><div class="v">${seen.size.toLocaleString()} 個</div>
+                <div class="k">船舶</div><div class="v">${cat.vessel.toLocaleString()}</div>
+                <div class="k">AtoN 浮標</div><div class="v">${cat.aton.toLocaleString()}</div>
+                <div class="k">基地台</div><div class="v">${cat.base_station.toLocaleString()}</div>
+                <div class="k">搜救飛機</div><div class="v">${cat.sar_aircraft.toLocaleString()}</div>
+              </div>
+              <div style="font-size:10px;color:#7c8a9e;margin-top:4px;">每張周邊船卡片底部顯示該 MMSI 首次→末次偵測時間與觀測次數</div>
+            </div>
+          </details>
+        `;
+      })()}
+
+      <div class="vd-section">
+        <div class="vd-section-title">周邊船顯示篩選</div>
+        ${(() => {
+          const f = STATE.filters;
+          const selectedCount = f.selectedMmsi.size;
+          const isSelectMode = selectedCount > 0;
+          return `
+            <div style="background:#0d0d0d;border:1px solid #2a2a2a;border-radius:4px;padding:8px 10px;font-size:11px;">
+              <div style="margin-bottom:6px;">
+                <input type="text" id="mmsiSearchInput" oninput="setMmsiSearch(this.value)"
+                  value="${(f.searchQuery || '').replace(/"/g,'&quot;')}"
+                  placeholder="搜尋 MMSI (輸入數字查找附近船舶)..."
+                  style="width:100%;background:#141414;color:#e4eaf2;border:1px solid #2a2a2a;border-radius:3px;padding:5px 8px;font-size:11px;font-family:ui-monospace;">
+              </div>
+
+              ${isSelectMode ? `
+                <div style="display:flex;align-items:center;gap:6px;padding:4px 6px;background:rgba(44,108,219,0.10);border:1px solid #2c6cdb;border-radius:3px;margin-bottom:6px;">
+                  <span style="color:#9ec5ff;font-weight:600;">✓ 選取模式</span>
+                  <span style="color:#9aa5b8;">已選取 ${selectedCount} 艘</span>
+                  <button class="btn-std btn-sm btn-primary" onclick="clearSelected()" style="margin-left:auto;">取消選取</button>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px;">
+                  ${[...f.selectedMmsi].map(m => {
+                    const fl = lookupFleet(m);
+                    const ext = lookupExternal(m);
+                    const label = fl ? (fl.name_zh + ' / ' + fl.name_en) : (ext ? ext.name : m);
+                    return `<span style="background:rgba(44,108,219,0.15);color:#9ec5ff;border:1px solid rgba(44,108,219,0.3);padding:2px 6px;border-radius:2px;font-size:10px;display:inline-flex;align-items:center;gap:4px;">
+                      ${label} <button onclick="toggleSelect('${m}')" style="background:transparent;border:none;color:#9ec5ff;cursor:pointer;padding:0;font-size:11px;line-height:1;">×</button>
+                    </span>`;
+                  }).join('')}
+                </div>
+              ` : ''}
+
+              <div style="color:#9aa5b8;font-size:10px;margin-bottom:4px;${isSelectMode ? 'opacity:0.5;' : ''}">類別顯示 ${isSelectMode ? '(選取模式中無效)' : ''}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:11px;${isSelectMode ? 'opacity:0.5;pointer-events:none;' : ''}">
+                <label style="cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" ${f.showFleet?'checked':''} onchange="setCategoryFilter('showFleet',this.checked)" style="accent-color:#ffd700;"> <span style="color:#ffd700;">陽明同船隊</span></label>
+                <label style="cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" ${f.showExternal?'checked':''} onchange="setCategoryFilter('showExternal',this.checked)" style="accent-color:#9ec5ff;"> <span style="color:#9ec5ff;">已識別外來船</span></label>
+                <label style="cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" ${f.showGeneric?'checked':''} onchange="setCategoryFilter('showGeneric',this.checked)" style="accent-color:#fff;"> <span style="color:#fff;">一般船舶</span></label>
+                <label style="cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" ${f.showAton?'checked':''} onchange="setCategoryFilter('showAton',this.checked)" style="accent-color:#f5d04a;"> <span style="color:#f5d04a;">浮標</span></label>
+                <label style="cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" ${f.showBaseStation?'checked':''} onchange="setCategoryFilter('showBaseStation',this.checked)" style="accent-color:#9b59b6;"> <span style="color:#c39bd3;">基地台</span></label>
+              </div>
+
+              <div style="color:#9aa5b8;font-size:10px;margin:8px 0 4px;${isSelectMode ? 'opacity:0.5;' : ''}">風險篩選 ${isSelectMode ? '(選取模式中無效)' : ''}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:11px;${isSelectMode ? 'opacity:0.5;pointer-events:none;' : ''}">
+                <label style="cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" ${f.showCritical?'checked':''} onchange="setCategoryFilter('showCritical',this.checked)" style="accent-color:#ff4d4f;"> <span style="color:#ff6b6d;">Critical</span> <span style="background:rgba(255,77,79,0.18);color:#ff8a8a;border-radius:8px;padding:0 6px;font-size:10px;font-weight:600;min-width:16px;text-align:center;">${_riskCounts.critical}</span></label>
+                <label style="cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" ${f.showWarning?'checked':''} onchange="setCategoryFilter('showWarning',this.checked)" style="accent-color:#f5a623;"> <span style="color:#f5a623;">Warning</span> <span style="background:rgba(245,166,35,0.18);color:#f5c46a;border-radius:8px;padding:0 6px;font-size:10px;font-weight:600;min-width:16px;text-align:center;">${_riskCounts.warning}</span></label>
+                <label style="cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" ${f.showOther?'checked':''} onchange="setCategoryFilter('showOther',this.checked)" style="accent-color:#4cd97a;"> <span style="color:#7fcf99;">其他 / 安全</span> <span style="background:rgba(76,217,122,0.18);color:#7fcf99;border-radius:8px;padding:0 6px;font-size:10px;font-weight:600;min-width:16px;text-align:center;">${_riskCounts.other}</span></label>
+              </div>
+            </div>
+          `;
+        })()}
       </div>
+
+      ${(() => {
+        const q = (STATE.filters.searchQuery || '').trim();
+        // 有搜尋字串 → 全部 surrounding 中過濾 MMSI 包含字串
+        // 無搜尋字串 → 顯示所有周邊船舶（依距離排序）
+        let listVessels;
+        let titleStr;
+        const isSelectMode = STATE.filters.selectedMmsi.size > 0;
+        // 非選取模式：套用「類別顯示」+「風險」篩選，與圖層連動
+        let base = lastSnap.surrounding.slice();
+        if (!isSelectMode) {
+          base = base.filter(s => passesCategoryFilter(s) && passesRiskFilter(s));
+        }
+        const allSurrounding = base.sort((a,b) => a.dist_nm - b.dist_nm);
+        if (q) {
+          listVessels = allSurrounding.filter(s => s.mmsi.includes(q));
+          titleStr = `搜尋結果（${listVessels.length} 艘 MMSI 含 "${q}"）`;
+        } else {
+          listVessels = allSurrounding;
+          const totalRaw = lastSnap.surrounding.length;
+          const filtered = totalRaw - listVessels.length;
+          titleStr = filtered > 0
+            ? `5 NM 內周邊船舶（顯示 ${listVessels.length} / 全部 ${totalRaw} 艘，${filtered} 艘被類別/風險篩選遮蔽）`
+            : `5 NM 內周邊船舶（${listVessels.length} 艘）`;
+        }
+        return `
+      <div class="vd-section">
+        <div class="vd-section-title">${titleStr}<br><span style="font-size:10px;color:#9aa5b8;font-weight:400;text-transform:none;letter-spacing:0;">點卡片：選取 (含軌跡顯示)</span></div>
+        ${listVessels.map(s => {
+          const fleet = lookupFleet(s.mmsi);
+          const ext = lookupExternal(s.mmsi);
+          const flagLabel = getFlagByMmsi(s.mmsi);
+          let nameLine = '', borderStyle = '', tagHtml = '', subInfo = '';
+          if (fleet) {
+            nameLine = `<div style="color:#ffd700;font-weight:600;">${fleet.name_zh} / ${fleet.name_en}</div>`;
+            borderStyle = 'border-left:3px solid #ffd700;';
+            tagHtml = `<span style="display:inline-block;background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid #ffd700;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin-right:4px;">同船隊</span>`;
+            subInfo = `IMO ${fleet.imo} · ${flagLabel}`;
+          } else if (ext) {
+            nameLine = `<div style="color:#9ec5ff;font-weight:600;">${ext.name}</div>`;
+            borderStyle = 'border-left:3px solid #9ec5ff;';
+            tagHtml = ext.operator ? `<span style="display:inline-block;background:rgba(44,108,219,0.18);color:#9ec5ff;border:1px solid #2c6cdb;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin-right:4px;">${ext.operator}</span>` : '';
+            subInfo = `${ext.type || ''}${ext.imo ? ' · IMO ' + ext.imo : ''} · ${ext.flag_label || flagLabel}`;
+          } else {
+            const kind = classifyAis(s.mmsi, s.cat);
+            const km = AIS_KIND[kind];
+            if (kind === 'aton') {
+              // AtoN 導航標：只用色彩標籤，不畫左邊框
+              tagHtml = `<span style="display:inline-block;background:${km.color}22;color:${km.color};border:1px solid ${km.color};padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin-right:4px;">◈ ${km.label}</span>`;
+            } else if (kind === 'base_station' || kind === 'sar_aircraft' || kind === 'sart' || kind === 'epirb' || kind === 'mob') {
+              tagHtml = `<span style="display:inline-block;background:${km.color}22;color:${km.color};border:1px solid ${km.color};padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin-right:4px;">${km.label}</span>`;
+            }
+            subInfo = flagLabel;
+          }
+          const sog = (s.sog === null || s.sog === undefined) ? '<span style="color:#f5b753;" title="資料缺漏">缺</span>' : `${s.sog} kn`;
+          const cog = (s.cog === null || s.cog === undefined) ? '<span style="color:#f5b753;">-</span>' : `${s.cog}°`;
+          // CPA 風險徽章
+          let riskBadge = '';
+          if (s._risk && s._risk.level !== 'safe' && s._risk.level !== 'unknown') {
+            const r = s._risk;
+            const dcpaTxt = s._cpa.cpa_nm != null ? ` · DCPA ${s._cpa.cpa_nm.toFixed(2)} nm` : '';
+            const tcpaTxt = s._cpa.tcpa_min != null && s._cpa.tcpa_min > 0 ? ` · TCPA ${s._cpa.tcpa_min.toFixed(0)} min` : '';
+            const methodTxt = s._cpa.method === 'route_sweep' ? '沿軌跡' : s._cpa.method === 'line_sweep' ? '直線' : '';
+            const methodLine = methodTxt ? `<div style="font-size:9px;color:#9aa5b8;font-weight:400;margin-top:1px;">${s._cpa.confidence} · ${methodTxt}預測</div>` : '';
+            riskBadge = `<div style="margin-top:3px;padding:3px 6px;background:${r.color}1a;color:${r.color};border-radius:2px;font-size:10px;font-weight:600;">${r.label}${dcpaTxt}${tcpaTxt}${methodLine}</div>`;
+            // 升級邊框色
+            borderStyle = `border-left:3px solid ${r.color};`;
+          } else if (s._cpa && s._cpa.cpa_nm != null) {
+            // Safe / Caution 也顯示 DCPA / TCPA 數值（淡色資訊）
+            const dcpaTxt = `DCPA ${s._cpa.cpa_nm.toFixed(2)} nm`;
+            const tcpaTxt = s._cpa.tcpa_min != null && s._cpa.tcpa_min > 0 ? ` · TCPA ${s._cpa.tcpa_min.toFixed(0)} min` : '';
+            riskBadge = `<div style="margin-top:3px;font-size:10px;color:#7c8a9e;">${dcpaTxt}${tcpaTxt}</div>`;
+          }
+          // 選取狀態
+          const kind = classifyAis(s.mmsi, s.cat);
+          const canSelect = (kind === 'vessel' || kind === 'fleet_vessel' || kind === 'ext_vessel');
+          const isSelected = STATE.filters.selectedMmsi.has(s.mmsi);
+          const selectedStyle = isSelected
+            ? 'box-shadow:0 0 0 2px #2c6cdb inset;background:rgba(44,108,219,0.10);'
+            : '';
+          const selectedBadge = isSelected
+            ? `<span style="display:inline-block;background:rgba(44,108,219,0.25);color:#9ec5ff;border:1px solid #2c6cdb;padding:1px 6px;border-radius:2px;font-size:10px;font-weight:600;margin-left:4px;">✓ 已選</span>`
+            : '';
+          const clickAttr = canSelect ? `onclick="toggleSelect('${s.mmsi}')" style="cursor:pointer;${borderStyle}${selectedStyle}"` : `style="${borderStyle}"`;
+          // 偵測起迄時間 (本船視角)
+          const ps = lookupPerSourceStat(s.mmsi);
+          let detLine = '';
+          if (ps) {
+            const covPct = (ps.coverage * 100).toFixed(0);
+            const gapsTxt = ps.gaps > 0 ? ` · 中斷 ${ps.gaps} 次` : ' · 無中斷';
+            detLine = `<div class="meta" style="margin-top:2px;font-size:10px;color:#7c8a9e;">觀測 ${formatDetTs(ps.first)} → ${formatDetTs(ps.last)} · ${formatDuration(ps.durH)} · 連續度 ${covPct}%${gapsTxt}</div>`;
+          }
+          return `
+          <div class="surr-card" ${clickAttr}>
+            ${nameLine}
+            <div style="display:flex;align-items:center;gap:4px;">${tagHtml}<span class="mmsi">${s.mmsi}</span>${selectedBadge}</div>
+            <div class="meta" style="margin-top:3px;">
+              距 ${s.dist_nm.toFixed(2)} nm · ${sog} · 航向 ${cog}
+            </div>
+            <div class="coord-display" style="margin-top:3px;font-size:10px;">
+              <span class="lat">${s.lat.toFixed(5)}°</span> <span class="lon">${s.lon.toFixed(5)}°</span>
+            </div>
+            ${riskBadge}
+            ${subInfo ? `<div class="meta" style="margin-top:2px;font-size:10px;">${subInfo}</div>` : ''}
+            ${detLine}
+          </div>
+        `;
+        }).join('')}
+      </div>`;
+      })()}
+
+      ${(() => {
+        const fleetMembers = lastSnap.surrounding.filter(s => lookupFleet(s.mmsi));
+        return fleetMembers.length > 0 ? `
+        <div class="vd-section">
+          <div class="vd-section-title">⭐ 5 NM 內同船隊船舶 (${fleetMembers.length} 艘)</div>
+          ${fleetMembers.sort((a,b)=>a.dist_nm-b.dist_nm).map(s => {
+            const f = lookupFleet(s.mmsi);
+            return `<div class="surr-card" style="border-left:3px solid #ffd700;">
+              <div style="color:#ffd700;font-weight:600;">${f.name_zh} / ${f.name_en}</div>
+              <div class="meta">距 ${s.dist_nm.toFixed(2)} nm · MMSI ${s.mmsi}</div>
+            </div>`;
+          }).join('')}
+        </div>` : '';
+      })()}
     </div>
   `;
   document.getElementById('rightPanel').innerHTML = html;
@@ -833,6 +2827,22 @@ function drawDetailMap() {
 
   const v = STATE.selectedVessel;
   const snap = STATE.currentSnapshots[STATE.currentSnapshotIdx];
+
+  // 自動清理：已選取但不在當前周邊清單的船 → 從選取移除 + 隱藏軌跡
+  if (STATE.filters.selectedMmsi.size > 0 && snap.surrounding) {
+    const currentMmsiSet = new Set(snap.surrounding.map(s => s.mmsi));
+    const toRemove = [];
+    STATE.filters.selectedMmsi.forEach(m => {
+      if (!currentMmsiSet.has(m)) toRemove.push(m);
+    });
+    toRemove.forEach(m => {
+      STATE.filters.selectedMmsi.delete(m);
+      hideExternalTrack(m);
+    });
+    if (toRemove.length > 0) {
+      console.log(`🧹 自動移除 ${toRemove.length} 艘已離開 5 NM 的選取: ${toRemove.join(', ')}`);
+    }
+  }
 
   // 1. 軌跡 polyline（全 8 天）
   if (document.getElementById('lyrTrack').checked && v._track) {
@@ -857,47 +2867,342 @@ function drawDetailMap() {
     }).addTo(STATE.map);
   }
 
-  // 3. 本船 marker
+  // 取得本船在此快照時刻的 SOG/COG（用於 CPA 與本船 marker 旋轉）
+  const ownMotion = getOwnMotionAtTime(snap.ts);
+  const ownSog = ownMotion?.sog;
+  const ownCog = ownMotion?.cog;
+
+  // 3. 本船 marker（旋轉跟著實際軌跡方向，不用 AIS COG）
+  const ownTrackBearing = ownMotion?._idx != null ? bearingFromTrack(ownMotion._idx) : null;
+  // 優先序：軌跡方位角 > AIS COG > 0
+  const ownDisplayCog = (ownTrackBearing != null) ? ownTrackBearing
+                      : (ownCog != null && ownCog < 360) ? ownCog
+                      : 0;
   const ownIcon = L.divIcon({
     className: 'own-marker',
-    html: `<svg width="26" height="26" viewBox="0 0 26 26" style="overflow:visible;">
-            <circle cx="13" cy="13" r="12" fill="none" stroke="${COLORS.ownShip}" stroke-width="1" opacity="0.5"/>
+    html: `<svg width="26" height="26" viewBox="0 0 26 26" style="transform:rotate(${ownDisplayCog}deg);overflow:visible;">
+            <circle cx="13" cy="13" r="12" fill="none" stroke="${COLORS.ownShip}" stroke-width="1" opacity="0.5" transform="rotate(${-ownDisplayCog} 13 13)"/>
             <polygon points="13,3 6,21 20,21" fill="${COLORS.ownShip}" stroke="#000" stroke-width="0.5"/>
            </svg>`,
     iconSize: [26, 26],
     iconAnchor: [13, 13],
   });
+  const sogStr = (ownSog != null) ? `${ownSog} kn` : '—';
+  const cogStr = (ownCog != null && ownCog < 360) ? `${ownCog}°` : '—';
+  const trackBearStr = (ownTrackBearing != null) ? `${ownTrackBearing.toFixed(1)}°` : '—（靜止 / 錨泊）';
   L.marker([snap.own_pos.lat, snap.own_pos.lon], { icon: ownIcon })
-    .bindPopup(`<b>本船</b><br>${v.own_mmsi}<br>${snap.ts}`)
+    .bindPopup(`
+      <div style="border-left:3px solid #f5a623;padding-left:8px;margin-bottom:6px;">
+        <div style="font-weight:700;color:#f5a623;font-size:13px;">本船 ${v.name_zh || ''} / ${v.name_en || 'src ' + v.source_id}</div>
+        <div style="font-size:10px;color:#9aa5b8;">⭐ 自家船 · ${v.operator || ''}</div>
+      </div>
+      <div style="font-size:11px;line-height:1.7;">
+        <div>MMSI <span class="pop-mono">${v.own_mmsi}</span>${v.imo ? ' · IMO ' + v.imo : ''}</div>
+        <div>時間 <span class="pop-mono">${snap.ts}</span></div>
+        <div>SOG <span class="pop-mono">${sogStr}</span> · AIS COG <span class="pop-mono">${cogStr}</span></div>
+        <div style="color:${ownTrackBearing != null ? '#6ee094' : '#9aa5b8'};">軌跡方位角 <span class="pop-mono">${trackBearStr}</span></div>
+        <div class="coord-display" style="margin-top:4px;padding:4px 6px;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:3px;">
+          <span class="lat">${snap.own_pos.lat.toFixed(5)}°</span> · <span class="lon">${snap.own_pos.lon.toFixed(5)}°</span>
+        </div>
+      </div>`)
     .addTo(STATE.layers.vesselMarkers);
 
-  // 4. 周邊 markers
-  if (document.getElementById('lyrSurr').checked) {
+  // 4a. 自動隱藏「已離開 5 NM」的軌跡
+  //     若目前已顯示的軌跡 MMSI 不在當前快照的周邊船清單中 → 自動隱藏
+  if (STATE.shownExternalTracks.size > 0) {
+    const currentMmsiSet = new Set(snap.surrounding.map(x => x.mmsi));
+    const toHide = [];
+    STATE.shownExternalTracks.forEach(mmsi => {
+      if (!currentMmsiSet.has(mmsi)) toHide.push(mmsi);
+    });
+    toHide.forEach(mmsi => hideExternalTrack(mmsi));
+    if (toHide.length > 0) console.log(`🚫 自動隱藏 ${toHide.length} 條離開 5NM 的軌跡`);
+  }
+
+  // 4. 周邊 markers (永遠顯示，篩選由右側清單控制)
+  {
     STATE.layers.surroundingMarkers = L.layerGroup().addTo(STATE.map);
     snap.surrounding.forEach(s => {
-      const isClose = s.dist_nm < 1;
-      const color = isClose ? COLORS.critical : COLORS.surrounding;
-      const cog = s.cog || 0;
+      // 篩選：不符合條件直接跳過
+      if (!passesFilter(s)) return;
+      const fleet = lookupFleet(s.mmsi);
+      const kind = classifyAis(s.mmsi, s.cat);
+
+      // CPA 計算 + 風險判定（只對船舶類目標）
+      let cpa = null, risk = null;
+      const isVesselKind = (kind === 'vessel' || kind === 'fleet_vessel' || kind === 'ext_vessel');
+      if (isVesselKind) {
+        cpa = calculateCPA(snap.own_pos, ownSog, ownCog, s.lat, s.lon, s.sog, s.cog, snap._ms || snap.ts);
+        risk = classifyCpaRisk(cpa, ownSog);
+      }
+      // 將 CPA 結果暫存到 surrounding entry（給 popup 與右側 panel 用）
+      s._cpa = cpa;
+      s._risk = risk;
+
+      // 是否要顯示為「危險接近」（critical / warning）
+      const isClose = risk && (risk.level === 'critical' || risk.level === 'warning');
+      const iconData = buildAisIcon(kind, s.cog, isClose);
       const icon = L.divIcon({
-        html: `<svg width="14" height="14" viewBox="0 0 14 14" style="transform:rotate(${cog}deg);overflow:visible;">
-                <polygon points="7,1 3,12 11,12" fill="${color}" stroke="#000" stroke-width="0.5"/>
-               </svg>`,
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
+        html: iconData.svg,
+        iconSize: [iconData.sz, iconData.sz],
+        iconAnchor: [iconData.sz / 2, iconData.sz / 2],
         className: '',
       });
+
+      // 不畫 CPA 預測虛線（避免壓陸視覺干擾）
+      // 保留 s._cpa / s._risk 給 popup 與右側清單使用
+      const ext = lookupExternal(s.mmsi);
+      const flagLabel = getFlagByMmsi(s.mmsi);
+      const motion = fmtMotion(s.sog, s.cog);
+      const coordBlock = `
+        <div class="coord-display" style="margin-top:4px;padding:4px 6px;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:3px;">
+          <span class="lat">${s.lat.toFixed(5)}°</span> · <span class="lon">${s.lon.toFixed(5)}°</span>
+        </div>`;
+      // CPA 風險區塊（只對船舶 + 有計算結果時呈現）
+      let cpaBlock = '';
+      if (s._cpa && s._risk) {
+        const c = s._cpa, r = s._risk;
+        const cpaStr = c.cpa_nm != null ? c.cpa_nm.toFixed(2) + ' nm' : '—';
+        const tcpaStr = c.tcpa_min != null ? (c.tcpa_min === 0 ? '已遠離' : c.tcpa_min.toFixed(1) + ' min') : '—';
+        const relSp = c.relative_speed != null ? c.relative_speed.toFixed(1) + ' kn' : '—';
+        cpaBlock = `
+          <div style="margin-top:6px;padding:6px 8px;background:${r.color}1a;border:1px solid ${r.color};border-radius:3px;">
+            <div style="font-weight:700;color:${r.color};font-size:12px;">${r.label}</div>
+            <div style="display:grid;grid-template-columns:60px 1fr;gap:2px 6px;margin-top:4px;font-size:10px;">
+              <div style="color:#7c8a9e;">DCPA</div><div style="font-family:ui-monospace;">${cpaStr}</div>
+              <div style="color:#7c8a9e;">TCPA</div><div style="font-family:ui-monospace;">${tcpaStr}</div>
+              <div style="color:#7c8a9e;">相對速度</div><div style="font-family:ui-monospace;">${relSp}</div>
+              <div style="color:#7c8a9e;">情境</div><div>${c.encounter || '—'}</div>
+              <div style="color:#7c8a9e;">信心</div><div style="color:${c.confidence==='HIGH'?'#6ee094':c.confidence==='MED'?'#f5b753':'#ff8a8a'};">${c.confidence} · ${c.confidence_reason}</div>
+            </div>
+          </div>`;
+      }
+      let popupHtml;
+      if (fleet) {
+        popupHtml = `
+          <div style="border-left:3px solid #ffd700;padding-left:8px;margin-bottom:6px;">
+            <div style="font-weight:700;color:#ffd700;font-size:13px;">${fleet.name_zh} / ${fleet.name_en}</div>
+            <div style="font-size:10px;color:#9aa5b8;">⭐ 同船隊（陽明海運）</div>
+          </div>
+          <div style="font-size:11px;line-height:1.7;">
+            <div>MMSI <span class="pop-mono">${s.mmsi}</span> · IMO ${fleet.imo}</div>
+            <div>註冊 ${flagLabel}</div>
+            <div>距本船 <b>${s.dist_nm.toFixed(2)} nm</b></div>
+            <div>速度 ${motion}</div>
+            ${coordBlock}
+            ${cpaBlock}
+          </div>`;
+      } else if (ext) {
+        popupHtml = `
+          <div style="border-left:3px solid #9ec5ff;padding-left:8px;margin-bottom:6px;">
+            <div style="font-weight:700;color:#9ec5ff;font-size:13px;">${ext.name}</div>
+            <div style="font-size:10px;color:#9aa5b8;">${ext.operator_full || ext.operator || '外來船'} · ${ext.operator_flag || ''}</div>
+          </div>
+          <div style="font-size:11px;line-height:1.7;">
+            <div>MMSI <span class="pop-mono">${s.mmsi}</span>${ext.imo ? ' · IMO ' + ext.imo : ''}</div>
+            <div>船型 ${ext.type || '-'}${ext.built ? ' · 建造 ' + ext.built : ''}</div>
+            ${ext.length_m ? `<div>尺寸 ${ext.length_m} × ${ext.beam_m} m · DWT ${(ext.dwt||0).toLocaleString()}</div>` : ''}
+            <div>註冊 ${ext.flag_label || flagLabel}</div>
+            <div>距本船 <b>${s.dist_nm.toFixed(2)} nm</b></div>
+            <div>速度 ${motion}</div>
+            ${coordBlock}
+            ${cpaBlock}
+          </div>`;
+      } else {
+        const kind = classifyAis(s.mmsi, s.cat);
+        const km = AIS_KIND[kind];
+        const isVessel = (kind === "vessel" || kind === "unknown");
+        const subLabel = isVessel ? "尚未列入船舶資料庫" : "非船舶 AIS 目標";
+        popupHtml = `
+          <div style="border-left:3px solid ${km.color};padding-left:8px;margin-bottom:6px;">
+            <div style="font-weight:700;color:${km.color};font-size:13px;">${km.label}</div>
+            <div style="font-size:10px;color:#9aa5b8;">${subLabel}${s.cat ? ' · cat=' + s.cat : ''}</div>
+          </div>
+          <div style="font-size:11px;line-height:1.7;">
+            <div>MMSI <span class="pop-mono">${s.mmsi}</span></div>
+            <div>註冊 ${flagLabel}</div>
+            <div>距本船 <b>${s.dist_nm.toFixed(2)} nm</b></div>
+            ${isVessel ? '<div>速度 ' + motion + '</div>' : ''}
+            ${coordBlock}
+            ${(isVessel && !s.sog && !s.cog) ? '<div style="margin-top:6px;padding:4px 6px;background:rgba(245,166,35,0.10);color:#f5b753;border-radius:3px;font-size:10px;">⚠ 速度/航向資料缺漏：可能為靜止錨泊、AIS 訊號弱或欄位未發送</div>' : ''}
+            ${kind === 'aton' ? '<div style="margin-top:6px;padding:4px 6px;background:rgba(245,208,74,0.10);color:#f5d04a;border-radius:3px;font-size:10px;">浮標 / 燈塔 / 導航標——固定位置設施，無航行資訊</div>' : ''}
+            ${kind === 'base_station' ? '<div style="margin-top:6px;padding:4px 6px;background:rgba(155,89,182,0.12);color:#c39bd3;border-radius:3px;font-size:10px;">🗼 AIS 基地台——岸基訊號接收站</div>' : ''}
+            ${(kind === 'sart' || kind === 'epirb' || kind === 'mob') ? '<div style="margin-top:6px;padding:4px 6px;background:rgba(255,77,79,0.18);color:#ff8a8a;border-radius:3px;font-size:10px;font-weight:600;">🆘 緊急信標！立即聯絡海事單位</div>' : ''}
+          </div>`;
+      }
       L.marker([s.lat, s.lon], { icon })
-        .bindPopup(`<b class="pop-mono">${s.mmsi}</b><br>距 ${s.dist_nm.toFixed(2)} nm<br>${s.sog ?? '-'} kn @ ${s.cog ?? '-'}°`)
+        .bindPopup(popupHtml)
         .addTo(STATE.layers.surroundingMarkers);
     });
   }
 
-  // 5. fit bounds
-  STATE.map.setView([snap.own_pos.lat, snap.own_pos.lon], 11);
+  // 6. 視角控制
+  if (!STATE.detailViewInitialized) {
+    // 首次進船舶詳情 → setView 對準本船 + 預設縮放
+    STATE.map.setView([snap.own_pos.lat, snap.own_pos.lon], 11);
+    STATE.detailViewInitialized = true;
+  } else if (document.getElementById('tlFollow')?.checked) {
+    // 「跟隨本船」開啟 → 平移到本船位置（保留使用者縮放）
+    STATE.map.panTo([snap.own_pos.lat, snap.own_pos.lon], {
+      animate: true,
+      duration: 0.3,
+      easeLinearity: 0.5,
+      noMoveStart: true,
+    });
+  }
 
-  // 顯示圖層 toggle
+  // 顯示圖層 toggle + AIS 圖例
   document.getElementById('layerToggle').style.display = 'flex';
+  document.getElementById('aisLegend').style.display = 'block';
 }
+
+// AIS 圖例收合 (預設收合)
+window.toggleAisLegend = function() {
+  const body = document.getElementById('aisLegendBody');
+  const arrow = document.getElementById('aisLegendArrow');
+  const opened = body.style.display !== 'none';
+  body.style.display = opened ? 'none' : 'block';
+  if (arrow) arrow.style.transform = opened ? 'rotate(0deg)' : 'rotate(180deg)';
+};
+
+// 提供按鈕讓使用者主動重置到本船位置
+// ============================================================
+// 警報門檻設定 (CPA 安全距離 + TCPA 預警時間)
+// ============================================================
+const THRESHOLD_DEFAULTS = { cpa: 0.7, tcpa: 20 };
+
+function updateThresholdPreview() {
+  const cpa = parseFloat(document.getElementById('thrCpaNum').value) || THRESHOLD_DEFAULTS.cpa;
+  const tcpa = parseFloat(document.getElementById('thrTcpaNum').value) || THRESHOLD_DEFAULTS.tcpa;
+  document.getElementById('thrCpaVal').textContent = cpa.toFixed(2);
+  document.getElementById('thrTcpaVal').textContent = tcpa.toFixed(0);
+  document.getElementById('prevCrit').textContent = `CPA < ${(cpa*0.5).toFixed(2)} nm · TCPA < ${(tcpa*0.5).toFixed(0)} min`;
+  document.getElementById('prevWarn').textContent = `CPA < ${cpa.toFixed(2)} nm · TCPA < ${tcpa.toFixed(0)} min`;
+}
+
+window.showThresholdSettings = function() {
+  // 用目前生效的 Warning 值填入
+  const warn = STATE.cpaThresholds.warning;
+  document.getElementById('thrCpaSlider').value = warn.cpa;
+  document.getElementById('thrCpaNum').value = warn.cpa;
+  document.getElementById('thrTcpaSlider').value = warn.tcpa;
+  document.getElementById('thrTcpaNum').value = warn.tcpa;
+  updateThresholdPreview();
+  document.getElementById('thresholdModal').classList.add('show');
+};
+
+window.closeThresholdSettings = function(e) {
+  // 點 overlay 也關，但不能誤吃 modal-card 內部點擊
+  if (e && e.target && !e.target.classList.contains('modal-overlay') && e.type !== undefined) {
+    if (e.type === 'click' && !e.target.classList.contains('modal-overlay') && !e.target.classList.contains('modal-close')) return;
+  }
+  document.getElementById('thresholdModal').classList.remove('show');
+};
+
+window.applyThresholdSettings = function() {
+  const cpa = parseFloat(document.getElementById('thrCpaNum').value);
+  const tcpa = parseFloat(document.getElementById('thrTcpaNum').value);
+  if (!(cpa > 0) || !(tcpa > 0)) { alert('CPA 與 TCPA 需 > 0'); return; }
+  STATE.cpaThresholds = {
+    critical: { cpa: +(cpa * 0.5).toFixed(2),  tcpa: +(tcpa * 0.5).toFixed(0) },
+    warning:  { cpa: +cpa.toFixed(2),           tcpa: +tcpa.toFixed(0) },
+  };
+  // 即時重算全船隊風險 (CPA 閾值改變)
+  evaluateFleetRisk();
+  // 重畫
+  if (STATE.selectedVessel) {
+    drawDetailMap();
+    renderDetail();
+  } else {
+    renderFleet();
+  }
+  closeThresholdSettings();
+};
+
+window.resetThresholdSettings = function() {
+  document.getElementById('thrCpaSlider').value = THRESHOLD_DEFAULTS.cpa;
+  document.getElementById('thrCpaNum').value = THRESHOLD_DEFAULTS.cpa;
+  document.getElementById('thrTcpaSlider').value = THRESHOLD_DEFAULTS.tcpa;
+  document.getElementById('thrTcpaNum').value = THRESHOLD_DEFAULTS.tcpa;
+  updateThresholdPreview();
+};
+
+// slider 與 number input 雙向綁定 + 即時更新預覽
+document.addEventListener('DOMContentLoaded', () => {
+  const cpaS = document.getElementById('thrCpaSlider');
+  const cpaN = document.getElementById('thrCpaNum');
+  const tcpaS = document.getElementById('thrTcpaSlider');
+  const tcpaN = document.getElementById('thrTcpaNum');
+  if (cpaS) {
+    cpaS.addEventListener('input', () => { cpaN.value = cpaS.value; updateThresholdPreview(); });
+    cpaN.addEventListener('input', () => { cpaS.value = cpaN.value; updateThresholdPreview(); });
+    tcpaS.addEventListener('input', () => { tcpaN.value = tcpaS.value; updateThresholdPreview(); });
+    tcpaN.addEventListener('input', () => { tcpaS.value = tcpaN.value; updateThresholdPreview(); });
+  }
+});
+
+window.recenterOnOwnShip = function() {
+  if (!STATE.currentSnapshots) return;
+  const snap = STATE.currentSnapshots[STATE.currentSnapshotIdx];
+  STATE.map.setView([snap.own_pos.lat, snap.own_pos.lon], STATE.map.getZoom() || 11);
+};
+
+// 船隊風險明細彈出層
+const RISK_LABEL = { critical: 'Critical · 風險船隊', warning: 'Warning · 警示船隊', normal: 'Normal · 一般船隊' };
+const RISK_CLASS = { critical: 'c', warning: 'w', normal: 'n' };
+window.toggleRiskPopover = function(level) {
+  const pop = document.getElementById('riskPopover');
+  const opened = pop.classList.contains('show') && STATE._riskPopoverLevel === level;
+  document.querySelectorAll('.summary-pill').forEach(p => p.classList.remove('active'));
+  if (opened) {
+    closeRiskPopover();
+    return;
+  }
+  STATE._riskPopoverLevel = level;
+  // 標頭
+  document.getElementById('rpTitle').textContent = RISK_LABEL[level] || '船隊明細';
+  const cls = RISK_CLASS[level];
+  document.getElementById('pill' + (level === 'critical' ? 'Crit' : level === 'warning' ? 'Warn' : 'Norm')).classList.add('active');
+  // 列出該等級船舶
+  const list = STATE.vessels
+    .filter(v => v._currentRisk === level)
+    .sort((a, b) => (a._minDistNm ?? 999) - (b._minDistNm ?? 999));
+  const body = document.getElementById('rpBody');
+  if (list.length === 0) {
+    body.innerHTML = `<div style="color:#7c8a9e;font-size:11px;padding:8px 4px;">目前沒有 ${RISK_LABEL[level].split('·')[0].trim()} 等級的船</div>`;
+  } else {
+    body.innerHTML = list.map(v => {
+      const dcpaTxt = v._worstCpa?.cpa_nm != null ? `DCPA ${v._worstCpa.cpa_nm.toFixed(2)} nm` : '—';
+      const tcpaTxt = v._worstCpa?.tcpa_min != null && v._worstCpa.tcpa_min > 0 ? ` · TCPA ${v._worstCpa.tcpa_min.toFixed(0)} min` : '';
+      const distTxt = v._minDistNm != null ? `最近 ${v._minDistNm.toFixed(2)} nm` : '';
+      const surrTxt = v._surroundCount != null ? `周邊 ${v._surroundCount} 艘` : '';
+      const name = v.name || ('src ' + v.source_id);
+      return `
+        <div class="rp-item ${cls}" onclick="selectVessel(STATE.vessels.find(x=>x.source_id===${v.source_id})); closeRiskPopover();">
+          <div class="name">${v.flag_label} ${name}</div>
+          <div class="meta">${dcpaTxt}${tcpaTxt} · ${distTxt} · ${surrTxt}<br>MMSI ${v.own_mmsi}</div>
+        </div>
+      `;
+    }).join('');
+  }
+  pop.classList.add('show');
+};
+window.closeRiskPopover = function() {
+  document.getElementById('riskPopover').classList.remove('show');
+  document.querySelectorAll('.summary-pill').forEach(p => p.classList.remove('active'));
+  STATE._riskPopoverLevel = null;
+};
+// 點外面關閉
+document.addEventListener('click', (e) => {
+  const pop = document.getElementById('riskPopover');
+  if (!pop || !pop.classList.contains('show')) return;
+  if (pop.contains(e.target)) return;
+  if (e.target.closest('.summary-pill')) return;
+  closeRiskPopover();
+});
+
+// 播放速度對應 ms/snapshot
+const PLAY_INTERVAL_MS = { 0.5: 2000, 1: 1000, 2: 500, 5: 200, 10: 100, 20: 50 };
 
 function setupTimeline() {
   const wrap = document.getElementById('timelineWrap');
@@ -905,13 +3210,205 @@ function setupTimeline() {
   const slider = document.getElementById('tlSlider');
   slider.max = STATE.currentSnapshots.length - 1;
   slider.value = STATE.currentSnapshotIdx;
+  // 預設區間 = 全部
+  STATE.rangeFromIdx = 0;
+  STATE.rangeToIdx = STATE.currentSnapshots.length - 1;
+  // 把 datetime-local 預填為完整資料區間
+  const firstTs = STATE.currentSnapshots[0].ts;
+  const lastTs  = STATE.currentSnapshots[STATE.currentSnapshots.length-1].ts;
+  // ts 格式 "2026-05-25T00:00:00Z" → datetime-local 需 "2026-05-25T00:00"
+  const fmt = ts => ts.substring(0, 16);
+  document.getElementById('tlRangeFrom').value = fmt(firstTs);
+  document.getElementById('tlRangeTo').value   = fmt(lastTs);
+  document.getElementById('tlRangeFrom').min = fmt(firstTs);
+  document.getElementById('tlRangeFrom').max = fmt(lastTs);
+  document.getElementById('tlRangeTo').min   = fmt(firstTs);
+  document.getElementById('tlRangeTo').max   = fmt(lastTs);
+  updateRangeStatus();
   updateTimelineInfo();
+
+  // 拖動 slider 時：暫停 + 立即更新（限制於區間內）
   slider.oninput = (e) => {
-    STATE.currentSnapshotIdx = parseInt(e.target.value);
+    pauseTimeline();
+    let idx = parseInt(e.target.value);
+    if (idx < STATE.rangeFromIdx) idx = STATE.rangeFromIdx;
+    if (idx > STATE.rangeToIdx)   idx = STATE.rangeToIdx;
+    STATE.currentSnapshotIdx = idx;
+    e.target.value = idx;
     updateTimelineInfo();
     drawDetailMap();
     renderDetail();
   };
+  // 按鈕事件
+  document.getElementById('tlStepBack').onclick = () => seekTimeline(STATE.currentSnapshotIdx - 1);
+  document.getElementById('tlStepFwd').onclick = () => seekTimeline(STATE.currentSnapshotIdx + 1);
+  document.getElementById('tlPlay').onclick = togglePlay;
+  document.getElementById('tlSpeed').onchange = (e) => {
+    STATE.playSpeed = parseFloat(e.target.value);
+    if (STATE.playing) {
+      pauseTimeline();
+      playTimeline();
+    }
+  };
+
+  // 歷史回放區間
+  document.getElementById('tlApplyRange').onclick = applyTimeRange;
+  document.getElementById('tlResetRange').onclick = resetTimeRange;
+}
+
+// 找出最接近某 ts 的 snapshot idx
+function findIdxByTs(targetMs) {
+  const snaps = STATE.currentSnapshots;
+  let best = 0, bestDiff = Infinity;
+  for (let i = 0; i < snaps.length; i++) {
+    const diff = Math.abs(new Date(snaps[i].ts) - targetMs);
+    if (diff < bestDiff) { bestDiff = diff; best = i; }
+  }
+  return best;
+}
+
+window.applyTimeRange = function() {
+  pauseTimeline();
+  const snaps = STATE.currentSnapshots;
+  const dataFirstMs = new Date(snaps[0].ts).getTime();
+  const dataLastMs  = new Date(snaps[snaps.length-1].ts).getTime();
+
+  const fromVal = document.getElementById('tlRangeFrom').value;
+  const toVal   = document.getElementById('tlRangeTo').value;
+  if (!fromVal || !toVal) { alert('請輸入起迄時間'); return; }
+  let fromMs = new Date(fromVal + ':00Z').getTime();
+  let toMs   = new Date(toVal   + ':00Z').getTime();
+
+  // 防呆：clamp 到資料區間內
+  if (fromMs < dataFirstMs) fromMs = dataFirstMs;
+  if (toMs   > dataLastMs)  toMs   = dataLastMs;
+  if (fromMs >= toMs) {
+    alert('起始時間需早於結束時間，且兩者必須在資料區間 ' +
+          snaps[0].ts.substring(0,16) + ' ~ ' + snaps[snaps.length-1].ts.substring(0,16) + ' 內');
+    return;
+  }
+  STATE.rangeFromIdx = findIdxByTs(fromMs);
+  STATE.rangeToIdx   = findIdxByTs(toMs);
+  if (STATE.rangeToIdx <= STATE.rangeFromIdx) STATE.rangeToIdx = STATE.rangeFromIdx + 1;
+
+  // 同步顯示 input 為 clamp 後的實際時間
+  document.getElementById('tlRangeFrom').value = snaps[STATE.rangeFromIdx].ts.substring(0,16);
+  document.getElementById('tlRangeTo').value   = snaps[STATE.rangeToIdx].ts.substring(0,16);
+
+  // slider 縮為區間長度（min=rangeFromIdx, max=rangeToIdx）
+  const slider = document.getElementById('tlSlider');
+  slider.min = STATE.rangeFromIdx;
+  slider.max = STATE.rangeToIdx;
+  slider.value = STATE.rangeFromIdx;
+  STATE.currentSnapshotIdx = STATE.rangeFromIdx;
+
+  updateRangeStatus();
+  updateTimelineInfo();
+  drawDetailMap();
+  renderDetail();
+};
+
+window.resetTimeRange = function() {
+  pauseTimeline();
+  const snaps = STATE.currentSnapshots;
+  STATE.rangeFromIdx = 0;
+  STATE.rangeToIdx = snaps.length - 1;
+  document.getElementById('tlRangeFrom').value = snaps[0].ts.substring(0,16);
+  document.getElementById('tlRangeTo').value   = snaps[snaps.length-1].ts.substring(0,16);
+  // slider 還原
+  const slider = document.getElementById('tlSlider');
+  slider.min = 0;
+  slider.max = snaps.length - 1;
+  slider.value = STATE.currentSnapshotIdx;
+  updateRangeStatus();
+  updateTimelineInfo();
+};
+
+function updateRangeStatus() {
+  const el = document.getElementById('tlRangeStatus');
+  if (!el) return;
+  const total = STATE.currentSnapshots.length;
+  const inRange = STATE.rangeToIdx - STATE.rangeFromIdx + 1;
+  const isFull = (STATE.rangeFromIdx === 0 && STATE.rangeToIdx === total - 1);
+  if (isFull) {
+    el.textContent = `全部 ${total} 個快照`;
+    el.style.color = '#7c8a9e';
+  } else {
+    const fromTs = STATE.currentSnapshots[STATE.rangeFromIdx].ts.substring(5,16).replace('T',' ');
+    const toTs   = STATE.currentSnapshots[STATE.rangeToIdx].ts.substring(5,16).replace('T',' ');
+    el.innerHTML = `🎯 區間：<b style="color:#9ec5ff;">${fromTs} → ${toTs}</b> (${inRange} 個快照)`;
+    el.style.color = '#9aa5b8';
+  }
+}
+
+function seekTimeline(idx) {
+  const lo = STATE.rangeFromIdx ?? 0;
+  const hi = STATE.rangeToIdx ?? (STATE.currentSnapshots.length - 1);
+  if (idx < lo) idx = lo;
+  if (idx > hi) idx = hi;
+  STATE.currentSnapshotIdx = idx;
+  document.getElementById('tlSlider').value = idx;
+  updateTimelineInfo();
+  drawDetailMap();
+  if (!STATE.playing || !document.getElementById('tlLite').checked) {
+    renderDetail();
+  }
+}
+
+function togglePlay() {
+  if (STATE.playing) pauseTimeline();
+  else playTimeline();
+}
+
+function playTimeline() {
+  if (STATE.playing) return;
+  STATE.playing = true;
+  STATE.playSpeed = parseFloat(document.getElementById('tlSpeed').value);
+  const btn = document.getElementById('tlPlay');
+  btn.textContent = '⏸ 暫停';
+  btn.classList.add('playing');
+
+  const interval = PLAY_INTERVAL_MS[STATE.playSpeed] || 1000;
+  const lo = STATE.rangeFromIdx ?? 0;
+  const hi = STATE.rangeToIdx ?? (STATE.currentSnapshots.length - 1);
+  // 若播放起點不在區間內 → 跳到區間起點
+  if (STATE.currentSnapshotIdx < lo || STATE.currentSnapshotIdx > hi) {
+    STATE.currentSnapshotIdx = lo;
+  }
+  STATE.playTimer = setInterval(() => {
+    let nextIdx = STATE.currentSnapshotIdx + 1;
+    if (nextIdx > hi) {
+      if (document.getElementById('tlLoop').checked) {
+        nextIdx = lo;  // 循環到區間起點
+      } else {
+        pauseTimeline();
+        renderDetail();
+        return;
+      }
+    }
+    STATE.currentSnapshotIdx = nextIdx;
+    document.getElementById('tlSlider').value = nextIdx;
+    updateTimelineInfo();
+    drawDetailMap();
+    // 流暢模式：播放期間略過右側 panel 重繪
+    if (!document.getElementById('tlLite').checked) {
+      renderDetail();
+    }
+  }, interval);
+}
+
+function pauseTimeline() {
+  if (!STATE.playing) return;
+  STATE.playing = false;
+  if (STATE.playTimer) {
+    clearInterval(STATE.playTimer);
+    STATE.playTimer = null;
+  }
+  const btn = document.getElementById('tlPlay');
+  btn.textContent = '▶ 播放';
+  btn.classList.remove('playing');
+  // 暫停時補渲染一次完整 detail
+  renderDetail();
 }
 
 function updateTimelineInfo() {
@@ -922,10 +3419,184 @@ function updateTimelineInfo() {
   document.getElementById('tlTotal').textContent = STATE.currentSnapshots.length;
 }
 
+// 鍵盤快捷鍵
+document.addEventListener('keydown', (e) => {
+  if (!STATE.selectedVessel) return;
+  // 避免在 input/textarea 內觸發
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); seekTimeline(STATE.currentSnapshotIdx - 1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); seekTimeline(STATE.currentSnapshotIdx + 1); }
+});
+
+// ============================================================
+// 港口擁塞看板
+// ============================================================
+const KNOWN_PORTS = [
+  { name:'高雄港',    flag:'🇹🇼', lat:22.61, lon:120.27, capacity:80 },
+  { name:'基隆港',    flag:'🇹🇼', lat:25.14, lon:121.74, capacity:50 },
+  { name:'台中港',    flag:'🇹🇼', lat:24.28, lon:120.51, capacity:40 },
+  { name:'上海洋山港',flag:'🇨🇳', lat:30.62, lon:122.07, capacity:200 },
+  { name:'上海外港',  flag:'🇨🇳', lat:31.34, lon:121.69, capacity:120 },
+  { name:'寧波港',    flag:'🇨🇳', lat:29.95, lon:121.85, capacity:150 },
+  { name:'青島港',    flag:'🇨🇳', lat:36.07, lon:120.31, capacity:100 },
+  { name:'深圳鹽田',  flag:'🇨🇳', lat:22.58, lon:114.30, capacity:120 },
+  { name:'深圳蛇口',  flag:'🇨🇳', lat:22.48, lon:113.92, capacity:80 },
+  { name:'香港',      flag:'🇭🇰', lat:22.30, lon:114.18, capacity:100 },
+  { name:'廈門港',    flag:'🇨🇳', lat:24.48, lon:118.07, capacity:80 },
+  { name:'東京港',    flag:'🇯🇵', lat:35.60, lon:139.78, capacity:80 },
+  { name:'橫濱港',    flag:'🇯🇵', lat:35.44, lon:139.65, capacity:70 },
+  { name:'名古屋港',  flag:'🇯🇵', lat:35.05, lon:136.86, capacity:60 },
+  { name:'神戶港',    flag:'🇯🇵', lat:34.66, lon:135.21, capacity:60 },
+  { name:'釜山港',    flag:'🇰🇷', lat:35.10, lon:129.07, capacity:150 },
+  { name:'胡志明港',  flag:'🇻🇳', lat:10.78, lon:106.75, capacity:60 },
+  { name:'頭頓港',    flag:'🇻🇳', lat:10.40, lon:107.07, capacity:50 },
+  { name:'曼谷港',    flag:'🇹🇭', lat:13.14, lon:100.88, capacity:60 },
+  { name:'新加坡港',  flag:'🇸🇬', lat:1.27,  lon:103.84, capacity:300 },
+  { name:'孟買港',    flag:'🇮🇳', lat:18.95, lon:72.95,  capacity:60 },
+];
+// 港口偵測半徑 (度)
+const PORT_DETECT_RADIUS = 0.35;
+const PORT_INPORT_SOG_KN = 2.0;
+
+// 由 20 艘 YM 自船的軌跡與 surroundings 推估每個港口的擁塞
+function computePortCongestion() {
+  const result = KNOWN_PORTS.map(p => ({
+    ...p,
+    ymInPort: [],     // 目前在港的 YM 船 [name, sog]
+    ymVisited: [],    // 資料區間曾到訪的 YM 船 (含停留時數)
+    surroundingNow: 0,  // 在港 YM 船目前 5NM 內的周邊船總數 (代表實際擁塞)
+    surroundingPeak: 0, // 8 天內峰值
+  }));
+
+  STATE.vessels.forEach(v => {
+    if (!v._track || v._track.length === 0) return;
+
+    // 末位置 → 是否在哪個港口
+    const last = v._track[v._track.length - 1];
+    result.forEach(p => {
+      const d = Math.hypot(last.lat - p.lat, last.lon - p.lon);
+      if (d < PORT_DETECT_RADIUS && (last.sog || 0) < PORT_INPORT_SOG_KN) {
+        p.ymInPort.push({ name: v.name || ('src ' + v.source_id), src: v.source_id, sog: last.sog || 0 });
+        // 末快照的 surrounding 數量 (在港時的擁塞代表)
+        if (v._lastSnapshot) {
+          p.surroundingNow += v._lastSnapshot.surrounding_count || 0;
+        }
+      }
+    });
+
+    // 軌跡中所有經過的港口 → 統計停留時數 (sog<1 且在港內)
+    let cur = null;
+    for (let i = 0; i < v._track.length; i++) {
+      const pt = v._track[i];
+      const inAnyPort = result.find(p =>
+        Math.hypot(pt.lat - p.lat, pt.lon - p.lon) < PORT_DETECT_RADIUS && (pt.sog || 0) < PORT_INPORT_SOG_KN
+      );
+      if (inAnyPort) {
+        if (!cur || cur.port !== inAnyPort.name) {
+          cur = { port: inAnyPort.name, startTs: pt.ts, ref: inAnyPort };
+        }
+        cur.endTs = pt.ts;
+      } else if (cur) {
+        const dwellH = (new Date(cur.endTs) - new Date(cur.startTs)) / 3600000;
+        if (dwellH > 0.5) {
+          cur.ref.ymVisited.push({ name: v.name || ('src ' + v.source_id), dwellH });
+        }
+        cur = null;
+      }
+    }
+    if (cur) {
+      const dwellH = (new Date(cur.endTs) - new Date(cur.startTs)) / 3600000;
+      if (dwellH > 0.5) cur.ref.ymVisited.push({ name: v.name || ('src ' + v.source_id), dwellH });
+    }
+  });
+
+  // 擁塞分級：根據 surroundingNow / capacity 比例 + YM 在港船數
+  result.forEach(p => {
+    const utilization = p.surroundingNow / p.capacity;  // 0~∞
+    if (utilization > 0.7 || p.surroundingNow > 50) p.level = 'critical';
+    else if (utilization > 0.4 || p.surroundingNow > 25) p.level = 'high';
+    else if (utilization > 0.15 || p.surroundingNow > 8) p.level = 'medium';
+    else p.level = 'low';
+    p.utilization = utilization;
+  });
+
+  // 按擁塞排序 (critical > high > medium > low)，同級按 YM 在港船數
+  const lvlOrder = { critical:0, high:1, medium:2, low:3 };
+  result.sort((a, b) => {
+    if (lvlOrder[a.level] !== lvlOrder[b.level]) return lvlOrder[a.level] - lvlOrder[b.level];
+    return b.ymInPort.length - a.ymInPort.length;
+  });
+  return result;
+}
+
+window.showPortCongestion = function() {
+  // 退出單船檢視
+  if (STATE.selectedVessel) {
+    exitDetail();
+  }
+  document.querySelectorAll('.sb-item').forEach(it => it.classList.remove('active'));
+  event?.currentTarget?.classList?.add('active');
+
+  const ports = computePortCongestion();
+  const lvlLabel = { critical: '🔴 嚴重擁塞', high: '🟠 高擁塞', medium: '🟡 中擁塞', low: '🟢 順暢' };
+  const totalYmInPort = ports.reduce((s,p)=>s+p.ymInPort.length, 0);
+  const portsWithYm = ports.filter(p => p.ymInPort.length > 0).length;
+  const totalYmVisits = ports.reduce((s,p)=>s+p.ymVisited.length, 0);
+  const congCritical = ports.filter(p => p.level === 'critical').length;
+
+  document.getElementById('rightPanel').innerHTML = `
+    <div id="panelPortCongestion">
+      <div class="port-dash-title">⚓ 港口擁塞看板</div>
+      <div class="port-dash-sub">基於 YM 船隊 20 艘軌跡 + 周邊偵測推估 · 資料區間 5/25 ~ 6/02</div>
+
+      <div class="port-summary-bar">
+        <div><div class="lbl">嚴重擁塞</div><div class="val" style="color:#ff8a8a;">${congCritical}</div></div>
+        <div><div class="lbl">YM 停泊船</div><div class="val">${totalYmInPort}</div></div>
+        <div><div class="lbl">資料區間到訪次</div><div class="val">${totalYmVisits}</div></div>
+        <div><div class="lbl">有 YM 訪港</div><div class="val">${portsWithYm}</div></div>
+      </div>
+
+      <div style="padding:0 14px 8px;font-size:10px;color:#7c8a9e;">點港口卡片 → 地圖縮放到該港</div>
+
+      ${ports.map(p => {
+        const ymInPortTxt = p.ymInPort.length
+          ? p.ymInPort.slice(0,3).map(s => s.name.split('/')[0].trim()).join('、') + (p.ymInPort.length>3?` 等 ${p.ymInPort.length} 艘`:'')
+          : '無';
+        const avgDwellH = p.ymVisited.length
+          ? (p.ymVisited.reduce((s,v)=>s+v.dwellH,0)/p.ymVisited.length).toFixed(1)
+          : '—';
+        return `
+          <div class="port-card cong-${p.level}" onclick="zoomToPort(${p.lat},${p.lon})">
+            <div class="pc-head">
+              <div><span class="pc-name">${p.flag} ${p.name}</span></div>
+              <span class="pc-cong-badge">${lvlLabel[p.level]}</span>
+            </div>
+            <div class="pc-metrics">
+              <div class="pc-metric"><div class="k">在港擁塞 (5NM 推估)</div><div class="v">${p.surroundingNow}</div></div>
+              <div class="pc-metric"><div class="k">使用率</div><div class="v">${(p.utilization*100).toFixed(0)}%</div></div>
+              <div class="pc-metric"><div class="k">平均停泊</div><div class="v">${avgDwellH}h</div></div>
+            </div>
+            <div class="pc-ymships">
+              YM 在港：${p.ymInPort.length} 艘 ${ymInPortTxt !== '無' ? '(' + ymInPortTxt + ')' : ''} · 8 天到訪 ${p.ymVisited.length} 次
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+};
+
+window.zoomToPort = function(lat, lon) {
+  STATE.map.setView([lat, lon], 11);
+};
+
 window.exitDetail = function() {
+  pauseTimeline();  // 退出時先停止播放
   STATE.selectedVessel = null;
   document.getElementById('timelineWrap').classList.remove('show');
   document.getElementById('layerToggle').style.display = 'none';
+  document.getElementById('aisLegend').style.display = 'none';
 
   ['trackLine', 'nmCircle', 'surroundingMarkers'].forEach(k => {
     if (STATE.layers[k]) STATE.map.removeLayer(STATE.layers[k]);
@@ -944,7 +3615,7 @@ window.exitDetail = function() {
 };
 
 // 圖層 toggle 即時更新
-['lyrTrack', 'lyrCircle', 'lyrSurr'].forEach(id => {
+['lyrTrack', 'lyrCircle'].forEach(id => {
   document.addEventListener('change', e => {
     if (e.target.id === id && STATE.selectedVessel) {
       drawDetailMap();
