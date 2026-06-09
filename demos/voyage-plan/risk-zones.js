@@ -22,49 +22,347 @@
  * ───────────────────────────────────────────────────────────────── */
 
 window.RISK_ZONE_CATEGORIES = [
-  { key: "piracy",     label: "海盜 / 武裝搶劫高風險區", label_en: "Piracy / Armed Robbery",       color: "#ff4d4f" },
-  { key: "war",        label: "戰爭 / 武裝衝突區",       label_en: "War / Armed Conflict",          color: "#a02030" },
-  { key: "sanction",   label: "制裁 / 禁運 / 敏感港口", label_en: "Sanctions / Embargo",            color: "#ff8c00" },
-  { key: "military",   label: "軍演 / 臨時禁航區",       label_en: "Military Exercise / NOTAM",      color: "#b069ff" },
-  { key: "weather",    label: "氣象與海況高風險區",     label_en: "Weather / Heavy Seas",            color: "#1e90ff" },
-  { key: "eca",        label: "環保排放管制區 (ECA)",   label_en: "Emission Control Area",           color: "#2ecc71" },
-  { key: "protected",  label: "保護區 / 鯨豚限速區",     label_en: "Protected / Whale Speed Limit",  color: "#1abc9c" },
-  { key: "congestion", label: "航道壅塞 / 避碰熱區",     label_en: "Congested Traffic Lane",          color: "#f5d04a" },
+  /* 風險區 — 進入時觸發警示（red/orange 色系） */
+  { key: "piracy",     label: "海盜 / 武裝搶劫高風險區", label_en: "Piracy / Armed Robbery",       color: "#ff4d4f", semantic: "risk" },
+  { key: "war",        label: "戰爭 / 武裝衝突區",       label_en: "War / Armed Conflict",          color: "#a02030", semantic: "risk" },
+  { key: "sanction",   label: "制裁 / 禁運 / 敏感港口", label_en: "Sanctions / Embargo",            color: "#ff8c00", semantic: "risk" },
+  { key: "military",   label: "軍演 / 臨時禁航區",       label_en: "Military Exercise / NOTAM",      color: "#b069ff", semantic: "risk" },
+  { key: "weather",    label: "氣象與海況高風險區",     label_en: "Weather / Heavy Seas",            color: "#1e90ff", semantic: "risk" },
+  /* 操作參考 — 進入時觸發「請啟動通報程序」、「進入安全通道」提示（cyan/green 色系） */
+  { key: "reporting",  label: "自願通報區 (VRA)",        label_en: "Voluntary Reporting Area",       color: "#00bfb3", semantic: "reporting" },
+  { key: "corridor",   label: "安全通道 / 護航走廊",     label_en: "Safety Corridor / Transit Route",color: "#6ee094", semantic: "corridor" },
+  /* 環保 / 保護 / 壅塞 — 屬於合規與航行注意（green/yellow 色系） */
+  { key: "eca",        label: "環保排放管制區 (ECA)",   label_en: "Emission Control Area",           color: "#2ecc71", semantic: "compliance" },
+  { key: "protected",  label: "保護區 / 鯨豚限速區",     label_en: "Protected / Whale Speed Limit",  color: "#1abc9c", semantic: "compliance" },
+  { key: "congestion", label: "航道壅塞 / 避碰熱區",     label_en: "Congested Traffic Lane",          color: "#f5d04a", semantic: "advisory" },
 ];
 /* 注意：港口錨地不算「風險區」而是「另一個風險監控維度」(window.ANCHORAGE_AREAS)
  * 對應 voyage-alert.html 的 anchorage 維度，獨立計算 + 獨立 threshold + 獨立圖層 */
+
+/* ─────────────────────────────────────────────────────────────────
+ * 風險區命中時的「建議動作清單」模板
+ * 來源文件：
+ *   - BMP5 (Best Management Practices to Deter Piracy v5, BIMCO/ICS/IGP&I/INTERTANKO/OCIMF, Jun 2018)
+ *   - ITF List of Designated Risk Areas with Applicable Benefits, 13 March 2026
+ *   - Liberia Marine Security Advisory 09/2023 Rev 7 — Anti-Piracy Checklist
+ *   - GCPG (Global Counter Piracy Guidance)
+ *
+ * 每個 zone 透過 action_template 欄位指向其中一個 template key；命中時依此模板出建議動作。
+ * 動作依「進入前 / 進入中 / 受攻擊 / 通報」階段分組，前端可摺疊顯示。
+ * ───────────────────────────────────────────────────────────────── */
+window.ZONE_ACTION_TEMPLATES = {
+  // ─── ITF Warlike Operations Area（最高層級：ISPS 3 + 拒航權 + 5 天最低戰險加成）
+  itf_woa: {
+    designation:    "ITF Warlike Operations Area (WOA)",
+    designation_cn: "ITF 戰爭風險區",
+    isps_level:     3,
+    bmp_level:      "BMP5 + GCPG（強制等同 ISPS Level 3）",
+    refs: [
+      "BMP5 §4 Planning / §5 Ship Protection Measures / §6 Reporting / §7 Ships under attack",
+      "ITF Designation 1/2/4/5/6/8（依區域）— 2026-03-13",
+      "Liberia Marine Security Advisory 09/2023 Rev 7 — Anti-Piracy Checklist",
+      "GCPG Part 6 Crew Briefing / Part 7 Ship Hardening",
+    ],
+    phases: [
+      { phase: "進入 VRA 之前 / Before entering VRA", items: [
+        "向 MSCIO 提交 Vessel Movement Registration Form（前身為 MSCHOA；postmaster@mscio.eu）",
+        "向 UKMTO 提交 Vessel Position Reporting Form — Initial Report（BMP5 Annex D）",
+        "完成航線專屬風險評估（含替代路線、是否使用 PCASP 武裝安全人員）",
+        "與保險公司確認 JWC / Lloyd's JWLA 加費條款；通知船員權益（5 天最低戰險加成 + 雙倍死亡傷害補償）",
+        "向公司 DPA / CSO 通報並取得最終出航許可",
+      ]},
+      { phase: "進入 HRA 之前 / Before entering HRA", items: [
+        "船舶 ISPS Security Level 設為 **Level 3**（強制），啟用最高等級安全措施",
+        "向船員宣告權益：依 ITF 規定有權拒絕航行；如拒航，公司負擔遣返費用 + 2 個月基本工資補償",
+        "依 BMP5 §4 進行全船船員簡報並完成演練（含警報、Citadel 撤離、通訊）",
+        "測試所有警報、SSAS、內部通訊、PA 廣播；驗證 UKMTO / MSCIO 緊急聯絡電話在駕駛室與 Citadel",
+        "Citadel 已備妥糧食、飲水、衛生用品、衛星電話 + VHF；演練全員撤離至 Citadel 並確認門禁",
+        "確認推進機可全速運轉；確認 AIS 維持開啟（軍方追蹤用）但限制資訊欄位",
+      ]},
+      { phase: "進入 HRA 之後 / During transit", items: [
+        "依 §6 提交 Position Report；持續監看 NAVAREA 警報與 UKMTO 更新",
+        "管制駕駛室與機艙出入口為單一進入點；非值班船員撤離至 Safe Muster Point",
+        "部署反登船障礙：高張力刺鐵絲（730/980mm 線圈直徑）、消防水帶噴射模式、泡沫水砲、探照燈",
+        "移除可協助攀爬的繩索、梯子；風暴梯（Pilot Ladder）收回",
+        "強化瞭望：增加額外瞭望員、縮短輪值、夜視鏡 / 熱顯像、雷達連續監視",
+        "避免漂航、慢速、錨泊；尤其在 MSTC 走廊內全速通過",
+        "VHF 減量使用，改用 Email 或衛星電話；只回應已知合法呼叫",
+      ]},
+      { phase: "若遭遇攻擊 / Under attack", items: [
+        "BMP5 §7：啟動警報、廣播 PA、船員撤至 Citadel；持續鳴汽笛干擾攻擊者",
+        "立即發送 SSAS（Ship Security Alert System）",
+        "通知 UKMTO（+44 1923 958 545 / watchkeepers@ukmto.org）+ MSCIO + 船公司 CSO",
+        "增速並進行迴避操作（操船產生水壓船尾效應，比單純加速更有效）",
+        "部署所有水砲 / 探照燈；舷外射燈以強光阻撓攻擊者",
+        "全員進入 Citadel 後門禁鎖死，與外界保持雙向通訊；軍方介入需「全員確認在 Citadel + 雙向通訊」兩條件",
+      ]},
+      { phase: "事件後通報 / After incident", items: [
+        "對 UKMTO + MSCIO + 船旗國 + 公司 DPA 提交事件報告（BMP5 §7 表單）",
+        "對 IMB Piracy Reporting Centre 提交副本",
+        "保留 CCTV 錄影、現場照片（船舶受損、攻擊船特徵）",
+        "驗證船員人數、傷亡、損害；依 ITF 規定，攻擊當日有額外補償資格",
+      ]},
+    ],
+    benefits: [
+      "依 ITF 2026-03-13 規定：最低 5 天戰險加成等於基本工資；其後依實際停留天數加給",
+      "雙倍死亡與傷殘補償（compensation doubled for death and disability）",
+      "船員享有拒航權；如拒航，公司負擔遣返費 + 兩個月基本工資補償",
+      "船東須執行等同 ISPS Level 3 的強化安全措施",
+    ],
+  },
+
+  // ─── ITF Extended Risk Zone（中層級：BMP 等級提升 + 攻擊當日加成）
+  itf_erz: {
+    designation:    "ITF Extended Risk Zone (ERZ)",
+    designation_cn: "ITF 擴展風險區",
+    isps_level:     2,
+    bmp_level:      "BMP5 / BMP West Africa（提升至最新版）",
+    refs: [
+      "BMP5 §4 / §5 / §6",
+      "BMP West Africa（如 Gulf of Guinea）",
+      "ITF Designation 3 / 9 / 10 — 2026-03-13",
+    ],
+    phases: [
+      { phase: "進入前 / Before entry", items: [
+        "依最新 BMP（BMP5 或 BMP West Africa）執行風險評估與航線規劃",
+        "通知 MDAT-GoG（西非）或 UKMTO（其它區域）並登記 Vessel Position Report",
+        "船員簡報：說明 ITF 攻擊當日加成（100% 基本工資）與雙倍傷亡補償權益",
+        "ISPS Security Level 提升至 Level 2",
+      ]},
+      { phase: "進入後 / During transit", items: [
+        "依 BMP 部署反登船障礙；維持強化瞭望",
+        "管制入口；Citadel 演練；通訊測試",
+        "AIS 維持開啟（除非當地軍方建議關閉）；持續監看區域警報",
+      ]},
+      { phase: "若遭遇攻擊 / Under attack", items: [
+        "啟動警報、SSAS、進入 Citadel；同 WOA 程序",
+        "事件報告須提交至國際認可機構（MDAT-GoG 等）以證明 ITF 加成資格",
+        "船日誌正式記載攻擊事件",
+      ]},
+    ],
+    benefits: [
+      "攻擊當日（且僅當日）享有 100% 基本工資加成",
+      "攻擊當日傷亡享雙倍補償",
+      "提升 BMP 等級為強制執行條件",
+    ],
+  },
+
+  // ─── ITF High Risk Area（中高層級：ISPS 3 + 全期加成 + 拒航權）
+  itf_hra: {
+    designation:    "ITF High Risk Area (HRA)",
+    designation_cn: "ITF 高風險區",
+    isps_level:     3,
+    bmp_level:      "BMP5 + GCPG",
+    refs: [
+      "BMP5 §4 / §5 / §6 / §7",
+      "ITF Designation 7（黑海 HRA）— 2026-03-13",
+    ],
+    phases: [
+      { phase: "進入前 / Before entry", items: [
+        "向 UKMTO 提交 Vessel Position Report — Initial Report",
+        "ISPS Security Level 設為 Level 3",
+        "依 BMP5 完成船員簡報、Citadel 演練、通訊測試",
+        "通知船員權益：實際停留期間皆享 100% 基本工資加成；雙倍傷亡補償；可拒航",
+      ]},
+      { phase: "進入後 / During transit", items: [
+        "依 BMP5 §5 部署所有 SPM（Ship Protection Measures）",
+        "持續監看 UKMTO / 區域軍方警報",
+        "管制出入口、強化瞭望、避免慢速漂航",
+      ]},
+      { phase: "若遭遇攻擊 / Under attack", items: [
+        "依 BMP5 §7 流程；同 WOA 程序",
+      ]},
+    ],
+    benefits: [
+      "依 ITF：實際停留 / 通過天數皆享 100% 基本工資加成",
+      "雙倍死亡傷殘補償；可拒航 + 2 個月基本工資補償",
+      "船東須執行等同 ISPS Level 3 強化安全措施",
+    ],
+  },
+
+  // ─── 海盜 BMP West Africa（西非適用，補充 ERZ 不足之處）
+  piracy_bmp_wa: {
+    designation:    "BMP West Africa (Gulf of Guinea)",
+    designation_cn: "BMP 西非版（幾內亞灣）",
+    isps_level:     2,
+    bmp_level:      "BMP West Africa（補 BMP5）",
+    refs: [
+      "BMP West Africa 4th edition",
+      "ITF Designation 3 — Gulf of Guinea ERZ",
+      "MDAT-GoG（Maritime Domain Awareness for the Gulf of Guinea）",
+    ],
+    phases: [
+      { phase: "進入前 / Before entry", items: [
+        "向 MDAT-GoG 提交 Reporting Form（西非地區的對應 UKMTO 機制）",
+        "依 BMP West Africa 進行風險評估，考慮使用區域 Convoy（如有提供）",
+        "ISPS Level 提升 Level 2",
+        "與保險公司確認 JWC 加費（西非長期戰險區）",
+      ]},
+      { phase: "進入後 / During transit", items: [
+        "部署反登船障礙：刺鐵絲、水砲、探照燈、CCTV",
+        "管制出入口；夜間限縮對外通訊",
+        "監看 MDAT-GoG 公告、區域海軍動態（奈及利亞、加納）",
+      ]},
+      { phase: "若遭遇攻擊 / Under attack", items: [
+        "通知 MDAT-GoG（+33 2 98 22 88 88）+ 船旗國 + 公司 CSO",
+        "啟動 SSAS + 警報 + Citadel 撤離",
+        "事件後提交報告予 IMB Piracy Reporting Centre + MDAT-GoG（ITF 攻擊當日加成資格憑證）",
+      ]},
+    ],
+    benefits: [
+      "ITF ERZ：攻擊當日 100% 基本工資加成 + 雙倍傷亡補償",
+      "BMP 等級提升為強制執行條件",
+    ],
+  },
+
+  // ─── 自願通報區（reporting）— 進入時觸發「請啟動通報程序」流程
+  reporting_general: {
+    designation:    "Voluntary Reporting Area (VRA)",
+    designation_cn: "自願通報區",
+    isps_level:     null,
+    bmp_level:      "BMP5 / GCPG（依區域）",
+    refs: [
+      "BMP5 §6 Reporting / GCPG Section 6",
+      "Admiralty Charts Q6099 (WIO) / Q6112+Q6113 (SE Asia) / Q6114 (GoG)",
+      "MC(18)48 - Global Counter Piracy Guidance",
+    ],
+    phases: [
+      { phase: "進入 VRA 之前 / Before entering VRA", items: [
+        "依該 VRA 所屬機構（MSCIO / MDAT-GoG / IFC Singapore / ReCAAP）取得最新指南與聯絡資訊",
+        "船員簡報通報程序：誰、何時、何種頻率送 Initial / Daily / Final Report",
+        "確認 SSAS、衛星電話、Email 通訊管道可用",
+      ]},
+      { phase: "進入 VRA / On entering", items: [
+        "提交 **Initial Report**（依該機構表單）— 通常含：船名、IMO、MMSI、Call Sign、入區時間/座標、預計航程、貨物、船員國籍、武裝安全人員（若有）",
+        "向 UKMTO（WIO）/ MDAT-GoG（GoG）/ IFC Singapore（SEA）登記船舶移動",
+      ]},
+      { phase: "在 VRA 期間 / During transit", items: [
+        "依規定頻率提交 **Daily Position Report**（通常每 6 或 12 小時一次）",
+        "監看區域警報與其他船舶 incident 報告",
+        "如遇可疑接近或攻擊，即刻向該 VRA 機構通報 + 對國旗國 / 公司 CSO 同步",
+      ]},
+      { phase: "離開 VRA / On exit", items: [
+        "提交 **Final Report**：離區時間/座標、靠港資訊、有無 incident",
+      ]},
+    ],
+    benefits: [
+      "獲得區域軍方 / 護衛艦的即時援助管道",
+      "區域安全情資（IRTA / IRTB）共享",
+      "船員權益依該 VRA 內的特定子區 ITF 規定（如 ITF WOA / HRA / ERZ）另行適用",
+    ],
+  },
+
+  // ─── 安全通道（corridor）— 護航走廊 / TSS
+  corridor_general: {
+    designation:    "Safety Corridor / Transit Scheme",
+    designation_cn: "安全通道 / 護航走廊",
+    isps_level:     null,
+    bmp_level:      "BMP5 §1（MSTC）/ COLREG Rule 10（TSS）",
+    refs: [
+      "BMP5 §1 Maritime Security Transit Corridor",
+      "IMO COLREG Rule 10 Traffic Separation Schemes",
+      "Admiralty Chart Q6099（IRTC / BAM TSS）",
+      "MSCIO Group Transit Scheme",
+    ],
+    phases: [
+      { phase: "進入通道前 / Before entering corridor", items: [
+        "確認船速能保持通道內最低航速（IRTC 內建議全速通過）",
+        "向 MSCIO 登記參加 Group Transit（如有提供）",
+        "規劃精準的進入點 / 退出點時間，避免在 corridor 外慢速漂航",
+      ]},
+      { phase: "在通道內 / Inside corridor", items: [
+        "全速通過、不漂航、不錨泊（規格 BMP5 §4）",
+        "依 COLREG Rule 10 行駛分隔通道（東行 / 西行）",
+        "AIS 維持開啟，便於軍方追蹤護航",
+        "VHF 維持與護航艦聯絡頻道（IRTC 通常為 VHF 16 + 軍方指定頻道）",
+      ]},
+      { phase: "出通道 / Exiting corridor", items: [
+        "提交 Final Position Report，確認離開時間與下一個 leg 計畫",
+      ]},
+    ],
+    benefits: [
+      "獲得軍方護航艦與空中監視涵蓋",
+      "享受 Group Transit 編隊優勢（多艘船同時通過降低個別風險）",
+      "事故發生時援助到達時間最短",
+    ],
+  },
+
+  // ─── 制裁區（通用：與 BMP / ITF 無關，著重法律與合規）
+  sanction_general: {
+    designation:    "Sanctions / Embargo Zone",
+    designation_cn: "制裁 / 禁運區",
+    isps_level:     null,
+    bmp_level:      null,
+    refs: [
+      "OFAC SDN List / EU Council Reg 833 / UN Security Council Resolutions",
+      "船公司法律顧問建議",
+    ],
+    phases: [
+      { phase: "進入前 / Before entry", items: [
+        "向法律顧問與 DPA 確認該港 / 該貨主 / 該收貨人是否在 SDN / EU Annex / UN 名單",
+        "確認貨物未列入禁運品（武器、軍民兩用、能源產品等）",
+        "確認支付通路（避免使用美元結算列名銀行）",
+        "考慮取得 OFAC General License 或 EU Annex 例外（如適用）",
+        "船東與承租人簽署 Letter of Indemnity（LOI）；確認保險覆蓋",
+      ]},
+      { phase: "進入後 / During port call", items: [
+        "保留完整文件鏈：BOL、貨主、收貨人、船員國籍、付款流水",
+        "AIS 維持開啟（**不可關閉 AIS**，避免被列入「影子船隊」嫌疑）",
+        "船員離港制度依當地規定（部分制裁港需事先取得船員簽證）",
+      ]},
+      { phase: "離港後 / After departure", items: [
+        "保留所有港口紀錄至少 5 年備查",
+        "向公司合規部門提交完整航次報告",
+      ]},
+    ],
+    benefits: [],
+  },
+};
+/* helper：依 action_template key 取出 template；找不到回 null */
+window.getZoneActionTemplate = function(key) {
+  return key ? (window.ZONE_ACTION_TEMPLATES[key] || null) : null;
+};
 
 window.RISK_ZONES = [
   /* ── 1. 海盜 / 武裝搶劫高風險區 ──────────────────────────────── */
   { cat: "piracy", id: "PIR-GoG-2026", level: "low",
     name: "幾內亞灣（西非）", name_en: "Gulf of Guinea",
     type: "海盜熱區（已大幅冷卻）", type_en: "Piracy hotspot (sharp decline)",
-    desc: "IMB Q1 2026 全西非僅 1 起；自 2022 峰值大幅下降。BMP West Africa 仍建議；偶有近岸搶劫。",
-    desc_en: "IMB Q1 2026: just 1 incident in entire West Africa region — sharp decline since 2022 peak. BMP West Africa still recommended; occasional inshore robbery.",
-    source: "IMB Piracy Reporting Centre Q1 2026 / MDAT-GoG",
+    desc: "IMB Q1 2026 全西非僅 1 起；自 2022 峰值大幅下降。BMP West Africa 仍建議；偶有近岸搶劫。ITF 仍維持為 Extended Risk Zone（攻擊當日適用戰險加成）。",
+    desc_en: "IMB Q1 2026: just 1 incident in entire West Africa region — sharp decline since 2022 peak. BMP West Africa still recommended; occasional inshore robbery. ITF maintains Extended Risk Zone designation (war-risk benefit applies on day of attack only).",
+    source: "ITF ERZ Designation 3 (Gulf of Guinea, since 2023-01-01) / IMB Piracy Reporting Centre Q1 2026 / MDAT-GoG",
     source_url: "https://www.icc-ccs.org/piracy-reporting-centre",
-    effective_from: "全年（長期）", effective_to: "進行中 / ongoing",
-    coords: [[6.8, -5.0], [6.8, 9.0], [-2.0, 9.0], [-2.0, 2.0], [3.0, -5.0]] },
+    effective_from: "ITF ERZ 自 2023-01-01；長期", effective_to: "進行中 / ongoing",
+    action_template: "piracy_bmp_wa",
+    itf_designation: "Extended Risk Zone (ERZ)",
+    coords: [[6.8, -5.0], [6.8, 9.0], [-2.0, 9.0], [-2.0, 2.0], [3.0, -5.0]],
+    source_kinds: ["doc", "official", "web"] },
 
   { cat: "piracy", id: "PIR-SOM-2026", level: "high",
     name: "索馬利亞外海 / 亞丁灣 (HRA 重啟)", name_en: "Off Somalia / Gulf of Aden (HRA reactivated)",
     type: "BMP5 高風險區 / 2026 重啟劫船", type_en: "BMP5 HRA / Hijacks resumed 2026",
-    desc: "2026-04 一週內 Alkhary 2 (4/20)、Honour 25 (4/21)、Sward (4/26) 三船遭劫，自 2017 以來最嚴峻復發；Alkhary 2 已於 4/22 釋放，Honour 25 / Sward 仍被扣。母船 (dhow) 作業範圍延伸至離岸 600 nm。分析師推測紅海反海盜兵力分散創造機會（與 Houthi 之關聯未獲權威證實）。",
-    desc_en: "Three hijackings in one week April 2026 — Alkhary 2 (4/20), Honour 25 (4/21), Sward (4/26) — most severe resurgence since 2017; Alkhary 2 released Apr 22, Honour 25 / Sward still held. Mothership (dhow) operations extend to 600 nm offshore. Analysts speculate diverted Red Sea anti-piracy forces created opportunity (Houthi linkage unconfirmed by authoritative sources).",
-    source: "Al Jazeera / DefenceWeb / EU NAVFOR ATALANTA / UKMTO",
+    desc: "2026-04 一週內 Alkhary 2 (4/20)、Honour 25 (4/21)、Sward (4/26) 三船遭劫，自 2017 以來最嚴峻復發；Alkhary 2 已於 4/22 釋放，Honour 25 / Sward 仍被扣。母船 (dhow) 作業範圍延伸至離岸 600 nm。分析師推測紅海反海盜兵力分散創造機會（與 Houthi 之關聯未獲權威證實）。對應 ITF Designation 2（南紅海 / 亞丁灣 WOA）。",
+    desc_en: "Three hijackings in one week April 2026 — Alkhary 2 (4/20), Honour 25 (4/21), Sward (4/26) — most severe resurgence since 2017. Mothership (dhow) operations extend to 600 nm offshore. Maps onto ITF Designation 2 (Southern Red Sea / Gulf of Aden WOA).",
+    source: "ITF WOA Designation 2 (Southern Red Sea & Gulf of Aden, since 2024-03-19) / Al Jazeera / DefenceWeb / EU NAVFOR ATALANTA / UKMTO",
     source_url: "https://www.aljazeera.com/news/2026/5/1/why-is-piracy-rising-off-somalia-again-and-is-the-iran-war",
-    effective_from: "2026-04（重啟）", effective_to: "進行中 / ongoing",
-    coords: [[16, 42], [16, 60], [4, 65], [-5, 55], [0, 45], [10, 42]] },
+    effective_from: "ITF WOA 自 2024-03-19；劫船重啟 2026-04", effective_to: "進行中 / ongoing",
+    action_template: "itf_woa",
+    itf_designation: "Warlike Operations Area (WOA)",
+    coords: [[16, 42], [16, 60], [4, 65], [-5, 55], [0, 45], [10, 42]],
+    source_kinds: ["doc", "official", "web"] },
 
   { cat: "piracy", id: "PIR-SOMBASIN-2026", level: "high",
     name: "索馬利亞海盆（擴展區）", name_en: "Somali Basin (extended threat area)",
     type: "母船延伸打擊區", type_en: "Mothership-extended attack range",
-    desc: "海盜以 dhow 為母船延伸至離岸 600 nm；商船於 IOR 西部需保持警戒、走 IRTC 護航走廊。",
-    desc_en: "Mothership-supported operations reach 600 nm offshore using dhows; merchant vessels in W Indian Ocean advised to use IRTC convoy corridor.",
-    source: "Windward / UKMTO / EU NAVFOR ATALANTA",
+    desc: "海盜以 dhow 為母船延伸至離岸 600 nm；商船於 IOR 西部需保持警戒、走 IRTC 護航走廊。屬 BMP5 高風險區。",
+    desc_en: "Mothership-supported operations reach 600 nm offshore using dhows; merchant vessels in W Indian Ocean advised to use IRTC convoy corridor. Within BMP5 HRA scope.",
+    source: "BMP5 (Indian Ocean HRA) / Windward / UKMTO / EU NAVFOR ATALANTA",
     source_url: "https://www.ukmto.org",
     effective_from: "2026-04", effective_to: "進行中 / ongoing",
-    coords: [[8, 50], [8, 68], [-8, 68], [-8, 50]] },
+    action_template: "itf_woa",
+    itf_designation: "BMP5 HRA scope",
+    coords: [[8, 50], [8, 68], [-8, 68], [-8, 50]],
+    source_kinds: ["doc", "official", "web"] },
 
   { cat: "piracy", id: "PIR-SS-2026", level: "medium",
     name: "新加坡海峽 / 麻六甲", name_en: "Singapore Strait / Malacca",
@@ -74,7 +372,9 @@ window.RISK_ZONES = [
     source: "ReCAAP ISC Annual Report 2025 / Jan 2026 brief",
     source_url: "https://www.recaap.org",
     effective_from: "全年", effective_to: "進行中 / ongoing",
-    coords: [[3.5, 100], [3.5, 105.5], [0.5, 105.5], [-0.5, 102], [1, 99]] },
+    action_template: "piracy_bmp_wa",
+    coords: [[3.5, 100], [3.5, 105.5], [0.5, 105.5], [-0.5, 102], [1, 99]],
+    source_kinds: ["official"] },
 
   { cat: "piracy", id: "PIR-SULU-2026", level: "low",
     name: "蘇祿—西里伯斯海", name_en: "Sulu–Celebes Sea",
@@ -84,58 +384,114 @@ window.RISK_ZONES = [
     source: "ReCAAP Guidance 2025 / PCG advisories",
     source_url: "https://www.recaap.org/resources/ck/files/guide/Recaap_guidance_FA(single).pdf",
     effective_from: "2025-01（下調 LOW）", effective_to: "進行中 / ongoing",
-    coords: [[8, 118], [8, 124], [3, 124.5], [3, 118]] },
+    action_template: "piracy_bmp_wa",
+    coords: [[8, 118], [8, 124], [3, 124.5], [3, 118]],
+    source_kinds: ["official"] },
 
   /* ── 2. 戰爭 / 武裝衝突區 ─────────────────────────────────────── */
   { cat: "war", id: "WAR-BLK-2026", level: "critical",
     name: "黑海（俄烏戰區）", name_en: "Black Sea (RU-UA war zone)",
     type: "JWLA 戰區 / USV 攻擊俄油輪", type_en: "JWLA war risk / USV strikes on RU tankers",
-    desc: "Risk Intelligence 預測 2026 全球國家武力攻擊船舶首位；烏方公開以無人水面艇打擊俄油輪；UA 港口 7 日戰險升至約 0.5% 船價，俄 BS 港 0.65–0.8%。",
-    desc_en: "Risk Intelligence ranks Black Sea #1 for state-on-shipping attacks in 2026; UA released USV strike footage on RU tankers; UA-port 7-day war risk ~0.5% of hull, RU BS ports 0.65–0.8%.",
-    source: "JWC / Lloyd's JWLA-027 / Risk Intelligence 2026 forecast",
+    desc: "Risk Intelligence 預測 2026 全球國家武力攻擊船舶首位；烏方公開以無人水面艇打擊俄油輪；UA 港口 7 日戰險升至約 0.5% 船價，俄 BS 港 0.65–0.8%。ITF Designation 7 將整個黑海列為 HRA（自 2023-11-01）、北黑海另列為 WOA（Designation 5）。",
+    desc_en: "Risk Intelligence ranks Black Sea #1 for state-on-shipping attacks in 2026; UA released USV strike footage on RU tankers; UA-port 7-day war risk ~0.5% of hull, RU BS ports 0.65–0.8%. ITF designates entire Black Sea as HRA (Designation 7, since 2023-11-01), with Northern Black Sea as WOA (Designation 5).",
+    source: "ITF WOA Designation 5 + HRA Designation 7 (2026-03-13 revision) / JWC / Lloyd's JWLA-027 / Risk Intelligence 2026 forecast",
     source_url: "https://www.lmalloyds.com",
-    effective_from: "2022-02-24", effective_to: "進行中 / ongoing",
-    coords: [[47.2, 28], [47.2, 41.5], [42, 41.5], [42, 28]] },
+    effective_from: "ITF WOA/HRA 自 2023-11-01；戰爭自 2022-02-24", effective_to: "進行中 / ongoing",
+    action_template: "itf_hra",
+    itf_designation: "Warlike Operations Area (north) + High Risk Area",
+    coords: [[47.2, 28], [47.2, 41.5], [42, 41.5], [42, 28]],
+    source_kinds: ["doc", "official", "web"] },
 
   { cat: "war", id: "WAR-UKR-PORT-2026", level: "critical",
     name: "烏克蘭港口（Odesa / Yuzhny）", name_en: "Ukrainian Ports (Odesa / Yuzhny)",
     type: "俄軍持續打擊港口設施", type_en: "Continued RU strikes on port terminals",
-    desc: "Odesa / Pivdennyi (Yuzhne) / Chornomorsk 多次遭俄飛彈與無人機攻擊；2025-11 Izmail 港 gas tanker 受損、2025-12 多艘土耳其籍船在 Odesa 受損、2024-10 Pivdennyi 散貨船 Paresa 受損；船員傷亡與保費維持高位。",
-    desc_en: "Odesa / Pivdennyi (Yuzhne) / Chornomorsk repeatedly hit by RU missiles & drones; gas tanker damaged at Izmail Nov 2025, Turkish-owned vessels damaged at Odesa Dec 2025, bulker Paresa damaged at Pivdennyi Oct 2024; crew casualties and premiums remain elevated.",
-    source: "Maritime Executive / NorthStandard / Ukrainian MIU",
+    desc: "Odesa / Pivdennyi (Yuzhne) / Chornomorsk 多次遭俄飛彈與無人機攻擊；2025-11 Izmail 港 gas tanker 受損、2025-12 多艘土耳其籍船在 Odesa 受損、2024-10 Pivdennyi 散貨船 Paresa 受損；船員傷亡與保費維持高位。對應 ITF Designation 6（全烏克蘭港口 WOA）。",
+    desc_en: "Odesa / Pivdennyi (Yuzhne) / Chornomorsk repeatedly hit by RU missiles & drones; gas tanker damaged at Izmail Nov 2025, Turkish-owned vessels damaged at Odesa Dec 2025, bulker Paresa damaged at Pivdennyi Oct 2024. Maps to ITF Designation 6 (all Ukrainian ports WOA).",
+    source: "ITF WOA Designation 6 (All Ukrainian ports, since 2022-03-01) / Maritime Executive / NorthStandard / Ukrainian MIU",
     source_url: "https://maritime-executive.com",
-    effective_from: "2022-02", effective_to: "進行中 / ongoing",
-    coords: [[46.8, 30.5], [46.8, 32.0], [45.8, 32.0], [45.8, 30.5]] },
+    effective_from: "ITF WOA 自 2022-03-01", effective_to: "進行中 / ongoing",
+    action_template: "itf_woa",
+    itf_designation: "Warlike Operations Area (WOA)",
+    coords: [[46.8, 30.5], [46.8, 32.0], [45.8, 32.0], [45.8, 30.5]],
+    source_kinds: ["doc", "web"] },
 
   { cat: "war", id: "WAR-RED-2026", level: "high",
     name: "紅海 / Bab-el-Mandeb（Houthi）", name_en: "Red Sea / Bab-el-Mandeb (Houthi)",
     type: "Houthi 重新威脅；攻擊未實際重啟", type_en: "Houthi resumed threats; no confirmed attacks yet",
-    desc: "2025-11 至 2026-02 暫無確認攻擊；2026-02-28 美以對伊朗動武後 Houthi 公開表態恢復攻擊；多數承運仍走好望角；UKMTO 維持高威脅。",
-    desc_en: "No confirmed attacks Nov 2025–Feb 2026. After US-Israel strikes on Iran (Feb 28 2026) Houthis publicly threatened to resume targeting shipping. Most carriers still routing via Cape of Good Hope; UKMTO threat level remains high.",
-    source: "UKMTO / MARAD 2026-006 / CMF",
+    desc: "2025-11 至 2026-02 暫無確認攻擊；2026-02-28 美以對伊朗動武後 Houthi 公開表態恢復攻擊；多數承運仍走好望角。對應 ITF Designation 1（葉門海岸 12nm WOA，自 2018-03-01）+ Designation 2（南紅海/亞丁灣 WOA，自 2024-03-19）。**NAVCENT 子區**：12°N–16°N、46°E 以西 + Bab al Mandab Strait 為攻擊熱點極高威脅子區（依 Liberia Marine Security Advisory 09/2023 Rev 7）；攻擊範圍曾達離岸 100 nm。**OPG (Operation Prosperity Guardian)** 由 CMF / CTF-153 在 Southern Red Sea 進行存在嚇阻任務。",
+    desc_en: "Houthis publicly threatened to resume targeting shipping after US-Israel strikes on Iran (Feb 28 2026). Most carriers still routing via Cape of Good Hope. Maps to ITF Designation 1 (12nm off Yemeni coast WOA, since 2018-03-01) + Designation 2 (Southern Red Sea/Gulf of Aden WOA, since 2024-03-19). **NAVCENT sub-zone**: 12°N–16°N, west of 46°E + Bab al Mandab Strait identified as highest-threat attack hotspot (per Liberia Marine Security Advisory 09/2023 Rev 7); attacks reached up to 100 nm offshore. **OPG (Operation Prosperity Guardian)** runs presence-and-deterrence missions in Southern Red Sea under CMF / CTF-153.",
+    source: "ITF WOA Designations 1 & 2 / Liberia MSA 09/2023 Rev 7 / NAVCENT / UKMTO / MARAD 2026-006 / CMF / OPG (CTF-153)",
     source_url: "https://www.ukmto.org",
-    effective_from: "2023-11", effective_to: "進行中 / ongoing",
-    coords: [[20, 36], [20, 46], [11, 46], [11, 41]] },
+    effective_from: "ITF WOA 自 2018-03-01 / 2024-03-19；Houthi 威脅自 2023-11", effective_to: "進行中 / ongoing",
+    action_template: "itf_woa",
+    itf_designation: "Warlike Operations Area (WOA) ×2 + NAVCENT 極高威脅子區",
+    coords: [[20, 36], [20, 46], [11, 46], [11, 41]],
+    source_kinds: ["doc", "official", "web"] },
+
+  { cat: "war", id: "WAR-RED-NAVCENT-2026", level: "critical",
+    name: "南紅海 NAVCENT 極高威脅子區", name_en: "Southern Red Sea NAVCENT Highest-Threat Sub-zone",
+    type: "Houthi 飛彈/無人機/水雷攻擊熱點", type_en: "Houthi missile / UAV / mine attack hotspot",
+    desc: "NAVCENT 於 Liberia Marine Security Advisory 09/2023 Rev 7 標示「南紅海 12°N–16°N、46°E 以西 + Bab al Mandab Strait」為「持續高度威脅」攻擊熱點。Houthi 已多次以反艦飛彈、反艦彈道飛彈、無人機、WBIED 攻擊商船；近葉門海岸佈雷有時脫纜漂入主航道。**Liberian flag 強制 ISPS Level 3**，COMUSNAVCENT 建議 AIS 關閉時須每 2–3 小時提交位置報告。",
+    desc_en: "NAVCENT identifies sub-zone 12°N–16°N west of 46°E + Bab al Mandab Strait as 'continued high threat' attack hotspot (per Liberia MSA 09/2023 Rev 7). Houthis have attacked merchant ships with anti-ship missiles, anti-ship ballistic missiles, UAVs, and WBIEDs; mines near Yemen coast occasionally drift into traffic lanes. **Liberian-flag vessels mandated ISPS Level 3**; if AIS is off, ships must position-report to COMUSNAVCENT every 2–3 hrs.",
+    source: "NAVCENT / Liberia Marine Security Advisory 09/2023 Rev 7 (12 Mar 2025) / OPG (CTF-153)",
+    source_url: "https://www.cusnc.navy.mil",
+    effective_from: "2023-11（依 MSA 09/2023）", effective_to: "進行中 / ongoing",
+    action_template: "itf_woa",
+    itf_designation: "NAVCENT Highest-Threat Sub-zone（在 ITF WOA 內）",
+    coords: [[16, 41], [16, 46], [12, 46], [12, 43.2]],
+    source_kinds: ["doc"] },
 
   { cat: "war", id: "WAR-HORM-2026", level: "critical",
     name: "波斯灣 / 荷莫茲海峽（2026 伊朗戰）", name_en: "Persian Gulf / Strait of Hormuz (2026 Iran War)",
     type: "海峽封閉 / 佈雷 / 美軍反封鎖", type_en: "Strait closure / Mining / US counter-blockade",
-    desc: "2026-02-28 美以動武、暗殺 Khamenei；伊朗封閉海峽、佈雷扣船；2026-04-13 至 05-29 美軍封鎖伊朗港口；商船通量降至戰前 5%（4 月僅 191 艘）；IEA 稱史上最大油供應中斷。2026-05-29 起 60 日停火延長談判中，佈雷與通量未完全恢復、清雷估需 6 個月。",
-    desc_en: "Iran closed Strait & laid mines after US-Israel strikes & Khamenei killed (Feb 28 2026); US blockade of Iranian ports Apr 13 – May 29 2026; only 191 vessels crossed in April (≈5% of pre-war level); IEA calls it largest oil supply disruption ever. 60-day ceasefire extension under negotiation since May 29 2026; mines and throughput not fully restored; mine-clearing estimated 6 months.",
-    source: "Wikipedia 2026 Iran war / Strait of Hormuz crisis / US naval blockade of Iran / Iran war ceasefire",
+    desc: "2026-02-28 美以動武、暗殺 Khamenei；伊朗封閉海峽、佈雷扣船；2026-04-13 至 05-29 美軍封鎖伊朗港口；商船通量降至戰前 5%（4 月僅 191 艘）。對應 ITF Designation 8（波斯灣/荷莫茲海峽/阿曼灣 WOA，自 2026-03-06 生效，反映 Iran 戰升級）。",
+    desc_en: "Iran closed Strait & laid mines after US-Israel strikes (Feb 28 2026); only 191 vessels crossed in April (≈5% of pre-war level). ITF Designation 8 (Persian Gulf/Hormuz/Gulf of Oman WOA) took effect 2026-03-06 in response to Iran war escalation.",
+    source: "ITF WOA Designation 8 (since 2026-03-06) / Wikipedia 2026 Iran war / Strait of Hormuz crisis / US naval blockade of Iran",
     source_url: "https://en.wikipedia.org/wiki/2026_Strait_of_Hormuz_crisis",
-    effective_from: "2026-02-28（戰爭升級）", effective_to: "2026-05-29 停火（談判延長中）",
-    coords: [[30, 48], [30, 58], [24, 58], [24, 48]] },
+    effective_from: "ITF WOA 自 2026-03-06；戰爭升級 2026-02-28", effective_to: "2026-05-29 停火（談判延長中）",
+    action_template: "itf_woa",
+    itf_designation: "Warlike Operations Area (WOA)",
+    coords: [[30, 48], [30, 58], [24, 58], [24, 48]],
+    source_kinds: ["doc", "web"] },
+
+  { cat: "war", id: "WAR-AZOV-2026", level: "critical",
+    name: "亞速海 / 刻赤海峽（北 45°03'N）", name_en: "Sea of Azov / Strait of Kerch (north of 45°03'N)",
+    type: "ITF WOA 戰爭風險區", type_en: "ITF Warlike Operations Area",
+    desc: "亞速海與刻赤海峽北緯 45°03'N 以北全部水域與港口；俄烏戰爭期間長期衝突區，自 2023-11-01 列為 ITF Designation 4 WOA。涵蓋克里米亞東岸 + 俄南方港口（Taganrog、Rostov、Mariupol、Berdyansk）。",
+    desc_en: "All waters and ports of Sea of Azov and Strait of Kerch north of 45°03'00\"N. Long-standing conflict zone during RU-UA war; ITF Designation 4 WOA since 2023-11-01. Covers eastern Crimea + Russian southern ports (Taganrog, Rostov, Mariupol, Berdyansk).",
+    source: "ITF WOA Designation 4 (Sea of Azov / Strait of Kerch, since 2023-11-01) / JWC / Lloyd's JWLA-027",
+    source_url: "https://www.itfseafarers.org",
+    effective_from: "ITF WOA 自 2023-11-01", effective_to: "進行中 / ongoing",
+    action_template: "itf_woa",
+    itf_designation: "Warlike Operations Area (WOA)",
+    coords: [[47.3, 34.7], [47.3, 39.5], [45.05, 39.5], [45.05, 34.7]],
+    source_kinds: ["doc", "official"] },
+
+  { cat: "war", id: "WAR-GOO-2026", level: "high",
+    name: "阿曼灣 ERZ（北 24°N）", name_en: "Gulf of Oman ERZ (north of 24°N)",
+    type: "ITF 擴展風險區（伊朗戰外延）", type_en: "ITF Extended Risk Zone (Iran war spillover)",
+    desc: "ITF Designation 9：阿曼灣 24°00'N 緯線以南 + Ra's al Hadd 燈塔 035° 方位線以西的水域，自 2026-03-06 列為 ERZ，與 ITF #8 波斯灣 WOA 互補。攻擊當日適用 100% 基本工資加成與雙倍傷亡補償。",
+    desc_en: "ITF Designation 9: waters south of 24°00'N latitude and west of the 035° bearing line from Ra's al Hadd light. Designated ERZ since 2026-03-06, complementing ITF #8 Persian Gulf WOA. 100% basic-wage bonus + doubled compensation apply on attack day.",
+    source: "ITF ERZ Designation 9 (Gulf of Oman, since 2026-03-06)",
+    source_url: "https://www.itfseafarers.org",
+    effective_from: "ITF ERZ 自 2026-03-06", effective_to: "進行中 / ongoing",
+    action_template: "itf_erz",
+    itf_designation: "Extended Risk Zone (ERZ)",
+    coords: [[24, 57.1], [24, 60.97], [22.5, 59.8], [22.5, 57.1]],
+    source_kinds: ["doc"] },
 
   { cat: "war", id: "WAR-EMED-2026", level: "high",
     name: "東地中海（黎凡特）", name_en: "Eastern Mediterranean (Levant)",
     type: "區域衝突 / 海上軍事活動", type_en: "Regional conflict / Naval activity",
-    desc: "以哈與黎巴嫩外海軍事活動延續；伊朗戰升級後黎凡特水域風險再上升；JWLA 戰險加費維持。",
-    desc_en: "Israel-Hamas + Lebanon offshore military activity continues; Levant risk rose further after Iran war escalation; JWLA war-risk surcharge maintained.",
-    source: "JWC / Lloyd's JWLA",
+    desc: "以哈與黎巴嫩外海軍事活動延續；伊朗戰升級後黎凡特水域風險再上升；JWLA 戰險加費維持。ITF Designation 10 將以色列沿岸 12 海浬列為 ERZ（自 2026-03-13）。",
+    desc_en: "Israel-Hamas + Lebanon offshore military activity continues; Levant risk rose further after Iran war escalation; JWLA war-risk surcharge maintained. ITF Designation 10 lists 12NM off Israel coastline as ERZ (since 2026-03-13).",
+    source: "ITF ERZ Designation 10 (12NM off Israel, since 2026-03-13) / JWC / Lloyd's JWLA",
     source_url: "https://www.lmalloyds.com",
-    effective_from: "2023-10", effective_to: "進行中 / ongoing",
-    coords: [[35.5, 32], [35.5, 36.5], [31, 36.5], [31, 32]] },
+    effective_from: "ITF ERZ 自 2026-03-13；衝突自 2023-10", effective_to: "進行中 / ongoing",
+    action_template: "itf_erz",
+    itf_designation: "Extended Risk Zone (ERZ)",
+    coords: [[35.5, 32], [35.5, 36.5], [31, 36.5], [31, 32]],
+    source_kinds: ["doc", "official"] },
 
   /* ── 3. 制裁 / 禁運 / 敏感港口區 ──────────────────────────────── */
   { cat: "sanction", id: "SAN-RU-BAL-2026", level: "high",
@@ -146,7 +502,9 @@ window.RISK_ZONES = [
     source: "EU Council 20th sanctions package / OFAC",
     source_url: "https://www.consilium.europa.eu",
     effective_from: "2022-12-05", effective_to: "進行中 / ongoing",
-    coords: [[60.5, 27], [60.5, 35], [58, 35], [58, 27]] },
+    coords: [[60.5, 27], [60.5, 35], [58, 35], [58, 27]],
+    action_template: "sanction_general",
+    source_kinds: ["official"] },
 
   { cat: "sanction", id: "SAN-RU-BLK-2026", level: "high",
     name: "俄羅斯黑海港口", name_en: "Russian Black Sea Ports",
@@ -156,7 +514,9 @@ window.RISK_ZONES = [
     source: "EU Council Reg 833 (20th amendment) / OFAC",
     source_url: "https://www.consilium.europa.eu",
     effective_from: "2026-04-23 採納 / 04-24 生效（Tuapse 新增）", effective_to: "進行中 / ongoing",
-    coords: [[45.5, 36.5], [45.5, 39.5], [43.5, 39.5], [43.5, 36.5]] },
+    coords: [[45.5, 36.5], [45.5, 39.5], [43.5, 39.5], [43.5, 36.5]],
+    action_template: "sanction_general",
+    source_kinds: ["official"] },
 
   { cat: "sanction", id: "SAN-RU-MUR-2026", level: "high",
     name: "俄羅斯北極港 Murmansk", name_en: "Russian Arctic Port Murmansk",
@@ -166,7 +526,9 @@ window.RISK_ZONES = [
     source: "EU Council Reg 833 (20th amendment)",
     source_url: "https://www.consilium.europa.eu",
     effective_from: "2026-04-24", effective_to: "進行中 / ongoing",
-    coords: [[69.4, 32.5], [69.4, 34.0], [68.7, 34.0], [68.7, 32.5]] },
+    coords: [[69.4, 32.5], [69.4, 34.0], [68.7, 34.0], [68.7, 32.5]],
+    action_template: "sanction_general",
+    source_kinds: ["official"] },
 
   { cat: "sanction", id: "SAN-IR-2026", level: "critical",
     name: "伊朗港口（戰時封鎖）", name_en: "Iranian Ports (wartime blockade)",
@@ -176,7 +538,9 @@ window.RISK_ZONES = [
     source: "OFAC / Wikipedia 2026 US naval blockade of Iran",
     source_url: "https://ofac.treasury.gov",
     effective_from: "2018-11-05（戰時 2026-04-13）", effective_to: "進行中 / ongoing",
-    coords: [[28, 50], [28, 58], [25, 58], [25, 50]] },
+    coords: [[28, 50], [28, 58], [25, 58], [25, 50]],
+    action_template: "sanction_general",
+    source_kinds: ["official", "web"] },
 
   { cat: "sanction", id: "SAN-DPRK-2026", level: "critical",
     name: "北韓港口", name_en: "DPRK Ports",
@@ -186,7 +550,9 @@ window.RISK_ZONES = [
     source: "UNSC Res 1718/2270/2371/2397 / OFAC DPRK advisory",
     source_url: "https://www.un.org/securitycouncil",
     effective_from: "2006-10-14", effective_to: "進行中 / ongoing",
-    coords: [[43, 124], [43, 131], [37.5, 131], [37.5, 124]] },
+    coords: [[43, 124], [43, 131], [37.5, 131], [37.5, 124]],
+    action_template: "sanction_general",
+    source_kinds: ["official"] },
 
   { cat: "sanction", id: "SAN-VEN-2026", level: "low",
     name: "委內瑞拉港口（GL 鬆綁）", name_en: "Venezuelan Ports (GL eased)",
@@ -196,7 +562,9 @@ window.RISK_ZONES = [
     source: "OFAC Venezuela GL 47, 48, 49, 50, 50A / Crowell / Morgan Lewis",
     source_url: "https://ofac.treasury.gov/sanctions-programs-and-country-information/venezuela-related-sanctions",
     effective_from: "2026-02-03（GL 47 起鬆綁）", effective_to: "依 GL 動態調整",
-    coords: [[12, -72], [12, -61], [10, -61], [10, -72]] },
+    coords: [[12, -72], [12, -61], [10, -61], [10, -72]],
+    action_template: "sanction_general",
+    source_kinds: ["official", "web"] },
 
   { cat: "sanction", id: "SAN-SY-2026", level: "high",
     name: "敘利亞港口", name_en: "Syrian Ports",
@@ -206,7 +574,9 @@ window.RISK_ZONES = [
     source: "OFAC Syria Sanctions / EU Council Reg 36/2012",
     source_url: "https://ofac.treasury.gov",
     effective_from: "2011-05", effective_to: "進行中 / ongoing",
-    coords: [[36, 35], [36, 37], [34, 37], [34, 35]] },
+    coords: [[36, 35], [36, 37], [34, 37], [34, 35]],
+    action_template: "sanction_general",
+    source_kinds: ["official"] },
 
   { cat: "sanction", id: "SAN-CU-2026", level: "medium",
     name: "古巴港口", name_en: "Cuban Ports",
@@ -216,7 +586,9 @@ window.RISK_ZONES = [
     source: "OFAC Cuban Assets Control Regulations",
     source_url: "https://ofac.treasury.gov",
     effective_from: "1962（強化 2017）", effective_to: "進行中 / ongoing",
-    coords: [[24, -85], [24, -75], [19, -75], [19, -85]] },
+    coords: [[24, -85], [24, -75], [19, -75], [19, -85]],
+    action_template: "sanction_general",
+    source_kinds: ["official"] },
 
   /* ── 4. 軍演 / 臨時禁航區 ─────────────────────────────────────── */
   { cat: "military", id: "MIL-TWS-2026", level: "high",
@@ -227,7 +599,8 @@ window.RISK_ZONES = [
     source: "China MSA NAVAREA XI / Global Taiwan Institute / The Diplomat",
     source_url: "https://www.msa.gov.cn",
     effective_from: "依公告 / per NOTMAR", effective_to: "依公告 / per NOTMAR",
-    coords: [[26, 118], [26, 122], [22, 122], [22, 118]] },
+    coords: [[26, 118], [26, 122], [22, 122], [22, 118]],
+    source_kinds: ["official"] },
 
   { cat: "military", id: "MIL-SCS-2026", level: "medium",
     name: "南海", name_en: "South China Sea",
@@ -237,7 +610,8 @@ window.RISK_ZONES = [
     source: "USNI News / SCMP / Naval News",
     source_url: "https://news.usni.org",
     effective_from: "2026-04-20", effective_to: "2026-05-08（年度）",
-    coords: [[20, 110], [20, 120], [7, 120], [7, 110]] },
+    coords: [[20, 110], [20, 120], [7, 120], [7, 110]],
+    source_kinds: ["official"] },
 
   { cat: "military", id: "MIL-ECS-2026", level: "medium",
     name: "東海 / 釣魚台周邊", name_en: "East China Sea / Senkaku",
@@ -247,7 +621,8 @@ window.RISK_ZONES = [
     source: "JCG NAVAREA XI / CN MSA",
     source_url: "https://www6.kaiho.mlit.go.jp",
     effective_from: "長期", effective_to: "進行中 / ongoing",
-    coords: [[27, 122], [27, 127], [24, 127], [24, 122]] },
+    coords: [[27, 122], [27, 127], [24, 127], [24, 122]],
+    source_kinds: ["official"] },
 
   { cat: "military", id: "MIL-KOR-2026", level: "medium",
     name: "朝鮮半島周邊", name_en: "Korean Peninsula",
@@ -257,7 +632,8 @@ window.RISK_ZONES = [
     source: "USNI News / ROK NAVAREA XIII / KCG",
     source_url: "https://news.usni.org",
     effective_from: "依公告 / per NOTMAR", effective_to: "依公告 / per NOTMAR",
-    coords: [[40, 123], [40, 131], [35, 131], [35, 123]] },
+    coords: [[40, 123], [40, 131], [35, 131], [35, 123]],
+    source_kinds: ["official", "web"] },
 
   { cat: "military", id: "MIL-HAW-2026", level: "low",
     name: "夏威夷周邊 RIMPAC 2026", name_en: "Off Hawaii RIMPAC 2026",
@@ -267,7 +643,8 @@ window.RISK_ZONES = [
     source: "US Pacific Fleet / US 3rd Fleet NAVAREA XII",
     source_url: "https://www.cpf.navy.mil/rimpac/",
     effective_from: "2026-06-24", effective_to: "2026-07-31",
-    coords: [[24, -163], [24, -154], [18, -154], [18, -163]] },
+    coords: [[24, -163], [24, -154], [18, -154], [18, -163]],
+    source_kinds: ["official"] },
 
   /* ── 5. 氣象與海況高風險區 ────────────────────────────────────── */
   { cat: "weather", id: "WX-CGH-2026", level: "high",
@@ -278,7 +655,8 @@ window.RISK_ZONES = [
     source: "SAWS / NOAA OPC",
     source_url: "https://www.weathersa.co.za",
     effective_from: "5–9 月加劇", effective_to: "全年",
-    coords: [[-32, 15], [-32, 24], [-38, 24], [-38, 15]] },
+    coords: [[-32, 15], [-32, 24], [-38, 24], [-38, 15]],
+    source_kinds: ["official", "web"] },
 
   { cat: "weather", id: "WX-NATL-HUR-2026", level: "medium",
     name: "北大西洋颶風帶 2026", name_en: "North Atlantic Hurricane Belt 2026",
@@ -288,7 +666,8 @@ window.RISK_ZONES = [
     source: "NOAA NHC 2026 Atlantic outlook (May 22 2026)",
     source_url: "https://www.nhc.noaa.gov",
     effective_from: "2026-06-01", effective_to: "2026-11-30",
-    coords: [[32, -98], [32, -55], [10, -55], [10, -85]] },
+    coords: [[32, -98], [32, -55], [10, -55], [10, -85]],
+    source_kinds: ["official"] },
 
   { cat: "weather", id: "WX-WPAC-2026", level: "high",
     name: "西北太平洋颱風帶 2026", name_en: "Western North Pacific Typhoon Belt 2026",
@@ -298,7 +677,8 @@ window.RISK_ZONES = [
     source: "JMA RSMC Tokyo / JTWC",
     source_url: "https://www.jma.go.jp/en/typh",
     effective_from: "全年（2026 異常自 1 月起）", effective_to: "11 月",
-    coords: [[28, 125], [28, 155], [10, 155], [10, 125]] },
+    coords: [[28, 125], [28, 155], [10, 155], [10, 125]],
+    source_kinds: ["official"] },
 
   { cat: "weather", id: "WX-BOB-2026", level: "medium",
     name: "孟加拉灣熱帶氣旋區", name_en: "Bay of Bengal Cyclone Area",
@@ -308,7 +688,8 @@ window.RISK_ZONES = [
     source: "IMD RSMC New Delhi",
     source_url: "https://mausam.imd.gov.in",
     effective_from: "4–5 月、10–11 月", effective_to: "—",
-    coords: [[22, 80], [22, 95], [10, 95], [10, 80]] },
+    coords: [[22, 80], [22, 95], [10, 95], [10, 80]],
+    source_kinds: ["official", "web"] },
 
   { cat: "weather", id: "WX-DRAKE-2026", level: "critical",
     name: "Drake Passage / 合恩角", name_en: "Drake Passage / Cape Horn",
@@ -318,7 +699,8 @@ window.RISK_ZONES = [
     source: "NOAA OPC / SHN Argentina",
     source_url: "https://ocean.weather.gov",
     effective_from: "全年", effective_to: "全年",
-    coords: [[-52, -76], [-52, -54], [-62, -54], [-62, -76]] },
+    coords: [[-52, -76], [-52, -54], [-62, -54], [-62, -76]],
+    source_kinds: ["web"] },
 
   /* ── 6. 環保排放管制區 ECA ────────────────────────────────────── */
   { cat: "eca", id: "ECA-MED-2026", level: "info",
@@ -329,7 +711,8 @@ window.RISK_ZONES = [
     source: "MARPOL Annex VI / IMO MEPC.361(79) / EMSA",
     source_url: "https://www.imo.org",
     effective_from: "2025-05-01", effective_to: "進行中 / ongoing",
-    coords: [[46, -6], [46, 36], [30, 36], [30, -6]] },
+    coords: [[46, -6], [46, 36], [30, 36], [30, -6]],
+    source_kinds: ["official"] },
 
   { cat: "eca", id: "ECA-CAN-ARC-2026", level: "info",
     name: "加拿大北極 ECA（新）", name_en: "Canadian Arctic ECA (new)",
@@ -339,7 +722,8 @@ window.RISK_ZONES = [
     source: "IMO MEPC.392(82) / DNV",
     source_url: "https://www.imo.org",
     effective_from: "2026-03-01（生效）/ 2027-03-01（執行）", effective_to: "進行中 / ongoing",
-    coords: [[80, -120], [80, -60], [65, -60], [65, -120]] },
+    coords: [[80, -120], [80, -60], [65, -60], [65, -120]],
+    source_kinds: ["official", "web"] },
 
   { cat: "eca", id: "ECA-NOR-SEA-2026", level: "info",
     name: "挪威海 ECA（新）", name_en: "Norwegian Sea ECA (new)",
@@ -349,7 +733,8 @@ window.RISK_ZONES = [
     source: "IMO MEPC.392(82) / DNV",
     source_url: "https://www.imo.org",
     effective_from: "2026-03-01（生效）/ 2027-03-01（執行）", effective_to: "進行中 / ongoing",
-    coords: [[78, -5], [78, 32], [62, 32], [62, -5]] },
+    coords: [[78, -5], [78, 32], [62, 32], [62, -5]],
+    source_kinds: ["official"] },
 
   { cat: "eca", id: "ECA-NA-E-2026", level: "info",
     name: "北美 ECA（東岸）", name_en: "North American ECA (East Coast)",
@@ -359,7 +744,8 @@ window.RISK_ZONES = [
     source: "MARPOL Annex VI / IMO MEPC.176(58)",
     source_url: "https://www.imo.org",
     effective_from: "2012-08-01 / 2016-01-01", effective_to: "進行中 / ongoing",
-    coords: [[60, -52], [60, -68], [25, -82], [25, -76]] },
+    coords: [[60, -52], [60, -68], [25, -82], [25, -76]],
+    source_kinds: ["official"] },
 
   { cat: "eca", id: "ECA-NA-W-2026", level: "info",
     name: "北美 ECA（西岸）", name_en: "North American ECA (West Coast)",
@@ -369,7 +755,8 @@ window.RISK_ZONES = [
     source: "MARPOL Annex VI / IMO MEPC.176(58)",
     source_url: "https://www.imo.org",
     effective_from: "2012-08-01 / 2016-01-01", effective_to: "進行中 / ongoing",
-    coords: [[60, -135], [60, -125], [33, -116], [33, -125]] },
+    coords: [[60, -135], [60, -125], [33, -116], [33, -125]],
+    source_kinds: ["official"] },
 
   { cat: "eca", id: "ECA-NS-BAL-2026", level: "info",
     name: "北海 + 波羅的海 ECA", name_en: "North Sea + Baltic Sea ECA",
@@ -379,7 +766,8 @@ window.RISK_ZONES = [
     source: "MARPOL Annex VI / IMO MEPC.286(71)",
     source_url: "https://www.imo.org",
     effective_from: "2007-11-19 / 2021-01-01", effective_to: "進行中 / ongoing",
-    coords: [[66, -2], [66, 30], [51, 30], [51, -2]] },
+    coords: [[66, -2], [66, 30], [51, 30], [51, -2]],
+    source_kinds: ["official"] },
 
   { cat: "eca", id: "ECA-CN-DECA-2026", level: "info",
     name: "中國沿海 DECA", name_en: "China Domestic ECA",
@@ -389,7 +777,8 @@ window.RISK_ZONES = [
     source: "China MOT / China MSA DECA plan",
     source_url: "https://www.msa.gov.cn",
     effective_from: "2019-01-01", effective_to: "進行中 / ongoing",
-    coords: [[40, 117], [40, 124], [18, 113], [18, 108]] },
+    coords: [[40, 117], [40, 124], [18, 113], [18, 108]],
+    source_kinds: ["official"] },
 
   /* ── 7. 保護區 / 限速區 / 鯨豚保護區 ──────────────────────────── */
   { cat: "protected", id: "PRO-NARW-NE-2026", level: "info",
@@ -400,7 +789,8 @@ window.RISK_ZONES = [
     source: "NOAA Fisheries 50 CFR 224.105",
     source_url: "https://www.fisheries.noaa.gov",
     effective_from: "1 月 1 日", effective_to: "5 月 15 日",
-    coords: [[43, -71], [43, -68], [40, -68], [40, -71]] },
+    coords: [[43, -71], [43, -68], [40, -68], [40, -71]],
+    source_kinds: ["official"] },
 
   { cat: "protected", id: "PRO-NARW-SE-2026", level: "info",
     name: "北大西洋露脊鯨 SMA（東南）", name_en: "NARW SMA (SE US)",
@@ -410,7 +800,8 @@ window.RISK_ZONES = [
     source: "NOAA Fisheries 50 CFR 224.105",
     source_url: "https://www.fisheries.noaa.gov",
     effective_from: "11 月 15 日", effective_to: "4 月 15 日",
-    coords: [[33, -82], [33, -77], [27, -77], [27, -82]] },
+    coords: [[33, -82], [33, -77], [27, -77], [27, -82]],
+    source_kinds: ["official"] },
 
   { cat: "protected", id: "PRO-GBR-2026", level: "info",
     name: "大堡礁海洋公園 (PSSA)", name_en: "Great Barrier Reef Marine Park (PSSA)",
@@ -420,7 +811,8 @@ window.RISK_ZONES = [
     source: "AMSA / GBRMPA / IMO MEPC.133(53)",
     source_url: "https://www.amsa.gov.au",
     effective_from: "1990（強化 2005）", effective_to: "進行中 / ongoing",
-    coords: [[-10, 143], [-10, 154], [-24, 154], [-24, 145]] },
+    coords: [[-10, 143], [-10, 154], [-24, 154], [-24, 145]],
+    source_kinds: ["official"] },
 
   { cat: "protected", id: "PRO-GAL-2026", level: "info",
     name: "加拉巴哥海洋保護區（擴展）", name_en: "Galápagos Marine Reserve (expanded)",
@@ -430,7 +822,8 @@ window.RISK_ZONES = [
     source: "Galápagos Conservancy / WildAid",
     source_url: "https://www.galapagos.org",
     effective_from: "1998（擴展 2022-01）", effective_to: "進行中 / ongoing",
-    coords: [[2, -93], [2, -87], [-3, -87], [-3, -93]] },
+    coords: [[2, -93], [2, -87], [-3, -87], [-3, -93]],
+    source_kinds: ["official"] },
 
   { cat: "protected", id: "PRO-PEL-2026", level: "info",
     name: "地中海 Pelagos Sanctuary", name_en: "Pelagos Sanctuary",
@@ -440,7 +833,8 @@ window.RISK_ZONES = [
     source: "Pelagos Agreement (1999)",
     source_url: "https://www.sanctuaire-pelagos.org",
     effective_from: "2002-02-21", effective_to: "進行中 / ongoing",
-    coords: [[44, 6], [44, 10], [41, 10], [41, 6]] },
+    coords: [[44, 6], [44, 10], [41, 10], [41, 6]],
+    source_kinds: ["official"] },
 
   /* ── 8. 航道壅塞 / 避碰高風險區 ──────────────────────────────── */
   { cat: "congestion", id: "CON-SUE-2026", level: "high",
@@ -451,7 +845,8 @@ window.RISK_ZONES = [
     source: "Suez Canal Authority / Maritime News / Logfret",
     source_url: "https://www.suezcanal.gov.eg",
     effective_from: "2024-01（繞道起）", effective_to: "進行中 / ongoing",
-    coords: [[32, 32], [32, 33.5], [29, 33.5], [29, 32]] },
+    coords: [[32, 32], [32, 33.5], [29, 33.5], [29, 32]],
+    source_kinds: ["official"] },
 
   { cat: "congestion", id: "CON-PAN-2026", level: "low",
     name: "巴拿馬運河進出區", name_en: "Panama Canal Approaches",
@@ -461,7 +856,8 @@ window.RISK_ZONES = [
     source: "Panama Canal Authority (ACP) / NOAA CPC",
     source_url: "https://www.pancanal.com",
     effective_from: "2023-08（限額）", effective_to: "進行中 / ongoing",
-    coords: [[10, -80.5], [10, -78.5], [8.2, -78.5], [8.2, -80.5]] },
+    coords: [[10, -80.5], [10, -78.5], [8.2, -78.5], [8.2, -80.5]],
+    source_kinds: ["official"] },
 
   { cat: "congestion", id: "CON-DOV-2026", level: "high",
     name: "多佛海峽 / 英吉利海峽", name_en: "Dover Strait / English Channel",
@@ -471,7 +867,8 @@ window.RISK_ZONES = [
     source: "IMO COLREG Rule 10 / UK MCA CNIS",
     source_url: "https://www.gov.uk/government/organisations/maritime-and-coastguard-agency",
     effective_from: "1967（首條 TSS）", effective_to: "進行中 / ongoing",
-    coords: [[51.5, 0.8], [51.5, 2.5], [50.5, 2.5], [50.5, 0.8]] },
+    coords: [[51.5, 0.8], [51.5, 2.5], [50.5, 2.5], [50.5, 0.8]],
+    source_kinds: ["official"] },
 
   { cat: "congestion", id: "CON-SS-2026", level: "high",
     name: "新加坡海峽 TSS", name_en: "Singapore Strait TSS",
@@ -481,7 +878,8 @@ window.RISK_ZONES = [
     source: "IMO STRAITREP / MPA Singapore",
     source_url: "https://www.mpa.gov.sg",
     effective_from: "1981（強化 1998）", effective_to: "進行中 / ongoing",
-    coords: [[3, 100], [3, 105.5], [0.7, 105.5], [0.7, 100]] },
+    coords: [[3, 100], [3, 105.5], [0.7, 105.5], [0.7, 100]],
+    source_kinds: ["official"] },
 
   { cat: "congestion", id: "CON-CGH-RTE-2026", level: "medium",
     name: "好望角繞道航線", name_en: "Cape of Good Hope Detour Route",
@@ -491,7 +889,8 @@ window.RISK_ZONES = [
     source: "Bertling / Adriaports / Lloyd's List",
     source_url: "https://www.bertling.com/news-pool/blog/suez-canal/",
     effective_from: "2024-01", effective_to: "進行中 / ongoing",
-    coords: [[-30, 14], [-30, 35], [-40, 35], [-40, 14]] },
+    coords: [[-30, 14], [-30, 35], [-40, 35], [-40, 14]],
+    source_kinds: ["official"] },
 
   { cat: "congestion", id: "CON-BOS-2026", level: "medium",
     name: "博斯普魯斯海峽", name_en: "Bosphorus Strait",
@@ -501,7 +900,75 @@ window.RISK_ZONES = [
     source: "Turkish Straits VTS",
     source_url: "https://atlas.kiyiemniyeti.gov.tr",
     effective_from: "1994（VTS 1998）", effective_to: "進行中 / ongoing",
-    coords: [[41.4, 28.5], [41.4, 29.5], [40.9, 29.5], [40.9, 28.5]] },
+    coords: [[41.4, 28.5], [41.4, 29.5], [40.9, 29.5], [40.9, 28.5]],
+    source_kinds: ["official"] },
+
+  /* ── 9. 自願通報區 (VRA) ─────────────────────────────────────────
+   *   進入時觸發「請啟動通報程序」提示，而非警示。BMP5 / MC(18)48 / GCPG 三大區。
+   *   邊界為依文件與 Chart Q6099/Q6112/Q6113/Q6114 的近似多邊形。 */
+
+  { cat: "reporting", id: "RPT-MSCIO-VRA-2026", level: "info",
+    name: "MSCIO / UKMTO 自願通報區（西印度洋）", name_en: "MSCIO / UKMTO VRA (Western Indian Ocean)",
+    type: "BMP5 西印度洋通報區", type_en: "BMP5 WIO Voluntary Reporting Area",
+    desc: "BMP5 §1 定義的 UKMTO Voluntary Reporting Area，涵蓋紅海、亞丁灣、阿拉伯海、整個西印度洋至 78°E、北至 Suez 30°N、南至 10°S。Admiralty Chart Q6099 標示。MSCHOA 於 2025 改名為 MSCIO (Maritime Security Centre – Indian Ocean)。所有船進入此 VRA 應向 UKMTO 提交 Initial Report，並在 MSCIO 登記船舶移動。",
+    desc_en: "UKMTO Voluntary Reporting Area defined by BMP5 §1, covering Red Sea, Gulf of Aden, Arabian Sea, entire WIO out to 78°E, north to Suez 30°N, south to 10°S. Shown on Admiralty Chart Q6099. MSCHOA was renamed MSCIO (Maritime Security Centre – Indian Ocean) in 2025. All vessels entering this VRA should submit Initial Report to UKMTO and register movements with MSCIO.",
+    source: "BMP5 §1 / UKMTO / MSCIO (was MSCHOA) / Admiralty Chart Q6099",
+    source_url: "https://www.ukmto.org",
+    effective_from: "BMP5 v5（2018-06）", effective_to: "進行中 / ongoing",
+    action_template: "reporting_general",
+    coords: [[30, 32], [30, 78], [-10, 78], [-10, 40], [12, 43], [30, 32]],
+    source_kinds: ["official", "web"] },
+
+  { cat: "reporting", id: "RPT-MDAT-VRA-2026", level: "info",
+    name: "MDAT-GoG 自願通報區（幾內亞灣）", name_en: "MDAT-GoG VRA (Gulf of Guinea)",
+    type: "MC(18)48 西非通報區", type_en: "MC(18)48 West Africa Voluntary Reporting Area",
+    desc: "MC(18)48 / MDAT-GoG 定義的西非自願通報區，由法國 (Brest) 與英國 (Portsmouth) 海軍共同營運。涵蓋象牙海岸/賴比瑞亞邊界至安哥拉/那米比亞邊界沿岸海域，可延伸至 00°N 005°E。Admiralty Chart Q6114 標示。進入時提交 Initial Report 給 watchkeepers@mdat-gog.org（+33 2 98 22 88 88）。",
+    desc_en: "Voluntary Reporting Area for West Africa defined by MC(18)48 / MDAT-GoG, jointly operated by French (Brest) and UK (Portsmouth) navies. Covers Liberia/Ivory Coast border to Angola/Namibia border, extending to 00°N 005°E. Shown on Admiralty Chart Q6114. Submit Initial Report on entry: watchkeepers@mdat-gog.org (+33 2 98 22 88 88).",
+    source: "MC(18)48 - Gulf of Guinea Region V3 / MDAT-GoG / Admiralty Chart Q6114 / SHOM 8801CS",
+    source_url: "https://www.mdat-gog.org",
+    effective_from: "2016-06（MC(18)48 V3 2018-06）", effective_to: "進行中 / ongoing",
+    action_template: "reporting_general",
+    coords: [[10, -10], [10, 10], [-18, 10], [-18, -5], [10, -10]],
+    source_kinds: ["official"] },
+
+  { cat: "reporting", id: "RPT-IFC-VRA-2026", level: "info",
+    name: "IFC Singapore / ReCAAP 通報區（東南亞）", name_en: "IFC Singapore / ReCAAP VRA (Southeast Asia)",
+    type: "GCPG 東南亞通報區", type_en: "GCPG Southeast Asia Voluntary Reporting Area",
+    desc: "GCPG Annex C 定義的東南亞自願通報區，涵蓋麻六甲海峽、新加坡海峽、南海南部、蘇祿—西里伯斯海。Admiralty Charts Q6112 + Q6113 標示。IFC (Information Fusion Centre, Singapore) 為主要 24/7 監看中心；ReCAAP ISC 為政府間情資共享機制。可疑接近或事件向最近 Coastal State MRCC 通報。",
+    desc_en: "Voluntary Reporting Area for Southeast Asia defined by GCPG Annex C, covering Malacca Strait, Singapore Strait, southern South China Sea, and Sulu-Celebes Seas. Shown on Admiralty Charts Q6112 + Q6113. IFC (Information Fusion Centre, Singapore) is the 24/7 monitoring hub; ReCAAP ISC handles inter-governmental information sharing.",
+    source: "GCPG Annex C / IFC Singapore / ReCAAP ISC / Admiralty Charts Q6112 + Q6113",
+    source_url: "https://www.infofusioncentre.gov.sg",
+    effective_from: "2006-11（ReCAAP ISC）", effective_to: "進行中 / ongoing",
+    action_template: "reporting_general",
+    coords: [[20, 95], [20, 130], [-10, 130], [-10, 100], [8, 95]],
+    source_kinds: ["official", "web"] },
+
+  /* ── 10. 安全通道 / 護航走廊 ────────────────────────────────────
+   *   進入時觸發「進入安全通道」提示。IRTC、BAM TSS 等。 */
+
+  { cat: "corridor", id: "COR-IRTC-2026", level: "info",
+    name: "IRTC 國際建議護航走廊（亞丁灣）", name_en: "IRTC Internationally Recommended Transit Corridor (Gulf of Aden)",
+    type: "BMP5 / EUNAVFOR 護航走廊", type_en: "BMP5 / EUNAVFOR Transit Corridor",
+    desc: "亞丁灣內的軍方建立護航走廊，分東行 / 西行兩條分隔航線。由 EU NAVFOR ATALANTA 與 CMF 共同護航，是 MSTC (Maritime Security Transit Corridor) 主要組成。商船應全速通過、不漂航、不錨泊。可向 MSCIO 登記參加 Group Transit 編隊。對應 Admiralty Chart Q6099。",
+    desc_en: "Military-established transit corridor in Gulf of Aden with separated eastbound / westbound lanes. Jointly patrolled by EU NAVFOR ATALANTA and CMF; main component of MSTC (Maritime Security Transit Corridor). Vessels should transit at full speed without drifting/anchoring. Group Transit scheme available via MSCIO. Shown on Admiralty Chart Q6099.",
+    source: "BMP5 §1 / EU NAVFOR ATALANTA / CMF / Admiralty Chart Q6099",
+    source_url: "https://www.eunavfor.eu",
+    effective_from: "2009-02（IRTC 建立）", effective_to: "進行中 / ongoing",
+    action_template: "corridor_general",
+    coords: [[14.5, 45], [14.5, 53], [11.8, 53], [11.8, 45]],
+    source_kinds: ["official"] },
+
+  { cat: "corridor", id: "COR-BAM-2026", level: "info",
+    name: "BAM TSS 巴布艾爾曼德海峽分隔通道", name_en: "BAM TSS (Bab el Mandeb Traffic Separation Scheme)",
+    type: "BMP5 / IMO TSS 海峽分隔通道", type_en: "BMP5 / IMO TSS Strait Separation",
+    desc: "BMP5 §1 標示的 Bab el Mandeb 海峽分隔通道，連接紅海與亞丁灣的關鍵 chokepoint。屬於 MSTC 一環，並與 IRTC 透過雙向航道相連。海峽寬度最窄處僅約 26 km；商船須依 IMO COLREG Rule 10 駛入正確分隔通道。**NAVCENT 標示為極高威脅子區** — 受 Houthi 飛彈/無人機/WBIED 攻擊熱點。",
+    desc_en: "Bab el Mandeb Strait Traffic Separation Scheme per BMP5 §1, connecting Red Sea and Gulf of Aden as a critical chokepoint. Part of MSTC, connected to IRTC via a two-way route. Narrowest at ~26 km; vessels must use correct lane per IMO COLREG Rule 10. **Identified by NAVCENT as highest-threat sub-zone** — hotspot for Houthi missile / UAV / WBIED attacks.",
+    source: "BMP5 §1 / IMO COLREG Rule 10 / Admiralty Chart Q6099 / NAVCENT MSA 09/2023",
+    source_url: "https://www.imo.org",
+    effective_from: "IMO TSS 長期；BMP5 §1（2018-06）", effective_to: "進行中 / ongoing",
+    action_template: "corridor_general",
+    coords: [[12.8, 43.1], [12.8, 43.55], [12.4, 43.55], [12.4, 43.1]],
+    source_kinds: ["official"] },
 ];
 
 /* ─────────────────────────────────────────────────────────────────
@@ -515,43 +982,51 @@ window.ANCHORAGE_AREAS = [
     region: "East Asia / China",
     desc: "長江口外與洋山深水港外錨地近似範圍",
     source: "Shanghai MSA chart 參考近似",
-    coords: [[31.50,121.70],[31.50,122.40],[30.95,122.40],[30.55,122.25],[30.55,122.05],[31.15,121.70]] },
+    coords: [[31.50,121.70],[31.50,122.40],[30.95,122.40],[30.55,122.25],[30.55,122.05],[31.15,121.70]],
+    source_kinds: ["official"] },
   { id: "ANC-CNNGB", port_code: "CNNGB",
     port_name: "Ningbo-Zhoushan Outer Anchorages", port_name_cn: "寧波舟山港外錨地",
     region: "East Asia / China",
     desc: "寧波舟山港外與螺頭水道附近錨地近似範圍",
     source: "Ningbo MSA chart 參考近似",
-    coords: [[30.10,121.85],[30.10,122.30],[29.75,122.30],[29.75,121.85]] },
+    coords: [[30.10,121.85],[30.10,122.30],[29.75,122.30],[29.75,121.85]],
+    source_kinds: ["web"] },
   { id: "ANC-CNQIN", port_code: "CNQIN",
     port_name: "Qingdao", port_name_cn: "青島",
     region: "East Asia / China",
-    coords: [[36.15,120.32000000000001],[36.15,120.48],[36.07,120.49600000000001],[35.99,120.48],[35.99,120.32000000000001]] },
+    coords: [[36.15,120.32000000000001],[36.15,120.48],[36.07,120.49600000000001],[35.99,120.48],[35.99,120.32000000000001]],
+    source_kinds: ["official"] },
   { id: "ANC-CNTAO", port_code: "CNTAO",
     port_name: "Tianjin / Xingang", port_name_cn: "天津新港",
     region: "East Asia / China",
-    coords: [[39.07,117.7],[39.07,117.86],[38.99,117.876],[38.910000000000004,117.86],[38.910000000000004,117.7]] },
+    coords: [[39.07,117.7],[39.07,117.86],[38.99,117.876],[38.910000000000004,117.86],[38.910000000000004,117.7]],
+    source_kinds: ["doc", "official"] },
   { id: "ANC-CNDLC", port_code: "CNDLC",
     port_name: "Dalian", port_name_cn: "大連",
     region: "East Asia / China",
-    coords: [[39,121.58],[39,121.74],[38.92,121.756],[38.84,121.74],[38.84,121.58]] },
+    coords: [[39,121.58],[39,121.74],[38.92,121.756],[38.84,121.74],[38.84,121.58]],
+    source_kinds: ["doc", "official"] },
   { id: "ANC-CNXMN", port_code: "CNXMN",
     port_name: "Xiamen Bay Outer Anchorages", port_name_cn: "環廈門灣港外推薦錨區（閩廈港外 11-17）",
     region: "East Asia / China",
     desc: "中國海事局公布閩廈港外 11/12/14/15/16/17 共 6 個推薦錨區，涵蓋環廈門灣（廈門 / 漳州 / 泉州外港）水域",
     source: "中華人民共和國海事局《關於公佈環廈門灣水域港外推薦錨區的通告》",
-    coords: [[24.55,117.85],[24.55,118.25],[24.30,118.40],[24.05,118.30],[24.05,117.85]] },
+    coords: [[24.55,117.85],[24.55,118.25],[24.30,118.40],[24.05,118.30],[24.05,117.85]],
+    source_kinds: ["doc", "official"] },
   { id: "ANC-CNZHA", port_code: "CNZHA",
     port_name: "Zhangzhou Outer Anchorages", port_name_cn: "漳州港外錨地",
     region: "East Asia / China",
     desc: "漳州外港錨地（涵蓋於環廈門灣港外推薦錨區範圍內，含古雷 / 招商局碼頭外港等）",
     source: "中華人民共和國海事局 / 漳州海事局 參考近似",
-    coords: [[24.10,117.70],[24.10,117.95],[23.85,117.95],[23.85,117.70]] },
+    coords: [[24.10,117.70],[24.10,117.95],[23.85,117.95],[23.85,117.70]],
+    source_kinds: ["doc", "official"] },
   { id: "ANC-CNQUZ", port_code: "CNQUZ",
     port_name: "Quanzhou Outer Anchorages", port_name_cn: "泉州港外錨地",
     region: "East Asia / China",
     desc: "泉州港外錨地（含圍頭灣 / 肖厝 / 斗尾 等深水錨地）",
     source: "福建海事局 參考近似",
-    coords: [[24.95,118.85],[24.95,119.10],[24.70,119.10],[24.70,118.85]] },
+    coords: [[24.95,118.85],[24.95,119.10],[24.70,119.10],[24.70,118.85]],
+    source_kinds: ["doc", "official"] },
   { id: "ANC-CNPTN", port_code: "CNPTN",
     port_name: "Pingtan Outer Anchorages", port_name_cn: "平潭港外錨地",
     region: "East Asia / China",
