@@ -2,18 +2,18 @@
   "description": "外來船 (非陽明) 識別資料庫 — 從 5 NM 周邊觀測資料中辨識出的真實船舶",
   "source": "VesselFinder.com / Maritime Optima 公開 AIS 資料查詢 + 本地 AIS 基本資料表 (vessel_basic_info.csv) 自動補入 (更新 2026-06-10)",
   "note": "本資料庫為人工 / 半自動建立。執行 preprocess/lookup_external_vessels.py 自動擴充。",
-  "vessel_count": 509,
+  "vessel_count": 659,
   "by_operator": {
-    "Unknown/未知": 420,
-    "Unknown": 15,
+    "Unknown": 573,
+    "MSC": 8,
     "長榮": 7,
-    "MSC": 6,
+    "CMA CGM": 6,
     "泰國油輪業者 (推測)": 5,
     "萬海": 3,
     "德翔": 3,
     "Harbor Service": 2,
     "SITC": 2,
-    "CMA CGM": 2,
+    "PIL": 2,
     "GSL": 1,
     "Hong Yong Shipping": 1,
     "Zhe Hai Shipping": 1,
@@ -39,7 +39,6 @@
     "Taiwan Fisheries Research (推測)": 1,
     "Taiwan tug operator (推測)": 1,
     "AC Glory / Zhengdong Shipping": 1,
-    "PIL": 1,
     "錦江航運": 1,
     "COSCO": 1,
     "CUL": 1,
@@ -57,38 +56,46 @@
     "海洋網聯": 1,
     "DHT": 1,
     "Temas/SPIL": 1,
-    "PSA": 1
+    "PSA": 1,
+    "中遠海運": 1,
+    "X-Press Feeders": 1,
+    "KMTC": 1,
+    "TS LINES": 1,
+    "Pacific Tanker Operator (推測)": 1
   },
   "by_type": {
-    "Fishing Vessel": 100,
-    "Tug": 93,
-    "General Cargo Ship": 63,
-    "Container Ship": 36,
-    "Tanker": 31,
-    "Pleasure Craft": 30,
-    "Bulk Carrier": 18,
-    "Other": 18,
-    "Unknown": 17,
-    "Passenger Ship": 11,
-    "Pilot Vessel": 10,
-    "Oil Products Tanker": 8,
+    "Tug": 119,
+    "Fishing Vessel": 105,
+    "General Cargo Ship": 101,
+    "Container Ship": 50,
+    "Pleasure Craft": 42,
+    "Tanker": 37,
+    "Other": 27,
+    "Bulk Carrier": 21,
+    "Unknown": 18,
+    "Passenger Ship": 16,
+    "Pilot Vessel": 14,
+    "Oil Products Tanker": 10,
+    "Port Tender": 9,
     "Dredger": 7,
-    "Chemical/Oil Products Tanker": 3,
+    "High Speed Craft": 7,
+    "Chemical/Oil Products Tanker": 5,
     "Law Enforcement Vessel": 3,
     "Sailing Vessel": 3,
     "Unknown (可替換)": 3,
-    "High Speed Craft": 3,
+    "未知（可替換）": 3,
+    "SAR Vessel": 3,
     "Special Craft": 3,
     "Other (可替換)": 3,
-    "Port Tender": 3,
+    "Oil/Chemical Tanker": 3,
     "Crude Oil Tanker": 2,
     "Chemical Tanker": 2,
     "Harbor Service": 2,
     "Navigation Aid": 2,
     "Local Vessel": 2,
     "Other / Unknown（可替換）": 2,
-    "未知（可替換）": 2,
-    "SAR Vessel": 2,
+    "Heavy Load Carrier": 2,
+    "Aid to Navigation": 2,
     "Training Ship": 1,
     "Bitumen Tanker": 1,
     "Fishing Support Vessel": 1,
@@ -99,14 +106,12 @@
     "Unknown (Reserved)": 1,
     "Other / Unspecified": 1,
     "Search & Rescue Vessel": 1,
-    "Heavy Load Carrier": 1,
     "Vehicles Carrier": 1,
     "Spare": 1,
     "Navigation Aid / Beacon": 1,
     "Offshore Tug/Supply Ship": 1,
     "Passenger/Ro-Ro Cargo Ship": 1,
     "Bunkering Tanker": 1,
-    "Aid to Navigation": 1,
     "Navigation Aid (導航設施)": 1,
     "Container Ship (Feeder)": 1,
     "Bulk Carrier (Capesize)": 1,
@@ -115,7 +120,13 @@
     "Navigation Aid (VTS)": 1,
     "Navigation Aid (Leading Light)": 1,
     "Crude Oil Tanker (VLCC)": 1,
-    "Anti-Pollution Vessel": 1
+    "Anti-Pollution Vessel": 1,
+    "VTS Station": 1,
+    "Navigation Aid / VTS": 1,
+    "未知": 1,
+    "Navigation Aid (AtoN)": 1,
+    "Unknown（可替換）": 1,
+    "Reserved": 1
   },
   "vessels": {
     "210646000": {
@@ -21941,6 +21952,6306 @@
         }
       ],
       "note": "WebSearch MMSI 吻合補入規格；GT 待補可替換"
+    },
+    "563031390": {
+      "name": "DIVETECH VALIANT",
+      "type": "Port Tender",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "300000000": {
+      "name": "REBOCADOR SOCO",
+      "type": "Tug",
+      "flag": "300",
+      "flag_label": "未知（可替換）",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "566512000": {
+      "name": "POSH FALCON",
+      "type": "Other",
+      "flag": "566",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "457658000": {
+      "name": "GALAXY STRIKER",
+      "type": "General Cargo Ship",
+      "flag": "457",
+      "flag_label": "🇲🇨 摩納哥",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch MMSI 吻合(MarineTraffic)但 IMO 顯示 0 且船名疑改為 BELLIS，規格待確認可替換"
+    },
+    "413470850": {
+      "name": "HUI JIN QIAO 218",
+      "type": "General Cargo Ship",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416000844": {
+      "name": "YUNG TONG NO.18",
+      "type": "Pilot Vessel",
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413767488": {
+      "name": "LIZHOU18",
+      "type": "General Cargo Ship",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "538090606": {
+      "name": "OPHELIA",
+      "type": "Container Ship",
+      "flag": "538",
+      "flag_label": "🇲🇭 馬紹爾",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": "9765586",
+      "built": 2018,
+      "gt": null,
+      "dwt": 22000,
+      "length_m": 172,
+      "beam_m": 27,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "25",
+          "own_mmsi": "636012795",
+          "name_zh": "駿明輪",
+          "name_en": "YM INCEPTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        }
+      ],
+      "note": "WebSearch 補規格：VesselFinder/MarineTraffic/maritimeoptima MMSI 完全吻合，IMO 9765586（1708 TEU 貨櫃支線船，馬紹爾籍，管理 Leonhardt & Blumberg）；GT 待補可替換"
+    },
+    "412474630": {
+      "name": "SHEGANG6HAO",
+      "type": "Tug",
+      "flag": "412",
+      "flag_label": "🇨🇳 中國",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413865672": {
+      "name": "ZHONGHANG933",
+      "type": "General Cargo Ship",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413479380": {
+      "name": "YECHANGTUO8",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "566224000": {
+      "name": "ASL MAJU",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "flag": "566",
+      "flag_label": "🇸🇬 新加坡",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "511101723": {
+      "name": "CAESAR",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "flag": "511",
+      "flag_label": "🇵🇼 帛琉",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": "9104653",
+      "built": 1994,
+      "gt": 2102,
+      "dwt": 2090,
+      "length_m": 86,
+      "beam_m": 13,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 補規格（VesselFinder，MMSI 吻合）"
+    },
+    "413906841": {
+      "name": "SHUN YI 358",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "352005814": {
+      "name": "MARINA LEO",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "flag": "352",
+      "flag_label": "🇵🇦 巴拿馬",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": "1063920",
+      "built": 2025,
+      "gt": null,
+      "dwt": 13530,
+      "length_m": 118,
+      "beam_m": 21,
+      "nearby_own_vessels": [
+        {
+          "source_id": "25",
+          "own_mmsi": "636012795",
+          "name_zh": "駿明輪",
+          "name_en": "YM INCEPTION"
+        },
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 補規格（vesseltracker/VesselFinder，MMSI 吻合；GT 未公開待補）"
+    },
+    "563040719": {
+      "name": "CAST LEADER",
+      "operator": null,
+      "operator_full": null,
+      "type": "Pleasure Craft",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416006665": {
+      "name": "DONG YANG NO.12",
+      "operator": null,
+      "operator_full": null,
+      "type": "Port Tender",
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563009180": {
+      "name": "NOBLE ACE",
+      "operator": null,
+      "operator_full": null,
+      "type": "Other",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "256730000": {
+      "name": "KADIMOS",
+      "operator": null,
+      "operator_full": null,
+      "type": "Passenger Ship",
+      "flag": "256",
+      "flag_label": "🇲🇹 馬爾他",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        },
+        {
+          "source_id": "54",
+          "own_mmsi": "636021244",
+          "name_zh": "賢明輪",
+          "name_en": "YM TOGETHER"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；名稱與 MMSI 吻合但 marinetraffic 顯示 IMO 0、另有 CMA CGM IVANHOE 共用此 MMSI，規格待確認可替換"
+    },
+    "563009230": {
+      "name": "NOBLE ATLAS",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563105900": {
+      "name": "PSA MARVEL",
+      "type": "Tug",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563075860": {
+      "name": "HYDROPRO 6",
+      "type": "Tug",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563019440": {
+      "name": "MARINA ZANITE",
+      "type": "Tug",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "376635000": {
+      "name": "SALVAGE WORKER",
+      "type": "Tug",
+      "flag": "376",
+      "flag_label": "未知（可替換）",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563126200": {
+      "name": "SERI ELBERT",
+      "type": "Tanker",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": "9864291",
+      "built": 2021,
+      "gt": null,
+      "dwt": 62367,
+      "length_m": 230,
+      "beam_m": 36,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 補規格（MMSI 吻合，IMO 9864291，LPG/VLGC 氣體船，GT 待補可替換）"
+    },
+    "538009341": {
+      "name": "ANDROMACHE",
+      "type": "Bulk Carrier",
+      "flag": "538",
+      "flag_label": "🇲🇭 馬紹爾群島",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": "9717981",
+      "built": 2017,
+      "gt": null,
+      "dwt": 81212,
+      "length_m": 229,
+      "beam_m": 32,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 補規格（MMSI 吻合，IMO 9717981，Kamsarmax 散裝；CSV 原標 Cargo 已修正為 Bulk Carrier，GT 待補可替換）"
+    },
+    "563459000": {
+      "name": "VB GAMMA",
+      "type": "Tug",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563040577": {
+      "name": "TEKONG 4",
+      "type": "Pleasure Craft",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563069130": {
+      "name": "PRESIDENT FIVE",
+      "type": "High Speed Craft",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563074320": {
+      "name": "YORK 310",
+      "type": "Pleasure Craft",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563542000": {
+      "name": "CHLOE",
+      "operator": null,
+      "operator_full": null,
+      "type": "Oil Products Tanker",
+      "imo": "9424522",
+      "flag": "563",
+      "flag_label": "SG 新加坡",
+      "built": 2008,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 補 IMO/建造年（MMSI 吻合，VesselFinder）；噸位待補可替換"
+    },
+    "563022820": {
+      "name": "MARINA ZIRCON",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "SG 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416005607": {
+      "name": "KAO NO.305",
+      "operator": null,
+      "operator_full": null,
+      "type": "Pilot Vessel",
+      "imo": null,
+      "flag": "416",
+      "flag_label": "TW 台灣",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416019000": {
+      "name": "SHENG YUN",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tanker",
+      "imo": null,
+      "flag": "416",
+      "flag_label": "TW 台灣",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "256311000": {
+      "name": "CMA CGM GEORGE SAND",
+      "operator": "CMA CGM",
+      "operator_full": "CMA CGM Group",
+      "type": "Container Ship",
+      "imo": "9332884",
+      "flag": "256",
+      "flag_label": "MT 馬爾他",
+      "built": 2009,
+      "gt": null,
+      "dwt": 72982,
+      "length_m": 293,
+      "beam_m": 40,
+      "competitor_class": "競品（貨櫃航商）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 規格已補（MMSI 吻合，VesselFinder/MarineTraffic）"
+    },
+    "353848000": {
+      "name": "HIGHWAY",
+      "operator": null,
+      "operator_full": null,
+      "type": "Container Ship",
+      "imo": "9158575",
+      "flag": "353",
+      "flag_label": "PA 巴拿馬",
+      "built": 1998,
+      "gt": null,
+      "dwt": 24757,
+      "length_m": 182,
+      "beam_m": 30,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "25",
+          "own_mmsi": "636012795",
+          "name_zh": "駿明輪",
+          "name_en": "YM INCEPTION"
+        },
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 規格已補（MMSI 吻合，VesselFinder/vesseltracker）"
+    },
+    "215219000": {
+      "name": "CMA CGM ALEXANDER VON HUMBOLDT",
+      "operator": "CMA CGM",
+      "operator_full": "CMA CGM Group",
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "215",
+      "flag_label": "MT 馬爾他",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "競品（貨櫃航商）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "54",
+          "own_mmsi": "636021244",
+          "name_zh": "賢明輪",
+          "name_en": "YM TOGETHER"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "636023268": {
+      "name": "MSC GIUSY",
+      "operator": "MSC",
+      "operator_full": "Mediterranean Shipping Company",
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "636",
+      "flag_label": "LR 賴比瑞亞",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "競品（貨櫃航商）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "4773776": {
+      "name": "VTS 4773776",
+      "operator": null,
+      "operator_full": null,
+      "type": "VTS Station",
+      "imo": null,
+      "flag": "477",
+      "flag_label": "HK 香港",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563005800": {
+      "name": "VB DUTA",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "SG 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563041069": {
+      "name": "SC 3942C",
+      "operator": null,
+      "operator_full": null,
+      "type": "Passenger Ship",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563086260": {
+      "name": "HELIOS S5",
+      "operator": null,
+      "operator_full": null,
+      "type": "Other",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416460000": {
+      "name": "DER YUN",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tanker",
+      "imo": "9589982",
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "built": 2012,
+      "gt": null,
+      "dwt": null,
+      "length_m": 108,
+      "beam_m": 19,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "WebSearch 補規格 (VesselFinder/MarineTraffic，MMSI 416460000 吻合，IMO 9589982，化學品/油品船)；GT/DWT 待補可替換"
+    },
+    "413906585": {
+      "name": "NAN GANG 20",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": 64,
+      "beam_m": 16,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "WebSearch MMSI 413906585 吻合 (MarineTraffic)，近岸中國貨船無正式 IMO；GT/DWT 待補可替換"
+    },
+    "563081140": {
+      "name": "YORK 312",
+      "operator": null,
+      "operator_full": null,
+      "type": "Pleasure Craft",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563040566": {
+      "name": "SC 3943 A",
+      "operator": null,
+      "operator_full": null,
+      "type": "Pleasure Craft",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "5631108": {
+      "name": "VTS 5631108",
+      "operator": null,
+      "operator_full": null,
+      "type": "Navigation Aid / VTS",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "412476860": {
+      "name": "SHE GANG 9 HAO",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "imo": null,
+      "flag": "412",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "477995437": {
+      "name": "CLEAN HARBOUR 1",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "477",
+      "flag_label": "🇭🇰 香港",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "WebSearch MMSI 477995437 吻合 (MarineTraffic)，香港港勤廢棄物處理船 (Waste Disposal Vessel)，無正式 IMO；規格待補可替換"
+    },
+    "563069100": {
+      "name": "SALAMAH P M F",
+      "operator": null,
+      "operator_full": null,
+      "type": "未知",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "566515000": {
+      "name": "POSH OSPREY",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "imo": null,
+      "flag": "SG",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "5631128": {
+      "name": "SINKI BEACON",
+      "operator": null,
+      "operator_full": null,
+      "type": "Navigation Aid (AtoN)",
+      "imo": null,
+      "flag": "SG",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416004127": {
+      "name": "YU HONG",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "imo": null,
+      "flag": "TW",
+      "flag_label": "🇹🇼 台灣",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416014525": {
+      "name": "CHAUR JINQ",
+      "operator": null,
+      "operator_full": null,
+      "type": "Fishing Vessel",
+      "imo": null,
+      "flag": "TW",
+      "flag_label": "🇹🇼 台灣",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413905281": {
+      "name": "CHENGXIANG558",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "CN",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 查無 MMSI 413905281 吻合之公開詳情頁，規格待確認可替換"
+    },
+    "564833000": {
+      "name": "ENA FORTUNE",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "imo": null,
+      "flag": "SG",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "525601311": {
+      "name": "PACIFIC LEGACY",
+      "operator": null,
+      "operator_full": null,
+      "type": "Other",
+      "imo": null,
+      "flag": "ID",
+      "flag_label": "🇮🇩 印尼",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563080620": {
+      "name": "KENKI 53",
+      "operator": null,
+      "operator_full": null,
+      "type": "Pleasure Craft",
+      "imo": null,
+      "flag": "SG",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "636022866": {
+      "name": "BRAVE",
+      "operator": null,
+      "operator_full": null,
+      "type": "Oil/Chemical Tanker",
+      "imo": "9335068",
+      "flag": "LR",
+      "flag_label": "🇱🇷 賴比瑞亞",
+      "built": 2008,
+      "gt": null,
+      "dwt": 45953,
+      "length_m": 183,
+      "beam_m": 32,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格經 WebSearch 確認 (MMSI 636022866 吻合，vesseltracker/MyShipTracking/VesselFinder)；GT 待補可替換"
+    },
+    "563009210": {
+      "name": "NOBLE ORION",
+      "operator": null,
+      "operator_full": null,
+      "type": "Other",
+      "imo": null,
+      "flag": "SG",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "432847000": {
+      "name": "MIDNIGHT DREAM",
+      "operator": null,
+      "operator_full": null,
+      "type": "Bulk Carrier",
+      "imo": "9558191",
+      "flag": "432",
+      "flag_label": "🇯🇵 日本",
+      "built": 2012,
+      "gt": null,
+      "dwt": null,
+      "length_m": 292,
+      "beam_m": 45,
+      "competitor_class": "非競品（散裝船）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "22",
+          "own_mmsi": "636013698",
+          "name_zh": "發明輪",
+          "name_en": "YM EFFICIENCY"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "54",
+          "own_mmsi": "636021244",
+          "name_zh": "賢明輪",
+          "name_en": "YM TOGETHER"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 補規格（MMSI 完全吻合，VesselFinder/MarineTraffic）；GT/DWT 待補可替換"
+    },
+    "413243010": {
+      "name": "DA WAN QU YI HAO",
+      "operator": null,
+      "operator_full": null,
+      "type": "Passenger Ship",
+      "imo": null,
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563011650": {
+      "name": "QSA PURARI",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563011690": {
+      "name": "MARINA ABLE",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563142000": {
+      "name": "SURYA RATNA 18",
+      "operator": null,
+      "operator_full": null,
+      "type": "Unknown（可替換）",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416015466": {
+      "name": "KMSC NO.903",
+      "operator": null,
+      "operator_full": null,
+      "type": "Port Tender",
+      "imo": null,
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413274020": {
+      "name": "SHEN GANG YIN7",
+      "operator": null,
+      "operator_full": null,
+      "type": "Pilot Vessel",
+      "imo": null,
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563282500": {
+      "name": "ESPIRITO SANTO EXPRESS",
+      "operator": null,
+      "operator_full": null,
+      "type": "Container Ship",
+      "imo": "9793923",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": 2018,
+      "gt": null,
+      "dwt": 132789,
+      "length_m": 330,
+      "beam_m": 48,
+      "competitor_class": "競品（貨櫃航商）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 補規格（MMSI 完全吻合，VesselFinder/VesselsValue，前名 Seaspan Harrier，Seaspan 租傭噸位）；GT 待補可替換"
+    },
+    "413867408": {
+      "name": "SHUNFENG868",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563039250": {
+      "name": "LLS18",
+      "operator": null,
+      "operator_full": null,
+      "type": "Pleasure Craft",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "256937000": {
+      "name": "BEIJING",
+      "type": "General Cargo Ship",
+      "operator": null,
+      "operator_full": null,
+      "flag": "256",
+      "flag_label": "未知（可替換）",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413907013": {
+      "name": "SUIDEYANG288",
+      "type": "General Cargo Ship",
+      "operator": null,
+      "operator_full": null,
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 查無吻合 MMSI 結果，規格待補可替換"
+    },
+    "565797000": {
+      "name": "POSH TEAL",
+      "type": "Reserved",
+      "operator": null,
+      "operator_full": null,
+      "flag": "565",
+      "flag_label": "🇸🇬 新加坡",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416190768": {
+      "name": "33",
+      "type": "Fishing Vessel",
+      "operator": null,
+      "operator_full": null,
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413608210": {
+      "name": "YING TAI 66",
+      "type": "General Cargo Ship",
+      "operator": null,
+      "operator_full": null,
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；名稱與 MMSI 吻合但無正式 IMO（中國近岸貨船），規格待確認可替換"
+    },
+    "477810700": {
+      "name": "XIANG HE KOU",
+      "type": "Heavy Load Carrier",
+      "operator": null,
+      "operator_full": null,
+      "flag": "477",
+      "flag_label": "🇭🇰 香港",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": "9752656",
+      "built": 2016,
+      "gt": null,
+      "dwt": 48163,
+      "length_m": 217,
+      "beam_m": 43,
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "22",
+          "own_mmsi": "636013698",
+          "name_zh": "發明輪",
+          "name_en": "YM EFFICIENCY"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch(VesselFinder/MarineTraffic) MMSI 完全吻合，補入 IMO/尺寸；GT 待補可替換"
+    },
+    "352003953": {
+      "name": "SKY CHALLENGE",
+      "type": "General Cargo Ship",
+      "operator": null,
+      "operator_full": null,
+      "flag": "352",
+      "flag_label": "🇵🇦 巴拿馬",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "25",
+          "own_mmsi": "636012795",
+          "name_zh": "駿明輪",
+          "name_en": "YM INCEPTION"
+        },
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563025160": {
+      "name": "ISLAMORADA",
+      "type": "Pleasure Craft",
+      "operator": null,
+      "operator_full": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "566925000": {
+      "name": "BEAVER",
+      "type": "Passenger Ship",
+      "operator": null,
+      "operator_full": null,
+      "flag": "566",
+      "flag_label": "🇸🇬 新加坡",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413454360": {
+      "name": "HE BIN",
+      "type": "General Cargo Ship",
+      "operator": null,
+      "operator_full": null,
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413493570": {
+      "name": "NANHANG777",
+      "type": "General Cargo Ship",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": 79,
+      "beam_m": 18,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；MMSI 吻合，無正式 IMO（中國沿海貨船），尺寸補入可替換"
+    },
+    "352003635": {
+      "name": "GLORY SKY",
+      "type": "Oil/Chemical Tanker",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "flag": "352",
+      "flag_label": "🇵🇦 巴拿馬",
+      "imo": "9517032",
+      "built": 2010,
+      "gt": null,
+      "dwt": 13674,
+      "length_m": 142,
+      "beam_m": 21,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格經 WebSearch 補入（MMSI 完全吻合）可替換"
+    },
+    "563067290": {
+      "name": "SUN ACE",
+      "type": "Tug",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563070310": {
+      "name": "JUMBO 11",
+      "type": "Pleasure Craft",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563040038": {
+      "name": "KENKI 20",
+      "type": "Pleasure Craft",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "566212000": {
+      "name": "BTS ELIZABETH",
+      "type": "Oil/Chemical Tanker",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "flag": "566",
+      "flag_label": "🇸🇬 新加坡",
+      "imo": "9460629",
+      "built": 2010,
+      "gt": null,
+      "dwt": 8066,
+      "length_m": 113,
+      "beam_m": 18,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格經 WebSearch 補入（MMSI 完全吻合）可替換"
+    },
+    "351040000": {
+      "name": "TAN BINH 246",
+      "type": "General Cargo Ship",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "flag": "351",
+      "flag_label": "🇵🇦 巴拿馬",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563055600": {
+      "name": "MAJU LOYALTY",
+      "type": "Tug",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563027920": {
+      "name": "SP1378B",
+      "type": "Port Tender",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416014904": {
+      "name": "927531",
+      "type": "Other",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "256951000": {
+      "name": "CMA CGM POINTE PERCEE",
+      "type": "Container Ship",
+      "flag": "256",
+      "flag_label": "🇲🇹 馬爾他",
+      "operator": "CMA CGM",
+      "operator_full": "CMA CGM Group",
+      "competitor_class": "競品（貨櫃航商）",
+      "imo": "9975258",
+      "built": 2025,
+      "gt": null,
+      "dwt": 85490,
+      "length_m": 272,
+      "beam_m": 43,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格經 WebSearch 補入（MMSI 吻合）"
+    },
+    "413873306": {
+      "name": "FENG NIAN 8",
+      "type": "General Cargo Ship",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563020750": {
+      "name": "TEKONG 2",
+      "type": "Port Tender",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563086360": {
+      "name": "KM XERXES",
+      "type": "Pleasure Craft",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416015403": {
+      "name": "JIA HORNG NO.6",
+      "type": "Fishing Vessel",
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "771123321": {
+      "name": "ATEST",
+      "type": "Tug",
+      "flag": "771",
+      "flag_label": "🇻🇪 委內瑞拉",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "255916090": {
+      "name": "MSC AUGUSTA III",
+      "type": "Container Ship",
+      "flag": "255",
+      "flag_label": "🇵🇹 葡萄牙(馬德拉)",
+      "operator": "MSC",
+      "operator_full": "Mediterranean Shipping Company",
+      "competitor_class": "競品（貨櫃航商）",
+      "imo": "9303792",
+      "built": 2006,
+      "gt": null,
+      "dwt": 39266,
+      "length_m": 222,
+      "beam_m": 30,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "22",
+          "own_mmsi": "636013698",
+          "name_zh": "發明輪",
+          "name_en": "YM EFFICIENCY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格經 WebSearch 補入（MMSI 吻合）"
+    },
+    "413261580": {
+      "name": "SHEN HUA 533",
+      "type": "General Cargo Ship",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "249452000": {
+      "name": "HELLAS APHRODITE",
+      "type": "Chemical/Oil Products Tanker",
+      "flag": "249",
+      "flag_label": "🇲🇹 馬爾他",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": "9722766",
+      "built": 2016,
+      "gt": null,
+      "dwt": 49992,
+      "length_m": 183,
+      "beam_m": 32,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格經 WebSearch 補入（MMSI 吻合）"
+    },
+    "341566001": {
+      "name": "RHINO",
+      "type": "General Cargo Ship",
+      "flag": "341",
+      "flag_label": "🇰🇳 聖克里斯多福",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563025850": {
+      "name": "HWANG CHANG 99",
+      "type": "未知（可替換）",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "305524000": {
+      "name": "HOOGE",
+      "type": "Container Ship",
+      "flag": "305",
+      "flag_label": "🇦🇬 安地卡及巴布達",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": "9944780",
+      "built": 2023,
+      "gt": null,
+      "dwt": 24000,
+      "length_m": 172,
+      "beam_m": 29,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        },
+        {
+          "source_id": "54",
+          "own_mmsi": "636021244",
+          "name_zh": "賢明輪",
+          "name_en": "YM TOGETHER"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格經 WebSearch 確認（MMSI 吻合）"
+    },
+    "416014931": {
+      "name": "928071",
+      "type": "Other",
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "477047100": {
+      "name": "GLORY OCEAN",
+      "type": "Container Ship",
+      "flag": "477",
+      "flag_label": "🇭🇰 香港",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": "9338280",
+      "built": 2007,
+      "gt": null,
+      "dwt": 13702,
+      "length_m": 148,
+      "beam_m": 24,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "22",
+          "own_mmsi": "636013698",
+          "name_zh": "發明輪",
+          "name_en": "YM EFFICIENCY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格經 WebSearch 確認（MMSI 吻合）"
+    },
+    "413380220": {
+      "name": "HAI MEN",
+      "type": "General Cargo Ship",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416003965": {
+      "name": "LONG FA JIN NO.168",
+      "type": "Fishing Vessel",
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "538006268": {
+      "name": "STAR CARIOCA",
+      "type": "Bulk Carrier",
+      "flag": "538",
+      "flag_label": "🇲🇭 馬紹爾群島",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": "9719549",
+      "built": 2015,
+      "gt": null,
+      "dwt": 81262,
+      "length_m": 229,
+      "beam_m": 32,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格經 WebSearch 確認（MMSI 吻合）"
+    },
+    "538009272": {
+      "name": "CONSCIENCE",
+      "type": "General Cargo Ship",
+      "flag": "538",
+      "flag_label": "🇲🇭 馬紹爾群島",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563004120": {
+      "name": "MARINA PRINCESS 3",
+      "type": "Tug",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "312627000": {
+      "name": "OPL 3",
+      "type": "General Cargo Ship",
+      "flag": "312",
+      "flag_label": "🇧🇿 貝里斯",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413314370": {
+      "name": "ZENG CHENG 888",
+      "type": "General Cargo Ship",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "22",
+          "own_mmsi": "636013698",
+          "name_zh": "發明輪",
+          "name_en": "YM EFFICIENCY"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563010750": {
+      "name": "BINA MARINE 35",
+      "type": "Tug",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "563015950": {
+      "name": "STET POLARIS",
+      "type": "Other",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413876063": {
+      "name": "YUEJINLUN 168",
+      "type": "General Cargo Ship",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413856971": {
+      "name": "HUIXINHUI283",
+      "type": "Aid to Navigation",
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "477997030": {
+      "name": "NIM WAN",
+      "type": "General Cargo Ship",
+      "flag": "477",
+      "flag_label": "🇭🇰 香港",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "477148800": {
+      "name": "COSCO SHIPPING ARIES",
+      "type": "Container Ship",
+      "flag": "477",
+      "flag_label": "🇭🇰 香港",
+      "operator": "中遠海運",
+      "operator_full": "COSCO Shipping Lines",
+      "competitor_class": "競品（貨櫃航商）",
+      "imo": "9783497",
+      "built": 2018,
+      "gt": null,
+      "dwt": 197021,
+      "length_m": 400,
+      "beam_m": 59,
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "54",
+          "own_mmsi": "636021244",
+          "name_zh": "賢明輪",
+          "name_en": "YM TOGETHER"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch MMSI 完全吻合，已補規格（VesselFinder/MarineTraffic）"
+    },
+    "212724000": {
+      "name": "SAN LORENZO",
+      "type": "Container Ship",
+      "flag": "212",
+      "flag_label": "🇨🇾 賽普勒斯",
+      "operator": "X-Press Feeders",
+      "operator_full": "X-Press Feeders",
+      "competitor_class": "競品（貨櫃航商）",
+      "imo": "9625293",
+      "built": 2014,
+      "gt": null,
+      "dwt": 21455,
+      "length_m": 172,
+      "beam_m": 27,
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch MMSI 完全吻合，已補規格（VesselFinder）；feeder 約 1714 TEU"
+    },
+    "636020886": {
+      "name": "HOLSATIA",
+      "type": "Container Ship",
+      "flag": "636",
+      "flag_label": "🇱🇷 賴比瑞亞",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "競品（貨櫃航商）",
+      "imo": "9233856",
+      "built": 2003,
+      "gt": 39941,
+      "dwt": 50914,
+      "length_m": 260,
+      "beam_m": 32,
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        },
+        {
+          "source_id": "54",
+          "own_mmsi": "636021244",
+          "name_zh": "賢明輪",
+          "name_en": "YM TOGETHER"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch MMSI 完全吻合，已補規格（VesselFinder）；Panamax 貨櫃船"
+    },
+    "563071620": {
+      "name": "CLS SINGAPORE",
+      "type": "General Cargo Ship",
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "operator": null,
+      "operator_full": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "566686000": {
+      "name": "DEMURE",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tanker",
+      "imo": null,
+      "flag": "SG",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "356619000": {
+      "name": "ORIENTAL ISLAND",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "PA",
+      "flag_label": "🇵🇦 巴拿馬",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "229778000": {
+      "name": "CMA CGM ARCTIC",
+      "operator": "CMA CGM",
+      "operator_full": "CMA CGM",
+      "type": "Container Ship",
+      "imo": "9867841",
+      "flag": "MT",
+      "flag_label": "🇲🇹 馬爾他",
+      "built": 2022,
+      "gt": null,
+      "dwt": 159614,
+      "length_m": 366,
+      "beam_m": 51,
+      "competitor_class": "競品（貨櫃航商）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "WebSearch 補規格（MMSI 完全吻合）；GT 待補可替換"
+    },
+    "311002140": {
+      "name": "PADIAN 3",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "未知",
+      "flag_label": "未知（可替換）",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413165000": {
+      "name": "XIN MEI ZHOU",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "CN",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "441902000": {
+      "name": "KMTC SHANGHAI",
+      "operator": "KMTC",
+      "operator_full": "高麗海運 KMTC",
+      "type": "Container Ship",
+      "imo": "9274202",
+      "flag": "KR",
+      "flag_label": "🇰🇷 南韓",
+      "built": 2004,
+      "gt": null,
+      "dwt": null,
+      "length_m": 187,
+      "beam_m": 28,
+      "competitor_class": "競品（貨櫃航商）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "22",
+          "own_mmsi": "636013698",
+          "name_zh": "發明輪",
+          "name_en": "YM EFFICIENCY"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        }
+      ],
+      "note": "WebSearch 補規格（MMSI 完全吻合）；GT/DWT 待補可替換"
+    },
+    "563178500": {
+      "name": "KOTA NAZAR",
+      "operator": "PIL",
+      "operator_full": "太平船務 Pacific Int. Lines",
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "SG",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "競品（貨櫃航商）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "22",
+          "own_mmsi": "636013698",
+          "name_zh": "發明輪",
+          "name_en": "YM EFFICIENCY"
+        },
+        {
+          "source_id": "25",
+          "own_mmsi": "636012795",
+          "name_zh": "駿明輪",
+          "name_en": "YM INCEPTION"
+        },
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "538010267": {
+      "name": "TS GUANGZHOU",
+      "operator": "TS LINES",
+      "operator_full": "德翔海運 TS Lines",
+      "type": "Container Ship",
+      "imo": "9946348",
+      "flag": "MH",
+      "flag_label": "🇲🇭 馬紹爾群島",
+      "built": 2022,
+      "gt": null,
+      "dwt": 24643,
+      "length_m": 172,
+      "beam_m": 28,
+      "competitor_class": "競品（貨櫃航商）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "53",
+          "own_mmsi": "563155200",
+          "name_zh": "納明輪",
+          "name_en": "YM TROPHY"
+        }
+      ],
+      "note": "WebSearch 補規格（MMSI 完全吻合）；GT 待補可替換"
+    },
+    "413845758": {
+      "name": "GUANG XING 9",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "CN",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413845954": {
+      "name": "YUEPING388",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "CN",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416005476": {
+      "name": "KAO NO 308",
+      "type": "Port Tender",
+      "operator": null,
+      "operator_full": null,
+      "flag": "TW",
+      "flag_label": "🇹🇼 台灣",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416003274": {
+      "name": "WOEN SHENQ NO66",
+      "type": "High Speed Craft",
+      "operator": null,
+      "operator_full": null,
+      "flag": "TW",
+      "flag_label": "🇹🇼 台灣",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413857688": {
+      "name": "MINGYANG938",
+      "type": "General Cargo Ship",
+      "operator": null,
+      "operator_full": null,
+      "flag": "CN",
+      "flag_label": "🇨🇳 中國",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "565237000": {
+      "name": "POSH CHAMPION",
+      "type": "Tug",
+      "operator": null,
+      "operator_full": null,
+      "flag": "SG",
+      "flag_label": "🇸🇬 新加坡",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "566530000": {
+      "name": "PACIFIC HONOUR",
+      "type": "Oil Products Tanker",
+      "operator": "Pacific Tanker Operator (推測)",
+      "operator_full": null,
+      "flag": "SG",
+      "flag_label": "🇸🇬 新加坡",
+      "imo": "9651864",
+      "built": 2013,
+      "gt": null,
+      "dwt": 4785,
+      "length_m": 90,
+      "beam_m": 16,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 規格已補(VesselFinder/MarineTraffic, MMSI 吻合) 2026-06-10"
+    },
+    "477185400": {
+      "name": "SC LIAONING",
+      "type": "Chemical/Oil Products Tanker",
+      "operator": null,
+      "operator_full": null,
+      "flag": "HK",
+      "flag_label": "🇭🇰 香港",
+      "imo": "9428310",
+      "built": 2009,
+      "gt": null,
+      "dwt": null,
+      "length_m": 128,
+      "beam_m": 20,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 規格已補(VesselFinder/MarineTraffic, MMSI 吻合, GT/DWT 待補) 2026-06-10"
+    },
+    "416009432": {
+      "name": "TONG MING NO.1",
+      "type": "Unknown",
+      "operator": null,
+      "operator_full": null,
+      "flag": "TW",
+      "flag_label": "🇹🇼 台灣",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416005918": {
+      "name": "JAU YANG NO.888",
+      "type": "Fishing Vessel",
+      "operator": null,
+      "operator_full": null,
+      "flag": "TW",
+      "flag_label": "🇹🇼 台灣",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "412476410": {
+      "name": "PENG XING 12",
+      "type": "High Speed Craft",
+      "operator": null,
+      "operator_full": null,
+      "flag": "CN",
+      "flag_label": "🇨🇳 中國",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "477991600": {
+      "name": "TING KAU",
+      "type": "Tug",
+      "operator": null,
+      "operator_full": null,
+      "flag": "HK",
+      "flag_label": "🇭🇰 香港",
+      "imo": null,
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413506380": {
+      "name": "ANSHENG28",
+      "operator": null,
+      "operator_full": null,
+      "type": "General Cargo Ship",
+      "imo": null,
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "17",
+          "own_mmsi": "636019894",
+          "name_zh": "聚明輪",
+          "name_en": "YM CREDENTIAL"
+        },
+        {
+          "source_id": "22",
+          "own_mmsi": "636013698",
+          "name_zh": "發明輪",
+          "name_en": "YM EFFICIENCY"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "24",
+          "own_mmsi": "416488000",
+          "name_zh": "英明輪",
+          "name_en": "YM IDEALS"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 名稱與 MMSI 吻合(AN SHENG 28)但 IMO 登記為 0、無噸位資料，規格待補可替換"
+    },
+    "441946000": {
+      "name": "MEGA CARAVAN 2",
+      "operator": null,
+      "operator_full": null,
+      "type": "Other",
+      "imo": null,
+      "flag": "441",
+      "flag_label": "未知（可替換）",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "567073900": {
+      "name": "SRI NATHAWEE",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tanker",
+      "imo": "9267833",
+      "flag": "567",
+      "flag_label": "🇹🇭 泰國",
+      "built": 2002,
+      "gt": null,
+      "dwt": 5503,
+      "length_m": 105,
+      "beam_m": 16,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 補規格（MMSI 吻合，VesselFinder/maritimeoptima）；GT 待補可替換"
+    },
+    "261005556": {
+      "name": "NIMBLE LEOPARD",
+      "operator": null,
+      "operator_full": null,
+      "type": "High Speed Craft",
+      "imo": null,
+      "flag": "261",
+      "flag_label": "未知（可替換）",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "566091000": {
+      "name": "ZEMIRA",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tanker",
+      "imo": "9397767",
+      "flag": "566",
+      "flag_label": "🇸🇬 新加坡",
+      "built": 2007,
+      "gt": null,
+      "dwt": 3876,
+      "length_m": 75,
+      "beam_m": 17,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；WebSearch 補規格（MMSI 吻合，VesselFinder/MagicPort）；GT 待補可替換"
+    },
+    "563021290": {
+      "name": "KANLIAN ARK",
+      "operator": null,
+      "operator_full": null,
+      "type": "Pleasure Craft",
+      "imo": null,
+      "flag": "563",
+      "flag_label": "🇸🇬 新加坡",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "525110412": {
+      "name": "M O R G A N",
+      "operator": null,
+      "operator_full": null,
+      "type": "SAR Vessel",
+      "imo": null,
+      "flag": "525",
+      "flag_label": "未知（可替換）",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "28",
+          "own_mmsi": "636013118",
+          "name_zh": "近明輪",
+          "name_en": "YM INSTRUCTION"
+        },
+        {
+          "source_id": "29",
+          "own_mmsi": "636013119",
+          "name_zh": "悅明輪",
+          "name_en": "YM INTERACTION"
+        },
+        {
+          "source_id": "34",
+          "own_mmsi": "416429000",
+          "name_zh": "威明輪",
+          "name_en": "YM HAWK"
+        },
+        {
+          "source_id": "45",
+          "own_mmsi": "636015182",
+          "name_zh": "盛明輪",
+          "name_en": "YM MILESTONE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416003266": {
+      "name": "S15 KMSC NO 702",
+      "operator": null,
+      "operator_full": null,
+      "type": "Pilot Vessel",
+      "imo": null,
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "31",
+          "own_mmsi": "636013121",
+          "name_zh": "來明輪",
+          "name_en": "YM IMPROVEMENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "416005514": {
+      "name": "CHUNG CHENG NO.7",
+      "operator": null,
+      "operator_full": null,
+      "type": "Tug",
+      "imo": null,
+      "flag": "416",
+      "flag_label": "🇹🇼 台灣",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "12",
+          "own_mmsi": "416465000",
+          "name_zh": "運明輪",
+          "name_en": "YM UPSURGENCE"
+        },
+        {
+          "source_id": "23",
+          "own_mmsi": "416486000",
+          "name_zh": "精明輪",
+          "name_en": "YM INTELLIGENT"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        },
+        {
+          "source_id": "50",
+          "own_mmsi": "416492000",
+          "name_zh": "雲明輪",
+          "name_en": "YM IMMENSE"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
+    },
+    "413268980": {
+      "name": "DA WAN QU ER HAO",
+      "operator": null,
+      "operator_full": null,
+      "type": "Passenger Ship",
+      "imo": null,
+      "flag": "413",
+      "flag_label": "🇨🇳 中國",
+      "built": null,
+      "gt": null,
+      "dwt": null,
+      "length_m": null,
+      "beam_m": null,
+      "competitor_class": "非競品（近岸雜船／散裝／油輪等）",
+      "nearby_own_vessels": [
+        {
+          "source_id": "16",
+          "own_mmsi": "636019893",
+          "name_zh": "洋明輪",
+          "name_en": "YM CONTINENT"
+        },
+        {
+          "source_id": "33",
+          "own_mmsi": "636019900",
+          "name_zh": "長明輪",
+          "name_en": "YM COOPERATION"
+        },
+        {
+          "source_id": "36",
+          "own_mmsi": "563234700",
+          "name_zh": "川明輪",
+          "name_en": "YM CAPACITY"
+        },
+        {
+          "source_id": "49",
+          "own_mmsi": "636013699",
+          "name_zh": "展明輪",
+          "name_en": "YM ETERNITY"
+        }
+      ],
+      "note": "本地 AIS 基本資料表補入；規格待補可替換"
     }
   },
   "queries_no_results": [
@@ -21975,35 +28286,40 @@
     ]
   },
   "by_flag": {
-    "🇹🇼 台灣": 142,
-    "🇸🇬 新加坡": 90,
-    "🇨🇳 中國": 66,
-    "🇭🇰 香港": 28,
+    "🇹🇼 台灣": 159,
+    "🇸🇬 新加坡": 142,
+    "🇨🇳 中國": 95,
+    "🇭🇰 香港": 35,
     "台灣": 27,
-    "🇱🇷 賴比瑞亞": 20,
-    "🇵🇦 巴拿馬": 18,
-    "未知（可替換）": 17,
+    "未知（可替換）": 24,
+    "🇵🇦 巴拿馬": 23,
+    "🇱🇷 賴比瑞亞": 22,
     "中國": 14,
+    "🇹🇭 泰國": 10,
     "泰國": 10,
-    "🇹🇭 泰國": 9,
+    "🇲🇭 馬紹爾群島": 8,
     "🇲🇾 馬來西亞": 8,
-    "SG 新加坡": 5,
-    "🇲🇭 馬紹爾群島": 4,
-    "🇲🇭 馬紹爾": 4,
-    "🇮🇩 印尼": 4,
+    "SG 新加坡": 8,
+    "🇲🇹 馬爾他": 6,
+    "🇲🇭 馬紹爾": 5,
+    "🇮🇩 印尼": 5,
+    "🇧🇿 貝里斯": 3,
+    "🇦🇬 安地卡及巴布達": 3,
     "🇬🇧 英國": 3,
     "🇧🇸 巴哈馬": 3,
+    "🇯🇵 日本": 3,
     "🇨🇰 庫克群島": 3,
     "CN 中國": 3,
+    "🇨🇾 賽普勒斯": 2,
     "🇹🇼 臺灣": 2,
     "巴拿馬": 2,
     "巴貝多 Barbados": 2,
     "🇻🇨 聖文森": 2,
-    "🇧🇿 貝里斯": 2,
-    "🇦🇬 安地卡及巴布達": 2,
-    "🇯🇵 日本": 2,
-    "🇲🇹 馬爾他": 2,
-    "🇨🇾 賽普勒斯": 1,
+    "🇰🇷 南韓": 2,
+    "🇵🇹 葡萄牙(馬德拉)": 2,
+    "LR 賴比瑞亞": 2,
+    "TW 台灣": 2,
+    "MT 馬爾他": 2,
     "🇷🇺 俄羅斯": 1,
     "🇻🇳 越南": 1,
     "新加坡": 1,
@@ -22012,11 +28328,14 @@
     "🇲🇳 蒙古": 1,
     "🇻🇺 萬那杜": 1,
     "🇩🇰 丹麥": 1,
-    "🇰🇷 南韓": 1,
-    "🇵🇹 葡萄牙(馬德拉)": 1,
     "🇲🇳 蒙古（WebSearch 補；可替換）": 1,
     "🇵🇹 葡萄牙（馬德拉）": 1,
-    "LR 賴比瑞亞": 1,
-    "❓ (613)": 1
+    "❓ (613)": 1,
+    "🇲🇨 摩納哥": 1,
+    "🇵🇼 帛琉": 1,
+    "PA 巴拿馬": 1,
+    "HK 香港": 1,
+    "🇻🇪 委內瑞拉": 1,
+    "🇰🇳 聖克里斯多福": 1
   }
 }
