@@ -572,6 +572,20 @@ body { display: flex; }
   padding-top: 5px;
   border-top: 1px dashed #2a2a2a;
 }
+/* 港口卡片狀態 banner */
+.port-card .pc-status {
+  font-size: 10px;
+  padding: 4px 7px;
+  border-radius: 3px;
+  margin: 4px 0 6px;
+  line-height: 1.4;
+}
+.pc-status-live { background: rgba(76,217,122,0.10); color: #6ee094; border-left: 2px solid #4cd97a; }
+.pc-status-hist { background: rgba(245,176,87,0.08); color: #f5b753; border-left: 2px solid #f5a623; }
+.pc-status-none { background: #1a1a1a; color: #7c8a9e; border-left: 2px solid #3a3a3a; }
+.port-card.port-historical { opacity: 0.78; }
+.port-card.port-historical:hover { opacity: 1; }
+.port-card.cong-unknown { border-left-color: #3a3a3a; }
 
 /* 收合區塊（船舶詳情用） */
 .vd-collapse {
@@ -1500,6 +1514,19 @@ function linearExtrap(pos, sog, cog, tauMin) {
 }
 
 // 兩經緯度間距離 (NM, equirectangular，近距離夠精準)
+// 拆分軌跡：當相鄰兩點 |Δlon| > 180° 時視為跨越國際換日線，斷開為新段
+// 避免 Leaflet 把 +179° → -179° 畫成一條橫跨整個世界地圖的直線
+function splitTrackAtDateLine(track) {
+  if (!track || track.length === 0) return [];
+  const segments = [[track[0]]];
+  for (let i = 1; i < track.length; i++) {
+    const dLon = Math.abs(track[i].lon - track[i-1].lon);
+    if (dLon > 180) segments.push([]);  // 換日線跨越 → 開新段
+    segments[segments.length - 1].push(track[i]);
+  }
+  return segments;
+}
+
 function distNm(lat1, lon1, lat2, lon2) {
   const meanLatRad = toRad((lat1 + lat2) / 2);
   const dx = (lon2 - lon1) * 60 * Math.cos(meanLatRad);
@@ -1790,9 +1817,13 @@ window.showExternalTrack = function(mmsi) {
   // 段內：實線；段間距離若 < 5 nm 直接連，否則跳開
   for (const seg of segments) {
     if (seg.length >= 2) {
-      allLayers.push(L.polyline(seg.map(p => [p.lat, p.lon]), {
-        color, weight: 2.5, opacity: 0.85,
-      }));
+      // 段內再依換日線拆段，避免畫橫跨整地球的線
+      const dlSegs = splitTrackAtDateLine(seg).filter(s => s.length >= 2);
+      for (const ds of dlSegs) {
+        allLayers.push(L.polyline(ds.map(p => [p.lat, p.lon]), {
+          color, weight: 2.5, opacity: 0.85,
+        }));
+      }
     }
     for (const p of seg) {
       // 觀測點：依風險變色 (Warning 以上 → 紅/橘)
@@ -2323,6 +2354,7 @@ async function loadVessels() {
 
     const op = data.operator_summary || {};
     const opStr = op['Yang Ming'] ? `Yang Ming ${op['Yang Ming']} 艘 · 其他 ${op['Other']} 艘` : '';
+    STATE.dataDateRange = data.date_range;  // 給港口擁塞看板等使用
     document.getElementById('fleetMeta').textContent =
       `共 ${data.vessel_count} 艘 (${opStr}) · 資料區間 ${data.date_range[0]} ~ ${data.date_range[1]} · 取樣 ${data.downsample.track_minutes} 分鐘`;
     loading.classList.remove('show');
@@ -2452,10 +2484,17 @@ async function renderFleet() {
     v._marker = marker;
   });
 
-  // 自動 fit 全船隊
-  if (STATE.vessels.some(v => v._lastPos)) {
-    const bounds = L.latLngBounds(STATE.vessels.filter(v => v._lastPos).map(v => [v._lastPos.lat, v._lastPos.lon]));
-    STATE.map.fitBounds(bounds, { padding: [50, 50] });
+  // 自動 fit 全船隊 — 預設台灣海峽，避免跨換日線船 (如太平洋橫渡) 把全球視角拉成橫向直線
+  const ymVessels = STATE.vessels.filter(v => v._lastPos);
+  if (ymVessels.length > 0) {
+    // 過濾掉跨換日線/太平洋橫渡（位於 |lon| > 160 區段）的船，只 fit 東亞主船隊
+    const eastAsia = ymVessels.filter(v => {
+      const lon = v._lastPos.lon;
+      return lon > 90 && lon < 160;  // 東亞海域
+    });
+    const fitList = eastAsia.length >= 3 ? eastAsia : ymVessels;
+    const bounds = L.latLngBounds(fitList.map(v => [v._lastPos.lat, v._lastPos.lon]));
+    STATE.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
   }
 
   // 渲染右側清單
@@ -2797,20 +2836,6 @@ function renderDetail() {
       </div>`;
       })()}
 
-      ${(() => {
-        const fleetMembers = lastSnap.surrounding.filter(s => lookupFleet(s.mmsi));
-        return fleetMembers.length > 0 ? `
-        <div class="vd-section">
-          <div class="vd-section-title">⭐ 5 NM 內同船隊船舶 (${fleetMembers.length} 艘)</div>
-          ${fleetMembers.sort((a,b)=>a.dist_nm-b.dist_nm).map(s => {
-            const f = lookupFleet(s.mmsi);
-            return `<div class="surr-card" style="border-left:3px solid #ffd700;">
-              <div style="color:#ffd700;font-weight:600;">${f.name_zh} / ${f.name_en}</div>
-              <div class="meta">距 ${s.dist_nm.toFixed(2)} nm · MMSI ${s.mmsi}</div>
-            </div>`;
-          }).join('')}
-        </div>` : '';
-      })()}
     </div>
   `;
   document.getElementById('rightPanel').innerHTML = html;
@@ -2844,14 +2869,15 @@ function drawDetailMap() {
     }
   }
 
-  // 1. 軌跡 polyline（全 8 天）
+  // 1. 軌跡 polyline（全 8 天）— 跨換日線時拆段避免畫橫跨整地球的長線
   if (document.getElementById('lyrTrack').checked && v._track) {
-    const latlngs = v._track.map(p => [p.lat, p.lon]);
-    STATE.layers.trackLine = L.polyline(latlngs, {
-      color: COLORS.track,
-      weight: 2,
-      opacity: 0.5,
-    }).addTo(STATE.map);
+    const segs = splitTrackAtDateLine(v._track);
+    const polylines = segs.filter(s => s.length >= 2).map(seg =>
+      L.polyline(seg.map(p => [p.lat, p.lon]), {
+        color: COLORS.track, weight: 2, opacity: 0.5,
+      })
+    );
+    STATE.layers.trackLine = L.layerGroup(polylines).addTo(STATE.map);
   }
 
   // 2. 5 NM 圓
@@ -3463,10 +3489,11 @@ const PORT_INPORT_SOG_KN = 2.0;
 function computePortCongestion() {
   const result = KNOWN_PORTS.map(p => ({
     ...p,
-    ymInPort: [],     // 目前在港的 YM 船 [name, sog]
-    ymVisited: [],    // 資料區間曾到訪的 YM 船 (含停留時數)
-    surroundingNow: 0,  // 在港 YM 船目前 5NM 內的周邊船總數 (代表實際擁塞)
-    surroundingPeak: 0, // 8 天內峰值
+    ymInPort: [],         // 目前在港的 YM 船 [name, sog]
+    ymVisited: [],        // 資料區間曾到訪 (每筆含 dwellH, startTs, endTs, name)
+    surroundingNow: 0,    // 在港 YM 船目前 5NM 內的周邊船總數 (代表實際擁塞)
+    firstVisitTs: null,
+    lastVisitTs: null,
   }));
 
   STATE.vessels.forEach(v => {
@@ -3478,14 +3505,13 @@ function computePortCongestion() {
       const d = Math.hypot(last.lat - p.lat, last.lon - p.lon);
       if (d < PORT_DETECT_RADIUS && (last.sog || 0) < PORT_INPORT_SOG_KN) {
         p.ymInPort.push({ name: v.name || ('src ' + v.source_id), src: v.source_id, sog: last.sog || 0 });
-        // 末快照的 surrounding 數量 (在港時的擁塞代表)
         if (v._lastSnapshot) {
           p.surroundingNow += v._lastSnapshot.surrounding_count || 0;
         }
       }
     });
 
-    // 軌跡中所有經過的港口 → 統計停留時數 (sog<1 且在港內)
+    // 軌跡中所有經過的港口 → 統計停留時數
     let cur = null;
     for (let i = 0; i < v._track.length; i++) {
       const pt = v._track[i];
@@ -3500,34 +3526,68 @@ function computePortCongestion() {
       } else if (cur) {
         const dwellH = (new Date(cur.endTs) - new Date(cur.startTs)) / 3600000;
         if (dwellH > 0.5) {
-          cur.ref.ymVisited.push({ name: v.name || ('src ' + v.source_id), dwellH });
+          cur.ref.ymVisited.push({ name: v.name || ('src ' + v.source_id), dwellH, startTs: cur.startTs, endTs: cur.endTs });
+          if (!cur.ref.firstVisitTs || cur.startTs < cur.ref.firstVisitTs) cur.ref.firstVisitTs = cur.startTs;
+          if (!cur.ref.lastVisitTs  || cur.endTs   > cur.ref.lastVisitTs)  cur.ref.lastVisitTs  = cur.endTs;
         }
         cur = null;
       }
     }
     if (cur) {
       const dwellH = (new Date(cur.endTs) - new Date(cur.startTs)) / 3600000;
-      if (dwellH > 0.5) cur.ref.ymVisited.push({ name: v.name || ('src ' + v.source_id), dwellH });
+      if (dwellH > 0.5) {
+        cur.ref.ymVisited.push({ name: v.name || ('src ' + v.source_id), dwellH, startTs: cur.startTs, endTs: cur.endTs });
+        if (!cur.ref.firstVisitTs || cur.startTs < cur.ref.firstVisitTs) cur.ref.firstVisitTs = cur.startTs;
+        if (!cur.ref.lastVisitTs  || cur.endTs   > cur.ref.lastVisitTs)  cur.ref.lastVisitTs  = cur.endTs;
+      }
     }
   });
 
-  // 擁塞分級：根據 surroundingNow / capacity 比例 + YM 在港船數
+  // 判定 isHistorical：「目前無 YM 在港 + 過去曾到訪」
+  // 擁塞分級分兩種：
+  //   有 YM 在港 (即時推估)：根據 surroundingNow / capacity
+  //   無 YM 在港但有歷史：根據歷史平均擁塞 (用該港的 ymVisited 數估)
+  //   完全無資料：unknown
   result.forEach(p => {
-    const utilization = p.surroundingNow / p.capacity;  // 0~∞
-    if (utilization > 0.7 || p.surroundingNow > 50) p.level = 'critical';
-    else if (utilization > 0.4 || p.surroundingNow > 25) p.level = 'high';
-    else if (utilization > 0.15 || p.surroundingNow > 8) p.level = 'medium';
-    else p.level = 'low';
-    p.utilization = utilization;
+    p.hasCurrent = p.ymInPort.length > 0;
+    p.hasHistory = p.ymVisited.length > 0;
+    p.isHistorical = !p.hasCurrent && p.hasHistory;
+    p.isUnknown   = !p.hasCurrent && !p.hasHistory;
+    if (p.hasCurrent) {
+      const utilization = p.surroundingNow / p.capacity;
+      if (utilization > 0.7 || p.surroundingNow > 50) p.level = 'critical';
+      else if (utilization > 0.4 || p.surroundingNow > 25) p.level = 'high';
+      else if (utilization > 0.15 || p.surroundingNow > 8) p.level = 'medium';
+      else p.level = 'low';
+      p.utilization = utilization;
+    } else if (p.hasHistory) {
+      // 歷史模式：依到訪次數粗估熱度
+      const visits = p.ymVisited.length;
+      if (visits >= 5)      p.level = 'medium';
+      else if (visits >= 2) p.level = 'low';
+      else                  p.level = 'low';
+      p.utilization = 0;
+    } else {
+      p.level = 'unknown';
+      p.utilization = 0;
+    }
   });
 
-  // 按擁塞排序 (critical > high > medium > low)，同級按 YM 在港船數
-  const lvlOrder = { critical:0, high:1, medium:2, low:3 };
+  // 排序：有 YM 在港 > 有歷史 > 無資料；同類依擁塞 / 訪次
+  const lvlOrder = { critical:0, high:1, medium:2, low:3, unknown:4 };
   result.sort((a, b) => {
+    if (a.hasCurrent !== b.hasCurrent) return a.hasCurrent ? -1 : 1;
+    if (a.hasHistory !== b.hasHistory) return a.hasHistory ? -1 : 1;
     if (lvlOrder[a.level] !== lvlOrder[b.level]) return lvlOrder[a.level] - lvlOrder[b.level];
     return b.ymInPort.length - a.ymInPort.length;
   });
   return result;
+}
+
+// 把 ISO ts 縮短為 MM/DD HH:mm
+function shortTs(ts) {
+  if (!ts) return '—';
+  return ts.substring(5,7) + '/' + ts.substring(8,10) + ' ' + ts.substring(11,16);
 }
 
 window.showPortCongestion = function() {
@@ -3539,22 +3599,24 @@ window.showPortCongestion = function() {
   event?.currentTarget?.classList?.add('active');
 
   const ports = computePortCongestion();
-  const lvlLabel = { critical: '🔴 嚴重擁塞', high: '🟠 高擁塞', medium: '🟡 中擁塞', low: '🟢 順暢' };
+  const lvlLabel = { critical: '🔴 嚴重擁塞', high: '🟠 高擁塞', medium: '🟡 中擁塞', low: '🟢 順暢', unknown: '— 無資料' };
   const totalYmInPort = ports.reduce((s,p)=>s+p.ymInPort.length, 0);
-  const portsWithYm = ports.filter(p => p.ymInPort.length > 0).length;
+  const portsWithYm = ports.filter(p => p.hasCurrent).length;
   const totalYmVisits = ports.reduce((s,p)=>s+p.ymVisited.length, 0);
   const congCritical = ports.filter(p => p.level === 'critical').length;
+  const dataRange = STATE.dataDateRange || ['—','—'];
+  const dataRangeShort = `${dataRange[0]} ~ ${dataRange[1]}`;
 
   document.getElementById('rightPanel').innerHTML = `
     <div id="panelPortCongestion">
       <div class="port-dash-title">⚓ 港口擁塞看板</div>
-      <div class="port-dash-sub">基於 YM 船隊 20 艘軌跡 + 周邊偵測推估 · 資料區間 5/25 ~ 6/02</div>
+      <div class="port-dash-sub">基於 YM 船隊 20 艘軌跡 + 周邊偵測推估 · 資料區間 ${dataRangeShort}</div>
 
       <div class="port-summary-bar">
         <div><div class="lbl">嚴重擁塞</div><div class="val" style="color:#ff8a8a;">${congCritical}</div></div>
         <div><div class="lbl">YM 停泊船</div><div class="val">${totalYmInPort}</div></div>
-        <div><div class="lbl">資料區間到訪次</div><div class="val">${totalYmVisits}</div></div>
-        <div><div class="lbl">有 YM 訪港</div><div class="val">${portsWithYm}</div></div>
+        <div><div class="lbl">區間內到訪次</div><div class="val">${totalYmVisits}</div></div>
+        <div><div class="lbl">目前有 YM 訪港</div><div class="val">${portsWithYm}</div></div>
       </div>
 
       <div style="padding:0 14px 8px;font-size:10px;color:#7c8a9e;">點港口卡片 → 地圖縮放到該港</div>
@@ -3566,20 +3628,49 @@ window.showPortCongestion = function() {
         const avgDwellH = p.ymVisited.length
           ? (p.ymVisited.reduce((s,v)=>s+v.dwellH,0)/p.ymVisited.length).toFixed(1)
           : '—';
+
+        // 歷史模式 banner
+        let statusBanner = '';
+        if (p.hasCurrent) {
+          statusBanner = `<div class="pc-status pc-status-live">● 即時推估 · 目前 ${p.ymInPort.length} 艘 YM 在港</div>`;
+        } else if (p.isHistorical) {
+          statusBanner = `<div class="pc-status pc-status-hist">📅 歷史資料 · 資料收集區間 ${dataRangeShort}<br>最後到訪 ${shortTs(p.lastVisitTs)} · 此後 YM 船隊未再進港</div>`;
+        } else {
+          statusBanner = `<div class="pc-status pc-status-none">⊘ 無資料 · 區間內無任何 YM 船到訪此港</div>`;
+        }
+
+        // 指標：有現況 / 有歷史 / 完全無
+        let metricsHtml;
+        if (p.hasCurrent) {
+          metricsHtml = `
+            <div class="pc-metric"><div class="k">在港擁塞 (5NM 推估)</div><div class="v">${p.surroundingNow}</div></div>
+            <div class="pc-metric"><div class="k">使用率</div><div class="v">${(p.utilization*100).toFixed(0)}%</div></div>
+            <div class="pc-metric"><div class="k">平均停泊</div><div class="v">${avgDwellH}h</div></div>`;
+        } else if (p.isHistorical) {
+          metricsHtml = `
+            <div class="pc-metric"><div class="k">區間到訪次</div><div class="v">${p.ymVisited.length}</div></div>
+            <div class="pc-metric"><div class="k">平均停泊</div><div class="v">${avgDwellH}h</div></div>
+            <div class="pc-metric"><div class="k">最後到訪</div><div class="v" style="font-size:10px;">${shortTs(p.lastVisitTs)}</div></div>`;
+        } else {
+          metricsHtml = `
+            <div class="pc-metric" style="grid-column:1/-1;text-align:center;color:#7c8a9e;">未有 YM 船活動紀錄</div>`;
+        }
+
+        const ymLine = p.hasCurrent
+          ? `YM 在港：${p.ymInPort.length} 艘 (${ymInPortTxt})`
+          : p.isHistorical
+            ? `區間到訪 YM：${[...new Set(p.ymVisited.map(v=>v.name.split('/')[0].trim()))].slice(0,4).join('、')}${[...new Set(p.ymVisited.map(v=>v.name))].length>4?` 等`:''}`
+            : '';
+
         return `
-          <div class="port-card cong-${p.level}" onclick="zoomToPort(${p.lat},${p.lon})">
+          <div class="port-card cong-${p.level}${p.isHistorical?' port-historical':''}" onclick="zoomToPort(${p.lat},${p.lon})">
             <div class="pc-head">
               <div><span class="pc-name">${p.flag} ${p.name}</span></div>
               <span class="pc-cong-badge">${lvlLabel[p.level]}</span>
             </div>
-            <div class="pc-metrics">
-              <div class="pc-metric"><div class="k">在港擁塞 (5NM 推估)</div><div class="v">${p.surroundingNow}</div></div>
-              <div class="pc-metric"><div class="k">使用率</div><div class="v">${(p.utilization*100).toFixed(0)}%</div></div>
-              <div class="pc-metric"><div class="k">平均停泊</div><div class="v">${avgDwellH}h</div></div>
-            </div>
-            <div class="pc-ymships">
-              YM 在港：${p.ymInPort.length} 艘 ${ymInPortTxt !== '無' ? '(' + ymInPortTxt + ')' : ''} · 8 天到訪 ${p.ymVisited.length} 次
-            </div>
+            ${statusBanner}
+            <div class="pc-metrics">${metricsHtml}</div>
+            ${ymLine ? `<div class="pc-ymships">${ymLine}</div>` : ''}
           </div>
         `;
       }).join('')}
