@@ -104,6 +104,10 @@
         .risk-table { width: 100%; margin-top: 4px; border-collapse: collapse; font-size: var(--font-xs); text-align: center; }
         .risk-table th { background-color: rgba(55, 65, 81, 0.8); border: 1px solid #4b5563; padding: 4px 6px; font-weight: normal; color: var(--text-muted); }
         .risk-table td { border: 1px solid #4b5563; padding: 4px 6px; }
+
+        /* 可點擊的船名 / 填報時間連結 (進入單船電報總覽與明細) */
+        .ship-link, .report-time-link { cursor: pointer; transition: opacity 0.15s; }
+        .ship-link:hover, .report-time-link:hover { text-decoration: underline !important; opacity: 0.8; }
     </style>
 </head>
 
@@ -160,17 +164,17 @@
                                 <thead class="border-bottom border-secondary" style="position: sticky; top: 0; background-color: #1f2937; z-index: 1;">
                                     <tr>
                                         <th class="py-2 text-secondary fw-normal">Ship Name-船名</th>
-                                        <th class="text-secondary fw-normal">Report Type-最新船報</th>
+                                        <th class="text-secondary fw-normal">Report Type-船報類型</th>
                                         <th class="text-secondary fw-normal">Status-當前狀態</th>
-                                        <th class="text-info fw-normal">填報時間 (CST)</th>
+                                        <th class="text-info fw-normal">填報時間 (LT)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td class="py-2 text-info fw-bold">Yuan Shun</td><td>NOON REPORT</td><td class="text-info">Sailing</td><td class="text-light font-monospace" style="font-size: 0.75rem;">2026-03-26 12:00Z</td></tr>
-                                    <tr><td class="py-2 text-info fw-bold">Jing Shun</td><td>ARRIVAL REPORT</td><td class="text-secondary">At Port</td><td class="text-light font-monospace" style="font-size: 0.75rem;">2026-03-26 09:30Z</td></tr>
-                                    <tr><td class="py-2 text-info fw-bold">Feng Shun</td><td>ANCHOR REPORT</td><td class="text-warning">Anchorage</td><td class="text-light font-monospace" style="font-size: 0.75rem;">2026-03-25 18:15Z</td></tr>
-                                    <tr><td class="py-2 text-info fw-bold">Hui Shun No.1</td><td>DAILY REPORT</td><td class="text-success">Discharging</td><td class="text-light font-monospace" style="font-size: 0.75rem;">2026-03-26 08:00Z</td></tr>
-                                    <tr><td class="py-2 text-info fw-bold">Gimpo Shun</td><td>SHIFTING REPORT</td><td style="color: #c084fc;">Shifting</td><td class="text-light font-monospace" style="font-size: 0.75rem;">2026-03-26 10:20Z</td></tr>
+                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Yuan%20Shun" class="ship-link text-info fw-bold text-decoration-none">Yuan Shun</a></td><td>NOON REPORT</td><td class="text-info">Sailing</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Yuan%20Shun#masterDataTable" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 0.75rem;">2026-03-26 12:00</a></td></tr>
+                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Jing%20Shun" class="ship-link text-info fw-bold text-decoration-none">Jing Shun</a></td><td>ARRIVAL REPORT</td><td class="text-secondary">Arrival</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Jing%20Shun#masterDataTable" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 0.75rem;">2026-03-26 09:30</a></td></tr>
+                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Feng%20Shun" class="ship-link text-info fw-bold text-decoration-none">Feng Shun</a></td><td>ANCHOR REPORT</td><td class="text-warning">Waiting</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Feng%20Shun#masterDataTable" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 0.75rem;">2026-03-25 18:15</a></td></tr>
+                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Hui%20Shun%20No.1" class="ship-link text-info fw-bold text-decoration-none">Hui Shun No.1</a></td><td>DAILY REPORT</td><td class="text-success">Discharging</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Hui%20Shun%20No.1#masterDataTable" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 0.75rem;">2026-03-26 08:00</a></td></tr>
+                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Gimpo%20Shun" class="ship-link text-info fw-bold text-decoration-none">Gimpo Shun</a></td><td>SHIFTING REPORT</td><td style="color: #c084fc;">Loading</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Gimpo%20Shun#masterDataTable" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 0.75rem;">2026-03-26 10:20</a></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -365,6 +369,7 @@
                 </div>
             </div>
 
+             <!-- 碳排強度趨勢 (EEOI vs CII) — 暫時隱藏
              <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body d-flex flex-column p-4">
@@ -402,6 +407,7 @@
                     </div>
                 </div>
             </div>
+            -->
 
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
@@ -580,8 +586,9 @@
             Highcharts.chart('chart-speed-oil', {
                 xAxis: { categories: ships }, tooltip: { shared: true },
                 yAxis: [
-                    { title: { text: '平均航速 (Knots)', style: { color: '#3b82f6' } }, labels: { style: { color: '#3b82f6' } } },
-                    { title: { text: '平均日油耗 (MT/Day)', style: { color: '#f59e0b' } }, labels: { style: { color: '#f59e0b' } }, opposite: true } // opposite: true 代表放置於右側
+                    // 雙軸同一方向：兩軸皆自 0 起算、且 tickAmount 一致，使左右刻度線同高對齊、方向一致
+                    { title: { text: '平均航速 (Knots)', style: { color: '#3b82f6' } }, labels: { style: { color: '#3b82f6' } }, min: 0, tickAmount: 6 },
+                    { title: { text: '平均日油耗 (MT/Day)', style: { color: '#f59e0b' } }, labels: { style: { color: '#f59e0b' } }, opposite: true, min: 0, tickAmount: 6 } // opposite: true 代表放置於右側
                 ],
                 series: [
                     { name: '空載航速 (Ballast)', type: 'column', yAxis: 0, data: [13.0, 12.8, 12.5, 11.9, 13.0], color: '#60a5fa', borderWidth: 0, tooltip: { valueSuffix: ' Knots' } },
@@ -669,7 +676,8 @@
                 ]
             });
 
-            // [圖表] 7. 碳排強度趨勢 (折線圖 + 法規紅線標示)
+            // [圖表] 7. 碳排強度趨勢 (折線圖 + 法規紅線標示) — 暫時隱藏 (對應 HTML 卡片已註解)
+            /*
             const years = ['2022', '2023', '2024', '2025', '2026'];
             Highcharts.chart('chart-eeoi', {
                 chart: { type: 'spline' }, xAxis: { categories: years }, yAxis: { title: { text: 'gCO2 / ton-nm' } }, tooltip: { valueSuffix: ' gCO2/t-nm' },
@@ -680,6 +688,7 @@
                     { name: 'CII 法規紅線 (C級底線)', data: Array(5).fill(11.5), color: '#ef4444', dashStyle: 'Dash', marker: { enabled: false } }
                 ]
             });
+            */
 
             // [圖表] 8. 燃油加油預警 (帶有危險底色區塊的動態長條圖)
             const robFO = [150, 110, 80, 240, 60]; 

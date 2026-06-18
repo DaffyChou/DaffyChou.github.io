@@ -8,11 +8,17 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    
+    <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" rel="stylesheet">
+
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <!-- DataTables Buttons：提供 Excel 導出 -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
     
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/highcharts-more.js"></script>
@@ -129,7 +135,7 @@
                 </div>
                 <div>
                     <span class="ds-label">監控船舶</span>
-                    <select class="form-select ds-select w-auto text-info fw-bold">
+                    <select id="vesselSelect" class="form-select ds-select w-auto text-info fw-bold">
                         <option value="Yuan Shun">Yuan Shun</option>
                         <option value="Jing Shun">Jing Shun</option>
                         <option value="Feng Shun">Feng Shun</option>
@@ -486,8 +492,8 @@
                         <div class="p-2 border border-secondary rounded bg-card">
                             <span class="badge bg-secondary mb-1">通用與衍生欄位</span>
                             <div class="text-muted" style="font-size: 0.8rem; line-height: 1.5;">
-                                <span class="text-light">各電報皆有填報：</span>航次號、LT/GMT時間、電報名稱、狀態、港口、各類存量ROB<br>
-                                <span class="text-info">系統自動衍生推算(船報無此原始欄位)：</span>最後更新時間(伺服器接收時間)、剩餘貨載(由提單總量 B/L 減去累計裝卸量 TTL 計算得出)、預計24H船位(依據航速與航向AI推算)
+                                <span class="text-light">各電報皆有填報：</span>船名、航次號、LT當地時間、電報名稱、狀態、港口、各類存量ROB<br>
+                                <span class="text-info">系統自動衍生推算(船報無此原始欄位)：</span>最後更新時間(伺服器接收時間)、剩餘貨載(由提單總量 B/L 減去累計裝卸量 TTL 計算得出)
                             </div>
                         </div>
                     </div>
@@ -585,21 +591,23 @@
                 <table id="masterDataTable" class="table table-dark table-hover table-custom-dt w-100 text-nowrap">
                     <thead>
                         <tr>
+                            <th rowspan="2">船名 <i class="info-icon" title="Vessel Name" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">航次號 <i class="info-icon" title="Voyage Number" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">時間 LT <i class="info-icon" title="當地時間 (Local Time)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">時間 GMT <i class="info-icon" title="格林威治時間 (Greenwich Mean Time)" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">電報名稱 <i class="info-icon" title="Report Name" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">狀態 <i class="info-icon" title="Vessel Status" onclick="event.stopPropagation()">i</i></th>
-                            <th colspan="6" class="border-bottom text-center">存量ROB(MT)</th>
-                            <th colspan="6" class="border-bottom text-center">日耗量(MT)</th>
+                            <th colspan="3" class="border-bottom text-center">存量ROB(MT)</th>
+                            <th colspan="3" class="border-bottom text-center">存量ROB(LTR)</th>
+                            <th colspan="3" class="border-bottom text-center">日耗量(MT)</th>
+                            <th colspan="3" class="border-bottom text-center">日耗量(LTR)</th>
                             <th rowspan="2">港口 <i class="info-icon" title="Port" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">遞交通知書 <i class="info-icon" title="NOR Tender" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">水尺(前/後) <i class="info-icon" title="Draft (DF/DA)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">抵達港區時間 <i class="info-icon" title="Arrived Time (ARVD)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">抵達港區時間 <i class="info-icon" title="抵達港區時間 (ARVD)：勾稽抵港報-結束海上定速航行時間 (End of Sea Passage)" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">下錨/漂航時間 <i class="info-icon" title="Anchor or Drifting Time" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">錨離 <i class="info-icon" title="Anchor Up" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">錨離/結束漂航時間 <i class="info-icon" title="Anchor Up / End of Drifting" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">引水員登船 <i class="info-icon" title="Pilot On Board (POB)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">第一根纜繩 <i class="info-icon" title="First Line Fast" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">引水員離船時間 <i class="info-icon" title="Pilot Off / Pilot Disembark" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">靠妥碼頭 <i class="info-icon" title="All Lines Fast" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">裝/卸貨 <i class="info-icon" title="Load / Discharge (L/D)" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">開始時間 <i class="info-icon" title="Commence Time" onclick="event.stopPropagation()">i</i></th>
@@ -615,14 +623,13 @@
                             <th rowspan="2">主機轉速 <i class="info-icon" title="Main Engine RPM" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">滑失率(%) <i class="info-icon" title="Slip (%)" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">日航程 <i class="info-icon" title="Distance to Go (DTG)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">總航程 <i class="info-icon" title="Total Distance" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">已航行總距離 <i class="info-icon" title="Total Distance Sailed (已航行總距離)" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">天氣 <i class="info-icon" title="Weather" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">蒲式風級 <i class="info-icon" title="Beaufort Wind Scale" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">風向 <i class="info-icon" title="Wind Direction" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">浪級 <i class="info-icon" title="Sea State" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">浪高 <i class="info-icon" title="Swell Height" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">浪向 <i class="info-icon" title="Swell Direction" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">預計24H船位 <i class="info-icon" title="Expected Position 24H (系統AI預測推算)" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">預計抵港時間 <i class="info-icon" title="ETA" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">港口名稱 <i class="info-icon" title="Next Port" onclick="event.stopPropagation()">i</i></th>
                             <th rowspan="2">貨物 <i class="info-icon" title="Cargo" onclick="event.stopPropagation()">i</i></th>
@@ -631,8 +638,8 @@
                             <th rowspan="2">最後更新時間 <i class="info-icon" title="System Last Update (伺服器接收時間)" onclick="event.stopPropagation()">i</i></th>
                         </tr>
                         <tr>
-                            <th>FO</th><th>DO</th><th>ME CLY</th><th>ME SYS</th><th>AE SYS</th><th>FW</th>
-                            <th>FO</th><th>DO</th><th>ME CLY</th><th>ME SYS</th><th>AE SYS</th><th>FW</th>
+                            <th>FO</th><th>DO</th><th>FW</th><th>ME CLY</th><th>ME SYS</th><th>AE SYS</th>
+                            <th>FO</th><th>DO</th><th>FW</th><th>ME CLY</th><th>ME SYS</th><th>AE SYS</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -1072,6 +1079,8 @@
          * ==========================================================================
          */
         function generateDemoData() {
+            // 船名：取目前「監控船舶」下拉所選船舶 (由總覽頁 ?ship= 帶入)
+            const shipName = (document.getElementById('vesselSelect') || {}).value || 'Yuan Shun';
             let voyHtml = '';
             for(let i=30; i>=1; i--) {
                 let voyNum = i < 10 ? '0'+i : i;
@@ -1136,26 +1145,26 @@
                     let portName = isF1 ? '-' : 'KHH';
 
                     let rowHtml = `<tr>
+                        <td class="text-info fw-bold">${shipName}</td>
                         <td>${currentVoy}</td>
                         <td>${dStr} ${report.lt}</td>
-                        <td>${dStr} ${report.gmt}</td>
                         <td><span class="badge ${report.badge}" title="${report.zh}">${report.name}</span></td>
                         <td class="fw-bold">${report.status}</td>
-                        
+
                         <td>${(Math.random()*200 + 100).toFixed(1)}</td>
                         <td>${(Math.random()*20 + 10).toFixed(1)}</td>
-                        <td>${Math.floor(Math.random()*500 + 100)}</td>
-                        <td>${Math.floor(Math.random()*500 + 100)}</td>
-                        <td>${Math.floor(Math.random()*500 + 100)}</td>
                         <td>${(Math.random()*100 + 100).toFixed(1)}</td>
-                        
+                        <td>${Math.floor(Math.random()*500 + 100)}</td>
+                        <td>${Math.floor(Math.random()*500 + 100)}</td>
+                        <td>${Math.floor(Math.random()*500 + 100)}</td>
+
                         <td class="${isF1 ? 'text-danger' : ''}">${isF1 ? (Math.random()*15 + 10).toFixed(1) : '-'}</td>
                         <td class="${isF1 ? 'text-warning' : ''}">${isF1 ? (Math.random()*2 + 1).toFixed(1) : '-'}</td>
+                        <td class="${isF1 ? 'text-info' : ''}">${isF1 ? (Math.random()*5 + 2).toFixed(1) : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*20 + 10) : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*5 + 1) : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*5 + 1) : '-'}</td>
-                        <td class="${isF1 ? 'text-info' : ''}">${isF1 ? (Math.random()*5 + 2).toFixed(1) : '-'}</td>
-                        
+
                         <td>${portName}</td>
                         <td>${isF2 ? report.lt : '-'}</td>
                         <td>${isF2 || isF4 ? '11.5 / 11.8' : '-'}</td>
@@ -1189,7 +1198,6 @@
                         <td>${isF1 ? Math.floor(Math.random()*3 + 1) : '-'}</td>
                         <td>${isF1 ? (Math.random()*2).toFixed(1) : '-'}</td>
                         <td>${isF1 ? 'NE' : '-'}</td>
-                        <td>${isF1 ? "20 10' N / 118 05' E" : "-"}</td>
                         <td>${isF1 || isF4 ? '2026-03-31' : '-'}</td>
                         <td>${isF1 || isF4 ? 'SIN' : '-'}</td>
                         <td>COAL</td>
@@ -1206,10 +1214,27 @@
         }
 
         $(document).ready(function() {
+            // 由戰情室總覽點選船名 / 填報時間進入時，依網址 ?ship= 參數自動帶入監控船舶
+            const shipParam = new URLSearchParams(window.location.search).get('ship');
+            if (shipParam) {
+                const sel = document.getElementById('vesselSelect');
+                if (sel && [...sel.options].some(o => o.value === shipParam)) sel.value = shipParam;
+            }
+
             generateDemoData();
 
             const voyTable = $('#voyageSummaryTable').DataTable({
                 "pageLength": 10, "lengthMenu": [10, 20, 30], "ordering": true,
+                "dom": "<'row mb-2'<'col-sm-6 d-flex align-items-center'l><'col-sm-6 text-end'B>>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                "buttons": [{
+                    extend: 'excelHtml5',
+                    text: '📥 導出 Excel',
+                    className: 'btn btn-success btn-sm ds-btn',
+                    title: '航次統計列表',
+                    exportOptions: { columns: ':visible' }
+                }],
                 "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json" }
             });
 
@@ -1232,10 +1257,20 @@
             });
 
             const masterTable = $('#masterDataTable').DataTable({
-                "scrollX": true, 
-                "pageLength": 10, 
-                "lengthMenu": [10, 20, 35], 
+                "scrollX": true,
+                "pageLength": 10,
+                "lengthMenu": [10, 20, 35],
                 "ordering": true,
+                "dom": "<'row mb-2'<'col-sm-6 d-flex align-items-center'l><'col-sm-6 text-end'B>>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                "buttons": [{
+                    extend: 'excelHtml5',
+                    text: '📥 導出 Excel',
+                    className: 'btn btn-success btn-sm ds-btn',
+                    title: '船報原始數據溯源',
+                    exportOptions: { columns: ':visible' }
+                }],
                 "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json" }
             });
 
@@ -1245,8 +1280,8 @@
                 let max = $('#maxDate').val(); 
                 let formatFilter = $('#reportTypeFilter').val();
                 
-                let dateCol = data[1].split(' ')[0]; 
-                let formatCol = data[3]; 
+                let dateCol = data[2].split(' ')[0];
+                let formatCol = data[3];
 
                 let datePass = true;
                 if (min && !max) datePass = (dateCol >= min);
@@ -1257,10 +1292,26 @@
             });
 
             $('#minDate, #maxDate, #reportTypeFilter').on('change', function() { masterTable.draw(); });
-            $('#clearFilterBtn').on('click', function() { 
+            $('#clearFilterBtn').on('click', function() {
                 $('#minDate').val(''); $('#maxDate').val(''); $('#reportTypeFilter').val('');
-                masterTable.draw(); 
+                masterTable.draw();
             });
+
+            // ==========================================
+            // 啟用 Bootstrap tooltip：讓欄位說明 (info-icon) 與電報名稱以樣式化提示確實顯示
+            // ==========================================
+            function initTooltips() {
+                document.querySelectorAll('.info-icon, #masterDataTable .badge[title], #masterDataTable .badge[data-bs-original-title]')
+                    .forEach(function(el) {
+                        if (!bootstrap.Tooltip.getInstance(el)) {
+                            new bootstrap.Tooltip(el, { container: 'body', placement: 'top' });
+                        }
+                    });
+            }
+            initTooltips();
+            // scrollX 會複製表頭、分頁會重建內文，重繪後補綁 tooltip
+            voyTable.on('draw.dt', initTooltips);
+            masterTable.on('draw.dt', initTooltips);
         });
     </script>
 </body>
