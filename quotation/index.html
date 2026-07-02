@@ -363,13 +363,6 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       <span class="sb-label" id="l-tm">條件管理</span>
     </div>
   </nav>
-  <div class="sb-divider"></div>
-  <div class="sb-footer">
-    <div class="lang-row">
-      <button class="lang-btn active" onclick="setLang('zh')" id="lb-zh">中</button>
-      <button class="lang-btn" onclick="setLang('en')" id="lb-en">EN</button>
-    </div>
-  </div>
 </aside>
 
 <!-- MAIN -->
@@ -435,31 +428,85 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
           </div>
           <!-- 安裝施工 (install) -->
           <div class="field" data-section="install">
-            <label>安裝施工 — 預設加成 %</label>
-            <input type="number" id="p-labm" value="100" min="0" max="999" class="mono">
-            <span class="hint">新增施工項目時的預設加成率</span>
+            <label>安裝施工 — 加成 %</label>
+            <input type="number" id="p-labm" value="100" min="0" max="999" class="mono" oninput="syncParam(installR,'markup',this.value)">
+            <span class="hint">套用全部施工列（可逐列再調整）</span>
           </div>
           <div class="field" data-section="install">
-            <label>安裝施工 — 預設日薪</label>
-            <input type="number" id="p-wage" value="3000" min="0" step="500" class="mono">
-            <span class="hint">新增施工項目時的預設日薪</span>
+            <label>安裝施工 — 日薪</label>
+            <input type="number" id="p-wage" value="3000" min="0" step="500" class="mono" oninput="syncParam(installR,'wage',this.value)">
+            <span class="hint">套用全部施工列（可逐列再調整）</span>
           </div>
           <!-- 軟體開發 (software) -->
           <div class="field" data-section="software">
-            <label>軟體 — 預設加成 %</label>
-            <input type="number" id="p-sw-markup" value="30" min="0" max="999" class="mono">
-            <span class="hint">新增軟體模組時的預設加成率</span>
+            <label>軟體 — 加成 %</label>
+            <input type="number" id="p-sw-markup" value="30" min="0" max="999" class="mono" oninput="syncParam(softwareR,'markup',this.value)">
+            <span class="hint">套用全部軟體列（可逐列再調整）</span>
           </div>
           <div class="field" data-section="software">
-            <label>軟體 — 預設人日成本</label>
-            <input type="number" id="p-sw-rate" value="8000" min="0" step="500" class="mono">
-            <span class="hint">新增軟體模組時的預設人日成本</span>
+            <label>軟體 — 人日成本</label>
+            <input type="number" id="p-sw-rate" value="8000" min="0" step="500" class="mono" oninput="syncParam(softwareR,'dayRate',this.value)">
+            <span class="hint">套用全部軟體列（可逐列再調整）</span>
+          </div>
+          <!-- 技術服務費 (svc) -->
+          <div class="field" data-section="svc">
+            <label>技術服務費 — 加成 %</label>
+            <input type="number" id="p-svc-markup" value="20" min="0" max="999" class="mono" oninput="syncParam(svcR,'markup',this.value)">
+            <span class="hint">套用全部服務列；報價＝成本 ×(1+加成%)</span>
+          </div>
+          <!-- 系統整合 (integration) -->
+          <div class="field" data-section="integration">
+            <label>系統整合 — 加成 %</label>
+            <input type="number" id="p-int-markup" value="25" min="0" max="999" class="mono" oninput="syncParam(integrationR,'markup',this.value)">
+            <span class="hint">套用全部整合列；報價＝成本 ×(1+加成%)</span>
+          </div>
+          <!-- 第三方成本 (third) -->
+          <div class="field" data-section="third">
+            <label>第三方 — 加成 %</label>
+            <input type="number" id="p-thr-markup" value="10" min="0" max="999" class="mono" oninput="syncParam(thirdR,'markup',this.value)">
+            <span class="hint">套用全部第三方列；報價＝成本 ×(1+加成%)</span>
+          </div>
+          <!-- 維護保固 (maint) -->
+          <div class="field" data-section="maint">
+            <label>維護保固 — 加成 %</label>
+            <input type="number" id="p-mnt-markup" value="20" min="0" max="999" class="mono" oninput="syncParam(maintR,'markup',this.value)">
+            <span class="hint">套用全部維護列；報價＝成本 ×(1+加成%)</span>
+          </div>
+          <!-- 訂閱／租賃 (recurring) -->
+          <div class="field" data-section="recurring">
+            <label>訂閱／租賃 — 加成 %</label>
+            <input type="number" id="p-rec-markup" value="15" min="0" max="999" class="mono" oninput="syncParam(recurringR,'markup',this.value)">
+            <span class="hint">套用全部訂閱列；單位報價＝單位成本 ×(1+加成%)</span>
           </div>
         </div>
       </div>
       <!-- legacy hidden inputs (kept for backward-compat: addRow 仍可讀 num('p-wk') / 'p-dy') -->
       <input type="hidden" id="p-wk" value="0">
       <input type="hidden" id="p-dy" value="0">
+    </div>
+
+    <!-- 風險與獲利假設（內部分層成本模型；對所有報價類型皆適用，全域重算） -->
+    <div class="card">
+      <div class="ch"><span class="ch-title">🧮 風險與獲利假設（內部）</span></div>
+      <div class="cb">
+        <div class="fg fg-3">
+          <div class="field">
+            <label>管銷分攤率 %</label>
+            <input type="number" id="p-overhead" value="50" min="0" max="999" class="mono" oninput="recalc()">
+            <span class="hint">房租、行政會計、軟硬體、教育訓練、非計費工時等間接成本，按直接成本比例分攤</span>
+          </div>
+          <div class="field">
+            <label>風險準備率 %</label>
+            <input type="number" id="p-risk" value="15" min="0" max="999" class="mono" oninput="recalc()">
+            <span class="hint">需求變更、工時低估、驗收延遲、呆帳、保固修 bug 的緩衝</span>
+          </div>
+          <div class="field">
+            <label>目標淨利率 %（＝真實淨利率）</label>
+            <input type="number" id="p-target" value="35" min="0" max="99" class="mono" oninput="recalc()">
+            <span class="hint">輸入您要達成的真實淨利率，總報價自動回推：底價 ÷ (1 − 此率)</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Materials -->
@@ -516,13 +563,13 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
       <div style="padding:0 0 6px">
         <table class="itbl" style="table-layout:fixed">
-          <colgroup><col style="width:34%"><col style="width:14%"><col style="width:14%"><col style="width:30%"><col style="width:8%"></colgroup>
+          <colgroup><col style="width:30%"><col style="width:13%"><col style="width:9%"><col style="width:14%"><col style="width:26%"><col style="width:8%"></colgroup>
           <thead><tr>
-            <th id="th-sn">服務項目</th><th class="r">成本</th><th class="r">報價</th><th id="th-sd">說明</th><th></th>
+            <th id="th-sn">服務項目</th><th class="r">成本</th><th class="r">加成%</th><th class="r">報價</th><th id="th-sd">說明</th><th></th>
           </tr></thead>
           <tbody id="svc-body"></tbody>
           <tfoot><tr class="itbl-sub">
-            <td colspan="2" style="text-align:right;font-size:12px;color:var(--ink3)" id="l-svcsub">服務費小計</td>
+            <td colspan="3" style="text-align:right;font-size:12px;color:var(--ink3)" id="l-svcsub">服務費小計</td>
             <td class="amtc r" id="svc-sub">$0</td><td colspan="2"></td>
           </tr></tfoot>
         </table>
@@ -580,13 +627,13 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
       <div style="padding:0 0 6px">
         <table class="itbl" style="table-layout:fixed">
-          <colgroup><col style="width:22%"><col style="width:14%"><col style="width:9%"><col style="width:8%"><col style="width:11%"><col style="width:11%"><col style="width:17%"><col style="width:8%"></colgroup>
+          <colgroup><col style="width:20%"><col style="width:13%"><col style="width:8%"><col style="width:7%"><col style="width:10%"><col style="width:8%"><col style="width:11%"><col style="width:15%"><col style="width:8%"></colgroup>
           <thead><tr>
-            <th>整合項目</th><th>整合對象</th><th>複雜度</th><th class="r">人日</th><th class="r">成本</th><th class="r">報價</th><th>備注</th><th></th>
+            <th>整合項目</th><th>整合對象</th><th>複雜度</th><th class="r">人日</th><th class="r">成本</th><th class="r">加成%</th><th class="r">報價</th><th>備注</th><th></th>
           </tr></thead>
           <tbody id="integration-body"></tbody>
           <tfoot><tr class="itbl-sub">
-            <td colspan="5" style="text-align:right;font-size:12px;color:var(--ink3)">系統整合小計</td>
+            <td colspan="6" style="text-align:right;font-size:12px;color:var(--ink3)">系統整合小計</td>
             <td class="amtc r" id="integration-sub">$0</td><td colspan="2"></td>
           </tr></tfoot>
         </table>
@@ -601,13 +648,13 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
       <div style="padding:0 0 6px">
         <table class="itbl" style="table-layout:fixed">
-          <colgroup><col style="width:22%"><col style="width:18%"><col style="width:12%"><col style="width:11%"><col style="width:11%"><col style="width:18%"><col style="width:8%"></colgroup>
+          <colgroup><col style="width:20%"><col style="width:17%"><col style="width:12%"><col style="width:10%"><col style="width:8%"><col style="width:11%"><col style="width:14%"><col style="width:8%"></colgroup>
           <thead><tr>
-            <th>項目</th><th>供應商</th><th>計費方式</th><th class="r">成本</th><th class="r">報價</th><th>備注</th><th></th>
+            <th>項目</th><th>供應商</th><th>計費方式</th><th class="r">成本</th><th class="r">加成%</th><th class="r">報價</th><th>備注</th><th></th>
           </tr></thead>
           <tbody id="third-body"></tbody>
           <tfoot><tr class="itbl-sub">
-            <td colspan="4" style="text-align:right;font-size:12px;color:var(--ink3)">第三方小計</td>
+            <td colspan="5" style="text-align:right;font-size:12px;color:var(--ink3)">第三方小計</td>
             <td class="amtc r" id="third-sub">$0</td><td colspan="2"></td>
           </tr></tfoot>
         </table>
@@ -622,13 +669,13 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       </div>
       <div style="padding:0 0 6px">
         <table class="itbl" style="table-layout:fixed">
-          <colgroup><col style="width:24%"><col style="width:12%"><col style="width:11%"><col style="width:11%"><col style="width:14%"><col style="width:20%"><col style="width:8%"></colgroup>
+          <colgroup><col style="width:22%"><col style="width:11%"><col style="width:10%"><col style="width:8%"><col style="width:11%"><col style="width:13%"><col style="width:17%"><col style="width:8%"></colgroup>
           <thead><tr>
-            <th>維護項目</th><th>期間</th><th class="r">成本</th><th class="r">報價</th><th>SLA</th><th>備注</th><th></th>
+            <th>維護項目</th><th>期間</th><th class="r">成本</th><th class="r">加成%</th><th class="r">報價</th><th>SLA</th><th>備注</th><th></th>
           </tr></thead>
           <tbody id="maint-body"></tbody>
           <tfoot><tr class="itbl-sub">
-            <td colspan="3" style="text-align:right;font-size:12px;color:var(--ink3)">維護小計</td>
+            <td colspan="4" style="text-align:right;font-size:12px;color:var(--ink3)">維護小計</td>
             <td class="amtc r" id="maint-sub">$0</td><td colspan="3"></td>
           </tr></tfoot>
         </table>
@@ -645,7 +692,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
         <table class="itbl" style="table-layout:fixed">
           <colgroup><col style="width:18%"><col style="width:9%"><col style="width:7%"><col style="width:10%"><col style="width:10%"><col style="width:8%"><col style="width:12%"><col style="width:18%"><col style="width:8%"></colgroup>
           <thead><tr>
-            <th>項目</th><th>計費</th><th class="r">數量</th><th class="r">單位成本</th><th class="r">單位報價</th><th class="r">月數</th><th class="r">報價小計</th><th>備注</th><th></th>
+            <th>項目</th><th>計費</th><th class="r">數量</th><th class="r">單位成本</th><th class="r">加成%</th><th class="r">月數</th><th class="r">報價小計</th><th>備注</th><th></th>
           </tr></thead>
           <tbody id="recurring-body"></tbody>
           <tfoot><tr class="itbl-sub">
@@ -668,30 +715,34 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
 
   <!-- SUMMARY -->
   <div class="sum-panel">
+    <!-- 報價摘要（已整合分層成本與風險，最後給出總報價） -->
     <div class="card">
-      <div class="ch"><span class="ch-title">💰 <span id="l-sum">報價摘要</span></span></div>
+      <div class="ch"><span class="ch-title">💰 <span id="l-sum">報價摘要</span><span style="font-weight:500;color:var(--ink4);font-size:11px;margin-left:6px">含分層成本與風險（內部）</span></span></div>
       <div class="cb">
-        <div class="sum-row"><span class="sum-lbl" id="sl-mat">料件</span><span class="sum-val blue" id="s-mat">$0</span></div>
-        <div class="sum-row"><span class="sum-lbl" id="sl-lab">人工</span><span class="sum-val blue" id="s-lab">$0</span></div>
-        <div class="sum-row"><span class="sum-lbl" id="sl-svc">技術服務費</span><span class="sum-val blue" id="s-svc">$0</span></div>
-        <div class="sum-row"><span class="sum-lbl" id="sl-trv">出差費</span><span class="sum-val blue" id="s-trv">$0</span></div>
-        <div class="sum-row" style="border-top:2px solid var(--line);margin-top:4px;padding-top:8px">
-          <span class="sum-lbl" id="sl-cost">總成本</span><span class="sum-val" id="s-cost">$0</span></div>
-        <div class="sum-row">
-          <span class="sum-lbl green" id="sl-profit" style="color:var(--green)">總毛利</span>
-          <span class="sum-val green" id="s-profit">$0</span></div>
+        <!-- 各區塊報價明細：依報價類型動態產生（軟體類顯示軟體開發/系統整合/…等） -->
+        <div id="sum-rows"></div>
+        <!-- 分層成本：直接成本 → 管銷 → 完全負擔 → 風險 → 底價 -->
+        <div class="sum-row" style="border-top:2px solid var(--line);margin-top:4px;padding-top:8px"><span class="sum-lbl">直接成本（人力／採購）</span><span class="sum-val" id="ly-direct">$0</span></div>
+        <div class="sum-row"><span class="sum-lbl">＋ 管銷分攤 <span id="ly-oh-pct" style="color:var(--ink4)">(50%)</span></span><span class="sum-val" id="ly-oh">$0</span></div>
+        <div class="sum-row"><span class="sum-lbl">＝ 完全負擔成本（損益兩平）</span><span class="sum-val" id="ly-full">$0</span></div>
+        <div class="sum-row"><span class="sum-lbl">＋ 風險準備 <span id="ly-risk-pct" style="color:var(--ink4)">(15%)</span></span><span class="sum-val" id="ly-risk">$0</span></div>
+        <div class="sum-row"><span class="sum-lbl" style="font-weight:600">＝ 風險調整後成本（底價）</span><span class="sum-val" id="ly-floor" style="color:var(--red);font-weight:700">$0</span></div>
+        <!-- 獲利分析 -->
+        <div class="sum-row" style="border-top:2px solid var(--line);margin-top:4px;padding-top:8px"><span class="sum-lbl">表面毛利（報價−直接）</span><span class="sum-val" id="ly-surf">$0</span></div>
+        <div class="margin-section">
+          <div class="margin-header"><span id="sl-margin">表面毛利率</span><span class="mpct" id="s-mpct">0%</span></div>
+          <div class="margin-track"><div class="margin-fill" id="s-mbar" style="width:0%"></div></div>
+        </div>
+        <div class="sum-row"><span class="sum-lbl green" style="color:var(--green)">真實淨利（報價−底價）</span><span class="sum-val green" id="ly-real">$0</span></div>
+        <div class="sum-row"><span class="sum-lbl">真實淨利率</span><span class="sum-val" id="ly-realpct">0%</span></div>
+        <div class="sum-row"><span class="sum-lbl">建議報價 <span id="ly-target-pct" style="color:var(--ink4)">(淨利35%)</span></span><span class="sum-val blue" id="ly-suggest">$0</span></div>
+        <div class="sum-row"><span class="sum-lbl">與目前報價差異</span><span class="sum-val" id="ly-diff">$0</span></div>
+        <!-- 成本結構佔比：依報價類型動態產生 -->
+        <div class="breakdown" id="sum-breakdown"></div>
+        <!-- 最終總報價 -->
         <div class="total-hero">
           <div class="th-lbl" id="sl-total">工程總報價</div>
           <div class="th-val" id="s-total">$0</div>
-        </div>
-        <div class="margin-section">
-          <div class="margin-header"><span id="sl-margin">毛利率</span><span class="mpct" id="s-mpct">0%</span></div>
-          <div class="margin-track"><div class="margin-fill" id="s-mbar" style="width:0%"></div></div>
-        </div>
-        <div class="breakdown">
-          <div class="bk-item bk-mat"><div class="bk-lbl" id="sl-mpct">料件</div><div class="bk-val" id="b-mat">0%</div></div>
-          <div class="bk-item bk-lab"><div class="bk-lbl" id="sl-lpct">人工</div><div class="bk-val" id="b-lab">0%</div></div>
-          <div class="bk-item bk-trv"><div class="bk-lbl" id="sl-tpct">出差</div><div class="bk-val" id="b-trv">0%</div></div>
         </div>
       </div>
     </div>
@@ -802,7 +853,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
             <span class="ch-title">📋 <span id="of2-items-hd">品項清單</span></span>
             <div style="display:flex;align-items:center;gap:10px">
               <span style="font-size:12px;color:var(--ink4)" id="of2-i-count">0 / 5</span>
-              <button class="btn btn-sm" onclick="ofReseedFromWorksheet()" title="重新從成本評估彙整 1 個品項">↻ 從成本評估彙整</button>
+              <button class="btn btn-sm" onclick="ofReseedFromWorksheet()" title="依成本評估明細各區塊重新產生品項">↻ 從成本評估彙整</button>
             </div>
           </div>
           <div class="cb">
@@ -849,9 +900,7 @@ body{font-family:var(--ff);background:var(--surf2);color:var(--ink);font-size:14
       <div class="cost-panel">
         <div class="cost-card">
           <h4 id="cp-hd1">成本評估（成本）</h4>
-          <div class="cost-row"><span class="cl">料件成本</span><span class="cv" id="cp-mat-c">$0</span></div>
-          <div class="cost-row"><span class="cl">人工成本</span><span class="cv" id="cp-lab-c">$0</span></div>
-          <div class="cost-row"><span class="cl">出差費</span><span class="cv" id="cp-trv">$0</span></div>
+          <div id="cp-cost-rows"></div>
           <div class="cost-row hi"><span class="cl">總成本</span><span class="cv" id="cp-cost">$0</span></div>
         </div>
         <div class="cost-card">
@@ -959,6 +1008,78 @@ const CATEGORY_CONFIG = {
 
 let currentCategory = null;  // null = show all sections (backward compat for legacy quotes)
 
+// ══ 報價摘要明細設定 ══
+// 右側「報價摘要」要顯示哪些成本區塊、用什麼顏色，依目前報價類型過濾。
+// sec 對應 data-section；key 對應 i18n 標籤；val 從 calcTotals() 取報價金額。
+const SUMMARY_SECTIONS = [
+  {sec:'mat',         key:'slMat', val:t=>t.matQ,         bg:'var(--blue-l)',   fg:'var(--blue2)'},
+  {sec:'install',     key:'slLab', val:t=>t.lQ,           bg:'var(--green-l)',  fg:'var(--green)'},
+  {sec:'software',    key:'slSw',  val:t=>t.softwareQ,    bg:'#E0F2FE',         fg:'#0369A1'},
+  {sec:'integration', key:'slInt', val:t=>t.integrationQ, bg:'#F3E8FF',         fg:'#7E22CE'},
+  {sec:'svc',         key:'slSvc', val:t=>t.svcQ,         bg:'var(--violet-l)', fg:'var(--violet)'},
+  {sec:'trv',         key:'slTrv', val:t=>t.trvQ,         bg:'var(--amber-l)',  fg:'var(--amber)'},
+  {sec:'third',       key:'slThr', val:t=>t.thirdQ,       bg:'var(--surf3)',    fg:'var(--ink2)'},
+  {sec:'maint',       key:'slMnt', val:t=>t.maintQ,       bg:'var(--teal-l)',   fg:'var(--teal)'},
+  {sec:'recurring',   key:'slRec', val:t=>t.recurringQ,   bg:'#FFEDD5',         fg:'#C2410C'},
+];
+const SUMMARY_CORE = ['mat','install','svc','trv'];  // 未選類型時的預設列（向後相容舊報價）
+
+// 依目前報價類型渲染右側摘要明細列與成本結構佔比。
+function renderSummary(tt){
+  tt = tt || calcTotals();
+  const secs = currentCategory ? CATEGORY_CONFIG[currentCategory].sections : null;
+  const rows = SUMMARY_SECTIONS.filter(s =>
+    secs ? secs.includes(s.sec) : (s.val(tt) > 0 || SUMMARY_CORE.includes(s.sec)));
+  const rowsEl = document.getElementById('sum-rows');
+  if(rowsEl) rowsEl.innerHTML = rows.map(s =>
+    `<div class="sum-row"><span class="sum-lbl">${t(s.key)}</span>`+
+    `<span class="sum-val blue">${fmt(s.val(tt))}</span></div>`).join('');
+  // 成本結構：只列出實際有金額的區塊，依佔工程總報價的百分比
+  const bkEl = document.getElementById('sum-breakdown');
+  if(bkEl){
+    const bk = rows.filter(s => s.val(tt) > 0);
+    bkEl.innerHTML = bk.map(s => {
+      const pct = tt.total > 0 ? Math.round(s.val(tt)/tt.total*100) : 0;
+      return `<div class="bk-item" style="background:${s.bg}">`+
+        `<div class="bk-lbl">${t(s.key)}</div>`+
+        `<div class="bk-val" style="color:${s.fg}">${pct}%</div></div>`;
+    }).join('');
+  }
+}
+
+// ══ 各成本區塊「成本 × (1+加成%) = 報價」的預設加成 % ══
+// 與計算參數卡的 p-*-markup 對應；新增列時的種子值，也是舊資料無加成欄時的後援值。
+const DEFAULT_MARKUP = {svc:20, integration:25, third:10, maint:20, recurring:15};
+
+// 將舊版（手動輸入報價/單位報價）的列遷移為加成%模型，並保持原報價金額不變。
+function normMarkup(rows, key){
+  rows.forEach(r=>{
+    if(r.markup!=null) return;  // 已是新模型
+    if(key==='recurring'){
+      const uc=+r.unitCost||0, uq=(r.unitQuote!=null)?+r.unitQuote:0;
+      if(!uc && uq>0){ r.unitCost=uq; r.markup=0; }            // 舊列只有單位報價無成本
+      else r.markup = uc>0 ? Math.max(0,Math.round((uq/uc-1)*100)) : DEFAULT_MARKUP.recurring;
+      return;
+    }
+    const q=(r.quote!=null)?+r.quote:(r.amount!=null?+r.amount:0);
+    const c=+r.cost||0;
+    if(!c && q>0){ r.cost=q; r.markup=0; }                     // 舊列只有報價無成本
+    else r.markup = c>0 ? Math.max(0,Math.round((q/c-1)*100)) : DEFAULT_MARKUP[key];
+  });
+}
+function normalizeAll(){
+  normMarkup(svcR,'svc'); normMarkup(integrationR,'integration');
+  normMarkup(thirdR,'third'); normMarkup(maintR,'maint'); normMarkup(recurringR,'recurring');
+}
+
+// 計算參數連動：改上方參數時，把該區塊「所有現有列」的對應欄位同步為新值並即時重算。
+// （新增列時仍以同一參數作為種子；下方每列之後仍可個別覆寫。）
+function syncParam(rows, key, value){
+  const v = Math.max(0, +value||0);
+  rows.forEach(r=>{ r[key]=v; });
+  recalc();
+}
+
 // Mirror customer fields into the read-only summary strip on 報價單 page.
 // Called both on page setup and on every input change in the customer card.
 function syncCustStrip(){
@@ -1001,6 +1122,8 @@ function applySectionVisibility(){
   const badgeIcon = document.getElementById('cat-badge-icon');
   if(badgeName) badgeName.textContent = conf ? conf.label : '— 尚未選擇 —';
   if(badgeIcon) badgeIcon.textContent = conf ? conf.icon : '◯';
+  // 摘要明細需跟著類型一起切換
+  renderSummary();
 }
 
 // === Category picker modal ===
@@ -1104,9 +1227,9 @@ const T={
     thSn:'項目',thSa:'金額',thSd:'說明',
     thTn:'項目',thTp:'人數',thTt:'次/晚',thTu:'單價',thTs:'小計',thTnt:'備注',
     matsub:'料件小計',svcsub:'服務費小計',trvsub:'出差費小計',
-    sum:'報價摘要',slMat:'料件',slLab:'人工',slSvc:'技術服務費',slTrv:'出差費',
-    slCost:'總成本',slProfit:'總毛利',slTotal:'工程總報價',slMargin:'毛利率',
-    slMpct:'料件',slLpct:'人工',slTpct:'出差',
+    sum:'報價摘要',slMat:'料件',slLab:'安裝施工',slSvc:'技術服務費',slTrv:'出差費',
+    slSw:'軟體開發',slInt:'系統整合',slThr:'第三方成本',slMnt:'維護保固',slRec:'訂閱／租賃',
+    slCost:'直接成本',slProfit:'表面毛利',slTotal:'工程總報價',slMargin:'表面毛利率',
     qa:'快速操作',qaExp:'內部成本評估 .xlsx',qaOff:'報價單編輯',qaClr:'清空重填',
     amat:'新增料件',asvc:'新增',atrv:'新增',
     sw:'軟體',hw:'硬體',net:'系統整合',ship:'船舶',
@@ -1140,9 +1263,9 @@ const T={
     thSn:'Service',thSa:'Amount',thSd:'Description',
     thTn:'Item',thTp:'Persons',thTt:'Times',thTu:'Unit',thTs:'Total',thTnt:'Note',
     matsub:'Materials Total',svcsub:'Services Total',trvsub:'Travel Total',
-    sum:'Summary',slMat:'Materials',slLab:'Labor',slSvc:'Services',slTrv:'Travel',
-    slCost:'Total Cost',slProfit:'Gross Profit',slTotal:'Total Quote',slMargin:'Margin',
-    slMpct:'Mat.',slLpct:'Labor',slTpct:'Travel',
+    sum:'Summary',slMat:'Materials',slLab:'Installation',slSvc:'Services',slTrv:'Travel',
+    slSw:'Software',slInt:'Integration',slThr:'Third-party',slMnt:'Maintenance',slRec:'Subscription',
+    slCost:'Direct Cost',slProfit:'Surface Margin',slTotal:'Total Quote',slMargin:'Surface Margin %',
     qa:'Quick Actions',qaExp:'Cost Assessment .xlsx',qaOff:'Quote Editor',qaClr:'Clear',
     amat:'Add Item',asvc:'Add',atrv:'Add',
     sw:'Software',hw:'Hardware',net:'Systems',ship:'Marine',
@@ -1163,10 +1286,11 @@ const T={
 };
 const t=k=>(T[lang]||T.zh)[k]||k;
 
+// 已移除中英切換：固定中文（保留 applyLang 以套用既有標籤）
 function setLang(l){
-  lang=l;
-  document.getElementById('lb-zh').classList.toggle('active',l==='zh');
-  document.getElementById('lb-en').classList.toggle('active',l==='en');
+  lang = l || 'zh';
+  const z=document.getElementById('lb-zh'); if(z) z.classList.toggle('active',lang==='zh');
+  const e=document.getElementById('lb-en'); if(e) e.classList.toggle('active',lang==='en');
   applyLang(); renderHist();
 }
 
@@ -1190,9 +1314,8 @@ function applyLang(){
     ['th-sn','thSn'],['th-sa','thSa'],['th-sd','thSd'],
     ['th-tn','thTn'],['th-tp','thTp'],['th-tt','thTt'],['th-tu','thTu'],['th-ts','thTs'],['th-tnt','thTnt'],
     ['l-matsub','matsub'],['l-svcsub','svcsub'],['l-trvsub','trvsub'],
-    ['l-sum','sum'],['sl-mat','slMat'],['sl-lab','slLab'],['sl-svc','slSvc'],['sl-trv','slTrv'],
+    ['l-sum','sum'],
     ['sl-cost','slCost'],['sl-profit','slProfit'],['sl-total','slTotal'],['sl-margin','slMargin'],
-    ['sl-mpct','slMpct'],['sl-lpct','slLpct'],['sl-tpct','slTpct'],
     ['l-qa','qa'],['qa-clr','qaClr'],
     ['l-amat','amat'],['l-asvc','asvc'],['l-atrv','atrv'],
     ['l-sw','sw'],['l-hw','hw'],['l-net','net'],['l-ship','ship'],
@@ -1200,6 +1323,7 @@ function applyLang(){
     ['fs-all','fsAll'],['fs-dr','fsDr'],['fs-st','fsSt'],['fs-wn','fsWn'],['fs-ls','fsLs'],
   ];
   map.forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.textContent=t(k);});
+  renderSummary();  // 摘要明細標籤需隨語言切換
   const hs=document.getElementById('h-search');if(hs)hs.placeholder=t('hsearch');
   const activePage = document.querySelector('.page.active');
   const pageId = activePage ? activePage.id.replace('page-','') : 'list';
@@ -1337,6 +1461,9 @@ function loadIntoEditor(i){
   document.getElementById('p-wage').value=p.wage||3000;
   document.getElementById('p-wk').value=p.wk||4;
   document.getElementById('p-dy').value=p.dy||2;
+  document.getElementById('p-overhead').value=p.overhead!=null?p.overhead:50;
+  document.getElementById('p-risk').value=p.risk!=null?p.risk:15;
+  document.getElementById('p-target').value=p.target!=null?p.target:35;
   curTypes=(q.types||[]).slice();
   ['sw','hw','net','ship'].forEach(tp=>{
     document.getElementById('tp-'+tp).classList.toggle('on',curTypes.includes(tp));
@@ -1394,7 +1521,7 @@ function toggleType(tp){
 // ── Rows ──
 function addRow(kind){
   if(kind==='mat'){matR.push({name:'',qty:1,cost:0,note:''});}
-  if(kind==='svc'){svcR.push({name:'',cost:0,quote:0,note:''});}
+  if(kind==='svc'){svcR.push({name:'',cost:0,markup:num('p-svc-markup')||DEFAULT_MARKUP.svc,note:''});}
   if(kind==='trv'){trvR.push({name:'',persons:1,times:1,unit:0,note:''});}
   if(kind==='install'){
     // Defaults from the (hidden) params 預設加成 / 預設日薪 controls
@@ -1415,10 +1542,10 @@ function addRow(kind){
       note:''
     });
   }
-  if(kind==='integration'){integrationR.push({name:'',target:'',complexity:'中',days:1,cost:0,quote:0,note:''});}
-  if(kind==='third'){thirdR.push({name:'',supplier:'',billing:'一次性',cost:0,quote:0,note:''});}
-  if(kind==='maint'){maintR.push({name:'',period:'年',cost:0,quote:0,sla:'',note:''});}
-  if(kind==='recurring'){recurringR.push({name:'',period:'月費',qty:1,unitCost:0,unitQuote:0,months:12,note:''});}
+  if(kind==='integration'){integrationR.push({name:'',target:'',complexity:'中',days:1,cost:0,markup:num('p-int-markup')||DEFAULT_MARKUP.integration,note:''});}
+  if(kind==='third'){thirdR.push({name:'',supplier:'',billing:'一次性',cost:0,markup:num('p-thr-markup')||DEFAULT_MARKUP.third,note:''});}
+  if(kind==='maint'){maintR.push({name:'',period:'年',cost:0,markup:num('p-mnt-markup')||DEFAULT_MARKUP.maint,sla:'',note:''});}
+  if(kind==='recurring'){recurringR.push({name:'',period:'月費',qty:1,unitCost:0,markup:num('p-rec-markup')||DEFAULT_MARKUP.recurring,months:12,note:''});}
   renderAll();recalc();
 }
 function delRow(k,i){
@@ -1435,6 +1562,8 @@ function delRow(k,i){
 }
 
 function renderAll(){
+  normalizeAll();  // 確保各列都有加成%（舊資料遷移）
+  applyGlobalMarkup();  // 三率取代逐項加成%
   const mm=(parseFloat(document.getElementById('p-matm').value)||0)/100;
   // Mat
   document.getElementById('mat-body').innerHTML=matR.map((r,i)=>{
@@ -1451,13 +1580,13 @@ function renderAll(){
   }).join('');
   // Svc (v1.3: cost + quote split — falls back to legacy amount field for old quotes)
   document.getElementById('svc-body').innerHTML=svcR.map((r,i)=>{
-    // Migrate-on-read: if old row has amount and no cost/quote, show amount as quote
-    const cv = (r.cost!=null) ? r.cost : 0;
-    const qv = (r.quote!=null) ? r.quote : (r.amount!=null ? r.amount : 0);
+    const cv = (+r.cost||0), mk = (+r.markup||0);
+    const qv = Math.round(cv*(1+mk/100));
     return`<tr>
       <td><input type="text" value="${esc(r.name)}" placeholder="服務項目" oninput="svcR[${i}].name=this.value"></td>
       <td><input type="number" value="${cv}" min="0" style="width:96px" oninput="svcR[${i}].cost=+this.value;recalc()"></td>
-      <td><input type="number" value="${qv}" min="0" style="width:96px" oninput="svcR[${i}].quote=+this.value;recalc()"></td>
+      <td><input type="number" value="${mk}" min="0" max="500" style="width:54px" oninput="svcR[${i}].markup=+this.value;recalc()"></td>
+      <td class="calc-val hi r" style="color:var(--violet);font-weight:600">${fmt(qv)}</td>
       <td><input type="text" value="${esc(r.note)}" placeholder="服務範圍" oninput="svcR[${i}].note=this.value"></td>
       <td><button class="btn btn-ghost btn-xs" onclick="delRow('svc',${i})">✕</button></td>
     </tr>`;
@@ -1516,7 +1645,9 @@ function renderAll(){
 
   // System integration: 項目 / 對象 / 複雜度 / 人日 / 成本 / 報價 / 備注
   const intBody = document.getElementById('integration-body');
-  if(intBody) intBody.innerHTML = integrationR.map((r,i)=>`<tr>
+  if(intBody) intBody.innerHTML = integrationR.map((r,i)=>{
+    const mk=(+r.markup||0), qv=Math.round((+r.cost||0)*(1+mk/100));
+    return`<tr>
     <td><input type="text" value="${esc(r.name)}" placeholder="整合項目" oninput="integrationR[${i}].name=this.value"></td>
     <td><input type="text" value="${esc(r.target)}" placeholder="系統或設備名稱" oninput="integrationR[${i}].target=this.value"></td>
     <td><select onchange="integrationR[${i}].complexity=this.value" style="border:1px solid transparent;background:transparent;font-size:13px;font-family:var(--ff)">
@@ -1524,43 +1655,52 @@ function renderAll(){
     </select></td>
     <td><input type="number" value="${r.days}" min="0" step="0.5" style="width:58px" oninput="integrationR[${i}].days=+this.value"></td>
     <td><input type="number" value="${r.cost}" min="0" style="width:90px" oninput="integrationR[${i}].cost=+this.value;recalc()"></td>
-    <td><input type="number" value="${r.quote}" min="0" style="width:90px" oninput="integrationR[${i}].quote=+this.value;recalc()"></td>
+    <td><input type="number" value="${mk}" min="0" max="500" style="width:54px" oninput="integrationR[${i}].markup=+this.value;recalc()"></td>
+    <td class="calc-val hi r" style="color:#7E22CE;font-weight:600">${fmt(qv)}</td>
     <td><input type="text" value="${esc(r.note)}" placeholder="風險／限制" oninput="integrationR[${i}].note=this.value"></td>
     <td><button class="btn btn-ghost btn-xs" onclick="delRow('integration',${i})">✕</button></td>
-  </tr>`).join('');
+  </tr>`;}).join('');
 
   // Third-party: 項目 / 供應商 / 計費方式 / 成本 / 報價 / 備注
   const thrBody = document.getElementById('third-body');
-  if(thrBody) thrBody.innerHTML = thirdR.map((r,i)=>`<tr>
+  if(thrBody) thrBody.innerHTML = thirdR.map((r,i)=>{
+    const mk=(+r.markup||0), qv=Math.round((+r.cost||0)*(1+mk/100));
+    return`<tr>
     <td><input type="text" value="${esc(r.name)}" placeholder="第三方服務名稱" oninput="thirdR[${i}].name=this.value"></td>
     <td><input type="text" value="${esc(r.supplier)}" placeholder="供應商" oninput="thirdR[${i}].supplier=this.value"></td>
     <td><select onchange="thirdR[${i}].billing=this.value" style="border:1px solid transparent;background:transparent;font-size:13px;font-family:var(--ff)">
       ${['一次性','月費','年費'].map(o=>`<option ${r.billing===o?'selected':''}>${o}</option>`).join('')}
     </select></td>
     <td><input type="number" value="${r.cost}" min="0" style="width:90px" oninput="thirdR[${i}].cost=+this.value;recalc()"></td>
-    <td><input type="number" value="${r.quote}" min="0" style="width:90px" oninput="thirdR[${i}].quote=+this.value;recalc()"></td>
+    <td><input type="number" value="${mk}" min="0" max="500" style="width:54px" oninput="thirdR[${i}].markup=+this.value;recalc()"></td>
+    <td class="calc-val hi r" style="color:var(--ink2);font-weight:600">${fmt(qv)}</td>
     <td><input type="text" value="${esc(r.note)}" placeholder="授權限制／計費條件" oninput="thirdR[${i}].note=this.value"></td>
     <td><button class="btn btn-ghost btn-xs" onclick="delRow('third',${i})">✕</button></td>
-  </tr>`).join('');
+  </tr>`;}).join('');
 
   // Maintenance: 維護項目 / 期間 / 成本 / 報價 / SLA / 備注
   const mntBody = document.getElementById('maint-body');
-  if(mntBody) mntBody.innerHTML = maintR.map((r,i)=>`<tr>
+  if(mntBody) mntBody.innerHTML = maintR.map((r,i)=>{
+    const mk=(+r.markup||0), qv=Math.round((+r.cost||0)*(1+mk/100));
+    return`<tr>
     <td><input type="text" value="${esc(r.name)}" placeholder="維護項目" oninput="maintR[${i}].name=this.value"></td>
     <td><select onchange="maintR[${i}].period=this.value" style="border:1px solid transparent;background:transparent;font-size:13px;font-family:var(--ff)">
       ${['月','年','一次性'].map(o=>`<option ${r.period===o?'selected':''}>${o}</option>`).join('')}
     </select></td>
     <td><input type="number" value="${r.cost}" min="0" style="width:90px" oninput="maintR[${i}].cost=+this.value;recalc()"></td>
-    <td><input type="number" value="${r.quote}" min="0" style="width:90px" oninput="maintR[${i}].quote=+this.value;recalc()"></td>
+    <td><input type="number" value="${mk}" min="0" max="500" style="width:54px" oninput="maintR[${i}].markup=+this.value;recalc()"></td>
+    <td class="calc-val hi r" style="color:var(--teal);font-weight:600">${fmt(qv)}</td>
     <td><input type="text" value="${esc(r.sla)}" placeholder="例：4hr 回應" oninput="maintR[${i}].sla=this.value"></td>
     <td><input type="text" value="${esc(r.note)}" placeholder="排除項目" oninput="maintR[${i}].note=this.value"></td>
     <td><button class="btn btn-ghost btn-xs" onclick="delRow('maint',${i})">✕</button></td>
-  </tr>`).join('');
+  </tr>`;}).join('');
 
   // Recurring (subscription / rental): 項目 / 計費 / 數量 / 單位成本 / 單位報價 / 月數 / 小計 / 備注
   const recBody = document.getElementById('recurring-body');
   if(recBody) recBody.innerHTML = recurringR.map((r,i)=>{
-    const quote = (+r.qty||0)*(+r.unitQuote||0)*(+r.months||0);
+    const mk=(+r.markup||0);
+    const unitQ = Math.round((+r.unitCost||0)*(1+mk/100));
+    const quote = (+r.qty||0)*unitQ*(+r.months||0);
     return`<tr>
       <td><input type="text" value="${esc(r.name)}" placeholder="訂閱／租賃項目" oninput="recurringR[${i}].name=this.value"></td>
       <td><select onchange="recurringR[${i}].period=this.value" style="border:1px solid transparent;background:transparent;font-size:13px;font-family:var(--ff)">
@@ -1568,13 +1708,18 @@ function renderAll(){
       </select></td>
       <td><input type="number" value="${r.qty}" min="0" style="width:54px" oninput="recurringR[${i}].qty=+this.value;recalc()"></td>
       <td><input type="number" value="${r.unitCost}" min="0" style="width:80px" oninput="recurringR[${i}].unitCost=+this.value;recalc()"></td>
-      <td><input type="number" value="${r.unitQuote}" min="0" style="width:80px" oninput="recurringR[${i}].unitQuote=+this.value;recalc()"></td>
+      <td><input type="number" value="${mk}" min="0" max="500" style="width:54px" oninput="recurringR[${i}].markup=+this.value;recalc()"></td>
       <td><input type="number" value="${r.months}" min="0" style="width:54px" oninput="recurringR[${i}].months=+this.value;recalc()"></td>
-      <td class="calc-val hi r" style="color:#F97316;font-weight:600">${fmt(quote)}</td>
+      <td class="calc-val hi r" style="color:#F97316;font-weight:600" title="單位報價 ${fmt(unitQ)}">${fmt(quote)}</td>
       <td><input type="text" value="${esc(r.note)}" placeholder="最低租期／續約" oninput="recurringR[${i}].note=this.value"></td>
       <td><button class="btn btn-ghost btn-xs" onclick="delRow('recurring',${i})">✕</button></td>
     </tr>`;
   }).join('');
+  // 三率取代逐項加成%：鎖定（停用）所有逐項加成%輸入欄，改由風險與獲利假設統一計算
+  document.querySelectorAll('[oninput*=".markup="]').forEach(el=>{
+    el.readOnly=true; el.tabIndex=-1; el.title='報價已改由「風險與獲利假設」三率統一計算';
+    el.style.color='var(--ink4)'; el.style.background='var(--surf2)';
+  });
 }
 
 // ── Recalc ──
@@ -1598,21 +1743,32 @@ function recalc(){
   setSub('maint-sub',        t.maintQ);
   setSub('recurring-sub',    t.recurringQ);
 
-  // Right summary panel
-  document.getElementById('s-mat').textContent=fmt(t.matQ);
-  document.getElementById('s-lab').textContent=fmt(t.lQ);
-  document.getElementById('s-svc').textContent=fmt(t.svcQ);
-  document.getElementById('s-trv').textContent=fmt(t.trvQ);
-  document.getElementById('s-cost').textContent=fmt(t.cost);
-  document.getElementById('s-profit').textContent=fmt(t.profit);
+  // Right summary panel — 通用合計
   document.getElementById('s-total').textContent=fmt(t.total);
   document.getElementById('s-mpct').textContent=t.mpct+'%';
   document.getElementById('s-mbar').style.width=Math.min(t.mpct,100)+'%';
-  if(t.total>0){
-    document.getElementById('b-mat').textContent=Math.round(t.matQ/t.total*100)+'%';
-    document.getElementById('b-lab').textContent=Math.round((t.lQ+t.svcQ)/t.total*100)+'%';
-    document.getElementById('b-trv').textContent=Math.round(t.trvQ/t.total*100)+'%';
+  // 分層成本與風險（內部）
+  const setTx=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  setTx('ly-direct',fmt(t.directCost));
+  setTx('ly-oh-pct',`(${t.overheadRate}%)`);
+  setTx('ly-oh',fmt(t.overhead));
+  setTx('ly-full',fmt(t.fullyLoaded));
+  setTx('ly-risk-pct',`(${t.riskRate}%)`);
+  setTx('ly-risk',fmt(t.riskReserve));
+  setTx('ly-floor',fmt(t.floorPrice));
+  setTx('ly-surf',fmt(t.profit));
+  setTx('ly-real',fmt(t.realProfit));
+  setTx('ly-realpct',t.realMpct+'%');
+  setTx('ly-target-pct',`(淨利${t.targetRate}%)`);
+  setTx('ly-suggest',fmt(t.suggestedPrice));
+  const diff=t.total-t.suggestedPrice;
+  const diffEl=document.getElementById('ly-diff');
+  if(diffEl){
+    diffEl.textContent=(diff>=0?'+':'−')+fmt(Math.abs(diff)).replace('$','$');
+    diffEl.style.color=diff>=0?'var(--green)':'var(--red)';
   }
+  // 明細列與成本結構佔比依報價類型動態產生
+  renderSummary(t);
   renderAll();
 }
 
@@ -1621,7 +1777,25 @@ function genNo(){
   const d=new Date(),pad=n=>String(n).padStart(2,'0');
   return`QT-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${String(quotes.length+1).padStart(3,'0')}`;
 }
+// 統一報價倍率：直接成本 → 報價，內含 管銷／風險／目標淨利 三率
+// 報價 = 直接成本 × (1+管銷率) × (1+風險率) ÷ (1−目標淨利率)；目標淨利率即希望達成的「真實淨利率」。
+function priceFactor(){
+  const oh=num('p-overhead')/100, rk=num('p-risk')/100, tg=num('p-target')/100;
+  return (1+oh)*(1+rk)/((tg<1)?(1-tg):0.0001);
+}
+// 三率取代逐項加成%：換算等效加成%後寫入所有列與料件毛利率，並鎖定（停用）逐項加成欄。
+function applyGlobalMarkup(){
+  const pct=Math.round((priceFactor()-1)*10000)/100;
+  [installR,softwareR,svcR,integrationR,thirdR,maintR,recurringR].forEach(arr=>arr.forEach(r=>{r.markup=pct;}));
+  ['p-matm','p-labm','p-sw-markup','p-svc-markup','p-int-markup','p-thr-markup','p-mnt-markup','p-rec-markup'].forEach(id=>{
+    const e=document.getElementById(id);
+    if(e){ e.value=pct; e.readOnly=true; e.title='報價已改由「風險與獲利假設」三率統一計算'; e.style.color='var(--ink4)'; e.style.background='var(--surf2)'; }
+  });
+  return pct;
+}
 function calcTotals(){
+  normalizeAll();  // 確保各列都有加成%（舊資料遷移）
+  applyGlobalMarkup();  // 三率取代逐項加成%：報價 = 直接成本 × 統一倍率
   const mm=num('p-matm')/100;
   let matC=0,matQ=0;matR.forEach(r=>{matC+=r.cost*r.qty;matQ+=Math.round(r.cost*(1+mm))*r.qty;});
   // v1.3: 安裝施工改為 installR 多列；累加每列 cost 與 quote
@@ -1631,33 +1805,47 @@ function calcTotals(){
     lC+=c;
     lQ+=Math.round(c*(1+(+r.markup||0)/100));
   });
-  // Legacy 技術服務 (will be restructured in commit C) — for now amount is the quote, cost=0
-  let svcC=0,svcQ=0;svcR.forEach(r=>{svcC+=(+r.cost||0);svcQ+=(+r.quote||+r.amount||0);});
+  // 技術服務費：報價 = 成本 ×(1+加成%)
+  let svcC=0,svcQ=0;svcR.forEach(r=>{const c=(+r.cost||0);svcC+=c;svcQ+=Math.round(c*(1+(+r.markup||0)/100));});
   let trvQ=0;trvR.forEach(r=>trvQ+=r.persons*r.times*r.unit);
   // v1.3 new sections:
   let softwareC=0,softwareQ=0;
   softwareR.forEach(r=>{const c=(+r.days||0)*(+r.dayRate||0);softwareC+=c;softwareQ+=Math.round(c*(1+(+r.markup||0)/100));});
   let integrationC=0,integrationQ=0;
-  integrationR.forEach(r=>{integrationC+=(+r.cost||0);integrationQ+=(+r.quote||0);});
+  integrationR.forEach(r=>{const c=(+r.cost||0);integrationC+=c;integrationQ+=Math.round(c*(1+(+r.markup||0)/100));});
   let thirdC=0,thirdQ=0;
-  thirdR.forEach(r=>{thirdC+=(+r.cost||0);thirdQ+=(+r.quote||0);});
+  thirdR.forEach(r=>{const c=(+r.cost||0);thirdC+=c;thirdQ+=Math.round(c*(1+(+r.markup||0)/100));});
   let maintC=0,maintQ=0;
-  maintR.forEach(r=>{maintC+=(+r.cost||0);maintQ+=(+r.quote||0);});
+  maintR.forEach(r=>{const c=(+r.cost||0);maintC+=c;maintQ+=Math.round(c*(1+(+r.markup||0)/100));});
   let recurringC=0,recurringQ=0;
   recurringR.forEach(r=>{
-    const months=(+r.months||0),qty=(+r.qty||0);
-    recurringC+=qty*(+r.unitCost||0)*months;
-    recurringQ+=qty*(+r.unitQuote||0)*months;
+    const months=(+r.months||0),qty=(+r.qty||0),uc=(+r.unitCost||0);
+    const uq=Math.round(uc*(1+(+r.markup||0)/100));
+    recurringC+=qty*uc*months;
+    recurringQ+=qty*uq*months;
   });
   const total=matQ+lQ+svcQ+trvQ+softwareQ+integrationQ+thirdQ+maintQ+recurringQ;
   const cost =matC+lC+trvQ+svcC+softwareC+integrationC+thirdC+maintC+recurringC;
-  const profit=total-cost;
+  const profit=total-cost;                       // 表面毛利（報價 − 直接成本）
+  // ── 分層成本與風險（對應試算表第三部分）──
+  const overheadRate=num('p-overhead'), riskRate=num('p-risk'), targetRate=num('p-target');
+  const directCost=cost;                          // 直接成本（各區塊成本加總）
+  const overhead=Math.round(directCost*overheadRate/100);          // 管銷分攤
+  const fullyLoaded=directCost+overhead;          // 完全負擔成本（損益兩平點）
+  const riskReserve=Math.round(fullyLoaded*riskRate/100);          // 風險準備
+  const floorPrice=fullyLoaded+riskReserve;       // 風險調整後成本（底價）
+  const realProfit=total-floorPrice;              // 真實淨利（報價 − 底價）
+  const realMpct=total>0?Math.round(realProfit/total*100):0;
+  const suggestedPrice=targetRate<100?Math.round(floorPrice/(1-targetRate/100)):0; // 建議報價
   return{
     total,cost,profit,mpct:total>0?Math.round(profit/total*100):0,
     matC,matQ,lC,lQ,svcC,svcQ,trvQ,
     softwareC,softwareQ,integrationC,integrationQ,
     thirdC,thirdQ,maintC,maintQ,
     recurringC,recurringQ,
+    overheadRate,riskRate,targetRate,
+    directCost,overhead,fullyLoaded,riskReserve,floorPrice,
+    realProfit,realMpct,suggestedPrice,
   };
 }
 function saveQuote(){
@@ -1679,7 +1867,8 @@ function saveQuote(){
       contact_person:document.getElementById('f-cp').value,
       contact_phone:document.getElementById('f-cphone').value,
     },
-    params:{matm:num('p-matm'),labm:num('p-labm'),wage:num('p-wage'),wk:num('p-wk'),dy:num('p-dy')},
+    params:{matm:num('p-matm'),labm:num('p-labm'),wage:num('p-wage'),wk:num('p-wk'),dy:num('p-dy'),
+            overhead:num('p-overhead'),risk:num('p-risk'),target:num('p-target')},
     matR:JSON.parse(JSON.stringify(matR)),
     installR:JSON.parse(JSON.stringify(installR)),
     softwareR:JSON.parse(JSON.stringify(softwareR)),
@@ -1773,6 +1962,7 @@ function renderHist(){
         <div class="qcard-margin">↑ ${q.mpct||0}% margin</div>
         <div class="qcard-actions" onclick="event.stopPropagation()">
           <select class="status-sel" onchange="setStatus(${i},this.value)">${statusOpts}</select>
+          <button class="btn btn-sm btn-ghost" onclick="duplicateQuote(${i})" title="複製報價單">⧉</button>
           <button class="btn btn-sm btn-ghost" onclick="exportExcel(quotes[${i}])" title="匯出內部成本評估">⬇</button>
           <button class="btn btn-sm btn-ghost" onclick="deleteQuote(${i})" title="刪除">✕</button>
         </div>
@@ -1788,67 +1978,163 @@ function deleteQuote(i){
   document.getElementById('hist-count').textContent=quotes.length;
   renderHist();renderHistStats();
 }
+// 產生一個未被使用的報價單號（以 genNo 為基礎，必要時往後遞增）
+function uniqueNo(){
+  const d=new Date(),pad=x=>String(x).padStart(2,'0');
+  const prefix=`QT-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-`;
+  let seq=quotes.length+1, no=prefix+String(seq).padStart(3,'0');
+  while(quotes.some(x=>x.no===no)){ seq++; no=prefix+String(seq).padStart(3,'0'); }
+  return no;
+}
+// 複製一張報價單：完整保留所有成本/報價內容，僅換新單號、日期與草稿狀態。
+function duplicateQuote(i){
+  const src=quotes[i];
+  if(!src)return;
+  const copy=JSON.parse(JSON.stringify(src));
+  const d=new Date(),pad=x=>String(x).padStart(2,'0');
+  copy.id=Date.now();
+  copy.no=uniqueNo();
+  copy.status='draft';
+  copy.date=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  copy.proj=(src.proj||'')+'（複本）';
+  copy.savedAt=new Date().toISOString();
+  // 報價單草稿的單號／日期清空，開啟時會依新單號重新帶入
+  if(copy.officialDraft){ copy.officialDraft.quoteNo=''; copy.officialDraft.quoteDate=''; }
+  quotes.unshift(copy);
+  localStorage.setItem('slab_q',JSON.stringify(quotes));
+  document.getElementById('hist-count').textContent=quotes.length;
+  renderHist();renderHistStats();
+  toast(lang==='zh'?'✓ 已複製為 '+copy.no:'✓ Duplicated as '+copy.no);
+}
 
-// ── Internal worksheet Excel export ──
-function exportExcel(src){
+// ── Internal worksheet Excel export（依各成本區塊逐項匯出；微軟正黑體 + 金額千分位）──
+async function exportExcel(src){
   const isObj=src&&typeof src==='object'&&src.matR;
   const q=isObj?src:null;
-  const mm=q?(q.params?.matm||0)/100:num('p-matm')/100;
-  const lm=q?(q.params?.labm||0)/100:num('p-labm')/100;
-  const wage=q?q.params?.wage||0:num('p-wage');
-  const wk=q?q.params?.wk||0:num('p-wk');
-  const dy=q?q.params?.dy||0:num('p-dy');
-  const mr=q?q.matR:matR, sr=q?q.svcR:svcR, tr=q?q.trvR:trvR;
+  // 各區塊小計／總計來源：即時報價用 calcTotals()，歷史報價用儲存的欄位（與畫面一致）
+  const T=q?q:calcTotals();
+  const mm=(q?(q.params&&q.params.matm!=null?q.params.matm:60):num('p-matm'))/100;
+  const mk=r=>(+r.markup||0);
+  // 三率（管銷／風險／目標淨利）與其換算的統一報價倍率
+  const ohR=q?(q.params&&q.params.overhead!=null?q.params.overhead:50):num('p-overhead');
+  const rkR=q?(q.params&&q.params.risk!=null?q.params.risk:15):num('p-risk');
+  const tgR=q?(q.params&&q.params.target!=null?q.params.target:35):num('p-target');
+  const factorX=(1+ohR/100)*(1+rkR/100)/((tgR<100)?(1-tgR/100):0.0001);
+  const matA=q?(q.matR||[]):matR;
+  const insA=q?(q.installR||[]):installR;
+  const swA =q?(q.softwareR||[]):softwareR;
+  const intA=q?(q.integrationR||[]):integrationR;
+  const svcA=q?(q.svcR||[]):svcR;
+  const trvA=q?(q.trvR||[]):trvR;
+  const thrA=q?(q.thirdR||[]):thirdR;
+  const mntA=q?(q.maintR||[]):maintR;
+  const recA=q?(q.recurringR||[]):recurringR;
   const client=q?q.client:document.getElementById('f-client').value;
   const proj=q?q.proj:document.getElementById('f-proj').value;
   const no=q?q.no:document.getElementById('f-no').value;
   const date=q?q.date:document.getElementById('f-date').value;
   const terms=q?q.terms:document.getElementById('f-terms').value;
 
-  let matC=0,matQ=0;mr.forEach(r=>{matC+=r.cost*r.qty;matQ+=Math.round(r.cost*(1+mm))*r.qty;});
-  const lC=wk*dy*wage,lQ=Math.round(lC*(1+lm));
-  let svcQ=0;sr.forEach(r=>svcQ+=r.amount);
-  let trvQ=0;tr.forEach(r=>trvQ+=r.persons*r.times*r.unit);
-  const total=matQ+lQ+svcQ+trvQ,cost=matC+lC+trvQ,profit=total-cost;
+  // ── 三率與分層計算（對應試算表第三、四部分）──
+  const totalQ=Math.round(T.total||0);
+  const direct=Math.round(T.cost||0);
+  const oh=Math.round(direct*ohR/100);
+  const full=direct+oh;
+  const rk=Math.round(full*rkR/100);
+  const floorP=full+rk;
+  const surf=totalQ-direct;
+  const real=totalQ-floorP;
+  const surfPct=totalQ>0?(surf/totalQ*100).toFixed(1)+'%':'0%';
+  const realPct=totalQ>0?(real/totalQ*100).toFixed(1)+'%':'0%';
+  const suggest=tgR<100?Math.round(floorP/(1-tgR/100)):0;
+  const tax=Math.round(totalQ*0.05);
 
-  const wb=XLSX.utils.book_new();
-  const rows=[
-    ['SLAB Quotation Worksheet','','','','',''],
-    [t('client'),client,'',t('no'),no,''],
-    [t('proj'),proj,'',t('date'),date,''],
-    [],
-    [lang==='zh'?'一、料件明細':'I. Materials','','','','',''],
-    [t('thN'),t('thQ'),t('thC'),t('thP'),t('thS'),t('thNt')],
-  ];
-  mr.forEach(r=>{const uq=Math.round(r.cost*(1+mm));rows.push([r.name,r.qty,r.cost,uq,uq*r.qty,r.note]);});
-  rows.push([t('matsub'),'','','',matQ,''],'');
-  rows.push([lang==='zh'?'二、安裝施工':'II. Labor','','','','','']);
-  rows.push([t('wk'),t('dy'),t('wage'),lang==='zh'?'成本':'Cost',lang==='zh'?'報價':'Quote','']);
-  rows.push([wk,dy,wage,lC,lQ,''],'');
-  if(sr.length){rows.push([lang==='zh'?'三、技術服務費':'III. Services','','','','','']);sr.forEach(r=>rows.push([r.name,'',r.amount,'','',r.note]));rows.push([t('svcsub'),'',svcQ,'','',''],'');}
-  if(tr.length){
-    rows.push([lang==='zh'?'四、出差費用':'IV. Travel','','','','','']);
-    rows.push([t('thTn'),t('thTp'),t('thTt'),t('thTu'),t('thTs'),t('thTnt')]);
-    tr.forEach(r=>rows.push([r.name,r.persons,r.times,r.unit,r.persons*r.times*r.unit,r.note]));
-    rows.push([t('trvsub'),'','','',trvQ,''],'');
-  }
-  rows.push([lang==='zh'?'工程報價總計':'Total Quote','','','',total,''],'');
-  if(terms)terms.split('\n').forEach(l=>rows.push([l]));
-  const ws=XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols']=[{wch:36},{wch:9},{wch:13},{wch:13},{wch:14},{wch:22}];
-  XLSX.utils.book_append_sheet(wb,ws,lang==='zh'?'成本評估':'Worksheet');
-  const an=[
-    [lang==='zh'?'成本分析':'Cost Analysis'],
-    [lang==='zh'?'項目':'Item',lang==='zh'?'金額':'Amount'],
-    [lang==='zh'?'料件成本':'Mat. Cost',matC],[lang==='zh'?'料件報價':'Mat. Quote',matQ],
-    [lang==='zh'?'人工成本':'Labor Cost',lC],[lang==='zh'?'人工報價':'Labor Quote',lQ],
-    [lang==='zh'?'技術服務費':'Services',svcQ],[lang==='zh'?'出差費':'Travel',trvQ],
-    [lang==='zh'?'總成本':'Total Cost',cost],[lang==='zh'?'總報價':'Total',total],
-    [lang==='zh'?'總毛利':'Profit',profit],[lang==='zh'?'毛利率':'Margin',total>0?(profit/total*100).toFixed(1)+'%':'0%'],
-  ];
-  const ws2=XLSX.utils.aoa_to_sheet(an);ws2['!cols']=[{wch:22},{wch:14}];
-  XLSX.utils.book_append_sheet(wb,ws2,lang==='zh'?'成本分析':'Analysis');
-  XLSX.writeFile(wb,(proj||'Quote')+'_'+(no||'')+'_成本評估.xlsx');
+  // ── 報價明細：把各區塊明細攤平成試算表的單一清單 ──
+  // 欄位：項目 | 角色／類別 | 人日／數量 | 單位成本 | 加成% | 直接成本 | 報價未稅
+  const items=[];
+  swA.forEach(r=>{ if(r.name||r.days){ const c=(+r.days||0)*(+r.dayRate||0); items.push([r.name||'(未命名)',r.role||'軟體',(+r.days||0),(+r.dayRate||0),mk(r)/100,c,Math.round(c*(1+mk(r)/100))]); }});
+  insA.forEach(r=>{ if(r.name||r.persons||r.days){ const md=(+r.persons||0)*(+r.days||0), c=md*(+r.wage||0); items.push([r.name||'安裝施工','施工',md,(+r.wage||0),mk(r)/100,c,Math.round(c*(1+mk(r)/100))]); }});
+  matA.forEach(r=>{ if(r.name||r.cost){ const c=(+r.cost||0)*(+r.qty||0); items.push([r.name||'料件','料件',(+r.qty||0),(+r.cost||0),mm,c,Math.round((+r.cost||0)*(1+mm))*(+r.qty||0)]); }});
+  intA.forEach(r=>{ if(r.name||r.cost){ const c=+r.cost||0; items.push([r.name||'整合','系統整合'+(r.target?'／'+r.target:''),(+r.days||0)||'','',mk(r)/100,c,Math.round(c*(1+mk(r)/100))]); }});
+  svcA.forEach(r=>{ if(r.name||r.cost||r.amount){ let c=+r.cost||0,m=mk(r); if(r.markup==null&&!c&&r.amount!=null){c=+r.amount;m=0;} items.push([r.name||'技術服務','技術服務','','',m/100,c,Math.round(c*(1+m/100))]); }});
+  thrA.forEach(r=>{ if(r.name||r.cost){ const c=+r.cost||0; items.push([r.name||'第三方','第三方'+(r.supplier?'／'+r.supplier:''),'','',mk(r)/100,c,Math.round(c*(1+mk(r)/100))]); }});
+  mntA.forEach(r=>{ if(r.name||r.cost){ const c=+r.cost||0; items.push([r.name||'維護','維護保固'+(r.period?'／'+r.period:''),'','',mk(r)/100,c,Math.round(c*(1+mk(r)/100))]); }});
+  recA.forEach(r=>{ if(r.name||r.unitCost){ const uc=+r.unitCost||0,m2=+r.months||0,qy=+r.qty||0,c=qy*uc*m2; items.push([r.name||'訂閱','訂閱／租賃'+(r.period?'／'+r.period:''),(qy*m2)||'',uc,mk(r)/100,c,Math.round(uc*(1+mk(r)/100))*qy*m2]); }});
+  trvA.forEach(r=>{ if(r.name||r.unit){ const c=(+r.persons||0)*(+r.times||0)*(+r.unit||0); items.push([r.name||'出差','出差（實支實付）',(+r.persons||0)*(+r.times||0)||'',(+r.unit||0),0,c,c]); }});
+
+  const surfFrac=totalQ>0?surf/totalQ:0, realFrac=totalQ>0?real/totalQ:0;
+
+  // ── 依「分層成本與風險試算表」格式組成單一工作表（每列帶型別 t 供樣式）──
+  const rows=[];
+  const R=(arr,type)=>rows.push({c:arr,t:type});
+  R(['內部分層成本與風險試算表','','','','','',''],'title');
+  R(['專案名稱／客戶','',(proj||'')+(client?'　／　'+client:''),'','','',''],'meta');
+  R(['報價單號／日期','',(no||'')+'　'+(date||''),'','','',''],'meta');
+  R([],'blank');
+  R(['一、假設參數（黃色為可調整輸入，其餘自動重算）','','','','','',''],'section');
+  R(['管銷分攤率',ohR/100,'房租、行政會計、軟硬體、教育訓練、非計費工時等間接成本分攤','','','',''],'rate');
+  R(['風險準備率',rkR/100,'需求變更、工時低估、驗收延遲、呆帳、保固修 bug 的緩衝','','','',''],'rate');
+  R(['目標淨利率',tgR/100,'＝希望達成的真實淨利率；報價＝底價 ÷（1 − 此率）','','','',''],'rate');
+  R([],'blank');
+  R(['二、報價明細','','','','','',''],'section');
+  R(['項目','角色／類別','人日／數量','單位成本\n(NT$/人日)','加成%','直接成本\n(NT$)','報價未稅\n(NT$)'],'head');
+  items.forEach(it=>R(it,'item'));
+  R(['合計','','','','',direct,totalQ],'sum');
+  R([],'blank');
+  R(['三、分層成本與獲利結構','','','','','',''],'section');
+  R(['直接成本（專案人力／採購）','','','','','',direct],'calc');
+  R(['＋ 管銷分攤（直接成本 × 管銷率）','','','','','',oh],'calc');
+  R(['＝ 完全負擔成本（損益兩平點）','','','','','',full],'calcgrn');
+  R(['＋ 風險準備（完全負擔成本 × 風險率）','','','','','',rk],'calc');
+  R(['＝ 風險調整後成本（底價，議價地板）','','','','','',floorP],'calcorg');
+  R([],'blank');
+  R(['報價未稅','','','','','',totalQ],'calc');
+  R(['表面毛利（報價 − 直接成本）','','','','','',surf],'calc');
+  R(['表面毛利率','','','','','',surfFrac],'calcpct');
+  R(['真實淨利（報價 − 底價，最大議價空間）','','','','','',real],'calcgold');
+  R(['真實淨利率','','','','','',realFrac],'calcgoldpct');
+  R(['建議報價（底價 ÷（1 − 目標淨利率））','','','','','',suggest],'calc');
+  R(['與目前報價差異（報價 − 建議報價）','','','','','',totalQ-suggest],'calc');
+  R(['※ 差異為正＝報價高於目標淨利所需，有議價緩衝；為負＝偏低，建議檢討。','','','','','',''],'note');
+  R([],'blank');
+  R(['四、稅與含稅總計（對外揭露用）','','','','','',''],'section');
+  R(['報價（未稅）','','','','','',totalQ],'calc');
+  R(['營業稅 5%','','','','','',tax],'calc');
+  R(['含稅總計','','','','','',totalQ+tax],'calcgrn');
+  R(['※ 對客戶揭露時僅呈現「報價明細」與「含稅總計」；假設參數與成本／獲利結構屬內部分析，請勿外流。','','','','','',''],'note');
+  if(terms){ R([],'blank'); R(['內部備註','','','','','',''],'section'); String(terms).split('\n').forEach(l=>R([l,'','','','','',''],'note')); }
+
+  // ── ExcelJS：忠實重現摯陞試算表樣式（深藍區段條、淺藍標籤、黃底輸入、綠/橘/金結果列）──
+  const FONT='微軟正黑體';
+  const NAVY='FF1F3864',LBL='FFD9E1F2',YEL='FFFFF2CC',GRN='FFE2EFDA',ORG='FFFCE4D6',GOLD='FFFFE699',BLUET='FF0000FF',GRAY='FF808080';
+  const thin={style:'thin',color:{argb:'FFBFBFBF'}};
+  const box={top:thin,left:thin,bottom:thin,right:thin};
+  const sf=(cell,argb)=>cell.fill={type:'pattern',pattern:'solid',fgColor:{argb}};
+  const wb=new ExcelJS.Workbook();
+  const ws=wb.addWorksheet('內部成本評估');
+  ws.columns=[{width:38},{width:14},{width:10},{width:14},{width:8},{width:14},{width:15}];
+  rows.forEach(({c,t})=>{
+    const row=ws.addRow(c); const rn=row.number; const g=ci=>row.getCell(ci);
+    if(t==='blank') return;
+    if(t==='title'){ ws.mergeCells(rn,1,rn,7); row.height=28; const cell=g(1); cell.font={name:FONT,size:15,bold:true,color:{argb:'FFFFFFFF'}}; sf(cell,NAVY); cell.alignment={horizontal:'center',vertical:'middle'}; return; }
+    if(t==='section'){ ws.mergeCells(rn,1,rn,7); const cell=g(1); cell.font={name:FONT,size:11,bold:true,color:{argb:'FFFFFFFF'}}; sf(cell,NAVY); cell.alignment={horizontal:'left',vertical:'middle'}; return; }
+    if(t==='meta'){ ws.mergeCells(rn,1,rn,2); ws.mergeCells(rn,3,rn,7); const a=g(1); a.font={name:FONT,size:10,bold:true}; sf(a,LBL); a.alignment={horizontal:'right',vertical:'middle'}; a.border=box; const v=g(3); v.font={name:FONT,size:10}; v.alignment={horizontal:'left',vertical:'middle'}; v.border=box; return; }
+    if(t==='rate'){ ws.mergeCells(rn,3,rn,7); const a=g(1); a.font={name:FONT,size:11,bold:true}; sf(a,LBL); a.alignment={horizontal:'right',vertical:'middle'}; a.border=box; const b=g(2); b.font={name:FONT,size:11,bold:true,color:{argb:BLUET}}; sf(b,YEL); b.alignment={horizontal:'center',vertical:'middle'}; b.border=box; b.numFmt='0.0%'; const d=g(3); d.font={name:FONT,size:9,color:{argb:GRAY}}; d.alignment={horizontal:'left',vertical:'middle'}; return; }
+    if(t==='head'){ row.height=30; for(let ci=1;ci<=7;ci++){ const cell=g(ci); cell.font={name:FONT,size:10,bold:true}; sf(cell,LBL); cell.alignment={horizontal:'center',vertical:'middle',wrapText:true}; cell.border=box; } return; }
+    if(t==='item'){ const al=['left','center','center','right','center','right','right']; const blue=[3,4,5]; const fmts={3:'0.0',4:'#,##0',5:'0%',6:'#,##0',7:'#,##0'}; for(let ci=1;ci<=7;ci++){ const cell=g(ci); cell.font={name:FONT,size:10,color:blue.includes(ci)?{argb:BLUET}:undefined}; cell.alignment={horizontal:al[ci-1],vertical:'middle'}; cell.border=box; if(fmts[ci]&&typeof cell.value==='number') cell.numFmt=fmts[ci]; } return; }
+    if(t==='sum'){ ws.mergeCells(rn,1,rn,5); for(let ci=1;ci<=7;ci++){ const cell=g(ci); cell.font={name:FONT,size:11,bold:true}; sf(cell,GRN); cell.border=box; cell.alignment={horizontal:ci===1?'center':'right',vertical:'middle'}; if((ci===6||ci===7)&&typeof cell.value==='number') cell.numFmt='#,##0'; } return; }
+    if(t.indexOf('calc')===0){ ws.mergeCells(rn,1,rn,6); const fillc=t.indexOf('grn')>=0?GRN:t.indexOf('org')>=0?ORG:t.indexOf('gold')>=0?GOLD:null; const bold=fillc!=null; const a=g(1); a.font={name:FONT,size:10,bold:bold}; a.alignment={horizontal:'left',vertical:'middle'}; if(fillc) sf(a,fillc); const v=g(7); v.font={name:FONT,size:10,bold:bold}; v.alignment={horizontal:'right',vertical:'middle'}; v.border=box; if(fillc) sf(v,fillc); v.numFmt=t.indexOf('pct')>=0?'0.0%':'#,##0'; return; }
+    if(t==='note'){ ws.mergeCells(rn,1,rn,7); const cell=g(1); cell.font={name:FONT,size:9,italic:true,color:{argb:GRAY}}; cell.alignment={horizontal:'left',vertical:'middle',wrapText:true}; return; }
+  });
+
+  const out=await wb.xlsx.writeBuffer();
+  const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const safeName=((proj||'Quote')+'_'+(no||'')+'_內部成本評估').replace(/[\\/:*?"<>|]/g,'_');
+  a.href=url; a.download=safeName+'.xlsx';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },1000);
   toast(t('exported'));
 }
 
@@ -1952,23 +2238,55 @@ function ofPersist(){
   }, 400);
 }
 
+// 依「成本評估明細」逐區塊彙整：回傳有報價的各區塊 {label, q(報價小計), descs[]}
+function worksheetSections(){
+  normalizeAll();
+  const mm=num('p-matm')/100;
+  const mk=r=>(+r.markup||0);
+  const out=[];
+  const push=(label,q,ds)=>{ if(q>0) out.push({label, q:Math.round(q), descs:ds.filter(Boolean).slice(0,3)}); };
+  // 料件
+  { let q=0; const ds=[]; matR.forEach(r=>{ if(r.name||r.cost){ q+=Math.round(r.cost*(1+mm))*r.qty; if(r.name) ds.push(`${r.name}（${r.qty} 套）`);} }); push('料件',q,ds); }
+  // 安裝施工
+  { let q=0; const ds=[]; installR.forEach(r=>{ if(r.name||r.persons||r.days){ const c=(+r.persons||0)*(+r.days||0)*(+r.wage||0); q+=Math.round(c*(1+mk(r)/100)); ds.push(`${r.name||'安裝施工'}（${r.persons||0} 人 × ${r.days||0} 日）`);} }); push('安裝施工',q,ds); }
+  // 軟體開發
+  { let q=0; const ds=[]; softwareR.forEach(r=>{ if(r.name||r.days){ const c=(+r.days||0)*(+r.dayRate||0); q+=Math.round(c*(1+mk(r)/100)); ds.push(`${r.name||'模組'}${r.role?'（'+r.role+'）':''}`);} }); push('軟體開發',q,ds); }
+  // 系統整合
+  { let q=0; const ds=[]; integrationR.forEach(r=>{ if(r.name||r.cost){ q+=Math.round((+r.cost||0)*(1+mk(r)/100)); ds.push(`${r.name||'整合項目'}${r.target?'（'+r.target+'）':''}`);} }); push('系統整合',q,ds); }
+  // 技術服務費
+  { let q=0; const ds=[]; svcR.forEach(r=>{ if(r.name||r.cost){ q+=Math.round((+r.cost||0)*(1+mk(r)/100)); if(r.name) ds.push(r.note?`${r.name}（${r.note}）`:r.name);} }); push('技術服務費',q,ds); }
+  // 出差費用
+  { let q=0; const ds=[]; trvR.forEach(r=>{ if(r.name||r.unit){ q+=(+r.persons||0)*(+r.times||0)*(+r.unit||0); if(r.name) ds.push(r.name);} }); push('出差費用',q,ds); }
+  // 第三方成本
+  { let q=0; const ds=[]; thirdR.forEach(r=>{ if(r.name||r.cost){ q+=Math.round((+r.cost||0)*(1+mk(r)/100)); ds.push(`${r.name||'第三方'}${r.supplier?'（'+r.supplier+'）':''}`);} }); push('第三方成本',q,ds); }
+  // 維護保固
+  { let q=0; const ds=[]; maintR.forEach(r=>{ if(r.name||r.cost){ q+=Math.round((+r.cost||0)*(1+mk(r)/100)); ds.push(`${r.name||'維護'}${r.period?'（'+r.period+'）':''}`);} }); push('維護保固',q,ds); }
+  // 訂閱／租賃
+  { let q=0; const ds=[]; recurringR.forEach(r=>{ if(r.name||r.unitCost){ const uc=(+r.unitCost||0),uq=Math.round(uc*(1+mk(r)/100)); q+=(+r.qty||0)*uq*(+r.months||0); ds.push(`${r.name||'訂閱'}${r.period?'（'+r.period+'）':''}`);} }); push('訂閱／租賃',q,ds); }
+  return out;
+}
+
+// 將各區塊轉成報價單品項（模板上限 5 項；超出時把較後面的併入「其他項目」）
+function ofBuildItems(){
+  const secs=worksheetSections();
+  const proj=document.getElementById('f-proj').value||'';
+  if(!secs.length){
+    return [{ title: proj?`${proj} — 報價`:'', descs:[], qty:1, price:0 }];
+  }
+  let items=secs.map(s=>({ title:s.label, descs:s.descs, qty:1, price:s.q }));
+  if(items.length>5){
+    const keep=items.slice(0,4);
+    const rest=items.slice(4);
+    keep.push({ title:'其他項目', descs:rest.map(r=>r.title).slice(0,3), qty:1,
+                price:rest.reduce((a,b)=>a+b.price,0) });
+    items=keep;
+  }
+  return items;
+}
+
 function ofMakeSeed(){
   // Auto-seed from current worksheet (used when draft is empty)
-  const tt=calcTotals();
-  const proj=document.getElementById('f-proj').value||'';
-  const total=Math.round(tt.matQ+tt.lQ+tt.svcQ+tt.trvQ);
-  const descs=[];
-  if(matR.length){
-    matR.slice(0,2).forEach(r=>{ if(r.name) descs.push(`${r.name}（${r.qty} 套）`); });
-  }
-  if(tt.lQ>0) descs.push(`系統整合、現場安裝與測試（${num('p-wk')} 人 × ${num('p-dy')} 日）`);
-  if(svcR.length && svcR[0].name) descs.push(`${svcR[0].name}${svcR[0].note?'（'+svcR[0].note+'）':''}`);
-  return [{
-    title: proj ? `${proj} — 系統開發建置` : '',
-    descs: descs.slice(0,3),
-    qty: 1,
-    price: total>0 ? total : 0,
-  }];
+  return ofBuildItems();
 }
 
 function setupOfficialPage(){
@@ -2027,71 +2345,97 @@ function setupOfficialPage(){
 function renderWorksheetSnapshot(){
   const wrap = document.getElementById('ws-snapshot');
   if(!wrap) return;
+  normalizeAll();                 // 確保各列都有加成%
   const mm = num('p-matm')/100;
-  const lm = num('p-labm')/100;
   let html = '';
+  // 區塊標題：cost→quote（quote 為 null 時只顯示單一金額，例：出差費）
+  const sec = (icon,label,cnt,cTot,qTot,rowsHtml)=>{
+    const subT = (qTot==null) ? fmt(cTot) : `${fmt(cTot)} → ${fmt(qTot)}`;
+    html += `<div class="ws-section"><div class="ws-sec-hd">${icon} ${label}${cnt!=null?` (${cnt})`:''} <span class="ws-sec-sub">${subT}</span></div>${rowsHtml}</div>`;
+  };
+  const row = (main,sub)=>`<div class="ws-row"><div class="ws-row-main">${main}</div><div class="ws-row-sub">${sub}</div></div>`;
+  const mk = r => (+r.markup||0);
 
-  // Materials
-  const matVisible = matR.filter(r=>r.name||r.cost);
-  if(matVisible.length){
-    let matCostTotal=0,matQuoteTotal=0;
-    matVisible.forEach(r=>{ matCostTotal+=r.cost*r.qty; matQuoteTotal+=Math.round(r.cost*(1+mm))*r.qty; });
-    html += `<div class="ws-section">
-      <div class="ws-sec-hd">📦 料件 (${matVisible.length}) <span class="ws-sec-sub">${fmt(matCostTotal)} → ${fmt(matQuoteTotal)}</span></div>`;
-    matVisible.forEach(r=>{
-      const uq = Math.round(r.cost*(1+mm));
-      const sub = uq*r.qty;
-      html += `<div class="ws-row">
-        <div class="ws-row-main">${esc(r.name||'(未命名)')} <span class="ws-qty">× ${r.qty}</span></div>
-        <div class="ws-row-sub">成本 ${fmt(r.cost)} → 報價 ${fmt(uq)} · 小計 <strong style="color:var(--blue2)">${fmt(sub)}</strong></div>
-      </div>`;
-    });
-    html += '</div>';
+  // 料件
+  const matV = matR.filter(r=>r.name||r.cost);
+  if(matV.length){
+    let c=0,q=0,rows='';
+    matV.forEach(r=>{const uq=Math.round(r.cost*(1+mm)),s=uq*r.qty;c+=r.cost*r.qty;q+=s;
+      rows+=row(`${esc(r.name||'(未命名)')} <span class="ws-qty">× ${r.qty}</span>`,
+        `成本 ${fmt(r.cost)} → 報價 ${fmt(uq)} · 小計 <strong style="color:var(--blue2)">${fmt(s)}</strong>`);});
+    sec('📦','料件',matV.length,c,q,rows);
   }
-
-  // Labor
-  const wk = num('p-wk'), dy = num('p-dy'), wage = num('p-wage');
-  if(wk>0 && dy>0 && wage>0){
-    const lC = wk*dy*wage;
-    const lQ = Math.round(lC*(1+lm));
-    html += `<div class="ws-section">
-      <div class="ws-sec-hd">👷 安裝施工 <span class="ws-sec-sub">${fmt(lC)} → ${fmt(lQ)}</span></div>
-      <div class="ws-row">
-        <div class="ws-row-main">${wk} 人 × ${dy} 日 × ${fmt(wage)}/日</div>
-        <div class="ws-row-sub">成本 ${fmt(lC)} → 報價 <strong style="color:var(--green)">${fmt(lQ)}</strong>（加成 ${num('p-labm')}%）</div>
-      </div>
-    </div>`;
+  // 安裝施工（installR）
+  const insV = installR.filter(r=>r.name||r.persons||r.days);
+  if(insV.length){
+    let c=0,q=0,rows='';
+    insV.forEach(r=>{const cost=(+r.persons||0)*(+r.days||0)*(+r.wage||0),qt=Math.round(cost*(1+mk(r)/100));c+=cost;q+=qt;
+      rows+=row(`${esc(r.name||'(未命名)')}`,
+        `${r.persons||0} 人 × ${r.days||0} 日 × ${fmt(r.wage||0)} = 成本 ${fmt(cost)} → 報價 <strong style="color:var(--green)">${fmt(qt)}</strong>（加成 ${mk(r)}%）`);});
+    sec('👷','安裝施工',insV.length,c,q,rows);
   }
-
-  // Services
-  const svcVisible = svcR.filter(r=>r.name||r.amount);
-  if(svcVisible.length){
-    let svcTotal=0; svcVisible.forEach(r=>svcTotal+=r.amount||0);
-    html += `<div class="ws-section">
-      <div class="ws-sec-hd">⚡ 技術服務費 (${svcVisible.length}) <span class="ws-sec-sub">${fmt(svcTotal)}</span></div>`;
-    svcVisible.forEach(r=>{
-      html += `<div class="ws-row">
-        <div class="ws-row-main">${esc(r.name||'(未命名)')}</div>
-        <div class="ws-row-sub"><strong style="color:var(--violet)">${fmt(r.amount||0)}</strong>${r.note?' · '+esc(r.note):''}</div>
-      </div>`;
-    });
-    html += '</div>';
+  // 技術服務費（成本×加成）
+  const svcV = svcR.filter(r=>r.name||r.cost);
+  if(svcV.length){
+    let c=0,q=0,rows='';
+    svcV.forEach(r=>{const cost=(+r.cost||0),qt=Math.round(cost*(1+mk(r)/100));c+=cost;q+=qt;
+      rows+=row(`${esc(r.name||'(未命名)')}`,
+        `成本 ${fmt(cost)} → 報價 <strong style="color:var(--violet)">${fmt(qt)}</strong>（加成 ${mk(r)}%）${r.note?' · '+esc(r.note):''}`);});
+    sec('⚡','技術服務費',svcV.length,c,q,rows);
   }
-
-  // Travel
-  const trvVisible = trvR.filter(r=>r.name||r.unit);
-  if(trvVisible.length){
-    let trvTotal=0; trvVisible.forEach(r=>trvTotal+=(r.persons||0)*(r.times||0)*(r.unit||0));
-    html += `<div class="ws-section">
-      <div class="ws-sec-hd">✈ 出差費用 (${trvVisible.length}) <span class="ws-sec-sub">${fmt(trvTotal)}</span></div>`;
-    trvVisible.forEach(r=>{
-      const sub = (r.persons||0)*(r.times||0)*(r.unit||0);
-      html += `<div class="ws-row">
-        <div class="ws-row-main">${esc(r.name||'(未命名)')}</div>
-        <div class="ws-row-sub">${r.persons} 人 × ${r.times} 次 × ${fmt(r.unit)} = <strong style="color:var(--amber)">${fmt(sub)}</strong></div>
-      </div>`;
-    });
-    html += '</div>';
+  // 出差費用
+  const trvV = trvR.filter(r=>r.name||r.unit);
+  if(trvV.length){
+    let t=0,rows='';
+    trvV.forEach(r=>{const s=(+r.persons||0)*(+r.times||0)*(+r.unit||0);t+=s;
+      rows+=row(`${esc(r.name||'(未命名)')}`,
+        `${r.persons} 人 × ${r.times} 次 × ${fmt(r.unit)} = <strong style="color:var(--amber)">${fmt(s)}</strong>`);});
+    sec('✈','出差費用',trvV.length,t,null,rows);
+  }
+  // 軟體開發
+  const swV = softwareR.filter(r=>r.name||r.days);
+  if(swV.length){
+    let c=0,q=0,rows='';
+    swV.forEach(r=>{const cost=(+r.days||0)*(+r.dayRate||0),qt=Math.round(cost*(1+mk(r)/100));c+=cost;q+=qt;
+      rows+=row(`${esc(r.name||'(未命名)')} <span class="ws-qty">${esc(r.role||'')}</span>`,
+        `${r.days||0} 人日 × ${fmt(r.dayRate||0)} = 成本 ${fmt(cost)} → 報價 <strong style="color:#0369A1">${fmt(qt)}</strong>（加成 ${mk(r)}%）`);});
+    sec('💻','軟體開發',swV.length,c,q,rows);
+  }
+  // 系統整合
+  const intV = integrationR.filter(r=>r.name||r.cost);
+  if(intV.length){
+    let c=0,q=0,rows='';
+    intV.forEach(r=>{const cost=(+r.cost||0),qt=Math.round(cost*(1+mk(r)/100));c+=cost;q+=qt;
+      rows+=row(`${esc(r.name||'(未命名)')} <span class="ws-qty">${esc(r.target||'')}</span>`,
+        `成本 ${fmt(cost)} → 報價 <strong style="color:#7E22CE">${fmt(qt)}</strong>（加成 ${mk(r)}%）`);});
+    sec('🔌','系統整合',intV.length,c,q,rows);
+  }
+  // 第三方成本
+  const thrV = thirdR.filter(r=>r.name||r.cost);
+  if(thrV.length){
+    let c=0,q=0,rows='';
+    thrV.forEach(r=>{const cost=(+r.cost||0),qt=Math.round(cost*(1+mk(r)/100));c+=cost;q+=qt;
+      rows+=row(`${esc(r.name||'(未命名)')} <span class="ws-qty">${esc(r.supplier||'')}</span>`,
+        `成本 ${fmt(cost)} → 報價 <strong style="color:var(--ink2)">${fmt(qt)}</strong>（加成 ${mk(r)}%）`);});
+    sec('🧩','第三方成本',thrV.length,c,q,rows);
+  }
+  // 維護保固
+  const mntV = maintR.filter(r=>r.name||r.cost);
+  if(mntV.length){
+    let c=0,q=0,rows='';
+    mntV.forEach(r=>{const cost=(+r.cost||0),qt=Math.round(cost*(1+mk(r)/100));c+=cost;q+=qt;
+      rows+=row(`${esc(r.name||'(未命名)')} <span class="ws-qty">${esc(r.period||'')}</span>`,
+        `成本 ${fmt(cost)} → 報價 <strong style="color:var(--teal)">${fmt(qt)}</strong>（加成 ${mk(r)}%）`);});
+    sec('🛡','維護保固',mntV.length,c,q,rows);
+  }
+  // 訂閱／租賃
+  const recV = recurringR.filter(r=>r.name||r.unitCost);
+  if(recV.length){
+    let c=0,q=0,rows='';
+    recV.forEach(r=>{const uc=(+r.unitCost||0),uq=Math.round(uc*(1+mk(r)/100)),qty=(+r.qty||0),m=(+r.months||0),cost=qty*uc*m,qt=qty*uq*m;c+=cost;q+=qt;
+      rows+=row(`${esc(r.name||'(未命名)')} <span class="ws-qty">${esc(r.period||'')}</span>`,
+        `${qty} × 單位報價 ${fmt(uq)} × ${m} 月 = <strong style="color:#F97316">${fmt(qt)}</strong>（加成 ${mk(r)}%）`);});
+    sec('🔄','訂閱／租賃',recV.length,c,q,rows);
   }
 
   if(!html){
@@ -2143,13 +2487,15 @@ function ofUpdateMeta(field, v){
 }
 
 function ofReseedFromWorksheet(){
+  const secCount = worksheetSections().length;
+  if(secCount===0){ toast('成本評估目前沒有可彙整的項目'); return; }
   if(ofState.items.length>0){
-    if(!confirm('將以成本評估目前內容覆蓋第 1 個品項（其餘品項保留）。確定？')) return;
+    if(!confirm('將以成本評估明細「重新產生」全部品項（會覆蓋現有品項）。確定？')) return;
   }
-  const seed = ofMakeSeed();
-  ofState.items[0] = seed[0];
+  ofState.items = ofBuildItems();
   renderOfficialItems(); updateCostPanel(); ofPersist();
-  toast('已從成本評估彙整至品項 1');
+  toast(secCount>5 ? `已彙整 ${secCount} 個區塊（超過 5 項，已合併為「其他項目」）`
+                   : `已從成本評估彙整 ${ofState.items.length} 個品項`);
 }
 
 function renderOfficialItems(){
@@ -2191,13 +2537,22 @@ function renderOfficialItems(){
 
 function updateCostPanel(){
   const tt = calcTotals();
-  document.getElementById('cp-mat-c').textContent = fmt(tt.cost - (tt.lQ ? (num('p-wk')*num('p-dy')*num('p-wage')) : 0) - tt.trvQ);
-  // Re-compute material cost cleanly:
-  let matC=0;matR.forEach(r=>{matC+=r.cost*r.qty;});
-  const lC=num('p-wk')*num('p-dy')*num('p-wage');
-  document.getElementById('cp-mat-c').textContent = fmt(matC);
-  document.getElementById('cp-lab-c').textContent = fmt(lC);
-  document.getElementById('cp-trv').textContent = fmt(tt.trvQ);
+  // 各區塊成本（只列有金額者），與總成本一致
+  const parts = [
+    ['料件成本',       tt.matC],
+    ['安裝施工成本',   tt.lC],
+    ['軟體開發成本',   tt.softwareC],
+    ['系統整合成本',   tt.integrationC],
+    ['技術服務成本',   tt.svcC],
+    ['出差費',         tt.trvQ],
+    ['第三方成本',     tt.thirdC],
+    ['維護保固成本',   tt.maintC],
+    ['訂閱／租賃成本', tt.recurringC],
+  ].filter(([,v])=>v>0);
+  const cpRows = document.getElementById('cp-cost-rows');
+  if(cpRows) cpRows.innerHTML = parts.length
+    ? parts.map(([l,v])=>`<div class="cost-row"><span class="cl">${l}</span><span class="cv">${fmt(v)}</span></div>`).join('')
+    : `<div class="cost-row"><span class="cl" style="font-style:italic;color:var(--ink4)">尚無成本</span><span class="cv">$0</span></div>`;
   document.getElementById('cp-cost').textContent = fmt(tt.cost);
 
   // Official items

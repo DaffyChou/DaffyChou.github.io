@@ -1292,6 +1292,34 @@ table.th-table tbody tr:hover td { background: #1a1a1a; }
   cursor: help;
 }
 
+/* 「持續時間」：W/C 數值下方的小型輸入框，搭配「持續 N 分」標籤 */
+.th-duration-row {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 4px; font-size: 14px; color: #9aa5b8;
+}
+.th-duration-row .th-input-wrap { background: #141414; }
+.th-duration-row .th-input-wrap .th-input { width: 56px; }
+.th-duration-row .th-input-wrap .th-unit { padding: 0 8px; }
+
+/* 通知方式：兩個 checkbox 直立堆疊 */
+.th-notify {
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: 14px;
+}
+.th-notify label {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: #c4cdda; cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.th-notify input[type="checkbox"] {
+  width: 14px; height: 14px;
+  accent-color: #4a9eff;
+  cursor: pointer;
+}
+.th-notify .nf-mail::before { content: "📧 "; opacity: 0.85; }
+.th-notify .nf-line::before { content: "💬 "; opacity: 0.85; }
+
 /* Event 統計 pill bar，給事件清單頁頂部用 */
 .ev-stats {
   display: flex; gap: 10px; flex-wrap: wrap;
@@ -2639,22 +2667,32 @@ let _fleetFilterOpen = sessionStorage.getItem("slab_va_filter_open") === "1";  /
  *   目前以 vessel_id 雜湊產生分數（demo），實務上對接氣象、AIS gap、ETA、IoT 後同樣門檻可沿用。
  * ───────────────────────────────────────────────────────────────── */
 const THRESHOLDS_STORAGE_KEY = "slab_va_thresholds_v1";
+/* 各維度的閾值結構：
+ *   - warning / critical: 數值閾值
+ *   - warningDuration / criticalDuration: 達到閾值後需持續的時間（分鐘）才觸發事件
+ *     （只有 route、speed 有意義；其他維度為瞬時值，duration 欄保留 0）
+ *   - notify: 觸發時的通知方式（mail / line 兩種，可勾任意組合）
+ *   port_io / zone_io 是距離型閾值（值越小越嚴格 → warning 設大、critical 設小） */
 const DEFAULT_THRESHOLDS = {
-  route:        { warning: 1.5,  critical: 3.0 },    // 航線偏移絕對距離（海浬 NM）
-  speed:        { warning: 0.20, critical: 0.40 },   // |SOG−plan|/plan
-  sea:          { warning: 0.65, critical: 0.85 },   // 浪/風指數 0~1
-  comm:         { warning: 75,   critical: 92  },    // AIS 延遲指標 0~100
-  engine:       { warning: 78,   critical: 93  },    // 主機異常指標 0~100
+  route:        { warning: 1.5,  critical: 3.0,  warningDuration: 60, criticalDuration: 3, notify: { mail: true,  line: false } },  // 航線偏移絕對距離 NM
+  speed:        { warning: 0.20, critical: 0.40, warningDuration: 60, criticalDuration: 3, notify: { mail: true,  line: false } },  // |SOG−plan|/plan
+  sea:          { warning: 0.65, critical: 0.85, warningDuration: 0,  criticalDuration: 0, notify: { mail: true,  line: false } },  // 浪/風指數 0~1
+  comm:         { warning: 75,   critical: 92,   warningDuration: 0,  criticalDuration: 0, notify: { mail: true,  line: false } },  // AIS 延遲指標
+  engine:       { warning: 78,   critical: 93,   warningDuration: 0,  criticalDuration: 0, notify: { mail: true,  line: false } },  // 主機異常指標
+  port_io:      { warning: 5.0,  critical: 0.5,  warningDuration: 0,  criticalDuration: 0, notify: { mail: true,  line: true  } },  // 與港口邊界距離 NM（小於 critical 即進/出港）
+  zone_io:      { warning: 5.0,  critical: 1.0,  warningDuration: 0,  criticalDuration: 0, notify: { mail: true,  line: true  } },  // 與風險區邊界距離 NM
   /* 港口錨地監控由「漂航圈半徑」掌握，依當前 AIS 狀態挑一組（大型貨輪不規劃繫泊圈） */
-  driftAnchor:  { warning: 500,  critical: 750 },    // 拋錨 ANC 半徑（公尺）
-  driftAdrift:  { warning: 1000, critical: 1500 },   // 漂航 DRIFT 半徑（公尺）
+  driftAnchor:  { warning: 500,  critical: 750,  warningDuration: 0,  criticalDuration: 0, notify: { mail: false, line: false } },  // 拋錨 ANC 半徑（公尺）
+  driftAdrift:  { warning: 1000, critical: 1500, warningDuration: 0,  criticalDuration: 0, notify: { mail: false, line: false } },  // 漂航 DRIFT 半徑（公尺）
 };
 const THRESHOLD_META = {
-  route:        { label: "航線偏移",       short: "Route Dev",   unit: "海浬 NM",        unitShort: "NM",        range: "0 – 10",    step: 0.5,  min: 0,  max: 10,  isPct: false },
-  speed:        { label: "速度異常",       short: "Speed Anom",  unit: "× 計畫平均速度", unitShort: "× planAvg", range: "0 – 2",     step: 0.05, min: 0,  max: 2,   isPct: false },
+  route:        { label: "航線偏移",       short: "Route Dev",   unit: "海浬 NM",        unitShort: "NM",        range: "0 – 10",    step: 0.5,  min: 0,  max: 10,  isPct: false, hasDuration: true },
+  speed:        { label: "速度異常",       short: "Speed Anom",  unit: "× 計畫平均速度", unitShort: "× planAvg", range: "0 – 2",     step: 0.05, min: 0,  max: 2,   isPct: false, hasDuration: true },
   sea:          { label: "海況/天候",      short: "Sea State",   unit: "海況指數",       unitShort: "score",     range: "0 – 1",     step: 0.05, min: 0,  max: 1,   isPct: false },
   comm:         { label: "AIS 訊號",       short: "AIS Comm",    unit: "通訊延遲分數",   unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
   engine:       { label: "主機異常",       short: "Engine",      unit: "主機異常分數",   unitShort: "pts",       range: "0 – 100",   step: 1,    min: 0,  max: 100, isPct: false },
+  port_io:      { label: "到離港監控",     short: "Port I/O",    unit: "與港口邊界距離 NM（值越小越嚴格）", unitShort: "NM", range: "0 – 20", step: 0.5, min: 0, max: 20, isPct: false, mode: "lower" },
+  zone_io:      { label: "到離區域監控",   short: "Zone I/O",    unit: "與區域邊界距離 NM（值越小越嚴格）", unitShort: "NM", range: "0 – 20", step: 0.5, min: 0, max: 20, isPct: false, mode: "lower" },
   driftAnchor:  { label: "拋錨漂航圈半徑", short: "Drift / ANC", unit: "公尺",         unitShort: "m",         range: "50 – 2000", step: 50,   min: 50, max: 2000,isPct: false },
   driftAdrift:  { label: "漂航漂航圈半徑", short: "Drift / DRIFT",unit: "公尺",        unitShort: "m",         range: "200 – 5000",step: 100,  min: 200,max: 5000,isPct: false },
 };
@@ -2667,10 +2705,18 @@ function loadThresholds() {
     // 與預設深層合併，避免 key 不齊或型別錯誤
     Object.keys(DEFAULT_THRESHOLDS).forEach(k => {
       if (saved[k] && typeof saved[k] === "object") {
-        const w = parseFloat(saved[k].warning);
-        const c = parseFloat(saved[k].critical);
-        if (!isNaN(w)) _thresholds[k].warning = w;
-        if (!isNaN(c)) _thresholds[k].critical = c;
+        const w  = parseFloat(saved[k].warning);
+        const c  = parseFloat(saved[k].critical);
+        const wd = parseInt(saved[k].warningDuration, 10);
+        const cd = parseInt(saved[k].criticalDuration, 10);
+        if (!isNaN(w))  _thresholds[k].warning = w;
+        if (!isNaN(c))  _thresholds[k].critical = c;
+        if (!isNaN(wd)) _thresholds[k].warningDuration = wd;
+        if (!isNaN(cd)) _thresholds[k].criticalDuration = cd;
+        if (saved[k].notify && typeof saved[k].notify === "object") {
+          _thresholds[k].notify.mail = !!saved[k].notify.mail;
+          _thresholds[k].notify.line = !!saved[k].notify.line;
+        }
       }
     });
   } catch (e) {}
@@ -4274,7 +4320,10 @@ function renderThresholdsCards() {
     const m = THRESHOLD_META[k];
     const cur = _thresholds[k];
     const def = DEFAULT_THRESHOLDS[k];
-    const dirty = (cur.warning !== def.warning) || (cur.critical !== def.critical);
+    const dirty = (cur.warning !== def.warning) || (cur.critical !== def.critical)
+      || (cur.warningDuration !== def.warningDuration)
+      || (cur.criticalDuration !== def.criticalDuration)
+      || (cur.notify.mail !== def.notify.mail) || (cur.notify.line !== def.notify.line);
     const stepperHtml = `
       <div class="th-stepper">
         <button type="button" class="th-step-up" tabindex="-1" aria-label="增加">
@@ -4284,6 +4333,18 @@ function renderThresholdsCards() {
           <svg viewBox="0 0 12 12"><path d="M2 4 L6 8 L10 4"/></svg>
         </button>
       </div>`;
+    function durHtml(lvl, value) {
+      return m.hasDuration ? `
+        <div class="th-duration-row">
+          持續
+          <div class="th-input-wrap">
+            <input type="number" class="th-input th-duration-input" data-k="${k}" data-dur-lvl="${lvl}"
+                   value="${value}" step="1" min="0" max="1440">
+            ${stepperHtml}
+            <span class="th-unit" title="分鐘 / minutes">分</span>
+          </div>
+        </div>` : "";
+    }
     return `
       <div class="m-thc" data-k="${k}">
         <div class="m-thc-head">
@@ -4291,7 +4352,7 @@ function renderThresholdsCards() {
           <b>${m.label}</b>
           ${dirty ? '<span class="modified">已修改</span>' : ""}
         </div>
-        <div class="m-thc-sub">${m.short} · ${m.unitShort} · 範圍 ${m.range} · 預設 W ${def.warning} / C ${def.critical}</div>
+        <div class="m-thc-sub">${m.short} · ${m.unitShort} · 範圍 ${m.range} · 預設 W ${def.warning} / C ${def.critical}${m.hasDuration ? `（持續 ${def.warningDuration}/${def.criticalDuration} 分）` : ""}</div>
         <div class="m-thc-fields">
           <div class="m-thc-field">
             <span class="m-thc-label warning">Warning ≥</span>
@@ -4302,6 +4363,7 @@ function renderThresholdsCards() {
               ${stepperHtml}
               <span class="th-unit" title="${escapeHtml(m.unit)} (${escapeHtml(m.range)})">${escapeHtml(m.unitShort)}</span>
             </div>
+            ${durHtml("warning", cur.warningDuration)}
           </div>
           <div class="m-thc-field">
             <span class="m-thc-label critical">Critical ≥</span>
@@ -4311,6 +4373,14 @@ function renderThresholdsCards() {
                      style="color:#ff8a8a">
               ${stepperHtml}
               <span class="th-unit" title="${escapeHtml(m.unit)} (${escapeHtml(m.range)})">${escapeHtml(m.unitShort)}</span>
+            </div>
+            ${durHtml("critical", cur.criticalDuration)}
+          </div>
+          <div class="m-thc-field m-thc-notify">
+            <span class="m-thc-label">通知</span>
+            <div class="th-notify" style="flex-direction:row;gap:14px">
+              <label><input type="checkbox" data-k="${k}" data-notify="mail"${cur.notify.mail ? " checked" : ""}><span class="nf-mail">Mail</span></label>
+              <label><input type="checkbox" data-k="${k}" data-notify="line"${cur.notify.line ? " checked" : ""}><span class="nf-line">LINE</span></label>
             </div>
           </div>
         </div>
@@ -5371,24 +5441,48 @@ function renderDriftOverridesBlock() {
 }
 
 function renderThresholds() {
+  // 自訂上下按鈕：取代原生 spinner，深色主題下視覺一致（兩個方向，多處共用）
+  const stepperHtml = `
+    <div class="th-stepper">
+      <button type="button" class="th-step-up" tabindex="-1" aria-label="增加">
+        <svg viewBox="0 0 12 12"><path d="M2 8 L6 4 L10 8"/></svg>
+      </button>
+      <button type="button" class="th-step-down" tabindex="-1" aria-label="減少">
+        <svg viewBox="0 0 12 12"><path d="M2 4 L6 8 L10 4"/></svg>
+      </button>
+    </div>`;
+
+  // 「持續時間」輸入區塊：只有 hasDuration 的維度（route / speed）會顯示
+  function durationRowHtml(k, lvl, value) {
+    return `
+      <div class="th-duration-row">
+        持續
+        <div class="th-input-wrap">
+          <input type="number" class="th-input th-duration-input" data-k="${k}" data-dur-lvl="${lvl}"
+                 value="${value}" step="1" min="0" max="1440">
+          ${stepperHtml}
+          <span class="th-unit" title="分鐘 / minutes">分</span>
+        </div>
+      </div>`;
+  }
+
   const rows = Object.keys(THRESHOLD_META).map(k => {
     const m = THRESHOLD_META[k];
     const cur = _thresholds[k];
     const def = DEFAULT_THRESHOLDS[k];
-    const dirty = (cur.warning !== def.warning) || (cur.critical !== def.critical);
-    // 數值輸入框旁的單位文字（讓使用者一眼看出這個閾值是「× SF」、「pts」還是「score」）
+    // dirty 偵測：值、持續、通知任一不同於預設都算修改
+    const dirty = (cur.warning !== def.warning) || (cur.critical !== def.critical)
+      || (cur.warningDuration !== def.warningDuration)
+      || (cur.criticalDuration !== def.criticalDuration)
+      || (cur.notify.mail !== def.notify.mail) || (cur.notify.line !== def.notify.line);
     const unitTip = `${m.unit} (${m.range})`;
     const unitSpan = `<span class="th-unit" title="${escapeHtml(unitTip)}">${escapeHtml(m.unitShort)}</span>`;
-    // 自訂上下按鈕：取代原生 spinner，深色主題下視覺一致
-    const stepperHtml = `
-      <div class="th-stepper">
-        <button type="button" class="th-step-up" tabindex="-1" aria-label="增加">
-          <svg viewBox="0 0 12 12"><path d="M2 8 L6 4 L10 8"/></svg>
-        </button>
-        <button type="button" class="th-step-down" tabindex="-1" aria-label="減少">
-          <svg viewBox="0 0 12 12"><path d="M2 4 L6 8 L10 4"/></svg>
-        </button>
-      </div>`;
+
+    const wDurHtml = m.hasDuration ? durationRowHtml(k, "warning", cur.warningDuration) : "";
+    const cDurHtml = m.hasDuration ? durationRowHtml(k, "critical", cur.criticalDuration) : "";
+    const wDefSuffix = m.hasDuration ? ` · 持續 ${def.warningDuration} 分` : "";
+    const cDefSuffix = m.hasDuration ? ` · 持續 ${def.criticalDuration} 分` : "";
+
     return `
       <tr data-k="${k}">
         <td style="padding:10px 12px">
@@ -5403,7 +5497,8 @@ function renderThresholds() {
             ${stepperHtml}
             ${unitSpan}
           </div>
-          <div style="color:#5e6b80;font-size:14px;margin-top:3px">預設 ${def.warning} ${escapeHtml(m.unitShort)}</div>
+          ${wDurHtml}
+          <div style="color:#5e6b80;font-size:14px;margin-top:3px">預設 ${def.warning} ${escapeHtml(m.unitShort)}${wDefSuffix}</div>
         </td>
         <td style="padding:10px 8px">
           <div class="th-input-wrap">
@@ -5413,7 +5508,14 @@ function renderThresholds() {
             ${stepperHtml}
             ${unitSpan}
           </div>
-          <div style="color:#5e6b80;font-size:14px;margin-top:3px">預設 ${def.critical} ${escapeHtml(m.unitShort)}</div>
+          ${cDurHtml}
+          <div style="color:#5e6b80;font-size:14px;margin-top:3px">預設 ${def.critical} ${escapeHtml(m.unitShort)}${cDefSuffix}</div>
+        </td>
+        <td style="padding:10px 8px" class="th-notify-cell">
+          <div class="th-notify">
+            <label><input type="checkbox" data-k="${k}" data-notify="mail"${cur.notify.mail ? " checked" : ""}><span class="nf-mail">Mail</span></label>
+            <label><input type="checkbox" data-k="${k}" data-notify="line"${cur.notify.line ? " checked" : ""}><span class="nf-line">LINE</span></label>
+          </div>
         </td>
         <td style="padding:10px 8px;width:32px">${dirty ? '<span style="color:#f5b753;font-size:14px" title="已修改 / Modified">●</span>' : ""}</td>
       </tr>`;
@@ -5439,9 +5541,10 @@ function renderThresholds() {
         <table class="th-table">
           <thead>
             <tr>
-              <th><span class="bi-th-tip" data-tip="維度 / Dimension&#10;9 個警示維度（與整體風險判斷對應）：&#10;・航線偏移、速度異常、海況/天候、Warning Mail、AIS 訊號、進行中事件、到港/離港、主機異常、區域警示。" tabindex="0">維度<span class="tip-i">i</span> / Dimension</span></th>
-              <th style="color:#f5b753"><span class="bi-th-tip" data-tip="Warning 閾值 / Warning Threshold&#10;當該維度的偵測指標 ≥ 此值時，會觸發 Warning 等級警示（橘色）。&#10;此值必須小於 Critical 閾值。" tabindex="0">Warning<span class="tip-i">i</span> ≥</span></th>
-              <th style="color:#ff8a8a"><span class="bi-th-tip" data-tip="Critical 閾值 / Critical Threshold&#10;當該維度的偵測指標 ≥ 此值時，會觸發 Critical 等級警示（紅色）。&#10;Critical 必須大於 Warning。" tabindex="0">Critical<span class="tip-i">i</span> ≥</span></th>
+              <th><span class="bi-th-tip" data-tip="維度 / Dimension&#10;9 個警示維度（與整體風險判斷對應）：&#10;・航線偏移、速度異常、海況/天候、Warning Mail、AIS 訊號、進行中事件、到港/離港、主機異常、區域警示、到離港監控、到離區域監控。" tabindex="0">維度<span class="tip-i">i</span> / Dimension</span></th>
+              <th style="color:#f5b753"><span class="bi-th-tip" data-tip="Warning 閾值 / Warning Threshold&#10;當該維度的偵測指標 ≥ 此值時，會觸發 Warning 等級警示（橘色）。&#10;對 route / speed 額外可設定「持續 N 分」才正式立案，避免短暫尖峰誤觸發。&#10;到離港 / 到離區域監控採距離型（值越大越提早提醒）。" tabindex="0">Warning<span class="tip-i">i</span> ≥</span></th>
+              <th style="color:#ff8a8a"><span class="bi-th-tip" data-tip="Critical 閾值 / Critical Threshold&#10;當該維度的偵測指標 ≥ 此值時，會觸發 Critical 等級警示（紅色）。&#10;對 route / speed 額外可設定「持續 N 分」才正式立案。&#10;到離港 / 到離區域監控採距離型（值越小越接近邊界、警示越嚴重）。" tabindex="0">Critical<span class="tip-i">i</span> ≥</span></th>
+              <th><span class="bi-th-tip" data-tip="通知方式 / Notify&#10;觸發 Warning 或 Critical 時自動發送通知。&#10;・Mail：寄到該船的監控信箱 / 隊長收件人&#10;・LINE：推到值班 LINE 群組。&#10;可同時勾選，未勾則靜默立案不發通知。" tabindex="0">通知<span class="tip-i">i</span> / Notify</span></th>
               <th title="已修改標記 / Modified — 與預設值不同時顯示橘點"></th>
             </tr>
           </thead>
@@ -5454,9 +5557,11 @@ function renderThresholds() {
 
     <div class="th-trigger-info">
       <b style="color:#9ec5ff">觸發邏輯 / Trigger logic</b><br>
-      ・<b>route</b>：max(目前 XTD, 歷史最大偏移) 直接與絕對閾值比對（warning 1.5 NM、critical 3.0 NM）<br>
-      ・<b>speed</b>：|SOG − 計畫平均|/計畫平均 &gt; 閾值（另：航行中近乎停止永遠 warning）<br>
-      ・<b>sea / comm / port / engine</b>：對應的偵測分數 &gt; 閾值<br>
+      ・<b>route</b>：max(目前 XTD, 歷史最大偏移) 直接與絕對閾值比對；超過閾值後須<b>持續</b> ≥ 設定分鐘才正式立案（避免短暫尖峰誤觸發）<br>
+      ・<b>speed</b>：|SOG − 計畫平均|/計畫平均 &gt; 閾值；同樣須<b>持續</b> ≥ 設定分鐘才立案（另：航行中近乎停止永遠 warning）<br>
+      ・<b>sea / comm / engine</b>：對應的偵測分數 &gt; 閾值，瞬時觸發<br>
+      ・<b>port_io / zone_io</b>：與港口 / 風險區邊界距離 ≤ 閾值即觸發；warning 設較大值（提早提醒）、critical 設較小值（接近邊界）<br>
+      ・<b>notify</b>：勾選 Mail 會寄到該船監控信箱、勾選 LINE 推到值班群組；皆未勾選則靜默立案<br>
       頁面載入時 <code>syncEventsFromAlerts()</code> 會根據新閾值自動立案；既有事件不會被刪除，但「條件已消失 / cleared」標記會更新。
     </div>
 
@@ -5516,11 +5621,28 @@ function renderThresholds() {
 }
 
 function saveThresholdsFromPage() {
-  // 從頁面內所有 .th-input 讀回
+  // 從頁面內所有 .th-input 讀回（同一 class 涵蓋 W/C 數值與 duration；用 data-* 判斷類型）
   document.querySelectorAll("#main .th-input").forEach(el => {
-    const k = el.dataset.k, lvl = el.dataset.lvl;
-    const v = parseFloat(el.value);
-    if (!isNaN(v) && _thresholds[k]) _thresholds[k][lvl] = v;
+    const k = el.dataset.k;
+    if (!_thresholds[k]) return;
+    const durLvl = el.dataset.durLvl;
+    if (durLvl) {
+      // 持續時間：整數分鐘
+      const v = parseInt(el.value, 10);
+      if (!isNaN(v) && v >= 0) _thresholds[k][durLvl + "Duration"] = v;
+    } else {
+      // 一般 warning / critical 數值
+      const lvl = el.dataset.lvl;
+      const v = parseFloat(el.value);
+      if (!isNaN(v) && (lvl === "warning" || lvl === "critical")) _thresholds[k][lvl] = v;
+    }
+  });
+  // 通知 checkbox：讀回 mail / line 兩個布林
+  document.querySelectorAll('#main .th-notify input[type="checkbox"][data-notify]').forEach(cb => {
+    const k = cb.dataset.k, kind = cb.dataset.notify;
+    if (_thresholds[k] && _thresholds[k].notify && (kind === "mail" || kind === "line")) {
+      _thresholds[k].notify[kind] = cb.checked;
+    }
   });
   saveThresholds();
   syncEventsFromAlerts();   // 用新閾值重評估、補立案

@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="mockup-data.js"></script>
+<script src="risk-zones.js"></script>
 
 <style>
 /* ── Design tokens：客戶 feedback「字級、命名、資訊密度不一致」整治用 ─
@@ -1443,6 +1444,498 @@ table.alert-table tr:last-child td { border-bottom: none; }
   color: #aab4c4;
   font-style: italic;
 }
+
+/* 持續時間 input — 接在 W/C 數值後，「持續 N 分」小字 */
+.th-num .th-dur {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-left: 4px;
+  font-size: 11px; color: #7c8a9e;
+}
+.th-num .th-dur-input {
+  width: 48px; padding: 3px 4px;
+  background: #0f1420; border: 1px solid #2e3a4d;
+  color: #c4cdda; border-radius: 3px;
+  font-size: 11px; font-family: inherit;
+  text-align: right;
+}
+.th-num .th-dur-input:focus { outline: none; border-color: #4a90e2; }
+
+/* 到離區域監控專用 — 圍籬清單表格（取代 W/C 數值輸入）
+ *   每列：[checkbox] [類別色條 + 名稱] [進入前 NM] [離開後 NM] [現況距離 / 狀態] */
+.th-fence-block {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 8px 0 4px 26px;
+  font-size: 12px;
+}
+.th-fence-toolbar {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+  color: #7c8a9e; font-size: 11px;
+}
+.th-fence-toolbar input[type="search"] {
+  flex: 1; min-width: 180px; max-width: 280px;
+  padding: 4px 8px;
+  background: #0f1420; border: 1px solid #2e3a4d;
+  color: #d8dee9; border-radius: 3px; font-size: 12px;
+}
+.th-fence-toolbar .th-fence-btn {
+  padding: 2px 8px;
+  background: #1a2030; border: 1px solid #2e3a4d;
+  color: #c4cdda; border-radius: 3px;
+  font-size: 11px; cursor: pointer;
+}
+.th-fence-toolbar .th-fence-btn:hover { background: #222d40; color: #e4eaf2; }
+.th-fence-toolbar .th-fence-btn.fence-act-primary {
+  background: rgba(176,105,255,0.18); border-color: #b069ff; color: #d6b9ff;
+  font-weight: 600;
+}
+.th-fence-toolbar .th-fence-btn.fence-act-primary:hover {
+  background: rgba(176,105,255,0.3); color: #fff;
+}
+.th-fence-toolbar .th-fence-count {
+  margin-left: auto;
+  color: #9ec5ff; font-weight: 500;
+}
+
+/* 到離方向 select + 提前距離 label */
+.th-fence-table select.fence-dir {
+  background: #0f1420; border: 1px solid #2e3a4d;
+  color: #d8dee9; border-radius: 3px;
+  padding: 2px 6px; font-size: 12px;
+  font-family: inherit;
+}
+
+/* 方向篩選 tabs（接在 toolbar 主按鈕之後） */
+.th-fence-dir-tabs {
+  display: inline-flex; gap: 0;
+  background: #0f1420; border: 1px solid #2e3a4d;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-left: 4px;
+}
+.th-fence-dir-tab {
+  background: transparent; border: none;
+  padding: 3px 10px;
+  color: #9aa5b8; font-size: 12px; cursor: pointer;
+  font-family: inherit;
+}
+.th-fence-dir-tab.is-active {
+  background: rgba(74,158,255,0.18); color: #9ec5ff; font-weight: 600;
+}
+.th-fence-dir-tab:not(.is-active):hover { background: rgba(255,255,255,0.04); color: #c8d4e0; }
+
+/* 批次設定面板 */
+.th-fence-bulk {
+  display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 12px; margin: 6px 0 8px;
+  background: rgba(74,144,226,0.08);
+  border: 1px solid rgba(74,144,226,0.35);
+  border-radius: 4px;
+  font-size: 12px;
+}
+.th-fence-bulk[hidden] { display: none !important; }
+.th-fence-bulk .th-fence-bulk-count { color: #9ec5ff; }
+.th-fence-bulk .th-fence-bulk-count b { color: #fff; }
+.th-fence-bulk label { display: inline-flex; align-items: center; gap: 4px; color: #c4cdda; }
+.th-fence-bulk select,
+.th-fence-bulk input[type="number"] {
+  background: #0f1420; border: 1px solid #2e3a4d;
+  color: #d8dee9; border-radius: 3px;
+  padding: 3px 6px; font-size: 12px;
+  font-family: inherit;
+}
+.th-fence-bulk input[type="number"] { width: 64px; text-align: right; }
+.th-fence-bulk .th-fence-bulk-unit { color: #9aa5b8; }
+.th-fence-bulk-apply {
+  background: #4a90e2; border: 1px solid #4a90e2;
+  color: #fff; border-radius: 3px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer;
+  font-family: inherit; font-weight: 500;
+}
+.th-fence-bulk-apply:hover { background: #5ba0f2; }
+.th-fence-bulk-clear {
+  background: transparent; border: 1px solid #2e3a4d;
+  color: #9aa5b8; border-radius: 3px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer;
+  font-family: inherit;
+}
+.th-fence-bulk-clear:hover { background: rgba(255,255,255,0.04); color: #c8d4e0; }
+
+/* 群組可摺疊：點 cat row 的 toggle 切換 chevron + 隱藏該群所有 row */
+.th-fence-cat-group .th-fence-cat-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer; user-select: none;
+}
+.th-fence-cat-group .cat-chev {
+  display: inline-block; width: 12px;
+  color: #9aa5b8; font-size: 10px;
+  transition: transform 0.15s ease;
+}
+.th-fence-cat-group.is-collapsed .cat-chev { transform: rotate(-90deg); }
+.zone-io-row.is-hidden-by-collapse { display: none !important; }
+.fence-select-all { accent-color: #4a9eff; }
+.fence-select { accent-color: #4a9eff; }
+/* 提前距離欄位：強制單行（標籤 + input + NM 並排不換行） */
+.th-fence-table .fence-advance {
+  display: inline-flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+}
+.th-fence-table .fence-advance-label {
+  color: #9aa5b8; font-size: 11px;
+  flex: 0 0 auto;
+}
+.th-fence-table .fence-nm-unit {
+  color: #9aa5b8; font-size: 11px;
+  flex: 0 0 auto;
+}
+/* (fence-bound-label / fence-boundary 邊界提醒欄已移除) */
+
+/* 圍籬列尾「編輯 / 刪除」按鈕 */
+.fence-act-btn {
+  padding: 1px 7px;
+  background: #1a2030; border: 1px solid #2e3a4d;
+  color: #c4cdda; border-radius: 3px;
+  font-size: 11px; cursor: pointer;
+  margin-right: 3px;
+}
+.fence-act-btn:hover { background: #222d40; color: #e4eaf2; }
+.fence-act-btn.fence-act-danger {
+  background: rgba(255,107,107,0.12); border-color: #ff6b6b66; color: #ff8a8a;
+  font-weight: 700;
+  padding: 1px 6px;
+}
+.fence-act-btn.fence-act-danger:hover {
+  background: rgba(255,107,107,0.25); color: #fff;
+}
+
+/* 繪製浮層（zone-draw-ui）— 固定在 viewport 頂端中央 */
+#zone-draw-ui {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+  z-index: 1500;
+  background: rgba(14,18,30,0.96);
+  border: 1px solid #b069ff;
+  border-radius: 6px;
+  padding: 12px 16px;
+  min-width: 320px; max-width: 92vw;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.6), 0 0 0 1px rgba(176,105,255,0.25);
+  color: #e4eaf2;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+#zone-draw-ui .zd-title {
+  font-weight: 600; font-size: 14px; color: #d6b9ff; margin-bottom: 4px;
+}
+#zone-draw-ui .zd-title .en { color: #7c8a9e; font-weight: 400; margin-left: 4px; font-size: 12px; }
+#zone-draw-ui .zd-hint {
+  font-size: 12px; color: #9aa5b8; margin-bottom: 10px;
+}
+#zone-draw-ui .zd-hint b { color: #d6b9ff; }
+#zone-draw-ui .zd-actions {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+#zone-draw-ui .zd-actions button {
+  padding: 4px 10px;
+  background: #1a2030; border: 1px solid #2e3a4d;
+  color: #c4cdda; border-radius: 3px;
+  font-size: 12px; cursor: pointer; font-family: inherit;
+}
+#zone-draw-ui .zd-actions button:hover:not(:disabled) {
+  background: #222d40; color: #e4eaf2;
+}
+#zone-draw-ui .zd-actions button:disabled {
+  opacity: 0.4; cursor: not-allowed;
+}
+#zone-draw-ui .zd-actions #zd-finish {
+  background: rgba(176,105,255,0.2); border-color: #b069ff; color: #d6b9ff;
+  font-weight: 600;
+}
+#zone-draw-ui .zd-actions #zd-finish:hover:not(:disabled) {
+  background: rgba(176,105,255,0.4); color: #fff;
+}
+#zone-draw-ui .zd-actions #zd-cancel {
+  background: rgba(255,107,107,0.12); border-color: #ff6b6b66; color: #ff8a8a;
+}
+
+/* ─── 區域編輯彈窗 (zem) ──
+ *   背景刻意做淡（rgba 0.18），讓使用者邊輸入邊看到地圖上即時預覽的多邊形。
+ *   modal 靠右上邊，留出地圖左半部空間呈現預覽。 */
+.zem-mask {
+  z-index: 1200;
+  background: rgba(0,0,0,0.18) !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+  padding: 60px 20px 0 0;
+}
+.zem-modal {
+  width: min(520px, 96vw);
+  max-height: calc(100vh - 80px); overflow-y: auto;
+  background: #1a1f2a;
+  color: #d8dee9;
+  border-radius: 6px;
+  padding: 18px 22px 20px;
+  position: relative;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.5), 0 0 0 1px rgba(74,144,226,0.18);
+}
+.zem-close {
+  position: absolute; top: 12px; right: 14px;
+  background: transparent; border: none;
+  color: #9aa5b8; font-size: 22px; cursor: pointer;
+  width: 28px; height: 28px;
+  border-radius: 4px;
+}
+.zem-close:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.zem-title {
+  margin: 0 0 10px; font-size: 16px; color: #e4eaf2; font-weight: 600;
+}
+.zem-title .en { color: #7c8a9e; font-weight: 400; margin-left: 4px; font-size: 13px; }
+.zem-tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid #2e3a4d;
+  margin: 0 -22px 14px;
+  padding: 0 22px;
+}
+.zem-tabs .zem-tab {
+  background: transparent; border: none;
+  padding: 8px 14px;
+  color: #9aa5b8; font-size: 14px; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-family: inherit;
+  margin-bottom: -1px;
+}
+.zem-tabs .zem-tab.is-active {
+  color: #4a90e2; border-bottom-color: #4a90e2; font-weight: 600;
+}
+.zem-tabs .zem-tab:not(.is-active):hover { color: #c8d4e0; }
+
+.zem-section { margin-bottom: 14px; }
+.zem-section-title {
+  font-size: 13px; color: #c8d4e0; font-weight: 600;
+  margin-bottom: 8px;
+  padding-left: 8px;
+  border-left: 3px solid #4a90e2;
+  line-height: 1.2;
+}
+
+/* 形狀按鈕列 */
+.zem-shapes { display: flex; gap: 10px; padding-left: 8px; }
+.zem-shape {
+  width: 38px; height: 32px;
+  background: #0f1420; border: 1px solid #2e3a4d;
+  color: #9aa5b8; border-radius: 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.zem-shape:hover:not(.is-disabled) { background: #1a2030; color: #c8d4e0; }
+.zem-shape.is-active {
+  background: rgba(74,144,226,0.18); border-color: #4a90e2; color: #4a90e2;
+}
+.zem-shape.is-disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 名稱 + 樣式 row */
+.zem-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding-left: 8px;
+}
+.zem-row label {
+  color: #9aa5b8; font-size: 13px;
+  white-space: nowrap;
+}
+.zem-row select, .zem-row input[type="text"], .zem-row input[type="number"] {
+  background: #0f1420; border: 1px solid #2e3a4d;
+  color: #d8dee9; border-radius: 3px;
+  padding: 5px 8px;
+  font-size: 13px; font-family: inherit;
+}
+.zem-row select:focus, .zem-row input:focus { outline: none; border-color: #4a90e2; }
+.zem-row .zem-group { width: 110px; }
+.zem-row .zem-name  { flex: 1 1 200px; min-width: 160px; }
+.zem-row .zem-group-add {
+  width: 26px; height: 26px;
+  background: #0f1420; border: 1px solid #2e3a4d;
+  color: #4a90e2; font-size: 16px; font-weight: 600; cursor: pointer;
+  border-radius: 3px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+.zem-row .zem-group-add:hover { background: rgba(74,144,226,0.18); }
+
+.zem-style-row select, .zem-style-row input[type="number"] { width: 64px; }
+.zem-style-row select { width: 88px; }
+.zem-style-row input[type="color"] {
+  width: 56px; height: 28px;
+  background: transparent; border: 1px solid #2e3a4d;
+  border-radius: 3px; cursor: pointer; padding: 2px;
+}
+
+/* 座標格式 tabs */
+.zem-coord-tabs {
+  display: flex; align-items: center; gap: 4px;
+  margin: 6px 0 4px;
+  padding-left: 8px;
+}
+.zem-coord-tab {
+  background: transparent; border: none;
+  padding: 4px 10px;
+  color: #9aa5b8; font-size: 13px; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-family: inherit;
+}
+.zem-coord-tab.is-active {
+  color: #4a90e2; border-bottom-color: #4a90e2; font-weight: 600;
+}
+.zem-coord-tab:not(.is-active):hover { color: #c8d4e0; }
+.zem-coord-add {
+  margin-left: auto;
+  background: transparent; border: 1px dashed #4a90e2;
+  color: #4a90e2; border-radius: 3px;
+  padding: 3px 10px; font-size: 12px; cursor: pointer; font-family: inherit;
+}
+.zem-coord-add:hover { background: rgba(74,144,226,0.12); }
+
+/* 頂點清單 */
+.zem-coords-list {
+  margin-top: 4px;
+  max-height: 220px; overflow-y: auto;
+  padding-right: 4px;
+}
+.zem-coord-row {
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 0;
+  font-size: 12px;
+}
+.zem-coord-row .zem-coord-no {
+  width: 24px; color: #9aa5b8; text-align: right;
+  flex: 0 0 24px;
+}
+.zem-coord-input {
+  background: #0f1420; border: 1px solid #2e3a4d;
+  color: #d8dee9; border-radius: 3px;
+  padding: 3px 6px;
+  font-size: 12px; font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  width: 60px;
+  text-align: right;
+}
+.zem-coord-input:focus { outline: none; border-color: #4a90e2; }
+.zem-coord-row .zem-deg-unit {
+  color: #7c8a9e; font-size: 12px;
+  margin: 0 1px;
+}
+.zem-hemi {
+  width: 26px; height: 24px;
+  background: #c5c9d0; border: 1px solid #2e3a4d;
+  color: #1a1f2a; border-radius: 3px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+.zem-hemi.is-pos {
+  background: #4a90e2; color: #fff; border-color: #4a90e2;
+}
+.zem-hemi:hover { filter: brightness(1.1); }
+.zem-coord-del {
+  margin-left: auto;
+  width: 22px; height: 22px;
+  background: transparent; border: none;
+  color: #9aa5b8; font-size: 16px; cursor: pointer;
+  border-radius: 3px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+.zem-coord-del:hover { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+
+/* 動作列 */
+.zem-actions {
+  display: flex; justify-content: center; gap: 12px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #2e3a4d;
+}
+.zem-actions button {
+  min-width: 80px;
+  padding: 6px 18px;
+  border-radius: 3px;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  font-family: inherit;
+  border: 1px solid transparent;
+}
+.zem-btn-primary {
+  background: #4a90e2; color: #fff; border-color: #4a90e2;
+}
+.zem-btn-primary:hover { background: #5ba0f2; }
+.zem-btn-secondary {
+  background: transparent; color: #c8d4e0; border-color: #2e3a4d;
+}
+.zem-btn-secondary:hover { background: #1a2030; color: #fff; }
+.th-fence-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 12px;
+}
+.th-fence-table th {
+  text-align: left; font-weight: 500;
+  color: #7c8a9e; font-size: 11px;
+  padding: 4px 6px;
+  border-bottom: 1px solid #1a2030;
+  background: #0f1420;
+  position: sticky; top: 0; z-index: 1;
+}
+.th-fence-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid #14182a;
+  vertical-align: middle;
+}
+.th-fence-table tr.fence-disabled td { opacity: 0.45; }
+.th-fence-cat-group td {
+  padding: 6px 6px 3px;
+  font-weight: 600;
+  color: #e4eaf2;
+  border-bottom: 1px solid #2e3a4d;
+}
+.th-fence-cat-swatch {
+  display: inline-block; width: 10px; height: 10px;
+  border-radius: 2px; margin-right: 6px;
+  vertical-align: middle;
+}
+.th-fence-name {
+  display: flex; flex-direction: column;
+  gap: 1px; line-height: 1.3;
+}
+.th-fence-name .cn { color: #d8dee9; font-weight: 500; }
+.th-fence-name .en { color: #7c8a9e; font-size: 10px; }
+.th-fence-table .fence-toggle { width: 14px; height: 14px; accent-color: #4a9eff; cursor: pointer; }
+.th-fence-table input.fence-nm {
+  width: 56px; padding: 3px 4px;
+  background: #0f1420; border: 1px solid #2e3a4d;
+  color: #c4cdda; border-radius: 3px;
+  font-size: 11px; font-family: inherit;
+  text-align: right;
+}
+.th-fence-table input.fence-nm:focus { outline: none; border-color: #4a90e2; }
+.th-fence-status {
+  font-size: 11px; color: #6ee094;
+  font-variant-numeric: tabular-nums;
+}
+.th-fence-status[data-level="warning"]  { color: #f5b753; }
+.th-fence-status[data-level="critical"] { color: #ff8a8a; font-weight: 600; }
+.th-fence-status .lbl { color: #5e6b80; margin-right: 4px; }
+.th-fence-container { max-height: 360px; overflow-y: auto; border: 1px solid #1a2030; border-radius: 4px; background: #0a0e18; }
+
+/* 通知方式列 — 兩個 checkbox（mail / line）橫排於 dim-row 底部 */
+.th-dim-notify {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding-left: 26px;
+  font-size: 11px; color: #7c8a9e;
+}
+.th-dim-notify .label { color: #7c8a9e; }
+.th-dim-notify label {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: #c4cdda; cursor: pointer; user-select: none;
+}
+.th-dim-notify input[type="checkbox"] {
+  width: 13px; height: 13px;
+  accent-color: #4a9eff;
+  cursor: pointer;
+}
+/* notify 標籤統一不加 emoji icon，純文字「Mail」「LINE」即可 */
 /* 預設值來源標記：「計畫」= 帶自船舶航線計畫 plan_thresholds */
 .th-default-src {
   display: inline-block;
@@ -2590,6 +3083,78 @@ table.th-table tbody tr:hover td { background: #1a1a1a; }
   justify-content: flex-end;
 }
 
+/* ── 警示設定頁 #/alert-settings ───────────────────────────────── */
+.as-outer { border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; background: #141414; margin-bottom: 14px; }
+.as-layout { display: grid; grid-template-columns: 180px 1fr; min-height: 520px; }
+@media (max-width: 640px) {
+  .as-layout { grid-template-columns: 1fr; }
+  .as-nav { flex-direction: row !important; overflow-x: auto; border-right: none !important; border-bottom: 1px solid #2a2a2a; }
+  .as-nav-item { border-left: 3px solid transparent !important; border-bottom: 3px solid transparent; white-space: nowrap; }
+  .as-nav-item.active { border-left-color: transparent !important; border-bottom-color: #4a9eff !important; }
+}
+.as-nav { background: #0f0f0f; border-right: 1px solid #2a2a2a; display: flex; flex-direction: column; padding: 8px 0; }
+.as-nav-item { display: flex; align-items: center; padding: 10px 16px; font-size: 14px; color: #9aa5b8; cursor: pointer; user-select: none; border-left: 3px solid transparent; transition: all 0.12s; }
+.as-nav-item:hover { background: rgba(255,255,255,0.04); color: #d8dee9; }
+.as-nav-item.active { background: rgba(74,158,255,0.08); border-left-color: #4a9eff; color: #e4eaf2; }
+.as-content { padding: 20px 24px; overflow-y: auto; max-height: 68vh; }
+.as-section { display: none; }
+.as-section.active { display: block; }
+.as-section-title { font-size: 16px; font-weight: 600; color: #e4eaf2; margin: 0 0 4px; }
+.as-section-desc { font-size: 12px; color: #7c8a9e; margin: 0 0 18px; line-height: 1.5; }
+.as-field { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1e1e1e; }
+.as-field:last-child { border-bottom: none; }
+.as-field-body { flex: 1; min-width: 0; }
+.as-field-label { font-size: 14px; font-weight: 500; color: #d8dee9; display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0; }
+.as-field-sub { font-size: 12px; color: #7c8a9e; margin-top: 2px; line-height: 1.5; }
+.as-field-params { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; color: #9aa5b8; }
+.as-cb { width: 16px; height: 16px; accent-color: #4a9eff; cursor: pointer; flex-shrink: 0; margin-top: 3px; }
+.as-channel-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.as-channel-btn { display: inline-flex; align-items: center; gap: 7px; padding: 0 16px; height: 36px; border: 1px solid #2a2a2a; border-radius: 6px; background: #1a1a1a; color: #9aa5b8; cursor: pointer; font-size: 14px; font-family: inherit; transition: all 0.12s; }
+.as-channel-btn .ch-dot { width: 8px; height: 8px; border-radius: 50%; background: #3a3a3a; transition: background 0.12s; flex-shrink: 0; }
+.as-channel-btn.active { border-color: #4a9eff; color: #9ec5ff; background: rgba(74,158,255,0.08); }
+.as-channel-btn.active .ch-dot { background: #4a9eff; }
+.as-tag-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.as-tag-btn { padding: 5px 12px; border-radius: 4px; border: 1px solid #2a2a2a; background: #1a1a1a; color: #9aa5b8; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.12s; }
+.as-tag-btn.active { border-color: #4a9eff; background: rgba(74,158,255,0.10); color: #9ec5ff; }
+.as-tag-btn:hover:not(.active) { background: #1e1e1e; color: #d8dee9; }
+.as-select { height: 32px; padding: 0 10px; border: 1px solid #2a2a2a; border-radius: 5px; background: #1a1a1a; color: #e4eaf2; font-size: 13px; font-family: inherit; outline: none; }
+.as-select:focus { border-color: #4a9eff; }
+.as-coord-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.as-coord-label { font-size: 12px; color: #7c8a9e; min-width: 32px; }
+.as-divider { font-size: 11px; font-weight: 600; color: #5e6b80; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 0; border-bottom: 1px solid #1e1e1e; margin: 10px 0 10px; }
+.as-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 24px; border-top: 1px solid #2a2a2a; background: #0f0f0f; }
+.as-btn { height: 34px; padding: 0 20px; border-radius: 5px; font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.12s; }
+.as-btn-cancel { background: transparent; border: 1px solid #2a2a2a; color: #7c8a9e; }
+.as-btn-cancel:hover { background: rgba(255,255,255,0.04); color: #d8dee9; }
+.as-btn-save { background: #4a9eff; border: 1px solid #4a9eff; color: #0d0d0d; font-weight: 600; }
+.as-btn-save:hover { background: #3d8fe5; border-color: #3d8fe5; }
+
+/* 警示區塊 — 嵌入分航段集體設定 / 單船設定 內 */
+.th-alert-block { margin-top: 20px; }
+.th-alert-block-head { font-size: 11px; color: #5e6b80; text-transform: uppercase; letter-spacing: .07em; padding-bottom: 8px; border-bottom: 1px solid #1e2430; margin-bottom: 10px; }
+.th-alert-card { background: #131921; border: 1px solid #1e2c3d; border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; }
+.th-alert-card-title { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #e4eaf2; font-weight: 500; margin-bottom: 6px; cursor: default; }
+.th-alert-card-title label { cursor: pointer; }
+.th-alert-params { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: #9aa5b8; margin-top: 6px; }
+.th-alert-divider { font-size: 11px; color: #5e6b80; text-transform: uppercase; letter-spacing: .06em; border-top: 1px solid #1e2430; margin: 10px 0 8px; padding-top: 8px; }
+/* 通用提醒設定 card (details) */
+.th-global-alert-card { background: #0f1520; border: 1px solid #1e2c3d; border-radius: 6px; margin-top: 18px; overflow: hidden; }
+.th-global-alert-card > summary { list-style: none; padding: 10px 14px; font-size: 13px; color: #9aa5b8; cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none; }
+.th-global-alert-card > summary::-webkit-details-marker { display: none; }
+.th-global-alert-card > summary::before { content: "▶"; font-size: 10px; color: #5e6b80; transition: transform .2s; }
+.th-global-alert-card[open] > summary::before { transform: rotate(90deg); }
+.th-global-alert-card > summary:hover { color: #c8d4e0; }
+.th-gac-hint { color: #4a5568; font-size: 11px; }
+.th-gac-body { padding: 0 14px 14px; }
+.th-gac-section { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #181f2a; }
+.th-gac-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.th-gac-label { font-size: 12px; color: #7c8a9e; margin-bottom: 8px; font-weight: 500; }
+/* 航線偏移 dim row 內嵌的警示參數 */
+.th-dim-alert-ext { margin-top: 10px; padding-top: 10px; border-top: 1px solid #1e2430; }
+/* dim row 事件徽章 */
+.th-ev-badge { display: inline-flex; align-items: center; gap: 3px; margin-left: 8px; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: rgba(126,197,255,0.12); color: #7ec5ff; border: 1px solid rgba(126,197,255,0.25); text-decoration: none; white-space: nowrap; }
+.th-ev-badge:hover { background: rgba(126,197,255,0.22); color: #aad8ff; }
+
 /* 閾值設定：input + 自訂上下按鈕 + 單位後綴
  * 原生 type=number spinner 在不同瀏覽器樣式不一、又無法配合深色主題，
  * 一律隱藏，改用自訂 .th-stepper 雙按鈕。
@@ -3429,9 +3994,9 @@ table.alert-table th input#ev-selall { accent-color: #4a9eff; cursor: pointer; w
       <span class="sb-ico"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="6" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="6" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="6" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg></span>
       <span class="sb-label">警示時間線</span>
     </a>
-    <a href="#/thresholds" data-route="thresholds" title="閾值設定 / Thresholds">
+    <a href="#/thresholds" data-route="thresholds" title="警示閾值設定 / Alert Thresholds">
       <span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-      <span class="sb-label">閾值設定</span>
+      <span class="sb-label">警示設定</span>
     </a>
   </nav>
 </aside>
@@ -3457,6 +4022,199 @@ table.alert-table th input#ev-selall { accent-color: #4a9eff; cursor: pointer; w
 </div>
 
 <script>
+/* ─────────────────────────────────────────────────────────────────
+ * 風險區（電子圍籬）資料覆寫：本檔不再使用 risk-zones.js 預設的全球風險區，
+ * 改為以 4 個台灣 NAVTEX 射擊演習公告區為初始值，並支援 localStorage 持久化、
+ * 使用者於地圖上手動繪製 / 編輯 / 刪除。
+ *
+ * 結構：
+ *   window.RISK_ZONE_CATEGORIES — 只保留 military 一類
+ *   window.RISK_ZONES           — 從 localStorage 載入；若無則用 DEFAULT_USER_ZONES
+ *
+ * 提供的 API（global）：
+ *   addUserZone({ name, coords, level })       新增；自動分配 id；存 localStorage
+ *   updateUserZone(id, patch)                  以 id 找出來部分更新；存 localStorage
+ *   deleteUserZone(id)                         移除；存 localStorage
+ *   resetUserZonesToDefault()                  還原為預設 4 區
+ *   ── 改動後皆會發 'userZonesChanged' CustomEvent 給 UI 監聽（重畫地圖 + 設定列）
+ * ───────────────────────────────────────────────────────────────── */
+window.RISK_ZONE_CATEGORIES = [
+  { key: "military", label: "軍演 / 臨時禁航區", label_en: "Military Exercise / NOTAM", color: "#b069ff", semantic: "risk" },
+];
+const USER_ZONES_KEY = "slab_va_user_zones_v1";
+const USER_ZONE_GROUPS_KEY = "slab_va_user_zone_groups_v1";
+const DEFAULT_ZONE_STYLE = { lineType: "dashed", lineWidth: 1, color: "#ff0000", opacity: 0.2 };
+const DEFAULT_USER_ZONES = [
+  { cat: "military", id: "TW-NAVTEX-FP-1", level: "high", group: "演習區域",
+    name: "Taiwan Navtex-Fire Practices-1", name_en: "Taiwan Navtex-Fire Practices-1",
+    type: "射擊演習區", type_en: "Fire Practice Area",
+    desc: "台灣 NAVTEX 公告射擊演習區 1。",
+    desc_en: "Taiwan NAVTEX-designated fire practice area 1.",
+    source: "Taiwan NAVTEX",
+    effective_from: "依公告 / per NOTMAR", effective_to: "依公告 / per NOTMAR",
+    coords: [[22.566667, 118.916667], [22.983333, 119.65], [22.266667, 119.616667], [22.35, 118.916667]],
+    style: { lineType: "dashed", lineWidth: 1, color: "#ff0000", opacity: 0.2 },
+    source_kinds: ["official"], editable: true },
+  { cat: "military", id: "TW-NAVTEX-FP-2", level: "high", group: "演習區域",
+    name: "Taiwan Navtex-Fire Practices-2", name_en: "Taiwan Navtex-Fire Practices-2",
+    type: "射擊演習區", type_en: "Fire Practice Area",
+    desc: "台灣 NAVTEX 公告射擊演習區 2。",
+    desc_en: "Taiwan NAVTEX-designated fire practice area 2.",
+    source: "Taiwan NAVTEX",
+    effective_from: "依公告 / per NOTMAR", effective_to: "依公告 / per NOTMAR",
+    coords: [[23.716667, 122.083333], [23.716667, 122.633333], [23.333333, 122.633333], [23, 122.083333]],
+    style: { lineType: "dashed", lineWidth: 1, color: "#ff0000", opacity: 0.2 },
+    source_kinds: ["official"], editable: true },
+  { cat: "military", id: "TW-NAVTEX-FP-3", level: "high", group: "演習區域",
+    name: "Taiwan Navtex-Fire Practices-3", name_en: "Taiwan Navtex-Fire Practices-3",
+    type: "射擊演習區", type_en: "Fire Practice Area",
+    desc: "台灣 NAVTEX 公告射擊演習區 3。",
+    desc_en: "Taiwan NAVTEX-designated fire practice area 3.",
+    source: "Taiwan NAVTEX",
+    effective_from: "依公告 / per NOTMAR", effective_to: "依公告 / per NOTMAR",
+    coords: [[22.915, 119.424722], [22.915, 119.758055], [22.581667, 119.758055], [22.581667, 119.424722]],
+    style: { lineType: "dashed", lineWidth: 1, color: "#ff0000", opacity: 0.2 },
+    source_kinds: ["official"], editable: true },
+  { cat: "military", id: "TW-NAVTEX-FP-4", level: "high", group: "演習區域",
+    name: "Taiwan Navtex-Fire Practices-4", name_en: "Taiwan Navtex-Fire Practices-4",
+    type: "射擊演習區", type_en: "Fire Practice Area",
+    desc: "台灣 NAVTEX 公告射擊演習區 4。",
+    desc_en: "Taiwan NAVTEX-designated fire practice area 4.",
+    source: "Taiwan NAVTEX",
+    effective_from: "依公告 / per NOTMAR", effective_to: "依公告 / per NOTMAR",
+    coords: [[23.665, 119.091388], [23.665, 119.258055], [23.498333, 119.258055], [23.498333, 119.091388]],
+    style: { lineType: "dashed", lineWidth: 1, color: "#ff0000", opacity: 0.2 },
+    source_kinds: ["official"], editable: true },
+];
+const DEFAULT_USER_ZONE_GROUPS = ["演習區域"];
+
+function _loadUserZoneGroups() {
+  try {
+    const raw = localStorage.getItem(USER_ZONE_GROUPS_KEY);
+    if (!raw) return DEFAULT_USER_ZONE_GROUPS.slice();
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) && arr.length ? arr : DEFAULT_USER_ZONE_GROUPS.slice();
+  } catch (e) { return DEFAULT_USER_ZONE_GROUPS.slice(); }
+}
+function _saveUserZoneGroups() {
+  try { localStorage.setItem(USER_ZONE_GROUPS_KEY, JSON.stringify(window.USER_ZONE_GROUPS)); } catch (e) {}
+}
+window.USER_ZONE_GROUPS = _loadUserZoneGroups();
+window.addUserZoneGroup = function(name) {
+  const n = String(name || "").trim();
+  if (!n) return false;
+  if (window.USER_ZONE_GROUPS.includes(n)) return false;
+  window.USER_ZONE_GROUPS.push(n);
+  _saveUserZoneGroups();
+  return true;
+};
+
+function _loadUserZones() {
+  try {
+    const raw = localStorage.getItem(USER_ZONES_KEY);
+    if (!raw) return JSON.parse(JSON.stringify(DEFAULT_USER_ZONES));
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return JSON.parse(JSON.stringify(DEFAULT_USER_ZONES));
+    return arr;
+  } catch (e) { return JSON.parse(JSON.stringify(DEFAULT_USER_ZONES)); }
+}
+function _saveUserZones() {
+  try { localStorage.setItem(USER_ZONES_KEY, JSON.stringify(window.RISK_ZONES || [])); } catch (e) {}
+}
+window.RISK_ZONES = _loadUserZones();
+
+function _fireUserZonesChanged() {
+  try { window.dispatchEvent(new CustomEvent("userZonesChanged")); } catch (e) {}
+}
+
+function _validZoneStyle(s) {
+  if (!s || typeof s !== "object") return null;
+  const out = Object.assign({}, DEFAULT_ZONE_STYLE);
+  if (["solid","dashed","dotted","dash-dot"].includes(s.lineType)) out.lineType = s.lineType;
+  const lw = parseFloat(s.lineWidth);
+  if (!isNaN(lw) && lw > 0 && lw <= 10) out.lineWidth = lw;
+  if (typeof s.color === "string" && /^#[0-9a-f]{6}$/i.test(s.color)) out.color = s.color;
+  const op = parseFloat(s.opacity);
+  if (!isNaN(op) && op >= 0 && op <= 1) out.opacity = op;
+  return out;
+}
+
+window.addUserZone = function(payload) {
+  const zones = window.RISK_ZONES;
+  let maxN = 0;
+  zones.forEach(z => {
+    const m = /^USER-(\d+)$/.exec(z.id || "");
+    if (m) maxN = Math.max(maxN, parseInt(m[1], 10));
+  });
+  const id = `USER-${maxN + 1}`;
+  const name = (payload && payload.name) ? String(payload.name).trim() : `Custom Zone ${maxN + 1}`;
+  const level = ["critical", "high", "medium", "low", "info"].includes(payload?.level) ? payload.level : "high";
+  const coords = (payload?.coords || []).map(p => [Number(p[0]), Number(p[1])])
+    .filter(p => isFinite(p[0]) && isFinite(p[1]));
+  if (coords.length < 3) throw new Error("polygon needs at least 3 vertices");
+  const group = (payload?.group && String(payload.group).trim()) || (window.USER_ZONE_GROUPS[0] || "自訂");
+  if (!window.USER_ZONE_GROUPS.includes(group)) window.addUserZoneGroup(group);
+  const style = _validZoneStyle(payload?.style) || Object.assign({}, DEFAULT_ZONE_STYLE);
+  const z = {
+    cat: "military", id, level, group,
+    name, name_en: name,
+    type: "使用者自訂", type_en: "User-defined",
+    desc: "使用者於地圖上繪製的電子圍籬。",
+    desc_en: "User-drawn geofence.",
+    source: "User", effective_from: "—", effective_to: "—",
+    coords, style, source_kinds: ["user"], editable: true,
+  };
+  zones.push(z);
+  _saveUserZones();
+  _fireUserZonesChanged();
+  return z;
+};
+
+window.updateUserZone = function(id, patch) {
+  const zones = window.RISK_ZONES;
+  const z = zones.find(x => x.id === id);
+  if (!z) return null;
+  if (!z.editable) return null;
+  if (patch.name != null)  { z.name = String(patch.name); z.name_en = z.name; }
+  if (patch.level && ["critical", "high", "medium", "low", "info"].includes(patch.level)) z.level = patch.level;
+  if (Array.isArray(patch.coords) && patch.coords.length >= 3) {
+    const cc = patch.coords.map(p => [Number(p[0]), Number(p[1])])
+      .filter(p => isFinite(p[0]) && isFinite(p[1]));
+    if (cc.length >= 3) z.coords = cc;
+  }
+  if (patch.group != null) {
+    const g = String(patch.group).trim();
+    if (g) {
+      z.group = g;
+      if (!window.USER_ZONE_GROUPS.includes(g)) window.addUserZoneGroup(g);
+    }
+  }
+  if (patch.style) {
+    const s = _validZoneStyle(patch.style);
+    if (s) z.style = s;
+  }
+  _saveUserZones();
+  _fireUserZonesChanged();
+  return z;
+};
+
+window.deleteUserZone = function(id) {
+  const zones = window.RISK_ZONES;
+  const idx = zones.findIndex(x => x.id === id);
+  if (idx < 0) return false;
+  if (!zones[idx].editable) return false;
+  zones.splice(idx, 1);
+  _saveUserZones();
+  _fireUserZonesChanged();
+  return true;
+};
+
+window.resetUserZonesToDefault = function() {
+  window.RISK_ZONES = JSON.parse(JSON.stringify(DEFAULT_USER_ZONES));
+  _saveUserZones();
+  _fireUserZonesChanged();
+};
+
 /* ─────────────────────────────────────────────────────────────────
  * Data & helpers
  * ───────────────────────────────────────────────────────────────── */
@@ -3694,7 +4452,7 @@ function modeBadge(mode) {
 /* 監管人員（規格 v1.0 §2 權限模型）— demo 階段為固定列表，未來支援動態 */
 const MANAGERS = ["監管 A·呂船長", "監管 B·林船務", "監管 C·陳值班"];
 
-const DIM_KEYS = ["route", "speed", "driftAnchor", "alert"];
+const DIM_KEYS = ["route", "speed", "driftAnchor", "alert", "port_io", "zone_io"];
 const DIM_META = {
   route:  { label: "航線偏移",   short: "Route Deviation", icon: iconRoute,
             desc:    "目前 XTD 或本航次歷史最大偏移距離達到該船舶設定閾值時，即觸發告警。",
@@ -3723,6 +4481,12 @@ const DIM_META = {
   zone:   { label: "區域警示",   short: "Zone Alert",    icon: iconZone,
             desc:    "依船舶當前位置判斷是否進入風險區域，並依區域風險等級顯示警告或嚴重警示。",
             desc_en: "Determines whether the vessel's current position falls within a risk zone, and displays a Warning or Critical alert based on the zone risk level." },
+  port_io:{ label: "到離港監控", short: "Port Arrival / Departure", icon: iconPortIo,
+            desc:    "計算船舶當前位置與計畫航線上「離港 / 抵港」端點的距離；距離 ≤ Warning 閾值 → 接近港界提早提醒、距離 ≤ Critical 閾值 → 已抵達或離開港界。",
+            desc_en: "Computes the distance between the vessel and the nearest Departure / Arrival port on the planned track. Within Warning threshold → approaching port boundary; within Critical threshold → at / crossing the boundary." },
+  zone_io:{ label: "到離區域監控", short: "Zone Arrival / Departure", icon: iconZone,
+            desc:    "依船舶當前位置與所有風險區域邊界（含 RISK_ZONES 多邊形）的最近距離判定；距離 ≤ Warning → 接近邊界、距離 ≤ Critical 或已在區域內 → 已進入 / 跨越邊界。",
+            desc_en: "Evaluates the minimum distance between the vessel and any RISK_ZONES boundary. Within Warning → approaching; within Critical or already inside → entered / crossed the zone boundary." },
 };
 
 // Risk dot icons (header)
@@ -3748,8 +4512,16 @@ function iconEvent(c="#9aa5b8") {
   return `<svg width="18" height="18" viewBox="-12 -12 24 24"><path d="M 0 -9 L 8 0 L 0 9 L -8 0 Z" fill="none" stroke="${c}" stroke-width="1.6" stroke-linejoin="round"/><circle cx="0" cy="0" r="1.8" fill="${c}"/></svg>`;
 }
 function iconPort(c="#9aa5b8") {
-  // 錨形 icon — 表達到港/離港監測
+  // 錨形 icon — 漂航圈 / 錨地監控專用（駐留 / 拋錨情境）
   return `<svg width="18" height="18" viewBox="-12 -12 24 24"><circle cx="0" cy="-7" r="2" fill="none" stroke="${c}" stroke-width="1.5"/><path d="M 0 -5 L 0 7 M -4 -2 L 4 -2 M -7 4 A 7 7 0 0 0 7 4" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+}
+function iconPortIo(c="#9aa5b8") {
+  // 港埠輪廓 + 雙向箭頭 — 到離港監控（進 / 出港事件）
+  return `<svg width="18" height="18" viewBox="-12 -12 24 24">
+    <path d="M -7 4 L -7 -2 L -3 -2 L -3 -6 L 3 -6 L 3 -2 L 7 -2 L 7 4 Z" fill="none" stroke="${c}" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M -10 8 L 10 8" stroke="${c}" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M -7 6 L -10 8 L -7 10 M 7 6 L 10 8 L 7 10" fill="none" stroke="${c}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
 }
 function iconEngine(c="#9aa5b8") {
   // 齒輪 icon — 表達主機監測
@@ -3805,6 +4577,136 @@ function vesselZoneAlert(v) {
   const top = hits[0];
   const level = (top.level === "critical" || top.level === "high") ? "critical" : "warning";
   return { level, hits, top };
+}
+
+/* Haversine 距離（海浬）— port_io / zone_io 用 */
+function haversineNm(lat1, lon1, lat2, lon2) {
+  const R = 3440.065;  // 地球半徑（海浬）
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2) ** 2
+          + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+/* 到離港監控：與計畫航線「離港 / 抵港」端點的最近距離（NM）。
+ * 沒有 planned port 端點或船位 → 回 null（→ N/A）。 */
+/* 與計畫航線「離港 / 抵港」端點的最近距離；同時判斷目前狀態：
+ *   - 到港   (arriving)  : 接近 Arrival 港口、SOG 仍有航行速度
+ *   - 靠泊   (berthed)   : 接近港口、SOG 接近 0（無論是 Arrival 還是 Departure 港）
+ *   - 離港   (departing) : 接近 Departure 港口、SOG 已有航行速度
+ *   - 接近抵港 / 接近離港: 距離仍超過警戒區但小於 warning 閾值
+ *
+ *   state ∈ { "arriving", "berthed", "departing", "approaching-arrival", "approaching-departure", null }
+ *   stateLabel(_cn / _en)：人類可讀的中英文字串
+ */
+function vesselPortIoDistance(v) {
+  if (v.latitude == null || v.longitude == null) return null;
+  const portPts = (v.planned_track || []).filter(p =>
+    p.port_unlocode && p.latitude != null && p.longitude != null &&
+    (p.position_type === "Departure" || p.position_type === "Arrival"));
+  if (!portPts.length) return null;
+  let minD = Infinity, nearest = null;
+  for (const p of portPts) {
+    const d = haversineNm(v.latitude, v.longitude, p.latitude, p.longitude);
+    if (d < minD) { minD = d; nearest = p; }
+  }
+
+  // 狀態判斷
+  const T = (typeof _thresholds !== "undefined" && _thresholds.port_io) || { warning: 5.0, critical: 0.5 };
+  const sog = parseFloat(v.sog);
+  const isBerthing = !isNaN(sog) && sog < 1.0;   // SOG < 1 視為靠泊 / 停俥
+  const closeToPort = minD <= T.critical;
+  const approachZone = minD <= T.warning;
+
+  let state = null, stateCn = null, stateEn = null;
+  if (nearest.position_type === "Arrival") {
+    if (closeToPort && isBerthing)      { state = "berthed";              stateCn = "靠泊";    stateEn = "Berthed"; }
+    else if (closeToPort)               { state = "arriving";             stateCn = "到港";    stateEn = "Arriving"; }
+    else if (approachZone)              { state = "approaching-arrival";  stateCn = "接近抵港"; stateEn = "Approaching arrival"; }
+  } else {
+    // Departure
+    if (closeToPort && isBerthing)      { state = "berthed";              stateCn = "靠泊";    stateEn = "Berthed"; }
+    else if (closeToPort)               { state = "departing";            stateCn = "離港";    stateEn = "Departing"; }
+    else if (approachZone)              { state = "approaching-departure";stateCn = "接近離港"; stateEn = "Approaching departure"; }
+  }
+
+  return {
+    distanceNm: minD, port: nearest,
+    state, stateCn, stateEn,
+    portName:    nearest.port_name || nearest.port_unlocode || "—",
+    portCode:    nearest.port_unlocode || "—",
+    isBerthing, sog,
+  };
+}
+
+/* 到離區域監控：逐圍籬掃描所有被「啟用監控」的 RISK_ZONES。
+ *   每個圍籬獨立判斷 inside / entry / exit 三種狀態：
+ *     inside（pointInPolygon 命中）→ critical
+ *     outside 但距離邊界 ≤ entryNm（接近）or ≤ exitNm（剛離開緩衝）→ warning
+ *     更遠 → 不計入
+ *   回傳：
+ *     { level: 'critical'|'warning'|'normal',
+ *       hits: [{ zone, status, distanceNm, cfg }, ...] 嚴重者排前,
+ *       top:  hits[0] 或 null,
+ *       enabledCount, monitoredHits } */
+/* 逐圍籬掃描；advanceNm 即是觸發距離：
+ *   - advanceNm === 0：雙向邊界提醒（不分方向，到達 + 離開都看 inside）
+ *       inside → critical；outside → 不提醒
+ *   - advanceNm > 0 + 到達(arrival)
+ *       inside → critical（已跨入）
+ *       outside 且距邊界 ≤ advanceNm → warning（到達前 N NM 預警）
+ *   - advanceNm > 0 + 離開(departure)
+ *       inside 且距邊界 ≤ advanceNm → warning（快離開 N NM 預警）
+ *       inside 且距邊界 > advanceNm → 不提醒（仍在區域中段，未接近邊界）
+ *       outside → 不提醒（已離開）
+ *   為簡化 demo：用「點對最近頂點」距離當作「點到邊界」近似。 */
+function vesselZoneIoStatus(v) {
+  if (v.latitude == null || v.longitude == null || !window.RISK_ZONES) {
+    return { level: "normal", hits: [], top: null, enabledCount: 0 };
+  }
+  const STATUS_RANK = { critical: 2, warning: 1, normal: 0 };
+  const hits = [];
+  let enabledCount = 0;
+  for (const z of window.RISK_ZONES) {
+    const cfg = getZoneIoFenceCfg(z.id);
+    if (!cfg.enabled) continue;
+    enabledCount++;
+
+    const inside = pointInPolygon(v.latitude, v.longitude, z.coords);
+    let minD = Infinity;
+    for (const vertex of z.coords) {
+      const d = haversineNm(v.latitude, v.longitude, vertex[0], vertex[1]);
+      if (d < minD) minD = d;
+    }
+    const distanceNm = inside ? 0 : minD;
+
+    let status = null;
+    let mode = null;   // "bidir" | "arrival" | "departure"
+    if (cfg.advanceNm === 0) {
+      mode = "bidir";
+      if (inside) status = "critical";
+    } else if (cfg.direction === "arrival") {
+      mode = "arrival";
+      if (inside) status = "critical";
+      else if (minD <= cfg.advanceNm) status = "warning";
+    } else {
+      mode = "departure";
+      if (inside && minD <= cfg.advanceNm) status = "warning";
+    }
+    if (status) hits.push({ zone: z, status, distanceNm, cfg, inside, mode });
+  }
+  hits.sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status] || a.distanceNm - b.distanceNm);
+  const level = hits.length === 0 ? "normal"
+              : (hits[0].status === "critical" ? "critical" : "warning");
+  return { level, hits, top: hits[0] || null, enabledCount };
+}
+/* 舊 API 保留為 thin wrapper（其他地方還在用 .distanceNm / .inside） */
+function vesselZoneIoDistance(v) {
+  const s = vesselZoneIoStatus(v);
+  if (!s.top) return null;
+  return { distanceNm: s.top.distanceNm, zone: s.top.zone, inside: s.top.distanceNm === 0 };
 }
 
 /* Compute risk per dimension for a vessel.
@@ -3897,6 +4799,34 @@ function computeAlerts(v) {
     else if (distMeters > warnR) lvl = "warning";
     a.driftAnchor = lvl;
     a._drift = { distMeters, driftCenter, warnR, critR, overridden: !!ovr };
+  }
+
+  // 5. 到離港監控（port_io）— 與計畫航線「離港 / 抵港」端點的最近距離
+  //    距離型閾值：距離 ≤ critical → critical（已抵達/離開港界）
+  //                 距離 ≤ warning → warning（接近港界，提早提醒）
+  //    無 planned port 端點或無船位 → N/A
+  const pio = vesselPortIoDistance(v);
+  if (!pio) {
+    a.port_io = "na";
+  } else {
+    const t = T.port_io;
+    if (pio.distanceNm <= t.critical)     a.port_io = "critical";
+    else if (pio.distanceNm <= t.warning) a.port_io = "warning";
+    else                                  a.port_io = "normal";
+    a._portIo = pio;
+  }
+
+  // 6. 到離區域監控（zone_io）— 逐圍籬掃描所有「啟用監控」的 RISK_ZONES
+  //    inside（pointInPolygon 命中） → critical
+  //    outside 但距離邊界 ≤ entryNm（接近）or ≤ exitNm（剛離開）→ warning
+  //    更遠 → normal
+  //    enabledCount === 0（全部未啟用）or 無船位 → N/A
+  const zios = vesselZoneIoStatus(v);
+  if (zios.enabledCount === 0 || v.latitude == null || v.longitude == null) {
+    a.zone_io = "na";
+  } else {
+    a.zone_io = zios.level;
+    a._zoneIo = zios;
   }
 
   // Overall risk (composite)
@@ -4049,13 +4979,16 @@ let _vesselViewSegment = sessionStorage.getItem("slab_va_th_vv_segment") || "sea
  *   - 主機異常 (engine) 監測項目待客戶確認（RPM/EGT/油壓 的權重與單位），UI 以 "待確認 / TBC" tag 標示 */
 const SEGMENT_META = {
   sea:    { cn: "海上航段",   en: "Sea Passage",       icon: "🌊", color: "#9ec5ff",
-            dims: ["route", "speed"],
+            dims: ["route", "speed", "zone_io"],
             coreDims: ["route"] },
   anchor: { cn: "錨泊／漂流", en: "Anchor / Drifting", icon: "⚓", color: "#f5b753",
             dims: ["driftAnchor"],
             coreDims: ["driftAnchor"] },
+  port:   { cn: "進／出港",   en: "Port Arrival / Departure", icon: "🚢", color: "#7ec5ff",
+            dims: ["port_io"],
+            coreDims: ["port_io"] },
   all:    { cn: "全航段通用", en: "All Segments",      icon: "🌐", color: "#9aa5b8",
-            dims: ["route", "speed", "driftAnchor"],
+            dims: ["route", "speed", "driftAnchor", "port_io", "zone_io"],
             coreDims: [] },
 };
 // 需與客戶詳細討論監測項目／閾值語意的維度（目前無）
@@ -4075,16 +5008,26 @@ let _fleetFilterOpen = sessionStorage.getItem("slab_va_filter_open") !== "0";  /
  *   目前以 vessel_id 雜湊產生分數（demo），實務上對接氣象、AIS gap、ETA、IoT 後同樣門檻可沿用。
  * ───────────────────────────────────────────────────────────────── */
 const THRESHOLDS_STORAGE_KEY = "slab_va_thresholds_v1";
+/* 各維度的閾值結構：
+ *   - warning / critical: 數值閾值
+ *   - warningDuration / criticalDuration: 達閾值後需持續分鐘才正式立案（只 route、speed 有意義）
+ *   - notify: 觸發時自動通知（mail / line 兩種，可勾任意組合，皆未勾則靜默立案）
+ *   port_io / zone_io 為距離型：值越小越接近邊界 → critical 設較小值（已抵 / 跨界），
+ *     warning 設較大值（接近邊界提早提醒） */
 const DEFAULT_THRESHOLDS = {
-  route:        { warning: 1.5,  critical: 3.0 },    // 航線偏移絕對距離（海浬 NM）
-  speed:        { warning: 0.20, critical: 0.40 },   // |SOG−plan|/plan
+  route:        { warning: 1.5,  critical: 3.0,  warningDuration: 60, criticalDuration: 3, notify: { mail: true,  line: false } },  // 航線偏移絕對距離（NM）
+  speed:        { warning: 0.20, critical: 0.40, warningDuration: 60, criticalDuration: 3, notify: { mail: true,  line: false } },  // 超過配速比例
   /* 錨泊監控由單一「漂航圈半徑」掌握（拋錨與漂航 AIS 狀態相同，合併為一） */
-  driftAnchor:  { warning: 500,  critical: 750 },    // 漂航圈半徑（公尺）
+  driftAnchor:  { warning: 500,  critical: 750,  warningDuration: 0,  criticalDuration: 0, notify: { mail: true,  line: false } },  // 漂航圈半徑（公尺）
+  port_io:      { warning: 5.0,  critical: 0.5,  warningDuration: 0,  criticalDuration: 0, notify: { mail: true,  line: true  } },  // 與港口端點距離（NM）
+  zone_io:      { warning: 5.0,  critical: 1.0,  warningDuration: 0,  criticalDuration: 0, notify: { mail: true,  line: true  } },  // 與區域邊界距離（NM）
 };
 const THRESHOLD_META = {
-  route:           { label: "航線偏移",       short: "Route Dev",         unit: "海浬 NM",        unitShort: "NM",        range: "0 – 10",    step: 0.5,  min: 0,  max: 10,  isPct: false },
-  speed:           { label: "速度異常",       short: "Speed Anom",        unit: "× 計畫平均速度", unitShort: "× planAvg", range: "0 – 2",     step: 0.05, min: 0,  max: 2,   isPct: false },
+  route:           { label: "航線偏移",       short: "Route Dev",         unit: "海浬 NM",        unitShort: "NM",        range: "0 – 10",    step: 0.5,  min: 0,  max: 10,  isPct: false, hasDuration: true },
+  speed:           { label: "速度異常",       short: "Speed Anom",        unit: "× 計畫平均速度", unitShort: "× planAvg", range: "0 – 2",     step: 0.05, min: 0,  max: 2,   isPct: false, hasDuration: true },
   driftAnchor:     { label: "漂航圈半徑",     short: "Drift Watch",       unit: "公尺",           unitShort: "m",         range: "50 – 2000", step: 50,   min: 50, max: 2000,isPct: false },
+  port_io:         { label: "到離港監控",     short: "Port I/O",          unit: "與港口端點距離 NM（值越小越接近港界）", unitShort: "NM", range: "0 – 20", step: 0.5, min: 0, max: 20, isPct: false, mode: "lower" },
+  zone_io:         { label: "到離區域監控",   short: "Zone I/O",          unit: "與區域邊界距離 NM（值越小越接近邊界）", unitShort: "NM", range: "0 – 20", step: 0.5, min: 0, max: 20, isPct: false, mode: "lower" },
 };
 let _thresholds = JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS));
 function loadThresholds() {
@@ -4095,10 +5038,18 @@ function loadThresholds() {
     // 與預設深層合併，避免 key 不齊或型別錯誤
     Object.keys(DEFAULT_THRESHOLDS).forEach(k => {
       if (saved[k] && typeof saved[k] === "object") {
-        const w = parseFloat(saved[k].warning);
-        const c = parseFloat(saved[k].critical);
-        if (!isNaN(w)) _thresholds[k].warning = w;
-        if (!isNaN(c)) _thresholds[k].critical = c;
+        const w  = parseFloat(saved[k].warning);
+        const c  = parseFloat(saved[k].critical);
+        const wd = parseInt(saved[k].warningDuration, 10);
+        const cd = parseInt(saved[k].criticalDuration, 10);
+        if (!isNaN(w))  _thresholds[k].warning = w;
+        if (!isNaN(c))  _thresholds[k].critical = c;
+        if (!isNaN(wd)) _thresholds[k].warningDuration = wd;
+        if (!isNaN(cd)) _thresholds[k].criticalDuration = cd;
+        if (saved[k].notify && typeof saved[k].notify === "object") {
+          _thresholds[k].notify.mail = !!saved[k].notify.mail;
+          _thresholds[k].notify.line = !!saved[k].notify.line;
+        }
       }
     });
   } catch (e) {}
@@ -4106,6 +5057,57 @@ function loadThresholds() {
 function saveThresholds() {
   try { localStorage.setItem(THRESHOLDS_STORAGE_KEY, JSON.stringify(_thresholds)); } catch (e) {}
 }
+
+/* ── 到離區域監控：逐圍籬設定 ───────────────────────────────────
+ * 結構：{ [zoneId]: {
+ *     enabled: bool,           是否監控
+ *     direction: "arrival"|"departure",  監控方向（先選到達 / 離開）
+ *     advanceNm: number,       提前距離（到達 = 入界前 N 海浬；離開 = 出界前 N 海浬）
+ *     boundaryAlert: bool      跨越邊界瞬間提醒（到達提醒 / 離開提醒）
+ * } }
+ *
+ * 預設：所有 RISK_ZONES 啟用、direction=arrival、advanceNm=5、boundaryAlert=true
+ *
+ * 注意：舊版資料若用 entryNm/exitNm，於 getZoneIoFenceCfg 自動 fallback 到新欄位。 */
+const ZONE_IO_CONFIG_KEY = "slab_va_zone_io_fences_v1";
+const ZONE_IO_DEFAULTS = {
+  enabled: true,
+  direction: "arrival",
+  advanceNm: 5.0,
+  boundaryAlert: true,
+};
+let _zoneIoFenceConfig = {};
+function loadZoneIoConfig() {
+  try {
+    const raw = localStorage.getItem(ZONE_IO_CONFIG_KEY);
+    _zoneIoFenceConfig = raw ? (JSON.parse(raw) || {}) : {};
+  } catch (e) { _zoneIoFenceConfig = {}; }
+}
+function saveZoneIoConfig() {
+  try { localStorage.setItem(ZONE_IO_CONFIG_KEY, JSON.stringify(_zoneIoFenceConfig)); } catch (e) {}
+}
+/* 查單一圍籬目前設定（與預設深層合併）；對舊版 entryNm/exitNm 欄位做 fallback。 */
+function getZoneIoFenceCfg(zoneId) {
+  const o = _zoneIoFenceConfig[zoneId] || {};
+  const direction = (o.direction === "departure") ? "departure" : "arrival";
+  // 舊版 → 新版：到達用 entryNm，離開用 exitNm；若都沒設定用預設
+  let advanceNm = (typeof o.advanceNm === "number") ? o.advanceNm
+    : (direction === "arrival" && typeof o.entryNm === "number") ? o.entryNm
+    : (direction === "departure" && typeof o.exitNm === "number") ? o.exitNm
+    : ZONE_IO_DEFAULTS.advanceNm;
+  return {
+    enabled: o.enabled ?? ZONE_IO_DEFAULTS.enabled,
+    direction,
+    advanceNm,
+    boundaryAlert: o.boundaryAlert ?? ZONE_IO_DEFAULTS.boundaryAlert,
+  };
+}
+function setZoneIoFenceCfg(zoneId, patch) {
+  const cur = getZoneIoFenceCfg(zoneId);
+  _zoneIoFenceConfig[zoneId] = Object.assign({}, cur, patch);
+  saveZoneIoConfig();
+}
+loadZoneIoConfig();
 /* ── 漂航圈 per-vessel 半徑覆寫 ──────────────────────────────────────
  *   監管人員可依不同船舶/錨地/作業情境，為個別 vessel_id 設定專屬半徑。
  *   結構：{ [vessel_id]: { driftAnchor: {warning, critical}, driftAdrift: {...} } }
@@ -4635,6 +5637,38 @@ function dimDescription(v, k, a) {
           : `<span style="color:#6ee094">✓ 在 ${info.warnR} m 漂航圈內</span>`;
       return `漂航圈：${msg}${info.overridden ? "（自訂半徑）" : ""}`
            + `<br><span style="color:#5e6b80">drift ${info.distMeters} m · W ${info.warnR} m / C ${info.critR} m</span>`;
+    }
+    case "port_io": {
+      if (lvl === "na") return `無航線端點可比對 / No planned port endpoints`;
+      const info = a._portIo;
+      if (!info) return `已遠離港界 / Far from port boundary`;
+      const portCn = escapeHtml(info.portName || "—");
+      const portEn = escapeHtml(info.portCode || "");
+      const dist   = info.distanceNm.toFixed(2);
+      const stateCn = info.stateCn || "—";
+      const stateEn = info.stateEn || "—";
+      const sogTxt  = !isNaN(info.sog) ? `SOG ${info.sog.toFixed(1)} kn` : "SOG —";
+      const stateColor = info.state === "berthed"  ? "#9ec5ff"
+                       : info.state === "arriving" ? "#6ee094"
+                       : info.state === "departing"? "#f5b753"
+                       : "#c4cdda";
+      return `<b style="color:${stateColor}">${stateCn}</b>：<b>${portCn}</b>（距 ${dist} NM · ${sogTxt}）`
+           + `<br><span style="color:#5e6b80">${stateEn} at ${portCn}${portEn ? ` (${portEn})` : ""} · ${dist} NM</span>`;
+    }
+    case "zone_io": {
+      if (lvl === "na" || !a._zoneIo) return `無啟用中的圍籬 / No active geofence`;
+      const zios = a._zoneIo;
+      const top = zios.top;
+      if (!top) return `均在安全距離外 / All fences clear`;
+      const cfg = top.cfg;
+      const modeCn = top.mode === "bidir" ? "雙向邊界"
+                   : top.mode === "arrival" ? "到達" : "離開";
+      const statusCn = top.status === "critical"
+        ? (top.inside ? "已在區域內" : "至邊界")
+        : (top.mode === "arrival" ? "接近邊界" : "即將離開");
+      const moreTxt = zios.hits.length > 1 ? `（另有 ${zios.hits.length - 1} 個圍籬觸發）` : "";
+      return `<b>${escapeHtml(top.zone.name || top.zone.id)}</b>（${modeCn}）：${statusCn} · 距 ${top.distanceNm.toFixed(2)} NM${moreTxt}`
+           + `<br><span style="color:#5e6b80">${escapeHtml(top.zone.name_en || top.zone.id)} · ${top.mode} · ${top.distanceNm.toFixed(2)} NM</span>`;
     }
     default: return "";
   }
@@ -5352,6 +6386,7 @@ function drawFleetDetailMap(v) {
   setupBaseTiles(map);
 
   // 單船 detail 視角也保留全球風險區圖層（依 _riskLayerState 顯示）
+  drawRiskZones(map);
   drawWxLayers(map);
 
   // 自訂 pane 控制疊放順序（值越大越上層）
@@ -5817,20 +6852,20 @@ function drawRiskZones(map) {
             <div class="rz-kv"><span class="rz-k">代碼 ID</span><span class="rz-v">${escapeHtml(z.id)} · Lv. ${escapeHtml(z.level)}</span></div>
           </div>
         </div>`;
-      // 依語意分類設定 polygon 視覺：
-      //   risk        → 實線 + 較濃填充（警示性質）
-      //   reporting   → 長虛線 + 極淡填充（通報區，非警示）
-      //   corridor    → 短虛線 + 中等填充（安全通道，建議性質）
-      //   compliance  → 短點線（環保 / 保護區）
-      //   advisory    → 細短線（壅塞）
+      // 依語意分類設定 polygon 預設視覺；若 zone.style 有自訂值則覆寫
       const sem = cat.semantic || "risk";
+      const zs = z.style;     // 使用者自訂樣式（可能不存在）
+      const lineTypeMap = { solid: null, dashed: "6 4", dotted: "2 4", "dash-dot": "6 3 2 3" };
+      const polyColor = (zs && zs.color) || cat.color;
       const polyStyle = {
-        color: cat.color,
-        weight: sem === "corridor" ? 2 : 1.2,
+        color: polyColor,
+        weight: zs && zs.lineWidth != null ? zs.lineWidth : (sem === "corridor" ? 2 : 1.2),
         opacity: sem === "reporting" ? 0.55 : 0.85,
-        fillColor: cat.color,
-        fillOpacity: sem === "reporting" ? 0.04 : (sem === "corridor" ? 0.18 : fillOpacity),
-        dashArray: sem === "reporting" ? "10 6"
+        fillColor: polyColor,
+        fillOpacity: zs && zs.opacity != null ? zs.opacity
+                  : (sem === "reporting" ? 0.04 : (sem === "corridor" ? 0.18 : fillOpacity)),
+        dashArray: zs && zs.lineType ? lineTypeMap[zs.lineType]
+                : sem === "reporting" ? "10 6"
                 : sem === "corridor"  ? "6 4"
                 : (cat.key === "eca" || cat.key === "protected") ? "4 3"
                 : null,
@@ -6044,6 +7079,7 @@ function drawFleetMap(enriched) {
   attachMapResize(map, document.getElementById("fleet-map"));
 
   // 全球風險區圖層：每類一個 layerGroup，依 _riskLayerState 決定是否掛上 map
+  drawRiskZones(map);
   drawWxLayers(map);
 
   const points = [];
@@ -6670,6 +7706,7 @@ function drawMap(v, vesselMails) {
   setupBaseTiles(map);
 
   // 單船頁也帶上全球風險區 + 港口錨地圖層（per-map layerGroup 副本）
+  drawRiskZones(map);
   drawWxLayers(map);
 
   // 單船頁面 — 圖層面板（風險區 / 其他圖層 / 海圖風格）注入到地圖右上+左下
@@ -7671,6 +8708,7 @@ function formatThresholdValue(dim, v) {
   if (dim === "driftAnchor" || dim === "driftAdrift") return v + " m";
   if (dim === "wind_speed") return v + " m/s";
   if (dim === "wave_sig_height" || dim === "swell_height") return v + " m";
+  if (dim === "port_io" || dim === "zone_io") return Number(v).toFixed(1) + " NM";
   return v + " pts"; // comm / engine
 }
 function dimInputAttrs(dim) {
@@ -7720,7 +8758,7 @@ function wireThresholdVesselCards() {
     const w = wInp.value === "" ? (_thresholds[dim]?.warning  ?? def.warning)  : parseFloat(wInp.value);
     const c = cInp.value === "" ? (_thresholds[dim]?.critical ?? def.critical) : parseFloat(cInp.value);
     const metric = getDimCurrentMetric(v, dim);
-    const lvl = dimLevelFor(metric, w, c);
+    const lvl = dimLevelFor(metric, w, c, dim);
     const metricEl = row.querySelector(".vc-metric");
     if (!metricEl) return;
     const lvlColor = lvl === "critical" ? "#ff8a8a"
@@ -7821,10 +8859,25 @@ function getDimCurrentMetric(v, dim) {
     if (a._drift && typeof a._drift.distMeters === "number") return a._drift.distMeters;
     return null;
   }
+  // 到離港 / 到離區域監控：與最近港界 / 區域邊界的距離（NM）
+  if (dim === "port_io") {
+    const pio = vesselPortIoDistance(v);
+    return pio ? pio.distanceNm : null;
+  }
+  if (dim === "zone_io") {
+    const zio = vesselZoneIoDistance(v);
+    return zio ? zio.distanceNm : null;
+  }
   return null;
 }
-function dimLevelFor(metric, warn, crit) {
+function dimLevelFor(metric, warn, crit, dim) {
   if (metric == null) return "normal";
+  // port_io / zone_io 為距離型（mode: "lower"）：metric ≤ critical → critical、metric ≤ warning → warning
+  if (dim === "port_io" || dim === "zone_io") {
+    if (metric <= crit) return "critical";
+    if (metric <= warn) return "warning";
+    return "normal";
+  }
   if (metric >= crit) return "critical";
   if (metric >= warn) return "warning";
   return "normal";
@@ -7857,7 +8910,7 @@ function renderThresholdVesselCards() {
       const effC = ovr?.critical != null ? ovr.critical : (_thresholds[k]?.critical ?? def.critical);
       const overridden = !!(ovr && (ovr.warning != null || ovr.critical != null));
       const metric = getDimCurrentMetric(v, k);
-      const lvl = dimLevelFor(metric, effW, effC);
+      const lvl = dimLevelFor(metric, effW, effC, k);
       const lvlColor = lvl === "critical" ? "#ff8a8a"
                      : lvl === "warning"  ? "#f5b753"
                      : "#6ee094";
@@ -8466,17 +9519,232 @@ function getDimDisplayMeta(dim) {
   return { label: dim, short: dim, icon: () => "" };
 }
 
-function dimRowHTML({ dim, valW, valC, defW, defC, metric, level, overridden, isCore, segNote, withReset, hideMetric, defSource }) {
+/* 到離區域監控專用列：替每個 RISK_ZONE 提供 enabled checkbox + entryNm + exitNm，
+ * 並在右側顯示該船目前對該圍籬的狀態（critical=已在區域內、warning=接近/剛離開、normal）。
+ *   args.hideMetric=true（batch 視角）→ 不顯示「船舶現況」欄
+ *   args.targetVesselId（per-vessel 視角）→ 帶入該船狀態到狀態欄
+ */
+function zoneIoRowHTML(args) {
+  const m = getDimDisplayMeta("zone_io");
+  const t = _thresholds.zone_io || DEFAULT_THRESHOLDS.zone_io || {};
+  const zones = (window.RISK_ZONES || []).slice();
+  const cats  = (window.RISK_ZONE_CATEGORIES || []);
+
+  // 對齊船舶現況用：若 args 帶 v，計算其圍籬狀態
+  const v = args.vessel || (args.targetVesselId
+    ? VESSELS.find(x => x.vessel_id === args.targetVesselId) : null);
+  const vStatus = (v && !args.hideMetric) ? vesselZoneIoStatus(v) : null;
+  const hitByZone = new Map();
+  if (vStatus) vStatus.hits.forEach(h => hitByZone.set(h.zone.id, h));
+
+  // 過濾狀態（session 持久化）
+  const dirFilter = sessionStorage.getItem("slab_va_zoneio_dir_filter") || "all"; // all | arrival | departure
+  // 群組收合狀態（每個 cat.key → 是否收合）
+  let collapsed = {};
+  try { collapsed = JSON.parse(sessionStorage.getItem("slab_va_zoneio_collapsed") || "{}") || {}; } catch (e) {}
+
+  // 統計：監控中 / 總圍籬數；命中數
+  const monitoredCount = zones.filter(z => getZoneIoFenceCfg(z.id).enabled).length;
+  const hitCritical = vStatus ? vStatus.hits.filter(h => h.status === "critical").length : 0;
+  const hitWarning  = vStatus ? vStatus.hits.filter(h => h.status === "warning").length  : 0;
+
+  // 依類別分組（過濾掉不符方向篩選的）
+  const groups = {};
+  zones.forEach(z => {
+    const cfg = getZoneIoFenceCfg(z.id);
+    if (dirFilter !== "all" && cfg.direction !== dirFilter) return;
+    (groups[z.cat] ||= []).push(z);
+  });
+
+  const rowsHtml = [];
+  cats.forEach(cat => {
+    const list = groups[cat.key];
+    if (!list || !list.length) return;
+    const isCollapsed = !!collapsed[cat.key];
+    rowsHtml.push(`
+      <tr class="th-fence-cat-group${isCollapsed ? " is-collapsed" : ""}" data-cat="${escapeHtml(cat.key)}">
+        <td colspan="7">
+          <span class="th-fence-cat-toggle" data-cat="${escapeHtml(cat.key)}">
+            <span class="cat-chev" aria-hidden="true">▾</span>
+            <span class="th-fence-cat-swatch" style="background:${cat.color}"></span>
+            ${escapeHtml(cat.label)}<span style="color:#7c8a9e;font-weight:400;margin-left:6px">${escapeHtml(cat.label_en)} · ${list.length}</span>
+          </span>
+        </td>
+      </tr>`);
+    list.forEach(z => {
+      const cfg = getZoneIoFenceCfg(z.id);
+      const hit = hitByZone.get(z.id);
+      const statusLabel = hit
+        ? (hit.status === "critical"
+            ? "已在區域內"
+            : `${hit.distanceNm.toFixed(1)} NM`)
+        : "—";
+      const statusLvl = hit ? hit.status : "normal";
+      const statusBadge = vStatus
+        ? `<span class="th-fence-status" data-level="${statusLvl}"><span class="lbl">現況</span>${statusLabel}</span>`
+        : `<span class="th-fence-status" data-level="normal" style="opacity:0.5">—</span>`;
+      const actionsCell = z.editable
+        ? `<td>
+             <button type="button" class="fence-act-btn" data-act="edit" data-zid="${escapeHtml(z.id)}" title="編輯名稱與等級">編輯</button>
+             <button type="button" class="fence-act-btn fence-act-danger" data-act="delete" data-zid="${escapeHtml(z.id)}" title="刪除此圍籬">×</button>
+           </td>`
+        : `<td><span style="color:#5e6b80;font-size:11px">內建</span></td>`;
+      const isBidir = cfg.advanceNm === 0;
+      const advanceLabel = isBidir ? "邊界" : (cfg.direction === "arrival" ? "到達前" : "快離開");
+      const advTitle = isBidir
+        ? "設為 0 = 到達與離開雙向邊界提醒"
+        : (cfg.direction === "arrival" ? "進入區域前 N 海浬即提醒" : "區域內距邊界 N 海浬時提醒");
+      rowsHtml.push(`
+        <tr class="zone-io-row${cfg.enabled ? "" : " fence-disabled"}${isCollapsed ? " is-hidden-by-collapse" : ""}" data-zid="${escapeHtml(z.id)}" data-cat="${escapeHtml(cat.key)}" data-direction="${cfg.direction}">
+          <td><input type="checkbox" class="fence-select" data-zid="${escapeHtml(z.id)}" title="勾選以批次設定" aria-label="select zone"></td>
+          <td><input type="checkbox" class="fence-toggle" data-zid="${escapeHtml(z.id)}"${cfg.enabled ? " checked" : ""} title="啟用監控 / Enable"></td>
+          <td>
+            <div class="th-fence-name">
+              <span class="cn">${escapeHtml(z.name || z.id)}</span>
+              ${z.name_en && z.name_en !== z.name ? `<span class="en">${escapeHtml(z.name_en)}</span>` : ""}
+            </div>
+          </td>
+          <td>
+            <select class="fence-dir" data-zid="${escapeHtml(z.id)}" title="監控方向">
+              <option value="arrival"${cfg.direction === "arrival" ? " selected" : ""}>到達</option>
+              <option value="departure"${cfg.direction === "departure" ? " selected" : ""}>離開</option>
+            </select>
+          </td>
+          <td>
+            <span class="fence-advance">
+              <span class="fence-advance-label">${advanceLabel}</span>
+              <input type="number" class="fence-nm" data-zid="${escapeHtml(z.id)}" data-field="advanceNm" value="${cfg.advanceNm}" step="0.5" min="0" max="50" title="${advTitle}">
+              <span class="fence-nm-unit">NM</span>
+            </span>
+          </td>
+          <td>${statusBadge}</td>
+          ${actionsCell}
+        </tr>`);
+    });
+  });
+
+  // 通知方式
+  const notifyHtml = `
+    <div class="th-dim-notify">
+      <span class="label">通知 / Notify：</span>
+      <label><input type="checkbox" data-dim="zone_io" data-notify="mail"${t.notify?.mail ? " checked" : ""}><span class="nf-mail">Mail</span></label>
+      <label><input type="checkbox" data-dim="zone_io" data-notify="line"${t.notify?.line ? " checked" : ""}><span class="nf-line">LINE</span></label>
+    </div>`;
+
+  const statusSummary = vStatus
+    ? `<span style="color:#9aa5b8">監控 ${monitoredCount} / ${zones.length} 個圍籬</span>` +
+      (hitCritical > 0 ? `<span style="color:#ff8a8a;margin-left:10px">● 已在 ${hitCritical} 區內</span>` : "") +
+      (hitWarning  > 0 ? `<span style="color:#f5b753;margin-left:10px">▲ 接近 / 剛離開 ${hitWarning} 區</span>` : "") +
+      (hitCritical === 0 && hitWarning === 0 ? `<span style="color:#6ee094;margin-left:10px">✓ 均在安全距離外</span>` : "")
+    : `<span style="color:#9aa5b8">監控 ${monitoredCount} / ${zones.length} 個圍籬</span>`;
+
+  // 方向篩選 tabs
+  const dirTabsHtml = `
+    <div class="th-fence-dir-tabs" role="tablist">
+      <button type="button" class="th-fence-dir-tab${dirFilter === "all"       ? " is-active" : ""}" data-dir-filter="all">全部</button>
+      <button type="button" class="th-fence-dir-tab${dirFilter === "arrival"   ? " is-active" : ""}" data-dir-filter="arrival">到達</button>
+      <button type="button" class="th-fence-dir-tab${dirFilter === "departure" ? " is-active" : ""}" data-dir-filter="departure">離開</button>
+    </div>`;
+
+  // 批次設定面板
+  const bulkPanelHtml = `
+    <div class="th-fence-bulk" data-bulk-panel hidden>
+      <span class="th-fence-bulk-count">已選 <b data-bulk-count>0</b> 個區域</span>
+      <label>方向
+        <select data-bulk-dir>
+          <option value="">不變</option>
+          <option value="arrival">到達</option>
+          <option value="departure">離開</option>
+        </select>
+      </label>
+      <label>距離
+        <input type="number" data-bulk-nm min="0" max="50" step="0.5" placeholder="不變">
+        <span class="th-fence-bulk-unit">NM</span>
+      </label>
+      <button type="button" class="th-fence-bulk-apply" data-bulk-apply>套用至已勾選</button>
+      <button type="button" class="th-fence-bulk-clear" data-bulk-clear>清除選取</button>
+    </div>`;
+
+  return `
+    <div class="th-dim-row${args.isCore ? " is-core" : ""}" data-dim="zone_io">
+      <div class="th-dim-head">
+        <span class="th-dim-icon">${m.icon()}</span>
+        <span class="th-dim-name">${m.label}</span>
+        <span class="th-dim-short">${m.short}</span>
+        ${args.isCore ? `<span class="th-tag th-tag-core">該段核心</span>` : ""}
+        <span class="th-tag" style="background:rgba(74,158,255,0.15);color:#9ec5ff;margin-left:auto">逐圍籬設定</span>
+      </div>
+      <div class="th-fence-block" data-zone-io-block>
+        <div class="th-fence-toolbar">
+          <input type="search" placeholder="搜尋圍籬名稱 / Search by name…" id="th-fence-search">
+          <button type="button" class="th-fence-btn" data-act="enable-all">全部啟用</button>
+          <button type="button" class="th-fence-btn" data-act="disable-all">全部停用</button>
+          <button type="button" class="th-fence-btn fence-act-primary" data-act="draw-new" title="切到船隊地圖開始繪製新區域">＋ 繪製新區域</button>
+          ${dirTabsHtml}
+          <span class="th-fence-count">${statusSummary}</span>
+        </div>
+        ${bulkPanelHtml}
+        <div class="th-fence-container">
+          <table class="th-fence-table">
+            <thead>
+              <tr>
+                <th style="width:28px"><input type="checkbox" class="fence-select-all" title="全選 / 取消全選"></th>
+                <th style="width:28px"></th>
+                <th>圍籬名稱 / Fence</th>
+                <th style="width:84px">方向</th>
+                <th style="width:160px">提前距離</th>
+                <th style="width:120px">${vStatus ? "船舶現況" : ""}</th>
+                <th style="width:90px">操作</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml.join("")}</tbody>
+          </table>
+        </div>
+        ${notifyHtml}
+      </div>
+    </div>`;
+}
+
+function dimRowHTML(args) {
+  // 到離區域監控採「逐圍籬清單」UI，dispatch 給 zoneIoRowHTML
+  if (args.dim === "zone_io") return zoneIoRowHTML(args);
+  const { dim, valW, valC, defW, defC, metric, level, overridden, isCore, segNote, withReset, hideMetric, defSource, extraContent, activeEvent } = args;
   const m = getDimDisplayMeta(dim);
+  const tm = THRESHOLD_META[dim];
+  const t  = _thresholds[dim] || DEFAULT_THRESHOLDS[dim] || {};
   const isTBC = TBC_DIMS.has(dim);
   let metricBlock = "";
   if (!hideMetric) {
+    const evBadge = activeEvent
+      ? (() => {
+          const es = EVENT_STATUSES[activeEvent.status];
+          const evColor = es?.color || "#9aa5b8";
+          const evLabel = es?.cn || activeEvent.status;
+          return `<a class="th-ev-badge" href="#/events" title="點擊前往事件處理 / Go to event">● ${evLabel}</a>`;
+        })()
+      : "";
     metricBlock = metric != null
-      ? `<span class="th-row-current">船舶現況 / Current<span class="th-row-current-val">${formatThresholdValue(dim, metric)}</span><span class="th-row-lvl" data-level="${level}">${level === "critical" ? "Critical" : level === "warning" ? "Warning" : "Normal"}</span></span>`
+      ? `<span class="th-row-current">船舶現況 / Current<span class="th-row-current-val">${formatThresholdValue(dim, metric)}</span><span class="th-row-lvl" data-level="${level}">${level === "critical" ? "Critical" : level === "warning" ? "Warning" : "Normal"}</span>${evBadge}</span>`
       : `<span class="th-row-current muted">船舶現況 / Current —</span>`;
   }
   // 預設值來源標記：來自航線計畫（plan_thresholds）→ 顯示「計畫」tag，提示該預設值是直接從船舶上報的航線計畫帶入
   const defSrcTag = defSource === "plan" ? `<span class="th-default-src" title="預設值來自船舶上報的航線計畫">計畫</span>` : "";
+  // 持續時間：只有 hasDuration 的維度（route / speed）顯示
+  const durHtml = (lvl, durVal) => tm?.hasDuration ? `
+    <span class="th-dur" title="達到閾值後須持續 N 分才正式立案，避免短暫尖峰誤觸發">
+      持續
+      <input type="number" class="th-input th-dur-input" data-dim="${dim}" data-dur-lvl="${lvl}"
+             value="${durVal ?? ""}" placeholder="${(lvl === "warning" ? DEFAULT_THRESHOLDS[dim]?.warningDuration : DEFAULT_THRESHOLDS[dim]?.criticalDuration) ?? 0}"
+             min="0" max="1440" step="1"${isTBC ? " disabled" : ""}>
+      分
+    </span>` : "";
+  // 通知方式：所有維度都有
+  const notifyHtml = `
+    <div class="th-dim-notify">
+      <span class="label">通知 / Notify：</span>
+      <label><input type="checkbox" data-dim="${dim}" data-notify="mail"${t.notify?.mail ? " checked" : ""}><span class="nf-mail">Mail</span></label>
+      <label><input type="checkbox" data-dim="${dim}" data-notify="line"${t.notify?.line ? " checked" : ""}><span class="nf-line">LINE</span></label>
+    </div>`;
   return `
     <div class="th-dim-row${overridden ? " is-overridden" : ""}${isCore ? " is-core" : ""}${isTBC ? " is-tbc" : ""}" data-dim="${dim}">
       <div class="th-dim-head">
@@ -8494,15 +9762,19 @@ function dimRowHTML({ dim, valW, valC, defW, defC, metric, level, overridden, is
           <input type="number" class="th-input th-warn" data-dim="${dim}" data-lvl="warning"
                  value="${valW ?? ""}" placeholder="${defW}" step="0.1" min="0" max="200"${isTBC ? " disabled" : ""}>
           <span class="th-default">預設 ${formatThresholdValue(dim, defW)}${defSrcTag}</span>
+          ${durHtml("warning", t.warningDuration)}
         </span>
         <span class="th-num">
           <label>C ≥</label>
           <input type="number" class="th-input th-crit" data-dim="${dim}" data-lvl="critical"
                  value="${valC ?? ""}" placeholder="${defC}" step="0.1" min="0" max="200"${isTBC ? " disabled" : ""}>
           <span class="th-default">預設 ${formatThresholdValue(dim, defC)}${defSrcTag}</span>
+          ${durHtml("critical", t.criticalDuration)}
         </span>
         ${metricBlock}
       </div>
+      ${notifyHtml}
+      ${extraContent || ""}
     </div>`;
 }
 
@@ -8559,6 +9831,14 @@ function renderBatchBySegmentSetup(visibleVessels) {
   } else if (_batchScope === "byMgr") {
     targetVessel = VESSELS.find(v => v.manager === _batchScopeManager);
   }
+  // 本航段各維度進行中事件數（供 header 摘要）
+  const _visVids = new Set(visibleVessels.map(v => v.vessel_id));
+  const _segOpenEvents = seg.dims.reduce((acc, d) => {
+    acc[d] = _events.filter(e => _visVids.has(e.vessel_id) && e.dimension === d && e.status !== "resolved" && !e.cleared).length;
+    return acc;
+  }, {});
+  const _segTotalOpen = Object.values(_segOpenEvents).reduce((s, n) => s + n, 0);
+
   const dimRows = seg.dims.map(d => {
     const def = DEFAULT_THRESHOLDS[d]; if (!def) return "";
     const curGW = _thresholds[d]?.warning  ?? def.warning;
@@ -8598,16 +9878,9 @@ function renderBatchBySegmentSetup(visibleVessels) {
       }).join("")
     : "";
 
-  const portNote = _batchSegment === "port"
-    ? `<div class="th-batch-note" style="border-left-color:${seg.color}">
-         港口操船段以 CPA／TCPA 監測碰撞風險（依規格 v1.0 §4 + §6.3），需 SDataPro 周邊 AIS。Demo 階段尚未實作 CPA／TCPA，僅顯示主機維度。
-       </div>`
-    : "";
-
   return `
     <div class="th-batch">
       <div class="th-seg-tabs" role="tablist">${segTabs}</div>
-      ${portNote}
       ${scopeRow}
 
       <div class="th-batch-dims">
@@ -8619,7 +9892,11 @@ function renderBatchBySegmentSetup(visibleVessels) {
       </div>
 
       <div class="th-batch-footer">
-        <span class="th-impact" id="th-batch-impact">影響預覽：—</span>
+        <span class="th-impact" id="th-batch-impact">
+          ${_segTotalOpen > 0
+            ? `<a href="#/events" style="color:#7ec5ff;text-decoration:none" title="點擊前往事件處理">● 本航段共 ${_segTotalOpen} 件進行中事件</a>`
+            : "影響預覽：—"}
+        </span>
         <button type="button" class="trans-btn secondary" id="th-batch-reset">清除此航段所有設定</button>
       </div>
 
@@ -8658,18 +9935,777 @@ function wireBatchBySegmentSetup() {
     });
   }
   // input 即時預覽 + blur/Enter 寫回（與單船 view 模式一致）
-  root.querySelectorAll(".th-input").forEach(inp => {
+  //   排除持續時間 input（.th-dur-input），那條由 wireDurationAndNotify() 處理
+  root.querySelectorAll(".th-input:not(.th-dur-input)").forEach(inp => {
     inp.addEventListener("input", () => refreshDimRowLevel(inp.closest(".th-dim-row")));
     const commit = () => commitBatchRow(inp.closest(".th-dim-row"));
     inp.addEventListener("blur", commit);
     inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } });
   });
 
+  // 持續時間 + 通知方式：全域層級，與 scope 無關
+  wireDurationAndNotify(root);
+  // 到離區域監控逐圍籬設定
+  wireZoneIoFences(root);
+
   // 整個航段一鍵清除（套用對象決定影響範圍）
   root.querySelector("#th-batch-reset").addEventListener("click", () => resetBatchSegment());
 
   // 初始計算 footer 影響預覽
   refreshBatchImpact();
+}
+
+/* 共用：把到離區域監控（zone_io）逐圍籬 UI 的事件接好。
+ *   - checkbox（fence-toggle）：toggle 後立即 setZoneIoFenceCfg + 行的 fence-disabled class 跟著切換
+ *   - 進入前 / 離開後 NM（fence-nm）：blur / Enter 後寫入 entryNm / exitNm
+ *   - 搜尋（th-fence-search）：即時隱藏不符的行（保留類別標頭）
+ *   - 全部啟用 / 全部停用按鈕（data-act=enable-all/disable-all）：批次切換所有可見列的 enabled
+ *   寫入後 syncEventsFromAlerts 立即重算 zone_io 等級，但「不重繪整頁」以避免輸入框失焦。 */
+function wireZoneIoFences(root) {
+  const block = root.querySelector("[data-zone-io-block]");
+  if (!block) return;
+  // checkbox 啟用/停用
+  block.querySelectorAll(".fence-toggle").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const zid = cb.dataset.zid;
+      setZoneIoFenceCfg(zid, { enabled: cb.checked });
+      const tr = cb.closest("tr");
+      if (tr) tr.classList.toggle("fence-disabled", !cb.checked);
+      syncEventsFromAlerts();
+    });
+  });
+  // 共用：依目前 cfg 重新計算該列的「提前距離標籤」與 input 的 title
+  function _refreshRowLabels(tr, zid) {
+    if (!tr) return;
+    const cfg = getZoneIoFenceCfg(zid);
+    const isBidir = cfg.advanceNm === 0;
+    const advLbl = tr.querySelector(".fence-advance-label");
+    if (advLbl) advLbl.textContent = isBidir ? "邊界"
+      : (cfg.direction === "arrival" ? "到達前" : "快離開");
+    const nm = tr.querySelector(".fence-nm");
+    if (nm) nm.title = isBidir
+      ? "設為 0 = 到達與離開雙向邊界提醒"
+      : (cfg.direction === "arrival" ? "進入區域前 N 海浬即提醒" : "區域內距邊界 N 海浬時提醒");
+    // 同步 data-direction（給篩選與群組摺疊用）
+    tr.dataset.direction = cfg.direction;
+  }
+
+  // 提前距離 NM（advanceNm）
+  block.querySelectorAll(".fence-nm").forEach(inp => {
+    const save = () => {
+      const zid = inp.dataset.zid;
+      const field = inp.dataset.field;
+      const v = parseFloat(inp.value);
+      if (!isNaN(v) && v >= 0 && field === "advanceNm") {
+        setZoneIoFenceCfg(zid, { advanceNm: v });
+        _refreshRowLabels(inp.closest("tr"), zid);   // 0 / >0 之間切換時聯動文案
+        syncEventsFromAlerts();
+      }
+    };
+    inp.addEventListener("blur", save);
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } });
+  });
+  // 方向 select：切換時即時改 cfg + 重算該列文案
+  block.querySelectorAll(".fence-dir").forEach(sel => {
+    sel.addEventListener("change", () => {
+      const zid = sel.dataset.zid;
+      const direction = sel.value === "departure" ? "departure" : "arrival";
+      setZoneIoFenceCfg(zid, { direction });
+      _refreshRowLabels(sel.closest("tr"), zid);
+      syncEventsFromAlerts();
+    });
+  });
+  // 方向篩選 tabs：切換後重新 render（state 存 sessionStorage 由 zoneIoRowHTML 讀取）
+  block.querySelectorAll(".th-fence-dir-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      const v = tab.dataset.dirFilter || "all";
+      sessionStorage.setItem("slab_va_zoneio_dir_filter", v);
+      try { renderThresholds(); } catch (e) {}
+    });
+  });
+
+  // 群組摺疊：點 cat header 的可點區域 toggle
+  block.querySelectorAll(".th-fence-cat-toggle").forEach(toggle => {
+    toggle.addEventListener("click", () => {
+      const cat = toggle.dataset.cat;
+      let st = {};
+      try { st = JSON.parse(sessionStorage.getItem("slab_va_zoneio_collapsed") || "{}") || {}; } catch (e) {}
+      st[cat] = !st[cat];
+      sessionStorage.setItem("slab_va_zoneio_collapsed", JSON.stringify(st));
+      // 即時切換（不重 render）
+      const groupTr = block.querySelector(`tr.th-fence-cat-group[data-cat="${CSS.escape(cat)}"]`);
+      if (groupTr) groupTr.classList.toggle("is-collapsed", !!st[cat]);
+      block.querySelectorAll(`tr.zone-io-row[data-cat="${CSS.escape(cat)}"]`).forEach(tr => {
+        tr.classList.toggle("is-hidden-by-collapse", !!st[cat]);
+      });
+    });
+  });
+
+  // 批次選取 + 批次面板顯隱
+  const bulkPanel = block.querySelector("[data-bulk-panel]");
+  const bulkCountEl = block.querySelector("[data-bulk-count]");
+  function refreshBulkUI() {
+    const selected = Array.from(block.querySelectorAll(".fence-select:checked"));
+    if (selected.length > 0) {
+      bulkPanel.hidden = false;
+      if (bulkCountEl) bulkCountEl.textContent = selected.length;
+    } else {
+      bulkPanel.hidden = true;
+    }
+    // select-all 三態
+    const allBoxes = Array.from(block.querySelectorAll(".fence-select"));
+    const selAll = block.querySelector(".fence-select-all");
+    if (selAll) {
+      if (selected.length === 0) {
+        selAll.checked = false; selAll.indeterminate = false;
+      } else if (selected.length === allBoxes.length) {
+        selAll.checked = true; selAll.indeterminate = false;
+      } else {
+        selAll.checked = false; selAll.indeterminate = true;
+      }
+    }
+  }
+  block.querySelectorAll(".fence-select").forEach(cb => {
+    cb.addEventListener("change", refreshBulkUI);
+  });
+  const selAllBox = block.querySelector(".fence-select-all");
+  if (selAllBox) {
+    selAllBox.addEventListener("change", () => {
+      const checked = selAllBox.checked;
+      // 只勾選可見列（避開被群組摺疊或搜尋過濾的）
+      block.querySelectorAll(".fence-select").forEach(cb => {
+        const tr = cb.closest("tr");
+        if (!tr || tr.style.display === "none" || tr.classList.contains("is-hidden-by-collapse")) return;
+        cb.checked = checked;
+      });
+      refreshBulkUI();
+    });
+  }
+
+  const bulkApply = block.querySelector("[data-bulk-apply]");
+  if (bulkApply) {
+    bulkApply.addEventListener("click", () => {
+      const dirSel = block.querySelector("[data-bulk-dir]");
+      const nmInp  = block.querySelector("[data-bulk-nm]");
+      const newDir = dirSel?.value || "";
+      const newNm  = parseFloat(nmInp?.value);
+      const hasNm  = !isNaN(newNm) && newNm >= 0;
+      if (!newDir && !hasNm) {
+        alert("請至少設定方向或距離");
+        return;
+      }
+      const selected = Array.from(block.querySelectorAll(".fence-select:checked"));
+      if (!selected.length) return;
+      selected.forEach(cb => {
+        const zid = cb.dataset.zid;
+        const patch = {};
+        if (newDir) patch.direction = newDir;
+        if (hasNm)  patch.advanceNm = newNm;
+        setZoneIoFenceCfg(zid, patch);
+      });
+      syncEventsFromAlerts();
+      try { renderThresholds(); } catch (e) {}
+    });
+  }
+
+  const bulkClear = block.querySelector("[data-bulk-clear]");
+  if (bulkClear) {
+    bulkClear.addEventListener("click", () => {
+      block.querySelectorAll(".fence-select:checked").forEach(cb => cb.checked = false);
+      refreshBulkUI();
+    });
+  }
+  // 搜尋（即時過濾資料列；類別標頭僅在該類別還有可見列時顯示）
+  const search = block.querySelector("#th-fence-search");
+  if (search) {
+    search.addEventListener("input", () => {
+      const q = search.value.trim().toLowerCase();
+      const rows = block.querySelectorAll(".th-fence-table tbody tr:not(.th-fence-cat-group)");
+      rows.forEach(tr => {
+        if (!q) { tr.style.display = ""; return; }
+        const name = tr.querySelector(".th-fence-name")?.textContent?.toLowerCase() || "";
+        const zid  = tr.dataset.zid?.toLowerCase() || "";
+        tr.style.display = (name.includes(q) || zid.includes(q)) ? "" : "none";
+      });
+      // 隱藏空類別標頭
+      block.querySelectorAll(".th-fence-cat-group").forEach(gr => {
+        let next = gr.nextElementSibling, anyVisible = false;
+        while (next && !next.classList.contains("th-fence-cat-group")) {
+          if (next.style.display !== "none") { anyVisible = true; break; }
+          next = next.nextElementSibling;
+        }
+        gr.style.display = anyVisible ? "" : "none";
+      });
+    });
+  }
+  // 全部啟用 / 全部停用 / 繪製新區域
+  block.querySelectorAll(".th-fence-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const act = btn.dataset.act;
+      if (act === "draw-new") {
+        // 直接開編輯彈窗（與「編輯」相同 UI），不再走地圖點頂點流程
+        openZoneEditorModal({ mode: "new" });
+        return;
+      }
+      const enable = act === "enable-all";
+      block.querySelectorAll(".th-fence-table tbody tr:not(.th-fence-cat-group)").forEach(tr => {
+        if (tr.style.display === "none") return;
+        const cb = tr.querySelector(".fence-toggle");
+        if (!cb || cb.checked === enable) return;
+        cb.checked = enable;
+        const zid = cb.dataset.zid;
+        setZoneIoFenceCfg(zid, { enabled: enable });
+        tr.classList.toggle("fence-disabled", !enable);
+      });
+      syncEventsFromAlerts();
+    });
+  });
+  // 每列「編輯 / 刪除」
+  block.querySelectorAll(".fence-act-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const zid = btn.dataset.zid, act = btn.dataset.act;
+      if (act === "edit") {
+        openZoneEditModal(zid);
+      } else if (act === "delete") {
+        const z = (window.RISK_ZONES || []).find(x => x.id === zid);
+        if (!z) return;
+        if (confirm(`確定刪除「${z.name}」？\n刪除後無法復原。`)) {
+          window.deleteUserZone(zid);
+          // userZonesChanged 監聽會重畫；以防萬一，這裡也手動 reroute
+          try { renderThresholds(); } catch (e) {}
+        }
+      }
+    });
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * 區域繪製 / 編輯：使用者於船隊地圖上點頂點建立多邊形，或從列表開啟編輯彈窗
+ * ───────────────────────────────────────────────────────────────── */
+let _drawMode = null;  // { vertices, vertexMarkers, polyline, onClick }
+
+function enterDrawMode() {
+  // 若不在船隊頁，先切過去（route 之後 fleet map 才存在）
+  if (location.hash !== "#/fleet" && location.hash !== "") {
+    location.hash = "#/fleet";
+  }
+  // 等 fleet map 建好（renderFleet 是 sync，但 fitBounds setTimeout 80ms）
+  let tries = 0;
+  const tryStart = () => {
+    if (_fleetMap) { _setupDrawMode(_fleetMap); return; }
+    if (++tries > 30) return;
+    setTimeout(tryStart, 80);
+  };
+  tryStart();
+}
+
+function _setupDrawMode(map) {
+  if (_drawMode) return;   // 已在繪製
+  _drawMode = { vertices: [], vertexMarkers: [], polyline: null };
+
+  const ui = document.createElement("div");
+  ui.id = "zone-draw-ui";
+  ui.innerHTML = `
+    <div class="zd-title">繪製新區域 <span class="en">/ Draw New Zone</span></div>
+    <div class="zd-hint">在地圖上點擊加入頂點（至少 3 個） · 目前 <b id="zd-count">0</b> 個</div>
+    <div class="zd-actions">
+      <button type="button" id="zd-undo" disabled>↶ 撤回上一點</button>
+      <button type="button" id="zd-cancel">取消</button>
+      <button type="button" id="zd-finish" disabled>完成並儲存</button>
+    </div>`;
+  document.body.appendChild(ui);
+  map.getContainer().style.cursor = "crosshair";
+
+  const refresh = () => {
+    document.getElementById("zd-count").textContent = _drawMode.vertices.length;
+    document.getElementById("zd-undo").disabled = _drawMode.vertices.length === 0;
+    document.getElementById("zd-finish").disabled = _drawMode.vertices.length < 3;
+    _updateDrawPolyline(map);
+  };
+
+  const onClick = (e) => {
+    if (!_drawMode) return;
+    _drawMode.vertices.push([e.latlng.lat, e.latlng.lng]);
+    const m = L.circleMarker(e.latlng, {
+      radius: 5, color: "#b069ff", weight: 2, fillColor: "#b069ff", fillOpacity: 0.9
+    }).addTo(map);
+    _drawMode.vertexMarkers.push(m);
+    refresh();
+  };
+  map.on("click", onClick);
+  _drawMode.onClick = onClick;
+
+  document.getElementById("zd-undo").addEventListener("click", () => {
+    if (!_drawMode?.vertices.length) return;
+    _drawMode.vertices.pop();
+    const last = _drawMode.vertexMarkers.pop();
+    if (last) map.removeLayer(last);
+    refresh();
+  });
+  document.getElementById("zd-cancel").addEventListener("click", () => exitDrawMode());
+  document.getElementById("zd-finish").addEventListener("click", () => {
+    if (!_drawMode || _drawMode.vertices.length < 3) return;
+    const coords = _drawMode.vertices.slice();
+    exitDrawMode();
+    // 開啟編輯彈窗讓使用者命名、選組、設樣式、微調頂點
+    openZoneEditorModal({ mode: "new", prefillCoords: coords });
+  });
+}
+
+function _updateDrawPolyline(map) {
+  if (!_drawMode) return;
+  if (_drawMode.polyline) { map.removeLayer(_drawMode.polyline); _drawMode.polyline = null; }
+  if (_drawMode.vertices.length < 2) return;
+  const pts = _drawMode.vertices.length >= 3
+    ? _drawMode.vertices.concat([_drawMode.vertices[0]])
+    : _drawMode.vertices;
+  _drawMode.polyline = L.polyline(pts, {
+    color: "#b069ff", weight: 2, opacity: 0.85, dashArray: "5 4",
+  }).addTo(map);
+}
+
+function exitDrawMode() {
+  if (!_drawMode) return;
+  if (_fleetMap) {
+    if (_drawMode.onClick) _fleetMap.off("click", _drawMode.onClick);
+    _fleetMap.getContainer().style.cursor = "";
+    _drawMode.vertexMarkers.forEach(m => _fleetMap.removeLayer(m));
+    if (_drawMode.polyline) _fleetMap.removeLayer(_drawMode.polyline);
+  }
+  const ui = document.getElementById("zone-draw-ui");
+  if (ui) ui.remove();
+  _drawMode = null;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * 區域編輯彈窗（取代舊的 openZoneEditModal）
+ *   opts = { mode: "new"|"edit", zoneId?, prefillCoords? }
+ *   - 形狀：多邊形（active）/ 矩形 / 圓形（後兩者顯示但 disabled）
+ *   - 名稱：組名 dropdown + 名稱 input
+ *   - 樣式：線型 / 線寬 / 顏色 / 透明度
+ *   - 坐標：度 / 度分 / 度分秒 三種格式即時切換；逐頂點 N/S、E/W 切換
+ *   - 新增點 / 刪除點（最少 3 個）
+ *   - 保存：mode=new → addUserZone；mode=edit → updateUserZone
+ *   - 設定後觸發 userZonesChanged → 地圖與設定列表自動重畫
+ * ───────────────────────────────────────────────────────────────── */
+
+/* 坐標換算工具 */
+function _ddToDM(dd) {
+  const abs = Math.abs(dd);
+  const d = Math.floor(abs);
+  const m = (abs - d) * 60;
+  return { d, m, neg: dd < 0 };
+}
+function _ddToDMS(dd) {
+  const abs = Math.abs(dd);
+  const d = Math.floor(abs);
+  const mFull = (abs - d) * 60;
+  const m = Math.floor(mFull);
+  const s = (mFull - m) * 60;
+  return { d, m, s, neg: dd < 0 };
+}
+function _dmToDd(d, m, neg) {
+  const v = Math.abs(d) + Math.abs(m) / 60;
+  return neg ? -v : v;
+}
+function _dmsToDd(d, m, s, neg) {
+  const v = Math.abs(d) + Math.abs(m) / 60 + Math.abs(s) / 3600;
+  return neg ? -v : v;
+}
+
+/* 編輯彈窗開啟時掛在 _fleetMap 的即時預覽 polygon */
+let _zemPreviewLayer = null;
+const _zemLineTypeMap = { solid: null, dashed: "6 4", dotted: "2 4", "dash-dot": "6 3 2 3" };
+function _zemRefreshPreview(coords, style) {
+  if (!_fleetMap) return;
+  if (_zemPreviewLayer) { try { _fleetMap.removeLayer(_zemPreviewLayer); } catch (e) {} _zemPreviewLayer = null; }
+  if (!coords || coords.length < 2) return;
+  const color = (style && style.color) || "#ff0000";
+  const opts = {
+    color, weight: (style && style.lineWidth) || 1, opacity: 0.95,
+    fillColor: color,
+    fillOpacity: (style && style.opacity != null) ? style.opacity : 0.2,
+    dashArray: style && style.lineType ? _zemLineTypeMap[style.lineType] : null,
+  };
+  if (coords.length >= 3) {
+    _zemPreviewLayer = L.polygon(coords, opts).addTo(_fleetMap);
+  } else {
+    _zemPreviewLayer = L.polyline(coords, opts).addTo(_fleetMap);
+  }
+}
+function _zemClearPreview() {
+  if (_zemPreviewLayer && _fleetMap) {
+    try { _fleetMap.removeLayer(_zemPreviewLayer); } catch (e) {}
+  }
+  _zemPreviewLayer = null;
+}
+
+function openZoneEditorModal(opts) {
+  opts = opts || {};
+  const mode = opts.mode === "edit" ? "edit" : "new";
+  const z = mode === "edit" ? (window.RISK_ZONES || []).find(x => x.id === opts.zoneId) : null;
+  if (mode === "edit" && (!z || !z.editable)) return;
+
+  // 新區域預設：在台灣中部畫一個小三角當起點，使用者再調整
+  const _newDefaultCoords = [[24.0, 121.0], [24.0, 122.0], [23.0, 121.5]];
+
+  // 內部 state（會雙向綁定 UI）
+  const state = {
+    coordFmt: "dm",   // "dd" | "dm" | "dms"
+    group: z?.group || (window.USER_ZONE_GROUPS[0] || "演習區域"),
+    name: z?.name || (mode === "new" ? "Custom Zone" : ""),
+    level: z?.level || "high",
+    style: Object.assign({}, DEFAULT_ZONE_STYLE, z?.style || {}),
+    coords: (z?.coords || opts.prefillCoords || _newDefaultCoords).map(p => [Number(p[0]), Number(p[1])]),
+  };
+
+  // 若使用者不在船隊地圖頁，切過去讓地圖可見、預覽生效
+  if (location.hash !== "#/fleet" && location.hash !== "") {
+    location.hash = "#/fleet";
+  }
+
+  const mask = document.createElement("div");
+  mask.className = "modal-mask open zem-mask";
+  mask.style.zIndex = "1200";
+  mask.innerHTML = `
+    <div class="modal zem-modal">
+      <button type="button" class="modal-close zem-close" aria-label="close">×</button>
+      <h3 class="zem-title">${mode === "new" ? "繪製新區域" : "編輯區域"} <span class="en">/ ${mode === "new" ? "Draw New Zone" : "Edit Zone"}</span></h3>
+
+      <div class="zem-tab-body" data-tab="draw">
+        <!-- 名稱 -->
+        <div class="zem-section">
+          <div class="zem-section-title">名稱</div>
+          <div class="zem-row">
+            <label>組名</label>
+            <select class="zem-group" id="zem-group"></select>
+            <button type="button" class="zem-group-add" id="zem-group-add" title="新增組名">+</button>
+            <label>名稱</label>
+            <input type="text" class="zem-name" id="zem-name" maxlength="120" value="${escapeHtml(state.name)}">
+          </div>
+        </div>
+
+        <!-- 樣式 -->
+        <div class="zem-section">
+          <div class="zem-section-title">樣式</div>
+          <div class="zem-row zem-style-row">
+            <label>線型</label>
+            <select id="zem-linetype">
+              <option value="solid">———</option>
+              <option value="dashed">- - - -</option>
+              <option value="dotted">· · · ·</option>
+              <option value="dash-dot">— · — ·</option>
+            </select>
+            <label>線寬</label>
+            <input type="number" id="zem-linewidth" min="1" max="10" step="0.5" value="${state.style.lineWidth}">
+            <label>顏色</label>
+            <input type="color" id="zem-color" value="${state.style.color}">
+            <label>透明度</label>
+            <input type="number" id="zem-opacity" min="0" max="1" step="0.05" value="${state.style.opacity}">
+          </div>
+        </div>
+
+        <!-- 座標格式 tabs + 新增點 -->
+        <div class="zem-coord-tabs">
+          <button type="button" class="zem-coord-tab" data-fmt="dd">度</button>
+          <button type="button" class="zem-coord-tab is-active" data-fmt="dm">度分</button>
+          <button type="button" class="zem-coord-tab" data-fmt="dms">度分秒</button>
+          <button type="button" class="zem-coord-add" id="zem-add-pt">＋ 新增點</button>
+        </div>
+
+        <!-- 頂點清單 -->
+        <div class="zem-coords-list" id="zem-coords-list"></div>
+
+        <!-- 動作 -->
+        <div class="zem-actions">
+          <button type="button" class="zem-btn-primary" id="zem-save">保存</button>
+          <button type="button" class="zem-btn-secondary" id="zem-cancel">取消</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(mask);
+
+  const $ = sel => mask.querySelector(sel);
+  const close = () => mask.remove();
+
+  // 初始化：組名 select
+  function refreshGroupSelect() {
+    const sel = $("#zem-group");
+    sel.innerHTML = window.USER_ZONE_GROUPS.map(g =>
+      `<option value="${escapeHtml(g)}"${g === state.group ? " selected" : ""}>${escapeHtml(g)}</option>`).join("");
+  }
+  refreshGroupSelect();
+
+  // 線型 select 選中狀態
+  const lt = $("#zem-linetype");
+  Array.from(lt.options).forEach(o => { if (o.value === state.style.lineType) o.selected = true; });
+
+  // 頂點清單渲染
+  function renderCoordsList() {
+    const list = $("#zem-coords-list");
+    const rows = state.coords.map((pt, idx) => {
+      const lat = pt[0], lon = pt[1];
+      let inputs;
+      if (state.coordFmt === "dd") {
+        inputs = `
+          <input type="number" step="0.000001" class="zem-coord-input zem-lat-dd" data-idx="${idx}" value="${lat.toFixed(6)}">
+          <span class="zem-deg-unit">°</span>
+          <button type="button" class="zem-hemi zem-hemi-lat${lat >= 0 ? " is-pos" : ""}" data-idx="${idx}" data-axis="lat">${lat >= 0 ? "N" : "S"}</button>
+          <input type="number" step="0.000001" class="zem-coord-input zem-lon-dd" data-idx="${idx}" value="${lon.toFixed(6)}">
+          <span class="zem-deg-unit">°</span>
+          <button type="button" class="zem-hemi zem-hemi-lon${lon >= 0 ? " is-pos" : ""}" data-idx="${idx}" data-axis="lon">${lon >= 0 ? "E" : "W"}</button>
+        `;
+      } else if (state.coordFmt === "dm") {
+        const a = _ddToDM(lat), b = _ddToDM(lon);
+        inputs = `
+          <input type="number" class="zem-coord-input zem-lat-d" data-idx="${idx}" value="${a.d}" min="0" max="90">
+          <span class="zem-deg-unit">°</span>
+          <input type="number" step="0.000001" class="zem-coord-input zem-lat-m" data-idx="${idx}" value="${a.m.toFixed(0)}" min="0" max="59.999999">
+          <span class="zem-deg-unit">'</span>
+          <button type="button" class="zem-hemi zem-hemi-lat${!a.neg ? " is-pos" : ""}" data-idx="${idx}" data-axis="lat">${a.neg ? "S" : "N"}</button>
+          <input type="number" class="zem-coord-input zem-lon-d" data-idx="${idx}" value="${b.d}" min="0" max="180">
+          <span class="zem-deg-unit">°</span>
+          <input type="number" step="0.000001" class="zem-coord-input zem-lon-m" data-idx="${idx}" value="${b.m.toFixed(0)}" min="0" max="59.999999">
+          <span class="zem-deg-unit">'</span>
+          <button type="button" class="zem-hemi zem-hemi-lon${!b.neg ? " is-pos" : ""}" data-idx="${idx}" data-axis="lon">${b.neg ? "W" : "E"}</button>
+        `;
+      } else {
+        const a = _ddToDMS(lat), b = _ddToDMS(lon);
+        inputs = `
+          <input type="number" class="zem-coord-input zem-lat-d" data-idx="${idx}" value="${a.d}" min="0" max="90">
+          <span class="zem-deg-unit">°</span>
+          <input type="number" class="zem-coord-input zem-lat-m" data-idx="${idx}" value="${a.m}" min="0" max="59">
+          <span class="zem-deg-unit">'</span>
+          <input type="number" step="0.01" class="zem-coord-input zem-lat-s" data-idx="${idx}" value="${a.s.toFixed(2)}" min="0" max="59.99">
+          <span class="zem-deg-unit">&quot;</span>
+          <button type="button" class="zem-hemi zem-hemi-lat${!a.neg ? " is-pos" : ""}" data-idx="${idx}" data-axis="lat">${a.neg ? "S" : "N"}</button>
+          <input type="number" class="zem-coord-input zem-lon-d" data-idx="${idx}" value="${b.d}" min="0" max="180">
+          <span class="zem-deg-unit">°</span>
+          <input type="number" class="zem-coord-input zem-lon-m" data-idx="${idx}" value="${b.m}" min="0" max="59">
+          <span class="zem-deg-unit">'</span>
+          <input type="number" step="0.01" class="zem-coord-input zem-lon-s" data-idx="${idx}" value="${b.s.toFixed(2)}" min="0" max="59.99">
+          <span class="zem-deg-unit">&quot;</span>
+          <button type="button" class="zem-hemi zem-hemi-lon${!b.neg ? " is-pos" : ""}" data-idx="${idx}" data-axis="lon">${b.neg ? "W" : "E"}</button>
+        `;
+      }
+      return `
+        <div class="zem-coord-row" data-idx="${idx}">
+          <span class="zem-coord-no">${idx + 1}.</span>
+          ${inputs}
+          <button type="button" class="zem-coord-del" data-idx="${idx}" title="刪除此點">×</button>
+        </div>`;
+    }).join("");
+    list.innerHTML = rows;
+    wireCoordRows();
+  }
+
+  // 把使用者更新的 input 寫回 state.coords[idx]
+  function readRowToCoord(idx) {
+    const row = mask.querySelector(`.zem-coord-row[data-idx="${idx}"]`);
+    if (!row) return;
+    let lat, lon;
+    const latHemi = row.querySelector(".zem-hemi-lat");
+    const lonHemi = row.querySelector(".zem-hemi-lon");
+    const latNeg = !latHemi.classList.contains("is-pos");
+    const lonNeg = !lonHemi.classList.contains("is-pos");
+    if (state.coordFmt === "dd") {
+      lat = parseFloat(row.querySelector(".zem-lat-dd").value);
+      lon = parseFloat(row.querySelector(".zem-lon-dd").value);
+      if (!isFinite(lat) || !isFinite(lon)) return;
+      lat = Math.abs(lat) * (latNeg ? -1 : 1);
+      lon = Math.abs(lon) * (lonNeg ? -1 : 1);
+    } else if (state.coordFmt === "dm") {
+      const ld = parseFloat(row.querySelector(".zem-lat-d").value);
+      const lm = parseFloat(row.querySelector(".zem-lat-m").value);
+      const od = parseFloat(row.querySelector(".zem-lon-d").value);
+      const om = parseFloat(row.querySelector(".zem-lon-m").value);
+      if ([ld, lm, od, om].some(v => !isFinite(v))) return;
+      lat = _dmToDd(ld, lm, latNeg);
+      lon = _dmToDd(od, om, lonNeg);
+    } else {
+      const ld = parseFloat(row.querySelector(".zem-lat-d").value);
+      const lm = parseFloat(row.querySelector(".zem-lat-m").value);
+      const ls = parseFloat(row.querySelector(".zem-lat-s").value);
+      const od = parseFloat(row.querySelector(".zem-lon-d").value);
+      const om = parseFloat(row.querySelector(".zem-lon-m").value);
+      const os = parseFloat(row.querySelector(".zem-lon-s").value);
+      if ([ld, lm, ls, od, om, os].some(v => !isFinite(v))) return;
+      lat = _dmsToDd(ld, lm, ls, latNeg);
+      lon = _dmsToDd(od, om, os, lonNeg);
+    }
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return;
+    state.coords[idx] = [lat, lon];
+  }
+
+  // 即時預覽：拉目前 UI 樣式 + state.coords 重畫地圖上的 polygon
+  function refreshPreview() {
+    const style = {
+      lineType:  $("#zem-linetype")?.value || state.style.lineType,
+      lineWidth: parseFloat($("#zem-linewidth")?.value) || state.style.lineWidth,
+      color:     $("#zem-color")?.value || state.style.color,
+      opacity:   parseFloat($("#zem-opacity")?.value),
+    };
+    if (!isFinite(style.opacity)) style.opacity = state.style.opacity;
+    _zemRefreshPreview(state.coords, style);
+  }
+
+  function wireCoordRows() {
+    mask.querySelectorAll(".zem-coord-input").forEach(inp => {
+      inp.addEventListener("input", () => {
+        const idx = parseInt(inp.dataset.idx, 10);
+        readRowToCoord(idx);
+        refreshPreview();
+      });
+    });
+    mask.querySelectorAll(".zem-hemi").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        const axis = btn.dataset.axis;
+        btn.classList.toggle("is-pos");
+        btn.textContent = btn.classList.contains("is-pos")
+          ? (axis === "lat" ? "N" : "E")
+          : (axis === "lat" ? "S" : "W");
+        readRowToCoord(idx);
+        refreshPreview();
+      });
+    });
+    mask.querySelectorAll(".zem-coord-del").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        if (state.coords.length <= 3) { alert("多邊形至少需要 3 個頂點"); return; }
+        state.coords.splice(idx, 1);
+        renderCoordsList();
+        refreshPreview();
+      });
+    });
+  }
+  renderCoordsList();
+
+  // 座標格式切換（僅顯示格式變，coords 不變，不必更新預覽）
+  mask.querySelectorAll(".zem-coord-tab").forEach(t => {
+    t.addEventListener("click", () => {
+      mask.querySelectorAll(".zem-coord-row").forEach(row => readRowToCoord(parseInt(row.dataset.idx, 10)));
+      mask.querySelectorAll(".zem-coord-tab").forEach(x => x.classList.remove("is-active"));
+      t.classList.add("is-active");
+      state.coordFmt = t.dataset.fmt;
+      renderCoordsList();
+    });
+  });
+
+  // 新增點
+  $("#zem-add-pt").addEventListener("click", () => {
+    mask.querySelectorAll(".zem-coord-row").forEach(row => readRowToCoord(parseInt(row.dataset.idx, 10)));
+    const last = state.coords[state.coords.length - 1] || [23.5, 120.5];
+    state.coords.push([last[0] + 0.01, last[1] + 0.01]);
+    renderCoordsList();
+    refreshPreview();
+  });
+
+  // 樣式變動立即更新預覽
+  ["#zem-linetype", "#zem-linewidth", "#zem-color", "#zem-opacity"].forEach(sel => {
+    const el = $(sel); if (!el) return;
+    el.addEventListener("input",  refreshPreview);
+    el.addEventListener("change", refreshPreview);
+  });
+
+  // 新增組名
+  $("#zem-group-add").addEventListener("click", () => {
+    const name = prompt("新增組名 / New group name:");
+    if (name == null) return;
+    if (!window.addUserZoneGroup(name.trim())) return;
+    state.group = name.trim();
+    refreshGroupSelect();
+  });
+
+  // 關閉時清理預覽圖層
+  function closeAndCleanup() { _zemClearPreview(); close(); }
+  $(".zem-close").addEventListener("click", closeAndCleanup);
+  mask.addEventListener("click", e => { if (e.target === mask) closeAndCleanup(); });
+  $("#zem-cancel").addEventListener("click", closeAndCleanup);
+
+  // 等地圖建好（route 變 #/fleet 後 renderFleet 是 sync 但 fitBounds 有 80ms setTimeout）
+  let waitTries = 0;
+  const initialPreview = () => {
+    if (_fleetMap) { refreshPreview(); return; }
+    if (++waitTries > 30) return;
+    setTimeout(initialPreview, 80);
+  };
+  initialPreview();
+
+  // 保存
+  $("#zem-save").addEventListener("click", () => {
+    // 把 UI 最新值 commit 進 state（包括輸入中尚未 blur 的）
+    mask.querySelectorAll(".zem-coord-row").forEach(row => readRowToCoord(parseInt(row.dataset.idx, 10)));
+    const name = $("#zem-name").value.trim();
+    if (!name) { alert("名稱不可為空"); return; }
+    if (state.coords.length < 3) { alert("多邊形至少需要 3 個頂點"); return; }
+    const group = $("#zem-group").value;
+    const style = {
+      lineType:  $("#zem-linetype").value,
+      lineWidth: parseFloat($("#zem-linewidth").value) || 1,
+      color:     $("#zem-color").value,
+      opacity:   parseFloat($("#zem-opacity").value),
+    };
+    if (mode === "new") {
+      try {
+        window.addUserZone({ name, level: state.level, coords: state.coords.slice(), group, style });
+      } catch (e) { alert("儲存失敗：" + e.message); return; }
+    } else {
+      window.updateUserZone(opts.zoneId, { name, level: state.level, coords: state.coords.slice(), group, style });
+    }
+    closeAndCleanup();
+  });
+}
+
+// 對外保留舊名稱以兼容
+function openZoneEditModal(zid) { return openZoneEditorModal({ mode: "edit", zoneId: zid }); }
+
+/* 使用者圍籬變動時：重畫所有 map 的風險區圖層 + 重畫閾值設定列表（若可見） */
+window.addEventListener("userZonesChanged", () => {
+  // 對每個活躍的 map 重畫風險區圖層
+  [_fleetMap, _mapInstance].forEach(map => {
+    if (!map) return;
+    const old = _riskLayersByMap.get(map);
+    if (old) Object.values(old).forEach(g => { if (map.hasLayer(g)) map.removeLayer(g); });
+    try { drawRiskZones(map); } catch (e) {}
+  });
+  // 閾值設定頁可見的話重畫
+  if (location.hash === "#/thresholds") {
+    try { renderThresholds(); } catch (e) {}
+  }
+});
+
+/* 共用：把持續時間 input 與通知 checkbox 的事件接好（全域層級，不寫入 vessel override）
+ *   - 持續時間：blur / Enter 後寫入 _thresholds[dim].warningDuration / criticalDuration
+ *   - 通知：change 後立即寫入 _thresholds[dim].notify.mail / line
+ *   兩者都會 saveThresholds() 持久化，但 NOT 觸發 syncEventsFromAlerts / renderThresholds，
+ *   避免使用者調整時頁面跳動；下次 Save / re-render 時自然反映。 */
+function wireDurationAndNotify(root) {
+  if (!root) return;
+  root.querySelectorAll(".th-dur-input").forEach(inp => {
+    const save = () => {
+      const dim = inp.dataset.dim;
+      const lvl = inp.dataset.durLvl;
+      if (!_thresholds[dim] || (lvl !== "warning" && lvl !== "critical")) return;
+      const v = parseInt(inp.value, 10);
+      if (!isNaN(v) && v >= 0) {
+        _thresholds[dim][lvl + "Duration"] = v;
+        saveThresholds();
+      }
+    };
+    inp.addEventListener("blur", save);
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } });
+  });
+  root.querySelectorAll('input[type="checkbox"][data-notify]').forEach(cb => {
+    cb.addEventListener("change", () => {
+      const dim = cb.dataset.dim;
+      const kind = cb.dataset.notify;
+      if (_thresholds[dim] && _thresholds[dim].notify && (kind === "mail" || kind === "line")) {
+        _thresholds[dim].notify[kind] = cb.checked;
+        saveThresholds();
+      }
+    });
+  });
 }
 
 /* batch view：單列 commit。依目前 scope 寫入對應層級。
@@ -8754,7 +10790,7 @@ function refreshDimRowLevel(row) {
     return;
   }
   const metric = getDimCurrentMetric(v, dim);
-  const lvl = dimLevelFor(metric, w, c);
+  const lvl = dimLevelFor(metric, w, c, dim);
   if (metric == null) {
     metricEl.classList.add("muted");
     metricEl.innerHTML = "船舶現況 / Current —";
@@ -8898,12 +10934,18 @@ function renderPerVesselSetup(visibleVessels) {
     const metric = getDimCurrentMetric(v, d);
     const effW = valW != null ? valW : defW;
     const effC = valC != null ? valC : defC;
-    const level = dimLevelFor(metric, effW, effC);
+    const level = dimLevelFor(metric, effW, effC, d);
+    const activeEvent = _events.find(e =>
+      e.vessel_id === v.vessel_id && e.dimension === d &&
+      e.status !== "resolved" && !e.cleared
+    ) || null;
     return dimRowHTML({
       dim: d, valW, valC, defW, defC, metric, level, overridden,
       isCore: seg.coreDims.includes(d), segNote,
-      defSource: planTh ? "plan" : null,   // 用於 dimRowHTML 顯示「來自航線計畫」標記
+      defSource: planTh ? "plan" : null,
       withReset: true,
+      activeEvent,
+      vessel: v,  // zone_io 圍籬列要顯示該船目前對各圍籬的距離/狀態
     });
   }).filter(Boolean).join("");
 
@@ -8951,7 +10993,8 @@ function wirePerVesselSetup() {
     });
   });
   // input 即時預覽 + blur/Enter 寫回
-  root.querySelectorAll(".th-input").forEach(inp => {
+  //   排除持續時間 input（.th-dur-input），那條由 wireDurationAndNotify() 處理
+  root.querySelectorAll(".th-input:not(.th-dur-input)").forEach(inp => {
     inp.addEventListener("input", () => refreshDimRowLevel(inp.closest(".th-dim-row")));
     const commit = () => {
       const row = inp.closest(".th-dim-row");
@@ -8982,6 +11025,10 @@ function wirePerVesselSetup() {
     inp.addEventListener("blur", commit);
     inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } });
   });
+  // 持續時間 + 通知方式：全域層級，與 scope / vessel override 無關
+  wireDurationAndNotify(root);
+  // 到離區域監控逐圍籬設定
+  wireZoneIoFences(root);
   // 整個航段一鍵清除
   const segResetBtn = root.querySelector("#th-vv-reset");
   if (segResetBtn) {
@@ -9023,63 +11070,52 @@ function renderThresholds() {
 
   document.getElementById("main").innerHTML = `
     <h2 class="page-title">
-      <span>閾值設定 <span class="bi-line"><span class="en">/ Thresholds</span></span></span>
+      <span>警示閾值設定 <span class="bi-line"><span class="en">/ Alert Thresholds</span></span></span>
       <small>共 ${Object.keys(THRESHOLD_META).length} 個維度${dirtyCount > 0 ? ` · <span style="color:#f5b753">${dirtyCount} 項已修改</span>` : " · 全部為預設值"}</small>
     </h2>
 
     <div style="color:#9aa5b8;font-size:14px;margin-bottom:14px;line-height:1.55">
-      依「分航段集體設定」或「單船設定」兩種模式調整閾值。輸入完成後按 Enter 或點到其它欄位即自動儲存，立即重算所有船舶警示並依新閾值補立事件；觸發條件消失的事件會標記【警報已解除】。可調整的維度為航線偏移、速度異常、漂航圈半徑（速度異常採「超過配速」判定；船舶進入港區時自動暫停航線偏移監控）。
+      閾值即警示觸發條件：達到 <span style="color:#f5b753">Warning</span> 門檻時建立警示事件、進入事件處理流程；達到 <span style="color:#ff8a8a">Critical</span> 門檻時升級。儲存後立即重算所有船舶並自動補立 / 升級 / 解除對應事件。
+      可設定的維度為<b style="color:#c8d4e0">航線偏移</b>（NM）、<b style="color:#c8d4e0">速度異常</b>（超速 %）、<b style="color:#c8d4e0">漂航圈半徑</b>（m）；
+      速度異常採超過配速比例判定；船舶進入港區後自動暫停航線偏移監控。
     </div>
 
     <details class="th-help">
       <summary>使用說明 <span class="en">/ Help</span>　<span class="th-help-hint">點此展開</span></summary>
       <div class="th-help-body">
         <div class="th-help-section">
-          <b>兩種模式的差別</b>
+          <b>閾值 ＝ 警示觸發條件</b>
           <ul>
-            <li><b>分航段集體設定</b>：選一個航段（海上 / 錨泊 / 全航段通用）＋ 套用對象（主管才可選「全船隊預設」；監管只能「我的全部船」）。多個維度同時編輯，「按 Enter 或點到其它欄位」即自動儲存。</li>
-            <li><b>單船設定</b>：選一艘船，逐航段逐維度精細調整。同樣「按 Enter 或點到其它欄位」即自動儲存；已調整的維度會標 ★ 並可用 [復原] 還原；底部「清除此航段所有設定」可一鍵還原該段全部維度。</li>
-            <li>兩個 view 的儲存模式相同，差別只在「想批量套到很多船」就用集體、「想針對一艘船細調」就用單船。</li>
+            <li>每個維度設定 <b style="color:#f5b753">Warning（W）</b> 與 <b style="color:#ff8a8a">Critical（C）</b> 兩個門檻。船舶實測值達到門檻時，系統自動建立事件並進入事件處理流程。</li>
+            <li>儲存後立即重算全船隊：超過門檻 → 自動<b>新立案</b>；數值改善回正常 → 事件標記【警報已解除】。</li>
+            <li>事件可在 <a href="#/events" style="color:#4a9eff;text-decoration:none">事件處理</a> 頁面進行指派、備註、狀態流轉（新立案 → 處理中 → 已解決）。</li>
           </ul>
         </div>
 
         <div class="th-help-section">
-          <b>「船舶現況 / Current」是甚麼？右邊的 Normal / Warning / Critical 徽章又是甚麼？</b>
+          <b>兩種設定模式</b>
           <ul>
-            <li>每一列右側的「船舶現況」顯示<b>該船目前實際測得的數值</b>，與設定的 W/C 對照後得出徽章等級：
-              <ul>
-                <li>目前值 &lt; Warning → <span class="th-row-lvl" data-level="normal">Normal</span> 綠</li>
-                <li>Warning ≤ 目前值 &lt; Critical → <span class="th-row-lvl" data-level="warning">Warning</span> 橘</li>
-                <li>目前值 ≥ Critical → <span class="th-row-lvl" data-level="critical">Critical</span> 紅</li>
-              </ul>
-            </li>
-            <li>編輯 W/C 時徽章會即時刷新，方便預覽「這個閾值套下去，這艘船現在會被歸到哪個等級」。</li>
-            <li>注意：徽章是描述「船舶現況」的結果，不是設定值的等級。</li>
+            <li><b>分航段集體設定</b>：選航段（海上 / 錨泊 / 全航段）＋ 套用對象，多維度同時編輯，Enter 或 blur 自動儲存並套用到所選船隊範圍。</li>
+            <li><b>單船設定</b>：選一艘船逐維度細調；已調整的維度標 ★ 並可個別復原；右側即時顯示目前實測值與等級，以及是否已有進行中事件（<span class="th-ev-badge" style="font-size:11px;display:inline-flex;gap:3px">● 新立案</span>）。</li>
           </ul>
         </div>
 
         <div class="th-help-section">
-          <b>「目前 XXX」單位由維度決定（只顯示在「單船設定」）</b>
+          <b>各維度單位與判定邏輯</b>
           <ul>
-            <li><b>航線偏移 / Route Deviation</b> — <b>NM（海浬）</b>，當下 XTD 與本航次歷史最大偏移取較大者。例：0.366 NM。</li>
-            <li><b>速度異常 / Speed Anomaly</b> — <b>%</b>，超過配速比例 <code>(目前 SOG − 配速) ÷ 配速</code>，僅超速觸發。例：超速 31%。</li>
-            <li><b>漂航圈半徑</b> — <b>m（公尺）</b>，船舶在錨泊狀態（拋錨／漂航）時，位置距漂航圈中心的真實距離（Haversine）。</li>
+            <li><b>航線偏移 / Route Deviation</b> — 單位 <b>NM</b>。取當下 XTD 與本航次最大偏移的較大值；進入港區後自動暫停監控。</li>
+            <li><b>速度異常 / Speed Anomaly</b> — 單位 <b>% 超速</b>，即 <code>(SOG − 配速) ÷ 配速</code>；僅超速觸發，低速不告警。</li>
+            <li><b>漂航圈半徑 / Drift Radius</b> — 單位 <b>m</b>。船舶在錨泊狀態時，與錨泊中心點的 Haversine 距離；非錨泊狀態 → N/A。</li>
+            <li><b>警示信件 / Warning Mail</b> — 由外部來源（StormGeo）直接帶入等級，無 W/C 可調。</li>
           </ul>
-          <div style="color:#7c8a9e;font-size:11px;margin-top:4px">「分航段集體設定」是批次模式，會套到多艘船，因此不顯示單一艘船的「船舶現況」以避免誤導。</div>
+          <div style="color:#7c8a9e;font-size:11px;margin-top:4px">「分航段集體設定」為批次模式，不顯示單船現況以避免誤導。</div>
         </div>
 
         <div class="th-help-section">
           <b>套用對象（依登入身份）</b>
           <ul>
-            <li><b>主管 / Supervisor</b>：可選「全船隊預設」與「我的全部船」（= 全部 9 艘）。</li>
-            <li><b>監管人員 / Manager</b>：只能選「我的全部船」（= 自己管的 3 艘）；如需針對個別船舶，請切到「單船設定」分頁。</li>
-          </ul>
-        </div>
-
-        <div class="th-help-section">
-          <b>不在此處設定的維度</b>
-          <ul>
-            <li><b>警示信件 / Warning Mail</b> — 由外部來源（StormGeo 通知信）直接決定等級，無 W/C 可調。</li>
+            <li><b>主管 / Supervisor</b>：可選「全船隊預設」或「依監管人員的船隊」。</li>
+            <li><b>監管人員 / Manager</b>：固定套用「我的全部船」；個別船舶請切換至「單船設定」。</li>
           </ul>
         </div>
       </div>
@@ -9091,7 +11127,8 @@ function renderThresholds() {
     </div>
 
     <div class="th-view-body" data-view="${_thresholdView}">
-      ${_thresholdView === "vessel" ? renderPerVesselSetup(visibleVessels) : renderBatchBySegmentSetup(visibleVessels)}
+      ${_thresholdView === "vessel" ? renderPerVesselSetup(visibleVessels)
+      : renderBatchBySegmentSetup(visibleVessels)}
     </div>
   `;
 
@@ -9112,11 +11149,28 @@ function renderThresholds() {
 }
 
 function saveThresholdsFromPage() {
-  // 從頁面內所有 .th-input 讀回
+  // 從頁面內所有 .th-input 讀回：W/C 數值（data-lvl）與持續時間（data-dur-lvl）
+  // 注意：dimRowHTML 用的是 data-dim（不是 data-k），此處也支援兩種命名
   document.querySelectorAll("#main .th-input").forEach(el => {
-    const k = el.dataset.k, lvl = el.dataset.lvl;
-    const v = parseFloat(el.value);
-    if (!isNaN(v) && _thresholds[k]) _thresholds[k][lvl] = v;
+    const k = el.dataset.k || el.dataset.dim;
+    if (!_thresholds[k]) return;
+    const durLvl = el.dataset.durLvl;
+    if (durLvl) {
+      const v = parseInt(el.value, 10);
+      if (!isNaN(v) && v >= 0) _thresholds[k][durLvl + "Duration"] = v;
+    } else {
+      const lvl = el.dataset.lvl;
+      const v = parseFloat(el.value);
+      if (!isNaN(v) && (lvl === "warning" || lvl === "critical")) _thresholds[k][lvl] = v;
+    }
+  });
+  // 通知 checkbox：讀回 mail / line 兩個布林
+  document.querySelectorAll('#main input[type="checkbox"][data-notify]').forEach(cb => {
+    const k = cb.dataset.k || cb.dataset.dim;
+    const kind = cb.dataset.notify;
+    if (_thresholds[k] && _thresholds[k].notify && (kind === "mail" || kind === "line")) {
+      _thresholds[k].notify[kind] = cb.checked;
+    }
   });
   saveThresholds();
   syncEventsFromAlerts();   // 用新閾值重評估、補立案
@@ -9276,8 +11330,691 @@ function initUserSwitcher() {
   }
 }
 
+/* ─────────────────────────────────────────────────────────────────
+ * 警示設定頁 #/alert-settings
+ * ───────────────────────────────────────────────────────────────── */
+const AS_STORAGE_KEY = "slab_va_as_v1";
+let _asSection = sessionStorage.getItem("slab_va_as_sec") || "channels";
+
+function _asDefaults() {
+  return {
+    channels: { system: true, email: true, line: false },
+    portAlert: { arrival: true, berth: true, departure: true },
+    geofence:  { enterEnabled: true, leaveEnabled: true, zones: [] },
+    speed:     { enabled: true, direction: "lt", knots: 12, duration: 5 },
+    drift:     { autoEnabled: true, autoRadius: 1,
+                 customEnabled: false, lat_deg: 35, lat_min: 31.442, lat_hem: "N",
+                 lon_deg: 18, lon_min: 11.500, lon_hem: "E", customRadius: 1 },
+    aisLost:   { enabled: true, duration: 60 },
+    routeDev:  { enabled: true, routeId: "", deviation: 1, duration: 30 },
+    berthing:  { enabled: true, distance: 100, duration: 30, areaMode: "any", zones: [] }
+  };
+}
+let _alertSettings = _asDefaults();
+
+function loadAlertSettings() {
+  try {
+    const raw = localStorage.getItem(AS_STORAGE_KEY);
+    if (raw) _alertSettings = Object.assign(_asDefaults(), JSON.parse(raw));
+  } catch(e) {}
+}
+function saveAlertSettings() {
+  try { localStorage.setItem(AS_STORAGE_KEY, JSON.stringify(_alertSettings)); } catch(e) {}
+}
+
+function _asNumInp(id, val, min, max, step, unit) {
+  return `<div class="th-input-wrap"><input type="number" class="th-input as-ni" id="${id}" value="${val}" min="${min}" max="${max}" step="${step}"><div class="th-stepper"><button type="button" class="th-step-up" data-for="${id}"><svg viewBox="0 0 12 12"><path d="M2 8 L6 4 L10 8"/></svg></button><button type="button" class="th-step-down" data-for="${id}"><svg viewBox="0 0 12 12"><path d="M2 4 L6 8 L10 4"/></svg></button></div><span class="th-unit">${unit}</span></div>`;
+}
+
+function _asZoneTags(selectedZones, prefix) {
+  const zones = window.RISK_ZONES ? window.RISK_ZONES.slice(0, 12) : [
+    {id:"oman-south", name:"阿曼南側航線"}, {id:"hormuz-risk", name:"荷姆茲海峽高風險區"},
+    {id:"larak-exit", name:"拉拉克島出灣航線"}, {id:"mine-zone", name:"水雷區域"},
+    {id:"tw-navtex-1",name:"Taiwan Navtex Fir-A"},{id:"tw-navtex-2",name:"Taiwan Navtex Fir-B"},
+    {id:"tw-navtex-3",name:"Taiwan Navtex Fir-C"},{id:"tw-navtex-4",name:"Taiwan Navtex Fir-D"},
+    {id:"fuzhou-nav", name:"福州海事局發佈航行通告"},{id:"pingtan-nav",name:"平澳海事局發佈航行通告"}
+  ];
+  return `<div class="as-tag-grid">${zones.map(z =>
+    `<button type="button" class="as-tag-btn${selectedZones.includes(z.id)?" active":""}" data-zone="${escapeHtml(z.id)}" data-prefix="${prefix}">${escapeHtml(z.name)}</button>`
+  ).join("")}</div>`;
+}
+
+/* dim row 下方嵌入監測開關 + 持續時間 */
+function _buildDimAlertExt(enId, enKey, enProp, durId, durVal, curEnabled) {
+  const n = _asNumInp;
+  const ds = ok => ok ? "" : "opacity:0.4;pointer-events:none";
+  return `
+  <div class="th-dim-alert-ext">
+    <label style="display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#9aa5b8;cursor:pointer">
+      <input type="checkbox" class="as-cb" id="${enId}" data-k="${enKey}" data-p="${enProp}"${curEnabled ? " checked" : ""}>
+      <span style="color:#c8d4e0">監測開關</span><span style="color:#5e6b80;font-size:11px"> / Alert enabled</span>
+    </label>
+    <div id="${enId}-body" style="${ds(curEnabled)};display:inline-flex;align-items:center;gap:6px;margin-left:16px">
+      <span style="font-size:13px;color:#9aa5b8">持續時間：</span>${n(durId, durVal, 1, 240, 1, "分鐘")}
+    </div>
+  </div>`;
+}
+function _buildRouteDimAlertExt() {
+  return _buildDimAlertExt("ba-rd-en", "routeDev", "enabled", "ba-rd-dur",
+    _alertSettings.routeDev.duration, _alertSettings.routeDev.enabled);
+}
+function _buildSpeedDimAlertExt() {
+  return _buildDimAlertExt("ba-sp-en", "speed", "enabled", "ba-sp-dur",
+    _alertSettings.speed.duration, _alertSettings.speed.enabled);
+}
+
+/* ── 警示設定：嵌入各航段卡片（段內項目） ── */
+function _renderSegmentAlertBlock(segKey) {
+  const seg = SEGMENT_META[segKey];
+  if (!seg) return "";
+  const s = _alertSettings;
+  const n = _asNumInp;
+  const ds = ok => ok ? "" : "opacity:0.4;pointer-events:none";
+  let cards = "";
+
+  if (seg.dims.includes("driftAnchor")) {
+    cards += `
+    <div class="th-alert-card">
+      <div class="th-alert-card-title">
+        <input type="checkbox" class="as-cb" id="ba-dr-auto" data-k="drift" data-p="autoEnabled"${s.drift.autoEnabled ? " checked" : ""}>
+        <label for="ba-dr-auto">漂航圈偏移監控 <span style="color:#5e6b80;font-weight:400;font-size:12px">/ Drift Watch Alert</span></label>
+      </div>
+      <div id="ba-dr-auto-p" style="${ds(s.drift.autoEnabled)}">
+        <div class="th-alert-params">
+          <span>走錨自動監控 — 離開錨地：</span>${n("ba-dr-auto-r", s.drift.autoRadius, 0.1, 50, 0.1, "公里")}
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="th-alert-card-title" style="margin-bottom:4px">
+          <input type="checkbox" class="as-cb" id="ba-dr-cus" data-k="drift" data-p="customEnabled"${s.drift.customEnabled ? " checked" : ""}>
+          <label for="ba-dr-cus">自訂錨地位置</label>
+        </div>
+        <div id="ba-dr-cus-body" style="${ds(s.drift.customEnabled)}">
+          <div class="th-alert-params" style="flex-wrap:wrap">
+            <span>緯度：</span>
+            ${n("ba-lat-deg", s.drift.lat_deg, 0, 90, 1, "°")}
+            ${n("ba-lat-min", s.drift.lat_min, 0, 59.999, 0.001, "′")}
+            <select class="as-select" id="ba-lat-hem"><option value="N"${s.drift.lat_hem === "N" ? " selected" : ""}>N</option><option value="S"${s.drift.lat_hem === "S" ? " selected" : ""}>S</option></select>
+          </div>
+          <div class="th-alert-params" style="flex-wrap:wrap;margin-top:6px">
+            <span>經度：</span>
+            ${n("ba-lon-deg", s.drift.lon_deg, 0, 180, 1, "°")}
+            ${n("ba-lon-min", s.drift.lon_min, 0, 59.999, 0.001, "′")}
+            <select class="as-select" id="ba-lon-hem"><option value="E"${s.drift.lon_hem === "E" ? " selected" : ""}>E</option><option value="W"${s.drift.lon_hem === "W" ? " selected" : ""}>W</option></select>
+          </div>
+          <div class="th-alert-params" style="margin-top:8px">
+            <span>離開錨位：</span>${n("ba-dr-cus-r", s.drift.customRadius, 0.1, 50, 0.1, "公里")}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (!cards) return "";
+  return `
+  <div class="th-alert-block">
+    <div class="th-alert-block-head">⚡ 警示設定 <span class="en">/ Alert Parameters</span></div>
+    ${cards}
+  </div>`;
+}
+
+/* ── 警示設定：通用提醒卡（不受航段影響） ── */
+function _renderGlobalAlertCard() {
+  const s = _alertSettings;
+  const n = _asNumInp;
+  const ds = ok => ok ? "" : "opacity:0.4;pointer-events:none";
+  return `
+  <details class="th-global-alert-card">
+    <summary>🔔 通用提醒設定 <span class="en">/ Global Alert Config</span> <span class="th-gac-hint">（不受航段影響）</span></summary>
+    <div class="th-gac-body">
+      <div class="th-gac-section">
+        <div class="th-gac-label">通知管道 / Channels</div>
+        <div class="as-channel-row">
+          <button type="button" class="as-channel-btn${s.channels.system ? " active" : ""}" data-ch="system"><span class="ch-dot"></span>系統內</button>
+          <button type="button" class="as-channel-btn${s.channels.email ? " active" : ""}" data-ch="email"><span class="ch-dot"></span>Email</button>
+          <button type="button" class="as-channel-btn${s.channels.line ? " active" : ""}" data-ch="line"><span class="ch-dot"></span>Line</button>
+        </div>
+      </div>
+      <div class="th-gac-section">
+        <div class="th-gac-label">到離港提醒 / Port Alerts</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#9aa5b8;font-size:13px"><input type="checkbox" class="as-cb" data-k="portAlert" data-p="arrival"${s.portAlert.arrival ? " checked" : ""}> 到港</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#9aa5b8;font-size:13px"><input type="checkbox" class="as-cb" data-k="portAlert" data-p="berth"${s.portAlert.berth ? " checked" : ""}> 靠泊</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#9aa5b8;font-size:13px"><input type="checkbox" class="as-cb" data-k="portAlert" data-p="departure"${s.portAlert.departure ? " checked" : ""}> 離港</label>
+        </div>
+      </div>
+      <div class="th-gac-section">
+        <div class="th-gac-label">到離電子圍籬 / Geofence</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#9aa5b8;font-size:13px"><input type="checkbox" class="as-cb" data-k="geofence" data-p="enterEnabled"${s.geofence.enterEnabled ? " checked" : ""}> 到達圍籬</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#9aa5b8;font-size:13px"><input type="checkbox" class="as-cb" data-k="geofence" data-p="leaveEnabled"${s.geofence.leaveEnabled ? " checked" : ""}> 離開圍籬</label>
+        </div>
+        ${_asZoneTags(s.geofence.zones, "gf")}
+      </div>
+      <div class="th-gac-section">
+        <div class="th-gac-label">AIS 信號中斷 / AIS Lost</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#9aa5b8;font-size:13px;margin-bottom:8px">
+          <input type="checkbox" class="as-cb" id="ba-ais-en" data-k="aisLost" data-p="enabled"${s.aisLost.enabled ? " checked" : ""}> 信號消失提醒
+        </label>
+        <div id="ba-ais-body" style="${ds(s.aisLost.enabled)}">
+          <div class="th-alert-params"><span>消失時間門檻：</span>${n("ba-ais-dur", s.aisLost.duration, 10, 1440, 10, "分鐘")}</div>
+        </div>
+      </div>
+      <div class="th-gac-section">
+        <div class="th-gac-label">搭靠接近警示 / Berthing Alert</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#9aa5b8;font-size:13px;margin-bottom:8px">
+          <input type="checkbox" class="as-cb" id="ba-bt-en" data-k="berthing" data-p="enabled"${s.berthing.enabled ? " checked" : ""}> 搭靠接近警示
+        </label>
+        <div id="ba-bt-body" style="${ds(s.berthing.enabled)}">
+          <div class="th-alert-params" style="margin-bottom:8px">
+            <span>警示距離：</span>${n("ba-bt-dist", s.berthing.distance, 10, 200, 10, "米")}
+            <span style="margin-left:12px">持續時間：</span>${n("ba-bt-dur", s.berthing.duration, 5, 120, 5, "分鐘")}
+          </div>
+          <div style="font-size:12px;color:#9aa5b8;margin-bottom:6px">
+            搭靠區域：
+            <label style="margin-left:12px;cursor:pointer"><input type="radio" name="ba-bt-area" value="any"${s.berthing.areaMode === "any" ? " checked" : ""} style="accent-color:#4a9eff;margin-right:4px"> 不限</label>
+            <label style="margin-left:12px;cursor:pointer"><input type="radio" name="ba-bt-area" value="zone"${s.berthing.areaMode === "zone" ? " checked" : ""} style="accent-color:#4a9eff;margin-right:4px"> 指定標記區域</label>
+          </div>
+          <div id="ba-bt-zones" style="${s.berthing.areaMode === "zone" ? "" : "display:none"}">
+            ${_asZoneTags(s.berthing.zones, "berth")}
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>`;
+}
+
+/* ── 警示區塊接線（batch / vessel 兩個 view 共用） ── */
+function _wireAlertBlock(root) {
+  // Checkbox → _alertSettings + 子參數 enable/disable
+  root.querySelectorAll(".as-cb").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const obj = cb.dataset.k, prop = cb.dataset.p;
+      _alertSettings[obj][prop] = cb.checked;
+      const specialMap = {
+        "speed.enabled":       "ba-sp-en-body",
+        "routeDev.enabled":    "ba-rd-en-body",
+        "drift.autoEnabled":   "ba-dr-auto-p",
+        "drift.customEnabled": "ba-dr-cus-body",
+        "aisLost.enabled":     "ba-ais-body",
+        "berthing.enabled":    "ba-bt-body",
+      };
+      const el = document.getElementById(specialMap[`${obj}.${prop}`]);
+      if (el) { el.style.opacity = cb.checked ? "" : "0.4"; el.style.pointerEvents = cb.checked ? "" : "none"; }
+      saveAlertSettings();
+    });
+  });
+
+  // 通知管道 toggle
+  root.querySelectorAll(".as-channel-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const ch = btn.dataset.ch;
+      _alertSettings.channels[ch] = !_alertSettings.channels[ch];
+      btn.classList.toggle("active", _alertSettings.channels[ch]);
+      saveAlertSettings();
+    });
+  });
+
+  // Stepper 按鈕
+  root.querySelectorAll(".th-step-up, .th-step-down").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const inp = document.getElementById(btn.dataset.for);
+      if (!inp) return;
+      const step = parseFloat(inp.step) || 1;
+      const cur  = parseFloat(inp.value) || 0;
+      const min  = inp.min !== "" ? parseFloat(inp.min) : -Infinity;
+      const max  = inp.max !== "" ? parseFloat(inp.max) :  Infinity;
+      inp.value  = btn.classList.contains("th-step-up")
+        ? Math.min(max, parseFloat((cur + step).toFixed(6)))
+        : Math.max(min, parseFloat((cur - step).toFixed(6)));
+      inp.dispatchEvent(new Event("change"));
+    });
+  });
+
+  // 數值輸入 auto-save
+  const numSaveMap = {
+    "ba-sp-dur":     v => { _alertSettings.speed.duration        = v; saveAlertSettings(); },
+    "ba-rd-dur":     v => { _alertSettings.routeDev.duration     = v; saveAlertSettings(); },
+    "ba-dr-auto-r":  v => { _alertSettings.drift.autoRadius      = v; saveAlertSettings(); },
+    "ba-dr-cus-r":   v => { _alertSettings.drift.customRadius    = v; saveAlertSettings(); },
+    "ba-lat-deg":    v => { _alertSettings.drift.lat_deg         = v; saveAlertSettings(); },
+    "ba-lat-min":    v => { _alertSettings.drift.lat_min         = v; saveAlertSettings(); },
+    "ba-lon-deg":    v => { _alertSettings.drift.lon_deg         = v; saveAlertSettings(); },
+    "ba-lon-min":    v => { _alertSettings.drift.lon_min         = v; saveAlertSettings(); },
+    "ba-ais-dur":    v => { _alertSettings.aisLost.duration      = v; saveAlertSettings(); },
+    "ba-bt-dist":    v => { _alertSettings.berthing.distance     = v; saveAlertSettings(); },
+    "ba-bt-dur":     v => { _alertSettings.berthing.duration     = v; saveAlertSettings(); },
+  };
+  Object.entries(numSaveMap).forEach(([id, fn]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const handler = () => { const v = parseFloat(el.value); if (!isNaN(v)) fn(v); };
+    el.addEventListener("change", handler);
+    el.addEventListener("blur",   handler);
+  });
+
+  // Select auto-save
+  const selSaveMap = {
+    "ba-lat-hem": v => { _alertSettings.drift.lat_hem = v; saveAlertSettings(); },
+    "ba-lon-hem": v => { _alertSettings.drift.lon_hem = v; saveAlertSettings(); },
+  };
+  Object.entries(selSaveMap).forEach(([id, fn]) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("change", () => fn(el.value));
+  });
+
+  // Zone tag 切換
+  root.querySelectorAll(".as-tag-btn[data-zone]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const zid = btn.dataset.zone, prefix = btn.dataset.prefix;
+      const key = prefix === "gf" ? "geofence" : "berthing";
+      const arr = _alertSettings[key].zones;
+      const idx = arr.indexOf(zid);
+      if (idx === -1) arr.push(zid); else arr.splice(idx, 1);
+      btn.classList.toggle("active", idx === -1);
+      saveAlertSettings();
+    });
+  });
+
+  // 搭靠區域 radio
+  root.querySelectorAll('input[name="ba-bt-area"]').forEach(r => {
+    r.addEventListener("change", () => {
+      _alertSettings.berthing.areaMode = r.value;
+      const el = document.getElementById("ba-bt-zones");
+      if (el) el.style.display = r.value === "zone" ? "" : "none";
+      saveAlertSettings();
+    });
+  });
+}
+
+function _buildAlertHtml() {
+  const s = _alertSettings;
+  const n = _asNumInp;
+  const sec = k => _asSection === k ? " active" : "";
+  const ds  = ok => ok ? "" : "opacity:0.4;pointer-events:none";
+
+  const navItems = [
+    { key:"channels",  label:"通知管道" },
+    { key:"portAlert", label:"到離港提醒" },
+    { key:"geofence",  label:"到離電子圍籬" },
+    { key:"speed",     label:"速度異常警示" },
+    { key:"drift",     label:"漂航圈偏移監控" },
+    { key:"aisLost",   label:"AIS 信號中斷" },
+    { key:"routeDev",  label:"航線偏移監控" },
+    { key:"berthing",  label:"搭靠接近警示" },
+  ];
+
+  const routeOpts = VESSELS.map(v => {
+    const dep = v.planned_track.find(p => p.position_type === "Departure");
+    const label = dep ? `${v.vessel_name}（${dep.port_name || dep.port_unlocode}）` : v.vessel_name;
+    return `<option value="${v.vessel_id}"${s.routeDev.routeId==v.vessel_id?" selected":""}>${escapeHtml(label)}</option>`;
+  }).join("");
+
+  return `<div class="as-outer">
+  <div class="as-layout">
+    <nav class="as-nav">
+      ${navItems.map(it=>`<div class="as-nav-item${sec(it.key)}" data-sec="${it.key}">${it.label}</div>`).join("")}
+    </nav>
+    <div class="as-content">
+
+      <!-- 通知管道 -->
+      <div class="as-section${sec("channels")}" data-section="channels">
+        <div class="as-section-title">通知管道 <span style="font-size:14px;font-weight:400;color:#7c8a9e">/ Notification Channels</span></div>
+        <div class="as-section-desc">選擇接收警示通知的管道，至少需開啟一個。</div>
+        <div class="as-channel-row">
+          <button type="button" class="as-channel-btn${s.channels.system?" active":""}" data-ch="system"><span class="ch-dot"></span>系統內</button>
+          <button type="button" class="as-channel-btn${s.channels.email?" active":""}" data-ch="email"><span class="ch-dot"></span>Email</button>
+          <button type="button" class="as-channel-btn${s.channels.line?" active":""}" data-ch="line"><span class="ch-dot"></span>Line</button>
+        </div>
+        <div style="margin-top:16px;font-size:12px;color:#5e6b80;line-height:1.8">
+          <span style="color:#7c8a9e">系統內：</span>登入系統後可在警示中心查閱所有未讀通知。<br>
+          <span style="color:#7c8a9e">Email：</span>依各使用者帳號綁定的電子郵件發送。<br>
+          <span style="color:#7c8a9e">Line：</span>需先在帳號設定完成 Line 通知綁定。
+        </div>
+      </div>
+
+      <!-- 到離港提醒 -->
+      <div class="as-section${sec("portAlert")}" data-section="portAlert">
+        <div class="as-section-title">到離港提醒</div>
+        <div class="as-section-desc">船舶進出港口時依以下條件發送提醒。</div>
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-pa-arr" data-k="portAlert" data-p="arrival"${s.portAlert.arrival?" checked":""}>
+          <div class="as-field-body"><label class="as-field-label" for="as-pa-arr">到港提醒</label><div class="as-field-sub">船舶到達船訊網設定的標準港口時發送提醒</div></div>
+        </div>
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-pa-berth" data-k="portAlert" data-p="berth"${s.portAlert.berth?" checked":""}>
+          <div class="as-field-body"><label class="as-field-label" for="as-pa-berth">靠泊提醒</label><div class="as-field-sub">船舶靠泊船訊網設定的標準港口時發送提醒</div></div>
+        </div>
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-pa-dep" data-k="portAlert" data-p="departure"${s.portAlert.departure?" checked":""}>
+          <div class="as-field-body"><label class="as-field-label" for="as-pa-dep">離港提醒</label><div class="as-field-sub">船舶離開船訊網設定的標準港口時發送提醒</div></div>
+        </div>
+      </div>
+
+      <!-- 到離電子圍籬 -->
+      <div class="as-section${sec("geofence")}" data-section="geofence">
+        <div class="as-section-title">到離電子圍籬</div>
+        <div class="as-section-desc">船舶進入或離開自定義電子圍籬區域時發送提醒。</div>
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-gf-enter" data-k="geofence" data-p="enterEnabled"${s.geofence.enterEnabled?" checked":""}>
+          <div class="as-field-body"><label class="as-field-label" for="as-gf-enter">到達電子圍籬提醒</label><div class="as-field-sub">船舶到達自定義區域提醒</div></div>
+        </div>
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-gf-leave" data-k="geofence" data-p="leaveEnabled"${s.geofence.leaveEnabled?" checked":""}>
+          <div class="as-field-body"><label class="as-field-label" for="as-gf-leave">離開電子圍籬提醒</label><div class="as-field-sub">船舶離開自定義區域提醒</div></div>
+        </div>
+        <div class="as-divider">選擇電子圍籬</div>
+        ${_asZoneTags(s.geofence.zones, "gf")}
+      </div>
+
+      <!-- 速度異常警示 -->
+      <div class="as-section${sec("speed")}" data-section="speed">
+        <div class="as-section-title">速度異常警示</div>
+        <div class="as-section-desc">船速低於／高於設定的絕對速度並持續一定時間則即時提醒；超速偏離閾值另控制 Warning / Critical 等級判定，與分航段集體設定共用同一組數值。</div>
+
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-sp-en" data-k="speed" data-p="enabled"${s.speed.enabled?" checked":""}>
+          <div class="as-field-body">
+            <label class="as-field-label" for="as-sp-en">絕對速度提醒</label>
+            <div class="as-field-sub">船速高於／低於設定的速度並持續一定時間則發送提醒</div>
+            <div class="as-field-params" style="${ds(s.speed.enabled)};margin-top:8px">
+              <span>速度設定：</span>
+              <select class="as-select" id="as-sp-dir">
+                <option value="lt"${s.speed.direction==="lt"?" selected":""}>小於</option>
+                <option value="gt"${s.speed.direction==="gt"?" selected":""}>大於</option>
+              </select>
+              ${n("as-sp-kn", s.speed.knots, 0, 50, 0.5, "節")}
+            </div>
+            <div class="as-field-params" style="${ds(s.speed.enabled)};margin-top:8px">
+              <span>持續時間：</span>${n("as-sp-dur", s.speed.duration, 1, 120, 1, "分鐘")}
+            </div>
+          </div>
+        </div>
+
+        <div class="as-divider" style="margin-top:16px">超速偏離閾值 <span style="color:#5e6b80;font-weight:400;font-size:10px;text-transform:none;margin-left:6px">/ Overspeed Threshold · 與分航段集體設定共用</span></div>
+        <div style="font-size:12px;color:#7c8a9e;margin-bottom:12px;line-height:1.5">
+          超出配速（計畫平均速度）的比例，達此門檻即判定 Warning / Critical 等級。<br>
+          適用航段：<b style="color:#9aa5b8">海上航段</b>、<b style="color:#9aa5b8">全航段通用</b>。
+        </div>
+        <div class="as-field" style="padding:6px 0 6px;border-bottom:none">
+          <div class="as-field-body">
+            <div class="as-field-params" style="margin-bottom:10px">
+              <span style="min-width:90px;color:#f5b753">Warning ≥</span>
+              ${n("as-sp-warn", Math.round(_thresholds.speed.warning*100), 0, 200, 5, "% 超速")}
+            </div>
+            <div class="as-field-params">
+              <span style="min-width:90px;color:#ff8a8a">Critical ≥</span>
+              ${n("as-sp-crit", Math.round(_thresholds.speed.critical*100), 0, 200, 5, "% 超速")}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 漂航圈偏移監控 -->
+      <div class="as-section${sec("drift")}" data-section="drift">
+        <div class="as-section-title">漂航圈偏移監控</div>
+        <div class="as-section-desc">監控船舶在錨泊狀態下是否偏離設定位置。</div>
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-dr-auto" data-k="drift" data-p="autoEnabled"${s.drift.autoEnabled?" checked":""}>
+          <div class="as-field-body">
+            <label class="as-field-label" for="as-dr-auto">走錨自動監控</label>
+            <div class="as-field-sub">（船舶在拋錨狀態自動監控）</div>
+            <div class="as-field-params" id="as-dr-auto-p" style="${ds(s.drift.autoEnabled)};margin-top:8px">
+              <span>離開錨地：</span>${n("as-dr-auto-r", s.drift.autoRadius, 0.1, 50, 0.1, "公里")}
+            </div>
+          </div>
+        </div>
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-dr-cus" data-k="drift" data-p="customEnabled"${s.drift.customEnabled?" checked":""}>
+          <div class="as-field-body">
+            <label class="as-field-label" for="as-dr-cus">自訂錨地位置</label>
+            <div id="as-dr-cus-body" style="${ds(s.drift.customEnabled)}">
+              <div class="as-coord-group" style="margin-top:8px">
+                <span class="as-coord-label">緯度：</span>
+                ${n("as-lat-deg", s.drift.lat_deg, 0, 90, 1, "°")}
+                ${n("as-lat-min", s.drift.lat_min, 0, 59.999, 0.001, "′")}
+                <select class="as-select" id="as-lat-hem"><option value="N"${s.drift.lat_hem==="N"?" selected":""}>N</option><option value="S"${s.drift.lat_hem==="S"?" selected":""}>S</option></select>
+              </div>
+              <div class="as-coord-group" style="margin-top:6px">
+                <span class="as-coord-label">經度：</span>
+                ${n("as-lon-deg", s.drift.lon_deg, 0, 180, 1, "°")}
+                ${n("as-lon-min", s.drift.lon_min, 0, 59.999, 0.001, "′")}
+                <select class="as-select" id="as-lon-hem"><option value="E"${s.drift.lon_hem==="E"?" selected":""}>E</option><option value="W"${s.drift.lon_hem==="W"?" selected":""}>W</option></select>
+              </div>
+              <div class="as-field-params" style="margin-top:8px">
+                <span>離開錨位：</span>${n("as-dr-cus-r", s.drift.customRadius, 0.1, 50, 0.1, "公里")}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AIS 信號中斷 -->
+      <div class="as-section${sec("aisLost")}" data-section="aisLost">
+        <div class="as-section-title">AIS 信號中斷</div>
+        <div class="as-section-desc">船舶 AIS 訊號消失超過設定時間則發送提醒。</div>
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-ais-en" data-k="aisLost" data-p="enabled"${s.aisLost.enabled?" checked":""}>
+          <div class="as-field-body">
+            <label class="as-field-label" for="as-ais-en">信號消失提醒</label>
+            <div class="as-field-params" style="${ds(s.aisLost.enabled)};margin-top:8px">
+              <span>消失時間門檻：</span>${n("as-ais-dur", s.aisLost.duration, 10, 1440, 10, "分鐘")}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 航線偏移監控 -->
+      <div class="as-section${sec("routeDev")}" data-section="routeDev">
+        <div class="as-section-title">航線偏移監控</div>
+        <div class="as-section-desc">船舶偏離計畫航線超過設定的距離並持續一定時間則發送提醒。</div>
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-rd-en" data-k="routeDev" data-p="enabled"${s.routeDev.enabled?" checked":""}>
+          <div class="as-field-body">
+            <label class="as-field-label" for="as-rd-en">航線偏移監控</label>
+            <div class="as-field-params" style="${ds(s.routeDev.enabled)};margin-top:8px">
+              <span>計畫航線：</span>
+              <select class="as-select" id="as-rd-sel"><option value="">請選擇</option>${routeOpts}</select>
+              <button type="button" class="as-tag-btn" style="height:32px;padding:0 10px">＋ 新增</button>
+            </div>
+            <div class="as-field-params" style="${ds(s.routeDev.enabled)};margin-top:8px">
+              <span>偏離航線：</span>${n("as-rd-dev", s.routeDev.deviation, 0.1, 50, 0.1, "NM 提醒")}
+            </div>
+            <div class="as-field-params" style="${ds(s.routeDev.enabled)};margin-top:8px">
+              <span>持續時間：</span>${n("as-rd-dur", s.routeDev.duration, 1, 240, 5, "分鐘")}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 搭靠接近警示 -->
+      <div class="as-section${sec("berthing")}" data-section="berthing">
+        <div class="as-section-title">搭靠接近警示</div>
+        <div class="as-section-desc">船舶接近其他船舶或進入指定區域時發送提醒。</div>
+        <div class="as-field">
+          <input type="checkbox" class="as-cb" id="as-bt-en" data-k="berthing" data-p="enabled"${s.berthing.enabled?" checked":""}>
+          <div class="as-field-body">
+            <label class="as-field-label" for="as-bt-en">搭靠接近警示</label>
+            <div id="as-bt-body" style="${ds(s.berthing.enabled)}">
+              <div class="as-field-params" style="margin-top:8px">
+                <span>搭靠警示距離：</span>${n("as-bt-dist", s.berthing.distance, 10, 200, 10, "米（10–200）")}
+              </div>
+              <div class="as-field-params" style="margin-top:8px">
+                <span>持續時間：</span>${n("as-bt-dur", s.berthing.duration, 5, 120, 5, "分鐘（5–120）")}
+              </div>
+              <div style="margin-top:12px;font-size:13px;color:#9aa5b8">
+                選擇搭靠區域：
+                <label style="margin-left:12px;cursor:pointer"><input type="radio" name="as-bt-area" value="any"${s.berthing.areaMode==="any"?" checked":""} style="accent-color:#4a9eff;margin-right:4px"> 不限</label>
+                <label style="margin-left:12px;cursor:pointer"><input type="radio" name="as-bt-area" value="zone"${s.berthing.areaMode==="zone"?" checked":""} style="accent-color:#4a9eff;margin-right:4px"> 指定標記區域</label>
+                <a href="#" onclick="return false" style="margin-left:14px;color:#4a9eff;font-size:12px;text-decoration:none">新建區域</a>
+              </div>
+              <div id="as-bt-zones" style="${s.berthing.areaMode==="zone"?"":"display:none"};margin-top:8px">
+                ${_asZoneTags(s.berthing.zones, "berth")}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="as-footer">
+    <button type="button" class="as-btn as-btn-cancel" id="as-cancel-btn">取消</button>
+    <button type="button" class="as-btn as-btn-save"   id="as-save-btn">儲存</button>
+  </div>
+</div>`;
+}
+
+function wireAlertSettings() {
+  const main = document.getElementById("main");
+
+  // 左側導覽切換
+  main.querySelectorAll(".as-nav-item").forEach(el => {
+    el.addEventListener("click", () => {
+      _asSection = el.dataset.sec;
+      sessionStorage.setItem("slab_va_as_sec", _asSection);
+      main.querySelectorAll(".as-nav-item").forEach(n => n.classList.toggle("active", n.dataset.sec === _asSection));
+      main.querySelectorAll(".as-section").forEach(s => s.classList.toggle("active", s.dataset.section === _asSection));
+    });
+  });
+
+  // 通知管道 toggle
+  main.querySelectorAll(".as-channel-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const ch = btn.dataset.ch;
+      _alertSettings.channels[ch] = !_alertSettings.channels[ch];
+      btn.classList.toggle("active", _alertSettings.channels[ch]);
+    });
+  });
+
+  // Checkbox → enable/disable sub-params (inline style)
+  main.querySelectorAll(".as-cb").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const obj = cb.dataset.k, prop = cb.dataset.p;
+      _alertSettings[obj][prop] = cb.checked;
+      // 通用：切換同一 .as-field 內的 .as-field-params
+      const field = cb.closest(".as-field");
+      if (field) {
+        field.querySelectorAll(".as-field-params").forEach(p => {
+          p.style.opacity = cb.checked ? "" : "0.4";
+          p.style.pointerEvents = cb.checked ? "" : "none";
+        });
+      }
+      // 特例：drift / berthing 有獨立 id 的容器
+      const specialMap = {
+        "drift.autoEnabled":    "as-dr-auto-p",
+        "drift.customEnabled":  "as-dr-cus-body",
+        "berthing.enabled":     "as-bt-body",
+      };
+      const key = `${obj}.${prop}`;
+      if (specialMap[key]) {
+        const el = document.getElementById(specialMap[key]);
+        if (el) { el.style.opacity = cb.checked ? "" : "0.4"; el.style.pointerEvents = cb.checked ? "" : "none"; }
+      }
+    });
+  });
+
+  // Stepper 按鈕（上/下）
+  main.querySelectorAll(".th-step-up, .th-step-down").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const inp = document.getElementById(btn.dataset.for);
+      if (!inp) return;
+      const step = parseFloat(inp.step) || 1;
+      const cur  = parseFloat(inp.value) || 0;
+      const min  = inp.min !== "" ? parseFloat(inp.min) : -Infinity;
+      const max  = inp.max !== "" ? parseFloat(inp.max) :  Infinity;
+      inp.value  = btn.classList.contains("th-step-up")
+        ? Math.min(max, parseFloat((cur + step).toFixed(6)))
+        : Math.max(min, parseFloat((cur - step).toFixed(6)));
+      inp.dispatchEvent(new Event("change"));
+    });
+  });
+
+  // 速度 W/C 閾值輸入：即時寫回 _thresholds.speed，與分航段集體設定共用
+  function _commitSpeedThreshold() {
+    const wEl = document.getElementById("as-sp-warn");
+    const cEl = document.getElementById("as-sp-crit");
+    if (!wEl || !cEl) return;
+    const w = parseFloat(wEl.value);
+    const c = parseFloat(cEl.value);
+    if (!isNaN(w)) _thresholds.speed.warning  = parseFloat((w / 100).toFixed(4));
+    if (!isNaN(c)) _thresholds.speed.critical = parseFloat((c / 100).toFixed(4));
+    saveThresholds();
+    syncEventsFromAlerts();
+  }
+  ["as-sp-warn", "as-sp-crit"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", _commitSpeedThreshold);
+    el.addEventListener("blur",   _commitSpeedThreshold);
+  });
+
+  // 電子圍籬 / 搭靠區域 tag 切換
+  main.querySelectorAll(".as-tag-btn[data-zone]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const zid = btn.dataset.zone, prefix = btn.dataset.prefix;
+      const key = prefix === "gf" ? "geofence" : "berthing";
+      const arr = _alertSettings[key].zones;
+      const idx = arr.indexOf(zid);
+      if (idx === -1) arr.push(zid); else arr.splice(idx, 1);
+      btn.classList.toggle("active", idx === -1);
+    });
+  });
+
+  // 搭靠區域 radio
+  main.querySelectorAll('input[name="as-bt-area"]').forEach(r => {
+    r.addEventListener("change", () => {
+      _alertSettings.berthing.areaMode = r.value;
+      const el = document.getElementById("as-bt-zones");
+      if (el) el.style.display = r.value === "zone" ? "" : "none";
+    });
+  });
+
+  // 儲存
+  const saveBtn = document.getElementById("as-save-btn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", () => {
+      const rv = id => { const e = document.getElementById(id); return e ? parseFloat(e.value)||0 : null; };
+      const rs = id => { const e = document.getElementById(id); return e ? e.value : null; };
+      const w = (v, obj, p) => { if (v !== null) _alertSettings[obj][p] = v; };
+      w(rv("as-sp-kn"),      "speed",    "knots");
+      w(rv("as-sp-dur"),     "speed",    "duration");
+      w(rs("as-sp-dir"),     "speed",    "direction");
+      // 速度 W/C 閾值寫回 _thresholds（與分航段集體設定共用）
+      const spW = rv("as-sp-warn"); if (spW !== null) _thresholds.speed.warning  = parseFloat((spW / 100).toFixed(4));
+      const spC = rv("as-sp-crit"); if (spC !== null) _thresholds.speed.critical = parseFloat((spC / 100).toFixed(4));
+      saveThresholds();
+      syncEventsFromAlerts();
+      w(rv("as-dr-auto-r"),  "drift",    "autoRadius");
+      w(rv("as-lat-deg"),    "drift",    "lat_deg");
+      w(rv("as-lat-min"),    "drift",    "lat_min");
+      w(rs("as-lat-hem"),    "drift",    "lat_hem");
+      w(rv("as-lon-deg"),    "drift",    "lon_deg");
+      w(rv("as-lon-min"),    "drift",    "lon_min");
+      w(rs("as-lon-hem"),    "drift",    "lon_hem");
+      w(rv("as-dr-cus-r"),   "drift",    "customRadius");
+      w(rv("as-ais-dur"),    "aisLost",  "duration");
+      w(rv("as-rd-dev"),     "routeDev", "deviation");
+      w(rv("as-rd-dur"),     "routeDev", "duration");
+      w(rs("as-rd-sel"),     "routeDev", "routeId");
+      w(rv("as-bt-dist"),    "berthing", "distance");
+      w(rv("as-bt-dur"),     "berthing", "duration");
+      saveAlertSettings();
+      saveBtn.textContent = "已儲存 ✓";
+      setTimeout(() => { saveBtn.textContent = "儲存"; }, 2200);
+    });
+  }
+
+  // 取消：重載後重繪
+  const cancelBtn = document.getElementById("as-cancel-btn");
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => { loadAlertSettings(); renderThresholds(); });
+  }
+}
+
 // 啟動：載入持久化閾值、事件 + 從目前警示同步新立案
 loadThresholds();
+loadAlertSettings();
 loadEvents();
 syncEventsFromAlerts();
 applySidebarState();

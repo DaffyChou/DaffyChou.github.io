@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>船隊安全 · 清單＋篩選原型</title>
+<style>
+  :root{
+    --navy:#0B2942; --teal:#0E7C7B; --plum:#3a2d58;
+    --g:#06C755; --r:#E5484D; --y:#F5A623;
+    --ink:#16222E; --ink-soft:#5B6B78; --hair:#EEF2F6; --chat-bg:#8CA6C4; --page:#0d1622;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans TC",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:radial-gradient(1200px 600px at 15% -10%,#1c3a5c 0,transparent 55%),radial-gradient(900px 500px at 100% 110%,#0e4f4d 0,transparent 50%),var(--page);
+    color:#e7eef5;min-height:100vh;display:flex;justify-content:center;gap:38px;flex-wrap:wrap;align-items:flex-start;padding:32px 20px 60px}
+  .brief{max-width:340px;padding-top:14px}
+  .brief .eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:#7fa8cf;font-weight:700;margin-bottom:14px}
+  .brief h1{font-size:25px;line-height:1.3;font-weight:800;color:#fff}
+  .brief h1 span{color:#c3b0ec}
+  .brief p.lead{font-size:14px;line-height:1.7;color:#a9bccf;margin:14px 0 20px}
+  .brief .flow{border-left:2px solid #2a4a6b;padding-left:16px;margin-bottom:22px}
+  .brief .step{position:relative;padding:0 0 14px 4px}
+  .brief .step:last-child{padding-bottom:0}
+  .brief .step::before{content:"";position:absolute;left:-21px;top:4px;width:9px;height:9px;border-radius:50%;background:#c3b0ec;box-shadow:0 0 0 3px rgba(195,176,236,.18)}
+  .brief .step b{display:block;font-size:13.5px;color:#dbe8f4;font-weight:700}
+  .brief .step small{font-size:12px;color:#8ba3ba;line-height:1.5;display:block;margin-top:2px}
+  .brief .note{font-size:11.5px;color:#8fb0cf;background:rgba(120,160,207,.1);border:1px solid rgba(120,160,207,.2);border-radius:10px;padding:10px 12px;line-height:1.6;margin-bottom:10px}
+  .legend{display:flex;gap:14px;margin:6px 0 2px}
+  .legend .k{display:flex;align-items:center;gap:6px;font-size:12px;color:#b9cadb}
+  .foot{margin-top:14px;font-size:11.5px;color:#6f889f;line-height:1.6}
+
+  .device{width:390px;flex:none;background:#0a0f16;border-radius:46px;padding:12px;box-shadow:0 40px 80px -20px rgba(0,0,0,.7),0 0 0 2px #1c2733;position:sticky;top:24px}
+  .screen{--fs:1;background:var(--chat-bg);border-radius:36px;overflow:hidden;height:800px;display:flex;flex-direction:column;position:relative}
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#0a0f16;border-radius:0 0 16px 16px;z-index:5}
+  .statusbar{height:44px;background:var(--g);display:flex;align-items:center;justify-content:space-between;padding:0 24px 0 28px;color:#fff;font-size:13px;font-weight:600;flex:none}
+  .appbar{height:56px;background:var(--g);display:flex;align-items:center;gap:12px;padding:0 16px;color:#fff;flex:none}
+  .appbar .back{font-size:20px;cursor:pointer}
+  .appbar .avatar{width:34px;height:34px;border-radius:12px;background:#fff;display:grid;place-items:center;font-size:18px}
+  .appbar .who b{font-size:15px;font-weight:700;display:block;line-height:1.1}
+  .appbar .who small{font-size:11px;opacity:.85}
+  .appbar .icons{margin-left:auto;display:flex;gap:14px;font-size:17px}
+  .appbar .icons span{cursor:pointer}
+  .chat{flex:1;overflow-y:auto;padding:16px 12px 26px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+  .chat::-webkit-scrollbar{width:0}
+  .daystamp{align-self:center;background:rgba(0,0,0,.16);color:#fff;font-size:11px;padding:3px 12px;border-radius:20px}
+  .msg{display:flex;gap:8px;align-items:flex-end;max-width:96%;animation:pop .3s ease both}
+  @keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .msg .m-avatar{width:30px;height:30px;border-radius:50%;background:#0B2942;flex:none;display:grid;place-items:center;color:#fff;font-size:15px}
+  .msg .m-name{font-size:11px;color:#3f5165;padding-left:2px;margin-bottom:3px}
+  .msg .time{font-size:10px;color:rgba(255,255,255,.85);align-self:flex-end;margin:0 2px 3px}
+  .msg.me{align-self:flex-end;flex-direction:row-reverse}
+  .msg.me .bubble-txt{background:var(--g);color:#fff;border-radius:18px 18px 4px 18px}
+  .bubble-txt{background:#fff;color:#16222E;padding:10px 14px;border-radius:18px 18px 18px 4px;font-size:14px;line-height:1.5}
+
+  .flex{width:290px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.16);flex:none;font-size:calc(15px*var(--fs,1))}
+  .flex-hero{padding:12px 15px;color:#fff}
+  .flex-hero.nav{background:linear-gradient(135deg,var(--navy),#123a5e)}
+  .flex-hero.ppl{background:linear-gradient(135deg,var(--teal),#12938f)}
+  .flex-hero.cargo{background:linear-gradient(135deg,#7a4a12,#a5701f)}
+  .flex-hero.plum{background:linear-gradient(135deg,#232a45,var(--plum))}
+  .flex-hero .kicker{font-size:.72em;letter-spacing:.1em;opacity:.85;font-weight:700;text-transform:uppercase;line-height:1.35}
+  .flex-hero h2{font-size:1.3em;font-weight:800;margin-top:5px;line-height:1.2}
+  .flex-hero .sub{font-size:.78em;opacity:.9;margin-top:4px;line-height:1.35}
+  .flex-body{padding:6px 8px}
+  .flex-foot{padding:8px 15px 12px}
+  .updated{font-size:.72em;color:#94a3b0;text-align:center;line-height:1.4}
+
+  .dot{width:.8em;height:.8em;border-radius:50%;display:inline-block;flex:none}
+  .dot.g{background:var(--g)} .dot.y{background:var(--y)} .dot.r{background:var(--r)}
+
+  .row{display:flex;align-items:center;gap:10px;padding:12px 8px;border-radius:9px}
+  .row+.row{border-top:1px solid var(--hair)}
+  .row .id{flex:1;min-width:0}
+  .row .nm{font-size:1em;font-weight:700;color:var(--ink);line-height:1.3}
+  .row .en{font-size:.78em;color:#94a3b0;line-height:1.3;margin-top:1px;word-break:break-word}
+  .lights{display:flex;gap:14px;flex:none}
+  .lw{display:flex;flex-direction:column;align-items:center;gap:3px}
+  .lw small{font-size:.6em;color:#9aa9b6}
+  .st{font-size:.9em;font-weight:800;flex:none;display:flex;align-items:center;gap:5px;white-space:nowrap}
+  .st.g{color:#0a8a42} .st.r{color:#c62a2f}
+  .rowremark{font-size:.82em;color:#a23a3d;background:#FFF6F6;border-radius:8px;padding:7px 10px;margin:2px 8px 4px;line-height:1.5}
+  .rowremark.nav{color:#8a5a10;background:#FFFAF0}
+
+  .carousel{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x mandatory;max-width:332px}
+  .carousel::-webkit-scrollbar{height:5px}
+  .carousel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.5);border-radius:5px}
+  .carousel .flex{scroll-snap-align:start}
+
+  .fbtn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:14px 16px;border-radius:12px;border:0;font-size:1em;font-weight:700;cursor:pointer;text-align:left;line-height:1.3}
+  .fbtn:active{transform:scale(.98)}
+  .fbtn.nav{background:var(--navy);color:#fff}.fbtn.ppl{background:var(--teal);color:#fff}.fbtn.cargo{background:#8a5a15;color:#fff}
+  .fbtn+.fbtn{margin-top:10px}
+  .fbtn .cnt{background:rgba(255,255,255,.25);font-size:.8em;padding:3px 10px;border-radius:20px;flex:none;white-space:nowrap}
+  .fbtn .cnt.zero{opacity:.6}
+  .selectbody{padding:14px 15px}
+
+  /* filter quick replies */
+  .filters{padding-left:38px;display:flex;flex-direction:column;gap:7px;max-width:344px;font-size:calc(15px*var(--fs,1))}
+  .frow{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .frow .flabel{font-size:.8em;color:#3f5165;font-weight:700;margin-right:2px}
+  .chip{background:#fff;color:#3f5165;border:1px solid #cdd8e3;font-size:.85em;font-weight:700;padding:8px 13px;border-radius:20px;cursor:pointer;transition:all .12s}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .chip.on.ppl{background:var(--teal);border-color:var(--teal)}
+  .chip.on.cargo{background:#8a5a15;border-color:#8a5a15}
+
+  .menu-bar{flex:none;height:42px;background:#0f1b2a;color:#cfe0f0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;cursor:pointer}
+  .menu-bar .tri{font-size:11px;transition:transform .25s}.menu-bar.collapsed .tri{transform:rotate(180deg)}
+  .richmenu{flex:none;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);height:220px;overflow:hidden;transition:height .28s;background:#0d3b6b}
+  .richmenu.collapsed{height:0}
+  .tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;border:1px solid rgba(255,255,255,.07)}
+  .tile:active{filter:brightness(1.18)}
+  .tile svg{width:32px;height:32px}.tile .tl{font-size:16px;font-weight:800;color:#eaf2fb}
+  .t-a{background:#2b5c96}.t-b{background:#2f70c6}.t-c{background:#213e6e}
+  .tile.active{outline:2px solid #6fd0a3;outline-offset:-2px}
+  .tile.active::after{content:"改版";position:absolute;top:7px;right:7px;background:#6fd0a3;color:#08351f;font-size:9px;font-weight:800;padding:1px 6px;border-radius:8px}
+  .row.tap{cursor:pointer}
+  .row.tap:active{background:#F3F6F9}
+  .chev{color:#c3ccd5;font-size:1.15em;flex:none;margin-left:2px}
+  .hbadge{font-size:.62em;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:6px;white-space:nowrap;display:inline-block}
+  .hbadge.r{background:rgba(229,72,77,.12);color:#c62a2f}
+  .hbadge.y{background:rgba(245,166,35,.16);color:#b9760a}
+  /* detail */
+  .dsec{padding:6px 7px}
+  .drow{display:flex;gap:10px;padding:10px 2px;border-bottom:1px solid var(--hair);flex-wrap:wrap}
+  .drow .dl{font-size:.82em;color:var(--ink-soft);width:64px;flex:none;font-weight:700}
+  .drow .dv{font-size:.86em;color:var(--ink);font-weight:600;flex:1;min-width:150px;line-height:1.5}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:.78em;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap}
+  .badge.g{background:rgba(6,199,85,.12);color:#0a8a42}.badge.y{background:rgba(245,166,35,.14);color:#b9760a}.badge.r{background:rgba(229,72,77,.12);color:#c62a2f}
+  .ht{font-size:.8em;font-weight:800;color:#3f5165;margin:10px 2px 4px}
+  .hnone{font-size:.85em;color:#0a8a42;background:#F1FBF5;border:1px solid #CFEEDB;border-radius:9px;padding:10px;text-align:center;margin:2px}
+  .hitem{display:flex;gap:9px;align-items:flex-start;padding:9px 2px;border-bottom:1px dashed var(--hair)}
+  .hitem .hd{margin-top:4px;flex:none}
+  .hitem .hbody{flex:1;min-width:0}
+  .hitem .htime{font-size:.72em;color:#94a3b0}
+  .hitem .hdesc{font-size:.86em;color:var(--ink);font-weight:600;line-height:1.45}
+  .hitem .hstate{font-size:.68em;font-weight:800;padding:3px 8px;border-radius:8px;flex:none;margin-top:2px;white-space:nowrap}
+  .hstate.on{background:rgba(229,72,77,.1);color:#c62a2f}.hstate.off{background:#EEF2F6;color:#7c8b98}
+  .others{display:flex;gap:8px;margin:12px 2px 2px}
+  .chip2{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:#F3F6F9;border-radius:10px;padding:10px 4px}
+  .chip2 .lb{font-size:.72em;color:#94a3b0;font-weight:700}
+  /* 文字大小切換列 */
+  .fsbar{flex:none;background:#e8eef5;color:#3f5165;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 8px;border-bottom:1px solid #d6e0ea}
+  .fschip{border:1px solid #b9c6d4;border-radius:14px;padding:3px 11px;cursor:pointer;background:#fff}
+  .fschip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  @media(max-width:900px){.brief{max-width:390px;order:2}.device{position:static}}
+</style>
+</head>
+<body>
+  <aside class="brief">
+    <div class="eyebrow">LINE Flex · 清單篩選版</div>
+    <h1>船隊安全<br><span>清單＋分頁＋篩選</span></h1>
+    <p class="lead">結果改用<b style="color:#c3b0ec">清單</b>呈現（比單船卡好讀）；清單太長時用 carousel 分頁、橫向滑換頁——無內部捲軸。航安含 <b>AIS</b> 與 <b>風險管理</b>兩個燈號，並提供<b>船型</b>與<b>風險</b>篩選。</p>
+    <div class="legend"><span class="k"><span class="dot g"></span>正常</span><span class="k"><span class="dot y"></span>注意</span><span class="k"><span class="dot r"></span>警示</span></div>
+    <div class="note">人安・貨安為二元（🟢安全／🔴異常＋說明，取自對照表回報）；航安 <b>AIS 燈依 AIS 航行狀態判定</b>（綠＝航行中/錨泊/繫泊；紅＝失去操縱/操縱受限/吃水受限/擱淺＝優先避讓；黃＝其餘或不明）＋風險管理另一燈。船型＝Excel 的 Type 艦級代碼。</div>
+    <div class="note">👵 <b>長者放大</b>：上方「文字大小」可切標準／大／特大，文字放大時卡片自動換行加高、不破版。</div>
+    <div class="flow">
+      <div class="step"><b>1 · 船隊安全</b><small>選 航安 / 人安 / 貨安</small></div>
+      <div class="step"><b>2 · 清單結果</b><small>逐船一列；航安兩燈(AIS/風險)</small></div>
+      <div class="step"><b>3 · 篩選</b><small>船型 + 風險（清單即時換一批）</small></div>
+    </div>
+    <p class="foot">※ 船名取自對照表；燈號與說明為示意。</p>
+  </aside>
+
+  <div class="device"><div class="screen">
+    <div class="notch"></div>
+    <div class="statusbar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="appbar"><span class="back" onclick="resetChat()">✕</span><div class="avatar">🚢</div>
+      <div class="who"><b>船隊資訊查詢系統</b><small>此官方帳號由負責人員回覆訊息</small></div>
+      <div class="icons"><span onclick="resetChat()">↺</span> ☰</div></div>
+    <div class="fsbar">文字大小
+      <span class="fschip on" onclick="setFS(this,1)">標準</span>
+      <span class="fschip" onclick="setFS(this,1.35)">大</span>
+      <span class="fschip" onclick="setFS(this,1.7)">特大</span>
+    </div>
+    <div class="chat" id="chat"></div>
+    <div class="menu-bar" id="menubar" onclick="toggleMenu()"><span>功能選單</span><span class="tri">▾</span></div>
+    <div class="richmenu" id="richmenu">
+      <div class="tile t-a" onclick="tileMsg('船員資訊')"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><circle cx="8" cy="11" r="2.1"/><path d="M4.9 16.4c.5-1.6 1.7-2.4 3.1-2.4s2.6.8 3.1 2.4"/><line x1="14" y1="10" x2="19" y2="10"/><line x1="14" y1="13.6" x2="19" y2="13.6"/></svg><span class="tl">船員資訊</span></div>
+      <div class="tile t-b" onclick="tileMsg('船位資訊')"><svg viewBox="0 0 24 24" fill="#fff"><path d="M20.6 14.2 19.1 18.4a2 2 0 0 1-1.9 1.3H6.8A2 2 0 0 1 4.9 18.4L3.4 14.2a1 1 0 0 1 .95-1.32H19.65a1 1 0 0 1 .95 1.32Z"/><path d="M6.6 12.6V8.4a1 1 0 0 1 1-1H12l3.1 5.2Z"/></svg><span class="tl">船位資訊</span></div>
+      <div class="tile t-a" onclick="tileMsg('船期資訊')"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><line x1="3.5" y1="9" x2="20.5" y2="9"/><line x1="8" y1="3.5" x2="8" y2="6.5"/><line x1="16" y1="3.5" x2="16" y2="6.5"/></svg><span class="tl">船期資訊</span></div>
+      <div class="tile t-c" onclick="tileMsg('監管人員')"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.3"/><path d="M5.6 19.4c.6-3.3 3.1-5.1 6.4-5.1s5.8 1.8 6.4 5.1"/></svg><span class="tl">監管人員</span></div>
+      <div class="tile t-b active" onclick="openSafety()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 6v5c0 4.3 2.9 7.6 7 9 4.1-1.4 7-4.7 7-9V6l-7-2.8Z"/><path d="M9.1 12l2 2 3.7-4.2"/></svg><span class="tl">船隊安全</span></div>
+      <div class="tile t-c" onclick="tileMsg('相關連結')"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="9.5" y1="7" x2="20" y2="7"/><line x1="9.5" y1="12" x2="20" y2="12"/><line x1="9.5" y1="17" x2="20" y2="17"/><rect x="3.5" y="5.7" width="2.7" height="2.7" rx=".6" fill="#fff" stroke="none"/><rect x="3.5" y="10.7" width="2.7" height="2.7" rx=".6" fill="#fff" stroke="none"/><rect x="3.5" y="15.7" width="2.7" height="2.7" rx=".6" fill="#fff" stroke="none"/></svg><span class="tl">相關連結</span></div>
+    </div>
+  </div></div>
+
+<script>
+const UPDATED="2026/05/18 15:00";
+/* 船名取自對照表；ais/risk 紅黃綠(g/y/r)；ppl/cargo 為 null=安全 或 {r:說明}=異常 */
+const S=(cn,en,co,type,ais,risk,riskNote,ppl,cargo)=>({cn,en,co,type,ais,risk,riskNote,ppl,cargo});
+const SHIPS=[
+  S("常明","YM UPWARD","YM","U","g","g",null,null,null),
+  S("安明","YM UTILITY","YM","U","g","g",null,null,null),
+  S("團明","YM UNIFORM","YM","U","g","g",null,{r:"甲板部一員手部割傷，已包紮"},null),
+  S("結明","YM UNIFORMITY","YM","U+","g","g",null,null,null),
+  S("恆明","YM UBIQUITY","YM","U+","g","g",null,null,null),
+  S("續明","YM UNANIMITY","YM","U+","g","g",null,null,null),
+  S("震明","YM MUTUALITY","YM","M+","y","r","壓載水系統滲漏，監控中",null,{r:"危險品櫃文件待補確認"}),
+  S("動明","YM MOBILITY","YM","M+","y","g","AIS 訊號不穩定，持續確認",null,null),
+  S("盛明","YM MILESTONE","YM","M+","g","g",null,null,null),
+  S("菊明","YM COSMOS","YM","M","g","y","接近港區交通管制範圍",null,null),
+  S("達明","YM SUCCESS","YM","M","r","y","與鄰船 CPA 距離縮短",{r:"船長腰部拉傷，行動受限"},null),
+  S("源明","YM FOUNTAIN","YM","M","g","g",null,null,{r:"貨櫃輕微變形，待靠港檢查"}),
+  S("財明","YM WEALTH","YM","M","g","g",null,null,null),
+  S("梅明","YM PLUM","YM","M","g","g",null,null,null),
+  S("創明","YM EVOLUTION","YM","E+","g","y","即將進入夜航密集區",null,null),
+  S("實明","YM ESSENCE","YM","E+","g","g",null,null,null),
+  S("卓明","YM EXCELLENCE","YM","E+","g","g",null,null,null),
+  S("發明","YM EFFICIENCY","YM","E","g","g",null,null,null),
+  S("展明","YM ETERNITY","YM","E","g","g",null,null,null),
+  S("碩明","YM CELEBRITY","YM","C","r","r","偏離計畫航線並接近淺水區",{r:"輪機部大管輪發燒 38.5°C，隔離觀察中"},{r:"甲板貨櫃綁紮鬆動，複查中"}),
+  S("川明","YM CAPACITY","YM","C","g","g",null,null,null),
+  S("永明","YM CONSTANCY","YM","C","g","g",null,null,null),
+  S("百明","YM CENTENNIAL","YM","C","g","g",null,null,null),
+  S("英明","YM IDEALS","YM","I","g","r","主機轉速異常，減速航行中",null,{r:"第 3 艙冷藏櫃溫度偏高"}),
+  S("精明","YM INTELLIGENT","YM","I","g","g",null,null,null),
+  S("集明","YM INCREMENT","YM","I","g","g",null,null,null),
+  S("近明","YM INSTRUCTION","YM","I","g","g",null,null,null),
+  S("通明","YM INVENTIVE","YM","I","g","g",null,null,null),
+  S("鎮明","YM HARMONY","YM","H","g","g",null,null,null),
+  S("環明","YM HORIZON","YM","H","g","g",null,null,null),
+  S("宇明","YM HEIGHTS","YM","H","g","g",null,null,null),
+  S("威明","YM HAWK","YM","H","g","g",null,null,null),
+];
+SHIPS.forEach((s,i)=>s.id=i);
+/* AIS 文字說明 */
+const AISNOTE={'達明':'AIS 訊號中斷','碩明':'AIS 訊號中斷逾 8 分鐘','震明':'AIS 訊號間歇不穩','動明':'AIS 訊號不穩定，持續確認'};
+SHIPS.forEach(s=>s.aisNote=AISNOTE[s.cn]||null);
+/* 風險歷程（示意）：w=距今小時；lv=等級；s=狀態 */
+const HIST={
+ '碩明':[{t:'今日 06:10',d:'偏離計畫航線，接近淺水區',lv:'r',s:'持續中',w:9},{t:'昨日 23:40',d:'AIS 訊號中斷 8 分鐘',lv:'r',s:'已解除',w:15}],
+ '達明':[{t:'今日 05:40',d:'與鄰船 CPA 距離縮短',lv:'y',s:'持續中',w:9},{t:'今日 03:05',d:'AIS 訊號中斷',lv:'r',s:'已解除',w:12}],
+ '震明':[{t:'今日 04:15',d:'壓載水系統滲漏，監控中',lv:'r',s:'監控中',w:11}],
+ '英明':[{t:'今日 07:20',d:'主機轉速異常，減速航行',lv:'r',s:'持續中',w:8}],
+ '菊明':[{t:'今日 02:20',d:'接近港區交通管制範圍',lv:'y',s:'已解除',w:13}],
+ '動明':[{t:'今日 08:10',d:'AIS 訊號不穩定',lv:'y',s:'持續中',w:7}],
+ '創明':[{t:'昨日 20:30',d:'進入夜航密集區',lv:'y',s:'已解除',w:19}],
+ '盛明':[{t:'今日 01:30',d:'短暫偏離航線，已修正',lv:'y',s:'已解除',w:14}],
+ '精明':[{t:'昨日 18:40',d:'濃霧能見度不足警示',lv:'y',s:'已解除',w:20}]
+};
+SHIPS.forEach(s=>s.hist=HIST[s.cn]||[]);
+/* AIS 航行狀態（Navigational Status）→ 燈號判定
+   綠：Under way using engine / At anchor / Moored
+   紅：Not under command / Restricted manoeuvrability / Constrained by her draught / Aground
+   黃：其餘或不明 */
+const NAVSTATUS={
+ '碩明':'Aground（擱淺）',
+ '達明':'Not under command（失去操縱）',
+ '震明':'Under way sailing（張帆航行）',
+ '動明':'Undefined（未定義）',
+ '英明':'Under way using engine（引擎推進航行中）',
+ '常明':'At anchor（錨泊）',
+ '安明':'Moored（繫泊）',
+ '創明':'Engaged in fishing（漁撈作業中）'
+};
+const AIS_RED=['Not under command','Restricted manoeuvrability','Constrained by her draught','Aground'];
+const AIS_GREEN=['Under way using engine','At anchor','Moored'];
+function aisFromStatus(st){
+  const k=(st||'').split('（')[0].trim();
+  if(AIS_RED.some(x=>k.startsWith(x)))return 'r';
+  if(AIS_GREEN.some(x=>k.startsWith(x)))return 'g';
+  return 'y';
+}
+SHIPS.forEach(s=>{ s.navStatus=NAVSTATUS[s.cn]||'Under way using engine（引擎推進航行中）'; s.ais=aisFromStatus(s.navStatus); });
+const AIS_CAT={g:'正常',y:'其餘／不明',r:'優先避讓'};
+const TYPES=[...new Set(SHIPS.map(s=>s.type))];
+const sev={r:0,y:1,g:2};
+const worst=(...v)=>v.reduce((a,b)=>sev[a]<sev[b]?a:b);
+const navSev=s=>worst(s.ais,s.risk);
+const navAlert=s=>navSev(s)!=='g';
+const cntNav=SHIPS.filter(navAlert).length;
+const cntPpl=SHIPS.filter(s=>s.ppl).length;
+const cntCargo=SHIPS.filter(s=>s.cargo).length;
+const PAGE=8;
+
+const chat=document.getElementById('chat');
+function botMsg(inner){const w=document.createElement('div');w.className='msg';w.innerHTML=`<div class="m-avatar">🚢</div><div><div class="m-name">船隊資訊查詢系統</div>${inner}</div><span class="time">09:41</span>`;chat.appendChild(w);chat.scrollTop=chat.scrollHeight;return w;}
+function meMsg(t){const w=document.createElement('div');w.className='msg me';w.innerHTML=`<div><div class="bubble-txt">${t}</div></div><span class="time">09:41</span>`;chat.appendChild(w);chat.scrollTop=chat.scrollHeight;}
+function rawEl(html){const w=document.createElement('div');w.innerHTML=html;chat.appendChild(w.firstElementChild);chat.scrollTop=chat.scrollHeight;}
+const dot=v=>`<span class="dot ${v}"></span>`;
+
+/* 分頁 carousel 產生器 */
+function paginate(list,renderPage,heroCls,title,filterTxt){
+  if(!list.length) return `<div class="carousel"><div class="flex"><div class="flex-hero ${heroCls}"><div class="kicker">${filterTxt}</div><h2>${title}</h2><div class="sub">最新回報 ${UPDATED}</div></div><div class="selectbody" style="text-align:center;color:#0a8a42;font-weight:700;padding:22px 0">🟢 此條件下無符合船舶</div></div></div>`;
+  const pages=[];for(let i=0;i<list.length;i+=PAGE)pages.push(list.slice(i,i+PAGE));
+  const n=pages.length;
+  const bubbles=pages.map((pg,idx)=>`<div class="flex">
+      <div class="flex-hero ${heroCls}">
+        <div class="kicker">${filterTxt} · 共 ${list.length} 艘</div>
+        <h2>${title}</h2>
+        <div class="sub">第 ${idx+1}/${n} 頁　最新回報 ${UPDATED}</div>
+      </div>
+      <div class="flex-body">${pg.map(renderPage).join('')}</div>
+      <div class="flex-foot"><div class="updated">${n>1?'← 左右滑動換頁 →':'　'}</div></div>
+    </div>`).join('');
+  return `<div class="carousel">${bubbles}</div>`;
+}
+
+/* ---- 航安：清單精簡（點列看詳情） ---- */
+function navRow(s){
+  let recent='';
+  if(s.hist.length){ const on12=s.hist.some(e=>e.w<=12); recent=`<span class="hbadge ${on12?'r':'y'}">⏱ ${on12?'12':'24'}h曾警示</span>`; }
+  return `<div class="row tap" onclick="navDetail(${s.id})">
+      <div class="id"><div class="nm">${s.cn}${recent}</div><div class="en">${s.en} · ${s.type}</div></div>
+      <div class="lights"><div class="lw">${dot(s.ais)}<small>AIS</small></div><div class="lw">${dot(s.risk)}<small>風險</small></div></div>
+      <span class="chev">›</span>
+    </div>`;
+}
+function navDetail(id){const s=SHIPS[id];meMsg(s.cn+' 詳細狀況');setTimeout(()=>botMsg(detailCard(s)),300);}
+function detailCard(s){
+  const badge=(v,t)=>`<span class="badge ${v}">${dot(v)} ${t}</span>`;
+  const aisTxt={g:'訊號穩定',y:'訊號不穩',r:'訊號中斷'}[s.ais];
+  const riskTxt={g:'低風險',y:'中度注意',r:'高風險警示'}[s.risk];
+  const hItem=e=>`<div class="hitem"><span class="hd">${dot(e.lv)}</span><div class="hbody"><div class="htime">${e.t}</div><div class="hdesc">${e.d}</div></div><span class="hstate ${e.s==='已解除'?'off':'on'}">${e.s}</span></div>`;
+  const h12=s.hist.filter(e=>e.w<=12), h24=s.hist.filter(e=>e.w>12&&e.w<=24);
+  const grp=(t,a)=>a.length?`<div class="ht">${t}</div>${a.map(hItem).join('')}`:'';
+  const hist=s.hist.length?grp('近 12 小時',h12)+grp('12–24 小時',h24):`<div class="hnone">近 24 小時無風險紀錄 🟢</div>`;
+  return `<div class="flex"><div class="flex-hero nav">
+      <div class="kicker">船舶詳細狀況 · ${s.co}</div><h2>${s.cn}</h2><div class="sub">${s.en} · 船型 ${s.type}</div>
+    </div><div class="flex-body"><div class="dsec">
+      <div class="drow"><span class="dl">AIS 狀態</span><span class="dv">${badge(s.ais,AIS_CAT[s.ais])}　${s.navStatus}</span></div>
+      <div class="drow"><span class="dl">風險管理</span><span class="dv">${badge(s.risk,riskTxt)}${s.risk!=='g'&&s.riskNote?'　'+s.riskNote:''}</span></div>
+      <div class="ht" style="margin-top:12px">風險歷程（近 24 小時）</div>
+      ${hist}
+      <div class="others">
+        <div class="chip2"><span class="lb">人安</span><span class="st ${s.ppl?'r':'g'}">${s.ppl?'🔴異常':'🟢安全'}</span></div>
+        <div class="chip2"><span class="lb">貨安</span><span class="st ${s.cargo?'r':'g'}">${s.cargo?'🔴異常':'🟢安全'}</span></div>
+      </div>
+    </div></div><div class="flex-foot"><div class="updated">🕘 ${UPDATED}</div></div></div>`;
+}
+function navResult(type,ais,risk){
+  let list=SHIPS.filter(s=>(type==='全部'||s.type===type)&&(ais==='全部'||s.ais===ais)&&(risk==='全部'||s.risk===risk));
+  list=list.sort((a,b)=>sev[navSev(a)]-sev[navSev(b)]);
+  const lv={r:'🔴警示',y:'🟡注意',g:'🟢正常'};
+  const ft=`船型:${type}｜AIS:${ais==='全部'?'全部':lv[ais]}｜風險:${risk==='全部'?'全部':lv[risk]}`;
+  botMsg(paginate(list,navRow,'nav','航安狀態警示',ft));
+  navFilters(type,ais,risk);
+}
+function navFilters(type,ais,risk){
+  const tchip=t=>`<span class="chip${t===type?' on':''}" onclick="navResult('${t}','${ais}','${risk}')">${t}</span>`;
+  const achip=(v,l)=>`<span class="chip${v===ais?' on':''}" onclick="navResult('${type}','${v}','${risk}')">${l}</span>`;
+  const rchip=(v,l)=>`<span class="chip${v===risk?' on':''}" onclick="navResult('${type}','${ais}','${v}')">${l}</span>`;
+  rawEl(`<div class="filters">
+    <div class="frow"><span class="flabel">船型</span>${['全部',...TYPES].map(tchip).join('')}</div>
+    <div class="frow"><span class="flabel">AIS</span>${achip('全部','全部')}${achip('r','🔴')}${achip('y','🟡')}${achip('g','🟢')}</div>
+    <div class="frow"><span class="flabel">風險</span>${rchip('全部','全部')}${rchip('r','🔴')}${rchip('y','🟡')}${rchip('g','🟢')}</div>
+  </div>`);
+}
+
+/* ---- 人安 / 貨安：二元 + 說明 ---- */
+function binRow(domain){return s=>{
+  const bad=!!s[domain];
+  const rk=bad?`<div class="rowremark">${s[domain].r}</div>`:'';
+  return `<div class="row">
+      <div class="id"><div class="nm">${s.cn}</div><div class="en">${s.en} · ${s.type}</div></div>
+      <div class="st ${bad?'r':'g'}">${bad?'🔴 異常':'🟢 安全'}</div>
+    </div>${rk}`;
+};}
+function binResult(domain,type,status){
+  const label=domain==='ppl'?'人安':'貨安';const cls=domain==='ppl'?'ppl':'cargo';
+  let list=SHIPS.filter(s=>(type==='全部'||s.type===type)&&(status==='全部'|| (status==='異常'?!!s[domain]:!s[domain])));
+  list=list.sort((a,b)=>(b[domain]?1:0)-(a[domain]?1:0));
+  const ft=`${label} · 船型:${type} · ${status==='全部'?'全部':status==='異常'?'僅異常':'僅安全'}`;
+  botMsg(paginate(list,binRow(domain),cls,`${label}狀態警示`,ft));
+  binFilters(domain,type,status);
+}
+function binFilters(domain,type,status){
+  const cls=domain==='ppl'?'ppl':'cargo';
+  const tchip=t=>`<span class="chip${t===type?' on '+cls:''}" onclick="binResult('${domain}','${t}','${status}')">${t}</span>`;
+  const schip=v=>`<span class="chip${v===status?' on '+cls:''}" onclick="binResult('${domain}','${type}','${v}')">${v}</span>`;
+  rawEl(`<div class="filters">
+    <div class="frow"><span class="flabel">船型</span>${['全部',...TYPES].map(tchip).join('')}</div>
+    <div class="frow"><span class="flabel">狀態</span>${['全部','異常','安全'].map(schip).join('')}</div>
+  </div>`);
+}
+
+/* ---- 選單卡 ---- */
+function domainSelectCard(){
+  const b=(cls,fn,icon,label,cnt)=>`<button class="fbtn ${cls}" onclick="${fn}">${icon} ${label} <span class="cnt${cnt?'':' zero'}">異常 ${cnt}</span></button>`;
+  return `<div class="flex"><div class="flex-hero plum"><div class="kicker">FLEET SAFETY</div><h2>船隊安全</h2><div class="sub">請選擇要查看的安全狀態警示</div></div>
+    <div class="selectbody">
+      ${b('nav',"navFrom()",'🧭','航安狀態警示',cntNav)}
+      ${b('ppl',"pplFrom()",'👥','人安狀態警示',cntPpl)}
+      ${b('cargo',"cargoFrom()",'📦','貨安狀態警示',cntCargo)}
+    </div><div class="flex-foot"><div class="updated">🕘 最新回報 ${UPDATED}</div></div></div>`;
+}
+
+/* ---- 互動 ---- */
+function toggleMenu(){document.getElementById('richmenu').classList.toggle('collapsed');document.getElementById('menubar').classList.toggle('collapsed')}function collapseMenu(){document.getElementById('richmenu').classList.add('collapsed');document.getElementById('menubar').classList.add('collapsed')}
+function openSafety(){collapseMenu();meMsg('船隊安全');setTimeout(()=>botMsg(domainSelectCard()),300)}
+function navFrom(){meMsg('航安狀態警示');setTimeout(()=>navResult('全部','全部','全部'),300)}
+function pplFrom(){meMsg('人安狀態警示');setTimeout(()=>binResult('ppl','全部','全部'),300)}
+function cargoFrom(){meMsg('貨安狀態警示');setTimeout(()=>binResult('cargo','全部','全部'),300)}
+function tileMsg(n){collapseMenu();meMsg(n);setTimeout(()=>botMsg('「'+n+'」沿用現有查詢流程。本次改版聚焦「船隊安全」。'),300)}
+
+function setFS(el,v){document.querySelector('.screen').style.setProperty('--fs',v);document.querySelectorAll('.fschip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+function resetChat(){
+  chat.innerHTML='';
+  document.getElementById('richmenu').classList.remove('collapsed');
+  document.getElementById('menubar').classList.remove('collapsed');
+  const d=document.createElement('div');d.className='daystamp';d.textContent='今天 · 2026/05/18';chat.appendChild(d);
+  botMsg('您好 👋 這是船隊資訊查詢系統。點下方「船隊安全」，可依 航安（AIS＋風險）／人安／貨安 查看清單，並用船型、風險篩選。');
+}
+resetChat();
+</script>
+</body>
+</html>
