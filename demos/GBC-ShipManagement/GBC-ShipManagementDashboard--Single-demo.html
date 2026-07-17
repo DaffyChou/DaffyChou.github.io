@@ -249,19 +249,28 @@
             <div class="card-body p-4">
                 <div class="row mb-3 align-items-end bg-dark p-3 rounded border border-secondary gap-y-2">
                     <div class="col-12 col-md-3">
+                        <label class="ds-label">航次篩選</label>
+                        <select id="voyVoyageFilter" class="form-select ds-select"><option value="">全部航次</option></select>
+                    </div>
+                    <div class="col-6 col-md-2">
                         <label class="ds-label">航次開始日期</label>
                         <input type="date" id="voyMinDate" class="form-control ds-select">
                     </div>
-                    <div class="col-12 col-md-3">
+                    <div class="col-6 col-md-2">
                         <label class="ds-label">航次結束日期</label>
                         <input type="date" id="voyMaxDate" class="form-control ds-select">
                     </div>
-                    <div class="col-12 col-md-4">
-                        <label class="ds-label">關鍵字搜尋 (航次 / 港口)</label>
+                    <div class="col-12 col-md-3">
+                        <label class="ds-label">關鍵字 (航次 / 港口)</label>
                         <input type="text" id="voyKeyword" class="form-control ds-select" placeholder="請輸入關鍵字...">
                     </div>
-                    <div class="col-12 col-md-2 text-end">
-                        <button id="clearVoyFilterBtn" class="btn btn-primary w-100 ds-btn">清除篩選</button>
+                    <div class="col-6 col-md-1 text-end">
+                        <label class="ds-label d-none d-md-block">&nbsp;</label>
+                        <button id="voyApplyBtn" class="btn btn-primary w-100 ds-btn">套用</button>
+                    </div>
+                    <div class="col-6 col-md-1 text-end">
+                        <label class="ds-label d-none d-md-block">&nbsp;</label>
+                        <button id="clearVoyFilterBtn" class="btn btn-outline-secondary w-100 ds-btn">清除</button>
                     </div>
                 </div>
 
@@ -653,14 +662,18 @@
             <div class="card-body p-4">
                 <div class="row mb-3 align-items-end bg-dark p-3 rounded border border-secondary gap-y-2">
                     <div class="col-12 col-md-3">
-                        <label class="ds-label">填報開始日期</label>
-                        <input type="date" id="minDate" class="form-control ds-select">
+                        <label class="ds-label">航次篩選 <span class="text-muted" style="font-size:.75rem;">(第一階層)</span></label>
+                        <select id="masterVoyageFilter" class="form-select ds-select"><option value="">全部航次</option></select>
                     </div>
-                    <div class="col-12 col-md-3">
-                        <label class="ds-label">填報結束日期</label>
-                        <input type="date" id="maxDate" class="form-control ds-select">
+                    <div class="col-6 col-md-2">
+                        <label class="ds-label">回報日期(起)</label>
+                        <input type="date" id="masterDateStart" class="form-control ds-select">
                     </div>
-                    <div class="col-12 col-md-3">
+                    <div class="col-6 col-md-2">
+                        <label class="ds-label">回報日期(訖)</label>
+                        <input type="date" id="masterDateEnd" class="form-control ds-select">
+                    </div>
+                    <div class="col-12 col-md-2">
                         <label class="ds-label">電報格式過濾</label>
                         <select id="reportTypeFilter" class="form-select ds-select">
                             <option value="">全部格式</option>
@@ -673,10 +686,16 @@
                             <option value="Irregular Report">Irregular Report (特殊情況報)</option>
                         </select>
                     </div>
-                    <div class="col-12 col-md-3 text-end">
-                        <button id="clearFilterBtn" class="btn btn-primary w-100 ds-btn">清除篩選</button>
+                    <div class="col-6 col-md-1 text-end">
+                        <label class="ds-label d-none d-md-block">&nbsp;</label>
+                        <button id="masterApplyBtn" class="btn btn-primary w-100 ds-btn">套用</button>
+                    </div>
+                    <div class="col-6 col-md-1 text-end">
+                        <label class="ds-label d-none d-md-block">&nbsp;</label>
+                        <button id="clearFilterBtn" class="btn btn-outline-secondary w-100 ds-btn">清除</button>
                     </div>
                 </div>
+                <div class="text-muted mb-3" style="font-size:.8rem;">第二階層日期區間依「航次篩選」連動：未選航次時可選全部航次的日期範圍；選定航次後限縮為該航次的回報日期範圍（<span id="masterDateHint">—</span>）。所有條件按「套用」後才生效。</div>
                 
                 <table id="masterDataTable" class="table table-dark table-hover table-custom-dt w-100 text-nowrap">
                     <thead>
@@ -1046,14 +1065,18 @@
          * 2. Highcharts 圖表初始化設定
          * ==========================================================================
          */
-        Highcharts.setOptions({
-            chart: { backgroundColor: 'transparent', style: { fontFamily: 'sans-serif' }, spacingTop: 20 },
-            title: { text: null }, 
-            legend: { verticalAlign: 'bottom', itemStyle: { color: '#cbd5e1' }, itemHoverStyle: { color: '#ffffff' } },
-            xAxis: { gridLineColor: '#374151', lineColor: '#4b5563', labels: { style: { color: '#9ca3af' } } },
-            yAxis: { gridLineColor: '#374151', lineColor: '#4b5563', labels: { style: { color: '#9ca3af' } } },
-            tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.95)', style: { color: '#f3f4f6' }, borderColor: '#4b5563', shared: true }
-        });
+        // 圖表庫 (Highcharts CDN) 若載入失敗，僅略過圖表樣式設定，
+        // 不可讓此頂層呼叫拋錯而中斷整段初始化 (否則航次表格/篩選也一併失效)。
+        if (typeof Highcharts !== 'undefined') {
+            Highcharts.setOptions({
+                chart: { backgroundColor: 'transparent', style: { fontFamily: 'sans-serif' }, spacingTop: 20 },
+                title: { text: null },
+                legend: { verticalAlign: 'bottom', itemStyle: { color: '#cbd5e1' }, itemHoverStyle: { color: '#ffffff' } },
+                xAxis: { gridLineColor: '#374151', lineColor: '#4b5563', labels: { style: { color: '#9ca3af' } } },
+                yAxis: { gridLineColor: '#374151', lineColor: '#4b5563', labels: { style: { color: '#9ca3af' } } },
+                tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.95)', style: { color: '#f3f4f6' }, borderColor: '#4b5563', shared: true }
+            });
+        }
 
         function initCharts() {
             const timeContainers = ['eeoi-time-container', 'time-util-container'];
@@ -1061,6 +1084,9 @@
                 const selectEl = document.querySelector(`select[onchange*="${containerId}"]`);
                 if(selectEl) renderTimeInput(selectEl.value, containerId);
             });
+
+            // 圖表庫未載入 (CDN 失敗) 時，僅略過圖表繪製，其餘篩選/表格功能不受影響
+            if (typeof Highcharts === 'undefined') return;
 
             const defaultCategories = ['2023', '2024', '2025', '2026'];
             // 三個受 TASK-3 影響的圖表預設「船報日期」X 軸 (3/15 ~ 3/27 連續日期)
@@ -1422,22 +1448,31 @@
                 "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json" }
             });
 
+            // Apply-on-Submit：篩選一律按「套用」後才生效；ext.search 只讀「已套用狀態」，
+            // 避免排序/翻頁等重繪時把尚未套用的輸入值誤當作篩選條件。
+            let voyApplied = { voy: '', min: '', max: '' };
             $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
                 if (settings.nTable.id !== 'voyageSummaryTable') return true;
-                let min = $('#voyMinDate').val(); 
-                let max = $('#voyMaxDate').val(); 
+                let a = voyApplied;
                 let dateCol = data[1];
-
-                if (min && !max && dateCol < min) return false;
-                if (!min && max && dateCol > max) return false;
-                if (min && max && (dateCol < min || dateCol > max)) return false;
+                if (a.voy && data[0] !== a.voy) return false;
+                if (a.min && dateCol < a.min) return false;
+                if (a.max && dateCol > a.max) return false;
                 return true;
             });
-            $('#voyMinDate, #voyMaxDate').on('change', function() { voyTable.draw(); });
-            $('#voyKeyword').on('keyup', function() { voyTable.search(this.value).draw(); });
-            $('#clearVoyFilterBtn').on('click', function() { 
-                $('#voyMinDate').val(''); $('#voyMaxDate').val(''); $('#voyKeyword').val('');
-                voyTable.search('').draw(); 
+            function applyVoyFilter() {
+                voyApplied = {
+                    voy: $('#voyVoyageFilter').val(),
+                    min: $('#voyMinDate').val(),
+                    max: $('#voyMaxDate').val()
+                };
+                voyTable.search($('#voyKeyword').val()).draw();   // 關鍵字也一併於套用時生效
+            }
+            $('#voyApplyBtn').on('click', applyVoyFilter);
+            $('#voyKeyword').on('keydown', function(e) { if (e.key === 'Enter') applyVoyFilter(); });   // Enter 視為送出
+            $('#clearVoyFilterBtn').on('click', function() {
+                $('#voyVoyageFilter').val(''); $('#voyMinDate').val(''); $('#voyMaxDate').val(''); $('#voyKeyword').val('');
+                applyVoyFilter();
             });
 
             const masterTable = $('#masterDataTable').DataTable({
@@ -1477,28 +1512,76 @@
                 "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json" }
             });
 
+            let masterApplied = { voy: '', dateStart: '', dateEnd: '', format: '' };
             $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
                 if (settings.nTable.id !== 'masterDataTable') return true;
-                let min = $('#minDate').val(); 
-                let max = $('#maxDate').val(); 
-                let formatFilter = $('#reportTypeFilter').val();
-                
+                let a = masterApplied;
+                let voyCol = data[1];
                 let formatCol = data[2];
-                let dateCol = data[3].split(' ')[0];
-
-                let datePass = true;
-                if (min && !max) datePass = (dateCol >= min);
-                else if (!min && max) datePass = (dateCol <= max);
-                else if (min && max) datePass = (dateCol >= min && dateCol <= max);
-                let formatPass = formatFilter ? formatCol.includes(formatFilter) : true;
-                return datePass && formatPass;
+                let dateCol = String(data[3]).split(' ')[0];   // 回報日期 (去掉時間)
+                if (a.voy && voyCol !== a.voy) return false;
+                if (a.dateStart && dateCol < a.dateStart) return false;   // 日期區間下界
+                if (a.dateEnd && dateCol > a.dateEnd) return false;       // 日期區間上界
+                if (a.format && !formatCol.includes(a.format)) return false;
+                return true;
             });
-
-            $('#minDate, #maxDate, #reportTypeFilter').on('change', function() { masterTable.draw(); });
-            $('#clearFilterBtn').on('click', function() {
-                $('#minDate').val(''); $('#maxDate').val(''); $('#reportTypeFilter').val('');
+            function applyMasterFilter() {
+                masterApplied = {
+                    voy: $('#masterVoyageFilter').val(),
+                    dateStart: $('#masterDateStart').val(),
+                    dateEnd: $('#masterDateEnd').val(),
+                    format: $('#reportTypeFilter').val()
+                };
                 masterTable.draw();
+            }
+            $('#masterApplyBtn').on('click', applyMasterFilter);
+            // 第一階層(航次)變動：只連動調整第二階層日期區間的可選範圍，不套用篩選 (等按「套用」)
+            $('#masterVoyageFilter').on('change', updateMasterDateBounds);
+            $('#clearFilterBtn').on('click', function() {
+                $('#masterVoyageFilter').val(''); $('#reportTypeFilter').val('');
+                $('#masterDateStart').val(''); $('#masterDateEnd').val('');
+                updateMasterDateBounds();
+                applyMasterFilter();
             });
+
+            // 依表格實際資料填入「航次篩選」下拉 (新航次在前)
+            function populateVoyageFilter(table, colIdx, selectId) {
+                let $sel = $(selectId);
+                table.column(colIdx).data().unique().sort().reverse().each(function(v) {
+                    if (v !== null && String(v).trim() !== '') {
+                        $sel.append('<option value="' + v + '">' + v + '</option>');
+                    }
+                });
+            }
+
+            // 第二階層日期區間：依「已選航次」求可選的最早/最晚回報日期，設為兩個日期輸入的 min/max；
+            // 未選航次時取全部航次範圍。純調整輸入可選範圍與提示，不套用篩選。
+            function masterDateExtent(voy) {
+                let min = null, max = null;
+                masterTable.rows().data().each(function(d) {
+                    if (!voy || d[1] === voy) {
+                        let dt = String(d[3]).split(' ')[0];
+                        if (dt) { if (min === null || dt < min) min = dt; if (max === null || dt > max) max = dt; }
+                    }
+                });
+                return { min: min, max: max };
+            }
+            function updateMasterDateBounds() {
+                let ext = masterDateExtent($('#masterVoyageFilter').val());
+                let $s = $('#masterDateStart'), $e = $('#masterDateEnd');
+                $s.attr('min', ext.min || '').attr('max', ext.max || '');
+                $e.attr('min', ext.min || '').attr('max', ext.max || '');
+                // 切換航次後，超出新範圍的殘留日期一律清掉，避免留下跨航次的無效區間
+                [$s, $e].forEach(function($x) {
+                    let v = $x.val();
+                    if (v && ext.min && ext.max && (v < ext.min || v > ext.max)) $x.val('');
+                });
+                $('#masterDateHint').text(ext.min && ext.max ? (ext.min + ' ~ ' + ext.max) : '—');
+            }
+
+            populateVoyageFilter(voyTable, 0, '#voyVoyageFilter');
+            populateVoyageFilter(masterTable, 1, '#masterVoyageFilter');
+            updateMasterDateBounds();
 
             // ==========================================
             // 欄位顯示彈出視窗 (勾選式) — 依群組分區，前三固定欄不列入
