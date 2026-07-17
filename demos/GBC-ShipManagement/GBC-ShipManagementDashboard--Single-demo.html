@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.bootstrap5.min.css" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -19,6 +20,10 @@
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <!-- DataTables ColVis：欄位顯示/隱藏切換 -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.colVis.min.js"></script>
+    <!-- DataTables FixedColumns：固定左側欄位 -->
+    <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
     
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/highcharts-more.js"></script>
@@ -38,27 +43,27 @@
 
     <style>
         :root {
-            --bg-main: #111827;         
-            --bg-card: #1f2937;         
-            --border-color: #374151;    
-            --text-main: #f3f4f6;       
-            --text-muted: #9ca3af;      
-            --primary: #3b82f6;         
+            --bg-main: #111827;
+            --bg-card: #1f2937;
+            --border-color: #374151;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #3b82f6;
             --success: #10b981;         
             --warning: #f59e0b;         
             --danger: #ef4444;          
             --font-base: 1rem;          
-            --font-sm: 0.875rem;        
-            --font-xs: 0.75rem;         
+            --font-sm: 1rem;
+            --font-xs: 0.75rem;
         }
 
         html { overflow-y: scroll; }
-        body { background-color: var(--bg-main); font-family: sans-serif; color: var(--text-main); }
+        body { background-color: var(--bg-main); font-family: sans-serif; color: var(--text-main); font-size: 16px; }
         .highcharts-credits { display: none !important; }
         
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-card); }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
 
         .card-custom { background-color: var(--bg-card) !important; border-color: var(--border-color) !important; }
@@ -81,7 +86,7 @@
         .ai-indicator { animation: pulse-purple 2s infinite; }
         @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(192, 132, 252, 0); } 100% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0); } }
 
-        .desc-box { background-color: rgba(31, 41, 55, 0.8); border-left: 4px solid var(--primary); padding: 1rem; border-radius: 0 0.5rem 0.5rem 0; margin-bottom: 1rem; font-size: 0.8rem; color: #d1d5db; line-height: 1.6; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .desc-box { background-color: rgba(31, 41, 55, 0.8); border-left: 4px solid var(--primary); padding: 1rem; border-radius: 0 0.5rem 0.5rem 0; margin-bottom: 1rem; font-size: 1rem; color: #d1d5db; line-height: 1.6; box-shadow: none; }
         .badge-custom { padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; display: inline-block; margin-bottom: 4px; font-size: var(--font-xs); }
         .badge-source { color: #60a5fa; background-color: rgba(30, 58, 138, 0.4); }
         .badge-risk { color: #f87171; background-color: rgba(127, 29, 29, 0.4); }
@@ -101,8 +106,8 @@
         .page-item.active .page-link { background-color: var(--primary); border-color: var(--primary); }
         .page-link { background-color: var(--bg-card); border-color: var(--border-color); color: #d1d5db; }
         .page-link:hover { background-color: var(--border-color); color: #fff; }
-        .table-custom-dt th { background-color: var(--border-color) !important; color: #d1d5db; font-weight: 600; white-space: nowrap; text-align: center; border-bottom: 2px solid #4b5563 !important; font-size: 0.75rem; padding: 6px 10px;}
-        .table-custom-dt td { white-space: nowrap; vertical-align: middle; border-bottom: 1px solid var(--border-color); text-align: center; color: var(--text-main); font-size: 0.75rem; padding: 6px 10px;}
+        .table-custom-dt th { background-color: #111827 !important; color: #93c5fd; font-weight: 600; white-space: nowrap; text-align: center; border-bottom: 1px solid #374151 !important; font-size: 1rem; padding: 8px 12px;}
+        .table-custom-dt td { white-space: nowrap; vertical-align: middle; border-bottom: 1px solid var(--border-color); text-align: center; color: var(--text-main); font-size: 1rem; padding: 8px 12px;}
         .table-custom-dt tbody tr:hover td { background-color: rgba(55, 65, 81, 0.5) !important; }
         
         .info-icon {
@@ -113,47 +118,133 @@
         .info-icon:hover { background-color: var(--primary); }
         .cursor-pointer { cursor: pointer; }
         .cursor-pointer:hover { opacity: 0.8; }
+
+        /* 欄位群組分隔線：區分「油品存量」與「油品耗量」等群組 */
+        #masterDataTable th.grp-l, #masterDataTable td.grp-l { border-left: 2px solid #60a5fa !important; }
+        #masterDataTable th.grp-r, #masterDataTable td.grp-r { border-right: 2px solid #60a5fa !important; }
+
+        /* FixedColumns 固定欄：深色主題背景與分隔線 */
+        .dtfc-fixed-start { background-color: var(--bg-card) !important; z-index: 2; }
+        table.dataTable thead .dtfc-fixed-start { background-color: var(--border-color) !important; }
+        .dtfc-fixed-start:last-of-type, th.dtfc-fixed-start:last-of-type, td.dtfc-fixed-start:last-of-type { border-right: 2px solid #4b5563 !important; }
+        div.dtfc-right-top-blocker, div.dtfc-left-top-blocker { background-color: var(--bg-card); }
+
+        /* ColVis 欄位可見性下拉：深色主題 */
+        div.dt-button-collection { background-color: var(--bg-card); border: 1px solid var(--border-color); max-height: 420px; overflow-y: auto; }
+        div.dt-button-collection .dt-button { color: #d1d5db; background: transparent; text-align: left; }
+        div.dt-button-collection .dt-button:hover { background-color: var(--border-color); color: #fff; }
+        div.dt-button-collection .dt-button.active, div.dt-button-collection .dt-button.dt-button-active { background-color: rgba(59,130,246,0.25); color: #fff; }
+        div.dt-button-collection .dt-button.dt-button-active::before, div.dt-button-collection .dt-button.active::before { color: var(--success); }
+
+        /* ==========================================================
+         * 無障礙(WCAG AA)按鈕配色 — 深色底上文字對比 ≥ 4.5:1
+         * 對比值(對深色底 #1a1d21 / 卡片 #23272c 取較嚴者)：
+         *   outline-primary  #60a5fa ≈ 6.2:1   outline-danger  #f87171 ≈ 5.3:1
+         *   outline-info     #38bdf8 ≈ 7.4:1   outline-warning #fbbf24 ≈ 9.6:1
+         *   outline-secondary#adb5bd ≈ 6.9:1   實心 primary 白字/#2563eb ≈ 5.2:1
+         * hover 以亮色填滿並改用深色文字(對比 ≥ 8:1)
+         * ========================================================== */
+        .btn-outline-primary { color: #60a5fa; border-color: #60a5fa; }
+        .btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active,
+        .btn-outline-primary.active { background-color: #60a5fa; border-color: #60a5fa; color: #0b0e14; }
+
+        .btn-outline-danger { color: #f87171; border-color: #f87171; }
+        .btn-outline-danger:hover, .btn-outline-danger:focus, .btn-outline-danger:active,
+        .btn-outline-danger.active { background-color: #f87171; border-color: #f87171; color: #160b0b; }
+
+        .btn-outline-info { color: #38bdf8; border-color: #38bdf8; }
+        .btn-outline-info:hover, .btn-outline-info:focus, .btn-outline-info:active,
+        .btn-outline-info.active { background-color: #38bdf8; border-color: #38bdf8; color: #04222e; }
+
+        .btn-outline-warning { color: #fbbf24; border-color: #fbbf24; }
+        .btn-outline-warning:hover, .btn-outline-warning:focus, .btn-outline-warning:active,
+        .btn-outline-warning.active { background-color: #fbbf24; border-color: #fbbf24; color: #161000; }
+
+        .btn-outline-secondary { color: #adb5bd; border-color: #6b7280; }
+        .btn-outline-secondary:hover, .btn-outline-secondary:focus, .btn-outline-secondary:active,
+        .btn-outline-secondary.active { background-color: #adb5bd; border-color: #adb5bd; color: #111418; }
+
+        .btn-outline-success { color: #34d399; border-color: #34d399; }
+        .btn-outline-success:hover, .btn-outline-success:focus, .btn-outline-success:active,
+        .btn-outline-success.active { background-color: #34d399; border-color: #34d399; color: #04231a; }
+
+        /* 實心綠(白字對比 ≈ 5.0:1) */
+        .btn-success { background-color: #15803d; border-color: #15803d; color: #fff; }
+        .btn-success:hover, .btn-success:focus, .btn-success:active,
+        .btn-success.active { background-color: #166534; border-color: #166534; color: #fff; }
+
+        /* 說明按鈕（比照 CSE-RecordsSingle）：卡片右上角的灰色膠囊鈕 */
+        .card-custom > .card-body { position: relative; }
+        .desc-toggle {
+            position: absolute; top: 1.1rem; right: 1.1rem; z-index: 3;
+            font-size: 0.875rem; line-height: 1.2; font-weight: 500;
+            color: #9ca3af; background-color: #374151;
+            border: none; padding: 5px 14px; border-radius: 0.375rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            transition: color .15s, background-color .15s;
+        }
+        .desc-toggle:hover, .desc-toggle.open { color: #fff; background-color: #4b5563; }
+
+        .btn-primary { background-color: #2563eb; border-color: #2563eb; color: #fff; }
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+        .btn-primary.active { background-color: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+
+        /* 可見的鍵盤聚焦框(無障礙 focus indicator) */
+        .btn:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; box-shadow: none; }
+
+        /* 高對比工具色 — 表格數值與連結文字(深底 ≥ 4.5:1) */
+        .text-danger  { color: #f87171 !important; }   /* ≈ 5.7:1 */
+        .text-warning { color: #fbbf24 !important; }   /* ≈ 9.6:1 */
+        .text-info    { color: #60a5fa !important; }   /* ≈ 6.4:1 */
+        .text-success { color: #34d399 !important; }   /* ≈ 8.3:1 */
+
+        /* ==========================================================================
+           圖片風格微調：扁平卡片、細邊框、pill 標籤（乾淨 CRM 視覺）
+           ========================================================================== */
+        .card-custom { box-shadow: none !important; border: 1px solid var(--border-color) !important; border-radius: 0.75rem; }
+        .card.shadow, .card.shadow-sm { box-shadow: none !important; }
+        .badge-source, .badge-calc, .badge-risk, .badge-ai, .badge-custom, .badge-gap { border-radius: 999px; }
     </style>
 </head>
 
 <body class="p-3 p-md-4 min-vh-100">
 
     <div class="container-fluid mb-4" style="max-width: 1800px;">
-        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 bg-dark p-3 rounded border border-secondary shadow-lg">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-end justify-content-between gap-3 border-bottom border-secondary pb-3">
             <div class="d-flex align-items-center gap-3">
-                <div class="bg-primary rounded" style="width: 8px; height: 32px;"></div>
-                <h1 class="h4 mb-0 fw-bold tracking-wide text-light">SLAB 岸端戰情室 - 風險與營運分析</h1>
+                <a id="backToFleet" href="GBC-ShipManagementDashboard-demo-BS.html" class="btn btn-outline-secondary btn-sm d-none p-2 lh-1" title="返回船隊戰情室總覽" aria-label="返回總覽"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg></a>
+                <div class="bg-primary rounded" style="width: 6px; height: 40px;"></div>
+                <div class="d-flex flex-column">
+                    <h1 id="pageTitle" class="h4 mb-0 fw-bold text-light">風險與營運分析</h1>
+                </div>
             </div>
             
-            <div class="d-flex align-items-center gap-3">
-                <div>
-                    <span class="ds-label">船型篩選</span>
-                    <select class="form-select ds-select w-auto">
-                        <option value="bulk" selected>散裝船 (Bulk Carrier)</option>
-                    </select>
-                </div>
-                <div>
-                    <span class="ds-label">監控船舶</span>
-                    <select id="vesselSelect" class="form-select ds-select w-auto text-info fw-bold">
-                        <option value="Yuan Shun">Yuan Shun</option>
-                        <option value="Jing Shun">Jing Shun</option>
-                        <option value="Feng Shun">Feng Shun</option>
-                        <option value="Hui Shun No.1">Hui Shun No.1</option>
-                        <option value="Gimpo Shun">Gimpo Shun</option>
-                    </select>
-                </div>
-            </div>
+            <!-- 監控船舶：由總覽 ?ship= 帶入，單船頁不再顯示船型/船舶切換器，僅保留隱藏元素供資料生成 -->
+            <select id="vesselSelect" class="d-none" aria-hidden="true">
+                <option value="Yuan Shun">Yuan Shun</option>
+                <option value="Jing Shun">Jing Shun</option>
+                <option value="Feng Shun">Feng Shun</option>
+                <option value="Hui Shun No.1">Hui Shun No.1</option>
+                <option value="Gimpo Shun">Gimpo Shun</option>
+            </select>
 
             <div class="d-flex align-items-center gap-4">
-                <div><span class="ds-label">當前監控航次</span><span class="text-info fw-bold font-monospace fs-5">V.2630-E</span></div>
+                <div><span class="ds-label">當前監控航次</span><span class="text-info fw-bold font-monospace fs-6">2630</span></div>
                 <div><span class="ds-label">資料庫最新同步</span><span class="text-light font-monospace fs-6">2026-03-27 18:00 CST</span></div>
             </div>
         </div>
     </div>
 
+    <!-- 來源提示橫幅：僅由船隊總覽 (from=fleet) 鑽入時顯示 -->
+    <div class="container-fluid mb-4" style="max-width: 1800px;">
+        <div id="fleetSourceBanner" class="d-none d-flex align-items-center gap-2 py-2 px-3" style="background-color: rgba(59,130,246,0.12); border: 1px solid var(--primary); border-radius: 0.5rem;">
+            <span class="text-info" style="font-size: 1rem;">來源：船隊戰情室總覽 · 已載入 <b id="fleetSourceShip">—</b> 的單船深度分析</span>
+        </div>
+    </div>
+
     <div class="container-fluid" style="max-width: 1800px;">
 
-        <div class="section-title text-success"><i class="me-2">■</i>航次統計列表 (Voyage Summary List)</div>
+        <div class="section-title"><i class="me-2">■</i>航次統計列表 (Voyage Summary)</div>
         <div class="card card-custom shadow mb-5">
             <div class="card-body p-4">
                 <div class="row mb-3 align-items-end bg-dark p-3 rounded border border-secondary gap-y-2">
@@ -170,7 +261,7 @@
                         <input type="text" id="voyKeyword" class="form-control ds-select" placeholder="請輸入關鍵字...">
                     </div>
                     <div class="col-12 col-md-2 text-end">
-                        <button id="clearVoyFilterBtn" class="btn btn-outline-warning w-100 ds-btn">清除篩選</button>
+                        <button id="clearVoyFilterBtn" class="btn btn-primary w-100 ds-btn">清除篩選</button>
                     </div>
                 </div>
 
@@ -193,14 +284,14 @@
             </div>
         </div>
         
-        <div class="section-title text-danger"><i class="me-2">■</i>岸端技術與資源風險診斷 (Tech & Resource Risk Analytics)</div>
+        <div class="section-title"><i class="me-2">■</i>岸端技術與資源風險診斷 (Tech & Resource Risk Analytics)</div>
         <div class="row g-4 mb-4">
             
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-info ps-2 mb-3">生存資源預警系統 (Fresh Water)</h2>
-                        <div class="desc-box" style="border-left-color: #0ea5e9;">
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">生存資源預警系統 (Fresh Water)</h2>
+                        <div class="desc-box" style="border-left-color: var(--primary);">
                             <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>交叉比對 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">ROB FW-淡水存量</code>、<code class="text-info">格式3-日電報</code> 的 <code class="text-info">每日淡水存量</code> 與 <code class="text-info">格式4-離港/完工報</code> 的 <code class="text-info">完工淡水存量</code>。</div>
                             <div id="fw-calc-desc" class="mb-2">
                                 <span class="badge-custom badge-calc">基準線計算</span>健康耗水基準線 = 
@@ -227,7 +318,7 @@
                             </div>
                         </div>
 
-                        <div id="chart-fw-balance" class="flex-grow-1" style="min-height: 220px;"></div>
+                        <div id="chart-fw-balance" style="height: 220px;"></div>
                     </div>
                 </div>
             </div>
@@ -235,8 +326,8 @@
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-danger ps-2 mb-3">燃油加油預警 (Fuel Remaining Days)</h2>
-                        <div class="desc-box" style="border-left-color: #ef4444;">
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">燃油加油預警 (Fuel Remaining Days)</h2>
+                        <div class="desc-box" style="border-left-color: var(--primary);">
                             <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>取系統依據 <code class="text-info">CST-岸端標準時間(UTC+8)</code> 最新回傳的船報，提取 <code class="text-info">ROB FO-重油存量</code> 與 <code class="text-info">ROB DO-輕油存量</code>。</div>
                             <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯 (MT轉天數)</span>為消除各船油箱容量與引擎耗油差異，系統自動將數值標準化轉換：<br>
                             1. <b>歷史日均耗基準</b>：取該船近30天在相同「船舶狀況(空/重載)」下的平均每日耗油量(MT/Day)。<br>
@@ -245,7 +336,7 @@
                         </div>
                         
                         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary align-items-center">
-                            <div class="col-12 col-md-9 text-secondary d-flex align-items-center" style="font-size: 0.75rem;">
+                            <div class="col-12 col-md-9 text-secondary d-flex align-items-center" style="font-size: 1rem;">
                                 <span class="rounded-circle bg-success me-2 live-indicator" style="width: 8px; height: 8px;"></span> 此圖表為即時狀態監控，無須區間篩選。
                             </div>
                             <div class="col-12 col-md-3 d-flex justify-content-end">
@@ -253,7 +344,7 @@
                             </div>
                         </div>
 
-                        <div id="chart-fuel-warning" class="flex-grow-1" style="min-height: 250px;"></div>
+                        <div id="chart-fuel-warning" style="height: 250px;"></div>
                     </div>
                 </div>
             </div>
@@ -261,8 +352,8 @@
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-danger ps-2 mb-3">船體阻力與推進風險</h2>
-                        <div class="desc-box" style="border-left-color: #ef4444;">
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">船體阻力與推進風險</h2>
+                        <div class="desc-box" style="border-left-color: var(--primary);">
                             <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>擷取自 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">SLIP(%)-滑失率</code>、<code class="text-info">蒲式風級</code> 與 <code class="text-info">浪級</code>。</div>
                             <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯</span>無近期水下洗船紀錄時，系統自動提取該船「過去一年內，在良好海象 (風級<3、浪級<2) 下的歷史平均滑失率」作為動態基準線。</div>
                             <div class="mb-2"><span class="badge-custom badge-risk">營運監控</span>若風/浪級皆低於 4 級，但實際滑失率卻持續大幅高於基準線，戰情室應警示「船體嚴重結垢(Fouling)或螺旋槳異常」，建議評估清艙洗船。</div>
@@ -290,7 +381,7 @@
                             </div>
                         </div>
 
-                        <div id="chart-slip-weather" class="flex-grow-1" style="min-height: 250px;"></div>
+                        <div id="chart-slip-weather" style="height: 250px;"></div>
                     </div>
                 </div>
             </div>
@@ -298,8 +389,8 @@
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-warning ps-2 mb-3">機件耗損與注油成本</h2>
-                        <div class="desc-box" style="border-left-color: #f59e0b;">
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">機件耗損與注油成本</h2>
+                        <div class="desc-box" style="border-left-color: var(--primary);">
                             <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>擷取自 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">RPM-主機轉速</code> 與 <code class="text-info">前24小時主機汽缸油耗量</code>。</div>
                             <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯</span>利用轉速推算主機負荷：
                                 <div class="formula-box">$$Load (\%) = \left(\frac{Current\ RPM}{Max\ RPM}\right)^3 \times 100$$</div>
@@ -333,14 +424,14 @@
                             </div>
                         </div>
 
-                        <div id="chart-cyl-rpm" class="flex-grow-1" style="min-height: 250px;"></div>
+                        <div id="chart-cyl-rpm" style="height: 250px;"></div>
                     </div>
                 </div>
             </div>
             
         </div>
 
-        <div class="section-title text-info"><i class="me-2">■</i>港埠作業與航次周轉效能 (Port & Voyage Operations)</div>
+        <div class="section-title"><i class="me-2">■</i>港埠作業與航次周轉效能 (Port & Voyage Operations)</div>
         <div class="row g-4 mb-4">
 
             <!-- 貨物裝卸進度與周轉 (Cargo Handling) — 暫時隱藏
@@ -348,20 +439,20 @@
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h2 class="h6 fw-bold text-light border-start border-4 border-info ps-2 m-0">貨物裝卸進度與周轉 (Cargo Handling)</h2>
+                            <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 m-0">貨物裝卸進度與周轉 (Cargo Handling)</h2>
                             <div class="text-end">
-                                <span class="badge-ai mb-0 border-0" style="font-size: 0.75rem;">最後 AI 影像判讀時間</span>
-                                <span class="text-info font-monospace d-block mt-1" style="font-size: 0.875rem;">2026-03-27 17:45 CST</span>
+                                <span class="badge-ai mb-0 border-0" style="font-size: 1rem;">最後 AI 影像判讀時間</span>
+                                <span class="text-info font-monospace d-block mt-1" style="font-size: 1rem;">2026-03-27 17:45 CST</span>
                             </div>
                         </div>
-                        <div class="desc-box" style="border-left-color: #0ea5e9;">
+                        <div class="desc-box" style="border-left-color: var(--primary);">
                             <div class="mb-2"><span class="badge-custom badge-ai">CCTV AI 監控</span>系統持續以船端回傳之 CCTV 影像辨識進行各貨艙 (Hold) 體積估算，即時填補船報時序盲區。</div>
                             <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯</span><code class="text-info">剩餘未作業量</code> = <code class="text-info">提單總量(B/L)</code> - <code class="text-info">AI 已作業量估算</code>。</div>
                             <div><span class="badge-custom badge-risk">營運監控</span>即時監控各艙裝卸效率。若特定艙進度嚴重落後，岸端可提早介入協調碼頭工人分配。</div>
                         </div>
 
                         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary align-items-center">
-                            <div class="col-12 col-md-9 text-secondary d-flex align-items-center" style="font-size: 0.75rem;">
+                            <div class="col-12 col-md-9 text-secondary d-flex align-items-center" style="font-size: 1rem;">
                                 <span class="rounded-circle bg-purple me-2 ai-indicator" style="width: 8px; height: 8px; background-color: #c084fc;"></span> 顯示當前掛靠港口之各艙進度，自動更新。
                             </div>
                             <div class="col-12 col-md-3 d-flex justify-content-end">
@@ -369,7 +460,7 @@
                             </div>
                         </div>
 
-                        <div id="chart-cctv-cargo" class="flex-grow-1" style="min-height: 220px;"></div>
+                        <div id="chart-cctv-cargo" style="height: 220px;"></div>
                     </div>
                 </div>
             </div>
@@ -378,8 +469,8 @@
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-success ps-2 mb-3">港埠延滯與作業效能</h2>
-                        <div class="desc-box" style="border-left-color: #10b981;">
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">港埠延滯與作業效能</h2>
+                        <div class="desc-box" style="border-left-color: var(--primary);">
                             <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>擷取自 <code class="text-info">格式3-日電報</code> 的 <code class="text-info">每日裝卸貨量</code> 與 <code class="text-info">工班數量</code>。若裝卸貨不超過 24 小時無日報，系統自動調用 <code class="text-info">格式4-離港報</code> 的 <code class="text-info">總裝/卸貨數量</code> 進行單一柱狀圖展示。</div>
                             <div><span class="badge-custom badge-risk">營運監控</span>若工班數維持不變，但每日裝卸產能卻急遽下滑，強烈暗示遭遇岸吊故障、天候停工或碼頭效率低落，戰情室需立即介入以防高額延滯費 (Demurrage)。拉長至月/季區間則可用以評估該港口長期的平均效能。</div>
                         </div>
@@ -406,7 +497,7 @@
                             </div>
                         </div>
 
-                        <div id="chart-port-ops" class="flex-grow-1" style="min-height: 220px;"></div>
+                        <div id="chart-port-ops" style="height: 220px;"></div>
                     </div>
                 </div>
             </div>
@@ -414,8 +505,8 @@
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-success ps-2 mb-3">法規碳排強度與能效 (EEOI Tracker)</h2>
-                        <div class="desc-box" style="border-left-color: #10b981;">
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">法規碳排強度與能效 (EEOI Tracker)</h2>
+                        <div class="desc-box" style="border-left-color: var(--primary);">
                             <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>擷取 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">日航程與油耗</code>；及 <code class="text-info">格式4-離港報</code> 的 <code class="text-info">總裝卸貨量</code>。</div>
                             <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯</span>衡量每運送一噸貨物跑一海浬的 \(CO_2\) 排放量 (\(C_F\) 為 IMO 燃油碳排轉換係數)：
                                 <div class="formula-box">$$EEOI = \frac{Fuel_{cons} \times C_F}{Cargo \times Distance}$$</div>
@@ -436,7 +527,7 @@
                             </div>
                         </div>
 
-                        <div id="chart-eeoi" class="flex-grow-1" style="min-height: 250px;"></div>
+                        <div id="chart-eeoi" style="height: 250px;"></div>
                     </div>
                 </div>
             </div>
@@ -444,8 +535,8 @@
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-warning ps-2 mb-3">航次時間利用率分析</h2>
-                        <div class="desc-box" style="border-left-color: #f59e0b;">
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">航次時間利用率分析</h2>
+                        <div class="desc-box" style="border-left-color: var(--primary);">
                             <div class="mb-2"><span class="badge-custom badge-source">規則說明</span>與全船隊的「航次時間分佈與利用率」規則相同，鎖定 <code class="text-info">Voyage Number-航次號</code> 區間計算。</div>
                             <div class="rule-box mb-2">
                                 <ul>
@@ -471,26 +562,26 @@
                             </div>
                         </div>
 
-                        <div id="chart-time-util" class="flex-grow-1" style="min-height: 250px;"></div>
+                        <div id="chart-time-util" style="height: 250px;"></div>
                     </div>
                 </div>
             </div>
             
         </div>
 
-        <div class="section-title text-primary"><i class="me-2">■</i>總表船報原始數據溯源 (Master Data Ledger)</div>
+        <div class="section-title"><i class="me-2">■</i>船報原始數據明細 (Master Data Ledger)</div>
         
-        <div class="desc-box mb-3" style="border-left-color: #60a5fa;">
+        <div class="desc-box mb-3" style="border-left-color: var(--primary);">
             <div class="d-flex justify-content-between align-items-center cursor-pointer" data-bs-toggle="collapse" data-bs-target="#mappingTable" style="cursor: pointer;">
-                <span class="badge-custom badge-source fs-6 mb-0"><i class="me-1">📘</i> 總表欄位與船報來源對應字典 (Data Mapping Dictionary)</span>
-                <span class="text-info" style="font-size: 0.875rem;">點擊展開 / 收合 ▼</span>
+                <span class="badge-custom badge-source fs-6 mb-0">總表欄位與船報來源對應字典 (Data Mapping Dictionary)</span>
+                <span class="text-info" style="font-size: 1rem;">點擊展開 / 收合 ▼</span>
             </div>
-            <div class="collapse show mt-3" id="mappingTable">
+            <div class="collapse mt-3" id="mappingTable">
                 <div class="row g-3">
                     <div class="col-12">
                         <div class="p-2 border border-secondary rounded bg-card">
                             <span class="badge bg-secondary mb-1">通用與衍生欄位</span>
-                            <div class="text-muted" style="font-size: 0.8rem; line-height: 1.5;">
+                            <div class="text-muted" style="font-size: 1rem; line-height: 1.5;">
                                 <span class="text-light">各電報皆有填報：</span>船名、航次號、LT當地時間、電報名稱、狀態、港口、各類存量ROB<br>
                                 <span class="text-info">系統自動衍生推算(船報無此原始欄位)：</span>最後更新時間(伺服器接收時間)、剩餘貨載(由提單總量 B/L 減去累計裝卸量 TTL 計算得出)
                             </div>
@@ -499,7 +590,7 @@
                     <div class="col-md-4">
                         <div class="p-2 border border-secondary rounded bg-card h-100">
                             <span class="badge bg-primary mb-1">格式1 - 船位報 (NOON/MORN)</span>
-                            <ul class="mb-0 ps-3 text-muted" style="font-size: 0.75rem; line-height: 1.6;">
+                            <ul class="mb-0 ps-3 text-muted" style="font-size: 1rem; line-height: 1.6;">
                                 <li><b class="text-info">消耗數據：</b>各類日耗量</li>
                                 <li><b class="text-info">航行狀態：</b>緯度、經度、航向、航速、RPM、滑失率、日/總航程</li>
                                 <li><b class="text-info">海氣象：</b>天氣、蒲式風級/向、浪級/高/向</li>
@@ -510,17 +601,17 @@
                     <div class="col-md-4">
                         <div class="p-2 border border-secondary rounded bg-card h-100">
                             <span class="badge bg-secondary mb-1">格式2 - 抵港報 (ARVL)</span>
-                            <ul class="mb-0 ps-3 text-muted" style="font-size: 0.75rem; line-height: 1.6;">
+                            <ul class="mb-0 ps-3 text-muted" style="font-size: 1rem; line-height: 1.6;">
                                 <li><b class="text-info">進港動態：</b>抵達港區時間(ARVD)、下錨/漂航時間、引水員登船(POB)</li>
                                 <li><b class="text-info">靠泊作業：</b>帶上第一根纜繩、靠妥碼頭</li>
-                                <li><b class="text-info">船舶狀態：</b>遞交通知書(NOR)、水尺(前/後)</li>
+                                <li><b class="text-info">船舶狀態：</b>遞交通知書(NOR)、水尺(前/中/後)、預計靠泊(ETB)/開工/離港(ETCD)</li>
                             </ul>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-2 border border-secondary rounded bg-card h-100">
                             <span class="badge bg-info text-dark mb-1">格式3 - 日電報 (DR)</span>
-                            <ul class="mb-0 ps-3 text-muted" style="font-size: 0.75rem; line-height: 1.6;">
+                            <ul class="mb-0 ps-3 text-muted" style="font-size: 1rem; line-height: 1.6;">
                                 <li><b class="text-info">裝卸及等泊動態：</b>裝/卸貨(L/D)、開始時間、日裝卸貨數、累計裝卸數(TTL)</li>
                                 <li><b class="text-info">作業資源：</b>工班/吊機使用狀況</li>
                                 <li><b class="text-info">預估時間：</b>預計完貨/離港時間(ETCD)</li>
@@ -530,16 +621,16 @@
                     <div class="col-md-4">
                         <div class="p-2 border border-secondary rounded bg-card h-100">
                             <span class="badge bg-success mb-1">格式4 - 完工/離港報 (DEPT)</span>
-                            <ul class="mb-0 ps-3 text-muted" style="font-size: 0.75rem; line-height: 1.6;">
-                                <li><b class="text-info">離泊結算：</b>離港水尺(前/後)、最終總貨量結算</li>
-                                <li><b class="text-info">下一航次：</b>總航程(Distance Next Port)、預計抵港時間(ETA)、下一港口名稱</li>
+                            <ul class="mb-0 ps-3 text-muted" style="font-size: 1rem; line-height: 1.6;">
+                                <li><b class="text-info">離泊結算：</b>離港水尺(前/中/後)、最終總貨量結算</li>
+                                <li><b class="text-info">下一航次：</b>距下港距離(Distance to Next Port)、預計抵港時間(ETA)、下一港口名稱</li>
                             </ul>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-2 border border-secondary rounded bg-card h-100">
                             <span class="badge bg-warning text-dark mb-1">格式5 - 移泊報 (SHIFTING)</span>
-                            <ul class="mb-0 ps-3 text-muted" style="font-size: 0.75rem; line-height: 1.6;">
+                            <ul class="mb-0 ps-3 text-muted" style="font-size: 1rem; line-height: 1.6;">
                                 <li><b class="text-info">移泊動態：</b>移泊開始時間 (寫入各靠泊欄位)、靠妥新碼頭時間</li>
                                 <li><b class="text-info">移泊消耗：</b>移泊期間的油水消耗 (反映在存量ROB變動)</li>
                             </ul>
@@ -548,7 +639,7 @@
                     <div class="col-md-4">
                         <div class="p-2 border border-secondary rounded bg-card h-100">
                             <span class="badge bg-danger mb-1">格式6 - 特殊情況報 (SPECIAL)</span>
-                            <ul class="mb-0 ps-3 text-muted" style="font-size: 0.75rem; line-height: 1.6;">
+                            <ul class="mb-0 ps-3 text-muted" style="font-size: 1rem; line-height: 1.6;">
                                 <li><b class="text-info">異常/停泊動態：</b>下錨或漂航時間、錨離(Anchor Up)時間、特殊天候避風等</li>
                                 <li><b class="text-info">狀況備註：</b>其他事項 (Remarks) 詳述異常原因與預計恢復時間</li>
                             </ul>
@@ -562,11 +653,11 @@
             <div class="card-body p-4">
                 <div class="row mb-3 align-items-end bg-dark p-3 rounded border border-secondary gap-y-2">
                     <div class="col-12 col-md-3">
-                        <label class="ds-label">發報開始日期</label>
+                        <label class="ds-label">填報開始日期</label>
                         <input type="date" id="minDate" class="form-control ds-select">
                     </div>
                     <div class="col-12 col-md-3">
-                        <label class="ds-label">發報結束日期</label>
+                        <label class="ds-label">填報結束日期</label>
                         <input type="date" id="maxDate" class="form-control ds-select">
                     </div>
                     <div class="col-12 col-md-3">
@@ -583,62 +674,68 @@
                         </select>
                     </div>
                     <div class="col-12 col-md-3 text-end">
-                        <button id="clearFilterBtn" class="btn btn-outline-warning w-100 ds-btn">清除篩選</button>
+                        <button id="clearFilterBtn" class="btn btn-primary w-100 ds-btn">清除篩選</button>
                     </div>
                 </div>
                 
                 <table id="masterDataTable" class="table table-dark table-hover table-custom-dt w-100 text-nowrap">
                     <thead>
                         <tr>
-                            <th rowspan="2">船名 <i class="info-icon" title="Vessel Name" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">航次號 <i class="info-icon" title="Voyage Number" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">時間 LT <i class="info-icon" title="當地時間 (Local Time)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">電報名稱 <i class="info-icon" title="Report Name" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">狀態 <i class="info-icon" title="Vessel Status" onclick="event.stopPropagation()">i</i></th>
-                            <th colspan="3" class="border-bottom text-center">存量ROB(MT)</th>
-                            <th colspan="3" class="border-bottom text-center">存量ROB(LTR)</th>
-                            <th colspan="3" class="border-bottom text-center">日耗量(MT)</th>
-                            <th colspan="3" class="border-bottom text-center">日耗量(LTR)</th>
-                            <th rowspan="2">港口 <i class="info-icon" title="Port" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">遞交通知書 <i class="info-icon" title="NOR Tender" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">水尺(前/後) <i class="info-icon" title="Draft (DF/DA)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">抵達港區時間 <i class="info-icon" title="抵達港區時間 (ARVD)：勾稽抵港報-結束海上定速航行時間 (End of Sea Passage)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">下錨/漂航時間 <i class="info-icon" title="Anchor or Drifting Time" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">錨離/結束漂航時間 <i class="info-icon" title="Anchor Up / End of Drifting" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">引水員登船 <i class="info-icon" title="Pilot On Board (POB)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">引水員離船時間 <i class="info-icon" title="Pilot Off / Pilot Disembark" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">靠妥碼頭 <i class="info-icon" title="All Lines Fast" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">裝/卸貨 <i class="info-icon" title="Load / Discharge (L/D)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">開始時間 <i class="info-icon" title="Commence Time" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">日裝卸貨數 <i class="info-icon" title="Daily Load/Discharge" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">累計裝卸數 <i class="info-icon" title="Total Accumulated (TTL)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">剩餘貨載 <i class="info-icon" title="Balance Cargo (系統由 B/L 減去 TTL 計算)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">工班狀況 <i class="info-icon" title="Gangs" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">預計完貨/離港 <i class="info-icon" title="Estimated Time of Completion/Departure (ETCD)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">緯度 <i class="info-icon" title="Latitude (N/S)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">經度 <i class="info-icon" title="Longitude (E/W)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">航向 <i class="info-icon" title="Course" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">平均航速 <i class="info-icon" title="Average Speed (SPD)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">主機轉速 <i class="info-icon" title="Main Engine RPM" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">滑失率(%) <i class="info-icon" title="Slip (%)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">日航程 <i class="info-icon" title="Distance to Go (DTG)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">已航行總距離 <i class="info-icon" title="Total Distance Sailed (已航行總距離)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">天氣 <i class="info-icon" title="Weather" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">蒲式風級 <i class="info-icon" title="Beaufort Wind Scale" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">風向 <i class="info-icon" title="Wind Direction" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">浪級 <i class="info-icon" title="Sea State" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">浪高 <i class="info-icon" title="Swell Height" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">浪向 <i class="info-icon" title="Swell Direction" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">預計抵港時間 <i class="info-icon" title="ETA" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">港口名稱 <i class="info-icon" title="Next Port" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">貨物 <i class="info-icon" title="Cargo" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">貨物情況 <i class="info-icon" title="Cargo Condition" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">其他事項 <i class="info-icon" title="Remarks" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2">最後更新時間 <i class="info-icon" title="System Last Update (伺服器接收時間)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">船名 <i class="info-icon" title="Vessel｜B 船名" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">航次號 <i class="info-icon" title="Voy.｜C 航次號" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">船報類型 <i class="info-icon" title="Report Type｜D 船報類型 (電報名稱)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">填報時間 LT <i class="info-icon" title="Report Time｜E 填報時間 (採當地時間 LT)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">預計抵港時間 <i class="info-icon" title="ETA｜F 預計抵港時間 (船位報/離港報的預計抵達下一港時間)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">港口名稱 <i class="info-icon" title="NEXT PORT｜G 港口名稱 (預計抵達的下一港)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">當前狀態 <i class="info-icon" title="Status｜H 當前狀態" onclick="event.stopPropagation()">i</i></th>
+                            <th colspan="6" class="border-bottom text-center grp-l grp-r">油品存量 <i class="info-icon" title="I~N 油品存量 ROB (參考 02 總表油品存油勾稽邏輯)" onclick="event.stopPropagation()">i</i></th>
+                            <th colspan="6" class="border-bottom text-center grp-r">油品耗量 <i class="info-icon" title="O~T 油品耗量 (今日報與前一日報油料相減；參考 03 油品耗量勾稽邏輯)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">港口 <i class="info-icon" title="Port｜U 港口 (各電報的港口；航行報則勾稽下一港)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">遞交通知書 <i class="info-icon" title="Nor Tender｜V 遞交準備就緒通知書 NOR 的時間 (抵港或靠泊報)" onclick="event.stopPropagation()">i</i></th>
+                            <th colspan="3" class="border-bottom text-center">水尺 <i class="info-icon" title="W~Y 水尺 (抵港報與離港報；前 DF / 中 DM / 後 DA)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">結束海上定速航行 <i class="info-icon" title="Time of EOSP｜Z 結束海上定速航行時間 (End of Sea Passage)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">下錨或漂航時間 <i class="info-icon" title="Anchor or Drifting｜AA 下錨或漂航時間" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">起錨或結束漂航 <i class="info-icon" title="Anchor Aweigh or Drifting End｜AB 起錨或結束飄航時間" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">引水員登船 <i class="info-icon" title="POB｜AC 引水員登船時間 (Pilot On Board)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">預計靠泊 <i class="info-icon" title="ETB｜AD 預計靠泊時間 (Estimated Time of Berthing)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">預計開工 <i class="info-icon" title="EST Commence Working｜AE 預計開工時間" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">預計離港 <i class="info-icon" title="ETCD｜AF 預計離港時間" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">靠泊時間 <i class="info-icon" title="All Lines Made Fast｜AG 靠泊時間 (纜繩全繫上時間)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">開始移船 <i class="info-icon" title="Time of Shift Start｜AH 開始移船 (移泊報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">結束移船 <i class="info-icon" title="Time of Shifting End｜AI 結束移船 (錨地或泊位)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">事件發生時間 <i class="info-icon" title="Irregular Time｜AJ 事件發生時間 (特殊情況報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">預計恢復正常航時間 <i class="info-icon" title="Estimate Resume Sailing Time｜AK 預計恢復正常航行時間 (特殊情況報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">載重狀況 <i class="info-icon" title="Laden/Ballast｜AL 船舶狀況 (每日電報的空重狀態)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">裝卸狀況 <i class="info-icon" title="Loading/Discharging｜AM 船舶狀況 (每日電報的裝卸作業)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">開始時間 <i class="info-icon" title="Commence Working｜AN 開始時間 (每日電報的開工時間)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">貨物 <i class="info-icon" title="CARGO｜AO 貨物 (靠泊、離港報；空船以空白表示)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">日裝卸貨物數 <i class="info-icon" title="Daily Qty｜AP 日裝卸貨物數 (每日電報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">已裝船總量 <i class="info-icon" title="Total O/B｜AQ 已裝船總量 (每日電報的總裝/卸量)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">剩餘貨載 <i class="info-icon" title="Balance Qty｜AR 剩餘貨載 (每日電報的剩餘貨量)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">工班/吊機狀況 <i class="info-icon" title="Gangs｜AS 工班/吊機使用狀況" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">預計完貨/離港時間 <i class="info-icon" title="ETCD｜AT 預計完貨、離港時間 (每日電報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">緯度 <i class="info-icon" title="Lat｜AU 緯度 (各電報所在位置)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">經度 <i class="info-icon" title="Long｜AV 經度 (各電報所在位置)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">平均航速 <i class="info-icon" title="SPD｜AW 平均航速 (船位報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">主機轉速 <i class="info-icon" title="RPM｜AX 主機轉速 (船位報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">滑失率(%) <i class="info-icon" title="SLIP｜AY 滑失率 (船位報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">日航程 <i class="info-icon" title="Daily Distance｜AZ 日航程 (船位報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">距下港距離 <i class="info-icon" title="Distance to Next Port｜BA 距下港距離 (船位報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">天氣 <i class="info-icon" title="Weather condition｜BB 天氣 (各報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">蒲式風級 <i class="info-icon" title="Wind Scale｜BC 蒲式風級 (船位報、特殊情況報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">風速 <i class="info-icon" title="Wind Speed｜BD 風速 (船位報、特殊情況報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">風向 <i class="info-icon" title="Wind Direction｜BE 風向 (船位報、特殊情況報)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">浪級 <i class="info-icon" title="Sea Scale｜BF 浪級 (道格拉斯浪級)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">浪高 <i class="info-icon" title="Swell Height｜BG 浪高 (海浪高)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">浪向 <i class="info-icon" title="Sea Direction｜BH 浪向" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">流向 <i class="info-icon" title="Current Sitation｜BI 流向" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">其他事項 <i class="info-icon" title="REMARKS｜BJ 其他事項 (每份報的備註)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2">最後更新時間 <i class="info-icon" title="last update｜BK 最後更新時間 (伺服器接收時間)" onclick="event.stopPropagation()">i</i></th>
                         </tr>
                         <tr>
-                            <th>FO</th><th>DO</th><th>FW</th><th>ME CLY</th><th>ME SYS</th><th>AE SYS</th>
-                            <th>FO</th><th>DO</th><th>FW</th><th>ME CLY</th><th>ME SYS</th><th>AE SYS</th>
+                            <th class="grp-l">FO</th><th>DO</th><th>M/E CYL</th><th>M/E SYS</th><th>A/E SYS</th><th class="grp-r">FW</th>
+                            <th>FO</th><th>DO</th><th>M/E CYL</th><th>M/E SYS</th><th>A/E SYS</th><th class="grp-r">FW</th>
+                            <th>前 DF</th><th>中 DM</th><th>後 DA</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -646,6 +743,36 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- 欄位顯示設定：彈出視窗 (勾選欄位) -->
+    <div class="modal fade" id="colVisModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-secondary" style="background-color: var(--bg-card);">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-light">欄位顯示設定</h5>
+                    <div class="ms-auto d-flex gap-2 me-3">
+                        <button type="button" class="btn btn-outline-info btn-sm ds-btn" id="colVisAll">全部顯示</button>
+                        <button type="button" class="btn btn-outline-warning btn-sm ds-btn" id="colVisNone">全部隱藏</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm ds-btn" id="colVisReset">還原預設</button>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="colVisBody">
+                    <div class="text-muted small mb-2">勾選要顯示的欄位;航次號、船報類型等固定欄位一律顯示。變更即時套用,匯出 Excel 也僅含目前顯示的欄位。</div>
+                    <div class="mb-3 position-relative">
+                        <input type="text" id="colVisSearch" class="form-control ds-select" placeholder="搜尋欄位名稱…" autocomplete="off" style="height: 36px; padding-right: 30px;">
+                        <span id="colVisSearchClear" class="text-muted" style="display:none; position:absolute; right:10px; top:5px; cursor:pointer; font-size:1.1rem; line-height:1.4;">&times;</span>
+                        <div id="colVisNoResult" class="text-muted small mt-2" style="display:none;">找不到符合的欄位</div>
+                    </div>
+                    <!-- 由 JS 動態產生分組勾選框 -->
+                </div>
+                <div class="modal-footer border-secondary">
+                    <span class="text-muted small me-auto" id="colVisCount"></span>
+                    <button type="button" class="btn btn-primary btn-sm ds-btn" data-bs-dismiss="modal">完成</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -792,10 +919,10 @@
                         newDataLen = newCategories.length;
                         chart.xAxis[0].setCategories(newCategories, false);
                     } else if (chartId === 'chart-time-util') {
-                        if (dimension === 'year') { newCategories = ['V.2510', 'V.2511', 'V.2601', 'V.2602', 'V.2603', 'V.2604']; newDataLen = 6; }
-                        else if (dimension === 'quarter') { newCategories = ['V.2601', 'V.2602', 'V.2603']; newDataLen = 3; }
-                        else if (dimension === 'month') { newCategories = ['V.2603', 'V.2604']; newDataLen = 2; }
-                        else if (dimension === 'day') { newCategories = ['V.2604']; newDataLen = 1; }
+                        if (dimension === 'year') { newCategories = ['2510', '2511', '2601', '2602', '2603', '2604']; newDataLen = 6; }
+                        else if (dimension === 'quarter') { newCategories = ['2601', '2602', '2603']; newDataLen = 3; }
+                        else if (dimension === 'month') { newCategories = ['2603', '2604']; newDataLen = 2; }
+                        else if (dimension === 'day') { newCategories = ['2604']; newDataLen = 1; }
                         chart.xAxis[0].setCategories(newCategories, false);
                     } else if (chartId === 'chart-eeoi') {
                         if (dimension === 'year') { newCategories = ['2023', '2024', '2025', '2026']; newDataLen = 4; }
@@ -853,6 +980,21 @@
                             return;
                         }
 
+                        // 港埠延滯：日裝卸量、工班數，第三條 = 峰值日基準線 (讀第一條最大值填滿)
+                        if (chartId === 'chart-port-ops') {
+                            if (idx === 0) {
+                                newValues = newCategories.map(() => Math.floor(4000 + Math.random() * 10000));
+                            } else if (idx === 1) {
+                                newValues = newCategories.map(() => Math.floor(1 + Math.random() * 3));
+                            } else {
+                                const dischArr = chart.series[0].options.data || [];
+                                const peak = dischArr.length ? Math.max.apply(null, dischArr) : 0;
+                                newValues = newCategories.map(() => peak);
+                            }
+                            s.setData(newValues, false);
+                            return;
+                        }
+
                         for(let i = 0; i < newDataLen; i++) {
                             if (chartId === 'chart-slip-weather') {
                                 if (idx === 0) newValues.push(Math.floor(Math.random() * 6 + 2));
@@ -866,9 +1008,6 @@
                                     if(paramSelect === 'load') newValues.push(Math.floor(65 + Math.random() * 25));
                                     else newValues.push(Math.floor(85 + Math.random() * 25));
                                 }
-                            } else if (chartId === 'chart-port-ops') {
-                                if (idx === 0) newValues.push(Math.floor(4000 + Math.random() * 10000));
-                                else newValues.push(Math.floor(1 + Math.random() * 3));
                             } else if (chartId === 'chart-time-util') {
                                 if (idx === 0) newValues.push(Math.floor(50 + Math.random() * 20));
                                 else if (idx === 1) newValues.push(Math.floor(5 + Math.random() * 15));
@@ -1008,6 +1147,8 @@
             */
 
             // 6. Port Ops Chart — X 軸：船報日期 (不連續，僅顯示有裝卸事件之日)
+            const portOpsDischarge = portEventDates.map(() => Math.floor(4000 + Math.random() * 10000));
+            const portOpsPeak = Math.max.apply(null, portOpsDischarge); // 峰值日：期間內單日最高裝卸量，作為可達基準
             Highcharts.chart('chart-port-ops', {
                 xAxis: {
                     categories: portEventDates,
@@ -1026,15 +1167,16 @@
                     }
                 },
                 series: [
-                    { name: '日裝卸貨量 (MT)', type: 'column', yAxis: 0, data: portEventDates.map(() => Math.floor(4000 + Math.random() * 10000)), color: '#10b981' },
-                    { name: '工班數量', type: 'spline', yAxis: 1, data: portEventDates.map(() => Math.floor(1 + Math.random() * 3)), color: '#facc15', lineWidth: 0, marker: { radius: 6, symbol: 'circle' } }
+                    { name: '日裝卸貨量 (MT)', type: 'column', yAxis: 0, data: portOpsDischarge, color: '#10b981' },
+                    { name: '工班數量', type: 'spline', yAxis: 1, data: portEventDates.map(() => Math.floor(1 + Math.random() * 3)), color: '#facc15', lineWidth: 0, marker: { radius: 6, symbol: 'circle' } },
+                    { name: '峰值日基準線 (MT)', type: 'line', yAxis: 0, data: portEventDates.map(() => portOpsPeak), color: '#f87171', dashStyle: 'ShortDash', lineWidth: 2, marker: { enabled: false } }
                 ]
             });
 
             // 7. Time Util Chart
             Highcharts.chart('chart-time-util', {
                 chart: { type: 'bar' }, 
-                xAxis: { categories: ['V.2510', 'V.2511', 'V.2601', 'V.2602', 'V.2603', 'V.2604'] }, 
+                xAxis: { categories: ['2510', '2511', '2601', '2602', '2603', '2604'] }, 
                 yAxis: { min: 0, max: 100, title: null, visible: false },
                 plotOptions: { bar: { stacking: 'percent', borderWidth: 0, dataLabels: { enabled: true, format: '{y}%', style: { color: '#fff', textOutline: 'none', fontWeight: 'normal', fontSize: '10px' } } } },
                 series: [
@@ -1090,7 +1232,7 @@
                 let date = `2026-${mStr}-${dStr}`;
                 
                 voyHtml += `<tr>
-                    <td>V.26${voyNum}-E</td><td>${date}</td><td>KAOHSIUNG</td><td>SINGAPORE</td>
+                    <td>26${voyNum}</td><td>${date}</td><td>KAOHSIUNG</td><td>SINGAPORE</td>
                     <td>${(Math.random()*2000 + 500).toFixed(0)}</td>
                     <td>${(Math.random()*200 + 100).toFixed(1)}</td>
                     <td>${(Math.random()*15 + 2).toFixed(1)}</td>
@@ -1126,7 +1268,7 @@
             let voyNum = 29;
 
             for(let v=0; v<3; v++) {
-                let currentVoy = `V.26${voyNum+v}-E`;
+                let currentVoy = `26${voyNum+v}`;
                 voyageTimeline.forEach(report => {
                     // 日報或船位報會跨天
                     if(report.f === 1 || report.f === 3 || report.f === 4) {
@@ -1146,61 +1288,70 @@
                     let rowHtml = `<tr>
                         <td class="text-info fw-bold">${shipName}</td>
                         <td>${currentVoy}</td>
-                        <td>${dStr} ${report.lt}</td>
                         <td><span class="badge ${report.badge}" title="${report.zh}">${report.name}</span></td>
+                        <td>${dStr} ${report.lt}</td>
+                        <td>${isF1 || isF4 ? '2026-03-31' : '-'}</td>
+                        <td>${isF1 || isF4 ? 'SIN' : '-'}</td>
                         <td class="fw-bold">${report.status}</td>
 
-                        <td>${(Math.random()*200 + 100).toFixed(1)}</td>
+                        <td class="grp-l">${(Math.random()*200 + 100).toFixed(1)}</td>
                         <td>${(Math.random()*20 + 10).toFixed(1)}</td>
-                        <td>${(Math.random()*100 + 100).toFixed(1)}</td>
                         <td>${Math.floor(Math.random()*500 + 100)}</td>
                         <td>${Math.floor(Math.random()*500 + 100)}</td>
                         <td>${Math.floor(Math.random()*500 + 100)}</td>
+                        <td class="grp-r">${(Math.random()*100 + 100).toFixed(1)}</td>
 
                         <td class="${isF1 ? 'text-danger' : ''}">${isF1 ? (Math.random()*15 + 10).toFixed(1) : '-'}</td>
                         <td class="${isF1 ? 'text-warning' : ''}">${isF1 ? (Math.random()*2 + 1).toFixed(1) : '-'}</td>
-                        <td class="${isF1 ? 'text-info' : ''}">${isF1 ? (Math.random()*5 + 2).toFixed(1) : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*20 + 10) : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*5 + 1) : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*5 + 1) : '-'}</td>
+                        <td class="grp-r ${isF1 ? 'text-info' : ''}">${isF1 ? (Math.random()*5 + 2).toFixed(1) : '-'}</td>
 
                         <td>${portName}</td>
                         <td>${isF2 ? report.lt : '-'}</td>
-                        <td>${isF2 || isF4 ? '11.5 / 11.8' : '-'}</td>
+                        <td>${isF2 || isF4 ? '11.5' : '-'}</td>
+                        <td>${isF2 || isF4 ? '11.65' : '-'}</td>
+                        <td>${isF2 || isF4 ? '11.8' : '-'}</td>
                         <td>${isF2 ? report.lt : '-'}</td>
                         <td>${isF5 || isF6 ? report.lt : '-'}</td>
                         <td>${isF5 || isF6 ? report.lt : '-'}</td>
                         <td>${isF2 || isF5 ? report.lt : '-'}</td>
+                        <td>${isF2 ? '2026-03-30 20:00' : '-'}</td>
+                        <td>${isF2 ? '2026-03-30 22:00' : '-'}</td>
+                        <td>${isF2 ? '2026-03-31 18:00' : '-'}</td>
                         <td>${isF2 || isF5 ? report.lt : '-'}</td>
-                        <td>${isF2 || isF5 ? report.lt : '-'}</td>
-                        
-                        <td>${isF3 ? 'D' : '-'}</td>
+                        <td>${isF5 ? report.lt : '-'}</td>
+                        <td>${isF5 ? report.lt : '-'}</td>
+                        <td>${isF6 ? report.lt : '-'}</td>
+                        <td>${isF6 ? '2026-03-30 12:00' : '-'}</td>
+
+                        <td>${isF3 || isF4 ? 'Laden' : '-'}</td>
+                        <td>${isF3 ? 'Discharging' : '-'}</td>
                         <td>${isF3 ? report.lt : '-'}</td>
+                        <td>COAL</td>
                         <td>${isF3 ? Math.floor(Math.random()*10000 + 2000) : '-'}</td>
                         <td>${isF3 ? Math.floor(Math.random()*50000 + 10000) : '-'}</td>
                         <td>${isF3 ? Math.floor(Math.random()*20000 + 5000) : '-'}</td>
                         <td>${isF3 ? Math.floor(Math.random()*3 + 1) : '-'}</td>
                         <td>${isF3 ? '2026-03-30' : '-'}</td>
-                        
+
                         <td>${isF1 ? "22 30' N" : "-"}</td>
                         <td>${isF1 ? "120 15' E" : "-"}</td>
-                        <td>${isF1 ? "210" : "-"}</td>
                         <td>${isF1 ? (Math.random()*3 + 10).toFixed(1) : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*20 + 85) : '-'}</td>
                         <td>${isF1 ? (Math.random()*5 + 10).toFixed(1) : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*200 + 100) : '-'}</td>
-                        <td>${isF4 ? Math.floor(Math.random()*1000 + 500) : '-'}</td>
-                        
+                        <td>${isF1 || isF4 ? Math.floor(Math.random()*1000 + 500) : '-'}</td>
+
                         <td>${isF1 ? 'Cloudy' : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*6 + 2) : '-'}</td>
+                        <td>${isF1 ? Math.floor(Math.random()*10 + 5) : '-'}</td>
                         <td>${isF1 ? 'NE' : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*3 + 1) : '-'}</td>
                         <td>${isF1 ? (Math.random()*2).toFixed(1) : '-'}</td>
                         <td>${isF1 ? 'NE' : '-'}</td>
-                        <td>${isF1 || isF4 ? '2026-03-31' : '-'}</td>
-                        <td>${isF1 || isF4 ? 'SIN' : '-'}</td>
-                        <td>COAL</td>
-                        <td>Normal</td>
+                        <td>${isF1 ? 'NW 0.5kt' : '-'}</td>
                         <td>${isF6 ? 'Waiting for berth' : '-'}</td>
                         <td>${dStr} 23:59:59</td>
                     </tr>`;
@@ -1213,11 +1364,45 @@
         }
 
         $(document).ready(function() {
-            // 由戰情室總覽點選船名 / 填報時間進入時，依網址 ?ship= 參數自動帶入監控船舶
-            const shipParam = new URLSearchParams(window.location.search).get('ship');
-            if (shipParam) {
-                const sel = document.getElementById('vesselSelect');
-                if (sel && [...sel.options].some(o => o.value === shipParam)) sel.value = shipParam;
+            // 由戰情室總覽點選船名 / 填報時間 / 圖表進入時，依網址參數自動帶入監控船舶並連動
+            const _urlParams = new URLSearchParams(window.location.search);
+            const shipParam = _urlParams.get('ship');
+            const fromParam = _urlParams.get('from');       // fleet = 來自船隊總覽
+            const sectionParam = _urlParams.get('section'); // 要聚焦捲動的區塊
+            const sel = document.getElementById('vesselSelect');
+            // 僅接受名單內的合法船名，避免網址參數注入
+            const validShip = (shipParam && sel && [...sel.options].some(o => o.value === shipParam)) ? shipParam : null;
+            if (validShip) {
+                sel.value = validShip;
+                // 標題標示當前船名：船名以強調色呈現，後綴「單船分析」以次要色
+                const h1 = document.getElementById('pageTitle');
+                if (h1) {
+                    h1.innerHTML = '<span class="text-info"></span><span class="text-secondary fw-normal ms-2" style="font-size: 1rem;">單船分析</span>';
+                    h1.querySelector('.text-info').textContent = validShip;
+                }
+                document.title = validShip + ' - 單船分析 | SLAB 岸端戰情室';
+            }
+            // 僅從總覽 (from=fleet) 進入時，顯示返回鈕與來源橫幅
+            if (fromParam === 'fleet') {
+                const back = document.getElementById('backToFleet');
+                if (back) back.classList.remove('d-none');
+                const banner = document.getElementById('fleetSourceBanner');
+                if (banner) {
+                    banner.classList.remove('d-none');
+                    const s = document.getElementById('fleetSourceShip');
+                    if (s) s.textContent = shipParam || '—';
+                }
+            }
+            // 依 section 參數，待表格渲染後平滑捲動至對應區塊
+            if (sectionParam) {
+                const sectionTargets = { masterData: 'masterDataTable', voyage: 'voyageSummaryTable' };
+                const targetId = sectionTargets[sectionParam];
+                if (targetId) {
+                    setTimeout(function () {
+                        const el = document.getElementById(targetId);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 900);
+                }
             }
 
             generateDemoData();
@@ -1229,7 +1414,7 @@
                        "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 "buttons": [{
                     extend: 'excelHtml5',
-                    text: '📥 導出 Excel',
+                    text: '匯出 Excel',
                     className: 'btn btn-success btn-sm ds-btn',
                     title: '航次統計列表',
                     exportOptions: { columns: ':visible' }
@@ -1260,16 +1445,35 @@
                 "pageLength": 10,
                 "lengthMenu": [10, 20, 35],
                 "ordering": true,
+                "fixedColumns": { start: 3 },   // 固定左側：船名、航次號、船報類型
                 "dom": "<'row mb-2'<'col-sm-6 d-flex align-items-center'l><'col-sm-6 text-end'B>>" +
                        "<'row'<'col-sm-12'tr>>" +
                        "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                "buttons": [{
-                    extend: 'excelHtml5',
-                    text: '📥 導出 Excel',
-                    className: 'btn btn-success btn-sm ds-btn',
-                    title: '船報原始數據溯源',
-                    exportOptions: { columns: ':visible' }
-                }],
+                "buttons": [
+                    {
+                        text: '欄位顯示',
+                        className: 'btn btn-primary btn-sm ds-btn',
+                        action: function() {
+                            bootstrap.Modal.getOrCreateInstance(document.getElementById('colVisModal')).show();
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: '匯出 Excel',
+                        className: 'btn btn-success btn-sm ds-btn',
+                        title: '船報原始數據明細',
+                        exportOptions: {
+                            columns: ':visible',                 // 僅匯出可見欄位
+                            format: {
+                                header: function(data, columnIdx) {
+                                    // 匯出時輸出乾淨表頭：移除 info-icon 的「i」
+                                    return $(masterTable.column(columnIdx).header())
+                                        .clone().children().remove().end().text().trim();
+                                }
+                            }
+                        }
+                    }
+                ],
                 "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json" }
             });
 
@@ -1279,8 +1483,8 @@
                 let max = $('#maxDate').val(); 
                 let formatFilter = $('#reportTypeFilter').val();
                 
-                let dateCol = data[2].split(' ')[0];
-                let formatCol = data[3];
+                let formatCol = data[2];
+                let dateCol = data[3].split(' ')[0];
 
                 let datePass = true;
                 if (min && !max) datePass = (dateCol >= min);
@@ -1294,6 +1498,142 @@
             $('#clearFilterBtn').on('click', function() {
                 $('#minDate').val(''); $('#maxDate').val(''); $('#reportTypeFilter').val('');
                 masterTable.draw();
+            });
+
+            // ==========================================
+            // 欄位顯示彈出視窗 (勾選式) — 依群組分區，前三固定欄不列入
+            // ==========================================
+            const colVisGroups = [
+                { name: '基本 / 狀態',      cols: [3, 4, 5, 6] },
+                { name: '油品存量',         cols: [7, 8, 9, 10, 11, 12],  prefix: '存量-' },
+                { name: '油品耗量',         cols: [13, 14, 15, 16, 17, 18], prefix: '耗量-' },
+                { name: '港口 / 靠泊作業',  cols: [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35] },
+                { name: '貨物作業',         cols: [36, 37, 38, 39, 40, 41, 42, 43, 44] },
+                { name: '航行 / 海氣象',    cols: [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59] },
+                { name: '其他',             cols: [60, 61] }
+            ];
+            function colVisTitle(idx, prefix) {
+                // 取表頭純文字(移除 info-icon 的 "i")
+                let raw = $(masterTable.column(idx).header()).clone().children().remove().end().text().trim();
+                if (!raw) raw = '欄 ' + idx;
+                if (idx >= 21 && idx <= 23) return '水尺-' + raw;   // 前 DF / 中 DM / 後 DA
+                return (prefix || '') + raw;
+            }
+            function buildColVisModal() {
+                let html = '<div class="row g-3">';
+                colVisGroups.forEach(function(g) {
+                    html += '<div class="col-md-6 cv-group-col"><div class="p-2 border border-secondary rounded bg-dark h-100 cv-group">' +
+                            '<div class="d-flex justify-content-between align-items-center mb-2">' +
+                            '<span><span class="badge bg-secondary">' + g.name + '</span>' +
+                            '<span class="text-muted small ms-2 cv-grp-count" data-cols="' + g.cols.join(',') + '"></span></span>' +
+                            '<span><a href="#" class="text-info small me-2 cv-grp" data-cols="' + g.cols.join(',') + '" data-on="1">全選</a>' +
+                            '<a href="#" class="text-warning small cv-grp" data-cols="' + g.cols.join(',') + '" data-on="0">全不選</a></span></div>';
+                    g.cols.forEach(function(idx) {
+                        let vis = masterTable.column(idx).visible();
+                        html += '<div class="form-check cv-row">' +
+                                '<input class="form-check-input cv-chk" type="checkbox" value="' + idx + '" id="cv-' + idx + '"' + (vis ? ' checked' : '') + '>' +
+                                '<label class="form-check-label text-light small" for="cv-' + idx + '">' + colVisTitle(idx, g.prefix) + '</label></div>';
+                    });
+                    html += '</div></div>';
+                });
+                html += '</div>';
+                $('#colVisBody').find('.row.g-3').remove();
+                $('#colVisBody').append(html);
+                $('#colVisSearch').val('');
+                applyColVisSearch('');
+                updateColVisCount();
+            }
+            function updateGroupCounts() {
+                $('#colVisBody .cv-grp-count').each(function() {
+                    let cols = this.getAttribute('data-cols').split(',');
+                    let shown = cols.filter(function(c){ return masterTable.column(+c).visible(); }).length;
+                    this.textContent = shown + ' / ' + cols.length;
+                });
+            }
+            function updateColVisCount() {
+                let total = masterTable.columns().count();
+                let visible = masterTable.columns(':visible').count();
+                $('#colVisCount').text('目前顯示 ' + visible + ' / ' + total + ' 欄');
+                updateGroupCounts();
+            }
+            // 欄位搜尋:即時過濾勾選列與群組
+            function applyColVisSearch(q) {
+                q = (q || '').trim().toLowerCase();
+                $('#colVisSearchClear').toggle(!!q);
+                let anyResult = false;
+                $('#colVisBody .cv-group-col').each(function() {
+                    let groupHas = false;
+                    $(this).find('.cv-row').each(function() {
+                        let match = !q || $(this).text().toLowerCase().indexOf(q) >= 0;
+                        $(this).toggle(match);
+                        if (match) groupHas = true;
+                    });
+                    $(this).toggle(groupHas);
+                    if (groupHas) anyResult = true;
+                });
+                $('#colVisNoResult').toggle(!!q && !anyResult);
+            }
+            $('#colVisSearch').on('input', function() { applyColVisSearch(this.value); });
+            $('#colVisSearchClear').on('click', function() { $('#colVisSearch').val(''); applyColVisSearch(''); $('#colVisSearch').focus(); });
+            // 勾選單一欄位
+            $('#colVisBody').on('change', '.cv-chk', function() {
+                masterTable.column(+this.value).visible(this.checked);
+                updateColVisCount();
+            });
+            // 群組全選 / 全不選
+            $('#colVisBody').on('click', '.cv-grp', function(e) {
+                e.preventDefault();
+                let on = this.getAttribute('data-on') === '1';
+                this.getAttribute('data-cols').split(',').forEach(function(c) {
+                    masterTable.column(+c).visible(on, false);
+                    $('#cv-' + c).prop('checked', on);
+                });
+                masterTable.columns.adjust();
+                updateColVisCount();
+            });
+            // 全部顯示 / 全部隱藏 (前三固定欄永遠顯示)
+            $('#colVisAll').on('click', function() {
+                masterTable.columns(':gt(2)').visible(true, false);
+                masterTable.columns.adjust();
+                $('.cv-chk').prop('checked', true);
+                updateColVisCount();
+            });
+            $('#colVisNone').on('click', function() {
+                masterTable.columns(':gt(2)').visible(false, false);
+                masterTable.columns.adjust();
+                $('.cv-chk').prop('checked', false);
+                updateColVisCount();
+            });
+            $('#colVisReset').on('click', function() {
+                masterTable.columns(':gt(2)').visible(true, false);
+                masterTable.columns.adjust();
+                $('.cv-chk').prop('checked', true);
+                updateColVisCount();
+            });
+            // 每次開啟時依當前狀態重建勾選框
+            document.getElementById('colVisModal').addEventListener('show.bs.modal', buildColVisModal);
+
+            // ==========================================
+            // 說明區塊：全部可收合，預設隱藏
+            //  - 已內建收合機制者(如對應字典)只需維持其自身邏輯
+            //  - 其餘 .desc-box 自動加上「顯示說明 / 收合說明」切換鈕並預設隱藏
+            // ==========================================
+            document.querySelectorAll('.desc-box').forEach(function(box) {
+                if (box.querySelector('[data-bs-toggle="collapse"]')) return; // 略過已有收合鈕者
+                box.style.display = 'none';
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'desc-toggle';
+                btn.textContent = '說明';
+                btn.setAttribute('aria-expanded', 'false');
+                box.parentNode.insertBefore(btn, box);
+                btn.addEventListener('click', function() {
+                    var expanded = btn.getAttribute('aria-expanded') === 'true';
+                    // 手風琴：說明內嵌展開/收合，卡片高度隨之伸縮（圖表為固定高度，不受影響、收合後確實復原）
+                    $(box).stop(true, true).slideToggle(160);
+                    btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                    btn.classList.toggle('open', !expanded);
+                });
             });
 
             // ==========================================

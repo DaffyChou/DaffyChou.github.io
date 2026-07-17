@@ -10,104 +10,189 @@
     <script src="https://code.highcharts.com/highcharts-more.js"></script>
 
     <style>
-        /* ==========================================================================
-           1. 全域變數設定區 (CSS Variables) - 集中管理顏色與字體大小，方便一鍵換膚
-           ========================================================================== */
         :root {
-            /* --- 顏色設定 --- */
-            --bg-main: #111827;         /* 網頁最底層主背景色 (深灰黑) */
-            --bg-card: #1f2937;         /* 圖表卡片、輸入框背景色 (稍微淺一點的灰) */
-            --border-color: #374151;    /* 邊框、分隔線顏色 */
-            --text-main: #f3f4f6;       /* 主要文字顏色 (近白色) */
-            --text-muted: #9ca3af;      /* 次要說明、備註文字顏色 (淺灰) */
-            
-            --primary: #3b82f6;         /* 系統主色調 (藍色 - 用於重點邊框、按鈕) */
-            --success: #10b981;         /* 成功/正常色調 (綠色) */
-            --warning: #f59e0b;         /* 警告色調 (橘黃色) */
-            --danger: #ef4444;          /* 危險色調 (紅色) */
-
-            /* --- 字體大小設定 (Typography Scale) --- */
-            --font-base: 1rem;          /* 16px - 基礎字體 (body) */
-            --font-sm: 0.875rem;        /* 14px - 次要內文、按鈕、輸入框、說明主文 */
-            --font-xs: 0.75rem;         /* 12px - 標籤、表格內容、Badge標籤 */
-            --font-xxs: 0.625rem;       /* 10px - 極小備註、圖表 Tooltip 提示、座標軸數值 */
+            --bg-main: #111827;
+            --bg-card: #1f2937;
+            --border-color: #374151;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #3b82f6;
+            --success: #10b981;         
+            --warning: #f59e0b;         
+            --danger: #ef4444;          
+            --font-base: 1rem;          
+            --font-sm: 1rem;
+            --font-xs: 0.75rem;
         }
 
-        /* ==========================================================================
-           2. 基礎元素與覆寫 Bootstrap 樣式
-           ========================================================================== */
-        body { 
-            background-color: var(--bg-main); 
-            font-family: sans-serif; 
-            font-size: var(--font-base); 
-            color: var(--text-main);
-        }
-        
-        /* 隱藏 Highcharts 官方版權浮水印 */
+        html { overflow-y: scroll; }
+        body { background-color: var(--bg-main); font-family: sans-serif; color: var(--text-main); font-size: 16px; }
         .highcharts-credits { display: none !important; }
         
-        /* 客製化捲軸樣式 (讓 Windows 系統上的捲軸也符合深色模式) */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-card); }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
 
-        /* 卡片與表格樣式覆寫 */
         .card-custom { background-color: var(--bg-card) !important; border-color: var(--border-color) !important; }
-        .table-custom tr:hover td { background-color: var(--border-color); }
 
-        /* ==========================================================================
-           3. 專案客製化元件 (UI Components)
-           ========================================================================== */
-        
-        /* 篩選器：下拉選單與日期輸入框 */
         .ds-select {
-            background-color: var(--border-color); /* 輸入框背景 */
-            color: var(--text-main); 
-            border: 1px solid #4b5563;
-            border-radius: 0.25rem; 
-            padding: 0 0.5rem; 
-            font-size: var(--font-sm); /* 14px */
+            background-color: var(--border-color); color: var(--text-main); border: 1px solid #4b5563;
+            border-radius: 0.25rem; padding: 0 0.5rem; font-size: var(--font-sm);
             width: 100%; height: 30px; outline: none; transition: border-color 0.2s; box-sizing: border-box;
         }
-        .ds-select:focus { border-color: var(--primary); }
+        .ds-select:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); }
         .ds-select:disabled, .ds-select option:disabled { color: #6b7280; background-color: var(--bg-card); font-style: italic; }
-        /* 將原生日期的日曆小圖示反白，以符合深色模式 */
         input[type="date"]::-webkit-calendar-picker-indicator, input[type="month"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; padding: 0;}
         
-        /* 篩選器：標籤文字與按鈕 */
         .ds-btn { height: 30px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; font-size: var(--font-sm); }
-        .ds-label { display: block; font-size: var(--font-xs); color: var(--text-muted); margin-bottom: 0.15rem; }
+        .ds-label { display: block; font-size: var(--font-xs); color: var(--text-muted); margin-bottom: 0.15rem; font-weight: 600; }
 
-        /* 最新動態的綠色閃爍指示燈動畫 */
         .live-indicator { animation: pulse-green 2s infinite; }
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        
+        .ai-indicator { animation: pulse-purple 2s infinite; }
+        @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(192, 132, 252, 0); } 100% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0); } }
 
-        /* 系統說明文字方塊 (左側帶藍條的區塊) */
-        .desc-box { 
-            background-color: rgba(55, 65, 81, 0.4); 
-            border-left: 3px solid var(--primary); 
-            padding: 0.75rem; border-radius: 0 0.375rem 0.375rem 0; margin-bottom: 0.75rem; 
-            font-size: var(--font-sm); color: #d1d5db; line-height: 1.6; 
+        .desc-box { background-color: rgba(31, 41, 55, 0.8); border-left: 4px solid var(--primary); padding: 1rem; border-radius: 0 0.5rem 0.5rem 0; margin-bottom: 1rem; font-size: 1rem; color: #d1d5db; line-height: 1.6; box-shadow: none; }
+        .badge-custom { padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; display: inline-block; margin-bottom: 4px; font-size: var(--font-xs); }
+        .badge-source { color: #60a5fa; background-color: rgba(30, 58, 138, 0.4); }
+        .badge-risk { color: #f87171; background-color: rgba(127, 29, 29, 0.4); }
+        .badge-calc { color: #34d399; background-color: rgba(6, 78, 59, 0.4); }
+        .badge-ai { color: #c084fc; background-color: rgba(88, 28, 135, 0.4); border: 1px solid #c084fc; }
+        .badge-gap { color: #fbbf24; background-color: rgba(120, 53, 15, 0.4); border: 1px dashed #fbbf24; }
+
+        .formula-box { background-color: var(--bg-main); padding: 0.5rem 1rem; border-radius: 0.25rem; margin: 0.5rem 0; border: 1px dashed #4b5563; color: var(--success); min-height: 52px; display: flex; align-items: center; justify-content: center; overflow: hidden; font-family: monospace; }
+        .rule-box { background-color: var(--bg-main); padding: 0.75rem; border-radius: 0.25rem; margin: 0.5rem 0; border: 1px solid #4b5563; color: #60a5fa; font-size: var(--font-xs); }
+        .rule-box ul { margin-bottom: 0; padding-left: 1.5rem; }
+
+        .section-title { font-size: 1.2rem; font-weight: bold; color: var(--text-main); border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-top: 2.5rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* DataTables 自訂樣式 */
+        .dataTables_filter { display: none !important; } 
+        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+        .page-item.active .page-link { background-color: var(--primary); border-color: var(--primary); }
+        .page-link { background-color: var(--bg-card); border-color: var(--border-color); color: #d1d5db; }
+        .page-link:hover { background-color: var(--border-color); color: #fff; }
+        .table-custom-dt th { background-color: #111827 !important; color: #93c5fd; font-weight: 600; white-space: nowrap; text-align: center; border-bottom: 1px solid #374151 !important; font-size: 1rem; padding: 8px 12px;}
+        .table-custom-dt td { white-space: nowrap; vertical-align: middle; border-bottom: 1px solid var(--border-color); text-align: center; color: var(--text-main); font-size: 1rem; padding: 8px 12px;}
+        .table-custom-dt tbody tr:hover td { background-color: rgba(55, 65, 81, 0.5) !important; }
+        
+        .info-icon {
+            cursor: help; display: inline-flex; align-items: center; justify-content: center; 
+            width: 14px; height: 14px; background-color: #6b7280; color: white; 
+            border-radius: 50%; font-size: 10px; font-style: normal; margin-left: 4px; vertical-align: middle;
         }
+        .info-icon:hover { background-color: var(--primary); }
+        .cursor-pointer { cursor: pointer; }
+        .cursor-pointer:hover { opacity: 0.8; }
 
-        /* 說明方塊內的彩色標籤 (Badge) - 統一 12px */
-        .badge-source, .badge-calc, .badge-risk, .badge-ai, .badge-warn { 
+        /* 欄位群組分隔線：區分「油品存量」與「油品耗量」等群組 */
+        #masterDataTable th.grp-l, #masterDataTable td.grp-l { border-left: 2px solid #60a5fa !important; }
+        #masterDataTable th.grp-r, #masterDataTable td.grp-r { border-right: 2px solid #60a5fa !important; }
+
+        /* FixedColumns 固定欄：深色主題背景與分隔線 */
+        .dtfc-fixed-start { background-color: var(--bg-card) !important; z-index: 2; }
+        table.dataTable thead .dtfc-fixed-start { background-color: var(--border-color) !important; }
+        .dtfc-fixed-start:last-of-type, th.dtfc-fixed-start:last-of-type, td.dtfc-fixed-start:last-of-type { border-right: 2px solid #4b5563 !important; }
+        div.dtfc-right-top-blocker, div.dtfc-left-top-blocker { background-color: var(--bg-card); }
+
+        /* ColVis 欄位可見性下拉：深色主題 */
+        div.dt-button-collection { background-color: var(--bg-card); border: 1px solid var(--border-color); max-height: 420px; overflow-y: auto; }
+        div.dt-button-collection .dt-button { color: #d1d5db; background: transparent; text-align: left; }
+        div.dt-button-collection .dt-button:hover { background-color: var(--border-color); color: #fff; }
+        div.dt-button-collection .dt-button.active, div.dt-button-collection .dt-button.dt-button-active { background-color: rgba(59,130,246,0.25); color: #fff; }
+        div.dt-button-collection .dt-button.dt-button-active::before, div.dt-button-collection .dt-button.active::before { color: var(--success); }
+
+        /* ==========================================================
+         * 無障礙(WCAG AA)按鈕配色 — 深色底上文字對比 ≥ 4.5:1
+         * 對比值(對深色底 #1a1d21 / 卡片 #23272c 取較嚴者)：
+         *   outline-primary  #60a5fa ≈ 6.2:1   outline-danger  #f87171 ≈ 5.3:1
+         *   outline-info     #38bdf8 ≈ 7.4:1   outline-warning #fbbf24 ≈ 9.6:1
+         *   outline-secondary#adb5bd ≈ 6.9:1   實心 primary 白字/#2563eb ≈ 5.2:1
+         * hover 以亮色填滿並改用深色文字(對比 ≥ 8:1)
+         * ========================================================== */
+        .btn-outline-primary { color: #60a5fa; border-color: #60a5fa; }
+        .btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active,
+        .btn-outline-primary.active { background-color: #60a5fa; border-color: #60a5fa; color: #0b0e14; }
+
+        .btn-outline-danger { color: #f87171; border-color: #f87171; }
+        .btn-outline-danger:hover, .btn-outline-danger:focus, .btn-outline-danger:active,
+        .btn-outline-danger.active { background-color: #f87171; border-color: #f87171; color: #160b0b; }
+
+        .btn-outline-info { color: #38bdf8; border-color: #38bdf8; }
+        .btn-outline-info:hover, .btn-outline-info:focus, .btn-outline-info:active,
+        .btn-outline-info.active { background-color: #38bdf8; border-color: #38bdf8; color: #04222e; }
+
+        .btn-outline-warning { color: #fbbf24; border-color: #fbbf24; }
+        .btn-outline-warning:hover, .btn-outline-warning:focus, .btn-outline-warning:active,
+        .btn-outline-warning.active { background-color: #fbbf24; border-color: #fbbf24; color: #161000; }
+
+        .btn-outline-secondary { color: #adb5bd; border-color: #6b7280; }
+        .btn-outline-secondary:hover, .btn-outline-secondary:focus, .btn-outline-secondary:active,
+        .btn-outline-secondary.active { background-color: #adb5bd; border-color: #adb5bd; color: #111418; }
+
+        .btn-outline-success { color: #34d399; border-color: #34d399; }
+        .btn-outline-success:hover, .btn-outline-success:focus, .btn-outline-success:active,
+        .btn-outline-success.active { background-color: #34d399; border-color: #34d399; color: #04231a; }
+
+        /* 實心綠(白字對比 ≈ 5.0:1) */
+        .btn-success { background-color: #15803d; border-color: #15803d; color: #fff; }
+        .btn-success:hover, .btn-success:focus, .btn-success:active,
+        .btn-success.active { background-color: #166534; border-color: #166534; color: #fff; }
+
+        /* 說明按鈕（與 Single-demo 相同）：卡片右上角的灰色膠囊鈕 */
+        .card-custom > .card-body { position: relative; }
+        .desc-toggle {
+            position: absolute; top: 1.1rem; right: 1.1rem; z-index: 3;
+            font-size: 0.875rem; line-height: 1.2; font-weight: 500;
+            color: #9ca3af; background-color: #374151;
+            border: none; padding: 5px 14px; border-radius: 0.375rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            transition: color .15s, background-color .15s;
+        }
+        .desc-toggle:hover, .desc-toggle.open { color: #fff; background-color: #4b5563; }
+
+        .btn-primary { background-color: #2563eb; border-color: #2563eb; color: #fff; }
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+        .btn-primary.active { background-color: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+
+        /* 可見的鍵盤聚焦框(無障礙 focus indicator) */
+        .btn:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; box-shadow: none; }
+
+        /* 高對比工具色 — 表格數值與連結文字(深底 ≥ 4.5:1) */
+        .text-danger  { color: #f87171 !important; }   /* ≈ 5.7:1 */
+        .text-warning { color: #fbbf24 !important; }   /* ≈ 9.6:1 */
+        .text-info    { color: #60a5fa !important; }   /* ≈ 6.4:1 */
+        .text-success { color: #34d399 !important; }   /* ≈ 8.3:1 */
+
+        /* ==========================================================================
+           demo-BS 專用元件樣式（船隊總覽頁特有，沿用原有外觀）
+           ========================================================================== */
+        /* 說明方塊內彩色標籤：本頁未套用 .badge-custom，於此補上尺寸 */
+        .badge-source, .badge-calc, .badge-risk, .badge-ai, .badge-warn {
             font-size: var(--font-xs); padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; display: inline-block; margin-bottom: 4px;
         }
-        .badge-source { color: #60a5fa; background-color: rgba(30, 58, 138, 0.4); } /* 資料來源-藍 */
-        .badge-calc { color: #34d399; background-color: rgba(6, 78, 59, 0.4); }     /* 計算邏輯-綠 */
-        .badge-risk { color: #f87171; background-color: rgba(127, 29, 29, 0.4); }   /* 風險提示-紅 */
-        .badge-ai { color: #c084fc; background-color: rgba(88, 28, 135, 0.4); border: 1px solid #c084fc; } /* AI計算-紫 */
-        .badge-warn { color: #facc15; background-color: rgba(133, 77, 14, 0.4); }   /* 警告提醒-黃 */
+        .badge-warn { color: #facc15; background-color: rgba(133, 77, 14, 0.4); }
 
-        /* 機務風險對照表專用樣式 */
+        /* 一般表格 hover */
+        .table-custom tr:hover td { background-color: var(--border-color); }
+
+        /* 機務風險對照表 */
         .risk-table { width: 100%; margin-top: 4px; border-collapse: collapse; font-size: var(--font-xs); text-align: center; }
         .risk-table th { background-color: rgba(55, 65, 81, 0.8); border: 1px solid #4b5563; padding: 4px 6px; font-weight: normal; color: var(--text-muted); }
         .risk-table td { border: 1px solid #4b5563; padding: 4px 6px; }
 
-        /* 可點擊的船名 / 填報時間連結 (進入單船電報總覽與明細) */
+        /* 可點擊船名 / 填報時間連結 */
         .ship-link, .report-time-link { cursor: pointer; transition: opacity 0.15s; }
         .ship-link:hover, .report-time-link:hover { text-decoration: underline !important; opacity: 0.8; }
+
+        /* ==========================================================================
+           圖片風格微調：扁平卡片、細邊框、pill 標籤（乾淨 CRM 視覺）
+           ========================================================================== */
+        .card-custom { box-shadow: none !important; border: 1px solid var(--border-color) !important; border-radius: 0.75rem; }
+        .card.shadow, .card.shadow-sm { box-shadow: none !important; }
+        .badge-source, .badge-calc, .badge-risk, .badge-ai, .badge-warn { border-radius: 999px; }
     </style>
 </head>
 
@@ -131,9 +216,9 @@
                 <h3 class="fs-6 fw-bold text-light mb-2 d-flex align-items-center">
                     <span class="badge-calc bg-primary bg-opacity-25 text-primary border-0 me-2">核心架構</span> 系統底層時序勾稽邏輯
                 </h3>
-                <p class="mb-0 text-secondary" style="font-size: 0.875rem; line-height: 1.6;">
+                <p class="mb-0 text-secondary" style="font-size: 1rem; line-height: 1.6;">
                     為確保統計不重複計算，系統嚴格以 <code class="text-info bg-dark px-1 rounded">Voyage Number-航次號</code> 為運算邊界。<br>
-                    國產船隊標準流程：前港 <b class="text-info">格式4-離港報DEPT</b> ➜ 航行 <b class="text-info">格式1-船位報NR</b> ➜ 抵港 <b class="text-info">格式2-抵港報ARVL</b> ➜ 在港 <b class="text-info">格式3-日電報DR</b> ➜ 完工 <b class="text-info">格式4-離港報DEPT</b>。<br>
+                    國產船隊標準流程：前港 <b class="text-info">格式4-離港報DEPT</b> → 航行 <b class="text-info">格式1-船位報NR</b> → 抵港 <b class="text-info">格式2-抵港報ARVL</b> → 在港 <b class="text-info">格式3-日電報DR</b> → 完工 <b class="text-info">格式4-離港報DEPT</b>。<br>
                     <span class="text-warning">※區間篩選：</span>系統以該航次「第一張船報的填報日期」來判定該航次歸屬的篩選區間，以確保完整航次數據不被截斷。
                 </p>
             </div>
@@ -150,18 +235,19 @@
                             <h2 class="h6 fw-bold text-light d-flex align-items-center m-0">
                                 <span class="rounded-circle bg-success me-2 live-indicator" style="width: 12px; height: 12px;"></span>船舶最新動態概況 (Live Snapshot)
                             </h2>
-                            <div class="text-end">
-                                <span class="text-secondary d-block" style="font-size: 0.75rem;">System Time</span>
-                                <span class="text-success font-monospace" style="font-size: 0.875rem;">2026-03-26 13:56:58 CST</span>
+                            <div class="text-end" style="margin-right: 4.5rem;">
+                                <span class="text-secondary d-block" style="font-size: 1rem;">System Time</span>
+                                <span class="text-success font-monospace" style="font-size: 1rem;">2026-03-26 13:56:58 CST</span>
                             </div>
                         </div>
                         <div class="desc-box">
                             <div><span class="badge-source">資料與計算</span>掃描全庫資料，自動取得各船 <code class="text-info">CST-標準時間</code> 最新的一筆船報。顯示 <code class="text-info">Report Type-報表種類</code> 與當前狀態。</div>
                             <div class="mt-1"><span class="badge-risk">營運監控</span>船隊即時分佈監控。若發現船舶長時間停滯於異常狀態，調度員需立即介入了解以避免延誤。</div>
+                            <div class="mt-1"><span class="badge-ai">操作</span>點下表船名可進入該船單船分析頁；下方各以船名為橫軸的比較圖表，亦可點選該船的柱狀 / 折線資料點鑽入單船頁。</div>
                         </div>
                         <div class="overflow-auto flex-grow-1 pe-2" style="min-height: 200px;">
-                            <table class="table table-dark table-borderless table-custom text-light mb-0" style="font-size: 0.875rem;">
-                                <thead class="border-bottom border-secondary" style="position: sticky; top: 0; background-color: #1f2937; z-index: 1;">
+                            <table class="table table-dark table-borderless table-custom text-light mb-0" style="font-size: 1rem;">
+                                <thead class="border-bottom border-secondary" style="position: sticky; top: 0; background-color: #111827; z-index: 1;">
                                     <tr>
                                         <th class="py-2 text-secondary fw-normal">Ship Name-船名</th>
                                         <th class="text-secondary fw-normal">Report Type-船報類型</th>
@@ -170,11 +256,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Yuan%20Shun" class="ship-link text-info fw-bold text-decoration-none">Yuan Shun</a></td><td>NOON REPORT</td><td class="text-info">Sailing</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Yuan%20Shun#masterDataTable" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 0.75rem;">2026-03-26 12:00</a></td></tr>
-                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Jing%20Shun" class="ship-link text-info fw-bold text-decoration-none">Jing Shun</a></td><td>ARRIVAL REPORT</td><td class="text-secondary">Arrival</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Jing%20Shun#masterDataTable" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 0.75rem;">2026-03-26 09:30</a></td></tr>
-                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Feng%20Shun" class="ship-link text-info fw-bold text-decoration-none">Feng Shun</a></td><td>ANCHOR REPORT</td><td class="text-warning">Waiting</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Feng%20Shun#masterDataTable" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 0.75rem;">2026-03-25 18:15</a></td></tr>
-                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Hui%20Shun%20No.1" class="ship-link text-info fw-bold text-decoration-none">Hui Shun No.1</a></td><td>DAILY REPORT</td><td class="text-success">Discharging</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Hui%20Shun%20No.1#masterDataTable" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 0.75rem;">2026-03-26 08:00</a></td></tr>
-                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Gimpo%20Shun" class="ship-link text-info fw-bold text-decoration-none">Gimpo Shun</a></td><td>SHIFTING REPORT</td><td style="color: #c084fc;">Loading</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Gimpo%20Shun#masterDataTable" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 0.75rem;">2026-03-26 10:20</a></td></tr>
+                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Yuan%20Shun&from=fleet" class="ship-link text-info fw-bold text-decoration-none">Yuan Shun</a></td><td>NOON REPORT</td><td class="text-info">Sailing</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Yuan%20Shun&from=fleet&section=masterData" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 1rem;">2026-03-26 12:00</a></td></tr>
+                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Jing%20Shun&from=fleet" class="ship-link text-info fw-bold text-decoration-none">Jing Shun</a></td><td>ARRIVAL REPORT</td><td class="text-secondary">Arrival</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Jing%20Shun&from=fleet&section=masterData" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 1rem;">2026-03-26 09:30</a></td></tr>
+                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Feng%20Shun&from=fleet" class="ship-link text-info fw-bold text-decoration-none">Feng Shun</a></td><td>ANCHOR REPORT</td><td class="text-warning">Waiting</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Feng%20Shun&from=fleet&section=masterData" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 1rem;">2026-03-25 18:15</a></td></tr>
+                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Hui%20Shun%20No.1&from=fleet" class="ship-link text-info fw-bold text-decoration-none">Hui Shun No.1</a></td><td>DAILY REPORT</td><td class="text-success">Discharging</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Hui%20Shun%20No.1&from=fleet&section=masterData" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 1rem;">2026-03-26 08:00</a></td></tr>
+                                    <tr><td class="py-2"><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Gimpo%20Shun&from=fleet" class="ship-link text-info fw-bold text-decoration-none">Gimpo Shun</a></td><td>SHIFTING REPORT</td><td style="color: #c084fc;">Loading</td><td><a href="GBC-ShipManagementDashboard--Single-demo.html?ship=Gimpo%20Shun&from=fleet&section=masterData" class="report-time-link text-light font-monospace text-decoration-none" style="font-size: 1rem;">2026-03-26 10:20</a></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -205,7 +291,7 @@
                                 <button onclick="applyFilter('chart-fuel-ops', this)" class="btn btn-primary btn-sm px-4 w-100 ds-btn">套用</button>
                             </div>
                         </div>
-                        <div id="chart-fuel-ops" class="flex-grow-1 w-100" style="min-height: 220px;"></div>
+                        <div id="chart-fuel-ops" class="w-100" style="height: 220px;"></div>
                     </div>
                 </div>
             </div>
@@ -236,10 +322,10 @@
                                 <button onclick="applyFilter('chart-speed-oil', this)" class="btn btn-primary btn-sm px-4 w-100 ds-btn">套用</button>
                             </div>
                         </div>
-                        <p class="text-secondary mb-2" style="font-size: 0.75rem;">
+                        <p class="text-secondary mb-2" style="font-size: 1rem;">
                             <i class="text-info">提示：</i>點擊圖表下方圖例 (Legend) 可切換「空載 / 重載」系列的顯示與隱藏。
                         </p>
-                        <div id="chart-speed-oil" class="flex-grow-1 w-100" style="min-height: 400px;"></div>
+                        <div id="chart-speed-oil" class="w-100" style="height: 400px;"></div>
                     </div>
                 </div>
             </div>
@@ -247,7 +333,7 @@
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body d-flex flex-column p-4">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-info ps-2 mb-3">航次時間分佈與利用率 (Time Utilization)</h2>
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">航次時間分佈與利用率 (Time Utilization)</h2>
                         <div class="desc-box">
                             <div><span class="badge-source">資料與計算</span>鎖定 <code class="text-info">Voyage Number-航次號</code> 區間。<br>
                                 【總週期】= 本次 <code class="text-info">格式4-DEPT</code> 離泊時間 減去 前次同欄位。<br>
@@ -269,7 +355,7 @@
                                 <button onclick="applyFilter('chart-time-util', this)" class="btn btn-primary btn-sm px-4 w-100 ds-btn">套用</button>
                             </div>
                         </div>
-                        <div id="chart-time-util" class="flex-grow-1 w-100" style="min-height: 350px;"></div>
+                        <div id="chart-time-util" class="w-100" style="height: 350px;"></div>
                     </div>
                 </div>
             </div>
@@ -279,19 +365,19 @@
                 <div class="card card-custom shadow h-100">
                     <div class="card-body d-flex flex-column p-4">
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h2 class="h6 fw-bold text-light border-start border-4 border-info ps-2 m-0">貨物裝卸進度與周轉 (Cargo Handling)</h2>
+                            <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 m-0">貨物裝卸進度與周轉 (Cargo Handling)</h2>
                             <div class="text-end">
-                                <span class="badge-ai mb-0 border-0" style="font-size: 0.75rem;">最後 AI 影像判讀時間</span>
-                                <span class="text-success font-monospace d-block mt-1" style="font-size: 0.875rem;">2026-03-26 13:40:00 CST</span>
+                                <span class="badge-ai mb-0 border-0" style="font-size: 1rem;">最後 AI 影像判讀時間</span>
+                                <span class="text-success font-monospace d-block mt-1" style="font-size: 1rem;">2026-03-26 13:40:00 CST</span>
                             </div>
                         </div>
                         <div class="desc-box">
                             <div><span class="badge-ai">CCTV AI 監控</span>系統持續以 CCTV 影像辨識進行貨艙體積估算 (約每 1 小時更新)，確保填補船報時序盲區。各船依貨品性質呈現專屬單位。</div>
-                            <div class="mt-1"><span class="badge-source">船報驗證</span><code class="text-info">格式3-日電報DR</code> 的 <code class="text-info">每日裝卸量</code> 作為驗證基準。<span class="badge-warn text-warning border-0">⚠需外部串接提單API取得預計總貨量</span>。</div>
+                            <div class="mt-1"><span class="badge-source">船報驗證</span><code class="text-info">格式3-日電報DR</code> 的 <code class="text-info">每日裝卸量</code> 作為驗證基準。<span class="badge-warn text-warning border-0">需外部串接提單API取得預計總貨量</span>。</div>
                             <div class="mt-1"><span class="badge-calc">計算邏輯</span>剩餘未作業量 = 提單預計總貨量 - (系統當前已作業量)。</div>
                             <div class="mt-1"><span class="badge-risk">營運分析</span>即時監控裝卸效率。若進度嚴重落後，可能產生高昂的延滯費 (Demurrage) 風險。</div>
                         </div>
-                        <div id="chart-cargo" class="flex-grow-1 w-100 mt-2" style="min-height: 350px;"></div>
+                        <div id="chart-cargo" class="w-100 mt-2" style="height: 350px;"></div>
                     </div>
                 </div>
             </div>
@@ -300,7 +386,7 @@
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body d-flex flex-column p-4">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-warning ps-2 mb-3">主機推進效率與轉速監控 (Slip vs RPM)</h2>
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">主機推進效率與轉速監控 (Slip vs RPM)</h2>
                         <div class="desc-box">
                             <div><span class="badge-calc">數據源</span>數值直接取自 <code class="text-info">格式1-船位報NR</code> 船員填報之 <code class="text-info">RPM-主機轉速</code> 與 <code class="text-info">SLIP(%)-滑失率</code> 原始數據，繪製雙軸時間序列趨勢。</div>
                             <div class="mt-1"><span class="badge-risk">機務風險對照表</span>
@@ -337,7 +423,7 @@
                                 <button onclick="applyFilter('chart-slip', this)" class="btn btn-primary btn-sm ds-btn px-3">套用</button>
                             </div>
                         </div>
-                        <div id="chart-slip" class="flex-grow-1 w-100" style="min-height: 250px;"></div>
+                        <div id="chart-slip" class="w-100" style="height: 250px;"></div>
                     </div>
                 </div>
             </div>
@@ -345,7 +431,7 @@
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body d-flex flex-column p-4">
-                        <h2 class="h6 fw-bold text-light border-start border-4" style="border-color: #8b5cf6 !important; padding-left: 0.5rem; margin-bottom: 1rem;">各類滑油消耗健康度監控 (Lube Oil)</h2>
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">各類滑油消耗健康度監控 (Lube Oil)</h2>
                         <div class="desc-box">
                             <div><span class="badge-calc">計算邏輯</span>為明確區分耗油場景，將資料分流運算：<br>
                             【航行日耗量】= 將期間內 <code class="text-info">格式1-船位報NR</code> 的各類滑油耗量加總 ÷ NR 報天數。<br>
@@ -364,7 +450,7 @@
                                 <button onclick="applyFilter('chart-lube', this)" class="btn btn-primary btn-sm w-100 ds-btn">套用</button>
                             </div>
                         </div>
-                        <div id="chart-lube" class="flex-grow-1 w-100" style="min-height: 300px;"></div>
+                        <div id="chart-lube" class="w-100" style="height: 300px;"></div>
                     </div>
                 </div>
             </div>
@@ -373,7 +459,7 @@
              <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body d-flex flex-column p-4">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-success ps-2 mb-3">碳排強度趨勢 (EEOI vs CII)</h2>
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">碳排強度趨勢 (EEOI vs CII)</h2>
                         <div class="desc-box">
                             <div><span class="badge-source">資料來源</span><code class="text-info">格式2-抵港報ARVL</code> 的 <code class="text-info">Total Distance</code> / <code class="text-info">Total Consumption</code> 與 <code class="text-info">格式3-日電報DR</code> 的實際載貨量。</div>
                             <div class="mt-1"><span class="badge-calc">計算與差異</span><br><b class="text-warning">EEOI (營運指標) =</b> 總碳排量 ÷ (<b class="text-success">實際載貨噸數 Payload</b> × 航距)。<br><b class="text-info">CII (法規評級) =</b> 年度總碳排量 ÷ (<b class="text-success">船舶總載重噸 DWT</b> × 航距)。</div>
@@ -403,7 +489,7 @@
                                 <button onclick="applyFilter('chart-eeoi', this)" class="btn btn-primary btn-sm ds-btn px-3">套用</button>
                             </div>
                         </div>
-                        <div id="chart-eeoi" class="flex-grow-1 w-100" style="min-height: 350px;"></div>
+                        <div id="chart-eeoi" class="w-100" style="height: 350px;"></div>
                     </div>
                 </div>
             </div>
@@ -412,7 +498,7 @@
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body d-flex flex-column p-4">
-                        <h2 class="h6 fw-bold text-light border-start border-4 border-danger ps-2 mb-3">燃油加油預警 (Fuel Remaining Days)</h2>
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">燃油加油預警 (Fuel Remaining Days)</h2>
                         <div class="desc-box">
                             <div><span class="badge-source">資料來源</span>取系統依據 <code class="text-info">CST-標準時間</code> 最新回傳的船報，提取其中的 <code class="text-info">ROB FO-重油存量</code> 與 <code class="text-info">ROB DO-輕油存量</code> 作為當前實際存量。<span class="text-warning fw-bold">各船最新資料來源請參考游標停靠提示 (Tooltip)。</span></div>
                             <div class="mt-1"><span class="badge-calc">計算邏輯 (MT轉天數)</span>為消除各船油箱容量與引擎耗油差異，系統自動將數值標準化轉換：<br>
@@ -422,18 +508,71 @@
                         </div>
                         
                         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary align-items-center">
-                            <div class="col-12 col-md-9 text-secondary d-flex align-items-center" style="font-size: 0.75rem;">
+                            <div class="col-12 col-md-9 text-secondary d-flex align-items-center" style="font-size: 1rem;">
                                 <span class="rounded-circle bg-success me-2 live-indicator" style="width: 8px; height: 8px;"></span> 此圖表為即時狀態監控，自動抓取各船最新一筆回報存量。
                             </div>
                             <div class="col-12 col-md-3 d-flex justify-content-end">
                                 <button onclick="applyFilter('chart-rob', this)" class="btn btn-outline-primary btn-sm w-100 ds-btn">強制更新油量</button>
                             </div>
                         </div>
-                        <div id="chart-rob" class="flex-grow-1 w-100" style="min-height: 350px;"></div>
+                        <div id="chart-rob" class="w-100" style="height: 350px;"></div>
                     </div>
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- ===================== 港口能效總覽 (Port Efficiency Overview) ===================== -->
+    <div class="container-fluid mb-4" style="max-width: 1800px;">
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3 border-bottom border-secondary pb-2">
+            <h2 class="h5 fw-bold text-light border-start border-4 border-primary ps-2 m-0">港口能效總覽 (Port Efficiency Overview)</h2>
+            <a href="GBC-PortPerformanceDashboard-demo.html" class="btn btn-outline-info btn-sm ds-btn">港埠效能與延滯歸因完整分析 →</a>
+        </div>
+        <div class="row g-4">
+            <!-- 共用說明 + 時間區間 -->
+            <div class="col-12">
+                <div class="card card-custom shadow">
+                    <div class="card-body p-4">
+                        <div class="desc-box">
+                            <div><span class="badge-calc">數據如何校正</span>各港的原始裝卸率 (t/hr) 會被船型與貨種扭曲，直接比較會失真。系統以「<b>同船型 × 同貨種 × 同作業方向</b>」的船隊歷史中位為基準，把各港實績標準化為<b>效率指數</b>（<span class="text-info">1.0 = 與同類作業隊史中位相當</span>、&gt;1 較快、&lt;1 較慢），比的是港口本身的作業能力，而非它剛好接到好船／好貨。</div>
+                            <div class="mt-1"><span class="badge-risk">為何分兩組比</span>本船隊港口方向固定（如台北、基隆卸貨；福州、名古屋、青州裝貨）。裝貨與卸貨是兩種不同作業，不可放同一把尺，故<b>卸貨港只與卸貨港比、裝貨港只與裝貨港比</b>，且每組各以「該方向的隊史中位」為 1.0 基準分別排名。<b class="text-success">綠＝優於中位</b>、<b class="text-warning">橘＝低於中位</b>。</div>
+                        </div>
+                        <div class="row g-2 align-items-end">
+                            <div class="col-6 col-md-3">
+                                <span class="ds-label">時間維度</span>
+                                <select class="form-select ds-select" onchange="renderTimeInput(this.value, 'port-eff-time-container')">
+                                    <option value="year">年度區間</option><option value="quarter">季度區間</option><option value="month" selected>月份區間</option>
+                                </select>
+                            </div>
+                            <div id="port-eff-time-container" class="col-12 col-md-6"></div>
+                            <div class="col-6 col-md-3 d-flex justify-content-end">
+                                <button onclick="applyPortEff(this)" class="btn btn-primary btn-sm px-4 w-100 ds-btn">套用</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 卸貨港效率排名 -->
+            <div class="col-12 col-xl-6">
+                <div class="card card-custom shadow h-100">
+                    <div class="card-body p-4">
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">卸貨港效率排名 (Discharge Ports · 卸貨隊史中位=1.0)</h2>
+                        <div id="chart-port-disc" class="w-100" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 裝貨港效率排名 -->
+            <div class="col-12 col-xl-6">
+                <div class="card card-custom shadow h-100">
+                    <div class="card-body p-4">
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">裝貨港效率排名 (Loading Ports · 裝貨隊史中位=1.0)</h2>
+                        <div id="chart-port-load" class="w-100" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -450,6 +589,13 @@
         const baseDailyDO = [2.5, 3.2, 1.8, 3.5, 2.0]; // 各船歷史日均耗輕油基準 (MT/Day)
         const cargoUnits = ['MT', 'CBM', 'MT', 'CBM', 'MT']; // 各船散裝貨物預設單位
         const robSources = ['NOON REPORT', 'ARRIVAL REPORT', 'ANCHOR REPORT', 'DAILY REPORT', 'SHIFTING REPORT']; // 模擬存油量資料來源
+
+        // 由總覽鑽入單船分析頁：帶入船名與來源(from=fleet)，可選擇聚焦區塊(section)
+        function goSingle(name, section) {
+            let url = 'GBC-ShipManagementDashboard--Single-demo.html?ship=' + encodeURIComponent(name) + '&from=fleet';
+            if (section) url += '&section=' + section;
+            window.location.href = url;
+        }
 
         /**
          * ==========================================================================
@@ -555,15 +701,75 @@
             legend: { itemStyle: { color: '#cbd5e1' }, itemHoverStyle: { color: '#ffffff' } },
             xAxis: { gridLineColor: '#374151', lineColor: '#4b5563', labels: { style: { color: '#9ca3af' } } },
             yAxis: { gridLineColor: '#374151', lineColor: '#4b5563', labels: { style: { color: '#9ca3af' } }, title: { text: null } },
-            tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.95)', style: { color: '#f3f4f6' }, borderColor: '#4b5563', shared: true }
+            tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.95)', style: { color: '#f3f4f6' }, borderColor: '#4b5563', shared: true },
+            // 全域：凡是 X 軸為船名的圖表，點該船的資料點即鑽入單船分析頁
+            plotOptions: {
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                        events: {
+                            click: function () {
+                                const c = this.category;
+                                if (typeof ships !== 'undefined' && ships.indexOf(c) > -1) goSingle(c);
+                            }
+                        }
+                    }
+                }
+            }
         });
+
+        // 港口能效：效率指數顏色（>=1 綠、優於中位；<1 橘、低於中位）
+        const effColor = v => (v >= 1 ? '#10b981' : '#f59e0b');
+        // 港口能效：單一方向的港口排名長條圖（各以該方向隊史中位=1.0 為基準）
+        function makePortRankChart(id, cats, vals, dirLabel) {
+            Highcharts.chart(id, {
+                chart: { type: 'bar' },
+                xAxis: { categories: cats, title: { text: null } },
+                yAxis: { title: { text: '效率指數' }, min: 0.5, max: 1.4, plotLines: [{ value: 1, color: '#9ca3af', width: 1.5, dashStyle: 'Dash', zIndex: 4, label: { text: dirLabel + '隊史中位 1.0', style: { color: '#9ca3af', fontSize: '0.75rem' }, align: 'right', x: -6 } }] },
+                legend: { enabled: false },
+                plotOptions: { bar: { borderWidth: 0, pointPadding: 0.08, dataLabels: { enabled: true, format: '{y:.2f}', style: { color: '#e5e7eb', textOutline: 'none', fontWeight: '600' } } } },
+                tooltip: {
+                    formatter: function () {
+                        const pct = Math.abs((this.y - 1) * 100).toFixed(0);
+                        return `<b>${this.key}</b>（${dirLabel}）<br/>效率指數 <b>${this.y.toFixed(2)}</b><br/><span style="color:#9ca3af">${this.y >= 1 ? '優於' : '低於'}${dirLabel}隊史中位 ${pct}%</span>`;
+                    }
+                },
+                series: [{ name: '效率指數', data: vals }]
+            });
+        }
+        // 港口能效：時間區間套用（同時更新卸貨港組與裝貨港組，並依值重新上色）
+        function applyPortEff(btnElement) {
+            const originalText = btnElement.innerText;
+            btnElement.innerText = '載入中..'; btnElement.disabled = true;
+            btnElement.classList.add('opacity-75'); btnElement.style.cursor = 'wait';
+            const selEl = btnElement.closest('.row').querySelector('select');
+            const dimension = selEl ? selEl.value : 'month';
+            setTimeout(() => {
+                ['chart-port-disc', 'chart-port-load'].forEach(id => {
+                    const c = Highcharts.charts.find(ch => ch && ch.renderTo.id === id);
+                    if (!c) return;
+                    c.series.forEach(s => {
+                        const nd = (s.options.data || []).map(pt => {
+                            const y0 = (pt && typeof pt === 'object') ? pt.y : pt;
+                            const variance = dimension === 'year' ? 0.05 : (dimension === 'month' ? 0.12 : 0.08);
+                            const y = parseFloat((y0 * (1 + (Math.random() * variance * 2 - variance))).toFixed(2));
+                            return { y: y, color: effColor(y) };
+                        });
+                        s.setData(nd, false);
+                    });
+                    c.redraw({ duration: 600 });
+                });
+                btnElement.innerText = originalText; btnElement.disabled = false;
+                btnElement.classList.remove('opacity-75'); btnElement.style.cursor = '';
+            }, 500);
+        }
 
         // 頁面載入時負責繪製所有初始圖表的主函數
         function initCharts() {
             // 自動初始化所有圖表上方的時間篩選器
             const timeContainers = [
                 'ops-time-container', 'speed-oil-time-container', 'time-util-container',
-                'lube-time-container', 'eeoi-time-container'
+                'lube-time-container', 'eeoi-time-container', 'port-eff-time-container'
             ];
             timeContainers.forEach(containerId => {
                 const selectEl = document.querySelector(`select[onchange*="${containerId}"]`);
@@ -734,6 +940,14 @@
                     { name: '輕油剩餘可用天數 (DO)', data: dataDO }
                 ]
             });
+
+            // [圖表] 9. 港口能效總覽 - 卸貨港組 / 裝貨港組 分開排名，各自以「該方向隊史中位」為 1.0 基準
+            makePortRankChart('chart-port-disc',
+                ['台北', '基隆'],
+                [{ y: 0.96, color: effColor(0.96) }, { y: 1.09, color: effColor(1.09) }], '卸貨');
+            makePortRankChart('chart-port-load',
+                ['青州', '福州', '名古屋'],
+                [{ y: 0.91, color: effColor(0.91) }, { y: 1.02, color: effColor(1.02) }, { y: 1.14, color: effColor(1.14) }], '裝貨');
         }
 
         /**
@@ -889,6 +1103,30 @@
 
         // 監聽 DOM 載入完畢事件，觸發圖表初始化
         document.addEventListener('DOMContentLoaded', initCharts);
+
+        // ==========================================
+        // 說明區塊：全部可收合，預設隱藏
+        //  - 每個 .desc-box 前自動插入卡片右上角的「說明」切換鈕（與 Single-demo 相同）
+        //  - 純原生 JS（本頁未載入 jQuery）
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.desc-box').forEach(function (box) {
+                if (box.previousElementSibling && box.previousElementSibling.classList.contains('desc-toggle')) return;
+                box.style.display = 'none';
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'desc-toggle';
+                btn.textContent = '說明';
+                btn.setAttribute('aria-expanded', 'false');
+                box.parentNode.insertBefore(btn, box);
+                btn.addEventListener('click', function () {
+                    var expanded = btn.getAttribute('aria-expanded') === 'true';
+                    box.style.display = expanded ? 'none' : '';
+                    btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                    btn.classList.toggle('open', !expanded);
+                });
+            });
+        });
     </script>
 </body>
 </html>
