@@ -78,6 +78,8 @@
         input[type="date"]::-webkit-calendar-picker-indicator, input[type="month"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; padding: 0;}
         
         .ds-btn { height: 30px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; font-size: var(--font-sm); }
+        /* 套用/清除等提交按鈕：固定尺寸，緊鄰篩選元件 */
+        .ds-apply { min-width: 96px; flex: 0 0 auto; }
         .ds-label { display: block; font-size: var(--font-xs); color: var(--text-muted); margin-bottom: 0.15rem; font-weight: 600; }
 
         .live-indicator { animation: pulse-green 2s infinite; }
@@ -98,7 +100,14 @@
         .rule-box { background-color: var(--bg-main); padding: 0.75rem; border-radius: 0.25rem; margin: 0.5rem 0; border: 1px solid #4b5563; color: #60a5fa; font-size: var(--font-xs); }
         .rule-box ul { margin-bottom: 0; padding-left: 1.5rem; }
 
-        .section-title { font-size: 1.2rem; font-weight: bold; color: var(--text-main); border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-top: 2.5rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        .group-title {
+            display: flex; align-items: center; gap: 0.6rem;
+            font-size: 1.05rem; font-weight: 700; color: var(--text-main);
+            margin: 1.75rem 0 0.25rem; padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color); letter-spacing: .5px;
+        }
+        .group-title .gt-bar { width: 5px; height: 20px; border-radius: 3px; background-color: var(--primary); flex: 0 0 auto; }
+        .group-title .gt-sub { font-size: 0.85rem; font-weight: 400; color: var(--text-muted); letter-spacing: 0; }
 
         /* DataTables 自訂樣式 */
         .dataTables_filter { display: none !important; } 
@@ -114,16 +123,13 @@
         #voyageSummaryTable_wrapper { overflow-x: auto; }
 
         /* 表頭中英雙語（§4）：共用樣式，中文為主、英文為輔，與 demo-BS 一致 */
-        .table-header-zh { display: block; font-weight: 600; line-height: 1.25; }
+        .table-header-zh { display: inline; font-weight: 600; line-height: 1.25; }
         .table-header-en { display: block; margin-top: 2px; font-size: var(--font-xs); font-weight: 400; opacity: 0.7; line-height: 1.2; letter-spacing: .2px; }
-        /* 雙語表頭時，info-icon 收到表頭右上角，避免擠掉中英文兩行排列 */
-        .table-custom-dt th:has(.table-header-zh) { position: relative; padding-right: 22px; }
-        .table-custom-dt th:has(.table-header-zh) .info-icon { position: absolute; top: 5px; right: 5px; margin-left: 0; }
 
         .info-icon {
-            cursor: help; display: inline-flex; align-items: center; justify-content: center; 
-            width: 14px; height: 14px; background-color: #6b7280; color: white; 
-            border-radius: 50%; font-size: 10px; font-style: normal; margin-left: 4px; vertical-align: middle;
+            cursor: help; display: inline-flex; align-items: center; justify-content: center;
+            width: 14px; height: 14px; background-color: #6b7280; color: white;
+            border-radius: 50%; font-size: 10px; font-style: normal; margin-left: 5px; vertical-align: middle;
         }
         .info-icon:hover { background-color: var(--primary); }
         .cursor-pointer { cursor: pointer; }
@@ -317,33 +323,33 @@
 
     <div class="container-fluid" style="max-width: 1800px;">
 
-        <div class="section-title" id="sec-voyage" data-sec><i class="me-2">■</i>航次統計列表 (Voyage Summary)</div>
+        <h2 class="group-title mb-0" id="sec-voyage" data-sec><span class="gt-bar"></span>航次統計列表 <span class="gt-sub">Voyage Summary</span></h2>
         <div class="card card-custom shadow mb-5">
             <div class="card-body p-4">
-                <div class="row mb-3 align-items-end gap-y-2">
-                    <div class="col-12 col-md-3">
+                <div class="row g-2 mb-3 align-items-end">
+                    <div class="col-auto">
                         <label class="ds-label">航次篩選</label>
-                        <select id="voyVoyageFilter" class="form-select ds-select"><option value="">全部航次</option></select>
+                        <select id="voyVoyageFilter" class="form-select ds-select" style="width:120px;"><option value="">全部航次</option></select>
                     </div>
-                    <div class="col-6 col-md-2">
+                    <div class="col-auto">
                         <label class="ds-label">航次開始日期</label>
-                        <input type="date" id="voyMinDate" class="form-control ds-select">
+                        <input type="date" id="voyMinDate" class="form-control ds-select" style="width:160px;">
                     </div>
-                    <div class="col-6 col-md-2">
+                    <div class="col-auto">
                         <label class="ds-label">航次結束日期</label>
-                        <input type="date" id="voyMaxDate" class="form-control ds-select">
+                        <input type="date" id="voyMaxDate" class="form-control ds-select" style="width:160px;">
                     </div>
-                    <div class="col-12 col-md-3">
+                    <div class="col-auto">
                         <label class="ds-label">關鍵字 (航次 / 港口)</label>
-                        <input type="text" id="voyKeyword" class="form-control ds-select" placeholder="請輸入關鍵字...">
+                        <input type="text" id="voyKeyword" class="form-control ds-select" placeholder="請輸入關鍵字..." style="width:200px;">
                     </div>
-                    <div class="col-6 col-md-1 text-end">
+                    <div class="col-auto">
                         <label class="ds-label d-none d-md-block">&nbsp;</label>
-                        <button id="voyApplyBtn" class="btn btn-primary w-100 ds-btn">套用</button>
+                        <button id="voyApplyBtn" class="btn btn-primary ds-btn ds-apply">套用</button>
                     </div>
-                    <div class="col-6 col-md-1 text-end">
+                    <div class="col-auto">
                         <label class="ds-label d-none d-md-block">&nbsp;</label>
-                        <button id="clearVoyFilterBtn" class="btn btn-outline-secondary w-100 ds-btn">清除</button>
+                        <button id="clearVoyFilterBtn" class="btn btn-outline-secondary ds-btn ds-apply">清除</button>
                     </div>
                 </div>
 
@@ -351,15 +357,13 @@
                 <table id="voyageSummaryTable" class="table table-dark table-hover table-custom-dt w-100">
                     <thead>
                         <tr>
-                            <th><span class="table-header-zh">航次</span><span class="table-header-en">VOY</span> <i class="info-icon" title="航次編號 (Voyage Number)" onclick="event.stopPropagation()">i</i></th>
-                            <th><span class="table-header-zh">起航日</span><span class="table-header-en">Date</span> <i class="info-icon" title="起航日 (Voyage Start Date)" onclick="event.stopPropagation()">i</i></th>
-                            <th><span class="table-header-zh">裝貨港</span><span class="table-header-en">L/Port</span> <i class="info-icon" title="起運港/裝貨港口 (Loading Port)" onclick="event.stopPropagation()">i</i></th>
-                            <th><span class="table-header-zh">卸貨港</span><span class="table-header-en">D/Port</span> <i class="info-icon" title="目的港/卸貨港口 (Discharging Port)" onclick="event.stopPropagation()">i</i></th>
-                            <th><span class="table-header-zh">航距</span><span class="table-header-en">Dist (NM)</span> <i class="info-icon" title="航行總距離 海浬 (Distance NM)" onclick="event.stopPropagation()">i</i></th>
-                            <th><span class="table-header-zh">重油耗量</span><span class="table-header-en">FO Cons (MT)</span> <i class="info-icon" title="重油總消耗量 (Fuel Oil Consumption MT)" onclick="event.stopPropagation()">i</i></th>
-                            <th><span class="table-header-zh">輕油耗量</span><span class="table-header-en">DO Cons (MT)</span> <i class="info-icon" title="輕油總消耗量 (Diesel Oil Consumption MT)" onclick="event.stopPropagation()">i</i></th>
-                            <th><span class="table-header-zh">淡水耗量</span><span class="table-header-en">F.W Cons (MT)</span> <i class="info-icon" title="淡水總消耗量 (Fresh Water Consumption MT)" onclick="event.stopPropagation()">i</i></th>
-                            <th><span class="table-header-zh">汽缸油</span><span class="table-header-en">Cyl Oil (L)</span> <i class="info-icon" title="汽缸油總消耗量 (Cylinder Oil L)" onclick="event.stopPropagation()">i</i></th>
+                            <th><span class="table-header-zh">航次</span><i class="info-icon" title="航次編號 (Voyage Number)" onclick="event.stopPropagation()">i</i><span class="table-header-en">VOY</span></th>
+                            <th><span class="table-header-zh">週期</span><i class="info-icon" title="航次週期：本航次裝貨港↔卸貨港來回所需天數 (Round-trip Cycle Days)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Cycle (Days)</span></th>
+                            <th><span class="table-header-zh">起航日</span><i class="info-icon" title="起航日 (Voyage Start Date)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Date</span></th>
+                            <th><span class="table-header-zh">裝卸貨港</span><i class="info-icon" title="裝貨港 ↔ 卸貨港（來回航線）(Loading ↔ Discharging Port)" onclick="event.stopPropagation()">i</i><span class="table-header-en">L/D Port</span></th>
+                            <th><span class="table-header-zh">裝貨數量</span><i class="info-icon" title="本航次總裝貨數量 (完工/離港報 總裝貨數量 MT)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Cargo (MT)</span></th>
+                            <th><span class="table-header-zh">重油耗量</span><i class="info-icon" title="重油總消耗量 (Fuel Oil Consumption MT)" onclick="event.stopPropagation()">i</i><span class="table-header-en">FO Cons (MT)</span></th>
+                            <th><span class="table-header-zh">輕油耗量</span><i class="info-icon" title="輕油總消耗量 (Diesel Oil Consumption MT)" onclick="event.stopPropagation()">i</i><span class="table-header-en">DO Cons (MT)</span></th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -368,7 +372,7 @@
             </div>
         </div>
 
-        <div class="section-title" id="sec-risk" data-sec><i class="me-2">■</i>岸端技術與資源風險診斷 (Tech & Resource Risk Analytics)</div>
+        <h2 class="group-title mb-0" id="sec-risk" data-sec><span class="gt-bar"></span>岸端技術與資源風險診斷 <span class="gt-sub">Tech &amp; Resource Risk Analytics</span></h2>
         <div class="row g-4 mb-4">
             
             <div class="col-12 col-xl-6">
@@ -397,8 +401,8 @@
                                 <span class="ds-label">船報日期 (訖)</span>
                                 <input type="date" class="form-control ds-select date-end" value="2026-03-27">
                             </div>
-                            <div class="col-12 col-md-4 d-flex justify-content-end">
-                                <button onclick="applyFilter('chart-fw-balance', this)" class="btn btn-primary w-100 ds-btn">套用</button>
+                            <div class="col-12 col-md-4 d-flex">
+                                <button onclick="applyFilter('chart-fw-balance', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
                             </div>
                         </div>
 
@@ -423,8 +427,8 @@
                             <div class="col-12 col-md-9 text-secondary d-flex align-items-center" style="font-size: 1rem;">
                                 <span class="rounded-circle bg-success me-2 live-indicator" style="width: 8px; height: 8px;"></span> 此圖表為即時狀態監控，無須區間篩選。
                             </div>
-                            <div class="col-12 col-md-3 d-flex justify-content-end">
-                                <button onclick="applyFilter('chart-fuel-warning', this)" class="btn btn-outline-danger w-100 ds-btn">強制更新油量</button>
+                            <div class="col-12 col-md-3 d-flex">
+                                <button onclick="applyFilter('chart-fuel-warning', this)" class="btn btn-outline-danger ds-btn ds-apply">強制更新油量</button>
                             </div>
                         </div>
 
@@ -460,8 +464,8 @@
                                 <span class="ds-label">船報日期 (訖)</span>
                                 <input type="date" class="form-control ds-select date-end" value="2026-03-27">
                             </div>
-                            <div class="col-12 col-md-4 d-flex justify-content-end">
-                                <button onclick="applyFilter('chart-slip-weather', this)" class="btn btn-primary w-100 ds-btn">套用</button>
+                            <div class="col-12 col-md-4 d-flex">
+                                <button onclick="applyFilter('chart-slip-weather', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
                             </div>
                         </div>
 
@@ -503,8 +507,8 @@
                                 <span class="ds-label">船報日期 (訖)</span>
                                 <input type="date" class="form-control ds-select date-end" value="2026-03-27">
                             </div>
-                            <div class="col-12 col-md-3 d-flex justify-content-end">
-                                <button onclick="applyFilter('chart-cyl-rpm', this)" class="btn btn-primary w-100 ds-btn">套用</button>
+                            <div class="col-12 col-md-3 d-flex">
+                                <button onclick="applyFilter('chart-cyl-rpm', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
                             </div>
                         </div>
 
@@ -515,7 +519,7 @@
             
         </div>
 
-        <div class="section-title" id="sec-portops" data-sec><i class="me-2">■</i>港埠作業與航次周轉效能 (Port & Voyage Operations)</div>
+        <h2 class="group-title mb-0" id="sec-portops" data-sec><span class="gt-bar"></span>港埠作業與航次周轉效能 <span class="gt-sub">Port &amp; Voyage Operations</span></h2>
         <div class="row g-4 mb-4">
 
             <!-- 貨物裝卸進度與周轉 (Cargo Handling) — 暫時隱藏
@@ -539,8 +543,8 @@
                             <div class="col-12 col-md-9 text-secondary d-flex align-items-center" style="font-size: 1rem;">
                                 <span class="rounded-circle bg-purple me-2 ai-indicator" style="width: 8px; height: 8px; background-color: #c084fc;"></span> 顯示當前掛靠港口之各艙進度，自動更新。
                             </div>
-                            <div class="col-12 col-md-3 d-flex justify-content-end">
-                                <button onclick="applyFilter('chart-cctv-cargo', this)" class="btn btn-outline-info w-100 ds-btn">強制重新估算</button>
+                            <div class="col-12 col-md-3 d-flex">
+                                <button onclick="applyFilter('chart-cctv-cargo', this)" class="btn btn-outline-info ds-btn ds-apply">強制重新估算</button>
                             </div>
                         </div>
 
@@ -576,8 +580,8 @@
                                 <span class="ds-label">船報日期 (訖)</span>
                                 <input type="date" class="form-control ds-select date-end" value="2026-03-27">
                             </div>
-                            <div class="col-12 col-md-2 d-flex justify-content-end">
-                                <button onclick="applyFilter('chart-port-ops', this)" class="btn btn-primary w-100 ds-btn">套用</button>
+                            <div class="col-12 col-md-2 d-flex">
+                                <button onclick="applyFilter('chart-port-ops', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
                             </div>
                         </div>
 
@@ -606,8 +610,8 @@
                                 </select>
                             </div>
                             <div id="eeoi-time-container" class="col-12 col-md-7"></div>
-                            <div class="col-12 col-md-2 d-flex justify-content-end">
-                                <button onclick="applyFilter('chart-eeoi', this)" class="btn btn-primary w-100 ds-btn">套用</button>
+                            <div class="col-12 col-md-2 d-flex">
+                                <button onclick="applyFilter('chart-eeoi', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
                             </div>
                         </div>
 
@@ -641,8 +645,8 @@
                                 </select>
                             </div>
                             <div id="time-util-container" class="col-12 col-md-7"></div>
-                            <div class="col-12 col-md-2 d-flex justify-content-end">
-                                <button onclick="applyFilter('chart-time-util', this)" class="btn btn-primary w-100 ds-btn">套用</button>
+                            <div class="col-12 col-md-2 d-flex">
+                                <button onclick="applyFilter('chart-time-util', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
                             </div>
                         </div>
 
@@ -653,7 +657,7 @@
             
         </div>
 
-        <div class="section-title" id="sec-master" data-sec><i class="me-2">■</i>船報原始數據明細 (Master Data Ledger)</div>
+        <h2 class="group-title mb-0" id="sec-master" data-sec><span class="gt-bar"></span>船報原始數據明細 <span class="gt-sub">Master Data Ledger</span></h2>
         
         <div class="desc-box mb-3" style="border-left-color: var(--primary);">
             <div class="d-flex justify-content-between align-items-center cursor-pointer" data-bs-toggle="collapse" data-bs-target="#mappingTable" style="cursor: pointer;">
@@ -735,22 +739,22 @@
 
         <div class="card card-custom shadow mb-5">
             <div class="card-body p-4">
-                <div class="row mb-3 align-items-end gap-y-2">
-                    <div class="col-12 col-md-3">
+                <div class="row g-2 mb-3 align-items-end">
+                    <div class="col-auto">
                         <label class="ds-label">航次篩選 <span class="text-muted" style="font-size:.75rem;">(第一階層)</span></label>
-                        <select id="masterVoyageFilter" class="form-select ds-select"><option value="">全部航次</option></select>
+                        <select id="masterVoyageFilter" class="form-select ds-select" style="width:150px;"><option value="">全部航次</option></select>
                     </div>
-                    <div class="col-6 col-md-2">
+                    <div class="col-auto">
                         <label class="ds-label">回報日期(起)</label>
-                        <input type="date" id="masterDateStart" class="form-control ds-select">
+                        <input type="date" id="masterDateStart" class="form-control ds-select" style="width:160px;">
                     </div>
-                    <div class="col-6 col-md-2">
+                    <div class="col-auto">
                         <label class="ds-label">回報日期(訖)</label>
-                        <input type="date" id="masterDateEnd" class="form-control ds-select">
+                        <input type="date" id="masterDateEnd" class="form-control ds-select" style="width:160px;">
                     </div>
-                    <div class="col-12 col-md-2">
+                    <div class="col-auto">
                         <label class="ds-label">電報格式過濾</label>
-                        <select id="reportTypeFilter" class="form-select ds-select">
+                        <select id="reportTypeFilter" class="form-select ds-select" style="width:240px;">
                             <option value="">全部格式</option>
                             <option value="Noon Report">Noon Report (船位報-午報)</option>
                             <option value="Morning Report">Morning Report (船位報-早報)</option>
@@ -761,13 +765,13 @@
                             <option value="Irregular Report">Irregular Report (特殊情況報)</option>
                         </select>
                     </div>
-                    <div class="col-6 col-md-1 text-end">
+                    <div class="col-auto">
                         <label class="ds-label d-none d-md-block">&nbsp;</label>
-                        <button id="masterApplyBtn" class="btn btn-primary w-100 ds-btn">套用</button>
+                        <button id="masterApplyBtn" class="btn btn-primary ds-btn ds-apply">套用</button>
                     </div>
-                    <div class="col-6 col-md-1 text-end">
+                    <div class="col-auto">
                         <label class="ds-label d-none d-md-block">&nbsp;</label>
-                        <button id="clearFilterBtn" class="btn btn-outline-secondary w-100 ds-btn">清除</button>
+                        <button id="clearFilterBtn" class="btn btn-outline-secondary ds-btn ds-apply">清除</button>
                     </div>
                 </div>
                 <div class="text-muted mb-3" style="font-size:.8rem;">第二階層日期區間依「航次篩選」連動：未選航次時可選全部航次的日期範圍；選定航次後限縮為該航次的回報日期範圍（<span id="masterDateHint">—</span>）。所有條件按「套用」後才生效。</div>
@@ -775,56 +779,56 @@
                 <table id="masterDataTable" class="table table-dark table-hover table-custom-dt w-100 text-nowrap">
                     <thead>
                         <tr>
-                            <th rowspan="2"><span class="table-header-zh">船名</span><span class="table-header-en">Vessel</span> <i class="info-icon" title="Vessel｜B 船名" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">航次號</span><span class="table-header-en">Voy.</span> <i class="info-icon" title="Voy.｜C 航次號" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">船報類型</span><span class="table-header-en">Report Type</span> <i class="info-icon" title="Report Type｜D 船報類型 (電報名稱)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">填報時間 LT</span><span class="table-header-en">Report Time</span> <i class="info-icon" title="Report Time｜E 填報時間 (採當地時間 LT)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">預計抵港時間</span><span class="table-header-en">ETA</span> <i class="info-icon" title="ETA｜F 預計抵港時間 (船位報/離港報的預計抵達下一港時間)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">港口名稱</span><span class="table-header-en">NEXT PORT</span> <i class="info-icon" title="NEXT PORT｜G 港口名稱 (預計抵達的下一港)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">當前狀態</span><span class="table-header-en">Status</span> <i class="info-icon" title="Status｜H 當前狀態" onclick="event.stopPropagation()">i</i></th>
-                            <th colspan="6" class="border-bottom text-center grp-l grp-r"><span class="table-header-zh">油品存量</span><span class="table-header-en">Oil ROB</span> <i class="info-icon" title="I~N 油品存量 ROB (參考 02 總表油品存油勾稽邏輯)" onclick="event.stopPropagation()">i</i></th>
-                            <th colspan="6" class="border-bottom text-center grp-r"><span class="table-header-zh">油品耗量</span><span class="table-header-en">Oil Consumption</span> <i class="info-icon" title="O~T 油品耗量 (今日報與前一日報油料相減；參考 03 油品耗量勾稽邏輯)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">港口</span><span class="table-header-en">Port</span> <i class="info-icon" title="Port｜U 港口 (各電報的港口；航行報則勾稽下一港)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">遞交通知書</span><span class="table-header-en">Nor Tender</span> <i class="info-icon" title="Nor Tender｜V 遞交準備就緒通知書 NOR 的時間 (抵港或靠泊報)" onclick="event.stopPropagation()">i</i></th>
-                            <th colspan="3" class="border-bottom text-center"><span class="table-header-zh">水尺</span><span class="table-header-en">Draft</span> <i class="info-icon" title="W~Y 水尺 (抵港報與離港報；前 DF / 中 DM / 後 DA)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">結束海上定速航行</span><span class="table-header-en">Time of EOSP</span> <i class="info-icon" title="Time of EOSP｜Z 結束海上定速航行時間 (End of Sea Passage)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">下錨或漂航時間</span><span class="table-header-en">Anchor or Drifting</span> <i class="info-icon" title="Anchor or Drifting｜AA 下錨或漂航時間" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">起錨或結束漂航</span><span class="table-header-en">Anchor Aweigh or Drifting End</span> <i class="info-icon" title="Anchor Aweigh or Drifting End｜AB 起錨或結束飄航時間" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">引水員登船</span><span class="table-header-en">POB</span> <i class="info-icon" title="POB｜AC 引水員登船時間 (Pilot On Board)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">預計靠泊</span><span class="table-header-en">ETB</span> <i class="info-icon" title="ETB｜AD 預計靠泊時間 (Estimated Time of Berthing)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">預計開工</span><span class="table-header-en">EST Commence Working</span> <i class="info-icon" title="EST Commence Working｜AE 預計開工時間" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">預計離港</span><span class="table-header-en">ETCD</span> <i class="info-icon" title="ETCD｜AF 預計離港時間" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">靠泊時間</span><span class="table-header-en">All Lines Made Fast</span> <i class="info-icon" title="All Lines Made Fast｜AG 靠泊時間 (纜繩全繫上時間)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">開始移船</span><span class="table-header-en">Time of Shift Start</span> <i class="info-icon" title="Time of Shift Start｜AH 開始移船 (移泊報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">結束移船</span><span class="table-header-en">Time of Shifting End</span> <i class="info-icon" title="Time of Shifting End｜AI 結束移船 (錨地或泊位)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">事件發生時間</span><span class="table-header-en">Irregular Time</span> <i class="info-icon" title="Irregular Time｜AJ 事件發生時間 (特殊情況報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">預計恢復正常航時間</span><span class="table-header-en">Estimate Resume Sailing Time</span> <i class="info-icon" title="Estimate Resume Sailing Time｜AK 預計恢復正常航行時間 (特殊情況報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">載重狀況</span><span class="table-header-en">Laden/Ballast</span> <i class="info-icon" title="Laden/Ballast｜AL 船舶狀況 (每日電報的空重狀態)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">裝卸狀況</span><span class="table-header-en">Loading/Discharging</span> <i class="info-icon" title="Loading/Discharging｜AM 船舶狀況 (每日電報的裝卸作業)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">開始時間</span><span class="table-header-en">Commence Working</span> <i class="info-icon" title="Commence Working｜AN 開始時間 (每日電報的開工時間)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">貨物</span><span class="table-header-en">CARGO</span> <i class="info-icon" title="CARGO｜AO 貨物 (靠泊、離港報；空船以空白表示)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">日裝卸貨物數</span><span class="table-header-en">Daily Qty</span> <i class="info-icon" title="Daily Qty｜AP 日裝卸貨物數 (每日電報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">已裝船總量</span><span class="table-header-en">Total O/B</span> <i class="info-icon" title="Total O/B｜AQ 已裝船總量 (每日電報的總裝/卸量)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">剩餘貨載</span><span class="table-header-en">Balance Qty</span> <i class="info-icon" title="Balance Qty｜AR 剩餘貨載 (每日電報的剩餘貨量)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">工班/吊機狀況</span><span class="table-header-en">Gangs</span> <i class="info-icon" title="Gangs｜AS 工班/吊機使用狀況" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">預計完貨/離港時間</span><span class="table-header-en">ETCD</span> <i class="info-icon" title="ETCD｜AT 預計完貨、離港時間 (每日電報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">緯度</span><span class="table-header-en">Lat</span> <i class="info-icon" title="Lat｜AU 緯度 (各電報所在位置)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">經度</span><span class="table-header-en">Long</span> <i class="info-icon" title="Long｜AV 經度 (各電報所在位置)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">平均航速</span><span class="table-header-en">SPD</span> <i class="info-icon" title="SPD｜AW 平均航速 (船位報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">主機轉速</span><span class="table-header-en">RPM</span> <i class="info-icon" title="RPM｜AX 主機轉速 (船位報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">滑失率(%)</span><span class="table-header-en">SLIP</span> <i class="info-icon" title="SLIP｜AY 滑失率 (船位報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">日航程</span><span class="table-header-en">Daily Distance</span> <i class="info-icon" title="Daily Distance｜AZ 日航程 (船位報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">距下港距離</span><span class="table-header-en">Distance to Next Port</span> <i class="info-icon" title="Distance to Next Port｜BA 距下港距離 (船位報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">天氣</span><span class="table-header-en">Weather condition</span> <i class="info-icon" title="Weather condition｜BB 天氣 (各報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">蒲式風級</span><span class="table-header-en">Wind Scale</span> <i class="info-icon" title="Wind Scale｜BC 蒲式風級 (船位報、特殊情況報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">風速</span><span class="table-header-en">Wind Speed</span> <i class="info-icon" title="Wind Speed｜BD 風速 (船位報、特殊情況報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">風向</span><span class="table-header-en">Wind Direction</span> <i class="info-icon" title="Wind Direction｜BE 風向 (船位報、特殊情況報)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">浪級</span><span class="table-header-en">Sea Scale</span> <i class="info-icon" title="Sea Scale｜BF 浪級 (道格拉斯浪級)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">浪高</span><span class="table-header-en">Swell Height</span> <i class="info-icon" title="Swell Height｜BG 浪高 (海浪高)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">浪向</span><span class="table-header-en">Sea Direction</span> <i class="info-icon" title="Sea Direction｜BH 浪向" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">流向</span><span class="table-header-en">Current Sitation</span> <i class="info-icon" title="Current Sitation｜BI 流向" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">其他事項</span><span class="table-header-en">REMARKS</span> <i class="info-icon" title="REMARKS｜BJ 其他事項 (每份報的備註)" onclick="event.stopPropagation()">i</i></th>
-                            <th rowspan="2"><span class="table-header-zh">最後更新時間</span><span class="table-header-en">last update</span> <i class="info-icon" title="last update｜BK 最後更新時間 (伺服器接收時間)" onclick="event.stopPropagation()">i</i></th>
+                            <th rowspan="2"><span class="table-header-zh">船名</span><i class="info-icon" title="Vessel｜B 船名" onclick="event.stopPropagation()">i</i><span class="table-header-en">Vessel</span></th>
+                            <th rowspan="2"><span class="table-header-zh">航次號</span><i class="info-icon" title="Voy.｜C 航次號" onclick="event.stopPropagation()">i</i><span class="table-header-en">Voy.</span></th>
+                            <th rowspan="2"><span class="table-header-zh">船報類型</span><i class="info-icon" title="Report Type｜D 船報類型 (電報名稱)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Report Type</span></th>
+                            <th rowspan="2"><span class="table-header-zh">填報時間 LT</span><i class="info-icon" title="Report Time｜E 填報時間 (採當地時間 LT)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Report Time</span></th>
+                            <th rowspan="2"><span class="table-header-zh">預計抵港時間</span><i class="info-icon" title="ETA｜F 預計抵港時間 (船位報/離港報的預計抵達下一港時間)" onclick="event.stopPropagation()">i</i><span class="table-header-en">ETA</span></th>
+                            <th rowspan="2"><span class="table-header-zh">港口名稱</span><i class="info-icon" title="NEXT PORT｜G 港口名稱 (預計抵達的下一港)" onclick="event.stopPropagation()">i</i><span class="table-header-en">NEXT PORT</span></th>
+                            <th rowspan="2"><span class="table-header-zh">當前狀態</span><i class="info-icon" title="Status｜H 當前狀態" onclick="event.stopPropagation()">i</i><span class="table-header-en">Status</span></th>
+                            <th colspan="6" class="border-bottom text-center grp-l grp-r"><span class="table-header-zh">油品存量</span><i class="info-icon" title="I~N 油品存量 ROB (參考 02 總表油品存油勾稽邏輯)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Oil ROB</span></th>
+                            <th colspan="6" class="border-bottom text-center grp-r"><span class="table-header-zh">油品耗量</span><i class="info-icon" title="O~T 油品耗量 (今日報與前一日報油料相減；參考 03 油品耗量勾稽邏輯)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Oil Consumption</span></th>
+                            <th rowspan="2"><span class="table-header-zh">港口</span><i class="info-icon" title="Port｜U 港口 (各電報的港口；航行報則勾稽下一港)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Port</span></th>
+                            <th rowspan="2"><span class="table-header-zh">遞交通知書</span><i class="info-icon" title="Nor Tender｜V 遞交準備就緒通知書 NOR 的時間 (抵港或靠泊報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Nor Tender</span></th>
+                            <th colspan="3" class="border-bottom text-center"><span class="table-header-zh">水尺</span><i class="info-icon" title="W~Y 水尺 (抵港報與離港報；前 DF / 中 DM / 後 DA)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Draft</span></th>
+                            <th rowspan="2"><span class="table-header-zh">結束海上定速航行</span><i class="info-icon" title="Time of EOSP｜Z 結束海上定速航行時間 (End of Sea Passage)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Time of EOSP</span></th>
+                            <th rowspan="2"><span class="table-header-zh">下錨或漂航時間</span><i class="info-icon" title="Anchor or Drifting｜AA 下錨或漂航時間" onclick="event.stopPropagation()">i</i><span class="table-header-en">Anchor or Drifting</span></th>
+                            <th rowspan="2"><span class="table-header-zh">起錨或結束漂航</span><i class="info-icon" title="Anchor Aweigh or Drifting End｜AB 起錨或結束飄航時間" onclick="event.stopPropagation()">i</i><span class="table-header-en">Anchor Aweigh or Drifting End</span></th>
+                            <th rowspan="2"><span class="table-header-zh">引水員登船</span><i class="info-icon" title="POB｜AC 引水員登船時間 (Pilot On Board)" onclick="event.stopPropagation()">i</i><span class="table-header-en">POB</span></th>
+                            <th rowspan="2"><span class="table-header-zh">預計靠泊</span><i class="info-icon" title="ETB｜AD 預計靠泊時間 (Estimated Time of Berthing)" onclick="event.stopPropagation()">i</i><span class="table-header-en">ETB</span></th>
+                            <th rowspan="2"><span class="table-header-zh">預計開工</span><i class="info-icon" title="EST Commence Working｜AE 預計開工時間" onclick="event.stopPropagation()">i</i><span class="table-header-en">EST Commence Working</span></th>
+                            <th rowspan="2"><span class="table-header-zh">預計離港</span><i class="info-icon" title="ETCD｜AF 預計離港時間" onclick="event.stopPropagation()">i</i><span class="table-header-en">ETCD</span></th>
+                            <th rowspan="2"><span class="table-header-zh">靠泊時間</span><i class="info-icon" title="All Lines Made Fast｜AG 靠泊時間 (纜繩全繫上時間)" onclick="event.stopPropagation()">i</i><span class="table-header-en">All Lines Made Fast</span></th>
+                            <th rowspan="2"><span class="table-header-zh">開始移船</span><i class="info-icon" title="Time of Shift Start｜AH 開始移船 (移泊報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Time of Shift Start</span></th>
+                            <th rowspan="2"><span class="table-header-zh">結束移船</span><i class="info-icon" title="Time of Shifting End｜AI 結束移船 (錨地或泊位)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Time of Shifting End</span></th>
+                            <th rowspan="2"><span class="table-header-zh">事件發生時間</span><i class="info-icon" title="Irregular Time｜AJ 事件發生時間 (特殊情況報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Irregular Time</span></th>
+                            <th rowspan="2"><span class="table-header-zh">預計恢復正常航時間</span><i class="info-icon" title="Estimate Resume Sailing Time｜AK 預計恢復正常航行時間 (特殊情況報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Estimate Resume Sailing Time</span></th>
+                            <th rowspan="2"><span class="table-header-zh">載重狀況</span><i class="info-icon" title="Laden/Ballast｜AL 船舶狀況 (每日電報的空重狀態)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Laden/Ballast</span></th>
+                            <th rowspan="2"><span class="table-header-zh">裝卸狀況</span><i class="info-icon" title="Loading/Discharging｜AM 船舶狀況 (每日電報的裝卸作業)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Loading/Discharging</span></th>
+                            <th rowspan="2"><span class="table-header-zh">開始時間</span><i class="info-icon" title="Commence Working｜AN 開始時間 (每日電報的開工時間)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Commence Working</span></th>
+                            <th rowspan="2"><span class="table-header-zh">貨物</span><i class="info-icon" title="CARGO｜AO 貨物 (靠泊、離港報；空船以空白表示)" onclick="event.stopPropagation()">i</i><span class="table-header-en">CARGO</span></th>
+                            <th rowspan="2"><span class="table-header-zh">日裝卸貨物數</span><i class="info-icon" title="Daily Qty｜AP 日裝卸貨物數 (每日電報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Daily Qty</span></th>
+                            <th rowspan="2"><span class="table-header-zh">已裝船總量</span><i class="info-icon" title="Total O/B｜AQ 已裝船總量 (每日電報的總裝/卸量)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Total O/B</span></th>
+                            <th rowspan="2"><span class="table-header-zh">剩餘貨載</span><i class="info-icon" title="Balance Qty｜AR 剩餘貨載 (每日電報的剩餘貨量)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Balance Qty</span></th>
+                            <th rowspan="2"><span class="table-header-zh">工班/吊機狀況</span><i class="info-icon" title="Gangs｜AS 工班/吊機使用狀況" onclick="event.stopPropagation()">i</i><span class="table-header-en">Gangs</span></th>
+                            <th rowspan="2"><span class="table-header-zh">預計完貨/離港時間</span><i class="info-icon" title="ETCD｜AT 預計完貨、離港時間 (每日電報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">ETCD</span></th>
+                            <th rowspan="2"><span class="table-header-zh">緯度</span><i class="info-icon" title="Lat｜AU 緯度 (各電報所在位置)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Lat</span></th>
+                            <th rowspan="2"><span class="table-header-zh">經度</span><i class="info-icon" title="Long｜AV 經度 (各電報所在位置)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Long</span></th>
+                            <th rowspan="2"><span class="table-header-zh">平均航速</span><i class="info-icon" title="SPD｜AW 平均航速 (船位報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">SPD</span></th>
+                            <th rowspan="2"><span class="table-header-zh">主機轉速</span><i class="info-icon" title="RPM｜AX 主機轉速 (船位報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">RPM</span></th>
+                            <th rowspan="2"><span class="table-header-zh">滑失率(%)</span><i class="info-icon" title="SLIP｜AY 滑失率 (船位報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">SLIP</span></th>
+                            <th rowspan="2"><span class="table-header-zh">日航程</span><i class="info-icon" title="Daily Distance｜AZ 日航程 (船位報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Daily Distance</span></th>
+                            <th rowspan="2"><span class="table-header-zh">距下港距離</span><i class="info-icon" title="Distance to Next Port｜BA 距下港距離 (船位報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Distance to Next Port</span></th>
+                            <th rowspan="2"><span class="table-header-zh">天氣</span><i class="info-icon" title="Weather condition｜BB 天氣 (各報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Weather condition</span></th>
+                            <th rowspan="2"><span class="table-header-zh">蒲式風級</span><i class="info-icon" title="Wind Scale｜BC 蒲式風級 (船位報、特殊情況報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Wind Scale</span></th>
+                            <th rowspan="2"><span class="table-header-zh">風速</span><i class="info-icon" title="Wind Speed｜BD 風速 (船位報、特殊情況報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Wind Speed</span></th>
+                            <th rowspan="2"><span class="table-header-zh">風向</span><i class="info-icon" title="Wind Direction｜BE 風向 (船位報、特殊情況報)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Wind Direction</span></th>
+                            <th rowspan="2"><span class="table-header-zh">浪級</span><i class="info-icon" title="Sea Scale｜BF 浪級 (道格拉斯浪級)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Sea Scale</span></th>
+                            <th rowspan="2"><span class="table-header-zh">浪高</span><i class="info-icon" title="Swell Height｜BG 浪高 (海浪高)" onclick="event.stopPropagation()">i</i><span class="table-header-en">Swell Height</span></th>
+                            <th rowspan="2"><span class="table-header-zh">浪向</span><i class="info-icon" title="Sea Direction｜BH 浪向" onclick="event.stopPropagation()">i</i><span class="table-header-en">Sea Direction</span></th>
+                            <th rowspan="2"><span class="table-header-zh">流向</span><i class="info-icon" title="Current Sitation｜BI 流向" onclick="event.stopPropagation()">i</i><span class="table-header-en">Current Sitation</span></th>
+                            <th rowspan="2"><span class="table-header-zh">其他事項</span><i class="info-icon" title="REMARKS｜BJ 其他事項 (每份報的備註)" onclick="event.stopPropagation()">i</i><span class="table-header-en">REMARKS</span></th>
+                            <th rowspan="2"><span class="table-header-zh">最後更新時間</span><i class="info-icon" title="last update｜BK 最後更新時間 (伺服器接收時間)" onclick="event.stopPropagation()">i</i><span class="table-header-en">last update</span></th>
                         </tr>
                         <tr>
                             <th class="grp-l"><span class="table-header-zh">重油</span><span class="table-header-en">FO</span></th><th><span class="table-header-zh">輕油</span><span class="table-header-en">DO</span></th><th><span class="table-header-zh">主機汽缸油</span><span class="table-header-en">M/E CYL</span></th><th><span class="table-header-zh">主機系統油</span><span class="table-header-en">M/E SYS</span></th><th><span class="table-header-zh">輔機系統油</span><span class="table-header-en">A/E SYS</span></th><th class="grp-r"><span class="table-header-zh">淡水</span><span class="table-header-en">FW</span></th>
@@ -1323,6 +1327,19 @@
         function generateDemoData() {
             // 船名：取目前「監控船舶」下拉所選船舶 (由總覽頁 ?ship= 帶入)
             const shipName = (document.getElementById('vesselSelect') || {}).value || 'Yuan Shun';
+
+            // 千分位格式（僅用於「數量/數值」，識別碼如航次號不套用）
+            const nf = v => Number(v).toLocaleString('en-US');
+
+            // 港口對照表：UN/LOCODE 5 碼 + 中文港名
+            // 註：羅源 / 青州 之 5 碼為 demo 暫用值，正式上線請以公司港口主檔為準
+            const PORT_DIR = {
+                '光陽': 'KRKAN', '浦項': 'KRKPO', '和歌山': 'JPWAK', '名古屋': 'JPNGO',
+                '君津': 'JPKMI', '羅源': 'CNLUY', '青州': 'CNQZH', '台北': 'TWTPE'
+            };
+            const LOAD_PORTS = ['光陽', '浦項', '和歌山', '名古屋', '君津', '羅源', '青州'];
+            const portLabel = n => PORT_DIR[n] + ' ' + n;
+
             let voyHtml = '';
             for(let i=30; i>=1; i--) {
                 let voyNum = i < 10 ? '0'+i : i;
@@ -1332,13 +1349,18 @@
                 let dStr = day < 10 ? '0'+day : day;
                 let date = `2026-${mStr}-${dStr}`;
                 
+                let cycleDays = Math.floor(Math.random() * 10) + 14;            // 來回週期 14~23 天
+                let cargoMT = nf((Math.random() * 3000 + 6000).toFixed(0));     // 裝貨數量 (MT)
+                let loadPort = LOAD_PORTS[i % LOAD_PORTS.length];               // 裝貨港輪替，卸貨港固定台北
+
                 voyHtml += `<tr>
-                    <td>26${voyNum}</td><td>${date}</td><td>KAOHSIUNG</td><td>SINGAPORE</td>
-                    <td>${(Math.random()*2000 + 500).toFixed(0)}</td>
+                    <td>26${voyNum}</td>
+                    <td>${cycleDays}</td>
+                    <td>${date}</td>
+                    <td class="text-start">${portLabel(loadPort)} ↔ ${portLabel('台北')}</td>
+                    <td>${cargoMT}</td>
                     <td>${(Math.random()*200 + 100).toFixed(1)}</td>
                     <td>${(Math.random()*15 + 2).toFixed(1)}</td>
-                    <td>${(Math.random()*80 + 10).toFixed(1)}</td>
-                    <td>${(Math.random()*1000 + 200).toFixed(0)}</td>
                 </tr>`;
             }
             $('#voyageSummaryTable tbody').html(voyHtml);
@@ -1431,9 +1453,9 @@
                         <td>${isF3 ? 'Discharging' : '-'}</td>
                         <td>${isF3 ? report.lt : '-'}</td>
                         <td>COAL</td>
-                        <td>${isF3 ? Math.floor(Math.random()*10000 + 2000) : '-'}</td>
-                        <td>${isF3 ? Math.floor(Math.random()*50000 + 10000) : '-'}</td>
-                        <td>${isF3 ? Math.floor(Math.random()*20000 + 5000) : '-'}</td>
+                        <td>${isF3 ? nf(Math.floor(Math.random()*10000 + 2000)) : '-'}</td>
+                        <td>${isF3 ? nf(Math.floor(Math.random()*50000 + 10000)) : '-'}</td>
+                        <td>${isF3 ? nf(Math.floor(Math.random()*20000 + 5000)) : '-'}</td>
                         <td>${isF3 ? Math.floor(Math.random()*3 + 1) : '-'}</td>
                         <td>${isF3 ? '2026-03-30' : '-'}</td>
 
@@ -1443,7 +1465,7 @@
                         <td>${isF1 ? Math.floor(Math.random()*20 + 85) : '-'}</td>
                         <td>${isF1 ? (Math.random()*5 + 10).toFixed(1) : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*200 + 100) : '-'}</td>
-                        <td>${isF1 || isF4 ? Math.floor(Math.random()*1000 + 500) : '-'}</td>
+                        <td>${isF1 || isF4 ? nf(Math.floor(Math.random()*1000 + 500)) : '-'}</td>
 
                         <td>${isF1 ? 'Cloudy' : '-'}</td>
                         <td>${isF1 ? Math.floor(Math.random()*6 + 2) : '-'}</td>
@@ -1517,8 +1539,28 @@
                     extend: 'excelHtml5',
                     text: '匯出 Excel',
                     className: 'btn btn-success btn-sm ds-btn',
-                    title: '航次統計列表',
-                    exportOptions: { columns: ':visible' }
+                    // title 設空字串以移除標題列(否則預設 '*' 會帶入 document.title)
+                    title: '',
+                    filename: '航次統計列表',
+                    sheetName: '航次統計',
+                    exportOptions: {
+                        columns: ':visible',
+                        format: {
+                            header: function(data, columnIdx) {
+                                // 匯出乾淨表頭：取雙語表頭中文＋英文，去掉說明用的 info-icon
+                                var h = $(voyTable.column(columnIdx).header());
+                                var zh = h.find('.table-header-zh').first().text().trim();
+                                if (zh) {
+                                    var en = h.find('.table-header-en').first().text().trim();
+                                    return en ? zh + ' ' + en : zh;
+                                }
+                                return h.clone().children().remove().end().text().trim();
+                            },
+                            body: exportCellText
+                        }
+                    },
+                    // 匯出時把畫面上合併的「裝卸貨港(裝 ↔ 卸)」拆成兩欄：裝貨港 / 卸貨港
+                    customize: function(xlsx) { splitVoyagePortColumn(xlsx); }
                 }],
                 "language": { "processing": "處理中...", "loadingRecords": "載入中...", "lengthMenu": "顯示 _MENU_ 筆", "zeroRecords": "沒有符合的資料", "info": "顯示第 _START_ 至 _END_ 筆，共 _TOTAL_ 筆", "infoEmpty": "顯示第 0 至 0 筆，共 0 筆", "infoFiltered": "(從 _MAX_ 筆資料中過濾)", "search": "搜尋:", "paginate": { "first": "第一頁", "previous": "上一頁", "next": "下一頁", "last": "最後一頁" } }
             });
@@ -1529,7 +1571,7 @@
             $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
                 if (settings.nTable.id !== 'voyageSummaryTable') return true;
                 let a = voyApplied;
-                let dateCol = data[1];
+                let dateCol = data[2];   // 欄位順序：0 航次 / 1 週期 / 2 起航日
                 if (a.voy && data[0] !== a.voy) return false;
                 if (a.min && dateCol < a.min) return false;
                 if (a.max && dateCol > a.max) return false;
@@ -1549,6 +1591,227 @@
                 $('#voyVoyageFilter').val(''); $('#voyMinDate').val(''); $('#voyMaxDate').val(''); $('#voyKeyword').val('');
                 applyVoyFilter();
             });
+
+            // 依表頭第一列的群組(colspan)建立「欄位index → 群組名稱」對照。
+            // Excel 只吃單列表頭，故匯出時把「油品存量 / 油品耗量」等群組名併入欄名，避免群組表頭遺失。
+            /**
+         * 匯出用：畫面上的千分位僅為呈現，匯出時還原為純數字，
+         * 否則 Excel 會把 "8,837" 當文字，無法加總或排序。
+         */
+        function stripThousands(data) {
+            return (typeof data === 'string' && /^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(data))
+                ? data.replace(/,/g, '')
+                : data;
+        }
+
+        /**
+         * 匯出用資料格清理：
+         *   1. 去除 HTML 標籤（如「船報類型/當前狀態」的 <span class="badge">…</span>），
+         *      只留純文字，避免 Excel 出現整段程式碼。
+         *   2. 再套用千分位還原。
+         */
+        function exportCellText(data) {
+            if (typeof data !== 'string') return data;
+            let txt = data;
+            if (/<[^>]+>/.test(txt)) {
+                const tmp = document.createElement('div');
+                tmp.innerHTML = txt;
+                txt = (tmp.textContent || tmp.innerText || '').trim();
+            }
+            return stripThousands(txt);
+        }
+
+        /* ==========================================================================
+         * 匯出格式：依「船報原始數據明細.xlsx」樣板 —— 兩列表頭
+         *   第 1 列 = 群組名（跨欄合併），第 2 列 = 各欄雙語欄名。
+         * 下列 11 個群組、欄數與樣板完全一致（7+6+6+2+3+12+9+2+5+8+2 = 62 欄）。
+         * ======================================================================== */
+        const MASTER_EXPORT_GROUPS = [
+            { zh: '基本資料',       en: 'Basic Information',          span: 7 },
+            { zh: '油品存量',       en: 'Remaining on Board (ROB)',   span: 6 },
+            { zh: '油品耗量',       en: 'Consumption',                span: 6 },
+            { zh: '港口與通知',     en: 'Port & Notice',              span: 2 },
+            { zh: '吃水資料',       en: 'Draft',                      span: 3 },
+            { zh: '航行與港口時間', en: 'Voyage & Port Timeline',     span: 12 },
+            { zh: '貨載與裝卸',     en: 'Cargo Operations',           span: 9 },
+            { zh: '船位',           en: 'Position',                   span: 2 },
+            { zh: '航行效能',       en: 'Navigation Performance',     span: 5 },
+            { zh: '天氣與海象',     en: 'Weather & Sea',              span: 8 },
+            { zh: '備註與更新',     en: 'Remarks & Update',           span: 2 }
+        ];
+        // 原始欄索引(0-61) → 群組物件
+        let _masterGroupOfCol = null;
+        function masterGroupOfCol(idx) {
+            if (!_masterGroupOfCol) {
+                _masterGroupOfCol = [];
+                MASTER_EXPORT_GROUPS.forEach(function (g, gi) {
+                    for (let k = 0; k < g.span; k++) _masterGroupOfCol.push({ gi: gi, zh: g.zh, en: g.en });
+                });
+            }
+            return _masterGroupOfCol[idx] || { gi: -1, zh: '', en: '' };
+        }
+        // 0→A, 26→AA … 供合併儲存格用
+        function xlsxCol(n) {
+            let s = '';
+            do { s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n / 26) - 1; } while (n >= 0);
+            return s;
+        }
+        // A→0, AA→26 …
+        function xlsxColIdx(letters) {
+            let n = 0;
+            for (const ch of letters) n = n * 26 + (ch.charCodeAt(0) - 64);
+            return n - 1;
+        }
+        // 取儲存格文字（inlineStr 或 <v>）
+        function xlsxCellText(c) {
+            const is = c.getElementsByTagName('is')[0];
+            if (is) { const t = is.getElementsByTagName('t')[0]; return t ? t.textContent : ''; }
+            const v = c.getElementsByTagName('v')[0];
+            return v ? v.textContent : '';
+        }
+
+        /**
+         * 匯出用：把畫面上合併呈現的「裝卸貨港（裝 ↔ 卸）」單欄，在匯出檔中拆成
+         * 「裝貨港 / 卸貨港」兩欄。畫面維持合併(含箭頭)，僅匯出檔拆分。
+         * 作法：於工作表 XML 中，把該欄(D)後方欄位整體右移一欄，再填入拆分後的值。
+         */
+        function splitVoyagePortColumn(xlsx) {
+            const NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+            const sheet = xlsx.xl.worksheets['sheet1.xml'];
+            const sheetData = sheet.getElementsByTagName('sheetData')[0];
+            if (!sheetData) return;
+            const SPLIT = 3;   // 裝卸貨港在第 4 欄(0-based=3, 即 D)
+
+            const rows = Array.prototype.slice.call(sheetData.getElementsByTagName('row'));
+            // 表頭列＝第一個「整寬」列（其上方可能有訊息列）
+            let maxCells = 0;
+            rows.forEach(r => { maxCells = Math.max(maxCells, r.getElementsByTagName('c').length); });
+            let headerSeen = false;
+
+            function makeCell(text, style) {
+                const c = sheet.createElementNS(NS, 'c');
+                if (style) c.setAttribute('s', style);
+                c.setAttribute('t', 'inlineStr');
+                const is = sheet.createElementNS(NS, 'is');
+                const t = sheet.createElementNS(NS, 't');
+                t.setAttribute('xml:space', 'preserve');
+                t.textContent = text || '';
+                is.appendChild(t); c.appendChild(is);
+                return c;
+            }
+
+            rows.forEach(function (row) {
+                const cells = Array.prototype.slice.call(row.getElementsByTagName('c'));
+                if (!cells.length) return;
+                const isHeader = !headerSeen && cells.length === maxCells;
+                if (isHeader) headerSeen = true;
+                const rn = (cells[0].getAttribute('r').match(/\d+/) || ['1'])[0];
+
+                cells.forEach(c => row.removeChild(c));
+                const out = [];   // {idx, node}
+                cells.forEach(function (c) {
+                    const idx = xlsxColIdx(c.getAttribute('r').match(/[A-Z]+/)[0]);
+                    if (idx < SPLIT) {
+                        out.push({ idx: idx, node: c });
+                    } else if (idx === SPLIT) {
+                        let left, right;
+                        if (isHeader) { left = '裝貨港 Loading Port'; right = '卸貨港 Discharging Port'; }
+                        else {
+                            const p = xlsxCellText(c).split('↔');
+                            left = (p[0] || '').trim(); right = (p[1] || '').trim();
+                        }
+                        const s = c.getAttribute('s');
+                        out.push({ idx: SPLIT,     node: makeCell(left, s) });
+                        out.push({ idx: SPLIT + 1, node: makeCell(right, s) });
+                    } else {
+                        out.push({ idx: idx + 1, node: c });   // 右移一欄
+                    }
+                });
+                out.sort((a, b) => a.idx - b.idx);
+                out.forEach(function (o) { o.node.setAttribute('r', xlsxCol(o.idx) + rn); row.appendChild(o.node); });
+                if (row.getAttribute('spans')) row.setAttribute('spans', '1:' + out.length);
+            });
+        }
+        /**
+         * 於匯出的工作表最上方插入「群組列」並合併儲存格，做出與樣板相同的兩列表頭。
+         * 會依目前「可見欄位」動態計算群組跨距，故隱藏欄位後仍正確。
+         */
+        function insertMasterGroupHeader(xlsx, dt) {
+            const NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+            const sheet = xlsx.xl.worksheets['sheet1.xml'];
+            const sheetData = sheet.getElementsByTagName('sheetData')[0];
+            if (!sheetData) return;
+
+            // 依可見欄位順序，把連續同群組的欄折成一段
+            const segs = [];
+            let colCount = 0;
+            dt.columns(':visible').every(function () {
+                colCount++;
+                const g = masterGroupOfCol(this.index());
+                const last = segs[segs.length - 1];
+                if (last && last.gi === g.gi) last.span++;
+                else segs.push({ gi: g.gi, zh: g.zh, en: g.en, span: 1 });
+            });
+
+            // 找出「表頭列」：第一個含所有可見欄位的整寬列（其上方可能有標題/訊息列）
+            const rowsArr = Array.prototype.slice.call(sheetData.getElementsByTagName('row'));
+            let headerRow = null;
+            for (const row of rowsArr) {
+                if (row.getElementsByTagName('c').length === colCount) { headerRow = row; break; }
+            }
+            if (!headerRow) headerRow = rowsArr[0];
+            const R = parseInt(headerRow.getAttribute('r'), 10);   // 群組列將插在此列之上、共用列號 R
+
+            // 表頭列與其後所有列整體下移一列，空出 R 給群組列
+            rowsArr.forEach(function (row) {
+                const rn = parseInt(row.getAttribute('r'), 10);
+                if (rn < R) return;
+                row.setAttribute('r', rn + 1);
+                Array.prototype.forEach.call(row.getElementsByTagName('c'), function (c) {
+                    c.setAttribute('r', c.getAttribute('r').replace(/\d+/, rn + 1));
+                });
+            });
+
+            // 建立群組列（r=R），套用與 DataTables 表頭相同的粗體樣式 s="2"
+            const groupRow = sheet.createElementNS(NS, 'row');
+            groupRow.setAttribute('r', String(R));
+            const merges = [];
+            let col = 0;
+            segs.forEach(function (s) {
+                const start = col;
+                for (let k = 0; k < s.span; k++) {
+                    const c = sheet.createElementNS(NS, 'c');
+                    c.setAttribute('r', xlsxCol(col) + R);
+                    c.setAttribute('s', '2');
+                    if (k === 0 && s.gi >= 0) {
+                        c.setAttribute('t', 'inlineStr');
+                        const is = sheet.createElementNS(NS, 'is');
+                        const t = sheet.createElementNS(NS, 't');
+                        t.textContent = s.en ? s.zh + ' ' + s.en : s.zh;
+                        is.appendChild(t); c.appendChild(is);
+                    }
+                    groupRow.appendChild(c);
+                    col++;
+                }
+                if (s.span > 1) merges.push(xlsxCol(start) + R + ':' + xlsxCol(start + s.span - 1) + R);
+            });
+            sheetData.insertBefore(groupRow, headerRow);
+
+            // 合併群組列儲存格（mergeCells 依 schema 置於 sheetData 之後）
+            if (merges.length) {
+                let mc = sheet.getElementsByTagName('mergeCells')[0];
+                if (!mc) {
+                    mc = sheet.createElementNS(NS, 'mergeCells');
+                    sheetData.parentNode.insertBefore(mc, sheetData.nextSibling);
+                }
+                merges.forEach(function (ref) {
+                    const m = sheet.createElementNS(NS, 'mergeCell');
+                    m.setAttribute('ref', ref);
+                    mc.appendChild(m);
+                });
+                mc.setAttribute('count', mc.getElementsByTagName('mergeCell').length);
+            }
+        }
 
             const masterTable = $('#masterDataTable').DataTable({
                 "scrollX": true,
@@ -1571,12 +1834,15 @@
                         extend: 'excelHtml5',
                         text: '匯出 Excel',
                         className: 'btn btn-success btn-sm ds-btn',
-                        title: '船報原始數據明細',
+                        // title 設空字串以移除標題列(否則預設 '*' 會帶入 document.title)；樣板首列即為群組列
+                        title: '',
+                        filename: '船報原始數據明細',
+                        sheetName: '船報明細',
                         exportOptions: {
                             columns: ':visible',                 // 僅匯出可見欄位
                             format: {
                                 header: function(data, columnIdx) {
-                                    // 匯出時輸出乾淨表頭：優先取雙語表頭中文＋英文(§4)，否則回退純文字
+                                    // 欄名列（第 2 列）：雙語中文＋英文；群組名改由 customize 於第 1 列合併呈現
                                     var h = $(masterTable.column(columnIdx).header());
                                     var zh = h.find('.table-header-zh').first().text().trim();
                                     if (zh) {
@@ -1584,9 +1850,12 @@
                                         return en ? zh + ' ' + en : zh;
                                     }
                                     return h.clone().children().remove().end().text().trim();
-                                }
+                                },
+                                body: exportCellText
                             }
-                        }
+                        },
+                        // 依樣板插入群組列（跨欄合併）→ 兩列表頭
+                        customize: function(xlsx) { insertMasterGroupHeader(xlsx, masterTable); }
                     }
                 ],
                 "language": { "processing": "處理中...", "loadingRecords": "載入中...", "lengthMenu": "顯示 _MENU_ 筆", "zeroRecords": "沒有符合的資料", "info": "顯示第 _START_ 至 _END_ 筆，共 _TOTAL_ 筆", "infoEmpty": "顯示第 0 至 0 筆，共 0 筆", "infoFiltered": "(從 _MAX_ 筆資料中過濾)", "search": "搜尋:", "paginate": { "first": "第一頁", "previous": "上一頁", "next": "下一頁", "last": "最後一頁" } }
