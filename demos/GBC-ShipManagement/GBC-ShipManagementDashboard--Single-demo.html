@@ -219,6 +219,10 @@
            ========================================================================== */
         .card-custom { box-shadow: none !important; border: 1px solid var(--border-color) !important; border-radius: 0.75rem; }
         .card.shadow, .card.shadow-sm { box-shadow: none !important; }
+        /* 說明方塊內彩色標籤：比照 demo-BS，尺寸直接掛在色系類別（未依賴 .badge-custom） */
+        .badge-source, .badge-calc, .badge-risk, .badge-ai, .badge-gap {
+            font-size: var(--font-xs); padding: 2px 6px; font-weight: bold; margin-right: 6px; display: inline-block; margin-bottom: 4px;
+        }
         .badge-source, .badge-calc, .badge-risk, .badge-ai, .badge-custom, .badge-gap { border-radius: 999px; }
 
         /* ==========================================================================
@@ -322,9 +326,13 @@
     </div>
 
     <div class="container-fluid" style="max-width: 1800px;">
+        <div class="row g-4 align-items-stretch">
 
-        <h2 class="group-title mb-0" id="sec-voyage" data-sec><span class="gt-bar"></span>航次統計列表 <span class="gt-sub">Voyage Summary</span></h2>
-        <div class="card card-custom shadow mb-5">
+        <div class="col-12" id="sec-voyage" data-sec>
+            <h2 class="group-title mb-0"><span class="gt-bar"></span>航次統計列表 <span class="gt-sub">Voyage Summary</span></h2>
+        </div>
+        <div class="col-12">
+        <div class="card card-custom shadow h-100">
             <div class="card-body p-4">
                 <div class="row g-2 mb-3 align-items-end">
                     <div class="col-auto">
@@ -371,22 +379,24 @@
                 </div>
             </div>
         </div>
+        </div>
 
-        <h2 class="group-title mb-0" id="sec-risk" data-sec><span class="gt-bar"></span>岸端技術與資源風險診斷 <span class="gt-sub">Tech &amp; Resource Risk Analytics</span></h2>
-        <div class="row g-4 mb-4">
-            
+        <div class="col-12" id="sec-risk" data-sec>
+            <h2 class="group-title mb-0"><span class="gt-bar"></span>岸端技術與資源風險診斷 <span class="gt-sub">Tech &amp; Resource Risk Analytics</span></h2>
+        </div>
+
             <div class="col-12 col-xl-6">
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">生存資源預警系統 (Fresh Water)</h2>
-                        <div class="desc-box" style="border-left-color: var(--primary);">
-                            <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>交叉比對 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">ROB FW-淡水存量</code>、<code class="text-info">格式3-日電報</code> 的 <code class="text-info">每日淡水存量</code> 與 <code class="text-info">格式4-離港/完工報</code> 的 <code class="text-info">完工淡水存量</code>。</div>
+                        <div class="desc-box">
+                            <div class="mb-2"><span class="badge-source">資料來源</span>交叉比對 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">ROB FW-淡水存量</code>、<code class="text-info">格式3-日電報</code> 的 <code class="text-info">每日淡水存量</code> 與 <code class="text-info">格式4-離港/完工報</code> 的 <code class="text-info">完工淡水存量</code>。</div>
                             <div id="fw-calc-desc" class="mb-2">
-                                <span class="badge-custom badge-calc">基準線計算</span>健康耗水基準線 = 
+                                <span class="badge-calc">基準線計算</span>健康耗水基準線 = 
                                 <div class="formula-box">$$FW_{baseline} = \frac{\sum_{i=1}^{N} Daily\ FW\ Cons_i}{N\ (Days)}$$</div>
                             </div>
                             <div id="fw-risk-desc">
-                                <span class="badge-custom badge-risk">營運監控</span><br>
+                                <span class="badge-risk">營運監控</span><br>
                                 <span class="text-danger fw-bold">【即時風險】</span>若「淡水存量」呈現非邏輯崩跌或「日耗量」異常飆高，為管路破裂警訊，需立即通報船上徹查。<br>
                                 <span class="text-warning fw-bold">【長期趨勢】</span>透過年/季區間建立各季節與航線的「健康耗水基準線」。若長期耗水偏高，可排查造水機效率衰退或人為用水異常。
                             </div>
@@ -415,12 +425,12 @@
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">燃油加油預警 (Fuel Remaining Days)</h2>
-                        <div class="desc-box" style="border-left-color: var(--primary);">
-                            <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>取系統依據 <code class="text-info">CST-岸端標準時間(UTC+8)</code> 最新回傳的船報，提取 <code class="text-info">ROB FO-重油存量</code> 與 <code class="text-info">ROB DO-輕油存量</code>。</div>
-                            <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯 (MT轉天數)</span>為消除各船油箱容量與引擎耗油差異，系統自動將數值標準化轉換：<br>
+                        <div class="desc-box">
+                            <div class="mb-2"><span class="badge-source">資料來源</span>取系統依據 <code class="text-info">CST-岸端標準時間(UTC+8)</code> 最新回傳的船報，提取 <code class="text-info">ROB FO-重油存量</code> 與 <code class="text-info">ROB DO-輕油存量</code>。</div>
+                            <div class="mb-2"><span class="badge-calc">計算邏輯 (MT轉天數)</span>為消除各船油箱容量與引擎耗油差異，系統自動將數值標準化轉換：<br>
                             1. <b>歷史日均耗基準</b>：取該船近30天在相同「船舶狀況(空/重載)」下的平均每日耗油量(MT/Day)。<br>
                             2. <b>剩餘可用天數</b>：<code class="text-info">當前存量(MT)</code> ÷ <code class="text-info">歷史日均耗基準(MT/Day)</code>。</div>
-                            <div><span class="badge-custom badge-risk">風險預警</span>Y軸已統一換算為「還能燒幾天」。圖表底層鋪設紅色(< 3天)與橘色(3~5天)警戒區。若柱體落入該區，代表存量逼近極限，需盡速安排加油。</div>
+                            <div><span class="badge-risk">風險預警</span>Y軸已統一換算為「還能燒幾天」。圖表底層鋪設紅色(< 3天)與橘色(3~5天)警戒區。若柱體落入該區，代表存量逼近極限，需盡速安排加油。</div>
                         </div>
                         
                         <div class="row g-2 mb-3 align-items-center">
@@ -441,11 +451,11 @@
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">船體阻力與推進風險</h2>
-                        <div class="desc-box" style="border-left-color: var(--primary);">
-                            <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>擷取自 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">SLIP(%)-滑失率</code>、<code class="text-info">蒲式風級</code> 與 <code class="text-info">浪級</code>。</div>
-                            <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯</span>無近期水下洗船紀錄時，系統自動提取該船「過去一年內，在良好海象 (風級<3、浪級<2) 下的歷史平均滑失率」作為動態基準線。</div>
-                            <div class="mb-2"><span class="badge-custom badge-risk">營運監控</span>若風/浪級皆低於 4 級，但實際滑失率卻持續大幅高於基準線，戰情室應警示「船體嚴重結垢(Fouling)或螺旋槳異常」，建議評估清艙洗船。</div>
-                            <div><span class="badge-custom badge-gap">資料缺口</span>動態基準線可信度仰賴下列欄位，目前船報未涵蓋，需另建/串接：
+                        <div class="desc-box">
+                            <div class="mb-2"><span class="badge-source">資料來源</span>擷取自 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">SLIP(%)-滑失率</code>、<code class="text-info">蒲式風級</code> 與 <code class="text-info">浪級</code>。</div>
+                            <div class="mb-2"><span class="badge-calc">計算邏輯</span>無近期水下洗船紀錄時，系統自動提取該船「過去一年內，在良好海象 (風級<3、浪級<2) 下的歷史平均滑失率」作為動態基準線。</div>
+                            <div class="mb-2"><span class="badge-risk">營運監控</span>若風/浪級皆低於 4 級，但實際滑失率卻持續大幅高於基準線，戰情室應警示「船體嚴重結垢(Fouling)或螺旋槳異常」，建議評估清艙洗船。</div>
+                            <div><span class="badge-gap">資料缺口</span>動態基準線可信度仰賴下列欄位，目前船報未涵蓋，需另建/串接：
                                 <ul class="mb-0 mt-1 ps-3" style="color:#fbbf24;">
                                     <li><b>船舶主資料表 (一次性建檔)</b>：<code class="text-warning">Propeller Pitch (P)</code>、<code class="text-warning">Gear Ratio</code>、<code class="text-warning">Design Draft</code>。</li>
                                     <li><b>PMS 機務系統串接</b>：<code class="text-warning">水下洗船日期</code>、<code class="text-warning">塢檢日期</code>、<code class="text-warning">螺旋槳磨光日期</code>——無此資訊，基準線會被「剛洗船的低滑失率樣本」拉偏而誤判。</li>
@@ -478,13 +488,13 @@
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">機件耗損與注油成本</h2>
-                        <div class="desc-box" style="border-left-color: var(--primary);">
-                            <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>擷取自 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">RPM-主機轉速</code> 與 <code class="text-info">前24小時主機汽缸油耗量</code>。</div>
-                            <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯</span>利用轉速推算主機負荷：
+                        <div class="desc-box">
+                            <div class="mb-2"><span class="badge-source">資料來源</span>擷取自 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">RPM-主機轉速</code> 與 <code class="text-info">前24小時主機汽缸油耗量</code>。</div>
+                            <div class="mb-2"><span class="badge-calc">計算邏輯</span>利用轉速推算主機負荷：
                                 <div class="formula-box">$$Load (\%) = \left(\frac{Current\ RPM}{Max\ RPM}\right)^3 \times 100$$</div>
                             </div>
-                            <div class="mb-2"><span class="badge-custom badge-risk">營運監控</span>若轉速(或負荷)調降，但汽缸油耗量未等比例減少，戰情室應提示「注油器設定可能異常」，避免過度注油浪費成本。</div>
-                            <div><span class="badge-custom badge-gap">資料缺口</span>負荷推算與「應耗多少油」的基準對比，需要下列主機型錄數據，目前船報未涵蓋：
+                            <div class="mb-2"><span class="badge-risk">營運監控</span>若轉速(或負荷)調降，但汽缸油耗量未等比例減少，戰情室應提示「注油器設定可能異常」，避免過度注油浪費成本。</div>
+                            <div><span class="badge-gap">資料缺口</span>負荷推算與「應耗多少油」的基準對比，需要下列主機型錄數據，目前船報未涵蓋：
                                 <ul class="mb-0 mt-1 ps-3" style="color:#fbbf24;">
                                     <li><b>船舶主資料表 (一次性建檔)</b>：<code class="text-warning">MCR_RPM (額定最大轉速)</code>、<code class="text-warning">MCR_kW (額定功率)</code>、<code class="text-warning">Propulsion Type (FPP/CPP)</code>。</li>
                                     <li><b>引擎台架數據</b>：<code class="text-warning">SFOC 曲線 (g/kWh @ 50/75/85/100% 負荷)</code>——用於把「應耗多少油」算出來，才能判定油耗是否過度。</li>
@@ -516,11 +526,10 @@
                     </div>
                 </div>
             </div>
-            
-        </div>
 
-        <h2 class="group-title mb-0" id="sec-portops" data-sec><span class="gt-bar"></span>港埠作業與航次周轉效能 <span class="gt-sub">Port &amp; Voyage Operations</span></h2>
-        <div class="row g-4 mb-4">
+        <div class="col-12" id="sec-portops" data-sec>
+            <h2 class="group-title mb-0"><span class="gt-bar"></span>港埠作業與航次周轉效能 <span class="gt-sub">Port &amp; Voyage Operations</span></h2>
+        </div>
 
             <!-- 貨物裝卸進度與周轉 (Cargo Handling) — 暫時隱藏
             <div class="col-12 col-xl-6">
@@ -533,10 +542,10 @@
                                 <span class="text-info font-monospace d-block mt-1" style="font-size: 1rem;">2026-03-27 17:45 CST</span>
                             </div>
                         </div>
-                        <div class="desc-box" style="border-left-color: var(--primary);">
-                            <div class="mb-2"><span class="badge-custom badge-ai">CCTV AI 監控</span>系統持續以船端回傳之 CCTV 影像辨識進行各貨艙 (Hold) 體積估算，即時填補船報時序盲區。</div>
-                            <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯</span><code class="text-info">剩餘未作業量</code> = <code class="text-info">提單總量(B/L)</code> - <code class="text-info">AI 已作業量估算</code>。</div>
-                            <div><span class="badge-custom badge-risk">營運監控</span>即時監控各艙裝卸效率。若特定艙進度嚴重落後，岸端可提早介入協調碼頭工人分配。</div>
+                        <div class="desc-box">
+                            <div class="mb-2"><span class="badge-ai">CCTV AI 監控</span>系統持續以船端回傳之 CCTV 影像辨識進行各貨艙 (Hold) 體積估算，即時填補船報時序盲區。</div>
+                            <div class="mb-2"><span class="badge-calc">計算邏輯</span><code class="text-info">剩餘未作業量</code> = <code class="text-info">提單總量(B/L)</code> - <code class="text-info">AI 已作業量估算</code>。</div>
+                            <div><span class="badge-risk">營運監控</span>即時監控各艙裝卸效率。若特定艙進度嚴重落後，岸端可提早介入協調碼頭工人分配。</div>
                         </div>
 
                         <div class="row g-2 mb-3 align-items-center">
@@ -558,9 +567,9 @@
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">港埠延滯與作業效能</h2>
-                        <div class="desc-box" style="border-left-color: var(--primary);">
-                            <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>擷取自 <code class="text-info">格式3-日電報</code> 的 <code class="text-info">每日裝卸貨量</code> 與 <code class="text-info">工班數量</code>。若裝卸貨不超過 24 小時無日報，系統自動調用 <code class="text-info">格式4-離港報</code> 的 <code class="text-info">總裝/卸貨數量</code> 進行單一柱狀圖展示。</div>
-                            <div><span class="badge-custom badge-risk">營運監控</span>若工班數維持不變，但每日裝卸產能卻急遽下滑，強烈暗示遭遇岸吊故障、天候停工或碼頭效率低落，戰情室需立即介入以防高額延滯費 (Demurrage)。拉長至月/季區間則可用以評估該港口長期的平均效能。</div>
+                        <div class="desc-box">
+                            <div class="mb-2"><span class="badge-source">資料來源</span>擷取自 <code class="text-info">格式3-日電報</code> 的 <code class="text-info">每日裝卸貨量</code> 與 <code class="text-info">工班數量</code>。若裝卸貨不超過 24 小時無日報，系統自動調用 <code class="text-info">格式4-離港報</code> 的 <code class="text-info">總裝/卸貨數量</code> 進行單一柱狀圖展示。</div>
+                            <div><span class="badge-risk">營運監控</span>若工班數維持不變，但每日裝卸產能卻急遽下滑，強烈暗示遭遇岸吊故障、天候停工或碼頭效率低落，戰情室需立即介入以防高額延滯費 (Demurrage)。拉長至月/季區間則可用以評估該港口長期的平均效能。</div>
                         </div>
 
                         <div class="row g-2 mb-3 align-items-end">
@@ -594,12 +603,12 @@
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">法規碳排強度與能效 (EEOI Tracker)</h2>
-                        <div class="desc-box" style="border-left-color: var(--primary);">
-                            <div class="mb-2"><span class="badge-custom badge-source">資料來源</span>擷取 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">日航程與油耗</code>；及 <code class="text-info">格式4-離港報</code> 的 <code class="text-info">總裝卸貨量</code>。</div>
-                            <div class="mb-2"><span class="badge-custom badge-calc">計算邏輯</span>衡量每運送一噸貨物跑一海浬的 \(CO_2\) 排放量 (\(C_F\) 為 IMO 燃油碳排轉換係數)：
+                        <div class="desc-box">
+                            <div class="mb-2"><span class="badge-source">資料來源</span>擷取 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">日航程與油耗</code>；及 <code class="text-info">格式4-離港報</code> 的 <code class="text-info">總裝卸貨量</code>。</div>
+                            <div class="mb-2"><span class="badge-calc">計算邏輯</span>衡量每運送一噸貨物跑一海浬的 \(CO_2\) 排放量 (\(C_F\) 為 IMO 燃油碳排轉換係數)：
                                 <div class="formula-box">$$EEOI = \frac{Fuel_{cons} \times C_F}{Cargo \times Distance}$$</div>
                             </div>
-                            <div><span class="badge-custom badge-risk">營運監控</span>法規紅線(維持C級的門檻)會逐年遞減加嚴。圖表同時呈現長期法定評級 CII 與短期營運效率 EEOI，若 EEOI 長期突破紅線(燒多跑少)，岸端應評估指示降速航行 (Slow Steaming)。游標懸停可查看當下評級。</div>
+                            <div><span class="badge-risk">營運監控</span>法規紅線(維持C級的門檻)會逐年遞減加嚴。圖表同時呈現長期法定評級 CII 與短期營運效率 EEOI，若 EEOI 長期突破紅線(燒多跑少)，岸端應評估指示降速航行 (Slow Steaming)。游標懸停可查看當下評級。</div>
                         </div>
 
                         <div class="row g-2 mb-3 align-items-end">
@@ -624,8 +633,8 @@
                 <div class="card card-custom shadow h-100">
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">航次時間利用率分析</h2>
-                        <div class="desc-box" style="border-left-color: var(--primary);">
-                            <div class="mb-2"><span class="badge-custom badge-source">規則說明</span>與全船隊的「航次時間分佈與利用率」規則相同，鎖定 <code class="text-info">Voyage Number-航次號</code> 區間計算。</div>
+                        <div class="desc-box">
+                            <div class="mb-2"><span class="badge-source">規則說明</span>與全船隊的「航次時間分佈與利用率」規則相同，鎖定 <code class="text-info">Voyage Number-航次號</code> 區間計算。</div>
                             <div class="rule-box mb-2">
                                 <ul>
                                     <li><b>【總週期】</b>= 本次 <code class="text-info">格式4-離港報</code> 離泊時間 減去 前次同欄位。</li>
@@ -634,7 +643,7 @@
                                     <li><b>【作業時間】</b>= <code class="text-info">格式4-離港報</code> 的 <code class="text-info">總作業時間</code>。</li>
                                 </ul>
                             </div>
-                            <div><span class="badge-custom badge-risk">營運監控</span>等泊閒置(橘色)佔比越高，該航次的日均收益(TCE)越被稀釋。戰情室可據此檢討租家調度或港口擁擠狀況。</div>
+                            <div><span class="badge-risk">營運監控</span>等泊閒置(橘色)佔比越高，該航次的日均收益(TCE)越被稀釋。戰情室可據此檢討租家調度或港口擁擠狀況。</div>
                         </div>
 
                         <div class="row g-2 mb-3 align-items-end">
@@ -654,18 +663,16 @@
                     </div>
                 </div>
             </div>
-            
-        </div>
 
-        <h2 class="group-title mb-0" id="sec-master" data-sec><span class="gt-bar"></span>船報原始數據明細 <span class="gt-sub">Master Data Ledger</span></h2>
-        
-        <div class="desc-box mb-3" style="border-left-color: var(--primary);">
-            <div class="d-flex justify-content-between align-items-center cursor-pointer" data-bs-toggle="collapse" data-bs-target="#mappingTable" style="cursor: pointer;">
-                <span class="badge-custom badge-source fs-6 mb-0">總表欄位與船報來源對應字典 (Data Mapping Dictionary)</span>
-                <span class="text-info" style="font-size: 1rem;">點擊展開 / 收合 ▼</span>
-            </div>
-            <div class="collapse mt-3" id="mappingTable">
-                <div class="row g-3">
+        <div class="col-12" id="sec-master" data-sec>
+            <h2 class="group-title mb-0"><span class="gt-bar"></span>船報原始數據明細 <span class="gt-sub">Master Data Ledger</span></h2>
+        </div>
+        <div class="col-12">
+        <div class="card card-custom shadow h-100">
+            <div class="card-body p-4">
+                <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">總表欄位與船報來源對應字典 (Data Mapping Dictionary)</h2>
+                <div class="desc-box">
+                    <div class="row g-3">
                     <div class="col-12">
                         <div class="p-2 border border-secondary rounded bg-card">
                             <span class="badge bg-secondary mb-1">通用與衍生欄位</span>
@@ -734,10 +741,13 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
         </div>
+        </div>
 
-        <div class="card card-custom shadow mb-5">
+        <div class="col-12">
+        <div class="card card-custom shadow h-100">
             <div class="card-body p-4">
                 <div class="row g-2 mb-3 align-items-end">
                     <div class="col-auto">
@@ -839,6 +849,8 @@
                     <tbody></tbody>
                 </table>
             </div>
+        </div>
+        </div>
         </div>
 
     </div>
