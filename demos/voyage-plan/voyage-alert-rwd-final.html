@@ -2165,6 +2165,140 @@ table.alert-table tr:last-child td { border-bottom: none; }
 .th-fence-status .lbl { color: var(--k-5e6b80); margin-right: 4px; }
 .th-fence-container { max-height: 360px; overflow-y: auto; border: 1px solid var(--k-1a2030); border-radius: 4px; background: var(--k-0a0e18); }
 
+/* ── 集體說明列（距離語意，可收合） ── */
+.th-fence-legend {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin: 0 0 8px; padding: 7px 10px;
+  background: var(--k-0f1420); border: 1px solid var(--k-1a2030);
+  border-radius: 6px; font-size: 12px; color: var(--k-7c8a9e); line-height: 1.5;
+}
+.th-fence-legend .legend-ic { color: var(--k-9ec5ff); flex: 0 0 auto; }
+.th-fence-legend .legend-txt { flex: 1; }
+.th-fence-legend .legend-txt b { color: var(--k-c4cdda); font-weight: 600; }
+.th-fence-legend .legend-x {
+  flex: 0 0 auto; background: transparent; border: none; cursor: pointer;
+  color: var(--k-7c8a9e); font-size: 16px; line-height: 1; padding: 0 2px;
+}
+.th-fence-legend .legend-x:hover { color: var(--k-e4eaf2); }
+.th-fence-table th .th-help-q { color: var(--k-5e6b80); font-size: 11px; cursor: help; }
+
+/* ── 到達 / 離開提醒 cell ── */
+.th-fence-table .fence-remind {
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.th-fence-table .fence-remind input[type="checkbox"] {
+  width: 14px; height: 14px; accent-color: var(--k-4a9eff); cursor: pointer; margin: 0;
+}
+.th-fence-table input.fence-remind-nm {
+  width: 52px; padding: 3px 4px;
+  background: var(--k-0f1420); border: 1px solid var(--k-2e3a4d);
+  color: var(--k-c4cdda); border-radius: 3px;
+  font-size: 13px; font-family: inherit; text-align: right;
+}
+.th-fence-table input.fence-remind-nm:focus { outline: none; border-color: var(--k-4a90e2); }
+.th-fence-table input.fence-remind-nm:disabled { opacity: 0.4; }
+.th-fence-table .fence-remind.is-off .fence-nm-unit { opacity: 0.4; }
+
+/* ── 船速 chip ── */
+.fence-speed-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 12px;
+  font-size: 12.5px; font-family: inherit; cursor: pointer;
+  white-space: nowrap; line-height: 1.3;
+}
+.fence-speed-chip.is-set {
+  background: rgba(74,158,255,0.12); border: 1px solid var(--k-4a9eff); color: var(--k-9ec5ff);
+}
+.fence-speed-chip.is-set:hover { background: rgba(74,158,255,0.22); }
+.fence-speed-chip.is-set .chev { color: var(--k-7c8a9e); font-size: 11px; }
+.fence-speed-chip.is-empty {
+  background: transparent; border: 1px dashed var(--k-4a5568); color: var(--k-9aa5b8);
+}
+.fence-speed-chip.is-empty:hover { border-color: var(--k-4a9eff); color: var(--k-9ec5ff); }
+.fence-speed-chip.is-off {
+  background: transparent; border: none; color: var(--k-5e6b80); cursor: default; padding-left: 2px;
+}
+
+/* ── 船速設定彈窗 #zone-speed-modal ── */
+.zone-speed-modal { width: min(560px, 94vw); }
+.zone-speed-modal h3 .en { color: var(--k-7c8a9e); font-weight: 400; font-size: 15px; }
+.zone-speed-modal .zsp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 6px; }
+.zone-speed-modal .zsp-tag {
+  display: inline-block; padding: 2px 10px; border-radius: 12px;
+  background: rgba(74,158,255,0.14); border: 1px solid var(--k-4a9eff);
+  color: var(--k-9ec5ff); font-size: 13px;
+}
+.zone-speed-modal .zsp-hint {
+  font-size: 12.5px; color: var(--k-7c8a9e); line-height: 1.55;
+  background: rgba(74,158,255,0.06); border-left: 3px solid var(--k-4a90e2);
+  padding: 7px 10px; border-radius: 0 3px 3px 0; margin-bottom: 12px;
+}
+.zsp-card {
+  border: 1px solid var(--k-2e3a4d); border-radius: 6px;
+  margin-bottom: 10px; background: var(--k-0f1420); overflow: hidden;
+}
+.zsp-card-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; cursor: pointer; user-select: none;
+}
+.zsp-card:not(.is-open) .zsp-card-head { opacity: 0.6; }
+.zsp-card:not(.is-open) .zsp-card-body { display: none; }
+.zsp-card-head .zsp-band-name { font-size: 15px; font-weight: 600; color: var(--k-e4eaf2); }
+.zsp-card-head .zsp-band-sub { font-size: 12.5px; color: var(--k-7c8a9e); flex: 1; }
+.zsp-card-head .zsp-band-summary {
+  font-size: 12.5px; color: var(--k-9ec5ff); font-variant-numeric: tabular-nums;
+}
+.zsp-card:not(.is-open) .zsp-band-summary { display: none; }
+/* switch */
+.zsp-switch { position: relative; display: inline-block; width: 34px; height: 18px; flex: 0 0 auto; }
+.zsp-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.zsp-switch .zsp-slider {
+  position: absolute; inset: 0; cursor: pointer; border-radius: 18px;
+  background: var(--k-2e3a4d); transition: background 0.15s;
+}
+.zsp-switch .zsp-slider::before {
+  content: ""; position: absolute; height: 14px; width: 14px; left: 2px; top: 2px;
+  background: #fff; border-radius: 50%; transition: transform 0.15s;
+}
+.zsp-switch input:checked + .zsp-slider { background: var(--k-4a9eff); }
+.zsp-switch input:checked + .zsp-slider::before { transform: translateX(16px); }
+.zsp-card-body { padding: 4px 12px 12px; font-size: 13.5px; color: var(--k-c4cdda); line-height: 1.6; }
+.zsp-space { color: var(--k-9aa5b8); font-size: 13px; margin-bottom: 8px; }
+.zsp-space b { color: var(--k-c4cdda); }
+.zsp-space-note { color: var(--k-7c8a9e); font-size: 12px; margin-top: 4px; }
+.zone-speed-modal .zsp-card-body input[type="number"] {
+  width: 56px; padding: 2px 5px; margin: 0 2px;
+  background: var(--k-1a1f2a); border: 1px solid var(--k-2e3a4d);
+  color: var(--k-d8dee9); border-radius: 3px; font-size: 13px; font-family: inherit; text-align: right;
+}
+.zone-speed-modal .zsp-card-body input[type="number"]:focus { outline: none; border-color: var(--k-4a90e2); }
+.zone-speed-modal .zsp-card-body input[type="number"]:disabled { opacity: 0.5; }
+.zsp-link-btn {
+  display: inline-block; margin-left: 4px; padding: 2px 9px;
+  border-radius: 12px; font-size: 12px; cursor: pointer; font-family: inherit;
+  background: rgba(74,158,255,0.12); border: 1px solid var(--k-4a9eff); color: var(--k-9ec5ff);
+}
+.zsp-link-btn.is-custom { background: transparent; border: 1px solid var(--k-4a5568); color: var(--k-9aa5b8); }
+.zsp-link-btn.is-unavail { opacity: 0.45; cursor: not-allowed; border-style: dashed; }
+.zsp-src { font-size: 11.5px; color: var(--k-7c8a9e); line-height: 1.5; margin-top: 4px; }
+.zsp-src.is-warn { color: var(--k-f5b753); }
+.zsp-cond { margin: 6px 0; font-size: 13px; color: var(--k-c4cdda); }
+.zsp-cond label { display: inline-flex; align-items: center; gap: 4px; margin-left: 10px; cursor: pointer; }
+.zsp-cond input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--k-4a9eff); cursor: pointer; }
+.zsp-thr { margin: 4px 0; }
+.zsp-thr[hidden] { display: none; }
+.zsp-line {
+  padding: 5px 9px; margin: 4px 0; border-radius: 4px;
+  font-size: 13px; line-height: 1.7;
+}
+.zsp-line b { font-weight: 600; }
+.zsp-line-w { background: rgba(245,183,83,0.12); border-left: 3px solid var(--k-f5b753); }
+.zsp-line-w b { color: var(--k-f5b753); }
+.zsp-line-c { background: rgba(255,138,138,0.12); border-left: 3px solid var(--k-ff8a8a); }
+.zsp-line-c b { color: var(--k-ff8a8a); }
+.zsp-err { color: var(--k-ff8a8a); font-size: 12.5px; margin-top: 6px; }
+.zsp-err[hidden] { display: none; }
+
 /* 通知方式列 — 兩個 checkbox（mail / line）橫排於 dim-row 底部 */
 .th-dim-notify {
   display: inline-flex; align-items: center; gap: 12px;
@@ -5460,24 +5594,31 @@ function saveThresholds() {
   try { localStorage.setItem(THRESHOLDS_STORAGE_KEY, JSON.stringify(_thresholds)); } catch (e) {}
 }
 
-/* ── 到離區域監控：逐圍籬設定 ───────────────────────────────────
- * 結構：{ [zoneId]: {
- *     enabled: bool,           是否監控
- *     direction: "arrival"|"departure",  監控方向（先選到達 / 離開）
- *     advanceNm: number,       提前距離（到達 = 入界前 N 海浬；離開 = 出界前 N 海浬）
- *     boundaryAlert: bool      跨越邊界瞬間提醒（到達提醒 / 離開提醒）
+/* ── 到離區域監控：逐圍籬設定（電子圍籬 + 船速閾值 UI） ──────────────
+ * 新結構：{ [zoneId]: {
+ *     enabled: bool,                        圍籬總開關
+ *     arrive:  { enabled, nm },             到達提醒（0=跨入邊界當下；>0=外側 N NM 提前預告）
+ *     depart:  { enabled, nm },             離開提醒（0=跨出邊界當下；>0=內側 N NM 提前預告）
+ *     speed:   {                            各空間帶船速門檻（SOG）；不存在=未設定船速
+ *       approach:{ enabled, bufferNm(null=連動到達距離), up, down, max:{w,c}, min:{w,c}, dur:{w,c} },
+ *       inside:  { enabled,                 up, down, max:{w,c}, min:{w,c}, dur:{w,c} },
+ *       preExit: { enabled, bufferNm(null=連動離開距離), up, down, max:{w,c}, min:{w,c}, dur:{w,c} },
+ *       postExit:{ enabled, bandNm, cutoffNm, up, down, max:{w,c}, min:{w,c}, dur:{w,c} }
+ *     }
  * } }
  *
- * 預設：所有 RISK_ZONES 啟用、direction=arrival、advanceNm=5、boundaryAlert=true
+ * 預設：所有 RISK_ZONES 啟用、到達提醒 5NM、離開提醒關、無船速門檻。
  *
- * 注意：舊版資料若用 entryNm/exitNm，於 getZoneIoFenceCfg 自動 fallback 到新欄位。 */
+ * 舊資料相容（on-the-fly，比照 entryNm/exitNm 遷移寫法，storage key 不變）：
+ *   direction:"arrival"+advanceNm → arrive{enabled,nm}；"departure" → depart{enabled,nm}；
+ *   advanceNm===0 → arrive 0 + depart 0 皆啟用；舊 entryNm/exitNm 亦 fallback。
+ *
+ * 判定引擎（vesselZoneIoStatus）不在本次範圍且不得更動，仍讀 cfg.direction/advanceNm，
+ * 故 getZoneIoFenceCfg 由 arrive/depart 反推等價的 legacy 欄位一併回傳。 */
 const ZONE_IO_CONFIG_KEY = "slab_va_zone_io_fences_v1";
-const ZONE_IO_DEFAULTS = {
-  enabled: true,
-  direction: "arrival",
-  advanceNm: 5.0,
-  boundaryAlert: true,
-};
+const ZONE_IO_DEFAULTS = { enabled: true, arriveNm: 5.0, departNm: 5.0 };
+const _zioNum = (x, d) => (typeof x === "number" && isFinite(x)) ? x : d;
+const _zioNumN = (x, d) => (x === null) ? null : ((typeof x === "number" && isFinite(x)) ? x : d);
 let _zoneIoFenceConfig = {};
 function loadZoneIoConfig() {
   try {
@@ -5488,25 +5629,95 @@ function loadZoneIoConfig() {
 function saveZoneIoConfig() {
   try { localStorage.setItem(ZONE_IO_CONFIG_KEY, JSON.stringify(_zoneIoFenceConfig)); } catch (e) {}
 }
-/* 查單一圍籬目前設定（與預設深層合併）；對舊版 entryNm/exitNm 欄位做 fallback。 */
+/* 單一空間帶預設值（供彈窗帶入 / 正規化用）。 */
+function zoneSpeedBandDefaults(kind) {
+  const b = { enabled: false, up: true, down: false,
+              max: { w: 5, c: 8 }, min: { w: 2, c: 1 }, dur: { w: 10, c: 5 } };
+  if (kind === "approach" || kind === "preExit") b.bufferNm = null;   // 預設連動提醒距離
+  if (kind === "postExit") { b.bandNm = 1.0; b.cutoffNm = 5.0; }
+  return b;
+}
+/* 把（可能為舊/缺欄位的）單帶物件正規化成完整結構。 */
+function normZoneSpeedBand(o, kind) {
+  const d = zoneSpeedBandDefaults(kind);
+  o = o || {};
+  const r = {
+    enabled: !!o.enabled,
+    up:   (o.up   != null) ? !!o.up   : d.up,
+    down: (o.down != null) ? !!o.down : d.down,
+    max: { w: _zioNumN(o.max && o.max.w, d.max.w), c: _zioNumN(o.max && o.max.c, d.max.c) },
+    min: { w: _zioNumN(o.min && o.min.w, d.min.w), c: _zioNumN(o.min && o.min.c, d.min.c) },
+    dur: { w: _zioNum(o.dur && o.dur.w, d.dur.w),  c: _zioNum(o.dur && o.dur.c, d.dur.c) },
+  };
+  if (kind === "approach" || kind === "preExit") {
+    r.bufferNm = (o.bufferNm === null) ? null : _zioNum(o.bufferNm, d.bufferNm);
+  }
+  if (kind === "postExit") {
+    r.bandNm   = _zioNum(o.bandNm, d.bandNm);
+    r.cutoffNm = _zioNum(o.cutoffNm, d.cutoffNm);
+  }
+  return r;
+}
+const ZONE_SPEED_BANDS = ["approach", "inside", "preExit", "postExit"];
+function normZoneSpeed(o) {
+  if (!o) return null;
+  const r = {};
+  ZONE_SPEED_BANDS.forEach(k => { r[k] = normZoneSpeedBand(o[k], k); });
+  return r;
+}
+/* 查單一圍籬目前設定（正規化 + 舊資料遷移 + legacy 欄位反推）。 */
 function getZoneIoFenceCfg(zoneId) {
   const o = _zoneIoFenceConfig[zoneId] || {};
-  const direction = (o.direction === "departure") ? "departure" : "arrival";
-  // 舊版 → 新版：到達用 entryNm，離開用 exitNm；若都沒設定用預設
-  let advanceNm = (typeof o.advanceNm === "number") ? o.advanceNm
-    : (direction === "arrival" && typeof o.entryNm === "number") ? o.entryNm
-    : (direction === "departure" && typeof o.exitNm === "number") ? o.exitNm
-    : ZONE_IO_DEFAULTS.advanceNm;
-  return {
-    enabled: o.enabled ?? ZONE_IO_DEFAULTS.enabled,
-    direction,
-    advanceNm,
-    boundaryAlert: o.boundaryAlert ?? ZONE_IO_DEFAULTS.boundaryAlert,
-  };
+  const enabled = o.enabled ?? ZONE_IO_DEFAULTS.enabled;
+  // ── 到達 / 離開提醒 ──
+  let arrive, depart;
+  if (o.arrive || o.depart) {
+    arrive = { enabled: !!(o.arrive && o.arrive.enabled),
+               nm: _zioNum(o.arrive && o.arrive.nm, ZONE_IO_DEFAULTS.arriveNm) };
+    depart = { enabled: !!(o.depart && o.depart.enabled),
+               nm: _zioNum(o.depart && o.depart.nm, ZONE_IO_DEFAULTS.departNm) };
+  } else {
+    // 舊 schema：direction + advanceNm（或 entryNm/exitNm）
+    const dir = (o.direction === "departure") ? "departure" : "arrival";
+    const adv = (typeof o.advanceNm === "number") ? o.advanceNm
+      : (dir === "arrival" && typeof o.entryNm === "number") ? o.entryNm
+      : (dir === "departure" && typeof o.exitNm === "number") ? o.exitNm
+      : ZONE_IO_DEFAULTS.arriveNm;
+    if (adv === 0) {
+      arrive = { enabled: true, nm: 0 }; depart = { enabled: true, nm: 0 };
+    } else if (dir === "departure") {
+      arrive = { enabled: false, nm: ZONE_IO_DEFAULTS.arriveNm }; depart = { enabled: true, nm: adv };
+    } else {
+      arrive = { enabled: true, nm: adv }; depart = { enabled: false, nm: ZONE_IO_DEFAULTS.departNm };
+    }
+  }
+  const speed = normZoneSpeed(o.speed);
+  // ── legacy 反推（供判定引擎；本次不動判定邏輯，僅近似還原） ──
+  let direction, advanceNm;
+  if (arrive.enabled && depart.enabled && arrive.nm === 0 && depart.nm === 0) {
+    direction = "arrival"; advanceNm = 0;               // 雙向邊界
+  } else if (depart.enabled && !arrive.enabled) {
+    direction = "departure"; advanceNm = depart.nm;
+  } else if (arrive.enabled) {
+    direction = "arrival"; advanceNm = arrive.nm;
+  } else {
+    direction = "arrival"; advanceNm = 0;
+  }
+  return { enabled, arrive, depart, speed, direction, advanceNm };
 }
+/* 寫入設定：正規化目前值後套用 patch（arrive/depart 淺合併；speed 整包覆蓋，null=清除）。 */
 function setZoneIoFenceCfg(zoneId, patch) {
   const cur = getZoneIoFenceCfg(zoneId);
-  _zoneIoFenceConfig[zoneId] = Object.assign({}, cur, patch);
+  const next = {
+    enabled: (patch.enabled != null) ? patch.enabled : cur.enabled,
+    arrive: patch.arrive ? Object.assign({}, cur.arrive, patch.arrive)
+                         : { enabled: cur.arrive.enabled, nm: cur.arrive.nm },
+    depart: patch.depart ? Object.assign({}, cur.depart, patch.depart)
+                         : { enabled: cur.depart.enabled, nm: cur.depart.nm },
+  };
+  if ("speed" in patch) { if (patch.speed) next.speed = patch.speed; }   // null / 缺 = 清除
+  else if (cur.speed) next.speed = cur.speed;
+  _zoneIoFenceConfig[zoneId] = next;
   saveZoneIoConfig();
 }
 loadZoneIoConfig();
@@ -10675,6 +10886,41 @@ function getDimDisplayMeta(dim) {
  *   args.hideMetric=true（batch 視角）→ 不顯示「船舶現況」欄
  *   args.targetVesselId（per-vessel 視角）→ 帶入該船狀態到狀態欄
  */
+/* 依 speed 設定計算船速 chip 的內容（已設定=實線；未設定=虛線）。 */
+const ZONE_SPEED_BAND_META = {
+  approach: { name: "接近時", short: "接近" },
+  inside:   { name: "區域內", short: "區內" },
+  preExit:  { name: "離開前", short: "離開前" },
+  postExit: { name: "離開後", short: "離開後" },
+};
+function zoneSpeedEnabledBands(speed) {
+  if (!speed) return [];
+  return ZONE_SPEED_BANDS.filter(k => speed[k] && speed[k].enabled);
+}
+/* 單帶主門檻摘要文字（上限顯示「≤w kn」＝速限；下限顯示「≥w kn」）。 */
+function zoneSpeedBandSummary(band) {
+  if (band.up && band.max && band.max.w != null) return `≤${band.max.w} kn`;
+  if (band.down && band.min && band.min.w != null) return `≥${band.min.w} kn`;
+  return "已設定";
+}
+function zoneSpeedChipHTML(zid, cfg) {
+  if (!cfg.enabled) {
+    return `<span class="fence-speed-chip is-off" title="圍籬停用時無法設定船速">—</span>`;
+  }
+  const bands = zoneSpeedEnabledBands(cfg.speed);
+  if (!bands.length) {
+    return `<button type="button" class="fence-speed-chip is-empty" data-speed-open data-zid="${escapeHtml(zid)}" title="設定各空間帶的船速門檻">＋ 設定船速</button>`;
+  }
+  let label;
+  if (bands.length === 1) {
+    const k = bands[0], b = cfg.speed[k];
+    label = `${ZONE_SPEED_BAND_META[k].short} ${zoneSpeedBandSummary(b)}`;
+  } else {
+    label = `船速 ${bands.length} 帶規則`;
+  }
+  return `<button type="button" class="fence-speed-chip is-set" data-speed-open data-zid="${escapeHtml(zid)}" title="點擊調整船速門檻">${escapeHtml(label)} <span class="chev">▾</span></button>`;
+}
+
 function zoneIoRowHTML(args) {
   const m = getDimDisplayMeta("zone_io");
   const t = _thresholds.zone_io || DEFAULT_THRESHOLDS.zone_io || {};
@@ -10688,22 +10934,38 @@ function zoneIoRowHTML(args) {
   const hitByZone = new Map();
   if (vStatus) vStatus.hits.forEach(h => hitByZone.set(h.zone.id, h));
 
-  // 過濾狀態（session 持久化）
-  const dirFilter = sessionStorage.getItem("slab_va_zoneio_dir_filter") || "all"; // all | arrival | departure
+  // 過濾狀態（session 持久化）：all | arrival | departure
+  //   arrival → 顯示「到達提醒」已勾選之列；departure → 顯示「離開提醒」已勾選之列。
+  const dirFilter = sessionStorage.getItem("slab_va_zoneio_dir_filter") || "all";
   // 群組收合狀態（每個 cat.key → 是否收合）
   let collapsed = {};
   try { collapsed = JSON.parse(sessionStorage.getItem("slab_va_zoneio_collapsed") || "{}") || {}; } catch (e) {}
+  // 集體說明列收合狀態（localStorage 持久化）
+  let legendCollapsed = false;
+  try { legendCollapsed = localStorage.getItem("slab_va_zoneio_legend_collapsed") === "1"; } catch (e) {}
 
   // 統計：監控中 / 總圍籬數；命中數
   const monitoredCount = zones.filter(z => getZoneIoFenceCfg(z.id).enabled).length;
   const hitCritical = vStatus ? vStatus.hits.filter(h => h.status === "critical").length : 0;
   const hitWarning  = vStatus ? vStatus.hits.filter(h => h.status === "warning").length  : 0;
 
+  // 表頭欄位數（現況欄恆存在，內容依 vStatus 顯示）：批次|啟用|名稱|到達|離開|船速|現況|動作 = 8
+  const COLSPAN = 8;
+  const remindCell = (zid, side, r) => `
+    <td class="fence-remind-cell">
+      <span class="fence-remind${r.enabled ? "" : " is-off"}">
+        <input type="checkbox" class="fence-remind-on" data-zid="${escapeHtml(zid)}" data-side="${side}"${r.enabled ? " checked" : ""} title="${side === "arrive" ? "啟用到達提醒" : "啟用離開提醒"}">
+        <input type="number" class="fence-remind-nm" data-zid="${escapeHtml(zid)}" data-side="${side}" value="${r.nm}" step="0.5" min="0" max="50"${r.enabled ? "" : " disabled"}>
+        <span class="fence-nm-unit">NM</span>
+      </span>
+    </td>`;
+
   // 依類別分組（過濾掉不符方向篩選的）
   const groups = {};
   zones.forEach(z => {
     const cfg = getZoneIoFenceCfg(z.id);
-    if (dirFilter !== "all" && cfg.direction !== dirFilter) return;
+    if (dirFilter === "arrival"   && !cfg.arrive.enabled) return;
+    if (dirFilter === "departure" && !cfg.depart.enabled) return;
     (groups[z.cat] ||= []).push(z);
   });
 
@@ -10714,7 +10976,7 @@ function zoneIoRowHTML(args) {
     const isCollapsed = !!collapsed[cat.key];
     rowsHtml.push(`
       <tr class="th-fence-cat-group${isCollapsed ? " is-collapsed" : ""}" data-cat="${escapeHtml(cat.key)}">
-        <td colspan="7">
+        <td colspan="${COLSPAN}">
           <span class="th-fence-cat-toggle" data-cat="${escapeHtml(cat.key)}">
             <span class="cat-chev" aria-hidden="true">▾</span>
             <span class="th-fence-cat-swatch" style="background:${cat.color}"></span>
@@ -10740,13 +11002,8 @@ function zoneIoRowHTML(args) {
              <button type="button" class="fence-act-btn fence-act-danger" data-act="delete" data-zid="${escapeHtml(z.id)}" title="刪除此圍籬">×</button>
            </td>`
         : `<td><span style="color:var(--k-5e6b80);font-size:13px">內建</span></td>`;
-      const isBidir = cfg.advanceNm === 0;
-      const advanceLabel = isBidir ? "邊界" : (cfg.direction === "arrival" ? "到達前" : "快離開");
-      const advTitle = isBidir
-        ? "設為 0 = 到達與離開雙向邊界提醒"
-        : (cfg.direction === "arrival" ? "進入區域前 N 海浬即提醒" : "區域內距邊界 N 海浬時提醒");
       rowsHtml.push(`
-        <tr class="zone-io-row${cfg.enabled ? "" : " fence-disabled"}${isCollapsed ? " is-hidden-by-collapse" : ""}" data-zid="${escapeHtml(z.id)}" data-cat="${escapeHtml(cat.key)}" data-direction="${cfg.direction}">
+        <tr class="zone-io-row${cfg.enabled ? "" : " fence-disabled"}${isCollapsed ? " is-hidden-by-collapse" : ""}" data-zid="${escapeHtml(z.id)}" data-cat="${escapeHtml(cat.key)}" data-arrive="${cfg.arrive.enabled ? 1 : 0}" data-depart="${cfg.depart.enabled ? 1 : 0}">
           <td><input type="checkbox" class="fence-select" data-zid="${escapeHtml(z.id)}" title="勾選以批次設定" aria-label="select zone"></td>
           <td><input type="checkbox" class="fence-toggle" data-zid="${escapeHtml(z.id)}"${cfg.enabled ? " checked" : ""} title="啟用監控 / Enable"></td>
           <td>
@@ -10755,19 +11012,9 @@ function zoneIoRowHTML(args) {
               ${z.name_en && z.name_en !== z.name ? `<span class="en">${escapeHtml(z.name_en)}</span>` : ""}
             </div>
           </td>
-          <td>
-            <select class="fence-dir" data-zid="${escapeHtml(z.id)}" title="監控方向">
-              <option value="arrival"${cfg.direction === "arrival" ? " selected" : ""}>到達</option>
-              <option value="departure"${cfg.direction === "departure" ? " selected" : ""}>離開</option>
-            </select>
-          </td>
-          <td>
-            <span class="fence-advance">
-              <span class="fence-advance-label">${advanceLabel}</span>
-              <input type="number" class="fence-nm" data-zid="${escapeHtml(z.id)}" data-field="advanceNm" value="${cfg.advanceNm}" step="0.5" min="0" max="50" title="${advTitle}">
-              <span class="fence-nm-unit">NM</span>
-            </span>
-          </td>
+          ${remindCell(z.id, "arrive", cfg.arrive)}
+          ${remindCell(z.id, "depart", cfg.depart)}
+          <td class="fence-speed-cell">${zoneSpeedChipHTML(z.id, cfg)}</td>
           <td>${statusBadge}</td>
           ${actionsCell}
         </tr>`);
@@ -10800,21 +11047,28 @@ function zoneIoRowHTML(args) {
   // 批次設定面板
   const bulkPanelHtml = `
     <div class="th-fence-bulk" data-bulk-panel hidden>
-      <span class="th-fence-bulk-count">已選 <b data-bulk-count>0</b> 個區域</span>
-      <label>方向
-        <select data-bulk-dir>
-          <option value="">不變</option>
-          <option value="arrival">到達</option>
-          <option value="departure">離開</option>
-        </select>
-      </label>
-      <label>距離
-        <input type="number" data-bulk-nm min="0" max="50" step="0.5" placeholder="不變">
+      <span class="th-fence-bulk-count">已選 <b data-bulk-count>0</b> 個圍籬</span>
+      <label>到達提醒
+        <input type="number" data-bulk-arrive min="0" max="50" step="0.5" placeholder="不變">
         <span class="th-fence-bulk-unit">NM</span>
       </label>
-      <button type="button" class="th-fence-bulk-apply" data-bulk-apply>套用至已勾選</button>
+      <label>離開提醒
+        <input type="number" data-bulk-depart min="0" max="50" step="0.5" placeholder="不變">
+        <span class="th-fence-bulk-unit">NM</span>
+      </label>
+      <button type="button" class="th-fence-bulk-apply" data-bulk-apply>套用提醒距離</button>
+      <button type="button" class="th-fence-bulk-apply" data-bulk-speed>設定船速…</button>
       <button type="button" class="th-fence-bulk-clear" data-bulk-clear>清除選取</button>
     </div>`;
+
+  // 集體說明列（ⓘ）：距離語意；可收合並記憶（localStorage）
+  const legendHtml = legendCollapsed ? "" : `
+    <div class="th-fence-legend" data-fence-legend>
+      <span class="legend-ic" aria-hidden="true">ⓘ</span>
+      <span class="legend-txt">到達／離開提醒的距離：<b>0＝跨界當下通知</b>（到達＝跨入邊界時、離開＝跨出邊界時）；<b>大於 0＝提前 N 海浬預告</b>（到達＝進入外側 N 海浬時、離開＝進入內側 N 海浬時）。</span>
+      <button type="button" class="legend-x" data-legend-collapse title="收合此說明">×</button>
+    </div>`;
+  const remindTip = "距離 0＝跨界當下通知（到達＝跨入邊界時、離開＝跨出邊界時）；大於 0＝提前 N 海浬預告（到達＝進入外側 N 海浬時、離開＝進入內側 N 海浬時）。";
 
   return `
     <div class="th-dim-row${args.isCore ? " is-core" : ""}" data-dim="zone_io">
@@ -10835,6 +11089,7 @@ function zoneIoRowHTML(args) {
           <span class="th-fence-count">${statusSummary}</span>
         </div>
         ${bulkPanelHtml}
+        ${legendHtml}
         <div class="th-fence-container">
           <table class="th-fence-table">
             <thead>
@@ -10842,8 +11097,9 @@ function zoneIoRowHTML(args) {
                 <th style="width:28px"><input type="checkbox" class="fence-select-all" title="全選 / 取消全選"></th>
                 <th style="width:28px"></th>
                 <th>圍籬名稱 / Fence</th>
-                <th style="width:84px">方向</th>
-                <th style="width:160px">提前距離</th>
+                <th style="width:130px" title="${escapeHtml(remindTip)}">到達提醒 <span class="th-help-q">ⓘ</span></th>
+                <th style="width:130px" title="${escapeHtml(remindTip)}">離開提醒 <span class="th-help-q">ⓘ</span></th>
+                <th style="width:150px">船速 / SOG</th>
                 <th style="width:120px">${vStatus ? "船舶現況" : ""}</th>
                 <th style="width:90px">操作</th>
               </tr>
@@ -11109,65 +11365,83 @@ function wireBatchBySegmentSetup() {
 }
 
 /* 共用：把到離區域監控（zone_io）逐圍籬 UI 的事件接好。
- *   - checkbox（fence-toggle）：toggle 後立即 setZoneIoFenceCfg + 行的 fence-disabled class 跟著切換
- *   - 進入前 / 離開後 NM（fence-nm）：blur / Enter 後寫入 entryNm / exitNm
+ *   - checkbox（fence-toggle）：toggle 後立即 setZoneIoFenceCfg + 行的 fence-disabled class + 船速 chip 灰化
+ *   - 到達／離開提醒（fence-remind-on / fence-remind-nm）：勾選啟用、blur/Enter 寫入距離
+ *   - 船速 chip（data-speed-open）：開啟船速設定彈窗
+ *   - 集體說明列收合（data-legend-collapse）：存 localStorage
  *   - 搜尋（th-fence-search）：即時隱藏不符的行（保留類別標頭）
  *   - 全部啟用 / 全部停用按鈕（data-act=enable-all/disable-all）：批次切換所有可見列的 enabled
  *   寫入後 syncEventsFromAlerts 立即重算 zone_io 等級，但「不重繪整頁」以避免輸入框失焦。 */
 function wireZoneIoFences(root) {
   const block = root.querySelector("[data-zone-io-block]");
   if (!block) return;
+
+  // 依目前 cfg 重畫該列的船速 chip（啟用/停用切換後 chip 需灰化或恢復）
+  function _refreshSpeedCell(tr) {
+    if (!tr) return;
+    const zid = tr.dataset.zid;
+    const cell = tr.querySelector(".fence-speed-cell");
+    if (!cell) return;
+    cell.innerHTML = zoneSpeedChipHTML(zid, getZoneIoFenceCfg(zid));
+    const btn = cell.querySelector("[data-speed-open]");
+    if (btn) btn.addEventListener("click", () => openZoneSpeedModal([zid]));
+  }
+
   // checkbox 啟用/停用
   block.querySelectorAll(".fence-toggle").forEach(cb => {
     cb.addEventListener("change", () => {
       const zid = cb.dataset.zid;
       setZoneIoFenceCfg(zid, { enabled: cb.checked });
       const tr = cb.closest("tr");
-      if (tr) tr.classList.toggle("fence-disabled", !cb.checked);
+      if (tr) { tr.classList.toggle("fence-disabled", !cb.checked); _refreshSpeedCell(tr); }
       syncEventsFromAlerts();
     });
   });
-  // 共用：依目前 cfg 重新計算該列的「提前距離標籤」與 input 的 title
-  function _refreshRowLabels(tr, zid) {
-    if (!tr) return;
-    const cfg = getZoneIoFenceCfg(zid);
-    const isBidir = cfg.advanceNm === 0;
-    const advLbl = tr.querySelector(".fence-advance-label");
-    if (advLbl) advLbl.textContent = isBidir ? "邊界"
-      : (cfg.direction === "arrival" ? "到達前" : "快離開");
-    const nm = tr.querySelector(".fence-nm");
-    if (nm) nm.title = isBidir
-      ? "設為 0 = 到達與離開雙向邊界提醒"
-      : (cfg.direction === "arrival" ? "進入區域前 N 海浬即提醒" : "區域內距邊界 N 海浬時提醒");
-    // 同步 data-direction（給篩選與群組摺疊用）
-    tr.dataset.direction = cfg.direction;
-  }
 
-  // 提前距離 NM（advanceNm）
-  block.querySelectorAll(".fence-nm").forEach(inp => {
+  // 到達 / 離開提醒：啟用勾選（勾選狀態控制同列 number input 的 disabled）
+  block.querySelectorAll(".fence-remind-on").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const zid = cb.dataset.zid, side = cb.dataset.side;   // arrive | depart
+      const wrap = cb.closest(".fence-remind");
+      const nm = wrap ? wrap.querySelector(".fence-remind-nm") : null;
+      if (nm) nm.disabled = !cb.checked;
+      if (wrap) wrap.classList.toggle("is-off", !cb.checked);
+      const patch = {}; patch[side] = { enabled: cb.checked };
+      setZoneIoFenceCfg(zid, patch);
+      const tr = cb.closest("tr");
+      if (tr) tr.dataset[side === "arrive" ? "arrive" : "depart"] = cb.checked ? 1 : 0;
+      if (_zoneSpeedModalRef) _zoneSpeedModalRef.onReminderChanged(zid, side);
+      syncEventsFromAlerts();
+    });
+  });
+  // 到達 / 離開提醒距離：blur / Enter 寫入
+  block.querySelectorAll(".fence-remind-nm").forEach(inp => {
     const save = () => {
-      const zid = inp.dataset.zid;
-      const field = inp.dataset.field;
+      const zid = inp.dataset.zid, side = inp.dataset.side;
       const v = parseFloat(inp.value);
-      if (!isNaN(v) && v >= 0 && field === "advanceNm") {
-        setZoneIoFenceCfg(zid, { advanceNm: v });
-        _refreshRowLabels(inp.closest("tr"), zid);   // 0 / >0 之間切換時聯動文案
+      if (!isNaN(v) && v >= 0) {
+        const patch = {}; patch[side] = { nm: v };
+        setZoneIoFenceCfg(zid, patch);
+        if (_zoneSpeedModalRef) _zoneSpeedModalRef.onReminderChanged(zid, side);
         syncEventsFromAlerts();
       }
     };
     inp.addEventListener("blur", save);
     inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } });
   });
-  // 方向 select：切換時即時改 cfg + 重算該列文案
-  block.querySelectorAll(".fence-dir").forEach(sel => {
-    sel.addEventListener("change", () => {
-      const zid = sel.dataset.zid;
-      const direction = sel.value === "departure" ? "departure" : "arrival";
-      setZoneIoFenceCfg(zid, { direction });
-      _refreshRowLabels(sel.closest("tr"), zid);
-      syncEventsFromAlerts();
-    });
+  // 船速 chip：開啟彈窗（單一圍籬）
+  block.querySelectorAll("[data-speed-open]").forEach(btn => {
+    btn.addEventListener("click", () => openZoneSpeedModal([btn.dataset.zid]));
   });
+  // 集體說明列收合（記憶於 localStorage）
+  const legendX = block.querySelector("[data-legend-collapse]");
+  if (legendX) {
+    legendX.addEventListener("click", () => {
+      try { localStorage.setItem("slab_va_zoneio_legend_collapsed", "1"); } catch (e) {}
+      const row = block.querySelector("[data-fence-legend]");
+      if (row) row.remove();
+    });
+  }
   // 方向篩選 tabs：切換後重新 render（state 存 sessionStorage 由 zoneIoRowHTML 讀取）
   block.querySelectorAll(".th-fence-dir-tab").forEach(tab => {
     tab.addEventListener("click", () => {
@@ -11235,29 +11509,39 @@ function wireZoneIoFences(root) {
     });
   }
 
+  // 批次套用「到達 / 離開提醒距離」（留白＝不變；填值＝啟用該提醒並設距離）
   const bulkApply = block.querySelector("[data-bulk-apply]");
   if (bulkApply) {
     bulkApply.addEventListener("click", () => {
-      const dirSel = block.querySelector("[data-bulk-dir]");
-      const nmInp  = block.querySelector("[data-bulk-nm]");
-      const newDir = dirSel?.value || "";
-      const newNm  = parseFloat(nmInp?.value);
-      const hasNm  = !isNaN(newNm) && newNm >= 0;
-      if (!newDir && !hasNm) {
-        alert("請至少設定方向或距離");
+      const arrInp = block.querySelector("[data-bulk-arrive]");
+      const depInp = block.querySelector("[data-bulk-depart]");
+      const arrNm  = parseFloat(arrInp?.value);
+      const depNm  = parseFloat(depInp?.value);
+      const hasArr = !isNaN(arrNm) && arrNm >= 0;
+      const hasDep = !isNaN(depNm) && depNm >= 0;
+      if (!hasArr && !hasDep) {
+        alert("請至少填入「到達提醒」或「離開提醒」距離");
         return;
       }
       const selected = Array.from(block.querySelectorAll(".fence-select:checked"));
       if (!selected.length) return;
       selected.forEach(cb => {
-        const zid = cb.dataset.zid;
-        const patch = {};
-        if (newDir) patch.direction = newDir;
-        if (hasNm)  patch.advanceNm = newNm;
+        const zid = cb.dataset.zid, patch = {};
+        if (hasArr) patch.arrive = { enabled: true, nm: arrNm };
+        if (hasDep) patch.depart = { enabled: true, nm: depNm };
         setZoneIoFenceCfg(zid, patch);
       });
       syncEventsFromAlerts();
       try { renderThresholds(); } catch (e) {}
+    });
+  }
+  // 批次「設定船速…」：勾選多列後開同一個彈窗，保存套用至所有勾選圍籬
+  const bulkSpeed = block.querySelector("[data-bulk-speed]");
+  if (bulkSpeed) {
+    bulkSpeed.addEventListener("click", () => {
+      const selected = Array.from(block.querySelectorAll(".fence-select:checked")).map(cb => cb.dataset.zid);
+      if (!selected.length) { alert("請先勾選至少一個圍籬"); return; }
+      openZoneSpeedModal(selected);
     });
   }
 
@@ -11309,6 +11593,7 @@ function wireZoneIoFences(root) {
         const zid = cb.dataset.zid;
         setZoneIoFenceCfg(zid, { enabled: enable });
         tr.classList.toggle("fence-disabled", !enable);
+        _refreshSpeedCell(tr);
       });
       syncEventsFromAlerts();
     });
@@ -11329,6 +11614,311 @@ function wireZoneIoFences(root) {
         }
       }
     });
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * 船速監控（SOG）設定彈窗 #zone-speed-modal
+ *   四張手風琴卡片（接近時 / 區域內 / 離開前 / 離開後），句子式門檻，
+ *   接近↔到達提醒距離、離開前↔離開提醒距離可連動或自訂。
+ *   本彈窗僅負責 UI 呈現、互動與設定持久化；不涉判定 / 立案 / 通知。
+ * ───────────────────────────────────────────────────────────────── */
+let _zoneSpeedModalRef = null;   // { primaryId, refresh(side) }，供清單修改提醒距離時同步
+
+const ZONE_SPEED_UI = {
+  approach: { name: "接近時",  sub: "尚未進入圍籬，於外側監控" },
+  inside:   { name: "區域內",  sub: "在圍籬內的整段期間持續監控" },
+  preExit:  { name: "離開前",  sub: "仍在圍籬內，接近邊界內側時" },
+  postExit: { name: "離開後",  sub: "跨出邊界後的離場航段" },
+};
+function _zsBandSummary(band) {
+  const parts = [];
+  if (band.up   && band.max && band.max.w != null) parts.push("≤" + band.max.w + " kn");
+  if (band.down && band.min && band.min.w != null) parts.push("≥" + band.min.w + " kn");
+  return parts.join("・") || "已啟用";
+}
+
+function openZoneSpeedModal(zoneIds) {
+  zoneIds = (zoneIds || []).filter(Boolean);
+  if (!zoneIds.length) return;
+  const zonesArr = (window.RISK_ZONES || []);
+  const primaryId = zoneIds[0];
+  const isBatch = zoneIds.length > 1;
+  const primaryCfg = getZoneIoFenceCfg(primaryId);
+
+  // 工作狀態：由主圍籬 speed 帶入（深拷貝）或預設；保存前才寫回
+  const st = normZoneSpeed(primaryCfg.speed
+    ? JSON.parse(JSON.stringify(primaryCfg.speed))
+    : { approach: {}, inside: {}, preExit: {}, postExit: {} });
+  const lastBuf = { approach: null, preExit: null };   // 解除連動時保留的最後顯示值
+
+  // ── 連動來源（以主圍籬的到達 / 離開提醒為準）──
+  const sideOf   = kind => (kind === "approach" ? "arrive" : "depart");
+  const remOf    = side => (side === "arrive" ? "到達提醒" : "離開提醒");
+  const sideCfg  = side => { const c = getZoneIoFenceCfg(primaryId); return side === "arrive" ? c.arrive : c.depart; };
+  const srcAvail = side => { const r = sideCfg(side); return r.enabled && r.nm > 0; };
+
+  const linkedTxt = (side, n) => side === "arrive"
+    ? `🔗 距離來源：本圍籬「到達提醒」目前設定的 ${n} 海浬。修改到達提醒距離時，此處同步更新；點按鈕解除連動後可自行輸入，兩者互不影響。`
+    : `🔗 距離來源：本圍籬「離開提醒」目前設定的 ${n} 海浬（即「離開前 ${n} 海浬預告」的同一條內側界線）。修改離開提醒距離時，此處同步更新；點按鈕解除連動後可自行輸入，兩者互不影響。`;
+  const releasedTxt = (side, n) =>
+    `⛓ 已解除連動：此距離為自訂值，與「${remOf(side)}」的距離互相獨立，修改提醒不會影響此處。點按鈕可恢復連動（將改回提醒距離的 ${n} 海浬）。`;
+  const unavailTxt = side =>
+    `${remOf(side)}目前為跨界即通知（0 NM）或未啟用，距離已改為自訂。`;
+
+  // 名稱 tag
+  const tags = zoneIds.map(id => {
+    const z = zonesArr.find(x => x.id === id);
+    return `<span class="zsp-tag">${escapeHtml(z ? (z.name || id) : id)}</span>`;
+  }).join("");
+
+  // ── 單帶卡片 HTML ──
+  const spaceHtml = (kind) => {
+    if (kind === "inside") return "";
+    if (kind === "postExit") {
+      const b = st.postExit;
+      return `
+        <div class="zsp-space">
+          <span>跨出邊界後，於外側 </span><input type="number" class="zsp-band" min="0" max="50" step="0.5" value="${b.bandNm}"><span> 海浬 內比對下列門檻；船舶駛離邊界 </span><input type="number" class="zsp-cutoff" min="0" max="50" step="0.5" value="${b.cutoffNm}"><span> 海浬 後，本航次對此圍籬的離場監控結束（未解除之事件自動關閉）。</span>
+          <div class="zsp-space-note">條件帶（C）之外、截止距離（D）之內：不再比對門檻，僅追蹤既有事件至解除或截止。</div>
+        </div>`;
+    }
+    // approach: 進入圍籬外側 [A] 海浬 範圍內…；preExit: 位於圍籬內側、距邊界 [B] 海浬 範圍內…
+    const sentence = kind === "approach"
+      ? `<span>船舶進入圍籬<b>外側</b> </span><input type="number" class="zsp-buffer" min="0" max="50" step="0.5"><span> 海浬 範圍內即開始監控</span>`
+      : `<span>船舶位於圍籬<b>內側</b>、距邊界 </span><input type="number" class="zsp-buffer" min="0" max="50" step="0.5"><span> 海浬 範圍內即開始監控</span>`;
+    return `
+      <div class="zsp-space">
+        ${sentence}
+        <button type="button" class="zsp-link-btn"></button>
+        <div class="zsp-src"></div>
+      </div>`;
+  };
+  const thrLine = (kind, k, sev) => {
+    const band = st[kind];
+    const rel = k === "max" ? "高於" : "低於";
+    const lvl = sev === "w" ? "警告" : "嚴重";
+    const xv  = band[k][sev], nv = band.dur[sev];
+    return `<div class="zsp-line zsp-line-${sev}">平均船速${rel} <input type="number" class="zsp-x" data-k="${k}" data-sev="${sev}" min="0" max="60" step="0.5" value="${xv == null ? "" : xv}"> kn，持續 <input type="number" class="zsp-n" data-sev="${sev}" min="0" max="240" step="1" value="${nv == null ? "" : nv}"> 分鐘 → <b>${lvl}</b></div>`;
+  };
+  const cardHtml = (kind) => {
+    const ui = ZONE_SPEED_UI[kind], band = st[kind];
+    return `
+      <div class="zsp-card${band.enabled ? " is-open" : ""}" data-band="${kind}">
+        <div class="zsp-card-head">
+          <label class="zsp-switch" title="啟用此帶監控"><input type="checkbox" class="zsp-enable"${band.enabled ? " checked" : ""}><span class="zsp-slider"></span></label>
+          <span class="zsp-band-name">${ui.name}</span>
+          <span class="zsp-band-sub">${ui.sub}</span>
+          <span class="zsp-band-summary">${escapeHtml(_zsBandSummary(band))}</span>
+        </div>
+        <div class="zsp-card-body">
+          ${spaceHtml(kind)}
+          <div class="zsp-cond">監控條件：
+            <label><input type="checkbox" class="zsp-up"${band.up ? " checked" : ""}> 太快（超過上限）</label>
+            <label><input type="checkbox" class="zsp-down"${band.down ? " checked" : ""}> 太慢（低於下限）</label>
+          </div>
+          <div class="zsp-thr zsp-thr-up"${band.up ? "" : " hidden"}>
+            ${thrLine(kind, "max", "w")}
+            ${thrLine(kind, "max", "c")}
+          </div>
+          <div class="zsp-thr zsp-thr-down"${band.down ? "" : " hidden"}>
+            ${thrLine(kind, "min", "w")}
+            ${thrLine(kind, "min", "c")}
+          </div>
+          <div class="zsp-err" hidden></div>
+        </div>
+      </div>`;
+  };
+
+  const mask = document.createElement("div");
+  mask.className = "modal-mask open";
+  mask.style.zIndex = "1300";
+  mask.innerHTML = `
+    <div class="modal zone-speed-modal" id="zone-speed-modal">
+      <button type="button" class="modal-close" data-zsp-close>×</button>
+      <h3>船速監控（SOG） <span class="en">/ Zone Speed</span></h3>
+      <div class="zsp-tags">${tags}</div>
+      <div class="zsp-hint">純到離通知請於清單的「到達提醒／離開提醒」設定；此處僅設定各空間帶的船速門檻。各帶獨立啟用，可多帶並存。</div>
+      ${ZONE_SPEED_BANDS.map(cardHtml).join("")}
+      <div class="modal-actions">
+        <button type="button" class="trans-btn secondary" data-zsp-close>取消 / Cancel</button>
+        <button type="button" class="trans-btn" data-zsp-save>保存 / Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(mask);
+  const $ = s => mask.querySelector(s);
+  const cardOf = kind => mask.querySelector(`.zsp-card[data-band="${kind}"]`);
+
+  // ── 連動 / 自訂：更新單帶的距離欄、按鈕與來源說明行 ──
+  function refreshBuffer(kind) {
+    if (kind !== "approach" && kind !== "preExit") return;
+    const card = cardOf(kind);
+    const inp = card.querySelector(".zsp-buffer");
+    const btn = card.querySelector(".zsp-link-btn");
+    const srcEl = card.querySelector(".zsp-src");
+    if (!inp || !btn || !srcEl) return;
+    const side = sideOf(kind);
+    const band = st[kind];
+    const avail = srcAvail(side);
+    const src = sideCfg(side);
+    let linked = band.bufferNm === null;
+    if (linked && !avail) {   // §4-3.3：來源不可用 → 自動轉自訂（保留最後顯示值）
+      linked = false;
+      band.bufferNm = (lastBuf[kind] != null) ? lastBuf[kind] : (src.nm > 0 ? src.nm : 3);
+    }
+    if (linked) {
+      inp.value = src.nm; inp.disabled = true; lastBuf[kind] = src.nm;
+      btn.className = "zsp-link-btn is-linked"; btn.disabled = false;
+      btn.textContent = side === "arrive" ? "🔗 連動到達提醒距離" : "🔗 連動離開提醒距離";
+      srcEl.className = "zsp-src"; srcEl.textContent = linkedTxt(side, src.nm);
+    } else if (!avail) {
+      inp.disabled = false;
+      if (band.bufferNm != null) inp.value = band.bufferNm;
+      lastBuf[kind] = parseFloat(inp.value) || 0;
+      btn.className = "zsp-link-btn is-unavail"; btn.disabled = true;
+      btn.textContent = "🔗 連動" + remOf(side) + "距離";
+      srcEl.className = "zsp-src is-warn"; srcEl.textContent = unavailTxt(side);
+    } else {
+      inp.disabled = false;
+      if (band.bufferNm != null) inp.value = band.bufferNm;
+      lastBuf[kind] = parseFloat(inp.value) || 0;
+      btn.className = "zsp-link-btn is-custom"; btn.disabled = false;
+      btn.textContent = "⛓ 已解除連動（自訂）";
+      srcEl.className = "zsp-src"; srcEl.textContent = releasedTxt(side, src.nm);
+    }
+  }
+  function updateSummary(kind) {
+    const card = cardOf(kind);
+    const s = card.querySelector(".zsp-band-summary");
+    if (s) s.textContent = _zsBandSummary(st[kind]);
+  }
+  function setEnabled(kind, on) {
+    st[kind].enabled = on;
+    const card = cardOf(kind);
+    card.classList.toggle("is-open", on);
+    const cb = card.querySelector(".zsp-enable");
+    if (cb) cb.checked = on;
+    updateSummary(kind);
+  }
+
+  // ── 逐帶接線 ──
+  ZONE_SPEED_BANDS.forEach(kind => {
+    const card = cardOf(kind);
+    const band = st[kind];
+    // 卡片標頭：點任意處切換啟用（輸入元件除外）
+    card.querySelector(".zsp-card-head").addEventListener("click", (e) => {
+      if (e.target.closest("input, button, label, .zsp-link-btn")) return;
+      setEnabled(kind, !band.enabled);
+    });
+    card.querySelector(".zsp-enable").addEventListener("change", (e) => {
+      e.stopPropagation(); setEnabled(kind, e.target.checked);
+    });
+    // 監控條件顯隱
+    const upBox = card.querySelector(".zsp-up"), downBox = card.querySelector(".zsp-down");
+    const upThr = card.querySelector(".zsp-thr-up"), downThr = card.querySelector(".zsp-thr-down");
+    upBox.addEventListener("change", () => { band.up = upBox.checked; upThr.hidden = !band.up; updateSummary(kind); });
+    downBox.addEventListener("change", () => { band.down = downBox.checked; downThr.hidden = !band.down; updateSummary(kind); });
+    // 門檻速度 x
+    card.querySelectorAll(".zsp-x").forEach(inp => {
+      inp.addEventListener("input", () => {
+        const k = inp.dataset.k, sev = inp.dataset.sev;
+        const v = parseFloat(inp.value);
+        band[k][sev] = isNaN(v) ? null : v;
+        updateSummary(kind);
+      });
+    });
+    // 持續時間 n（同嚴重度 warning/critical 於 max/min 共用，同步鏡射）
+    card.querySelectorAll(".zsp-n").forEach(inp => {
+      inp.addEventListener("input", () => {
+        const sev = inp.dataset.sev;
+        const v = parseFloat(inp.value);
+        band.dur[sev] = isNaN(v) ? null : v;
+        card.querySelectorAll(`.zsp-n[data-sev="${sev}"]`).forEach(o => { if (o !== inp) o.value = inp.value; });
+      });
+    });
+    // 空間帶距離
+    if (kind === "approach" || kind === "preExit") {
+      const inp = card.querySelector(".zsp-buffer");
+      const btn = card.querySelector(".zsp-link-btn");
+      inp.addEventListener("input", () => {
+        if (inp.disabled) return;
+        const v = parseFloat(inp.value);
+        band.bufferNm = isNaN(v) ? 0 : v;
+        lastBuf[kind] = band.bufferNm;
+      });
+      btn.addEventListener("click", () => {
+        const side = sideOf(kind);
+        if (btn.classList.contains("is-unavail")) return;
+        if (band.bufferNm === null) {                 // 連動 → 自訂
+          band.bufferNm = sideCfg(side).nm;
+        } else if (srcAvail(side)) {                  // 自訂 → 恢復連動（改回來源值）
+          band.bufferNm = null;
+        }
+        refreshBuffer(kind);
+      });
+      refreshBuffer(kind);
+    }
+    if (kind === "postExit") {
+      const bandInp = card.querySelector(".zsp-band"), cutInp = card.querySelector(".zsp-cutoff");
+      bandInp.addEventListener("input", () => { const v = parseFloat(bandInp.value); band.bandNm = isNaN(v) ? 0 : v; });
+      cutInp.addEventListener("input", () => { const v = parseFloat(cutInp.value); band.cutoffNm = isNaN(v) ? 0 : v; });
+    }
+  });
+
+  // ── 清單修改提醒距離時，同步連動中的帶 ──
+  _zoneSpeedModalRef = {
+    primaryId,
+    onReminderChanged(zid, side) {
+      if (zid !== primaryId) return;
+      refreshBuffer(side === "arrive" ? "approach" : "preExit");
+    }
+  };
+
+  // ── 驗證 ──
+  function showErr(kind, msg) {
+    const el = cardOf(kind).querySelector(".zsp-err");
+    if (el) { el.textContent = msg; el.hidden = false; }
+    // 確保出錯帶展開可見
+    if (!st[kind].enabled) return;
+    cardOf(kind).classList.add("is-open");
+  }
+  function clearErrs() { mask.querySelectorAll(".zsp-err").forEach(el => { el.hidden = true; el.textContent = ""; }); }
+  function validate() {
+    clearErrs();
+    let ok = true;
+    const enabledBands = ZONE_SPEED_BANDS.filter(k => st[k].enabled);
+    enabledBands.forEach(kind => {
+      const b = st[kind];
+      if (!b.up && !b.down) { showErr(kind, "請至少勾選一項監控條件（太快 / 太慢）。"); ok = false; return; }
+      if (b.up) {
+        if (b.max.w == null || b.max.c == null) { showErr(kind, "「太快」的警告 / 嚴重船速皆為必填。"); ok = false; return; }
+        if (b.max.c < b.max.w) { showErr(kind, "上限：嚴重船速須 ≥ 警告船速。"); ok = false; return; }
+      }
+      if (b.down) {
+        if (b.min.w == null || b.min.c == null) { showErr(kind, "「太慢」的警告 / 嚴重船速皆為必填。"); ok = false; return; }
+        if (b.min.c > b.min.w) { showErr(kind, "下限：嚴重船速須 ≤ 警告船速。"); ok = false; return; }
+      }
+      if (b.up && b.down && !(b.max.w > b.min.w)) {
+        showErr(kind, "同帶雙勾時，上限警告船速須大於下限警告船速。"); ok = false; return;
+      }
+      if (kind === "postExit" && !(b.bandNm <= b.cutoffNm)) {
+        showErr(kind, "離開後：條件帶距離（C）須 ≤ 截止距離（D）。"); ok = false;
+      }
+    });
+    return ok;
+  }
+
+  const close = () => { _zoneSpeedModalRef = null; mask.remove(); };
+  mask.querySelectorAll("[data-zsp-close]").forEach(b => b.addEventListener("click", close));
+  mask.addEventListener("click", (e) => { if (e.target === mask) close(); });
+  $("[data-zsp-save]").addEventListener("click", () => {
+    if (!validate()) return;
+    const anyEnabled = ZONE_SPEED_BANDS.some(k => st[k].enabled);
+    const speedPayload = anyEnabled ? normZoneSpeed(st) : null;   // 全帶停用 → 清除
+    zoneIds.forEach(zid => setZoneIoFenceCfg(zid, { speed: speedPayload }));
+    close();
+    try { renderThresholds(); } catch (e) {}
+    try { syncEventsFromAlerts(); } catch (e) {}
   });
 }
 
