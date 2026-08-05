@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>海生館典藏開放平台｜改版原型 Demo</title>
+<style>
+:root{
+  --navy:#12314f; --navy2:#1b4a75; --teal:#127a7f; --teal2:#0f9aa1;
+  --sand:#f6f3ec; --bg:#f2f5f7; --ink:#16242f; --mute:#5d707e;
+  --line:#dce5ea; --card:#ffffff; --accent:#e0663c; --ok:#1f7a4d;
+  --shadow:0 1px 2px rgba(18,49,79,.06),0 8px 24px rgba(18,49,79,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg); color:var(--ink); font-size:15px; line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font-family:inherit;font-size:inherit}
+a{color:var(--navy2)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:3px solid var(--teal2);outline-offset:2px}
+
+/* ── demo chrome ── */
+#demobar{
+  background:#0d2136;color:#cfe0ec;font-size:12.5px;
+  padding:7px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+}
+#demobar strong{color:#fff;font-weight:600}
+#demobar .sp{flex:1}
+.tgl{display:inline-flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+.tgl input{accent-color:var(--teal2);width:15px;height:15px}
+
+/* ── header ── */
+header.site{background:var(--navy);color:#fff;padding:14px 18px 16px}
+.hwrap{max-width:1280px;margin:0 auto}
+.brandrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo .mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(140deg,var(--teal2),#1b4a75);display:grid;place-items:center}
+.logo b{font-size:17px;letter-spacing:.5px}
+.logo span{display:block;font-size:11px;color:#9dc0d6;font-weight:400;letter-spacing:1px}
+.navlinks{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+.navlinks button{background:none;border:0;color:#c8dcea;padding:6px 11px;border-radius:7px;cursor:pointer;font-size:13.5px}
+.navlinks button:hover{background:rgba(255,255,255,.1);color:#fff}
+
+.searchrow{margin-top:14px;position:relative}
+.sbox{display:flex;background:#fff;border-radius:12px;overflow:visible;box-shadow:0 4px 18px rgba(0,0,0,.18);position:relative}
+.sbox input{flex:1;border:0;padding:14px 18px;font-size:16px;border-radius:12px 0 0 12px;color:var(--ink);min-width:0}
+.sbox button.go{border:0;background:var(--teal);color:#fff;padding:0 24px;cursor:pointer;font-size:15px;font-weight:600;border-radius:0 12px 12px 0}
+.sbox button.go:hover{background:var(--teal2)}
+.hint{margin-top:9px;font-size:12.5px;color:#9dc0d6}
+.hint b{color:#ffd9a8;font-weight:600}
+.qmode{display:inline-flex;background:rgba(255,255,255,.13);border-radius:8px;padding:2px}
+.qmode button{border:0;background:none;color:#bcd6e6;padding:4px 11px;border-radius:6px;cursor:pointer;font-size:12.5px}
+.qmode button.on{background:#fff;color:var(--navy);font-weight:600}
+.exchip{border:1px dashed rgba(255,255,255,.34);background:none;color:#cfe4f2;border-radius:20px;padding:3px 11px;cursor:pointer;font-size:12px}
+.exchip:hover{border-style:solid;border-color:var(--teal2);background:rgba(15,154,161,.22);color:#fff}
+.semb{background:linear-gradient(115deg,#0f5f66,#13808a);color:#fff;border-radius:14px;padding:15px 18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.semb .lead{font-size:13px;opacity:.86;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.semb .qq{font-size:17px;font-weight:600;margin:5px 0 11px}
+.semb .cw{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.semb .cc{background:rgba(255,255,255,.18);border-radius:20px;padding:3px 11px;font-size:12.5px}
+.semb .cc b{font-weight:600}
+.semb .cc small{opacity:.72}
+.semb .rest{margin-top:10px;font-size:12px;opacity:.8}
+.semtop{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:12px;margin:13px 0 0}
+.semc{background:rgba(255,255,255,.94);border-radius:11px;padding:10px 12px;cursor:pointer;color:var(--ink);display:flex;gap:10px;align-items:center}
+.semc:hover{background:#fff;transform:translateY(-2px)}
+.semc .ic{width:42px;height:42px;border-radius:9px;display:grid;place-items:center;flex:none}
+.semc .ic svg{width:28px;height:28px}
+.semc .zh{font-weight:600;font-size:14px;line-height:1.3}
+.semc .hit{font-size:11px;color:var(--mute);line-height:1.4;margin-top:1px}
+.semc .bar{height:4px;border-radius:4px;background:#e2eaee;margin-top:5px;overflow:hidden}
+.semc .bar i{display:block;height:100%;background:var(--teal2)}
+#ac{position:absolute;left:0;right:0;top:calc(100% + 4px);background:#fff;border-radius:11px;box-shadow:0 12px 34px rgba(0,0,0,.25);z-index:60;overflow:hidden;display:none}
+#ac div.it{padding:9px 16px;cursor:pointer;display:flex;gap:10px;align-items:center;color:var(--ink)}
+#ac div.it:hover,#ac div.it.on{background:#eaf4f5}
+#ac .sci{color:var(--mute);font-style:italic;font-size:13px}
+#ac .tag{margin-left:auto;font-size:11px;color:#fff;background:var(--teal);padding:1px 8px;border-radius:20px}
+
+/* ── layout ── */
+main{max-width:1280px;margin:0 auto;padding:18px;display:grid;grid-template-columns:264px 1fr;gap:18px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+
+aside{background:var(--card);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;position:sticky;top:12px}
+.stabs{display:flex;border-bottom:1px solid var(--line)}
+.stabs button{flex:1;border:0;background:none;padding:11px 4px;cursor:pointer;font-size:13px;color:var(--mute);border-bottom:3px solid transparent}
+.stabs button.on{color:var(--navy);font-weight:600;border-bottom-color:var(--teal)}
+.spane{padding:12px 14px 18px;display:none}
+.spane.on{display:block}
+.fgroup{border-bottom:1px solid var(--line);padding:10px 0}
+.fgroup:last-child{border-bottom:0}
+.fgroup h4{margin:0 0 7px;font-size:13px;color:var(--navy);display:flex;align-items:center;gap:6px}
+.fgroup h4 .c{margin-left:auto;font-size:11px;color:var(--mute);font-weight:400}
+.opt{display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer;font-size:13.5px;color:#33454f}
+.opt input{accent-color:var(--teal);width:14px;height:14px;flex:none}
+.opt .n{margin-left:auto;font-size:11.5px;color:var(--mute);background:#eef3f5;border-radius:20px;padding:0 7px;min-width:24px;text-align:center}
+.opt.dis{opacity:.38;cursor:default}
+.clearall{width:100%;margin-top:10px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px;cursor:pointer;font-size:13px;color:var(--mute)}
+.clearall:hover{border-color:var(--teal);color:var(--teal)}
+
+/* tree */
+.tree{font-size:13.5px}
+.tnode{padding:3px 0 3px 0}
+.tnode .row{display:flex;align-items:center;gap:6px;cursor:pointer;border-radius:6px;padding:3px 5px}
+.tnode .row:hover{background:#eef5f6}
+.tnode .row.sel{background:#dceff0;color:var(--navy);font-weight:600}
+.tw{width:14px;color:var(--mute);flex:none;text-align:center}
+.tkids{margin-left:14px;border-left:1px dashed var(--line);padding-left:6px;display:none}
+.tkids.open{display:block}
+.tn{font-size:11px;color:var(--mute);margin-left:auto}
+
+/* feature search */
+.fchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 11px;cursor:pointer;font-size:12.5px;color:#3b4d58;display:flex;gap:5px;align-items:center}
+.chip:hover{border-color:var(--teal)}
+.chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.chip svg{width:15px;height:15px}
+
+/* ── results ── */
+.toolbar{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:11px 15px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.count b{color:var(--navy);font-size:17px}
+.count .sub{color:var(--mute);font-size:12.5px}
+.tbspacer{flex:1}
+.views{display:flex;background:#eef3f5;border-radius:9px;padding:3px}
+.views button{border:0;background:none;padding:6px 12px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--mute);display:flex;gap:5px;align-items:center}
+.views button.on{background:#fff;color:var(--navy);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+select.sort{border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fff;color:#3b4d58}
+.btn-x{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;color:#3b4d58}
+.btn-x:hover{border-color:var(--teal);color:var(--teal)}
+
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.pill{background:#dceff0;color:#0d5559;border-radius:20px;padding:4px 8px 4px 12px;font-size:12.5px;display:flex;align-items:center;gap:7px}
+.pill button{border:0;background:none;cursor:pointer;color:#0d5559;font-size:15px;line-height:1;padding:0 3px}
+
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:14px}
+.card{background:var(--card);border-radius:13px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .13s,box-shadow .13s}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(18,49,79,.16)}
+.thumb{aspect-ratio:4/3;position:relative;display:grid;place-items:center}
+.thumb svg.ill{width:58%;height:58%;opacity:.92}
+.badge{position:absolute;top:8px;left:8px;background:rgba(13,33,54,.82);color:#fff;font-size:11px;padding:2px 8px;border-radius:20px;display:flex;gap:4px;align-items:center}
+.lic{position:absolute;bottom:8px;right:8px;background:rgba(255,255,255,.94);color:#0d5559;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px}
+.cbody{padding:9px 11px 12px}
+.cbody .zh{font-weight:600;font-size:14.5px;line-height:1.35}
+.cbody .sci{font-style:italic;color:var(--mute);font-size:12.5px}
+.cbody .meta{color:var(--mute);font-size:11.5px;margin-top:5px;display:flex;gap:6px;flex-wrap:wrap}
+
+/* list */
+.list{background:var(--card);border-radius:13px;box-shadow:var(--shadow);overflow:hidden}
+table.lt{width:100%;border-collapse:collapse;font-size:13.5px}
+table.lt th{background:#eef3f5;text-align:left;padding:10px 12px;color:var(--navy);font-size:12.5px;font-weight:600;white-space:nowrap}
+table.lt td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:middle}
+table.lt tr.r{cursor:pointer}
+table.lt tr.r:hover td{background:#f4fafa}
+.tmini{width:44px;height:34px;border-radius:6px;display:grid;place-items:center;flex:none}
+.tmini svg{width:26px;height:26px}
+td .sci{font-style:italic;color:var(--mute)}
+
+/* map */
+.mapwrap{background:var(--card);border-radius:13px;box-shadow:var(--shadow);padding:14px;display:grid;grid-template-columns:1fr 300px;gap:14px}
+@media(max-width:860px){.mapwrap{grid-template-columns:1fr}}
+.mapbox{background:linear-gradient(180deg,#dceef5,#c5e0ec);border-radius:11px;position:relative;overflow:hidden}
+.mapbox svg{display:block;width:100%;height:auto}
+.mpt{cursor:pointer}
+.mapside h4{margin:2px 0 8px;font-size:14px;color:var(--navy)}
+.mapside .li{display:flex;gap:9px;padding:7px 8px;border-radius:8px;cursor:pointer;align-items:center;font-size:13px}
+.mapside .li:hover{background:#eef5f6}
+.mapside .li .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
+.mapside .li .n{margin-left:auto;color:var(--mute);font-size:11.5px}
+.nocoord{margin-top:12px;background:#fff6ec;border:1px solid #f3d9c1;border-radius:9px;padding:9px 11px;font-size:12.5px;color:#8a5326}
+
+/* detail page */
+.page{max-width:1280px;margin:0 auto;padding:18px}
+.crumbs{font-size:13px;color:var(--mute);margin-bottom:12px}
+.crumbs button{border:0;background:none;color:var(--navy2);cursor:pointer;padding:0;font-size:13px}
+.dwrap{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.dhero{display:grid;grid-template-columns:340px 1fr;gap:0}
+@media(max-width:800px){.dhero{grid-template-columns:1fr}}
+.dhero .img{aspect-ratio:1/1;display:grid;place-items:center;position:relative}
+.dhero .img svg.ill{width:62%;height:62%}
+.dhero .info{padding:22px 26px}
+.dhero h1{margin:0;font-size:29px;color:var(--navy);line-height:1.25}
+.dhero .sci{font-style:italic;color:var(--mute);font-size:16px;margin-top:2px}
+.tagrow{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.tg{font-size:12px;border-radius:20px;padding:3px 11px;background:#eef3f5;color:#3b4d58}
+.tg.cons{background:#fdeee7;color:#a8462a;font-weight:600}
+.tg.ok{background:#e6f4ec;color:var(--ok);font-weight:600}
+.blurb{font-size:15.5px;line-height:1.85;color:#263a46;margin:6px 0 0}
+
+.modeswitch{display:inline-flex;background:#eef3f5;border-radius:9px;padding:3px;margin:16px 0 0}
+.modeswitch button{border:0;background:none;padding:7px 16px;border-radius:7px;cursor:pointer;font-size:13.5px;color:var(--mute)}
+.modeswitch button.on{background:#fff;color:var(--navy);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+.dsec{padding:20px 26px;border-top:1px solid var(--line)}
+.dsec h3{margin:0 0 12px;font-size:16px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.dsec h3 .cnt{font-size:12px;color:var(--mute);font-weight:400;background:#eef3f5;border-radius:20px;padding:1px 9px}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:2px 20px}
+.kv .r{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.kv .r .k{color:var(--mute);min-width:88px;flex:none}
+.kv .r .v.empty{color:#b9c5cc}
+.strip{display:flex;gap:11px;overflow-x:auto;padding-bottom:4px}
+.strip .m{width:150px;flex:none;border-radius:11px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;background:#fff}
+.strip .m .th{aspect-ratio:4/3;display:grid;place-items:center;position:relative}
+.strip .m .th svg.ill{width:56%;height:56%}
+.strip .m .cap{padding:7px 9px;font-size:12px;color:#3b4d58}
+.strip .m .cap .a{color:var(--mute);font-size:11px}
+
+table.sp{width:100%;border-collapse:collapse;font-size:13px}
+table.sp th{text-align:left;background:#eef3f5;padding:8px 10px;color:var(--navy);font-size:12px;white-space:nowrap}
+table.sp td{padding:8px 10px;border-top:1px solid var(--line)}
+table.sp td.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:11px}
+.dlc{border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+.dlc.free{border-color:#a9d9b8;background:#f3fbf5}
+.dlc h5{margin:0 0 3px;font-size:14px;color:var(--navy)}
+.dlc .px{font-size:12px;color:var(--mute)}
+.dlc .lc{display:inline-block;margin-top:8px;font-size:11px;font-weight:600;background:#dceff0;color:#0d5559;padding:2px 8px;border-radius:5px}
+.dlc button{margin-top:10px;width:100%;border:0;border-radius:8px;padding:8px;cursor:pointer;background:var(--navy);color:#fff;font-size:13px}
+.dlc.free button{background:var(--ok)}
+.dlc button.ghost{background:#fff;border:1px solid var(--line);color:#3b4d58}
+
+/* annotation layer */
+.ann{
+  display:none;background:#fff8ea;border-left:4px solid #e0a341;border-radius:0 9px 9px 0;
+  padding:9px 13px;font-size:12.5px;color:#6d4c13;margin:9px 0;line-height:1.65;
+}
+.ann b{color:#8a5c0d}
+body.ann-on .ann{display:block}
+.anndot{
+  display:none;background:#e0a341;color:#fff;font-size:10px;font-weight:700;
+  border-radius:20px;padding:1px 7px;margin-left:6px;vertical-align:middle;
+}
+body.ann-on .anndot{display:inline-block}
+
+/* topics */
+.topics{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.topic{border-radius:14px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;position:relative;min-height:132px;display:flex;align-items:flex-end;color:#fff;padding:14px}
+.topic:hover{transform:translateY(-3px)}
+.topic .t{position:relative;z-index:2}
+.topic .t b{display:block;font-size:16px}
+.topic .t span{font-size:12px;opacity:.9}
+.section-h{display:flex;align-items:baseline;gap:10px;margin:22px 0 12px}
+.section-h h2{margin:0;font-size:19px;color:var(--navy)}
+.section-h span{font-size:13px;color:var(--mute)}
+
+footer.site{max-width:1280px;margin:26px auto 40px;padding:18px;color:var(--mute);font-size:12.5px;border-top:1px solid var(--line)}
+.drop{border:2px dashed #b9cdd8;border-radius:14px;padding:34px 20px;text-align:center;background:#fafcfd}
+.drop b{display:block;margin-top:8px;color:var(--navy);font-size:15px}
+.drop:hover{border-color:var(--teal);background:#f2fafa}
+.samples{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:11px}
+.samp{border:1px solid var(--line);background:#fff;border-radius:11px;padding:0;overflow:hidden;cursor:pointer;text-align:left}
+.samp:hover{border-color:var(--teal);box-shadow:var(--shadow)}
+.samp img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
+.samp span{display:block;padding:7px 9px;font-size:12.5px;color:#3b4d58}
+.idwrap{display:grid;grid-template-columns:320px 1fr;gap:22px;align-items:start}
+@media(max-width:820px){.idwrap{grid-template-columns:1fr}}
+.idimg{width:100%;border-radius:12px;display:block;background:#eef3f5;max-height:260px;object-fit:contain}
+.idlist{display:flex;flex-direction:column;gap:9px}
+.idc{display:flex;gap:11px;align-items:center;border:1px solid var(--line);border-radius:11px;padding:9px 12px;cursor:pointer;background:#fff}
+.idc:hover{border-color:var(--teal);box-shadow:var(--shadow)}
+.idc .ic{width:46px;height:46px;border-radius:9px;display:grid;place-items:center;flex:none}
+.idc .ic svg{width:30px;height:30px}
+.idc .zh{font-weight:600;font-size:14.5px}
+.idc .sci{font-style:italic;color:var(--mute);font-size:12.5px}
+.idc .hit{font-size:11.5px;color:var(--mute);margin-top:1px}
+.idc .bar{height:5px;border-radius:5px;background:#e2eaee;margin-top:6px;overflow:hidden}
+.idc .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal2),var(--teal))}
+.idc .pc{font-size:19px;font-weight:700;color:var(--teal);flex:none}
+.idc .pc::after{content:'%';font-size:11px;margin-left:1px}
+.empty{background:var(--card);border-radius:13px;box-shadow:var(--shadow);padding:44px 20px;text-align:center;color:var(--mute)}
+.empty b{display:block;color:var(--navy);font-size:16px;margin-bottom:6px}
+.sug{display:inline-block;margin:4px;border:1px solid var(--line);border-radius:20px;padding:4px 12px;cursor:pointer;background:#fff;font-size:13px}
+.sug:hover{border-color:var(--teal);color:var(--teal)}
+
+/* modal */
+.mbg{position:fixed;inset:0;background:rgba(10,25,40,.6);display:none;z-index:200;padding:24px;overflow:auto}
+.mbg.on{display:block}
+.modal{max-width:820px;margin:20px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.mhead{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--line)}
+.mhead b{color:var(--navy);font-size:16px}
+.mhead button{margin-left:auto;border:0;background:#eef3f5;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:17px;color:#3b4d58}
+.mbody{padding:18px}
+.mimg{aspect-ratio:16/9;border-radius:11px;display:grid;place-items:center;margin-bottom:14px;position:relative}
+.mimg svg.ill{width:34%;height:60%}
+</style>
+</head>
+<body class="ann-on">
+
+<div id="demobar">
+  <strong>DEMO 原型</strong>
+  <span>海生館典藏開放平台改版構想　·　資料為示意，欄位與分類依實際網站</span>
+  <span class="sp"></span>
+  <label class="tgl"><input type="checkbox" id="annTgl" checked> 顯示改版註解</label>
+</div>
+
+<header class="site">
+  <div class="hwrap">
+    <div class="brandrow">
+      <div class="logo" onclick="goHome()" tabindex="0" onkeydown="if(event.key==='Enter')goHome()">
+        <span class="mark">
+          <svg width="21" height="21" viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round">
+            <path d="M8 62 Q28 40 50 62 Q72 84 92 62"/><path d="M8 38 Q28 16 50 38 Q72 60 92 38"/>
+          </svg>
+        </span>
+        <span><b>海生館典藏開放平台</b><span>NMMBA OPEN COLLECTIONS</span></span>
+      </div>
+      <nav class="navlinks">
+        <button onclick="goHome()">典藏檢索</button>
+        <button onclick="showIdent()">📷 以圖辨識</button>
+        <button onclick="showTopics()">主題策展</button>
+        <button onclick="alert('Demo 未實作：教育資源專區（分齡學習單、課程包、教學素材集）')">教育資源</button>
+        <button onclick="alert('Demo 未實作：開放資料（API 文件、DwC-A 下載、data.gov.tw 資料集）')">開放資料</button>
+        <button onclick="alert('Demo 未實作：線上借用申請表單與案件狀態追蹤')">標本借用</button>
+      </nav>
+    </div>
+
+    <div class="searchrow">
+      <div class="sbox">
+        <label class="sr" for="q">搜尋典藏</label>
+        <input id="q" placeholder="輸入中文名、學名、俗名或館藏編號　例如：海膽、Diadema、綠蠵龜、NMMB-M009603" autocomplete="off">
+        <button class="go" onclick="doSearch()">搜尋</button>
+        <div id="ac" role="listbox"></div>
+      </div>
+      <div class="hint" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span class="qmode" role="group" aria-label="檢索模式">
+          <button class="on" id="qm-auto" onclick="setQMode('auto')">自動</button>
+          <button id="qm-lit" onclick="setQMode('lit')">關鍵字</button>
+          <button id="qm-sem" onclick="setQMode('sem')">語意描述</button>
+        </span>
+        <span>一個搜尋框同時查<b> 標本、影像、影音、音源</b>　·　不需輸入 % 萬用字元</span>
+        <span style="opacity:.75">試試看：</span>
+        <button class="exchip" onclick="semExample('圓圓的、身上都是刺的那個球')">圓圓的、身上都是刺的那個球</button>
+        <button class="exchip" onclick="semExample('住在海葵裡面的橘色小魚')">住在海葵裡面的橘色小魚</button>
+        <button class="exchip" onclick="semExample('會變色的八隻腳')">會變色的八隻腳</button>
+        <button class="exchip" onclick="semExample('世界上最大的魚')">世界上最大的魚</button>
+        <button class="exchip" onclick="semExample('十月會過境墾丁的老鷹')">十月會過境墾丁的老鷹</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div id="app"></div>
+
+<footer class="site">
+  國立海洋生物博物館典藏開放平台（改版原型 Demo）　·　摯陞數位科技有限公司製作　·　2026.08<br>
+  本頁為概念驗證用途，資料為模擬示意；欄位名稱、分類項目與下載分級依實際網站現況設計。
+</footer>
+
+<div class="mbg" id="mbg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+</div>
+
+<script>
+/* ══════════════════════ 圖示（以群別區分的示意插圖） ══════════════════════ */
+const PAL={
+  魚類:['#1b6f8a','#7fd3d8'], 軟體動物:['#7a4a86','#e2b7d9'], 棘皮動物:['#a8422f','#f0b58a'],
+  刺胞動物:['#b2497a','#ffc2c9'], 節肢動物:['#8a5a20','#ffd79a'], 海洋哺乳類:['#2c4f6e','#a9c8de'],
+  海洋爬蟲類:['#2f6b45','#a8dcae'], 鳥類:['#3f5d8c','#bcd0ef'], 藻類:['#3d6b32','#c2e0a0'],
+  景觀:['#26607a','#a8d8e2']
+};
+const SIL={
+  魚類:'<path d="M6 50c14-20 44-24 60-4 3-12 12-18 12-18s-2 12 1 20c-3 8-1 20-1 20s-9-6-12-18C50 70 20 68 6 50z"/><circle cx="24" cy="46" r="3.2" fill="#fff"/>',
+  軟體動物:'<path d="M84 44c0 24-19 42-43 42-18 0-33-12-33-28 0-13 10-23 23-23 11 0 19 8 19 17 0 7-5 12-11 12-5 0-8-3-8-7" fill="none" stroke-width="8" stroke-linecap="round"/><path d="M84 44c0-19-14-32-32-32-9 0-17 3-23 8" fill="none" stroke-width="8" stroke-linecap="round"/>',
+  珊瑚:'<g fill="none" stroke-width="7" stroke-linecap="round"><path d="M50 92V52M50 60 32 40M50 60 68 40M32 40V20M32 40 16 26M68 40V20M68 40 84 26M50 52 50 30"/></g><g stroke-width="0"><circle cx="50" cy="26" r="5"/><circle cx="32" cy="16" r="5"/><circle cx="68" cy="16" r="5"/><circle cx="13" cy="23" r="5"/><circle cx="87" cy="23" r="5"/></g>',
+  章魚:'<path d="M22 44c0-16 12-28 28-28s28 12 28 28v10H22z"/><g fill="none" stroke-width="6" stroke-linecap="round"><path d="M28 56c-4 12-14 14-18 24M40 58c-2 14-8 18-8 30M60 58c2 14 8 18 8 30M72 56c4 12 14 14 18 24"/></g><circle cx="40" cy="40" r="4" fill="#fff"/><circle cx="60" cy="40" r="4" fill="#fff"/>',
+  海星:'<path d="M50 6 62 38l34 1-27 21 10 33-29-20-29 20 10-33-27-21 34-1z"/>',
+  棘皮動物:'<circle cx="50" cy="50" r="22"/><g stroke-width="4.5" stroke-linecap="round"><path d="M50 26V6M50 74v20M26 50H6M74 50h20M33 33 19 19M67 33 81 19M33 67 19 81M67 67 81 81"/></g>',
+  刺胞動物:'<path d="M20 46c0-17 13-30 30-30s30 13 30 30v6H20z"/><g stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 54c0 12-6 14-6 24M42 54c0 14 5 16 5 26M58 54c0-14-5 16-5 26M70 54c0 12 6 14 6 24"/></g>',
+  節肢動物:'<ellipse cx="50" cy="52" rx="24" ry="17"/><g stroke-width="4.5" stroke-linecap="round" fill="none"><path d="M26 44 8 30M26 56 8 66M74 44 92 30M74 56 92 66M36 68 30 86M64 68 70 86"/></g><circle cx="40" cy="46" r="3" fill="#fff"/><circle cx="60" cy="46" r="3" fill="#fff"/>',
+  海洋哺乳類:'<path d="M8 56c16-22 46-30 66-14 6-14 16-18 16-18s-4 14 0 22c-6 16-24 26-42 24-4 8-12 12-12 12s2-8 0-14C24 68 14 62 8 56z"/><circle cx="66" cy="44" r="3" fill="#fff"/>',
+  海洋爬蟲類:'<ellipse cx="50" cy="52" rx="26" ry="21"/><g stroke-width="5" stroke-linecap="round" fill="none"><path d="M28 38 12 26M28 66 12 78M72 38 88 26M72 66 88 78"/></g><circle cx="50" cy="22" r="9"/>',
+  鳥類:'<path d="M6 60Q28 26 50 54Q72 26 94 60" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M32 62Q50 48 68 62" stroke-width="5" fill="none" stroke-linecap="round"/>',
+  藻類:'<g stroke-width="6" fill="none" stroke-linecap="round"><path d="M50 92V34"/><path d="M50 60Q26 50 24 26M50 60Q74 50 76 26M50 40Q34 32 32 14M50 40Q66 32 68 14"/></g>',
+  景觀:'<path d="M6 74 32 36l16 20 12-14 34 32z"/><circle cx="72" cy="24" r="9"/>'
+};
+function ill(g,c,ic){const p=PAL[g]||PAL.景觀;const col=c||p[0];const key=ic||g;
+  return '<svg class="ill" viewBox="0 0 100 100" fill="'+col+'" stroke="'+col+'" aria-hidden="true">'+(SIL[key]||SIL[g]||SIL.景觀)+'</svg>';}
+function bgOf(g){const p=PAL[g]||PAL.景觀;return 'background:linear-gradient(145deg,'+p[1]+',#ffffff 130%)';}
+function inkOf(g){return (PAL[g]||PAL.景觀)[0]}
+
+/* ══════════════════════ 模擬資料 ══════════════════════ */
+/* 分類與欄位名稱對齊實際網站：界門綱目科屬種／館藏編號／保存方式／標本現況／儲存位置／採集者／鑑定人 等 */
+const SP=[
+ {zh:'木賊峨螺',sci:'Phos senticosus',g:'軟體動物',tax:['動物界 Animalia','軟體動物門 Mollusca','腹足綱 Gastropoda','新腹足目 Neogastropoda','峨螺科 Buccinidae','Phos','senticosus'],
+  shape:'貝殼',color:['褐','白'],hab:'潮間帶',
+  blurb:'一種常見於潮間帶到淺海砂泥底的小型肉食性螺類，殼表有明顯的縱肋與細螺紋，摸起來像銼刀。牠們會鑽入砂中伏擊小型無脊椎動物，是海底重要的清道夫之一。',
+  dist:'臺灣四周海域、西太平洋熱帶至亞熱帶',habitat:'潮間帶至水深約 50 公尺的砂泥底質',cons:null,
+  sp:[{cat:'NMMB-M009603',loc:'屏東縣車城鄉 後灣潮間帶',cy:'屏東縣',lat:22.048,lng:120.699,yr:2009,pres:'乾製保存',st:'已上架',sto:'二研典藏室',by:'捐贈',ident:'邱郁文',n:1,sex:'未確定',type:'一般標本'},
+      {cat:'NMMB-M009604',loc:'屏東縣恆春鎮 香蕉灣',cy:'屏東縣',lat:21.941,lng:120.848,yr:2011,pres:'乾製保存',st:'已上架',sto:'二研典藏室',by:'館內採集',ident:'邱郁文',n:3,sex:'未確定',type:'一般標本'}],
+  md:[{t:'木賊峨螺 殼體側面',k:'image',au:'陳威廷',d:'2019-04-12',cam:'Canon EOS 5D Mark IV',fl:'100 mm'}]},
+
+ {zh:'魔鬼海膽',sci:'Diadema setosum',g:'棘皮動物',tax:['動物界 Animalia','棘皮動物門 Echinodermata','海膽綱 Echinoidea','冠海膽目 Diadematoida','冠海膽科 Diadematidae','Diadema','setosum'],
+  shape:'球刺狀',color:['黑'],hab:'珊瑚礁',
+  blurb:'全身覆滿細長黑棘的海膽，殼頂上有一顆橘紅色的環，像一隻盯著你看的眼睛。棘刺中空且帶毒，被刺到會斷在皮膚裡，是浮潛時最需要留意的生物之一。牠們夜間出來啃食藻類，對維持珊瑚礁的健康很重要。',
+  dist:'印度洋至西太平洋，臺灣各地珊瑚礁海域普遍可見',habitat:'珊瑚礁區、潮池，水深 0–70 公尺',cons:null,
+  sp:[{cat:'NMMB-E002341',loc:'屏東縣恆春鎮 後壁湖',cy:'屏東縣',lat:21.937,lng:120.744,yr:2015,pres:'酒精浸液',st:'已上架',sto:'一研典藏室',by:'館內採集',ident:'李坤瑄',n:2,sex:'未確定',type:'一般標本'},
+      {cat:'NMMB-E002355',loc:'臺東縣綠島鄉 石朗',cy:'臺東縣',lat:22.657,lng:121.484,yr:2017,pres:'乾製保存',st:'已上架',sto:'一研典藏室',by:'館內採集',ident:'李坤瑄',n:1,sex:'未確定',type:'一般標本'}],
+  md:[{t:'魔鬼海膽 夜間覓食',k:'video',au:'林清哲',d:'2021-07-03',cam:'SONY A7S III',fl:'28 mm'},
+      {t:'魔鬼海膽 特寫',k:'image',au:'林清哲',d:'2021-07-03',cam:'NIKON D850',fl:'105 mm'}]},
+
+ {zh:'白棘三列海膽',sci:'Tripneustes gratilla',g:'棘皮動物',tax:['動物界 Animalia','棘皮動物門 Echinodermata','海膽綱 Echinoidea','拱齒目 Camarodonta','毒棘海膽科 Toxopneustidae','Tripneustes','gratilla'],
+  shape:'球刺狀',color:['白','紫'],hab:'珊瑚礁',
+  blurb:'俗稱「馬糞海膽」的近親，短白棘配上深色殼面十分好認。牠是草食性的，一天能吃掉相當於自己體重的海藻，在澎湖曾因過度採捕而數量銳減，現有禁漁期保護。',
+  dist:'印度洋至太平洋，臺灣南部與離島',habitat:'珊瑚礁與海草床，水深 0–30 公尺',cons:null,
+  sp:[{cat:'NMMB-E002110',loc:'澎湖縣馬公市 山水',cy:'澎湖縣',lat:23.526,lng:119.583,yr:2013,pres:'乾製保存',st:'已上架',sto:'一研典藏室',by:'館內採集',ident:'李坤瑄',n:4,sex:'未確定',type:'一般標本'}],
+  md:[{t:'白棘三列海膽 生態照',k:'image',au:'王志倫',d:'2018-06-20',cam:'OLYMPUS OM-D E-M1',fl:'60 mm'}]},
+
+ {zh:'綠蠵龜',sci:'Chelonia mydas',g:'海洋爬蟲類',tax:['動物界 Animalia','脊索動物門 Chordata','爬蟲綱 Reptilia','龜鱉目 Testudines','蠵龜科 Cheloniidae','Chelonia','mydas'],
+  shape:'有殼有腳',color:['綠','褐'],hab:'珊瑚礁',
+  blurb:'成年後幾乎只吃海草與海藻，脂肪因此帶綠色而得名。牠們會回到出生的沙灘產卵，臺灣的澎湖望安、蘭嶼與小琉球都是重要產卵地。全球數量因棲地破壞與混獲而下降，是保育類野生動物。',
+  dist:'全球熱帶與亞熱帶海域；臺灣以小琉球、蘭嶼、澎湖望安最常見',habitat:'珊瑚礁、海草床、產卵沙灘',cons:'保育類野生動物（瀕臨絕種）',
+  sp:[{cat:'NMMB-R000112',loc:'屏東縣琉球鄉（擱淺個體）',cy:'屏東縣',lat:22.341,lng:120.377,yr:2016,pres:'骨骼標本',st:'已上架',sto:'三研典藏室',by:'擱淺通報',ident:'程一駿',n:1,sex:'雌',type:'一般標本'}],
+  md:[{t:'綠蠵龜 於珊瑚礁上覓食',k:'video',au:'林清哲',d:'2022-05-11',cam:'SONY A7 IV',fl:'16 mm'},
+      {t:'綠蠵龜 背甲特寫',k:'image',au:'陳威廷',d:'2022-05-11',cam:'NIKON D500',fl:'85 mm'}]},
+
+ {zh:'眼斑雙鋸魚',sci:'Amphiprion ocellaris',g:'魚類',tax:['動物界 Animalia','脊索動物門 Chordata','條鰭魚綱 Actinopterygii','鱸形目 Perciformes','雀鯛科 Pomacentridae','Amphiprion','ocellaris'],
+  shape:'魚形',color:['橘','白'],hab:'珊瑚礁',
+  blurb:'就是大家熟知的「小丑魚」。牠身上有一層特殊黏液，能安然住在會螫人的海葵裡，靠海葵躲避掠食者，也幫海葵趕走啃食者。族群裡體型最大的是雌魚，若雌魚消失，最大的雄魚會轉變性別遞補。',
+  dist:'印度洋至西太平洋；臺灣南部、綠島、蘭嶼',habitat:'與奶嘴海葵、公主海葵共生的珊瑚礁區',cons:null,
+  sp:[{cat:'NMMB-P012908',loc:'臺東縣蘭嶼鄉 八代灣',cy:'臺東縣',lat:22.031,lng:121.535,yr:2012,pres:'酒精浸液',st:'已上架',sto:'一研典藏室',by:'館內採集',ident:'邵廣昭',n:5,sex:'未確定',type:'一般標本'}],
+  md:[{t:'眼斑雙鋸魚與奶嘴海葵',k:'image',au:'林清哲',d:'2020-08-14',cam:'NIKON D850',fl:'60 mm'},
+      {t:'小丑魚育幼行為',k:'video',au:'王志倫',d:'2020-08-15',cam:'SONY FX3',fl:'50 mm'},
+      {t:'珊瑚礁環境音',k:'audio',au:'海洋聲景計畫',d:'2020-08-15',cam:'ZOOM H6 + 水下麥克風',fl:'—'}]},
+
+ {zh:'曲紋唇魚',sci:'Cheilinus undulatus',g:'魚類',tax:['動物界 Animalia','脊索動物門 Chordata','條鰭魚綱 Actinopterygii','鱸形目 Perciformes','隆頭魚科 Labridae','Cheilinus','undulatus'],
+  shape:'魚形',color:['綠','藍'],hab:'珊瑚礁',
+  blurb:'俗稱「蘇眉」或「龍王鯛」，是珊瑚礁裡體型最大的隆頭魚，可長到近兩公尺、活過三十年。額頭會隨年齡隆起，臉上有像迷宮般的紋路。因為長得慢又被大量捕撈食用，全球數量嚴重下降，臺灣已公告禁捕。',
+  dist:'印度洋至太平洋；臺灣以綠島、蘭嶼、東沙較常記錄',habitat:'珊瑚礁外緣與礁溝，水深 1–100 公尺',cons:'保育類野生動物（珍貴稀有）',
+  sp:[{cat:'NMMB-P013455',loc:'臺東縣綠島鄉（混獲個體）',cy:'臺東縣',lat:22.669,lng:121.494,yr:2008,pres:'酒精浸液',st:'已上架',sto:'一研典藏室',by:'漁民捐贈',ident:'邵廣昭',n:1,sex:'雄',type:'一般標本'}],
+  md:[{t:'曲紋唇魚 側面',k:'image',au:'陳威廷',d:'2019-09-02',cam:'Canon EOS R5',fl:'35 mm'}]},
+
+ {zh:'鯨鯊',sci:'Rhincodon typus',g:'魚類',tax:['動物界 Animalia','脊索動物門 Chordata','軟骨魚綱 Chondrichthyes','鬚鯊目 Orectolobiformes','鯨鯊科 Rhincodontidae','Rhincodon','typus'],
+  shape:'魚形',color:['灰','白'],hab:'大洋',
+  blurb:'世界上最大的魚，最長可超過十二公尺，卻只吃浮游生物與小魚。身上的白點排列像棋盤，每一隻都不一樣，研究人員因此能靠花紋辨認個體。臺灣俗稱「豆腐鯊」，2008 年起全面禁捕。',
+  dist:'全球熱帶與溫帶海域；臺灣東部外海',habitat:'大洋表層，偶爾近岸',cons:'保育類野生動物（瀕臨絕種）',
+  sp:[{cat:'NMMB-P000031',loc:'花蓮縣豐濱鄉 石梯港外海',cy:'花蓮縣',lat:23.494,lng:121.512,yr:2001,pres:'骨骼標本',st:'已上架',sto:'三研典藏室',by:'漁民捐贈',ident:'莊守正',n:1,sex:'雌',type:'一般標本'}],
+  md:[{t:'鯨鯊 濾食行為',k:'video',au:'林清哲',d:'2017-06-08',cam:'SONY A7S II',fl:'16 mm'}]},
+
+ {zh:'花紋海豚',sci:'Grampus griseus',g:'海洋哺乳類',tax:['動物界 Animalia','脊索動物門 Chordata','哺乳綱 Mammalia','鯨偶蹄目 Cetartiodactyla','海豚科 Delphinidae','Grampus','griseus'],
+  shape:'魚形',color:['灰','白'],hab:'大洋',
+  blurb:'身上滿是白色抓痕，年紀越大越白，那是同伴打鬧與烏賊反擊留下的紀錄。牠們是花蓮、宜蘭賞鯨最常見的鯨豚之一，主要在深夜潛到深海獵捕頭足類。',
+  dist:'全球溫帶與熱帶深海；臺灣東部海域全年可見',habitat:'水深 400–1000 公尺的大陸斜坡海域',cons:'保育類野生動物',
+  sp:[{cat:'NMMB-C000208',loc:'宜蘭縣蘇澳鎮（擱淺個體）',cy:'宜蘭縣',lat:24.594,lng:121.868,yr:2014,pres:'骨骼標本',st:'已上架',sto:'三研典藏室',by:'擱淺通報',ident:'王建平',n:1,sex:'雄',type:'一般標本'}],
+  md:[{t:'花紋海豚 躍身擊浪',k:'image',au:'王志倫',d:'2021-04-22',cam:'Canon EOS R6',fl:'400 mm'},
+      {t:'花紋海豚 水下叫聲',k:'audio',au:'海洋聲景計畫',d:'2021-04-22',cam:'水下聽音器陣列',fl:'—'}]},
+
+ {zh:'錦繡龍蝦',sci:'Panulirus ornatus',g:'節肢動物',tax:['動物界 Animalia','節肢動物門 Arthropoda','軟甲綱 Malacostraca','十足目 Decapoda','龍蝦科 Palinuridae','Panulirus','ornatus'],
+  shape:'有殼有腳',color:['綠','橘'],hab:'珊瑚礁',
+  blurb:'臺灣體型最大的龍蝦，步足上有鮮明的黃黑環紋，觸角比身體還長。牠沒有大螯，遇敵時靠摩擦觸角基部發出刺耳聲響嚇退對手。白天躲在礁洞，夜裡才出來覓食。',
+  dist:'印度洋至西太平洋；臺灣南部與東部海域',habitat:'珊瑚礁與岩礁區，水深 1–50 公尺',cons:null,
+  sp:[{cat:'NMMB-A004520',loc:'屏東縣恆春鎮 萬里桐',cy:'屏東縣',lat:21.997,lng:120.700,yr:2010,pres:'酒精浸液',st:'已上架',sto:'二研典藏室',by:'漁民捐贈',ident:'何平和',n:1,sex:'雄',type:'一般標本'}],
+  md:[{t:'錦繡龍蝦 礁洞中',k:'image',au:'陳威廷',d:'2018-11-03',cam:'NIKON D500',fl:'60 mm'}]},
+
+ {zh:'弧邊招潮蟹',sci:'Austruca arcuata',g:'節肢動物',tax:['動物界 Animalia','節肢動物門 Arthropoda','軟甲綱 Malacostraca','十足目 Decapoda','沙蟹科 Ocypodidae','Austruca','arcuata'],
+  shape:'有殼有腳',color:['紅','白'],hab:'潮間帶',
+  blurb:'雄蟹有一隻誇張的大螯，會朝天空揮舞求偶，因此有「招潮」之名。牠們在泥灘上挖洞、進食時把泥沙送進口中濾食有機質，再吐出一顆顆整齊的擬糞球，是紅樹林濕地的地景工程師。',
+  dist:'臺灣西部與北部河口泥灘、紅樹林濕地',habitat:'半淡鹹水的潮間帶泥灘',cons:null,
+  sp:[{cat:'NMMB-A005011',loc:'嘉義縣東石鄉 鰲鼓濕地',cy:'嘉義縣',lat:23.502,lng:120.157,yr:2019,pres:'酒精浸液',st:'已上架',sto:'二研典藏室',by:'館內採集',ident:'何平和',n:6,sex:'雄',type:'一般標本'}],
+  md:[{t:'弧邊招潮蟹 揮螯求偶',k:'video',au:'王志倫',d:'2019-06-18',cam:'Canon EOS R5',fl:'180 mm'}]},
+
+ {zh:'鸚鵡螺',sci:'Nautilus pompilius',g:'軟體動物',tax:['動物界 Animalia','軟體動物門 Mollusca','頭足綱 Cephalopoda','鸚鵡螺目 Nautilida','鸚鵡螺科 Nautilidae','Nautilus','pompilius'],
+  shape:'貝殼',color:['白','紅'],hab:'深海',
+  blurb:'被稱為「活化石」，外形五億年來幾乎沒變。牠的殼內分成三十多個氣室，靠調節氣室內的氣體與液體來控制浮沉，就像潛水艇。白天待在數百公尺深處，夜裡上浮到淺處覓食。',
+  dist:'西太平洋深海；臺灣東部與南部外海偶有記錄',habitat:'珊瑚礁外緣陡坡，水深 100–500 公尺',cons:null,
+  sp:[{cat:'NMMB-M011002',loc:'屏東縣恆春鎮 外海（漁船捕獲）',cy:'屏東縣',lat:21.850,lng:120.900,yr:2006,pres:'乾製保存',st:'已上架',sto:'二研典藏室',by:'漁民捐贈',ident:'巫文隆',n:1,sex:'未確定',type:'一般標本'}],
+  md:[{t:'鸚鵡螺 殼體剖面',k:'image',au:'陳威廷',d:'2016-03-09',cam:'Canon EOS 5DS',fl:'100 mm'}]},
+
+ {zh:'長硨磲蛤',sci:'Tridacna maxima',g:'軟體動物',tax:['動物界 Animalia','軟體動物門 Mollusca','雙殼綱 Bivalvia','簾蛤目 Venerida','硨磲蛤科 Cardiidae','Tridacna','maxima'],
+  shape:'貝殼',color:['藍','綠'],hab:'珊瑚礁',
+  blurb:'外套膜上鮮豔的藍綠色來自體內共生的蟲黃藻，牠們替硨磲蛤製造養分，硨磲蛤則提供住所與陽光。因為色彩美麗又能長到很大，長期遭採集販售，臺灣已列為保育類。',
+  dist:'印度洋至太平洋；臺灣南部、東沙、南沙',habitat:'淺水珊瑚礁平台，水深 0–15 公尺',cons:'保育類野生動物（其他應予保育）',
+  sp:[{cat:'NMMB-M010455',loc:'東沙環礁（研究採集）',cy:'高雄市',lat:20.700,lng:116.720,yr:2011,pres:'乾製保存',st:'已上架',sto:'二研典藏室',by:'研究計畫',ident:'巫文隆',n:2,sex:'未確定',type:'一般標本'}],
+  md:[{t:'長硨磲蛤 外套膜色彩',k:'image',au:'林清哲',d:'2015-07-25',cam:'NIKON D810',fl:'105 mm'}]},
+
+ {zh:'棘冠海星',sci:'Acanthaster planci',g:'棘皮動物',tax:['動物界 Animalia','棘皮動物門 Echinodermata','海星綱 Asteroidea','鉗棘目 Valvatida','長棘海星科 Acanthasteridae','Acanthaster','planci'],
+  shape:'星形',color:['紅','紫'],hab:'珊瑚礁',
+  blurb:'全身佈滿有毒硬棘，以珊瑚蟲為食。平時數量不多還算生態的一環，一旦大爆發就能在數月內啃光整片珊瑚礁，是珊瑚保育上最頭痛的問題之一。',
+  dist:'印度洋至太平洋；臺灣南部與離島均有記錄',habitat:'珊瑚礁區，水深 0–30 公尺',cons:null,
+  sp:[{cat:'NMMB-E002890',loc:'屏東縣恆春鎮 出水口',cy:'屏東縣',lat:21.925,lng:120.760,yr:2018,pres:'乾製保存',st:'已上架',sto:'一研典藏室',by:'館內採集',ident:'李坤瑄',n:1,sex:'未確定',type:'一般標本'}],
+  md:[{t:'棘冠海星 啃食珊瑚',k:'video',au:'王志倫',d:'2018-05-30',cam:'SONY A7R IV',fl:'24 mm'}]},
+
+ {zh:'藍指海星',sci:'Linckia laevigata',g:'棘皮動物',tax:['動物界 Animalia','棘皮動物門 Echinodermata','海星綱 Asteroidea','瓣棘海星目 Valvatida','蛇海星科 Ophidiasteridae','Linckia','laevigata'],
+  shape:'星形',color:['藍'],hab:'珊瑚礁',
+  blurb:'鮮豔的寶藍色在珊瑚礁上非常醒目。牠的再生能力極強，一隻斷腕只要帶著一小塊中央盤，就能重新長成一整隻海星。',
+  dist:'印度洋至西太平洋；臺灣南部、綠島、蘭嶼',habitat:'珊瑚礁淺水域，水深 0–60 公尺',cons:null,
+  sp:[{cat:'NMMB-E002455',loc:'臺東縣綠島鄉 柴口',cy:'臺東縣',lat:22.678,lng:121.489,yr:2016,pres:'乾製保存',st:'已上架',sto:'一研典藏室',by:'館內採集',ident:'李坤瑄',n:2,sex:'未確定',type:'一般標本'}],
+  md:[{t:'藍指海星',k:'image',au:'林清哲',d:'2016-08-01',cam:'OLYMPUS OM-D E-M1 II',fl:'30 mm'}]},
+
+ {zh:'巴布亞硝水母',sci:'Mastigias papua',g:'刺胞動物',tax:['動物界 Animalia','刺胞動物門 Cnidaria','缽水母綱 Scyphozoa','根口水母目 Rhizostomeae','硝水母科 Mastigiidae','Mastigias','papua'],
+  shape:'傘狀',color:['白','褐'],hab:'大洋',
+  blurb:'傘上有白色斑點，體內同樣住著共生藻，因此牠會追著陽光在水層間上下移動，一天走完固定的路線。刺絲胞毒性很弱，是水族館裡最受歡迎的展示水母之一。',
+  dist:'西太平洋；臺灣南部海域與潟湖',habitat:'表層水域與半封閉海灣',cons:null,
+  sp:[{cat:'NMMB-CN000341',loc:'屏東縣車城鄉 海生館前海域',cy:'屏東縣',lat:22.045,lng:120.698,yr:2020,pres:'福馬林浸液',st:'已上架',sto:'一研典藏室',by:'館內採集',ident:'羅文增',n:3,sex:'未確定',type:'一般標本'}],
+  md:[{t:'巴布亞硝水母 群游',k:'video',au:'林清哲',d:'2020-09-12',cam:'SONY FX6',fl:'35 mm'}]},
+
+ {zh:'表孔軸孔珊瑚',sci:'Acropora millepora',g:'刺胞動物',tax:['動物界 Animalia','刺胞動物門 Cnidaria','珊瑚蟲綱 Anthozoa','石珊瑚目 Scleractinia','軸孔珊瑚科 Acroporidae','Acropora','millepora'],
+  shape:'其他',color:['綠','粉'],hab:'珊瑚礁',
+  blurb:'造礁珊瑚中生長最快的一群，一年可長高十公分以上，是珊瑚礁的主要建築工。每年農曆三、四月的滿月夜會集體產卵，把海面染成一片粉紅色的「海洋雪」。對海水升溫也最敏感，是白化事件中最先倒下的類群。',
+  dist:'印度洋至西太平洋；臺灣南部、綠島、蘭嶼、澎湖南方四島',habitat:'淺水珊瑚礁平台，水深 1–20 公尺',cons:null,
+  sp:[{cat:'NMMB-CN001120',loc:'屏東縣恆春鎮 眺石',cy:'屏東縣',lat:21.947,lng:120.741,yr:2017,pres:'乾製保存',st:'已上架',sto:'一研典藏室',by:'研究計畫',ident:'樊同雲',n:4,sex:'未確定',type:'一般標本'}],
+  md:[{t:'軸孔珊瑚 集體產卵',k:'video',au:'王志倫',d:'2019-04-21',cam:'SONY A7S III',fl:'50 mm'},
+      {t:'軸孔珊瑚 白化前後對照',k:'image',au:'陳威廷',d:'2020-08-30',cam:'Canon EOS R5',fl:'24 mm'}]},
+
+ {zh:'庫達海馬',sci:'Hippocampus kuda',g:'魚類',tax:['動物界 Animalia','脊索動物門 Chordata','條鰭魚綱 Actinopterygii','棘背魚目 Syngnathiformes','海龍科 Syngnathidae','Hippocampus','kuda'],
+  shape:'其他',color:['黃','褐'],hab:'海草床',
+  blurb:'由雄魚懷孕的魚。雌魚把卵產進雄魚腹部的育兒袋，雄魚再孵化並「生」下數百隻小海馬。牠們游泳能力很差，多半用尾巴纏住海草固定身體，靠伏擊吸食小型甲殼類維生。',
+  dist:'印度洋至西太平洋；臺灣西南部與東北角',habitat:'海草床、藻場與淺水泥砂底',cons:null,
+  sp:[{cat:'NMMB-P014200',loc:'澎湖縣湖西鄉 青螺',cy:'澎湖縣',lat:23.601,lng:119.639,yr:2013,pres:'酒精浸液',st:'已上架',sto:'一研典藏室',by:'館內採集',ident:'邵廣昭',n:2,sex:'雄',type:'一般標本'}],
+  md:[{t:'庫達海馬 纏繞海草',k:'image',au:'林清哲',d:'2014-05-06',cam:'NIKON D7100',fl:'105 mm'}]},
+
+ {zh:'石蓴',sci:'Ulva lactuca',g:'藻類',tax:['植物界 Plantae','綠藻門 Chlorophyta','石蓴綱 Ulvophyceae','石蓴目 Ulvales','石蓴科 Ulvaceae','Ulva','lactuca'],
+  shape:'其他',color:['綠'],hab:'潮間帶',
+  blurb:'薄得只有兩層細胞、像萵苣葉一樣的綠藻，俗稱「海萵苣」，可以食用。牠生長極快，在營養鹽過多的海域會大量爆發形成「綠潮」，腐爛後反而造成水質惡化。',
+  dist:'全球溫帶至熱帶潮間帶；臺灣各地岩岸',habitat:'潮間帶岩石表面與潮池',cons:null,
+  sp:[{cat:'NMMB-AL000455',loc:'新北市貢寮區 龍洞',cy:'新北市',lat:25.114,lng:121.922,yr:2015,pres:'臘葉標本',st:'已上架',sto:'二研典藏室',by:'館內採集',ident:'林綉美',n:5,sex:'未確定',type:'一般標本'}],
+  md:[{t:'石蓴 潮池群落',k:'image',au:'王志倫',d:'2015-03-14',cam:'Canon EOS 80D',fl:'24 mm'}]},
+
+ {zh:'白眼潛鴨',sci:'Aythya nyroca',g:'鳥類',tax:['動物界 Animalia','脊索動物門 Chordata','鳥綱 Aves','雁形目 Anseriformes','雁鴨科 Anatidae','Aythya','nyroca'],
+  shape:'其他',color:['褐','白'],hab:'濕地',
+  blurb:'雄鳥有一雙醒目的白色虹膜，因此得名。在臺灣屬於稀有的冬候鳥，多半單獨混在其他潛鴨群裡出現在西部的水塘與魚塭，是賞鳥人眼中的驚喜紀錄。',
+  dist:'歐亞大陸繁殖，冬季南遷；臺灣為稀有冬候鳥',habitat:'內陸淡水湖泊、魚塭與濕地',cons:null,
+  sp:[],
+  md:[{t:'白眼潛鴨',k:'image',au:'林清哲',d:'2026-01-02',cam:'NIKON D500',fl:'500 mm'},
+      {t:'白眼潛鴨 於水面理羽',k:'image',au:'林清哲',d:'2026-01-02',cam:'NIKON D500',fl:'500 mm'}]},
+
+ {zh:'紅隼',sci:'Falco tinnunculus',g:'鳥類',tax:['動物界 Animalia','脊索動物門 Chordata','鳥綱 Aves','隼形目 Falconiformes','隼科 Falconidae','Falco','tinnunculus'],
+  shape:'其他',color:['紅','褐'],hab:'濕地',
+  blurb:'能在空中定點懸停的小型猛禽，鎖定草叢裡的老鼠或昆蟲後才俯衝而下。臺灣為普遍冬候鳥，農田與海岸草生地常見牠停在電線上。',
+  dist:'歐亞非廣布；臺灣為普遍冬候鳥',habitat:'開闊農地、海岸草生地與都市邊緣',cons:'保育類野生動物（其他應予保育）',
+  sp:[],
+  md:[{t:'紅隼 空中懸停',k:'image',au:'林清哲',d:'2026-01-02',cam:'NIKON D500',fl:'500 mm'}]},
+
+ {zh:'灰面鵟鷹',sci:'Butastur indicus',g:'鳥類',tax:['動物界 Animalia','脊索動物門 Chordata','鳥綱 Aves','鷹形目 Accipitriformes','鷹科 Accipitridae','Butastur','indicus'],
+  shape:'其他',color:['灰','褐'],hab:'濕地',
+  blurb:'每年十月國慶前後過境墾丁，因此有「國慶鳥」之稱。牠們白天乘著上升氣流盤旋成「鷹柱」，傍晚降落滿州一帶的樹林過夜，是恆春半島秋季最壯觀的自然事件。',
+  dist:'東亞繁殖，東南亞度冬；臺灣為過境鳥，墾丁與八卦山為主要觀察點',habitat:'低海拔森林與丘陵，過境期集中於恆春半島',cons:'保育類野生動物（珍貴稀有）',
+  sp:[],
+  md:[{t:'灰面鵟鷹 過境鷹柱',k:'image',au:'林清哲',d:'2025-10-10',cam:'NIKON D500',fl:'500 mm'},
+      {t:'灰面鵟鷹 起鷹',k:'video',au:'王志倫',d:'2025-10-11',cam:'SONY A1',fl:'600 mm'}]},
+
+ {zh:'黑海參',sci:'Holothuria atra',g:'棘皮動物',tax:['動物界 Animalia','棘皮動物門 Echinodermata','海參綱 Holothuroidea','楯手目 Aspidochirotida','海參科 Holothuriidae','Holothuria','atra'],
+  shape:'其他',color:['黑'],hab:'珊瑚礁',
+  blurb:'礁台上最常見的黑色海參，會把砂粒黏在身上偽裝兼防曬。牠吞入砂子、消化其中的有機質再排出乾淨的砂，一年能翻動數十公斤底質，是名副其實的海底吸塵器。',
+  dist:'印度洋至太平洋；臺灣南部與離島礁台',habitat:'珊瑚礁平台與潮池，水深 0–20 公尺',cons:null,
+  sp:[{cat:'NMMB-E003012',loc:'屏東縣琉球鄉 杉福',cy:'屏東縣',lat:22.348,lng:120.361,yr:2018,pres:'酒精浸液',st:'已上架',sto:'一研典藏室',by:'館內採集',ident:'李坤瑄',n:2,sex:'未確定',type:'一般標本'}],
+  md:[{t:'黑海參 礁台上',k:'image',au:'陳威廷',d:'2018-04-19',cam:'OLYMPUS TG-6',fl:'—'}]},
+
+ {zh:'真蛸',sci:'Octopus vulgaris',g:'軟體動物',tax:['動物界 Animalia','軟體動物門 Mollusca','頭足綱 Cephalopoda','八腕目 Octopoda','蛸科 Octopodidae','Octopus','vulgaris'],
+  shape:'其他',color:['褐','紅'],hab:'岩礁',
+  blurb:'公認最聰明的無脊椎動物，能開罐、走迷宮、認得特定的人。皮膚裡數百萬個色素細胞讓牠在不到一秒內改變顏色與質感，幾乎完美融入背景。三顆心臟、藍色的血液，八隻腕各自有相當程度的自主神經。',
+  dist:'全球溫帶至熱帶；臺灣各地岩礁海域',habitat:'岩礁與礫石底，水深 0–200 公尺',cons:null,
+  sp:[{cat:'NMMB-M011560',loc:'基隆市中正區 潮境',cy:'基隆市',lat:25.146,lng:121.801,yr:2019,pres:'酒精浸液',st:'已上架',sto:'二研典藏室',by:'漁民捐贈',ident:'巫文隆',n:1,sex:'雌',type:'一般標本'}],
+  md:[{t:'真蛸 體色變化',k:'video',au:'林清哲',d:'2019-10-05',cam:'SONY A7 III',fl:'28 mm'}]},
+
+ {zh:'珊瑚礁地景',sci:'—',g:'景觀',tax:['—','—','—','—','—','—','—'],
+  shape:'其他',color:['藍','綠'],hab:'珊瑚礁',
+  blurb:'記錄臺灣各海域珊瑚礁的整體樣貌與長期變化，是監測白化、覆蓋率與族群消長的重要影像資料，也是展示與教育最常被使用的素材。',
+  dist:'臺灣南部、東部與離島',habitat:'—',cons:null,
+  sp:[],
+  md:[{t:'後壁湖珊瑚礁全景',k:'image',au:'王志倫',d:'2023-06-11',cam:'Canon EOS R5',fl:'15 mm'},
+      {t:'綠島大香菇',k:'image',au:'林清哲',d:'2022-08-08',cam:'SONY A7R V',fl:'16 mm'},
+      {t:'珊瑚礁一日聲景',k:'audio',au:'海洋聲景計畫',d:'2023-06-11',cam:'水下錄音陣列',fl:'—'}]}
+];
+
+/* 展開為統一檢索索引：標本與媒體同在一個索引裡 */
+const REC=[];
+const ICMAP={'表孔軸孔珊瑚':'珊瑚','真蛸':'章魚','棘冠海星':'海星','藍指海星':'海星'};
+SP.forEach(s=>{s.ic=ICMAP[s.zh]||s.g});
+SP.forEach((s,si)=>{
+  s.idx=si;
+  s.sp.forEach((r,i)=>REC.push({t:'標本',k:'specimen',s:si,i:i,zh:s.zh,sci:s.sci,g:s.g,ic:s.ic,cat:r.cat,loc:r.loc,cy:r.cy,lat:r.lat,lng:r.lng,yr:r.yr,img:true,lic:'CC BY 4.0',cons:s.cons,shape:s.shape,color:s.color,hab:s.hab,fam:s.tax[4]}));
+  s.md.forEach((m,i)=>REC.push({t:m.k==='image'?'影像':(m.k==='video'?'影音':'音源'),k:m.k,s:si,i:i,zh:m.t,sci:s.sci,g:s.g,ic:s.ic,cat:'M'+(47500+si*7+i),loc:s.sp[0]?s.sp[0].loc:'—',cy:s.sp[0]?s.sp[0].cy:'—',lat:s.sp[0]?s.sp[0].lat:null,lng:s.sp[0]?s.sp[0].lng:null,yr:+m.d.slice(0,4),img:true,lic:i===0?'CC0':'CC BY 4.0',cons:s.cons,au:m.au,cam:m.cam,fl:m.fl,date:m.d,shape:s.shape,color:s.color,hab:s.hab,fam:s.tax[4]}));
+});
+
+/* ══════════════════════ 語意（概念）檢索 ══════════════════════
+   說明：本 Demo 為純前端靜態檔，無法呼叫語言模型或向量資料庫。
+   這裡實作的是「概念詞庫 + 倒排索引」：把使用者的口語描述拆成概念，
+   再用概念反查物種。可離線、可解釋、可由館方自行維護詞庫。
+   正式版建議改用 embedding 向量檢索（見畫面上的說明）。            */
+const CONCEPTS=[
+ {k:'圓球狀',s:['圓圓','圓滾滾','圓形','圓的','球形','圓球','球狀','一顆球','像球','球','圓'],p:['魔鬼海膽','白棘三列海膽','巴布亞硝水母']},
+ {k:'身上有刺',s:['都是刺','滿是刺','有刺','很多刺','尖刺','刺刺的','刺刺','棘','扎人','會刺','像針','刺'],p:['魔鬼海膽','白棘三列海膽','棘冠海星','錦繡龍蝦']},
+ {k:'有硬殼',s:['有殼','硬殼','外殼','貝殼','背著殼','殼'],p:['木賊峨螺','鸚鵡螺','長硨磲蛤','綠蠵龜','錦繡龍蝦','弧邊招潮蟹']},
+ {k:'螺旋捲曲',s:['螺旋','捲起來','旋轉','一圈一圈','螺'],p:['木賊峨螺','鸚鵡螺']},
+ {k:'星星形狀',s:['星星','五角','星形','像星','海星'],p:['棘冠海星','藍指海星']},
+ {k:'傘狀漂浮',s:['像雨傘','雨傘','傘狀','漂浮','漂在','漂','浮','飄','透明','軟軟','水母'],p:['巴布亞硝水母']},
+ {k:'八隻腕足',s:['八隻腳','八腳','八爪','八隻','觸手','腕足','章魚','花枝'],p:['真蛸']},
+ {k:'一大一小的螯',s:['大螯','螯','鉗子','夾子','揮手','招手'],p:['弧邊招潮蟹']},
+ {k:'很多腳會爬',s:['很多腳','好多腳','會爬','爬來爬去','螃蟹','蝦'],p:['弧邊招潮蟹','錦繡龍蝦']},
+ {k:'會飛的鳥',s:['會飛','翅膀','鳥','天上','天空','盤旋','懸停','飛'],p:['白眼潛鴨','紅隼','灰面鵟鷹']},
+ {k:'魚類',s:['魚','游泳','游','魚鰭','鰭'],p:['眼斑雙鋸魚','曲紋唇魚','鯨鯊','庫達海馬']},
+ {k:'海龜',s:['海龜','烏龜','龜','背甲','背上有殼','背著殼','爬上沙灘','四隻腳會游泳'],p:['綠蠵龜']},
+ {k:'鯨豚',s:['海豚','鯨魚','鯨','哺乳動物','噴水','賞鯨'],p:['花紋海豚']},
+ {k:'體型很大',s:['世界上最大','全世界最大','最大的魚','很大','最大','超大','巨大','龐大','大隻'],p:['鯨鯊','曲紋唇魚','長硨磲蛤','綠蠵龜','花紋海豚']},
+ {k:'體型很小',s:['很小','小小','迷你','小隻','袖珍'],p:['眼斑雙鋸魚','庫達海馬','弧邊招潮蟹','木賊峨螺']},
+ {k:'有毒會螫人',s:['有毒','毒','會螫','螫人','被刺到','危險','不能碰'],p:['魔鬼海膽','棘冠海星','巴布亞硝水母']},
+ {k:'會變色偽裝',s:['變色','會變顏色','偽裝','隱形','融入背景','看不見'],p:['真蛸']},
+ {k:'很聰明',s:['聰明','智商','會開罐','解謎','認得人'],p:['真蛸']},
+ {k:'共生關係',s:['共生','住在一起','互相幫忙','躲在裡面','躲在'],p:['眼斑雙鋸魚','長硨磲蛤','表孔軸孔珊瑚']},
+ {k:'住在海葵裡',s:['海葵'],p:['眼斑雙鋸魚']},
+ {k:'吃珊瑚',s:['吃珊瑚','啃珊瑚','破壞珊瑚','大爆發'],p:['棘冠海星']},
+ {k:'造礁珊瑚',s:['造礁','珊瑚','白化','集體產卵','產卵'],p:['表孔軸孔珊瑚']},
+ {k:'保育類',s:['保育','保育類','瀕臨絕種','禁捕','稀有','珍貴','快絕種'],p:['綠蠵龜','曲紋唇魚','鯨鯊','花紋海豚','長硨磲蛤','紅隼','灰面鵟鷹']},
+ {k:'可食用',s:['可以吃','能吃','食用','好吃','海鮮','餐桌'],p:['白棘三列海膽','錦繡龍蝦','石蓴','真蛸']},
+ {k:'夜行性',s:['夜間','晚上','夜行','夜裡','半夜'],p:['魔鬼海膽','錦繡龍蝦','花紋海豚']},
+ {k:'深海',s:['深海','很深','深處','黑暗','看不到光'],p:['鸚鵡螺','花紋海豚']},
+ {k:'潮間帶',s:['潮間帶','退潮','潮池','沙灘','泥灘','海邊','踩水'],p:['木賊峨螺','弧邊招潮蟹','石蓴','黑海參']},
+ {k:'珊瑚礁區',s:['珊瑚礁','礁區','礁石','浮潛'],p:['魔鬼海膽','白棘三列海膽','眼斑雙鋸魚','曲紋唇魚','錦繡龍蝦','藍指海星','棘冠海星','黑海參','長硨磲蛤','綠蠵龜','表孔軸孔珊瑚']},
+ {k:'海草床',s:['海草','草叢','海草床'],p:['庫達海馬','綠蠵龜']},
+ {k:'活化石',s:['活化石','很古老','億年','沒有變過'],p:['鸚鵡螺']},
+ {k:'雄性育兒',s:['公的生','雄魚懷孕','育兒袋','爸爸生小孩'],p:['庫達海馬']},
+ {k:'會變性別',s:['變性','轉變性別','會變成母的'],p:['眼斑雙鋸魚']},
+ {k:'能再生',s:['再生','斷掉會長回來','重新長'],p:['藍指海星']},
+ {k:'濾食',s:['濾食','吃浮游生物','過濾','張大嘴']},
+ {k:'世界最大的魚',s:['世界上最大的魚','最大的魚','世界上最大','豆腐鯊'],p:['鯨鯊'],p:['鯨鯊','長硨磲蛤']},
+ {k:'海底清道夫',s:['吃沙','翻沙','清道夫','吸塵器','分解','清潔'],p:['黑海參','木賊峨螺']},
+ {k:'海藻',s:['海藻','藻類','綠藻','海萵苣','萵苣','菜'],p:['石蓴']},
+ {k:'候鳥過境',s:['過境','遷徙','候鳥','南遷','國慶鳥','秋天'],p:['灰面鵟鷹','白眼潛鴨','紅隼']},
+ {k:'猛禽',s:['老鷹','猛禽','鷹','隼','抓老鼠','獵捕'],p:['紅隼','灰面鵟鷹']},
+ {k:'水鴨',s:['鴨','水鴨','潛鴨'],p:['白眼潛鴨']},
+ {k:'顏色鮮豔',s:['鮮豔','很漂亮','彩色','五顏六色','很美'],p:['藍指海星','長硨磲蛤','眼斑雙鋸魚','表孔軸孔珊瑚']},
+ {k:'黑色',s:['黑色','黑黑','黑'],p:['魔鬼海膽','黑海參']},
+ {k:'橘色',s:['橘色','橙色','橘'],p:['眼斑雙鋸魚','錦繡龍蝦']},
+ {k:'藍色',s:['藍色','寶藍','很藍','藍'],p:['藍指海星','長硨磲蛤']},
+ {k:'白色',s:['白色','白白','白'],p:['白棘三列海膽','鯨鯊','花紋海豚']},
+ {k:'綠色',s:['綠色','綠'],p:['石蓴','綠蠵龜','表孔軸孔珊瑚','錦繡龍蝦']},
+ {k:'動作很慢',s:['很慢','不太會游','游很慢','慢吞吞'],p:['庫達海馬','黑海參']},
+ {k:'擱淺救援',s:['擱淺','受傷','救援','救傷'],p:['花紋海豚','綠蠵龜']},
+ {k:'長觸角',s:['長觸角','觸角','長鬚','鬍鬚'],p:['錦繡龍蝦']},
+ {k:'會發出聲音',s:['聲音','叫聲','發聲','會叫','摩擦'],p:['錦繡龍蝦','花紋海豚']}
+];
+const STOP=['住在','裡面','上面','外面','旁邊','世界上','世界','一樣','水裡','海裡','水中','海中','身上','身體','顏色','那隻','一隻','長得','看起來','的那個','那個','這個','是','有','在','會','都','一','個','和','跟','還有','很','就','然後','啊','嗎','呢','之','種','東西','生物','動物','牠','它','我','想','找','要','請','幫','看','什麼','叫','什','麼','一種','像','那','這','了','把','被','以及','或','與','小','大','的','，',',','、','。','？','?','！','!']
+function semantic(qraw){
+  const q=(qraw||'').trim(); if(!q)return null;
+  const hits=[],used=[];
+  CONCEPTS.forEach(c=>{
+    const m=c.s.filter(w=>q.indexOf(w)>=0);
+    if(m.length){hits.push({k:c.k,p:c.p,w:m.sort((a,b)=>b.length-a.length)[0]});used.push(...m);}
+  });
+  if(!hits.length)return null;
+  const sc={};
+  hits.forEach(h=>h.p.forEach(n=>{
+    const i=SP.findIndex(s=>s.zh===n); if(i<0)return;
+    sc[i]=sc[i]||{i:i,n:0,hits:[]}; sc[i].n++; sc[i].hits.push(h.k);
+  }));
+  const rank=Object.values(sc).sort((a,b)=>b.n-a.n||a.i-b.i);
+  const max=rank[0].n;
+  rank.forEach(r=>r.pct=Math.round(r.n/hits.length*100));
+  let rest=q; used.sort((a,b)=>b.length-a.length).forEach(w=>{rest=rest.split(w).join('')});
+  STOP.forEach(w=>{rest=rest.split(w).join('')});
+  return {q:q,concepts:hits,rank:rank.filter(r=>r.n>=Math.max(1,max-1)).slice(0,12),
+          spSet:new Set(rank.filter(r=>r.n>=Math.max(1,max-1)).slice(0,12).map(r=>r.i)),
+          rankMap:Object.fromEntries(rank.map(r=>[r.i,r.n])), rest:rest.trim(), total:hits.length};
+}
+function literalHits(q){
+  if(!q)return 0;
+  const t=q.toLowerCase();
+  return REC.filter(r=>(r.zh+r.sci+r.cat).toLowerCase().indexOf(t)>=0).length;
+}
+
+/* ══════════════════════ 狀態 ══════════════════════ */
+const F={q:'',g:new Set(),t:new Set(),cy:new Set(),yr:new Set(),lic:new Set(),cons:false,
+         fam:null,shape:null,color:null,hab:null,sem:null};
+let QMODE='auto';
+let VIEW='grid', SORT='rel', PAGE='home', CUR=null, MODE='public';
+
+/* ══════════════════════ 篩選 ══════════════════════ */
+function decade(y){return Math.floor(y/10)*10+' 年代'}
+function match(r,skip){
+  if(F.sem&&!F.sem.spSet.has(r.s))return false;
+  if(F.q){const q=F.q.toLowerCase();
+    const hay=(r.zh+' '+r.sci+' '+r.cat+' '+r.loc+' '+r.g+' '+SP[r.s].zh+' '+SP[r.s].tax.join(' ')).toLowerCase();
+    if(hay.indexOf(q)<0)return false;}
+  if(skip!=='g'&&F.g.size&&!F.g.has(r.g))return false;
+  if(skip!=='t'&&F.t.size&&!F.t.has(r.t))return false;
+  if(skip!=='cy'&&F.cy.size&&!F.cy.has(r.cy))return false;
+  if(skip!=='yr'&&F.yr.size&&!F.yr.has(decade(r.yr)))return false;
+  if(skip!=='lic'&&F.lic.size&&!F.lic.has(r.lic))return false;
+  if(F.cons&&!r.cons)return false;
+  if(F.fam&&r.fam!==F.fam&&SP[r.s].tax.indexOf(F.fam)<0)return false;
+  if(F.shape&&r.shape!==F.shape)return false;
+  if(F.color&&r.color.indexOf(F.color)<0)return false;
+  if(F.hab&&r.hab!==F.hab)return false;
+  return true;
+}
+function results(){
+  let a=REC.filter(r=>match(r));
+  if(F.sem&&SORT==='rel')a=a.slice().sort((x,y)=>(F.sem.rankMap[y.s]||0)-(F.sem.rankMap[x.s]||0)||x.s-y.s);
+  if(SORT==='new')a=a.slice().sort((x,y)=>y.yr-x.yr);
+  if(SORT==='old')a=a.slice().sort((x,y)=>x.yr-y.yr);
+  if(SORT==='az')a=a.slice().sort((x,y)=>x.zh.localeCompare(y.zh,'zh-Hant'));
+  return a;
+}
+function facetCount(key,val){return REC.filter(r=>{
+  if(!match(r,key))return false;
+  if(key==='g')return r.g===val;
+  if(key==='t')return r.t===val;
+  if(key==='cy')return r.cy===val;
+  if(key==='yr')return decade(r.yr)===val;
+  if(key==='lic')return r.lic===val;
+  return true;}).length;}
+
+function uniq(f){const m={};REC.forEach(r=>{const v=f(r);m[v]=(m[v]||0)+1});return Object.keys(m);}
+
+/* ══════════════════════ 側欄 ══════════════════════ */
+function facetBlock(title,key,vals,note){
+  let h='<div class="fgroup"><h4>'+title+(note?'<span class="c">'+note+'</span>':'')+'</h4>';
+  vals.forEach(v=>{
+    const n=facetCount(key,v), on=F[key].has(v);
+    h+='<label class="opt'+(n===0&&!on?' dis':'')+'"><input type="checkbox" '+(on?'checked':'')+(n===0&&!on?' disabled':'')+
+       ' onchange="tog(\''+key+'\',\''+v+'\')"><span>'+v+'</span><span class="n">'+n+'</span></label>';
+  });
+  return h+'</div>';
+}
+function tog(k,v){F[k].has(v)?F[k].delete(v):F[k].add(v);render()}
+function clearAll(){F.q='';document.getElementById('q').value='';['g','t','cy','yr','lic'].forEach(k=>F[k].clear());
+  F.cons=false;F.fam=null;F.shape=null;F.color=null;F.hab=null;F.sem=null;render()}
+
+const GROUPS=['魚類','軟體動物','棘皮動物','刺胞動物','節肢動物','海洋哺乳類','海洋爬蟲類','鳥類','藻類','景觀'];
+const TYPES=['標本','影像','影音','音源'];
+const SHAPES=[['魚形','魚類'],['貝殼','軟體動物'],['球刺狀','棘皮動物'],['星形','棘皮動物'],['傘狀','刺胞動物'],['有殼有腳','節肢動物'],['其他','景觀']];
+const COLORS=[['黑','#333'],['白','#e8e8e8'],['紅','#c0392b'],['橘','#e67e22'],['黃','#e6c229'],['綠','#27865a'],['藍','#2b6ea8'],['紫','#7a4a86'],['褐','#8a6234'],['灰','#8896a0'],['粉','#e39aa8']];
+const HABS=['珊瑚礁','潮間帶','大洋','深海','海草床','岩礁','濕地'];
+
+function sidebar(){
+  const cy=uniq(r=>r.cy).sort(), yr=uniq(r=>decade(r.yr)).sort();
+  return '<aside>'+
+  '<div class="stabs" role="tablist">'+
+    '<button class="'+(STAB===0?'on':'')+'" onclick="setTab(0)">分面篩選</button>'+
+    '<button class="'+(STAB===1?'on':'')+'" onclick="setTab(1)">分類樹</button>'+
+    '<button class="'+(STAB===2?'on':'')+'" onclick="setTab(2)">特徵檢索</button>'+
+  '</div>'+
+
+  '<div class="spane '+(STAB===0?'on':'')+'">'+
+    '<div class="ann">現況只有「科」一個下拉選單。這裡示範分面篩選：每個選項即時顯示筆數，選了之後其他分面的數字會跟著更新，選不到東西的選項自動變灰。</div>'+
+    facetBlock('資料型態','t',TYPES,'標本＋媒體')+
+    facetBlock('生物類群','g',GROUPS)+
+    facetBlock('採集／拍攝地','cy',cy)+
+    facetBlock('年代','yr',yr)+
+    facetBlock('授權','lic',['CC0','CC BY 4.0'])+
+    '<div class="fgroup"><h4>其他</h4>'+
+      '<label class="opt"><input type="checkbox" '+(F.cons?'checked':'')+' onchange="F.cons=this.checked;render()"><span>僅顯示保育類物種</span>'+
+      '<span class="n">'+REC.filter(r=>r.cons).length+'</span></label></div>'+
+    '<button class="clearall" onclick="clearAll()">清除所有條件</button>'+
+  '</div>'+
+
+  '<div class="spane '+(STAB===1?'on':'')+'"><div class="ann">從「界」一路點到「科」，不必知道學名也能逐層縮小範圍。</div>'+treeHTML()+'</div>'+
+
+  '<div class="spane '+(STAB===2?'on':'')+'">'+
+    '<div class="ann">為「不知道學名的民眾」設計的入口：從外型、顏色、棲地開始找，參考臺灣魚類資料庫的形態特徵檢索。</div>'+
+    '<div class="fgroup"><h4>外型</h4><div class="fchips">'+
+      SHAPES.map(s=>'<button class="chip '+(F.shape===s[0]?'on':'')+'" onclick="pick(\'shape\',\''+s[0]+'\')">'+
+      '<svg viewBox="0 0 100 100" fill="currentColor" stroke="currentColor">'+SIL[s[1]]+'</svg>'+s[0]+'</button>').join('')+'</div></div>'+
+    '<div class="fgroup"><h4>主要顏色</h4><div class="fchips">'+
+      COLORS.map(c=>'<button class="chip '+(F.color===c[0]?'on':'')+'" onclick="pick(\'color\',\''+c[0]+'\')">'+
+      '<span style="width:12px;height:12px;border-radius:50%;background:'+c[1]+';border:1px solid rgba(0,0,0,.15)"></span>'+c[0]+'</button>').join('')+'</div></div>'+
+    '<div class="fgroup"><h4>棲地環境</h4><div class="fchips">'+
+      HABS.map(h=>'<button class="chip '+(F.hab===h?'on':'')+'" onclick="pick(\'hab\',\''+h+'\')">'+h+'</button>').join('')+'</div></div>'+
+    '<button class="clearall" onclick="F.shape=null;F.color=null;F.hab=null;render()">清除特徵條件</button>'+
+  '</div></aside>';
+}
+let STAB=0;
+function setTab(i){STAB=i;render()}
+function pick(k,v){F[k]=(F[k]===v?null:v);render()}
+
+/* 分類樹 */
+const TREE={};
+SP.forEach(s=>{if(s.g==='景觀')return;
+  const [k,p,c,o,f]=s.tax;
+  TREE[k]=TREE[k]||{};TREE[k][p]=TREE[k][p]||{};TREE[k][p][c]=TREE[k][p][c]||{};
+  TREE[k][p][c][o]=TREE[k][p][c][o]||{};TREE[k][p][c][o][f]=(TREE[k][p][c][o][f]||0)+1;});
+const OPEN=new Set(['動物界 Animalia']);
+function toggleNode(n){OPEN.has(n)?OPEN.delete(n):OPEN.add(n);render()}
+function treeHTML(){
+  function walk(obj,depth){
+    let h='';
+    Object.keys(obj).sort().forEach(k=>{
+      const leaf=typeof obj[k]==='number';
+      const cnt=leaf?obj[k]:REC.filter(r=>SP[r.s].tax.indexOf(k)>=0).length;
+      const op=OPEN.has(k);
+      h+='<div class="tnode"><div class="row '+(F.fam===k?'sel':'')+'" onclick="'+(leaf?'pickFam(\''+k+'\')':'toggleNode(\''+k.replace(/'/g,"\\'")+'\')')+'">'+
+         '<span class="tw">'+(leaf?'·':(op?'▾':'▸'))+'</span><span>'+k+'</span><span class="tn">'+cnt+'</span></div>';
+      if(!leaf)h+='<div class="tkids '+(op?'open':'')+'">'+walk(obj[k],depth+1)+'</div>';
+      h+='</div>';
+    });return h;}
+  return '<div class="tree">'+walk(TREE,0)+'</div>';
+}
+function pickFam(f){F.fam=(F.fam===f?null:f);render()}
+
+/* ══════════════════════ 結果視圖 ══════════════════════ */
+function typeIcon(t){return t==='標本'?'🔬':(t==='影像'?'🖼':(t==='影音'?'▶':'♪'))}
+function card(r){
+  return '<article class="card" tabindex="0" onclick="openRec('+REC.indexOf(r)+')" onkeydown="if(event.key===\'Enter\')openRec('+REC.indexOf(r)+')">'+
+   '<div class="thumb" style="'+bgOf(r.g)+'">'+ill(r.g,null,r.ic)+
+   '<span class="badge">'+typeIcon(r.t)+' '+r.t+'</span><span class="lic">'+r.lic+'</span></div>'+
+   '<div class="cbody"><div class="zh">'+r.zh+'</div><div class="sci">'+r.sci+'</div>'+
+   '<div class="meta"><span>'+r.cat+'</span><span>·</span><span>'+r.cy+'</span><span>·</span><span>'+r.yr+'</span></div></div></article>';
+}
+function listView(a){
+  return '<div class="list"><table class="lt"><thead><tr><th></th><th>名稱</th><th>學名</th><th>類型</th><th>館藏／編號</th><th>採集地</th><th>年份</th><th>授權</th></tr></thead><tbody>'+
+   a.map(r=>'<tr class="r" onclick="openRec('+REC.indexOf(r)+')"><td><span class="tmini" style="'+bgOf(r.g)+'">'+ill(r.g,null,r.ic)+'</span></td>'+
+   '<td><b>'+r.zh+'</b></td><td class="sci">'+r.sci+'</td><td>'+typeIcon(r.t)+' '+r.t+'</td><td>'+r.cat+'</td><td>'+r.loc+'</td><td>'+r.yr+'</td><td>'+r.lic+'</td></tr>').join('')+
+   '</tbody></table></div>';
+}
+/* 地圖：以經緯度線性投影，含臺灣本島與離島輪廓 */
+const TW=[[121.54,25.30],[121.75,25.15],[122.00,25.01],[121.90,24.85],[121.86,24.60],[121.65,24.20],[121.62,23.80],[121.48,23.40],[121.38,23.05],[121.20,22.80],[120.95,22.30],[120.85,21.90],[120.72,22.10],[120.55,22.30],[120.35,22.55],[120.20,22.90],[120.10,23.25],[120.13,23.60],[120.25,23.95],[120.45,24.25],[120.72,24.60],[120.95,24.85],[121.20,25.05],[121.40,25.20]];
+const ISL=[[119.57,23.57,9,'澎湖'],[121.49,22.66,5,'綠島'],[121.55,22.03,5,'蘭嶼'],[120.37,22.34,4,'小琉球'],[121.93,24.84,3,'龜山島']];
+const MW=430,MH=635,LNG0=119.2,LNG1=122.3,LAT0=21.5,LAT1=25.7;
+function px(lng){return (lng-LNG0)/(LNG1-LNG0)*MW}
+function py(lat){return (LAT1-lat)/(LAT1-LAT0)*MH}
+function mapView(a){
+  const pts={};let noc=0;
+  a.forEach(r=>{if(r.lat==null||r.lng<LNG0||r.lng>LNG1||r.lat<LAT0){noc++;return;}
+    const k=r.loc;pts[k]=pts[k]||{lat:r.lat,lng:r.lng,n:0,rs:[]};pts[k].n++;pts[k].rs.push(r);});
+  const keys=Object.keys(pts);
+  let svg='<svg viewBox="0 0 '+MW+' '+MH+'" role="img" aria-label="採集地點分布圖">';
+  svg+='<polygon points="'+TW.map(p=>px(p[0]).toFixed(1)+','+py(p[1]).toFixed(1)).join(' ')+'" fill="#e8f0e2" stroke="#8fae94" stroke-width="1.4"/>';
+  ISL.forEach(i=>{svg+='<circle cx="'+px(i[0]).toFixed(1)+'" cy="'+py(i[1]).toFixed(1)+'" r="'+i[2]+'" fill="#e8f0e2" stroke="#8fae94" stroke-width="1.2"/>';
+    svg+='<text x="'+(px(i[0])+i[2]+4).toFixed(1)+'" y="'+(py(i[1])+4).toFixed(1)+'" font-size="10" fill="#5d707e">'+i[3]+'</text>';});
+  keys.forEach(k=>{const p=pts[k];const R=7+Math.min(p.n,8)*2;
+    svg+='<g class="mpt" onclick="mapPick(\''+k.replace(/'/g,"\\'")+'\')">'+
+      '<circle cx="'+px(p.lng).toFixed(1)+'" cy="'+py(p.lat).toFixed(1)+'" r="'+R+'" fill="rgba(224,102,60,.75)" stroke="#fff" stroke-width="2"/>'+
+      '<text x="'+px(p.lng).toFixed(1)+'" y="'+(py(p.lat)+4).toFixed(1)+'" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">'+p.n+'</text></g>';});
+  svg+='</svg>';
+  let side='<div class="mapside"><h4>採集／拍攝地點　'+keys.length+' 處</h4>';
+  keys.sort((x,y)=>pts[y].n-pts[x].n).forEach(k=>{
+    side+='<div class="li" onclick="mapPick(\''+k.replace(/'/g,"\\'")+'\')"><span class="dot"></span><span>'+k+'</span><span class="n">'+pts[k].n+'</span></div>';});
+  side+='<div class="nocoord"><b>'+noc+' 筆</b>無座標或位於圖幅外（含東沙、南沙）。<br>現況：這些資料在地圖上會直接消失，使用者誤以為不存在；改版建議另立「未標定位置」群組，並在後台品質儀表板列管。</div>';
+  side+='</div>';
+  return '<div class="mapwrap"><div class="mapbox">'+svg+'</div>'+side+'</div>';
+}
+function mapPick(loc){F.q=loc;document.getElementById('q').value=loc;VIEW='grid';render()}
+
+/* ══════════════════════ 頁面 ══════════════════════ */
+function pillbar(){
+  const ps=[];
+  if(F.q)ps.push(['關鍵字：'+F.q,"F.q='';document.getElementById('q').value='';render()"]);
+  if(F.sem)ps.push(['語意：'+F.sem.concepts.map(c=>c.k).join('＋'),"F.sem=null;document.getElementById('q').value='';render()"]);
+  ['g','t','cy','yr','lic'].forEach(k=>F[k].forEach(v=>ps.push([v,"F."+k+".delete('"+v+"');render()"])));
+  if(F.cons)ps.push(['保育類','F.cons=false;render()']);
+  if(F.fam)ps.push([F.fam,'F.fam=null;render()']);
+  if(F.shape)ps.push(['外型：'+F.shape,'F.shape=null;render()']);
+  if(F.color)ps.push(['顏色：'+F.color,'F.color=null;render()']);
+  if(F.hab)ps.push(['棲地：'+F.hab,'F.hab=null;render()']);
+  if(!ps.length)return '';
+  return '<div class="pills">'+ps.map(p=>'<span class="pill">'+p[0]+'<button onclick="'+p[1]+'" aria-label="移除條件">×</button></span>').join('')+
+    '<span class="pill" style="background:#f4f6f7;color:#5d707e">共 '+ps.length+' 項條件<button onclick="clearAll()">×</button></span></div>';
+}
+function semBanner(){
+  const s=F.sem; if(!s)return '';
+  let h='<div class="semb"><div class="lead">'+
+    '<span>🧭 語意描述檢索</span>'+
+    (F.semAuto?'<span style="background:rgba(255,255,255,.2);border-radius:20px;padding:2px 9px">看起來像是描述，已自動切換</span>':'')+
+    '<span style="margin-left:auto"><button class="exchip" style="border-color:rgba(255,255,255,.45);color:#fff" onclick="QMODE=\'lit\';doSearch()">改用關鍵字搜尋</button></span></div>'+
+    '<div class="qq">「'+s.q+'」</div>'+
+    '<div class="cw"><span style="font-size:12.5px;opacity:.85">理解為 '+s.total+' 個概念：</span>'+
+    s.concepts.map(c=>'<span class="cc"><b>'+c.k+'</b> <small>← '+c.w+'</small></span>').join('')+'</div>';
+  if(s.rest)h+='<div class="rest">未能對應的描述：「'+s.rest+'」　—　正式版建議由 embedding 向量模型處理這類詞彙，詞庫式比對無法涵蓋所有說法。</div>';
+  h+='<div class="semtop">'+s.rank.slice(0,8).map(r=>{const x=SP[r.i];
+    return '<div class="semc" onclick="openSpecies('+r.i+')"><span class="ic" style="'+bgOf(x.g)+'">'+ill(x.g,null,x.ic)+'</span>'+
+    '<span style="min-width:0"><span class="zh">'+x.zh+'</span><div class="hit">命中 '+r.hits.slice(0,3).join(' · ')+'</div>'+
+    '<div class="bar"><i style="width:'+r.pct+'%"></i></div></span></div>';}).join('')+'</div></div>';
+  return h;
+}
+function homeHTML(){
+  const a=results();
+  let body;
+  if(!a.length){
+    body='<div class="empty"><b>找不到符合的資料</b>試試看關鍵字：<br>'+
+      ['海膽','珊瑚','綠蠵龜','Diadema','墾丁','NMMB-M009603'].map(s=>'<button class="sug" onclick="quick(\''+s+'\')">'+s+'</button>').join('')+
+      '<div style="margin-top:12px">或用描述的方式問：</div>'+
+      ['圓圓的、身上都是刺的那個球','背上有殼會游泳的','像雨傘一樣漂在水裡的透明生物','黑黑軟軟躺在礁台上的']
+        .map(s=>'<button class="sug" onclick="semExample(\''+s+'\')">'+s+'</button>').join('')+
+      '<div class="ann" style="text-align:left;margin-top:16px">現況：查不到就是一片空白，也不會告訴使用者為什麼。改版建議在無結果時主動提供相近詞、放寬條件的建議、最接近的分類群，以及切換到語意描述檢索的入口。</div></div>';
+  } else if(VIEW==='grid') body='<div class="grid">'+a.map(card).join('')+'</div>';
+  else if(VIEW==='list') body=listView(a);
+  else body=mapView(a);
+
+  return '<main>'+sidebar()+'<section>'+
+   '<div class="toolbar"><div class="count"><b>'+a.length+'</b> 筆結果 <span class="sub">／ 全站 '+REC.length+' 筆示意資料</span></div>'+
+   '<div class="tbspacer"></div>'+
+   '<select class="sort" onchange="SORT=this.value;render()" aria-label="排序">'+
+     ['rel|相關度','new|年份（新→舊）','old|年份（舊→新）','az|名稱筆畫'].map(o=>{const[v,t]=o.split('|');
+       return '<option value="'+v+'" '+(SORT===v?'selected':'')+'>'+t+'</option>'}).join('')+'</select>'+
+   '<div class="views" role="group" aria-label="檢視模式">'+
+     '<button class="'+(VIEW==='grid'?'on':'')+'" onclick="VIEW=\'grid\';render()">▦ 縮圖牆</button>'+
+     '<button class="'+(VIEW==='list'?'on':'')+'" onclick="VIEW=\'list\';render()">☰ 清單</button>'+
+     '<button class="'+(VIEW==='map'?'on':'')+'" onclick="VIEW=\'map\';render()">◉ 地圖</button></div>'+
+   '<button class="btn-x" onclick="alert(\'Demo 示意：匯出目前 '+a.length+' 筆為 CSV／Darwin Core Archive\')">匯出 CSV</button>'+
+   '</div>'+
+   '<div class="ann">現況：查詢最多回傳 500 筆、無排序、無檢視切換，且標本與多媒體要分兩個網站各查一次。這裡是單一入口一次查完，結果同時包含標本、影像、影音與音源。</div>'+
+   semBanner()+
+   (F.sem?'<div class="ann"><b>關於語意檢索：</b>本 Demo 為純前端靜態檔，無法呼叫語言模型，這裡採用的是「概念詞庫＋倒排索引」——把口語描述拆成概念再反查物種，優點是完全離線、每一步都可解釋、詞庫可由館方自行維護，缺點是沒收錄的說法就比不到。正式版建議改為 embedding 向量檢索（物種描述與使用者查詢都轉成向量比對相似度），並保留這層概念詞庫作為可控的補強與同義詞校正。</div>':'')+
+   pillbar()+body+
+   '</section></main>';
+}
+function quick(s){F.q=s;document.getElementById('q').value=s;render()}
+
+/* 物種聚合頁 */
+function speciesHTML(si){
+  const s=SP[si];
+  const specs=s.sp, meds=s.md;
+  let h='<div class="page"><div class="crumbs"><button onclick="goHome()">典藏檢索</button> ／ '+s.g+' ／ '+s.tax[4]+' ／ <b>'+s.zh+'</b></div>';
+  h+='<div class="ann">改版核心：以「物種」為軸把兩站串起來。同一頁同時看到館藏標本（helloocean）與生態影像、影音、音源（media）。現況這兩批資料分屬不同網域，彼此沒有任何連結。</div>';
+  h+='<div class="dwrap"><div class="dhero"><div class="img" style="'+bgOf(s.g)+'">'+ill(s.g,null,s.ic)+
+     '<span class="badge">🖼 主要影像</span></div><div class="info">'+
+     '<h1>'+s.zh+'</h1><div class="sci">'+s.sci+'</div>'+
+     '<div class="tagrow"><span class="tg">'+s.g+'</span><span class="tg">'+s.tax[4]+'</span>'+
+     (s.cons?'<span class="tg cons">'+s.cons+'</span>':'<span class="tg ok">非保育類</span>')+
+     '<span class="tg">館藏 '+specs.length+' 件</span><span class="tg">媒體 '+meds.length+' 筆</span></div>'+
+     '<div class="modeswitch" role="group" aria-label="檢視模式">'+
+       '<button class="'+(MODE==='public'?'on':'')+'" onclick="MODE=\'public\';render()">民眾檢視</button>'+
+       '<button class="'+(MODE==='res'?'on':'')+'" onclick="MODE=\'res\';render()">研究檢視</button></div>'+
+     (MODE==='public'?'<p class="blurb">'+s.blurb+'</p>':
+       '<div class="kv" style="margin-top:14px">'+s.tax.map((t,i)=>'<div class="r"><span class="k">'+['界','門','綱','目','科','屬','種'][i]+'</span><span class="v">'+t+'</span></div>').join('')+'</div>')+
+     '</div></div>';
+
+  h+='<div class="ann" style="margin:0 26px">現況的標本詳目頁只有學名與典藏管理欄位，沒有任何一句話說明這是什麼生物，也沒有影像。這裡預設呈現民眾看得懂的內容，研究人員一鍵切到完整欄位。</div>';
+
+  if(MODE==='public'){
+    h+='<div class="dsec"><h3>分布與棲地</h3><div class="kv">'+
+      '<div class="r"><span class="k">分布</span><span class="v">'+s.dist+'</span></div>'+
+      '<div class="r"><span class="k">棲地</span><span class="v">'+s.habitat+'</span></div>'+
+      '<div class="r"><span class="k">保育狀態</span><span class="v">'+(s.cons||'未列保育類')+'</span></div>'+
+      '<div class="r"><span class="k">俗名</span><span class="v">'+(s.zh==='曲紋唇魚'?'蘇眉、龍王鯛、拿破崙魚':(s.zh==='鯨鯊'?'豆腐鯊、大憨鯊':(s.zh==='眼斑雙鋸魚'?'小丑魚、公主小丑':'—')))+'</span></div>'+
+      '</div><div class="ann">中文俗名、分布、棲地、保育等級都是現況沒有的欄位。保育等級可介接既有保育類名錄與紅皮書資料，不必人工逐筆建置。</div></div>';
+  }
+
+  if(meds.length){
+    h+='<div class="dsec"><h3>影像與影音 <span class="cnt">'+meds.length+' 筆　來源：多媒體影音平台</span></h3><div class="strip">'+
+      meds.map((m,i)=>'<div class="m" onclick="openMedia('+si+','+i+')"><div class="th" style="'+bgOf(s.g)+'">'+ill(s.g,null,s.ic)+
+      '<span class="badge">'+typeIcon(m.k==='image'?'影像':(m.k==='video'?'影音':'音源'))+'</span>'+
+      '<span class="lic">'+(i===0?'CC0':'CC BY 4.0')+'</span></div>'+
+      '<div class="cap">'+m.t+'<div class="a">'+m.au+'　'+m.d+'</div></div></div>').join('')+'</div></div>';
+  }
+
+  if(specs.length){
+    h+='<div class="dsec"><h3>館藏標本 <span class="cnt">'+specs.length+' 件　來源：生物標本典藏系統</span></h3>'+
+      '<table class="sp"><thead><tr><th>館藏編號</th><th>採集地點</th><th>採集年</th><th>保存方式</th><th>數量</th>'+
+      (MODE==='res'?'<th>儲存位置</th><th>採集者</th><th>鑑定人</th><th>性別</th><th>模式</th>':'')+'</tr></thead><tbody>'+
+      specs.map(r=>'<tr><td class="mono">'+r.cat+'</td><td>'+r.loc+'</td><td>'+r.yr+'</td><td>'+r.pres+'</td><td>'+r.n+'</td>'+
+      (MODE==='res'?'<td>'+r.sto+'</td><td>'+r.by+'</td><td>'+r.ident+'</td><td>'+r.sex+'</td><td>'+r.type+'</td>':'')+'</tr>').join('')+
+      '</tbody></table>'+
+      (MODE==='res'?'<div class="ann">研究檢視保留現況全部的典藏管理欄位（臨時編號、館藏類別、標本現況、儲存位置、採集方法、標本體重等），並額外提供 Darwin Core 欄位對照與引用格式。</div>':'')+
+      (s.cons?'<div class="nocoord" style="margin-top:12px">此物種為保育類，依 TBIA 敏感資料原則，公開頁面之採集座標已模糊化至約 10 公里網格；研究人員可提出申請取得精確座標。</div>':'')+
+      '</div>';
+  } else {
+    h+='<div class="dsec"><h3>館藏標本 <span class="cnt">0 件</span></h3>'+
+      '<p style="color:var(--mute);font-size:14px;margin:0">本物種目前無實體館藏標本，資料來自多媒體影音平台的影像紀錄。</p>'+
+      '<div class="ann">單一入口的價值：即使沒有標本，民眾一樣查得到這個物種的影像與說明；現況則是兩邊都只查得到自己那一半。</div></div>';
+  }
+
+  if(MODE==='res'){
+    h+='<div class="dsec"><h3>資料引用與下載</h3><div class="dl">'+
+      '<div class="dlc"><h5>Darwin Core Archive</h5><div class="px">標準格式，可直接匯入 GBIF／TBIA</div><span class="lic">DwC-A</span><button onclick="alert(\'Demo 示意：下載 DwC-A\')">下載</button></div>'+
+      '<div class="dlc"><h5>CSV 表格</h5><div class="px">本物種全部館藏紀錄</div><span class="lic">UTF-8</span><button onclick="alert(\'Demo 示意：下載 CSV\')">下載</button></div>'+
+      '<div class="dlc"><h5>引用格式</h5><div class="px">附 DOI，可直接引用於論文</div><span class="lic">DOI</span><button class="ghost" onclick="alert(\'Demo 示意：複製引用格式\')">複製</button></div>'+
+      '</div><div class="ann">現況兩站皆無資料下載與引用機制，研究者取得資料只能寄信申請。館方已是 TBIA 正式會員，一鍵產出 DwC-A 是把既有承諾落地的最短路徑。</div></div>';
+  }
+
+  h+='</div>';
+
+  const rel=SP.map((x,i)=>[x,i]).filter(([x,i])=>i!==si&&(x.g===s.g||x.hab===s.hab)).slice(0,6);
+  if(rel.length){
+    h+='<div class="section-h"><h2>相關物種</h2><span>同類群或同棲地</span></div><div class="grid">'+
+      rel.map(([x,i])=>'<article class="card" onclick="openSpecies('+i+')"><div class="thumb" style="'+bgOf(x.g)+'">'+ill(x.g,null,x.ic)+
+      '<span class="badge">'+x.g+'</span></div><div class="cbody"><div class="zh">'+x.zh+'</div><div class="sci">'+x.sci+'</div>'+
+      '<div class="meta"><span>館藏 '+x.sp.length+'</span><span>·</span><span>媒體 '+x.md.length+'</span></div></div></article>').join('')+'</div>';
+  }
+  return h+'</div>';
+}
+
+/* 主題策展 */
+const TOPICS=[
+ {t:'墾丁潮間帶的一百種生命',s:'從後灣到萬里桐，退潮後兩小時的世界',q:'潮間帶',g:'棘皮動物'},
+ {t:'珊瑚產卵之夜',s:'農曆三月的滿月，海裡下起粉紅色的雪',q:'珊瑚',g:'刺胞動物'},
+ {t:'被誤解的海底清道夫',s:'海參、海膽與螺類如何維持礁區健康',q:'海參',g:'棘皮動物'},
+ {t:'牠們是保育類',s:'綠蠵龜、龍王鯛、鯨鯊與臺灣的海洋保育',q:'',g:'海洋爬蟲類',cons:true},
+ {t:'恆春半島的過境季',s:'十月的國慶鳥與滿州的起鷹',q:'',g:'鳥類'},
+ {t:'深海來的訪客',s:'鸚鵡螺與那些少見天日的生命',q:'深海',g:'軟體動物'}
+];
+function showTopics(){PAGE='topics';render();window.scrollTo(0,0)}
+function topicsHTML(){
+  let h='<div class="page"><div class="crumbs"><button onclick="goHome()">典藏檢索</button> ／ <b>主題策展</b></div>';
+  h+='<div class="ann">現況十萬筆資產只能一筆一筆查，沒有任何主題式的進入點。策展頁把標本、影像、影音與說明文字聚合成一個故事，是民眾最容易進來的那道門。</div>';
+  h+='<div class="section-h"><h2>主題策展</h2><span>'+TOPICS.length+' 個主題　·　每個主題聚合標本、影像、影音與科普敘述</span></div>';
+  h+='<div class="topics">'+TOPICS.map((t,i)=>{const p=PAL[t.g];
+    return '<div class="topic" style="background:linear-gradient(160deg,'+p[0]+',' +p[1]+')" onclick="openTopic('+i+')">'+
+      '<div style="position:absolute;right:-6px;bottom:-14px;opacity:.28;width:118px;height:118px">'+ill(t.g,'#ffffff',t.ic)+'</div>'+
+      '<div class="t"><b>'+t.t+'</b><span>'+t.s+'</span></div></div>';}).join('')+'</div>';
+  h+='<div class="section-h"><h2>教育資源</h2><span>Demo 未實作</span></div>'+
+     '<div class="empty" style="text-align:left"><b>分齡學習單、課程包、教學素材集</b>'+
+     '規劃提供國小中高年級、國中兩個版本的學習單，以及可下載的教學素材包（含低解析度影像與說明文字，採 CC0 授權，教師可自由重製）。展場實體展品旁設 QR code，掃描後連往此處的完整物種頁。</div>';
+  return h+'</div>';
+}
+function openTopic(i){const t=TOPICS[i];clearAll();F.q=t.q;if(t.g)F.g.add(t.g);if(t.cons)F.cons=true;
+  document.getElementById('q').value=t.q;PAGE='home';render();window.scrollTo(0,0)}
+
+/* ══════════════════════ 媒體 Modal ══════════════════════ */
+function openMedia(si,mi){
+  const s=SP[si],m=s.md[mi];
+  const free=mi===0;
+  const kind=m.k==='image'?'影像':(m.k==='video'?'影音':'音源');
+  document.getElementById('modal').innerHTML=
+   '<div class="mhead"><b>'+m.t+'</b><span class="tg">'+kind+'</span><button onclick="closeModal()" aria-label="關閉">×</button></div>'+
+   '<div class="mbody">'+
+   '<div class="mimg" style="'+bgOf(s.g)+'">'+ill(s.g,null,s.ic)+'<span class="badge">'+typeIcon(kind)+' '+kind+'</span>'+
+   '<span class="lic">'+(free?'CC0 公眾領域':'CC BY 4.0')+'</span></div>'+
+   '<div class="kv">'+
+     [['作品名稱',m.t],['作者',m.au],['物種',s.zh+'（'+s.sci+'）'],['類別',s.g],
+      ['拍攝日期',m.d],['上傳日期',m.d],['機型',m.cam],['焦距',m.fl],
+      ['拍攝地點',s.sp[0]?s.sp[0].loc:'—'],['GPS 座標',s.sp[0]?(s.sp[0].lat+', '+s.sp[0].lng):'—'],
+      ['授權',free?'CC0（公眾領域）':'CC BY 4.0（須標示出處）'],['編號','M'+(47500+si*7+mi)]]
+     .map(r=>'<div class="r"><span class="k">'+r[0]+'</span><span class="v'+(r[1]==='—'?' empty':'')+'">'+r[1]+'</span></div>').join('')+
+   '</div>'+
+   '<div class="ann">現況抽樣可見「說明」「拍攝地點」「GPS 經緯度」「屬名」「種名」多為空白，日期則顯示為「115/1/2 上午 12:00:00」。改版建議：上傳時自動萃取完整 EXIF（含 GPS）、日期一律以 ISO 8601 儲存、顯示層再依語系轉換。</div>'+
+   '<h3 style="font-size:15px;color:var(--navy);margin:18px 0 10px">下載</h3>'+
+   '<div class="dl">'+
+    '<div class="dlc free"><h5>低解析度版</h5><div class="px">約 100 萬畫素　適合簡報、部落格</div><span class="lic">CC0　免登入</span><button onclick="alert(\'Demo 示意：直接下載，不需註冊或申請\')">直接下載</button></div>'+
+    '<div class="dlc"><h5>一般版</h5><div class="px">約 600 萬畫素　適合印刷品</div><span class="lic">CC BY 4.0　須標示出處</span><button onclick="alert(\'Demo 示意：同意授權條款後下載\')">同意並下載</button></div>'+
+    '<div class="dlc"><h5>專業版 ／ 原始檔</h5><div class="px">全解析度　商業或出版使用</div><span class="lic">申請制</span><button class="ghost" onclick="alert(\'Demo 示意：填寫線上申請表，可追蹤案件狀態\')">線上申請</button></div>'+
+   '</div>'+
+   '<div class="ann"><b>這是本案成本效益最高的一項。</b>多媒體平台目前已經有「低解析度／一般／專業」三級下載與購物車，三級價格都是 NT$0，只是被鎖在會員登入後，加上全站一條「未經書面同意不得使用」的聲明。分級開放的介面骨架已經存在，要改的是授權規則，不是重寫系統。做法可參考故宮 Open Data：低解析度 CC0 免登入、中解析度 CC BY 4.0 須標示。</div>'+
+   '<div style="margin-top:14px"><button class="btn-x" onclick="openSpecies('+si+')">查看物種完整頁面 →</button></div>'+
+   '</div>';
+  document.getElementById('mbg').classList.add('on');
+}
+function closeModal(){document.getElementById('mbg').classList.remove('on')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+function openRec(i){const r=REC[i];if(r.k==='specimen')openSpecies(r.s);else openMedia(r.s,r.i)}
+function openSpecies(si){closeModal();PAGE='sp';CUR=si;render();window.scrollTo(0,0)}
+function goHome(){closeModal();PAGE='home';render();window.scrollTo(0,0)}
+
+/* ══════════════════════ 自動完成 ══════════════════════ */
+const qEl=document.getElementById('q'),acEl=document.getElementById('ac');
+let acI=-1,acList=[];
+function buildAC(v){
+  if(!v){acEl.style.display='none';return}
+  const q=v.toLowerCase();const out=[];
+  SP.forEach((s,i)=>{if((s.zh+s.sci).toLowerCase().indexOf(q)>=0)out.push({l:s.zh,s:s.sci,t:'物種',a:'openSpecies('+i+')',v:s.zh});});
+  REC.forEach(r=>{if(r.cat.toLowerCase().indexOf(q)>=0&&out.length<10)out.push({l:r.cat,s:r.zh,t:'編號',a:'openRec('+REC.indexOf(r)+')',v:r.cat});});
+  uniq(r=>r.cy).forEach(c=>{if(c.toLowerCase().indexOf(q)>=0&&out.length<12)out.push({l:c,s:'採集地',t:'地點',a:'quick(\''+c+'\')',v:c});});
+  GROUPS.forEach(g=>{if(g.indexOf(v)>=0&&out.length<14)out.push({l:g,s:'生物類群',t:'分類',a:'quick(\''+g+'\')',v:g});});
+  acList=out.slice(0,8);acI=-1;
+  if(!acList.length){acEl.style.display='none';return}
+  acEl.innerHTML=acList.map((o,i)=>'<div class="it" data-i="'+i+'" onclick="'+o.a+';acEl.style.display=\'none\'"><span>'+o.l+'</span><span class="sci">'+o.s+'</span><span class="tag">'+o.t+'</span></div>').join('');
+  acEl.style.display='block';
+}
+qEl.addEventListener('input',e=>{buildAC(e.target.value.trim())});
+qEl.addEventListener('keydown',e=>{
+  if(acEl.style.display==='block'&&acList.length){
+    if(e.key==='ArrowDown'){acI=(acI+1)%acList.length;paintAC();e.preventDefault();return}
+    if(e.key==='ArrowUp'){acI=(acI-1+acList.length)%acList.length;paintAC();e.preventDefault();return}
+    if(e.key==='Enter'&&acI>=0){eval(acList[acI].a);acEl.style.display='none';e.preventDefault();return}
+  }
+  if(e.key==='Enter')doSearch();
+  if(e.key==='Escape')acEl.style.display='none';
+});
+function paintAC(){[...acEl.children].forEach((c,i)=>c.classList.toggle('on',i===acI))}
+document.addEventListener('click',e=>{if(!e.target.closest('.sbox'))acEl.style.display='none'});
+function doSearch(){
+  const v=qEl.value.trim();
+  acEl.style.display='none';PAGE='home';
+  F.sem=null;F.q='';
+  if(!v){render();return}
+  const sem=semantic(v), lit=literalHits(v);
+  if(QMODE==='sem'){ if(sem){F.sem=sem;F.semAuto=false;} else {F.q=v;} }
+  else if(QMODE==='lit'){ F.q=v; }
+  else { /* auto */
+    if(lit>0&&(!sem||v.length<=4)){F.q=v;}
+    else if(sem){F.sem=sem;F.semAuto=true;}
+    else {F.q=v;}
+  }
+  render();
+}
+function setQMode(m){QMODE=m;doSearch()}
+function semExample(s){qEl.value=s;QMODE='sem';doSearch();window.scrollTo(0,0)}
+
+/* 註解開關 */
+document.getElementById('annTgl').addEventListener('change',e=>{
+  document.body.classList.toggle('ann-on',e.target.checked)});
+
+/* ══════════════════════ 以圖辨識 ══════════════════════
+   說明：靜態檔無法載入 CV 模型。這裡實作的是真的在瀏覽器裡跑的
+   「色彩特徵萃取 + 特徵比對」：把圖畫進 canvas、取主要色彩分佈，
+   再與物種色彩／外型／棲地特徵比對排序。流程與 UX 與正式版一致，
+   差別只在辨識引擎——正式版應接 CV 模型。                        */
+const CNAME=[['黑',0,0,0],['白',0,0,100],['灰',0,0,55],['紅',0,80,60],['橘',28,80,70],['黃',52,75,75],
+             ['綠',120,60,50],['藍',210,65,55],['紫',280,50,55],['褐',25,55,38],['粉',335,45,80]];
+function rgb2hsv(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;
+  let h=0;if(d){if(mx===r)h=60*(((g-b)/d)%6);else if(mx===g)h=60*((b-r)/d+2);else h=60*((r-g)/d+4);}
+  if(h<0)h+=360;return [h,mx?d/mx*100:0,mx*100];}
+function colorName(r,g,b){const [h,s,v]=rgb2hsv(r,g,b);
+  if(v<18)return '黑'; if(s<12)return v>82?'白':'灰';
+  if(s<28&&v<62)return '褐';
+  let best='灰',bd=1e9;
+  CNAME.forEach(([n,ch,cs,cv])=>{if(n==='黑'||n==='白'||n==='灰')return;
+    let dh=Math.abs(h-ch);if(dh>180)dh=360-dh;
+    const d=dh*1.0+Math.abs(s-cs)*0.25+Math.abs(v-cv)*0.25;
+    if(d<bd){bd=d;best=n}});
+  return best;}
+let IDENT={img:null,colors:null,shape:null,hab:null,name:''};
+function count(d,bgc){
+  const t={};
+  for(let i=0;i<d.length;i+=4){
+    if(d[i+3]<40)continue;
+    if(bgc&&Math.hypot(d[i]-bgc[0],d[i+1]-bgc[1],d[i+2]-bgc[2])<58)continue;
+    const n=colorName(d[i],d[i+1],d[i+2]);t[n]=(t[n]||0)+1;}
+  return t;}
+function analyzeImage(src,name){
+  const im=new Image();
+  im.onload=()=>{
+    const c=document.createElement('canvas');c.width=64;c.height=64;
+    const x=c.getContext('2d');x.drawImage(im,0,0,64,64);
+    const d=x.getImageData(0,0,64,64).data;
+    const at=(px,py)=>{const k=(py*64+px)*4;return [d[k],d[k+1],d[k+2]]};
+    const cor=[at(1,1),at(62,1),at(1,62),at(62,62)];
+    const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+    const uniform=cor.every(c=>dist(c,cor[0])<42);
+    const bgc=[0,1,2].map(j=>cor.reduce((t,c)=>t+c[j],0)/4);
+    let tally=count(d,uniform?bgc:null);
+    if(uniform&&Object.values(tally).reduce((a,b)=>a+b,0)<64*64*0.05)tally=count(d,null);
+    const tot=Object.values(tally).reduce((a,b)=>a+b,0)||1;
+    const cols=Object.entries(tally).map(([n,v])=>({n:n,p:v/tot}))
+      .sort((a,b)=>b.p-a.p).filter(c=>c.p>0.04).slice(0,4);
+    IDENT.img=src;IDENT.colors=cols;IDENT.bgcut=uniform;IDENT.name=name||'上傳的照片';
+    PAGE='ident';render();window.scrollTo(0,0);
+  };
+  im.onerror=()=>{alert('圖片讀取失敗，請換一張試試');};
+  im.src=src;
+}
+function identScore(){
+  if(!IDENT.colors)return [];
+  return SP.map((s,i)=>{
+    let sc=0;const why=[];
+    IDENT.colors.forEach(c=>{if(s.color.indexOf(c.n)>=0){sc+=c.p*1.0;why.push('色彩「'+c.n+'」')}});
+    if(IDENT.shape){if(s.shape===IDENT.shape){sc+=0.38;why.push('外型「'+IDENT.shape+'」')}else sc-=0.10}
+    if(IDENT.hab){if(s.hab===IDENT.hab){sc+=0.26;why.push('棲地「'+IDENT.hab+'」')}else sc-=0.06}
+    return {i:i,sc:sc,why:why};
+  }).filter(r=>r.sc>0.02).sort((a,b)=>b.sc-a.sc).slice(0,8);
+}
+const SHEX={'黑':'#1a1a1a','白':'#f2f2f2','紅':'#c0392b','橘':'#e8791f','黃':'#e8c81f','綠':'#1f8a4c','藍':'#1f6fb0','紫':'#7a3f96','褐':'#6b4f33','灰':'#9aa3a8','粉':'#e88fa6'};
+function sampleSVG(si){
+  const s=SP[si];
+  const fg=SHEX[s.color[0]]||'#446';
+  const bg=s.color[1]?SHEX[s.color[1]]:'#dde7ec';
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="240" height="180" viewBox="0 0 240 180">'+
+   '<rect width="240" height="180" fill="'+bg+'"/>'+
+   '<g transform="translate(60,20) scale(1.35)" fill="'+fg+'" stroke="'+fg+'">'+(SIL[s.ic]||SIL[s.g]||SIL.景觀)+'</g></svg>';
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+function showIdent(){closeModal();if(!IDENT.colors){IDENT={img:null,colors:null,shape:null,hab:null,name:''}}
+  PAGE='ident';render();window.scrollTo(0,0)}
+function identPick(k,v){IDENT[k]=(IDENT[k]===v?null:v);render()}
+function identReset(){IDENT={img:null,colors:null,shape:null,hab:null,name:''};render()}
+function onFile(inp){const f=inp.files&&inp.files[0];if(!f)return;
+  const r=new FileReader();r.onload=e=>analyzeImage(e.target.result,f.name);r.readAsDataURL(f)}
+function onDrop(e){e.preventDefault();const f=e.dataTransfer.files&&e.dataTransfer.files[0];
+  if(!f||!/^image\//.test(f.type)){alert('請放入圖片檔');return}
+  const r=new FileReader();r.onload=ev=>analyzeImage(ev.target.result,f.name);r.readAsDataURL(f)}
+function identHTML(){
+  let h='<div class="page"><div class="crumbs"><button onclick="goHome()">典藏檢索</button> ／ <b>以圖辨識</b></div>';
+  h+='<div class="ann"><b>這一頁在做什麼：</b>照片會在你的瀏覽器裡被畫進 canvas，實際萃取主要色彩分佈，再與館藏物種的色彩、外型、棲地特徵比對排序——整段都在本機執行，圖片不會上傳。這是「特徵比對」而非真正的影像辨識模型；正式版應改接 CV 模型（見下方說明）。</div>';
+  h+='<div class="dwrap"><div class="dsec" style="border-top:0">';
+  if(!IDENT.colors){
+    h+='<div class="drop" ondragover="event.preventDefault()" ondrop="onDrop(event)">'+
+      '<div style="font-size:38px">📷</div>'+
+      '<b>把照片拖進來，或點擊選檔</b>'+
+      '<div style="color:var(--mute);font-size:13px;margin-top:4px">支援 JPG／PNG／HEIC 轉檔後的圖片　·　圖片僅在本機處理，不會上傳</div>'+
+      '<input type="file" accept="image/*" id="ffile" style="display:none" onchange="onFile(this)">'+
+      '<button class="btn-x" style="margin-top:12px" onclick="document.getElementById(\'ffile\').click()">選擇照片</button>'+
+      '</div>'+
+      '<h3 style="font-size:15px;color:var(--navy);margin:20px 0 10px">沒有照片？用這些範例試試</h3>'+
+      '<div class="samples">'+
+      [1,4,13,3,22,17].map(i=>'<button class="samp" onclick="analyzeImage(sampleSVG('+i+'),\''+SP[i].zh+' 範例圖\')">'+
+        '<img src="'+sampleSVG(i)+'" alt="'+SP[i].zh+' 範例圖"><span>'+SP[i].zh+'</span></button>').join('')+
+      '</div>';
+  } else {
+    const rank=identScore();
+    h+='<div class="idwrap"><div>'+
+      '<img class="idimg" src="'+IDENT.img+'" alt="待辨識的照片">'+
+      '<div style="font-size:12.5px;color:var(--mute);margin-top:6px">'+IDENT.name+'</div>'+
+      '<h4 style="margin:14px 0 7px;font-size:13.5px;color:var(--navy)">萃取到的主要色彩'+(IDENT.bgcut?'<span style="font-weight:400;font-size:11.5px;color:var(--mute)">　（背景已自動排除）</span>':'')+'</h4>'+
+      '<div class="fchips">'+IDENT.colors.map(c=>{const cc=COLORS.find(x=>x[0]===c.n);
+        return '<span class="chip"><span style="width:13px;height:13px;border-radius:50%;background:'+(cc?cc[1]:'#999')+';border:1px solid rgba(0,0,0,.15)"></span>'+c.n+' '+Math.round(c.p*100)+'%</span>'}).join('')+'</div>'+
+      '<div class="ann">正式版可再加：EXIF 的 GPS 座標（自動限縮到該海域可能出現的物種）、拍攝日期（季節性物種）、以及使用者所在位置。現況兩站的 GPS 欄位多為空白，這也是後台上架流程要補的一環。</div>'+
+      '<h4 style="margin:14px 0 7px;font-size:13.5px;color:var(--navy)">補充特徵可大幅提高準確度</h4>'+
+      '<div style="font-size:12px;color:var(--mute);margin-bottom:6px">外型</div><div class="fchips">'+
+      SHAPES.map(s=>'<button class="chip '+(IDENT.shape===s[0]?'on':'')+'" onclick="identPick(\'shape\',\''+s[0]+'\')">'+
+      '<svg viewBox="0 0 100 100" fill="currentColor" stroke="currentColor">'+SIL[s[1]]+'</svg>'+s[0]+'</button>').join('')+'</div>'+
+      '<div style="font-size:12px;color:var(--mute);margin:10px 0 6px">在哪裡看到的</div><div class="fchips">'+
+      HABS.map(x=>'<button class="chip '+(IDENT.hab===x?'on':'')+'" onclick="identPick(\'hab\',\''+x+'\')">'+x+'</button>').join('')+'</div>'+
+      '<button class="clearall" onclick="identReset()">換一張照片</button>'+
+      '</div><div>';
+    if(!rank.length){
+      h+='<div class="empty" style="text-align:left"><b>色彩特徵沒有比對到明確候選</b>試著在左邊補充外型或棲地，或換一張主體更清楚、背景較單純的照片。</div>';
+    } else {
+      const mx=rank[0].sc||1;
+      h+='<h3 style="font-size:15px;color:var(--navy);margin:0 0 4px">可能的物種　<span style="font-size:12px;color:var(--mute);font-weight:400">依特徵相符度排序</span></h3>'+
+        '<div style="font-size:12.5px;color:var(--mute);margin-bottom:11px">請自行確認，辨識結果僅供參考</div>';
+      h+='<div class="idlist">'+rank.map((r,n)=>{const x=SP[r.i];const pct=Math.round(r.sc/mx*100);
+        return '<div class="idc" onclick="openSpecies('+r.i+')">'+
+        '<span class="ic" style="'+bgOf(x.g)+'">'+ill(x.g,null,x.ic)+'</span>'+
+        '<span style="flex:1;min-width:0"><span class="zh">'+(n===0?'▲ ':'')+x.zh+'</span>'+
+        '<span class="sci" style="margin-left:6px">'+x.sci+'</span>'+
+        '<div class="hit">'+(r.why.length?'比對到 '+[...new Set(r.why)].join('、'):'色彩接近')+'</div>'+
+        '<div class="bar"><i style="width:'+pct+'%"></i></div></span>'+
+        '<span class="pc">'+pct+'</span></div>';}).join('')+'</div>';
+      h+='<div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">'+
+        '<button class="btn-x" onclick="alert(\'Demo 示意：確認為此物種後，可將這張照片與地點回報給館方，成為公民科學觀察紀錄，經審核後納入資料庫。\')">✓ 確認並回報為觀察紀錄</button>'+
+        '<button class="btn-x" onclick="alert(\'Demo 示意：都不是的話，可送出協助鑑定請求，由館方研究人員回覆。\')">都不是，請館方協助鑑定</button></div>';
+    }
+    h+='</div></div>';
+  }
+  h+='</div>'+
+   '<div class="dsec"><h3>正式版的辨識引擎怎麼做</h3>'+
+   '<div class="kv">'+
+   [['最省力','串接 iNaturalist 或同類的既有影像辨識 API，直接取得候選物種，再對回館藏資料。優點是立刻可用、模型持續更新；缺點是無法保證涵蓋館藏的冷門類群。'],
+    ['自建模型','以館藏的四萬筆影像微調（fine-tune）影像分類模型。館方的優勢正在於這批已標註物種的高品質影像，是外面沒有的訓練資料。'],
+    ['混合式','先用通用模型判到「科」的層級，再用館藏影像訓練的小模型細分到種，並以 GPS 與季節限縮候選。'],
+    ['同時做的事','辨識與檢索共用同一套物種主檔；使用者的回報成為新的標註資料，形成資料越用越好的循環。']]
+   .map(r=>'<div class="r"><span class="k" style="min-width:74px">'+r[0]+'</span><span class="v">'+r[1]+'</span></div>').join('')+
+   '</div>'+
+   '<div class="ann">這一項的前提同樣是資料整備：影像要有正確的物種標註、要有可用的授權、要有一致的欄位。館藏四萬筆影像目前「屬名」「種名」欄位多為空白，模型訓練會直接卡在這裡——這也再次說明第一期的資料清洗為什麼不能跳過。</div>'+
+   '</div></div></div>';
+  return h;
+}
+
+/* ══════════════════════ render ══════════════════════ */
+function render(){
+  ['auto','lit','sem'].forEach(m=>{const b=document.getElementById('qm-'+m);if(b)b.classList.toggle('on',QMODE===m)});
+  const app=document.getElementById('app');
+  if(PAGE==='home')app.innerHTML=homeHTML();
+  else if(PAGE==='sp')app.innerHTML=speciesHTML(CUR);
+  else if(PAGE==='ident')app.innerHTML=identHTML();
+  else app.innerHTML=topicsHTML();
+}
+render();
+</script>
+</body>
+</html>
