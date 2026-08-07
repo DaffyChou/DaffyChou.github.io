@@ -301,7 +301,7 @@
                 <option value="Yuan Shun">Yuan Shun</option>
                 <option value="Jing Shun">Jing Shun</option>
                 <option value="Feng Shun">Feng Shun</option>
-                <option value="Hui Shun No.1">Hui Shun No.1</option>
+                <option value="Hui Shun No.1" selected>Hui Shun No.1</option>
                 <option value="Gimpo Shun">Gimpo Shun</option>
             </select>
 
@@ -313,8 +313,8 @@
 
         <!-- 監控中繼資訊：保留原有航次/資料庫同步資訊 -->
         <div class="d-flex flex-wrap align-items-center gap-4 mt-2">
-            <div><span class="ds-label">當前監控航次</span><span class="text-info fw-bold font-monospace fs-6">2630</span></div>
-            <div><span class="ds-label">資料庫最新同步</span><span class="text-light font-monospace fs-6">2026-03-27 18:00 CST</span></div>
+            <div><span class="ds-label">當前監控航次</span><span class="text-info fw-bold font-monospace fs-6">2626</span></div>
+            <div><span class="ds-label">資料庫最新同步</span><span class="text-light font-monospace fs-6">2026-07-31 09:12 CST</span></div>
         </div>
     </div>
 
@@ -341,11 +341,11 @@
                     </div>
                     <div class="col-auto">
                         <label class="ds-label">航次開始日期</label>
-                        <input type="date" id="voyMinDate" class="form-control ds-select" style="width:160px;">
+                        <input type="date" id="voyMinDate" class="form-control ds-select" style="width:160px;" min="2026-06-21" max="2026-07-31">
                     </div>
                     <div class="col-auto">
                         <label class="ds-label">航次結束日期</label>
-                        <input type="date" id="voyMaxDate" class="form-control ds-select" style="width:160px;">
+                        <input type="date" id="voyMaxDate" class="form-control ds-select" style="width:160px;" min="2026-06-21" max="2026-07-31">
                     </div>
                     <div class="col-auto">
                         <label class="ds-label">關鍵字 (航次 / 港口)</label>
@@ -361,6 +361,7 @@
                     </div>
                 </div>
 
+                <div id="voyageInsuffNotice" class="alert alert-warning py-2 px-3 mb-2 d-none" role="alert" style="font-size:.85rem;"></div>
                 <div class="table-responsive">
                 <table id="voyageSummaryTable" class="table table-dark table-hover table-custom-dt w-100">
                     <thead>
@@ -390,10 +391,10 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">生存資源預警系統 (Fresh Water)</h2>
                         <div class="desc-box">
-                            <div class="mb-2"><span class="badge-source">資料來源</span>交叉比對 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">ROB FW-淡水存量</code>、<code class="text-info">格式3-日電報</code> 的 <code class="text-info">每日淡水存量</code> 與 <code class="text-info">格式4-離港/完工報</code> 的 <code class="text-info">完工淡水存量</code>。</div>
+                            <div class="mb-2"><span class="badge-source">資料來源（真實）</span>每日淡水耗量取自 <code class="text-info">格式1-船位報(午報)</code> 與 <code class="text-info">格式3-日電報(每日報)</code> 的 <code class="text-warning">FW_Consumption</code>；本欄<b>全船皆有</b>。</div>
                             <div id="fw-calc-desc" class="mb-2">
-                                <span class="badge-calc">基準線計算</span>健康耗水基準線 = 
-                                <div class="formula-box">$$FW_{baseline} = \frac{\sum_{i=1}^{N} Daily\ FW\ Cons_i}{N\ (Days)}$$</div>
+                                <span class="badge-calc">基準線計算</span>平均耗水基準線 = 期間每日耗量之平均 =
+                                <div class="formula-box">$$FW_{baseline} = \frac{\sum_{i=1}^{N} FW\_Consumption_i}{N\ (Days)}$$</div>
                             </div>
                             <div id="fw-risk-desc">
                                 <span class="badge-risk">營運監控</span><br>
@@ -405,11 +406,11 @@
                         <div class="row g-2 mb-3 align-items-end">
                             <div class="col-6 col-md-4">
                                 <span class="ds-label">船報日期 (起)</span>
-                                <input type="date" class="form-control ds-select date-start" value="2026-03-15">
+                                <input type="date" class="form-control ds-select date-start" value="2026-07-15" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-6 col-md-4">
                                 <span class="ds-label">船報日期 (訖)</span>
-                                <input type="date" class="form-control ds-select date-end" value="2026-03-27">
+                                <input type="date" class="form-control ds-select date-end" value="2026-07-27" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-12 col-md-4 d-flex">
                                 <button onclick="applyFilter('chart-fw-balance', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
@@ -426,11 +427,12 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">燃油加油預警 (Fuel Remaining Days)</h2>
                         <div class="desc-box">
-                            <div class="mb-2"><span class="badge-source">資料來源</span>取系統依據 <code class="text-info">CST-岸端標準時間(UTC+8)</code> 最新回傳的船報，提取 <code class="text-info">ROB FO-重油存量</code> 與 <code class="text-info">ROB DO-輕油存量</code>。</div>
-                            <div class="mb-2"><span class="badge-calc">計算邏輯 (MT轉天數)</span>為消除各船油箱容量與引擎耗油差異，系統自動將數值標準化轉換：<br>
-                            1. <b>歷史日均耗基準</b>：取該船近30天在相同「船舶狀況(空/重載)」下的平均每日耗油量(MT/Day)。<br>
-                            2. <b>剩餘可用天數</b>：<code class="text-info">當前存量(MT)</code> ÷ <code class="text-info">歷史日均耗基準(MT/Day)</code>。</div>
-                            <div><span class="badge-risk">風險預警</span>Y軸已統一換算為「還能燒幾天」。圖表底層鋪設紅色(< 3天)與橘色(3~5天)警戒區。若柱體落入該區，代表存量逼近極限，需盡速安排加油。</div>
+                            <div class="mb-2"><span class="badge-source">資料來源（真實）</span>存量取最新船報的 <code class="text-warning">ROB_FO</code>／<code class="text-warning">ROB_DO</code>（重油／輕油）。</div>
+                            <div class="mb-2"><span class="badge-calc">計算邏輯 (MT轉天數)</span>
+                            1. <b>航行日均耗基準</b>：取該船航行日均耗（MT/Day，校準自真實）。<br>
+                            2. <b>剩餘可用天數</b> = <code class="text-info">當前存量 ROB</code> ÷ <code class="text-info">航行日均耗</code>。</div>
+                            <div class="mb-2"><span class="badge-risk">風險預警</span>Y軸換算為「還能燒幾天」，底層紅(&lt;3天)／橘(3~5天)警戒區；落入該區需盡速加油。</div>
+                            <div><span class="badge-source">資料不足</span><b class="text-warning">源順輪航行日均耗基準不足 → 顯示「無法估算」</b>（其柱以灰色、tooltip 標資料不足）。</div>
                         </div>
                         
                         <div class="row g-2 mb-3 align-items-center">
@@ -452,9 +454,9 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">船體阻力與推進風險</h2>
                         <div class="desc-box">
-                            <div class="mb-2"><span class="badge-source">資料來源</span>擷取自 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">SLIP(%)-滑失率</code>、<code class="text-info">蒲式風級</code> 與 <code class="text-info">浪級</code>。</div>
-                            <div class="mb-2"><span class="badge-calc">計算邏輯</span>無近期水下洗船紀錄時，系統自動提取該船「過去一年內，在良好海象 (風級<3、浪級<2) 下的歷史平均滑失率」作為動態基準線。</div>
-                            <div class="mb-2"><span class="badge-risk">營運監控</span>若風/浪級皆低於 4 級，但實際滑失率卻持續大幅高於基準線，戰情室應警示「船體嚴重結垢(Fouling)或螺旋槳異常」，建議評估清艙洗船。</div>
+                            <div class="mb-2"><span class="badge-source">資料來源（真實）</span>逐日擷取自 <code class="text-info">格式1-船位報(午報)</code> 的 <code class="text-warning">BeaufortWindScale</code>（蒲式風級）、<code class="text-warning">DouglasSeaStateScale</code>（海象浪級）與 <code class="text-warning">RPM</code>（主機轉速）。</div>
+                            <div class="mb-2"><span class="badge-calc">計算邏輯</span><b>滑失率(SLIP%)需螺旋槳螺距</b>（船常數，船報未涵蓋，見下方資料缺口）→ 本圖<b class="text-info">暫以主機轉速 RPM</b> 呈現推進狀態；風級／浪級為當日實測。判讀：<b>風/浪級低、RPM/耗油卻偏高</b> ＝ 可能船體結垢(Fouling)或螺槳異常，建議評估清艙洗船。</div>
+                            <div class="mb-2"><span class="badge-source">資料不足</span><b class="text-warning">匯順1號、金保順無船位報（午報）→ 本圖顯示「資料不足」</b>（風浪/RPM 逐日資料僅源順／景順／豐順有）。</div>
                             <div><span class="badge-gap">資料缺口</span>動態基準線可信度仰賴下列欄位，目前船報未涵蓋，需另建/串接：
                                 <ul class="mb-0 mt-1 ps-3" style="color:#fbbf24;">
                                     <li><b>船舶主資料表 (一次性建檔)</b>：<code class="text-warning">Propeller Pitch (P)</code>、<code class="text-warning">Gear Ratio</code>、<code class="text-warning">Design Draft</code>。</li>
@@ -468,11 +470,11 @@
                         <div class="row g-2 mb-3 align-items-end">
                             <div class="col-6 col-md-4">
                                 <span class="ds-label">船報日期 (起)</span>
-                                <input type="date" class="form-control ds-select date-start" value="2026-03-15">
+                                <input type="date" class="form-control ds-select date-start" value="2026-07-15" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-6 col-md-4">
                                 <span class="ds-label">船報日期 (訖)</span>
-                                <input type="date" class="form-control ds-select date-end" value="2026-03-27">
+                                <input type="date" class="form-control ds-select date-end" value="2026-07-27" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-12 col-md-4 d-flex">
                                 <button onclick="applyFilter('chart-slip-weather', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
@@ -489,11 +491,9 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">機件耗損與注油成本</h2>
                         <div class="desc-box">
-                            <div class="mb-2"><span class="badge-source">資料來源</span>擷取自 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">RPM-主機轉速</code> 與 <code class="text-info">前24小時主機汽缸油耗量</code>。</div>
-                            <div class="mb-2"><span class="badge-calc">計算邏輯</span>利用轉速推算主機負荷：
-                                <div class="formula-box">$$Load (\%) = \left(\frac{Current\ RPM}{Max\ RPM}\right)^3 \times 100$$</div>
-                            </div>
-                            <div class="mb-2"><span class="badge-risk">營運監控</span>若轉速(或負荷)調降，但汽缸油耗量未等比例減少，戰情室應提示「注油器設定可能異常」，避免過度注油浪費成本。</div>
+                            <div class="mb-2"><span class="badge-source">資料來源（真實）</span>逐日擷取自 <code class="text-info">格式1-船位報(午報)</code> 的 <code class="text-warning">RPM</code>（主機轉速）與 <code class="text-warning">MECYO_Consumption</code>（汽缸油耗，已濾負值/&gt;500 的存量誤填）。</div>
+                            <div class="mb-2"><span class="badge-risk">營運監控</span>對照轉速與汽缸油耗：若<b>轉速調降但汽缸油耗未等比例減少</b>，提示「注油器設定可能異常」，避免過度注油浪費成本。（主機負荷 $Load\% = (RPM/MCR\_RPM)^3$ 需額定轉速，見下方資料缺口）</div>
+                            <div class="mb-2"><span class="badge-source">資料不足</span><b class="text-warning">匯順1號、金保順無船位報（午報）→ 本圖顯示「資料不足」</b>（航行汽缸油/RPM 逐日資料僅源順／景順／豐順有）。</div>
                             <div><span class="badge-gap">資料缺口</span>負荷推算與「應耗多少油」的基準對比，需要下列主機型錄數據，目前船報未涵蓋：
                                 <ul class="mb-0 mt-1 ps-3" style="color:#fbbf24;">
                                     <li><b>船舶主資料表 (一次性建檔)</b>：<code class="text-warning">MCR_RPM (額定最大轉速)</code>、<code class="text-warning">MCR_kW (額定功率)</code>、<code class="text-warning">Propulsion Type (FPP/CPP)</code>。</li>
@@ -511,11 +511,11 @@
                             </div>
                             <div class="col-6 col-md-3">
                                 <span class="ds-label">船報日期 (起)</span>
-                                <input type="date" class="form-control ds-select date-start" value="2026-03-15">
+                                <input type="date" class="form-control ds-select date-start" value="2026-07-15" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-6 col-md-3">
                                 <span class="ds-label">船報日期 (訖)</span>
-                                <input type="date" class="form-control ds-select date-end" value="2026-03-27">
+                                <input type="date" class="form-control ds-select date-end" value="2026-07-27" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-12 col-md-3 d-flex">
                                 <button onclick="applyFilter('chart-cyl-rpm', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
@@ -539,7 +539,7 @@
                             <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 m-0">貨物裝卸進度與周轉 (Cargo Handling)</h2>
                             <div class="text-end">
                                 <span class="badge-ai mb-0 border-0" style="font-size: 1rem;">最後 AI 影像判讀時間</span>
-                                <span class="text-info font-monospace d-block mt-1" style="font-size: 1rem;">2026-03-27 17:45 CST</span>
+                                <span class="text-info font-monospace d-block mt-1" style="font-size: 1rem;">2026-07-31 09:00 CST</span>
                             </div>
                         </div>
                         <div class="desc-box">
@@ -568,14 +568,15 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">港埠延滯與作業效能</h2>
                         <div class="desc-box">
-                            <div class="mb-2"><span class="badge-source">資料來源</span>擷取自 <code class="text-info">格式3-日電報</code> 的 <code class="text-info">每日裝卸貨量</code> 與 <code class="text-info">工班數量</code>。若裝卸貨不超過 24 小時無日報，系統自動調用 <code class="text-info">格式4-離港報</code> 的 <code class="text-info">總裝/卸貨數量</code> 進行單一柱狀圖展示。</div>
-                            <div><span class="badge-risk">營運監控</span>若工班數維持不變，但每日裝卸產能卻急遽下滑，強烈暗示遭遇岸吊故障、天候停工或碼頭效率低落，戰情室需立即介入以防高額延滯費 (Demurrage)。拉長至月/季區間則可用以評估該港口長期的平均效能。</div>
+                            <div class="mb-2"><span class="badge-source">資料來源（真實）</span>逐日裝卸貨量取自 <code class="text-info">格式3-日電報(每日報)</code> 的 <code class="text-warning">Daily_Cargo_Discharged</code>＋<code class="text-warning">Daily_Cargo_Loaded</code>（僅顯示有裝卸事件之日）；紅虛線為期間單日峰值基準。</div>
+                            <div class="mb-2"><span class="badge-risk">營運監控</span>每日裝卸產能急遽下滑，暗示岸吊故障、天候停工或碼頭效率低落，需介入以防延滯費(Demurrage)；拉長至月/季可評估該港長期效能。</div>
+                            <div><span class="badge-source">資料不足</span><b class="text-warning">工班數 <code>GangWorkingNumber</code> 真實資料全為 0（未回報）→ 本圖不繪工班</b>；<b class="text-warning">源順輪每日報無裝卸事件 → 顯示「資料不足」</b>。</div>
                         </div>
 
                         <div class="row g-2 mb-3 align-items-end">
                             <div class="col-6 col-md-2">
                                 <span class="ds-label">港口篩選</span>
-                                <select class="form-select ds-select"><option>全部</option><option selected>KHH</option><option>SIN</option></select>
+                                <select class="form-select ds-select"><option>全部</option><option selected>TPE</option><option>FOC</option></select>
                             </div>
                             <div class="col-6 col-md-2">
                                 <span class="ds-label">作業類型</span>
@@ -583,11 +584,11 @@
                             </div>
                             <div class="col-6 col-md-3">
                                 <span class="ds-label">船報日期 (起)</span>
-                                <input type="date" class="form-control ds-select date-start" value="2026-03-01">
+                                <input type="date" class="form-control ds-select date-start" value="2026-07-01" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-6 col-md-3">
                                 <span class="ds-label">船報日期 (訖)</span>
-                                <input type="date" class="form-control ds-select date-end" value="2026-03-27">
+                                <input type="date" class="form-control ds-select date-end" value="2026-07-27" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-12 col-md-2 d-flex">
                                 <button onclick="applyFilter('chart-port-ops', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
@@ -604,11 +605,11 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">法規碳排強度與能效 (EEOI Tracker)</h2>
                         <div class="desc-box">
-                            <div class="mb-2"><span class="badge-source">資料來源</span>擷取 <code class="text-info">格式1-船位報</code> 的 <code class="text-info">日航程與油耗</code>；及 <code class="text-info">格式4-離港報</code> 的 <code class="text-info">總裝卸貨量</code>。</div>
-                            <div class="mb-2"><span class="badge-calc">計算邏輯</span>衡量每運送一噸貨物跑一海浬的 \(CO_2\) 排放量 (\(C_F\) 為 IMO 燃油碳排轉換係數)：
+                            <div class="mb-2"><span class="badge-source">資料來源</span>需 <code class="text-info">油耗</code>(TotalConsumption FO/DO)×IMO 碳係數、<code class="text-info">貨量</code>(TotalCargo)、<code class="text-info">航距</code>(SeaPassage_TotalDistance)。</div>
+                            <div class="mb-2"><span class="badge-calc">計算邏輯</span>每運一噸貨跑一海浬的 \(CO_2\)（\(C_F\)＝IMO 燃油碳排係數）：
                                 <div class="formula-box">$$EEOI = \frac{Fuel_{cons} \times C_F}{Cargo \times Distance}$$</div>
                             </div>
-                            <div><span class="badge-risk">營運監控</span>法規紅線(維持C級的門檻)會逐年遞減加嚴。圖表同時呈現長期法定評級 CII 與短期營運效率 EEOI，若 EEOI 長期突破紅線(燒多跑少)，岸端應評估指示降速航行 (Slow Steaming)。游標懸停可查看當下評級。</div>
+                            <div><span class="badge-source">資料不足</span><b class="text-warning">本圖顯示「資料不足」</b>：CII 法規評級需<b>年度</b>碳排／航距，本正式期僅約 1.5 個月、且部分航次貨量／距離不全，暫無法計算法定評級（待年度資料補齊後再開）。</div>
                         </div>
 
                         <div class="row g-2 mb-3 align-items-end">
@@ -634,16 +635,17 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">航次時間利用率分析</h2>
                         <div class="desc-box">
-                            <div class="mb-2"><span class="badge-source">規則說明</span>與全船隊的「航次時間分佈與利用率」規則相同，鎖定 <code class="text-info">Voyage Number-航次號</code> 區間計算。</div>
+                            <div class="mb-2"><span class="badge-source">規則說明</span>與全船隊的「航次時間分佈與利用率」規則相同，逐航次(本船每一趟)呈現四段占該航次整個週期之比例。</div>
                             <div class="rule-box mb-2">
                                 <ul>
-                                    <li><b>【總週期】</b>= 本次 <code class="text-info">格式4-離港報</code> 離泊時間 減去 前次同欄位。</li>
-                                    <li><b>【航行時間】</b>= <code class="text-info">格式2-抵港報</code> 的 <code class="text-info">定速航行總時間</code>。</li>
-                                    <li><b>【等泊時間】</b>= <code class="text-info">格式2-抵港報</code> 的 <code class="text-info">等泊時總時間</code>。</li>
-                                    <li><b>【作業時間】</b>= <code class="text-info">格式4-離港報</code> 的 <code class="text-info">總作業時間</code>。</li>
+                                    <li><b>【總週期】</b>= 該航次營運時間軸（首末報表時距；概念上＝本次 <code class="text-info">格式4-離港報</code> 離泊時間減前次）。</li>
+                                    <li><b>【定速航行】</b>= <code class="text-info">格式2-抵港報</code> 的定速航行總時間 <code class="text-warning">SeaPassage_TotalTime</code>。</li>
+                                    <li><b>【等泊漂航】</b>= <code class="text-info">格式2-抵港報</code> 的等泊總時間 <code class="text-warning">TotalTime_Waiting</code>。</li>
+                                    <li><b>【港內作業】</b>= <code class="text-info">格式4-離港報</code> 的總作業時間 <code class="text-warning">Total_Working_Hour</code>（裝、卸兩港加總，不併完工報）。</li>
+                                    <li><b>【未歸類／機動】</b>= 總週期 −（航行＋作業＋等泊）；含進出港引航機動、繫解纜、移泊、待命／停擺與報表落差。</li>
                                 </ul>
                             </div>
-                            <div><span class="badge-risk">營運監控</span>等泊閒置(橘色)佔比越高，該航次的日均收益(TCE)越被稀釋。戰情室可據此檢討租家調度或港口擁擠狀況。</div>
+                            <div><span class="badge-risk">營運監控</span>等泊(橘)或未歸類/機動(灰)佔比越高，該航次日均收益(TCE)越被稀釋——戰情室可據此檢討租家調度、港口擁擠與進出港效率。</div>
                         </div>
 
                         <div class="row g-2 mb-3 align-items-end">
@@ -756,11 +758,11 @@
                     </div>
                     <div class="col-auto">
                         <label class="ds-label">回報日期(起)</label>
-                        <input type="date" id="masterDateStart" class="form-control ds-select" style="width:160px;">
+                        <input type="date" id="masterDateStart" class="form-control ds-select" style="width:160px;" min="2026-06-21" max="2026-07-31">
                     </div>
                     <div class="col-auto">
                         <label class="ds-label">回報日期(訖)</label>
-                        <input type="date" id="masterDateEnd" class="form-control ds-select" style="width:160px;">
+                        <input type="date" id="masterDateEnd" class="form-control ds-select" style="width:160px;" min="2026-06-21" max="2026-07-31">
                     </div>
                     <div class="col-auto">
                         <label class="ds-label">電報格式過濾</label>
@@ -891,6 +893,13 @@
          * 1. 篩選器互動邏輯與防呆 (UI & Validation)
          * ==========================================================================
          */
+        // 確定性偽變化（取代資料產生用的 Math.random）：同 index 恆得同值，避免每次重繪跳動
+        function det(i, b, a) { return b + a * Math.sin((i + 1) * 1.7); }
+        function detI(i, b, a) { return Math.round(det(i, b, a)); }
+        function detF(i, b, a, d) { return +det(i, b, a).toFixed(d == null ? 1 : d); }
+        // 以本地時間格式化 YYYY-MM-DD（避免 toISOString 的 UTC 位移導致日期早一天）
+        function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
         function renderTimeInput(dimension, containerId) {
             const container = document.getElementById(containerId);
             if(!container) return;
@@ -899,39 +908,40 @@
             const endId = `end-${containerId}`;
             let html = '';
 
+            // 防呆：所有可選範圍鎖定真實資料期間 2026-06-21 ~ 2026-07-31（僅 2026 Q2~Q3 / 6~7 月）
             if (dimension === 'year') {
-                const years = [2022, 2023, 2024, 2025, 2026];
+                const years = [2026];
                 html = `<span class="ds-label">選擇年度</span><div class="d-flex align-items-center gap-1">
                     <select id="${startId}" class="form-select ds-select" onchange="updateEndOptions('${startId}', '${endId}', 'year')">
-                        ${years.map(y => `<option value="${y}" ${y===2022?'selected':''}>${y}</option>`).join('')}
+                        ${years.map(y => `<option value="${y}" selected>${y}</option>`).join('')}
                     </select>
                     <span class="text-secondary">~</span>
                     <select id="${endId}" class="form-select ds-select">
-                        ${years.map(y => `<option value="${y}" ${y===2026?'selected':''}>${y}</option>`).join('')}
+                        ${years.map(y => `<option value="${y}" selected>${y}</option>`).join('')}
                     </select>
                 </div>`;
             } else if (dimension === 'quarter') {
-                const quarters = ['2024 Q3', '2024 Q4', '2025 Q1', '2025 Q2', '2025 Q3', '2025 Q4', '2026 Q1'];
+                const quarters = ['2026 Q2', '2026 Q3'];
                 html = `<span class="ds-label">選擇季度</span><div class="d-flex align-items-center gap-1">
                     <select id="${startId}" class="form-select ds-select" onchange="updateEndOptions('${startId}', '${endId}', 'quarter')">
-                        ${quarters.map(q => `<option value="${q}" ${q==='2025 Q1'?'selected':''}>${q}</option>`).join('')}
+                        ${quarters.map(q => `<option value="${q}" ${q==='2026 Q2'?'selected':''}>${q}</option>`).join('')}
                     </select>
                     <span class="text-secondary">~</span>
                     <select id="${endId}" class="form-select ds-select">
-                        ${quarters.map(q => `<option value="${q}" ${q==='2026 Q1'?'selected':''}>${q}</option>`).join('')}
+                        ${quarters.map(q => `<option value="${q}" ${q==='2026 Q3'?'selected':''}>${q}</option>`).join('')}
                     </select>
                 </div>`;
             } else if (dimension === 'month') {
                 html = `<span class="ds-label">選擇月份</span><div class="d-flex align-items-center gap-1">
-                    <input type="month" id="${startId}" class="form-control ds-select" value="2025-01" onchange="document.getElementById('${endId}').min = this.value;">
+                    <input type="month" id="${startId}" class="form-control ds-select" value="2026-06" min="2026-06" max="2026-07" onchange="document.getElementById('${endId}').min = this.value;">
                     <span class="text-secondary">~</span>
-                    <input type="month" id="${endId}" class="form-control ds-select" value="2026-03" min="2025-01">
+                    <input type="month" id="${endId}" class="form-control ds-select" value="2026-07" min="2026-06" max="2026-07">
                 </div>`;
             } else if (dimension === 'day') {
                 html = `<span class="ds-label">選擇日期</span><div class="d-flex align-items-center gap-1">
-                    <input type="date" id="${startId}" class="form-control ds-select" value="2026-03-21" onchange="document.getElementById('${endId}').min = this.value;">
+                    <input type="date" id="${startId}" class="form-control ds-select" value="2026-06-21" min="2026-06-21" max="2026-07-31" onchange="document.getElementById('${endId}').min = this.value;">
                     <span class="text-secondary">~</span>
-                    <input type="date" id="${endId}" class="form-control ds-select" value="2026-03-27" min="2026-03-21">
+                    <input type="date" id="${endId}" class="form-control ds-select" value="2026-07-31" min="2026-06-21" max="2026-07-31">
                 </div>`;
             }
             container.innerHTML = html;
@@ -977,7 +987,7 @@
             const dates = [];
             const cur = new Date(start);
             while (cur <= end) {
-                if (!sparse || Math.random() > 0.35) {
+                if (!sparse || i % 3 !== 0) {
                     dates.push(`${String(cur.getMonth()+1).padStart(2,'0')}/${String(cur.getDate()).padStart(2,'0')}`);
                 }
                 cur.setDate(cur.getDate() + 1);
@@ -1002,6 +1012,16 @@
             const dimension = selectEl ? selectEl.value : 'year';
 
             setTimeout(() => {
+                // 以下圖表皆為真實資料（ship-aware，含資料不足提醒）；套用鈕改呼叫對應 render 函式重繪，不做合成擾動
+                const SD_RENDER = { 'chart-time-util': renderVoyUtil, 'chart-fw-balance': renderFW, 'chart-fuel-warning': renderFuelWarn, 'chart-slip-weather': renderSlip, 'chart-cyl-rpm': renderCyl, 'chart-port-ops': renderPortOps, 'chart-eeoi': renderEEOI };
+                if (SD_RENDER[chartId]) {
+                    SD_RENDER[chartId]();
+                    btnElement.innerText = originalText;
+                    btnElement.classList.remove('opacity-75');
+                    btnElement.style.cursor = '';
+                    btnElement.disabled = false;
+                    return;
+                }
                 const chart = Highcharts.charts.find(c => c && c.renderTo.id === chartId);
                 if (chart) {
                     let newCategories = [];
@@ -1047,9 +1067,9 @@
                         let newValues = [];
 
                         if (chartId === 'chart-fuel-warning') {
-                            let foMT = Math.max(20, 150 + (Math.random()*100 - 50));
-                            let doMT = Math.max(5, 12 + (Math.random()*10 - 5));
-                            let baseFO = 28;
+                            let foMT = 130;
+                            let doMT = 45;
+                            let baseFO = 16;
                             let baseDO = 2.5;
                             let foDays = parseFloat((foMT/baseFO).toFixed(1));
                             let doDays = parseFloat((doMT/baseDO).toFixed(1));
@@ -1067,8 +1087,8 @@
                         if (chartId === 'chart-cctv-cargo') {
                             let holds = 5;
                             for(let i=0; i<holds; i++) {
-                                let total = 15000 + Math.random()*5000;
-                                let done = total * (0.3 + Math.random()*0.6);
+                                let total = 22000;
+                                let done = total * 0.6;
                                 if (idx === 0) newValues.push(Math.round(done));
                                 else newValues.push(Math.round(total - done));
                             }
@@ -1079,7 +1099,7 @@
                         // FW 圖表：先算「每日耗量」再以平均填基準線 (TASK-4)
                         if (chartId === 'chart-fw-balance') {
                             if (idx === 0) {
-                                newValues = newCategories.map(() => parseFloat((5 + Math.random() * 12).toFixed(1)));
+                                newValues = newCategories.map((_,i)=>detF(i,10,3));
                             } else {
                                 // 第二條系列 = 平均耗量基準線。讀取第一條已 set 的資料計算平均
                                 const dailyArr = chart.series[0].options.data || [];
@@ -1093,9 +1113,9 @@
                         // 港埠延滯：日裝卸量、工班數，第三條 = 峰值日基準線 (讀第一條最大值填滿)
                         if (chartId === 'chart-port-ops') {
                             if (idx === 0) {
-                                newValues = newCategories.map(() => Math.floor(4000 + Math.random() * 10000));
+                                newValues = newCategories.map((_,i)=>detI(i,8000,3000));
                             } else if (idx === 1) {
-                                newValues = newCategories.map(() => Math.floor(1 + Math.random() * 3));
+                                newValues = newCategories.map((_,i)=>detI(i,2,1));
                             } else {
                                 const dischArr = chart.series[0].options.data || [];
                                 const peak = dischArr.length ? Math.max.apply(null, dischArr) : 0;
@@ -1107,26 +1127,26 @@
 
                         for(let i = 0; i < newDataLen; i++) {
                             if (chartId === 'chart-slip-weather') {
-                                if (idx === 0) newValues.push(Math.floor(Math.random() * 6 + 2));
-                                else if (idx === 1) newValues.push(Math.floor(Math.random() * 4 + 1));
-                                else if (idx === 2) newValues.push(parseFloat((11 + Math.random() * 5).toFixed(1)));
+                                if (idx === 0) newValues.push(detI(i,3,1));
+                                else if (idx === 1) newValues.push(detI(i,3,1));
+                                else if (idx === 2) newValues.push(detF(i,13,3));
                                 else newValues.push(12.5);
                             } else if (chartId === 'chart-cyl-rpm') {
                                 const paramSelect = row.querySelectorAll('select')[0].value;
-                                if (idx === 0) newValues.push(Math.floor(150 + Math.random() * 30));
+                                if (idx === 0) newValues.push(detI(i,165,25));
                                 else {
-                                    if(paramSelect === 'load') newValues.push(Math.floor(65 + Math.random() * 25));
-                                    else newValues.push(Math.floor(85 + Math.random() * 25));
+                                    if(paramSelect === 'load') newValues.push(detI(i,78,12));
+                                    else newValues.push(detI(i,98,12));
                                 }
                             } else if (chartId === 'chart-time-util') {
-                                if (idx === 0) newValues.push(Math.floor(50 + Math.random() * 20));
-                                else if (idx === 1) newValues.push(Math.floor(5 + Math.random() * 15));
-                                else newValues.push(Math.floor(15 + Math.random() * 15));
+                                if (idx === 0) newValues.push(detI(i,60,10));
+                                else if (idx === 1) newValues.push(detI(i,12,6));
+                                else newValues.push(detI(i,22,7));
                             } else if (chartId === 'chart-eeoi') {
                                 let reqVal = parseFloat((13.5 - i * 0.4).toFixed(1));
-                                if (idx === 0) newValues.push(parseFloat((10.5 + Math.random() * 4).toFixed(1)));
+                                if (idx === 0) newValues.push(detF(i,12,2));
                                 else if (idx === 1) {
-                                    let ciiVal = parseFloat((11.5 + Math.random() * 2).toFixed(1));
+                                    let ciiVal = detF(i,12,1);
                                     let grade = 'C';
                                     if (ciiVal < reqVal * 0.85) grade = 'A';
                                     else if (ciiVal < reqVal * 0.95) grade = 'B';
@@ -1169,6 +1189,200 @@
             });
         }
 
+            // 逐航次時間利用率(真實聚合)：每航次四段時數[航行,作業,等泊,未歸類]，未歸類=該航次營運span−三段；圖表 stacking:'percent' 正規化。
+            // 只納入有實際三段資料的航次(排除純殘差如僅完工報的截斷航次)。單位:小時。
+            const SHIP_VOYUTIL = {
+                'Yuan Shun': [
+                    { voy: 'V2629', sail: 45, work: 43.5, wait: 19.4, other: 675.1 }
+                ],
+                'Jing Shun': [
+                    { voy: 'V2626', sail: 7.8, work: 13.6, wait: 0, other: 188.3 },
+                    { voy: 'V2627', sail: 20.3, work: 38, wait: 0, other: 24.5 },
+                    { voy: 'V2628', sail: 13.8, work: 34.5, wait: 2.3, other: 50.4 },
+                    { voy: 'V2629', sail: 244.9, work: 125.8, wait: 11.7, other: 55.8 },
+                    { voy: 'V2630', sail: 13.7, work: 119.5, wait: 0, other: 0 },
+                    { voy: 'V2631', sail: 13.4, work: 38.6, wait: 0, other: 5.6 }
+                ],
+                'Feng Shun': [
+                    { voy: 'V2623', sail: 12.9, work: 0, wait: 0, other: 45.1 },
+                    { voy: 'V2624', sail: 0, work: 50.8, wait: 1.6, other: 544.3 },
+                    { voy: 'V2625', sail: 244, work: 118.2, wait: 44.3, other: 0 }
+                ],
+                'Hui Shun No.1': [
+                    { voy: 'V2618', sail: 14.4, work: 77.7, wait: 3, other: 15.1 },
+                    { voy: 'V2619', sail: 14.4, work: 42.4, wait: 2.2, other: 13 },
+                    { voy: 'V2620', sail: 15, work: 35.6, wait: 3.3, other: 57.8 },
+                    { voy: 'V2621', sail: 92.6, work: 36.7, wait: 2.5, other: 16.8 },
+                    { voy: 'V2622', sail: 16.4, work: 35.7, wait: 4.3, other: 21.4 },
+                    { voy: 'V2623', sail: 15.2, work: 38.4, wait: 1, other: 14.4 },
+                    { voy: 'V2624', sail: 14.4, work: 25.2, wait: 0, other: 33.5 },
+                    { voy: 'V2625', sail: 13.6, work: 23.7, wait: 1.5, other: 52.5 },
+                    { voy: 'V2626', sail: 6.7, work: 46.6, wait: 5.2, other: 0 }
+                ],
+                'Gimpo Shun': [
+                    { voy: 'V2641', sail: 22.1, work: 22.8, wait: 0, other: 0 },
+                    { voy: 'V2642', sail: 27.9, work: 24.7, wait: 15.3, other: 0 },
+                    { voy: 'V2643', sail: 22, work: 20.5, wait: 1.3, other: 0 },
+                    { voy: 'V2644', sail: 16.9, work: 39.8, wait: 0, other: 48.6 },
+                    { voy: 'V2645', sail: 22.1, work: 33.2, wait: 1, other: 30.7 },
+                    { voy: 'V2646', sail: 20.1, work: 19.8, wait: 0, other: 23.1 },
+                    { voy: 'V2647', sail: 70.6, work: 26.8, wait: 41.3, other: 10.7 },
+                    { voy: 'V2648', sail: 18.4, work: 22.2, wait: 5.1, other: 4.1 },
+                    { voy: 'V2649', sail: 22.4, work: 21.6, wait: 0, other: 0 },
+                    { voy: 'V2650', sail: 21.1, work: 21.9, wait: 0, other: 5.4 },
+                    { voy: 'V2651', sail: 16.2, work: 19.4, wait: 2.8, other: 26 },
+                    { voy: 'V2652', sail: 16.2, work: 18.6, wait: 7.2, other: 54 },
+                    { voy: 'V2653', sail: 10.3, work: 19.5, wait: 0, other: 0 }
+                ]
+            };
+
+        // ===== Single-demo 各圖真實校準（午報NR+每日報DR 逐日；含資料不足提醒）=====
+        const SD_ORDER = ['Yuan Shun','Jing Shun','Feng Shun','Hui Shun No.1','Gimpo Shun'];
+        const SD_DAILY = {"Yuan Shun": [{"d": "06-29", "t": "NR", "fw": 5.0, "me": 150.0, "rpm": 105.0, "bf": 3, "sea": 2}, {"d": "07-04", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-31", "t": "DR", "fw": 60.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}], "Jing Shun": [{"d": "06-22", "t": "DR", "fw": 1.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-23", "t": "DR", "fw": 6.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-24", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-25", "t": "DR", "fw": 6.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-26", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-27", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-28", "t": "DR", "fw": 6.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-29", "t": "DR", "fw": 0.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-30", "t": "DR", "fw": 6.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-08", "t": "NR", "fw": 6.0, "me": 173.0, "rpm": 106.0, "bf": 2, "sea": 3}, {"d": "07-09", "t": "NR", "fw": 6.0, "me": 210.0, "rpm": 106.0, "bf": 1, "sea": 5}, {"d": "07-10", "t": "NR", "fw": 6.0, "me": 202.0, "rpm": 106.0, "bf": 3, "sea": 5}, {"d": "07-12", "t": "DR", "fw": null, "me": null, "rpm": null, "bf": null, "sea": null}, {"d": "07-13", "t": "DR", "fw": 8.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-14", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-15", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-17", "t": "NR", "fw": 7.0, "me": 255.0, "rpm": 106.0, "bf": 2, "sea": 3}, {"d": "07-18", "t": "NR", "fw": 7.0, "me": 220.0, "rpm": 106.0, "bf": 4, "sea": 4}, {"d": "07-19", "t": "NR", "fw": 7.0, "me": 210.0, "rpm": 106.0, "bf": 3, "sea": 4}], "Feng Shun": [{"d": "06-23", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-27", "t": "NR", "fw": null, "me": null, "rpm": 102.0, "bf": 0, "sea": 0}, {"d": "07-13", "t": "NR", "fw": null, "me": null, "rpm": 102.0, "bf": 5, "sea": 4}, {"d": "07-14", "t": "NR", "fw": 9.0, "me": 215.0, "rpm": null, "bf": 4, "sea": 4}, {"d": "07-16", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-17", "t": "DR", "fw": null, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-18", "t": "NR", "fw": 3.0, "me": 30.0, "rpm": 102.0, "bf": 6, "sea": 4}, {"d": "07-19", "t": "NR", "fw": 6.0, "me": 220.0, "rpm": 102.0, "bf": 3, "sea": 3}, {"d": "07-20", "t": "NR", "fw": 9.0, "me": 210.0, "rpm": null, "bf": 2, "sea": 3}, {"d": "07-22", "t": "DR", "fw": 7.0, "me": 5.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-23", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-24", "t": "DR", "fw": 7.0, "me": 10.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-25", "t": "NR", "fw": 3.0, "me": 190.0, "rpm": null, "bf": 3, "sea": 3}, {"d": "07-26", "t": "NR", "fw": 5.0, "me": 210.0, "rpm": 102.0, "bf": 2, "sea": 3}, {"d": "07-27", "t": "NR", "fw": 5.0, "me": 220.0, "rpm": 102.0, "bf": 3, "sea": 3}], "Hui Shun No.1": [{"d": "06-23", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-24", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-25", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-26", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "06-29", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-01", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-04", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-08", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-09", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-11", "t": "DR", "fw": 5.0, "me": 10.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-12", "t": "DR", "fw": 5.0, "me": 30.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-15", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-18", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-27", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-28", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-30", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}], "Gimpo Shun": [{"d": "07-01", "t": "DR", "fw": 4.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-02", "t": "DR", "fw": 4.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-04", "t": "DR", "fw": 0.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-11", "t": "DR", "fw": 4.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-12", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-13", "t": "DR", "fw": 12.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}, {"d": "07-14", "t": "DR", "fw": 3.0, "me": 0.0, "rpm": null, "bf": null, "sea": null}]};
+        const SD_PORT = {"Yuan Shun": [], "Jing Shun": [{"d": "06-30", "cargo": 20600, "gang": 0}], "Feng Shun": [{"d": "06-23", "cargo": 17940, "gang": 0}, {"d": "07-16", "cargo": 9000, "gang": 0}, {"d": "07-22", "cargo": 6900, "gang": 0}], "Hui Shun No.1": [{"d": "06-24", "cargo": 3000, "gang": 0}, {"d": "06-25", "cargo": 12800, "gang": 0}, {"d": "06-26", "cargo": 5200, "gang": 0}, {"d": "07-01", "cargo": 16700, "gang": 0}, {"d": "07-04", "cargo": 7190, "gang": 0}, {"d": "07-09", "cargo": 18510, "gang": 0}, {"d": "07-15", "cargo": 11500, "gang": 0}, {"d": "07-18", "cargo": 7700, "gang": 0}, {"d": "07-28", "cargo": 9705, "gang": 0}, {"d": "07-30", "cargo": 24400, "gang": 0}], "Gimpo Shun": [{"d": "07-01", "cargo": 6000, "gang": 0}]};
+        const SD_ROB_FO = [123, 324.3, 423.1, 348.9, 113.4];
+        const SD_ROB_DO = [32.7, 44.1, 60.9, 21.4, 102];
+        const SD_BASE_FO = [null, 20.4, 13.8, 14.0, 5.0];
+        const SD_BASE_DO = [null, 0.3, 0.1, 0.3, 1.5];
+        function sdShip() { return (document.getElementById('vesselSelect') || {}).value || 'Hui Shun No.1'; }
+        function sdClear(id) { var el = document.getElementById(id); if (el) el.innerHTML = ''; }
+        function sdInsuff(id, msg) {
+            if (typeof Highcharts === 'undefined') return;
+            var ex = Highcharts.charts.filter(Boolean).find(function (c) { return c && c.renderTo && c.renderTo.id === id; });
+            if (ex) ex.destroy();
+            var el = document.getElementById(id);
+            if (el) el.innerHTML = '<div class="d-flex align-items-center justify-content-center text-warning text-center px-3" style="height:100%;min-height:180px;font-size:.9rem;">\u26a0 ' + msg + '</div>';
+        }
+        function sdAvg(a) { return a.length ? +(a.reduce(function (x, c) { return x + c; }, 0) / a.length).toFixed(2) : null; }
+        function sdAllCharts() { renderFW(); renderFuelWarn(); renderSlip(); renderCyl(); renderPortOps(); renderEEOI(); }
+
+        function renderFW() {
+            if (typeof Highcharts === 'undefined') return;
+            var days = (SD_DAILY[sdShip()] || []).filter(function (o) { return o.fw != null; });
+            if (!days.length) { sdInsuff('chart-fw-balance', '本船無淡水耗量回報，資料不足'); return; }
+            sdClear('chart-fw-balance');
+            var cats = days.map(function (o) { return o.d; }), data = days.map(function (o) { return o.fw; }), avg = sdAvg(data);
+            Highcharts.chart('chart-fw-balance', {
+                xAxis: { categories: cats, title: { text: '船報日期' } },
+                yAxis: { title: { text: '淡水耗量 (MT)' }, min: 0 },
+                series: [
+                    { name: '每日耗量 (MT)', type: 'column', data: data, color: '#f87171' },
+                    { name: '平均耗量基準線 (MT)', type: 'line', data: cats.map(function () { return avg; }), color: '#10b981', dashStyle: 'ShortDash', marker: { enabled: false }, lineWidth: 2 }
+                ]
+            });
+        }
+        function renderFuelWarn() {
+            if (typeof Highcharts === 'undefined') return;
+            var i = SD_ORDER.indexOf(sdShip());
+            var bFO = SD_BASE_FO[i], bDO = SD_BASE_DO[i], rFO = SD_ROB_FO[i], rDO = SD_ROB_DO[i];
+            if (bFO == null && bDO == null) { sdInsuff('chart-fuel-warning', '本船航行日均耗基準不足，剩餘天數無法估算'); return; }
+            sdClear('chart-fuel-warning');
+            var dFO = bFO ? +(rFO / bFO).toFixed(1) : null, dDO = bDO ? +(rDO / bDO).toFixed(1) : null;
+            var col = function (d) { return d == null ? '#6b7280' : (d <= 3 ? '#ef4444' : (d <= 5 ? '#f59e0b' : '#10b981')); };
+            Highcharts.chart('chart-fuel-warning', {
+                chart: { type: 'column' }, xAxis: { categories: ['重油 (FO)', '輕油 (DO)'] },
+                yAxis: { title: { text: '可用天數 (Days)' }, min: 0, plotBands: [
+                    { from: 0, to: 3, color: 'rgba(239,68,68,0.15)', label: { text: '3天警戒', style: { color: '#ef4444', fontSize: '0.625em', fontWeight: 'bold' } } },
+                    { from: 3, to: 5, color: 'rgba(245,158,11,0.15)', label: { text: '5天預警', style: { color: '#f59e0b', fontSize: '0.625em', fontWeight: 'bold' } } } ] },
+                plotOptions: { column: { borderRadius: 2 } },
+                series: [{ name: '剩餘可用天數', showInLegend: false, data: [
+                    { y: dFO, mt: rFO, daily: bFO, color: col(dFO) }, { y: dDO, mt: rDO, daily: bDO, color: col(dDO) } ] }],
+                tooltip: { useHTML: true, formatter: function () {
+                    var dt = this.y == null ? '無法估算' : this.y + ' 天';
+                    var bl = this.point.daily == null ? '資料不足' : this.point.daily + ' MT';
+                    return '<b>' + this.x + '</b><br/>可用天數: <b>' + dt + '</b><br/><span style="color:#9ca3af;font-size:.625rem;">(存量 ' + this.point.mt + ' MT / 日均耗 ' + bl + ')</span>';
+                } }
+            });
+        }
+        function renderSlip() {
+            if (typeof Highcharts === 'undefined') return;
+            var days = (SD_DAILY[sdShip()] || []).filter(function (o) { return o.bf != null; });
+            if (!days.length) { sdInsuff('chart-slip-weather', '本船無船位報（午報），風浪/轉速逐日資料不足'); return; }
+            sdClear('chart-slip-weather');
+            var cats = days.map(function (o) { return o.d; });
+            Highcharts.chart('chart-slip-weather', {
+                xAxis: { categories: cats, title: { text: '船報日期' } },
+                yAxis: [{ title: { text: '風/浪級' } }, { title: { text: '主機轉速 RPM' }, opposite: true }],
+                series: [
+                    { name: '蒲式風級', type: 'column', yAxis: 0, data: days.map(function (o) { return o.bf; }), color: '#4b5563' },
+                    { name: '海象浪級', type: 'column', yAxis: 0, data: days.map(function (o) { return o.sea; }), color: '#6b7280' },
+                    { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: days.map(function (o) { return o.rpm; }), color: '#f59e0b', lineWidth: 3, connectNulls: true, marker: { radius: 4 } }
+                ]
+            });
+        }
+        function renderCyl() {
+            if (typeof Highcharts === 'undefined') return;
+            var days = (SD_DAILY[sdShip()] || []).filter(function (o) { return o.rpm != null; });
+            if (!days.length) { sdInsuff('chart-cyl-rpm', '本船無船位報（午報），汽缸油耗/轉速逐日資料不足'); return; }
+            sdClear('chart-cyl-rpm');
+            var cats = days.map(function (o) { return o.d; });
+            Highcharts.chart('chart-cyl-rpm', {
+                xAxis: { categories: cats, title: { text: '船報日期' } },
+                yAxis: [{ title: { text: '汽缸油耗 (L)' } }, { title: { text: '主機轉速 (RPM)' }, opposite: true }],
+                series: [
+                    { name: '汽缸油耗 (L)', type: 'column', yAxis: 0, data: days.map(function (o) { return o.me; }), color: '#c084fc' },
+                    { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: days.map(function (o) { return o.rpm; }), color: '#f59e0b', lineWidth: 3, connectNulls: true, tooltip: { valueSuffix: ' RPM' } }
+                ]
+            });
+        }
+        function renderPortOps() {
+            if (typeof Highcharts === 'undefined') return;
+            var days = SD_PORT[sdShip()] || [];
+            if (!days.length) { sdInsuff('chart-port-ops', '本船每日報無裝卸事件，港埠作業資料不足'); return; }
+            sdClear('chart-port-ops');
+            var cats = days.map(function (o) { return o.d; }), cargo = days.map(function (o) { return o.cargo; });
+            var peak = Math.max.apply(null, cargo);
+            Highcharts.chart('chart-port-ops', {
+                xAxis: { categories: cats, title: { text: '船報日期 (僅顯示有裝卸事件之日)' }, labels: { rotation: -30 } },
+                yAxis: { title: { text: '裝卸貨量 (MT)' } },
+                tooltip: { shared: true, valueSuffix: ' MT' },
+                series: [
+                    { name: '日裝卸貨量 (MT)', type: 'column', data: cargo, color: '#10b981' },
+                    { name: '峰值日基準線 (MT)', type: 'line', data: cats.map(function () { return peak; }), color: '#f87171', dashStyle: 'ShortDash', lineWidth: 2, marker: { enabled: false } }
+                ]
+            });
+        }
+        function renderEEOI() {
+            sdInsuff('chart-eeoi', 'EEOI/CII 需年度碳排、貨量與航距完整資料；本期間僅約 1.5 個月、部分航次貨量/距離不全，暫無法計算法規評級（資料不足）');
+        }
+
+            function renderVoyUtil(shipName) {
+                if (typeof Highcharts === 'undefined' || !Highcharts.version) return;
+                const el = document.getElementById('chart-time-util');
+                if (!el) return;
+                shipName = shipName || (document.getElementById('vesselSelect') || {}).value || 'Hui Shun No.1';
+                const list = SHIP_VOYUTIL[shipName] || [];
+                if (!list.length) { el.innerHTML = '<div class="text-warning p-3" style="font-size:.85rem;">本期間無足夠航次時間資料（資料不足）。</div>'; return; }
+                const cats = list.map(o => o.voy);
+                const mk = key => list.map(o => o[key]);
+                Highcharts.chart('chart-time-util', {
+                    chart: { type: 'bar', backgroundColor: 'transparent' },
+                    xAxis: { categories: cats },
+                    yAxis: { min: 0, max: 100, title: null, visible: false },
+                    tooltip: {
+                        useHTML: true, shared: true,
+                        formatter: function () {
+                            const o = list[this.points[0].point.index];
+                            const tot = (o.sail + o.work + o.wait + o.other) || 1;
+                            const pc = h => Math.round(h / tot * 100);
+                            return '<b>航次 ' + o.voy + '</b>（週期 ' + Math.round(tot) + ' h）<br>'
+                                + '<span style="color:#3b82f6">●</span> 定速航行 ' + o.sail + ' h（' + pc(o.sail) + '%）<br>'
+                                + '<span style="color:#10b981">●</span> 港內作業 ' + o.work + ' h（' + pc(o.work) + '%）<br>'
+                                + '<span style="color:#f59e0b">●</span> 等泊漂航 ' + o.wait + ' h（' + pc(o.wait) + '%）<br>'
+                                + '<span style="color:#6b7280">●</span> 未歸類／機動 ' + o.other + ' h（' + pc(o.other) + '%）';
+                        }
+                    },
+                    plotOptions: { bar: { stacking: 'percent', borderWidth: 0, dataLabels: { enabled: true, format: '{percentage:.0f}%', style: { color: '#fff', textOutline: 'none', fontWeight: 'normal', fontSize: '10px' } } } },
+                    series: [
+                        { name: '定速航行', data: mk('sail'), color: '#3b82f6' },
+                        { name: '港內作業', data: mk('work'), color: '#10b981' },
+                        { name: '等泊漂航', data: mk('wait'), color: '#f59e0b' },
+                        { name: '未歸類／機動', data: mk('other'), color: '#6b7280' }
+                    ]
+                });
+            }
+
+
         function initCharts() {
             const timeContainers = ['eeoi-time-container', 'time-util-container'];
             timeContainers.forEach(containerId => {
@@ -1181,154 +1395,18 @@
 
             const defaultCategories = ['2023', '2024', '2025', '2026'];
             // 三個受 TASK-3 影響的圖表預設「船報日期」X 軸 (3/15 ~ 3/27 連續日期)
-            const reportDates = ['03/15','03/16','03/17','03/18','03/19','03/20','03/21','03/22','03/23','03/24','03/25','03/26','03/27'];
+            const reportDates = ['07/15','07/16','07/17','07/18','07/19','07/20','07/21','07/22','07/23','07/24','07/25','07/26','07/27'];
             // 港埠延滯：只顯示有裝卸事件的日期 (不連續日期，跳過沒事件的日子)
-            const portEventDates = ['03/02','03/03','03/05','03/06','03/07','03/11','03/12','03/18','03/19','03/20','03/25','03/26'];
+            const portEventDates = ['07/02','07/03','07/05','07/06','07/07','07/11','07/12','07/18','07/19','07/20','07/25','07/26'];
 
-            // 1. FW Chart — 每日耗量 vs 平均耗量比較 (X 軸：船報日期)
-            const fwDailyDemo = reportDates.map(() => parseFloat((6 + Math.random() * 8).toFixed(1)));
-            const fwAvg = parseFloat((fwDailyDemo.reduce((a, b) => a + b, 0) / fwDailyDemo.length).toFixed(2));
-            Highcharts.chart('chart-fw-balance', {
-                xAxis: { categories: reportDates, title: { text: '船報日期' } },
-                yAxis: { title: { text: '淡水耗量 (MT)' }, min: 0 },
-                series: [
-                    { name: '每日耗量 (MT)', type: 'column', data: fwDailyDemo, color: '#f87171' },
-                    { name: '平均耗量基準線 (MT)', type: 'line', data: reportDates.map(() => fwAvg), color: '#10b981', dashStyle: 'ShortDash', marker: { enabled: false }, lineWidth: 2 }
-                ]
-            });
-
-            // 2. Fuel Warning Chart (New)
-            Highcharts.chart('chart-fuel-warning', {
-                chart: { type: 'column' },
-                xAxis: { categories: ['重油 (FO)', '輕油 (DO)'] },
-                yAxis: { 
-                    title: { text: '可用天數 (Days)' }, min: 0,
-                    plotBands: [
-                        { from: 0, to: 3, color: 'rgba(239, 68, 68, 0.15)', label: { text: '3天警戒 (危險)', style: { color: '#ef4444', fontSize: '0.625em', fontWeight: 'bold' } } },
-                        { from: 3, to: 5, color: 'rgba(245, 158, 11, 0.15)', label: { text: '5天預警 (安排)', style: { color: '#f59e0b', fontSize: '0.625em', fontWeight: 'bold' } } }
-                    ]
-                },
-                plotOptions: { column: { borderRadius: 2, colorByPoint: true } },
-                series: [{
-                    name: '剩餘可用天數', showInLegend: false,
-                    data: [
-                        { y: 8.5, mt: 238, baseline: 28, source: '格式1-船位報', color: '#10b981' },
-                        { y: 4.2, mt: 10.5, baseline: 2.5, source: '格式1-船位報', color: '#f59e0b' }
-                    ]
-                }],
-                tooltip: { 
-                    useHTML: true,
-                    formatter: function () {
-                        return `<b>${this.x}</b> <span style="color:#9ca3af; font-size:0.625rem; margin-left: 8px;">(來源: ${this.point.source})</span><br/>
-                        可用天數: <b style="color:${this.point.color}">${this.y} 天</b> <br/>
-                        <span style="color:#9ca3af; font-size:0.625rem;">(當前存量: ${this.point.mt} MT / 歷史日均耗: ${this.point.baseline} MT)</span><br/>`;
-                    }
-                }
-            });
-
-            // 3. Slip Chart — X 軸：船報日期 (連續日)
-            Highcharts.chart('chart-slip-weather', {
-                xAxis: { categories: reportDates, title: { text: '船報日期' } },
-                yAxis: [{ title: { text: '風/浪級' } }, { title: { text: '滑失率 %' }, opposite: true }],
-                series: [
-                    { name: '蒲式風級', type: 'column', yAxis: 0, data: reportDates.map(() => Math.floor(2 + Math.random() * 5)), color: '#4b5563' },
-                    { name: '海象浪級', type: 'column', yAxis: 0, data: reportDates.map(() => Math.floor(1 + Math.random() * 4)), color: '#6b7280' },
-                    { name: '實際滑失率', type: 'spline', yAxis: 1, data: reportDates.map(() => parseFloat((11 + Math.random() * 5).toFixed(1))), color: '#ef4444', lineWidth: 3, marker: { radius: 4 } },
-                    { name: '動態基準線', type: 'line', yAxis: 1, data: reportDates.map(() => 12.5), color: '#10b981', dashStyle: 'Dash', marker: { enabled: false } }
-                ]
-            });
-
-            // 4. Cyl/RPM Chart — X 軸：船報日期 (連續日)
-            Highcharts.chart('chart-cyl-rpm', {
-                xAxis: { categories: reportDates, title: { text: '船報日期' } },
-                yAxis: [{ title: { text: '汽缸油耗 (L)' } }, { title: { text: '主機轉速 (RPM)' }, opposite: true }],
-                series: [
-                    { name: '汽缸油耗 (L)', type: 'column', yAxis: 0, data: reportDates.map(() => Math.floor(150 + Math.random() * 30)), color: '#c084fc' },
-                    { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: reportDates.map(() => Math.floor(95 + Math.random() * 15)), color: '#f59e0b', lineWidth: 3, tooltip: { valueSuffix: ' RPM' } }
-                ]
-            });
-
-            // 5. CCTV Cargo Chart — 暫時隱藏 (對應 HTML 卡片已註解)
-            /*
-            Highcharts.chart('chart-cctv-cargo', {
-                chart: { type: 'bar' },
-                xAxis: { categories: ['Hold 1', 'Hold 2', 'Hold 3', 'Hold 4', 'Hold 5'] },
-                yAxis: { min: 0, title: { text: '裝卸進度 (MT)' } },
-                plotOptions: { bar: { stacking: 'normal', borderWidth: 0, dataLabels: { enabled: true, style: { textOutline: 'none', color: '#fff', fontSize: '0.625em' } } } },
-                series: [
-                    { name: 'AI 估算已作業量 (CCTV)', data: [12000, 15000, 14500, 11000, 13500], color: '#14b8a6' },
-                    { name: '剩餘未作業量 (Remaining)', data: [3000, 0, 500, 4000, 1500], color: '#4b5563' }
-                ],
-                tooltip: { shared: true, valueSuffix: ' MT' }
-            });
-            */
-
-            // 6. Port Ops Chart — X 軸：船報日期 (不連續，僅顯示有裝卸事件之日)
-            const portOpsDischarge = portEventDates.map(() => Math.floor(4000 + Math.random() * 10000));
-            const portOpsPeak = Math.max.apply(null, portOpsDischarge); // 峰值日：期間內單日最高裝卸量，作為可達基準
-            Highcharts.chart('chart-port-ops', {
-                xAxis: {
-                    categories: portEventDates,
-                    title: { text: '船報日期 (僅顯示有裝卸事件之日)' },
-                    labels: { rotation: -30 }
-                },
-                yAxis: [{ title: { text: '裝卸貨量 (MT)' } }, { title: { text: '工班數' }, opposite: true }],
-                tooltip: {
-                    shared: true,
-                    formatter: function () {
-                        let s = `<b>船報日期 ${this.x}</b><br/>`;
-                        this.points.forEach(p => {
-                            s += `<span style="color:${p.color}">●</span> ${p.series.name}: <b>${p.y}</b><br/>`;
-                        });
-                        return s;
-                    }
-                },
-                series: [
-                    { name: '日裝卸貨量 (MT)', type: 'column', yAxis: 0, data: portOpsDischarge, color: '#10b981' },
-                    { name: '工班數量', type: 'spline', yAxis: 1, data: portEventDates.map(() => Math.floor(1 + Math.random() * 3)), color: '#facc15', lineWidth: 0, marker: { radius: 6, symbol: 'circle' } },
-                    { name: '峰值日基準線 (MT)', type: 'line', yAxis: 0, data: portEventDates.map(() => portOpsPeak), color: '#f87171', dashStyle: 'ShortDash', lineWidth: 2, marker: { enabled: false } }
-                ]
-            });
-
-            // 7. Time Util Chart
-            Highcharts.chart('chart-time-util', {
-                chart: { type: 'bar' }, 
-                xAxis: { categories: ['2510', '2511', '2601', '2602', '2603', '2604'] }, 
-                yAxis: { min: 0, max: 100, title: null, visible: false },
-                plotOptions: { bar: { stacking: 'percent', borderWidth: 0, dataLabels: { enabled: true, format: '{y}%', style: { color: '#fff', textOutline: 'none', fontWeight: 'normal', fontSize: '10px' } } } },
-                series: [
-                    { name: '定速航行', data: [65, 70, 68, 60, 72, 65], color: '#3b82f6' }, 
-                    { name: '等泊閒置', data: [15, 10, 12, 18, 8, 15], color: '#f59e0b' },
-                    { name: '港埠作業', data: [20, 20, 20, 22, 20, 20], color: '#10b981' }
-                ]
-            });
-
-            // 8. EEOI Chart
-            Highcharts.chart('chart-eeoi', {
-                xAxis: { categories: defaultCategories },
-                yAxis: [{ title: { text: 'gCO2 / t-nm' } }],
-                tooltip: {
-                    shared: true,
-                    useHTML: true,
-                    formatter: function () {
-                        let s = `<b>${this.x}</b><br/>`;
-                        this.points.forEach(p => {
-                            s += `<span style="color:${p.color}">\u25CF</span> ${p.series.name}: <b>${p.y}</b>`;
-                            if (p.point.grade) {
-                                let gColor = p.point.grade === 'A' || p.point.grade === 'B' ? '#10b981' : (p.point.grade === 'C' ? '#f59e0b' : '#ef4444');
-                                s += ` <span style="background-color:${gColor}; color:#fff; padding: 1px 5px; border-radius: 3px; font-size: 0.7rem; margin-left: 5px;">等級 ${p.point.grade}</span>`;
-                            }
-                            s += `<br/>`;
-                        });
-                        return s;
-                    }
-                },
-                series: [
-                    { name: '營運碳排 (EEOI)', data: [11.2, 11.5, 10.8, 11.1], color: '#10b981', type: 'area', fillColor: { linearGradient: [0, 0, 0, 300], stops: [[0, 'rgba(16,185,129,0.3)'], [1, 'transparent']] }, marker: { radius: 4 } },
-                    { name: '法規評級 (CII)', data: [{y:12.1, grade:'C'}, {y:12.3, grade:'C'}, {y:11.9, grade:'B'}, {y:12.0, grade:'B'}], color: '#3b82f6', type: 'spline', lineWidth: 3, marker: { radius: 4 } },
-                    { name: '法規紅線 (C級下限)', type: 'line', data: [13.5, 13.0, 12.5, 12.0], color: '#ef4444', dashStyle: 'Dash', marker: { enabled: false } }
-                ]
-            });
+            // 各圖改真實校準(ship-aware，含資料不足提醒)：FW/燃油剩餘/風浪RPM/汽缸油/港埠作業/EEOI + 航次時間利用率
+            renderFW();
+            renderFuelWarn();
+            renderSlip();
+            renderCyl();
+            renderPortOps();
+            renderEEOI();
+            renderVoyUtil();
         }
 
         /**
@@ -1338,44 +1416,101 @@
          */
         function generateDemoData() {
             // 船名：取目前「監控船舶」下拉所選船舶 (由總覽頁 ?ship= 帶入)
-            const shipName = (document.getElementById('vesselSelect') || {}).value || 'Yuan Shun';
+            const shipName = (document.getElementById('vesselSelect') || {}).value || 'Hui Shun No.1';
 
             // 千分位格式（僅用於「數量/數值」，識別碼如航次號不套用）
-            const nf = v => Number(v).toLocaleString('en-US');
+            const nf = v => (v == null || isNaN(v)) ? '—' : Number(v).toLocaleString('en-US');
 
-            // 港口對照表：UN/LOCODE 5 碼 + 中文港名
-            // 註：羅源 / 青州 之 5 碼為 demo 暫用值，正式上線請以公司港口主檔為準
-            const PORT_DIR = {
-                '光陽': 'KRKAN', '浦項': 'KRKPO', '和歌山': 'JPWAK', '名古屋': 'JPNGO',
-                '君津': 'JPKMI', '羅源': 'CNLUY', '青州': 'CNQZH', '台北': 'TWTPE'
+            // 港口對照與角色（附錄B / 決策 D1）：台北=卸貨、境外+花蓮=裝貨、基隆=加油(不列裝卸)、舟山未證實
+            const PORT_DIR = { '福州': 'CNFOC', '花蓮': 'TWHUN', '名古屋': 'JPNGO', '和歌山': 'JPWAK', '晉江': 'CNJLY', '台北': 'TWTPE', '基隆': 'TWKEL', '舟山': 'CNDSN' };
+            const LOAD_PORTS = ['福州', '花蓮', '名古屋', '和歌山', '晉江'];
+            const DISC_PORTS = ['台北'];
+            const BUNKER_PORTS = ['基隆'];
+            const portLabel = n => n ? ((PORT_DIR[n] ? PORT_DIR[n] + ' ' : '') + n) : '—';
+
+            // ===== 各船正式期真實航次（附錄A）；j: full完整/short短航程完整/partial缺漏/trunc觀察期截斷 =====
+            const SHIP_VOYAGES = {
+                'Hui Shun No.1': [
+                    { voy: 'V2617', j: 'trunc', start: null, load: null, disc: '台北', cargo: null, cycle: null },
+                    { voy: 'V2618', j: 'full', start: '2026-06-27', load: '福州', disc: '台北', cargo: 20980, cycle: 4.5 },
+                    { voy: 'V2619', j: 'full', start: '2026-07-02', load: '福州', disc: '台北', cargo: 21690, cycle: 2.4 },
+                    { voy: 'V2620', j: 'full', start: '2026-07-05', load: '福州', disc: '台北', cargo: 21310, cycle: 4.0 },
+                    { voy: 'V2621', j: 'full', start: '2026-07-13', load: '福州', disc: '台北', cargo: 22650, cycle: 2.3 },
+                    { voy: 'V2622', j: 'full', start: '2026-07-16', load: '福州', disc: '台北', cargo: 22920, cycle: 2.5 },
+                    { voy: 'V2623', j: 'full', start: '2026-07-19', load: '福州', disc: '台北', cargo: 21390, cycle: 2.3 },
+                    { voy: 'V2624', j: 'full', start: '2026-07-22', load: '福州', disc: '台北', cargo: 19710, cycle: 2.5 },
+                    { voy: 'V2625', j: 'full', start: '2026-07-25', load: '福州', disc: '台北', cargo: 19705, cycle: 3.2 },
+                    { voy: 'V2626', j: 'trunc', start: '2026-07-29', load: '晉江', disc: '（航行中）', cargo: 25500, cycle: null }
+                ],
+                'Jing Shun': [
+                    { voy: 'V2626', j: 'trunc', start: '2026-06-22', load: null, disc: '台北', cargo: null, cycle: 8.4 },
+                    { voy: 'V2627', j: 'full', start: '2026-06-30', load: '福州', disc: '台北', cargo: 21850, cycle: 3.0 },
+                    { voy: 'V2628', j: 'full', start: '2026-07-04', load: '福州', disc: '台北', cargo: 22050, cycle: 3.0 },
+                    { voy: 'V2629', j: 'full', start: '2026-07-11', load: '名古屋', disc: '台北', cargo: 25000, cycle: 14.9 },
+                    { voy: 'V2630', j: 'full', start: '2026-07-26', load: '福州', disc: '台北', cargo: 20300, cycle: 2.4 },
+                    { voy: 'V2631', j: 'trunc', start: '2026-07-29', load: '福州', disc: '台北', cargo: 22395, cycle: null }
+                ],
+                'Feng Shun': [
+                    { voy: 'V2623', j: 'full', start: '2026-06-21', load: '基隆(加油)', disc: '台北', cargo: 22100, cycle: 2.7 },
+                    { voy: 'V2624', j: 'partial', start: '2026-06-23', load: '（缺③）', disc: '台北', cargo: null, cycle: 24.5, note: '含 16 天填報中斷與颱風停等，不代表實際週期' },
+                    { voy: 'V2625', j: 'trunc', start: '2026-07-21', load: '和歌山', disc: '基隆(加油)→台北', cargo: 25000, cycle: null }
+                ],
+                'Gimpo Shun': [
+                    { voy: 'V2641', j: 'short', start: '2026-06-23', load: '花蓮', disc: '台北', cargo: 8226, cycle: 0.6 },
+                    { voy: 'V2642', j: 'short', start: '2026-06-23', load: '福州', disc: '台北', cargo: 8155, cycle: 1.6 },
+                    { voy: 'V2643', j: 'short', start: '2026-06-25', load: '花蓮', disc: '台北', cargo: 8322, cycle: 2.2 },
+                    { voy: 'V2644', j: 'full', start: '2026-06-28', load: '福州', disc: '台北', cargo: 8165, cycle: 6.1, note: '含 7/2~7/4 等泊' },
+                    { voy: 'V2645', j: 'short', start: '2026-07-05', load: '花蓮', disc: '台北', cargo: 8293, cycle: 1.7 },
+                    { voy: 'V2646', j: 'full', start: '2026-07-07', load: '台北(待確認)', disc: '台北', cargo: 8250, cycle: 2.3 },
+                    { voy: 'V2647', j: 'short', start: '2026-07-12', load: '福州', disc: '台北', cargo: 8180, cycle: 4.2 },
+                    { voy: 'V2648', j: 'short', start: '2026-07-17', load: '福州', disc: '台北', cargo: 8210, cycle: 2.1 },
+                    { voy: 'V2649', j: 'short', start: '2026-07-20', load: '花蓮', disc: '台北', cargo: 8270, cycle: 1.7 },
+                    { voy: 'V2650', j: 'partial', start: '2026-07-22', load: '花蓮', disc: '台北', cargo: 8181, cycle: 1.6 },
+                    { voy: 'V2651', j: 'full', start: '2026-07-24', load: '福州', disc: '台北', cargo: 8000, cycle: 2.1 },
+                    { voy: 'V2652', j: 'full', start: '2026-07-27', load: '福州', disc: '台北', cargo: 8205, cycle: 2.5 },
+                    { voy: 'V2653', j: 'trunc', start: '2026-07-30', load: '花蓮', disc: '（航行中）', cargo: 8151, cycle: null }
+                ],
+                'Yuan Shun': [
+                    { voy: 'V2628', j: 'trunc', start: null, load: null, disc: '台北', cargo: null, cycle: null },
+                    { voy: 'V2629', j: 'trunc', start: '2026-06-30', load: '舟山(停擺)', disc: null, cargo: null, cycle: null }
+                ]
             };
-            const LOAD_PORTS = ['光陽', '浦項', '和歌山', '名古屋', '君津', '羅源', '青州'];
-            const portLabel = n => PORT_DIR[n] + ' ' + n;
+            // 各船航行日均耗（校準自真實）— 供航次油耗推估與存量天數估算
+            const SHIP_DAILY_FO = { 'Yuan Shun': null, 'Jing Shun': 20.4, 'Feng Shun': 13.8, 'Hui Shun No.1': 14.0, 'Gimpo Shun': 5.0 }; // 源順輪資料不足→null
+            const SHIP_DAILY_DO = { 'Yuan Shun': null, 'Jing Shun': 0.3, 'Feng Shun': 0.1, 'Hui Shun No.1': 0.3, 'Gimpo Shun': 1.5 };
 
-            let voyHtml = '';
-            for(let i=30; i>=1; i--) {
-                let voyNum = i < 10 ? '0'+i : i;
-                let month = Math.floor(Math.random() * 6) + 1; 
-                let mStr = month < 10 ? '0'+month : month;
-                let day = Math.floor(Math.random() * 28) + 1;
-                let dStr = day < 10 ? '0'+day : day;
-                let date = `2026-${mStr}-${dStr}`;
-                
-                let cycleDays = Math.floor(Math.random() * 10) + 14;            // 來回週期 14~23 天
-                let cargoMT = nf((Math.random() * 3000 + 6000).toFixed(0));     // 裝貨數量 (MT)
-                let loadPort = LOAD_PORTS[i % LOAD_PORTS.length];               // 裝貨港輪替，卸貨港固定台北
+            const shipVoyages = SHIP_VOYAGES[shipName] || [];
+            const validVoyages = shipVoyages.filter(v => v.j === 'full' || v.j === 'short'); // 納入週期/油耗統計者(排除截斷/缺漏)
+            const dFO = SHIP_DAILY_FO[shipName], dDO = SHIP_DAILY_DO[shipName];
 
-                voyHtml += `<tr>
-                    <td>26${voyNum}</td>
-                    <td>${cycleDays}</td>
-                    <td>${date}</td>
-                    <td class="text-start">${portLabel(loadPort)} ↔ ${portLabel('台北')}</td>
-                    <td>${cargoMT}</td>
-                    <td>${(Math.random()*200 + 100).toFixed(1)}</td>
-                    <td>${(Math.random()*15 + 2).toFixed(1)}</td>
+            // 航次統計列表：一列一航次（新到舊）；截斷/缺漏標註、不列統計欄；油耗欄依日均耗×週期推估(無週期或無日均耗顯示 —)
+            const JMARK = { trunc: '<span class="badge bg-secondary ms-1" style="font-size:.62rem;">觀察期截斷</span>', partial: '<span class="badge bg-warning text-dark ms-1" style="font-size:.62rem;">缺漏</span>', short: '', full: '' };
+            let voyHtml = shipVoyages.slice().reverse().map(vo => {
+                const excl = (vo.j === 'trunc' || vo.j === 'partial');   // 不納統計
+                const fo = (!excl && vo.cycle && dFO) ? Math.round(dFO * vo.cycle) : null;
+                const doo = (!excl && vo.cycle && dDO) ? (dDO * vo.cycle).toFixed(1) : null;
+                const noteT = vo.note ? ` title="${vo.note}"` : '';
+                return `<tr class="${excl ? 'text-muted' : ''}">
+                    <td>${vo.voy}${JMARK[vo.j] || ''}</td>
+                    <td${noteT}>${vo.cycle != null ? vo.cycle : '—'}</td>
+                    <td>${vo.start || '—'}</td>
+                    <td class="text-start">${portLabel(vo.load)} ↔ ${portLabel(vo.disc)}</td>
+                    <td>${nf(vo.cargo)}</td>
+                    <td title="依航行日均耗×週期推估">${fo != null ? fo : '—'}</td>
+                    <td title="依航行日均耗×週期推估">${doo != null ? doo : '—'}</td>
                 </tr>`;
+            }).join('');
+            // D7：本期間無完整航次（如源順輪）→ 於列表上方以獨立橫幅明示「資料不足」，表內僅列截斷航次供參考，不編造統計
+            const _notice = document.getElementById('voyageInsuffNotice');
+            if (_notice) {
+                if (validVoyages.length === 0) {
+                    _notice.textContent = '本期間資料不足：無完整航次（空倉裝貨→滿倉卸貨）。下表為觀察期截斷紀錄，僅供參考、不納入統計。';
+                    _notice.classList.remove('d-none');
+                } else {
+                    _notice.classList.add('d-none');
+                }
             }
-            $('#voyageSummaryTable tbody').html(voyHtml);
+            $('#voyageSummaryTable tbody').html(voyHtml || '<tr><td colspan="7" class="text-warning text-center py-4">本期間資料不足（無完整航次）</td></tr>');
 
             // ==========================================
             // 動態產生依循「真實航次動線」的假資料
@@ -1387,61 +1522,343 @@
             //   格式4 = Departure Report (離港報)
             //   格式5 = Shifting Report (移泊報)
             //   格式6 = Irregular Report (特殊情況報)
+            // 註：真實檔清洗後範圍內「無早報 Morning Report」，故僅保留午報 Noon Report
             const voyageTimeline = [
                 { f: 1, name: 'Noon Report',      zh: '船位報 (午報)',     badge: 'bg-primary',           status: 'Sailing',     lt: '12:00', gmt: '04:00' },
-                { f: 1, name: 'Morning Report',   zh: '船位報 (早報)',     badge: 'bg-primary',           status: 'Sailing',     lt: '06:00', gmt: '22:00' },
                 { f: 2, name: 'Arrival Report',   zh: '抵港報',            badge: 'bg-secondary',         status: 'At Port',     lt: '07:30', gmt: '23:30' },
                 { f: 6, name: 'Irregular Report', zh: '特殊情況報',        badge: 'bg-danger',            status: 'Anchorage',   lt: '09:00', gmt: '01:00' },
                 { f: 3, name: 'Daily Report',     zh: '每日報',            badge: 'bg-info text-dark',    status: 'Discharging', lt: '08:00', gmt: '00:00' },
                 { f: 5, name: 'Shifting Report',  zh: '移泊報',            badge: 'bg-warning text-dark', status: 'Shifting',    lt: '14:00', gmt: '06:00' },
                 { f: 3, name: 'Daily Report',     zh: '每日報',            badge: 'bg-info text-dark',    status: 'Discharging', lt: '08:00', gmt: '00:00' },
+                { f: 9, name: 'Completed Report', zh: '完工報',            badge: 'bg-success',           status: 'Completed',   lt: '16:00', gmt: '08:00' },
                 { f: 4, name: 'Departure Report', zh: '離港報',            badge: 'bg-success',           status: 'Sailing',     lt: '18:00', gmt: '10:00' }
             ];
 
             let chronologicalData = [];
-            let currentDate = new Date(2026, 2, 1); 
-            let voyNum = 29;
-
-            for(let v=0; v<3; v++) {
-                let currentVoy = `26${voyNum+v}`;
-                voyageTimeline.forEach(report => {
-                    // 日報或船位報會跨天
-                    if(report.f === 1 || report.f === 3 || report.f === 4) {
-                        currentDate.setDate(currentDate.getDate() + 1);
-                    }
+            // 依真實檔各船「實際發過的報別組合」過濾：f1 午報 / f5 移泊 / f6 特殊 各船有無不同
+            // （抵港 f2、每日 f3、離港 f4 各船皆有，一律保留）
+            const RPT_BY_SHIP = {
+                'Yuan Shun':     { f1: 1, f5: 1, f6: 1 }, // 源順輪：午報/移泊/特殊 皆有
+                'Jing Shun':     { f1: 1, f5: 1, f6: 0 }, // 景順輪：無特殊
+                'Feng Shun':     { f1: 1, f5: 0, f6: 1 }, // 豐順輪：無移泊
+                'Hui Shun No.1': { f1: 0, f5: 1, f6: 1 }, // 匯順1號：無午報
+                'Gimpo Shun':    { f1: 0, f5: 0, f6: 1 }  // 金保順：無午報、無移泊
+            };
+            const cfg = RPT_BY_SHIP[shipName] || { f1: 1, f5: 1, f6: 1 };
+            const SHIP_HAS_COMPLETED = { 'Yuan Shun': 0, 'Jing Shun': 1, 'Feng Shun': 1, 'Hui Shun No.1': 1, 'Gimpo Shun': 1 }; // 源順輪無完工報
+            const IRREG_VOYAGES = { 'Hui Shun No.1': 'V2621', 'Gimpo Shun': 'V2647' }; // 颱風停航對應航次（附錄D，07-10~12）
+            // 逐筆真實船報（供無完整航次者忠實呈現明細）：源順輪本期 11 筆——V2628 僅 1 筆特殊情況報(起航在觀察期前，僅此報落在期內)、
+            // V2629 共 10 筆(離港/午報/抵港×2/移泊×4/每日×2)。f 對應 voyageTimeline 報別；date/lt 為真實 ReportDate。
+            const REAL_REPORTS = {
+                'Yuan Shun': [
+                    { voy: 'V2628', f: 6, date: '2026-06-24', lt: '08:00' },
+                    { voy: 'V2629', f: 4, date: '2026-06-28', lt: '18:03' },
+                    { voy: 'V2629', f: 1, date: '2026-06-29', lt: '12:00' },
+                    { voy: 'V2629', f: 2, date: '2026-06-29', lt: '18:24' },
+                    { voy: 'V2629', f: 2, date: '2026-06-30', lt: '19:30' },
+                    { voy: 'V2629', f: 5, date: '2026-07-03', lt: '09:35' },
+                    { voy: 'V2629', f: 3, date: '2026-07-04', lt: '08:00' },
+                    { voy: 'V2629', f: 5, date: '2026-07-10', lt: '08:20' },
+                    { voy: 'V2629', f: 5, date: '2026-07-15', lt: '01:00' },
+                    { voy: 'V2629', f: 5, date: '2026-07-27', lt: '08:27' },
+                    { voy: 'V2629', f: 3, date: '2026-07-31', lt: '09:05' }
+                ],
+                'Jing Shun': [
+                    { voy: 'V2626', f: 4, date: '2026-06-21', lt: '18:15' },
+                    { voy: 'V2626', f: 2, date: '2026-06-22', lt: '02:20' },
+                    { voy: 'V2626', f: 3, date: '2026-06-22', lt: '20:50' },
+                    { voy: 'V2626', f: 3, date: '2026-06-23', lt: '12:51' },
+                    { voy: 'V2626', f: 3, date: '2026-06-24', lt: '10:17' },
+                    { voy: 'V2626', f: 3, date: '2026-06-25', lt: '10:33' },
+                    { voy: 'V2626', f: 3, date: '2026-06-26', lt: '12:11' },
+                    { voy: 'V2626', f: 3, date: '2026-06-27', lt: '08:00' },
+                    { voy: 'V2626', f: 3, date: '2026-06-28', lt: '07:56' },
+                    { voy: 'V2626', f: 5, date: '2026-06-28', lt: '12:00' },
+                    { voy: 'V2626', f: 3, date: '2026-06-29', lt: '09:00' },
+                    { voy: 'V2626', f: 3, date: '2026-06-30', lt: '09:49' },
+                    { voy: 'V2626', f: 9, date: '2026-06-30', lt: '12:00' },
+                    { voy: 'V2627', f: 4, date: '2026-06-30', lt: '12:00' },
+                    { voy: 'V2627', f: 2, date: '2026-06-30', lt: '22:00' },
+                    { voy: 'V2627', f: 2, date: '2026-07-01', lt: '17:00' },
+                    { voy: 'V2627', f: 9, date: '2026-07-02', lt: '12:00' },
+                    { voy: 'V2627', f: 4, date: '2026-07-02', lt: '12:00' },
+                    { voy: 'V2627', f: 2, date: '2026-07-02', lt: '22:30' },
+                    { voy: 'V2628', f: 4, date: '2026-07-03', lt: '12:00' },
+                    { voy: 'V2627', f: 9, date: '2026-07-03', lt: '22:50' },
+                    { voy: 'V2628', f: 2, date: '2026-07-04', lt: '12:00' },
+                    { voy: 'V2628', f: 9, date: '2026-07-05', lt: '14:50' },
+                    { voy: 'V2628', f: 4, date: '2026-07-05', lt: '14:50' },
+                    { voy: 'V2628', f: 2, date: '2026-07-05', lt: '23:59' },
+                    { voy: 'V2628', f: 9, date: '2026-07-07', lt: '17:00' },
+                    { voy: 'V2629', f: 4, date: '2026-07-07', lt: '17:17' },
+                    { voy: 'V2629', f: 1, date: '2026-07-08', lt: '12:00' },
+                    { voy: 'V2629', f: 1, date: '2026-07-09', lt: '12:00' },
+                    { voy: 'V2629', f: 1, date: '2026-07-10', lt: '12:00' },
+                    { voy: 'V2629', f: 2, date: '2026-07-11', lt: '03:30' },
+                    { voy: 'V2629', f: 2, date: '2026-07-11', lt: '12:00' },
+                    { voy: 'V2629', f: 3, date: '2026-07-12', lt: '07:36' },
+                    { voy: 'V2629', f: 3, date: '2026-07-13', lt: '09:33' },
+                    { voy: 'V2629', f: 3, date: '2026-07-14', lt: '10:20' },
+                    { voy: 'V2629', f: 3, date: '2026-07-15', lt: '09:52' },
+                    { voy: 'V2629', f: 4, date: '2026-07-16', lt: '08:00' },
+                    { voy: 'V2629', f: 1, date: '2026-07-17', lt: '12:00' },
+                    { voy: 'V2629', f: 1, date: '2026-07-18', lt: '12:00' },
+                    { voy: 'V2629', f: 1, date: '2026-07-19', lt: '12:00' },
+                    { voy: 'V2629', f: 2, date: '2026-07-20', lt: '12:00' },
+                    { voy: 'V2629', f: 2, date: '2026-07-20', lt: '12:00' },
+                    { voy: 'V2629', f: 4, date: '2026-07-20', lt: '14:00' },
+                    { voy: 'V2629', f: 5, date: '2026-07-22', lt: '12:00' },
+                    { voy: 'V2630', f: 4, date: '2026-07-25', lt: '12:00' },
+                    { voy: 'V2629', f: 9, date: '2026-07-25', lt: '23:30' },
+                    { voy: 'V2630', f: 2, date: '2026-07-26', lt: '12:00' },
+                    { voy: 'V2630', f: 4, date: '2026-07-27', lt: '10:00' },
+                    { voy: 'V2630', f: 2, date: '2026-07-27', lt: '19:48' },
+                    { voy: 'V2631', f: 4, date: '2026-07-28', lt: '12:00' },
+                    { voy: 'V2630', f: 9, date: '2026-07-28', lt: '23:18' },
+                    { voy: 'V2631', f: 2, date: '2026-07-29', lt: '15:00' },
+                    { voy: 'V2631', f: 4, date: '2026-07-30', lt: '12:00' },
+                    { voy: 'V2631', f: 2, date: '2026-07-30', lt: '21:38' }
+                ],
+                'Feng Shun': [
+                    { voy: 'V2623', f: 4, date: '2026-06-21', lt: '08:45' },
+                    { voy: 'V2623', f: 2, date: '2026-06-21', lt: '12:00' },
+                    { voy: 'V2623', f: 2, date: '2026-06-21', lt: '13:05' },
+                    { voy: 'V2623', f: 3, date: '2026-06-23', lt: '08:09' },
+                    { voy: 'V2624', f: 2, date: '2026-06-23', lt: '12:00' },
+                    { voy: 'V2623', f: 9, date: '2026-06-23', lt: '18:47' },
+                    { voy: 'V2624', f: 4, date: '2026-06-23', lt: '18:47' },
+                    { voy: 'V2624', f: 2, date: '2026-06-24', lt: '21:48' },
+                    { voy: 'V2624', f: 6, date: '2026-06-26', lt: '10:48' },
+                    { voy: 'V2624', f: 1, date: '2026-06-27', lt: '12:00' },
+                    { voy: 'V2624', f: 1, date: '2026-07-13', lt: '12:00' },
+                    { voy: 'V2624', f: 1, date: '2026-07-14', lt: '12:00' },
+                    { voy: 'V2624', f: 2, date: '2026-07-15', lt: '10:53' },
+                    { voy: 'V2624', f: 3, date: '2026-07-16', lt: '08:57' },
+                    { voy: 'V2624', f: 3, date: '2026-07-17', lt: '07:54' },
+                    { voy: 'V2624', f: 9, date: '2026-07-18', lt: '08:43' },
+                    { voy: 'V2625', f: 4, date: '2026-07-18', lt: '08:43' },
+                    { voy: 'V2625', f: 1, date: '2026-07-18', lt: '12:00' },
+                    { voy: 'V2625', f: 1, date: '2026-07-19', lt: '12:00' },
+                    { voy: 'V2625', f: 1, date: '2026-07-20', lt: '12:00' },
+                    { voy: 'V2625', f: 2, date: '2026-07-21', lt: '09:19' },
+                    { voy: 'V2625', f: 3, date: '2026-07-22', lt: '06:54' },
+                    { voy: 'V2625', f: 3, date: '2026-07-23', lt: '08:11' },
+                    { voy: 'V2625', f: 3, date: '2026-07-24', lt: '07:48' },
+                    { voy: 'V2625', f: 4, date: '2026-07-24', lt: '14:27' },
+                    { voy: 'V2625', f: 1, date: '2026-07-25', lt: '12:00' },
+                    { voy: 'V2625', f: 1, date: '2026-07-26', lt: '12:00' },
+                    { voy: 'V2625', f: 1, date: '2026-07-27', lt: '12:00' },
+                    { voy: 'V2625', f: 2, date: '2026-07-28', lt: '10:20' },
+                    { voy: 'V2625', f: 2, date: '2026-07-28', lt: '16:23' },
+                    { voy: 'V2625', f: 4, date: '2026-07-29', lt: '14:42' },
+                    { voy: 'V2625', f: 2, date: '2026-07-29', lt: '18:51' },
+                    { voy: 'V2625', f: 2, date: '2026-07-31', lt: '09:07' }
+                ],
+                'Hui Shun No.1': [
+                    { voy: 'V2617', f: 5, date: '2026-06-22', lt: '12:00' },
+                    { voy: 'V2617', f: 3, date: '2026-06-23', lt: '08:00' },
+                    { voy: 'V2617', f: 3, date: '2026-06-24', lt: '08:15' },
+                    { voy: 'V2617', f: 3, date: '2026-06-25', lt: '08:22' },
+                    { voy: 'V2617', f: 3, date: '2026-06-26', lt: '08:42' },
+                    { voy: 'V2617', f: 9, date: '2026-06-26', lt: '21:15' },
+                    { voy: 'V2618', f: 4, date: '2026-06-26', lt: '21:48' },
+                    { voy: 'V2618', f: 2, date: '2026-06-27', lt: '14:00' },
+                    { voy: 'V2618', f: 4, date: '2026-06-28', lt: '10:30' },
+                    { voy: 'V2618', f: 2, date: '2026-06-28', lt: '12:00' },
+                    { voy: 'V2618', f: 3, date: '2026-06-29', lt: '07:57' },
+                    { voy: 'V2618', f: 3, date: '2026-07-01', lt: '08:41' },
+                    { voy: 'V2618', f: 9, date: '2026-07-01', lt: '12:00' },
+                    { voy: 'V2619', f: 4, date: '2026-07-02', lt: '01:12' },
+                    { voy: 'V2619', f: 2, date: '2026-07-02', lt: '16:48' },
+                    { voy: 'V2619', f: 4, date: '2026-07-03', lt: '13:24' },
+                    { voy: 'V2619', f: 2, date: '2026-07-03', lt: '23:42' },
+                    { voy: 'V2619', f: 3, date: '2026-07-04', lt: '07:57' },
+                    { voy: 'V2619', f: 9, date: '2026-07-05', lt: '01:12' },
+                    { voy: 'V2620', f: 4, date: '2026-07-05', lt: '01:12' },
+                    { voy: 'V2620', f: 2, date: '2026-07-05', lt: '18:00' },
+                    { voy: 'V2620', f: 4, date: '2026-07-06', lt: '15:30' },
+                    { voy: 'V2620', f: 2, date: '2026-07-07', lt: '01:30' },
+                    { voy: 'V2620', f: 3, date: '2026-07-08', lt: '07:59' },
+                    { voy: 'V2620', f: 3, date: '2026-07-09', lt: '08:05' },
+                    { voy: 'V2620', f: 9, date: '2026-07-09', lt: '16:54' },
+                    { voy: 'V2621', f: 4, date: '2026-07-09', lt: '17:24' },
+                    { voy: 'V2621', f: 6, date: '2026-07-10', lt: '12:00' },
+                    { voy: 'V2621', f: 3, date: '2026-07-11', lt: '08:57' },
+                    { voy: 'V2621', f: 3, date: '2026-07-12', lt: '07:56' },
+                    { voy: 'V2621', f: 6, date: '2026-07-12', lt: '20:45' },
+                    { voy: 'V2621', f: 2, date: '2026-07-13', lt: '14:45' },
+                    { voy: 'V2621', f: 4, date: '2026-07-14', lt: '11:00' },
+                    { voy: 'V2621', f: 2, date: '2026-07-14', lt: '21:00' },
+                    { voy: 'V2621', f: 3, date: '2026-07-15', lt: '07:52' },
+                    { voy: 'V2621', f: 9, date: '2026-07-15', lt: '22:00' },
+                    { voy: 'V2622', f: 4, date: '2026-07-15', lt: '22:12' },
+                    { voy: 'V2622', f: 2, date: '2026-07-16', lt: '17:00' },
+                    { voy: 'V2622', f: 4, date: '2026-07-17', lt: '12:24' },
+                    { voy: 'V2622', f: 2, date: '2026-07-17', lt: '23:48' },
+                    { voy: 'V2622', f: 3, date: '2026-07-18', lt: '07:52' },
+                    { voy: 'V2622', f: 9, date: '2026-07-19', lt: '03:58' },
+                    { voy: 'V2623', f: 4, date: '2026-07-19', lt: '04:30' },
+                    { voy: 'V2623', f: 2, date: '2026-07-19', lt: '17:45' },
+                    { voy: 'V2623', f: 4, date: '2026-07-20', lt: '16:06' },
+                    { voy: 'V2623', f: 2, date: '2026-07-21', lt: '02:18' },
+                    { voy: 'V2623', f: 9, date: '2026-07-22', lt: '01:30' },
+                    { voy: 'V2624', f: 4, date: '2026-07-22', lt: '01:30' },
+                    { voy: 'V2624', f: 2, date: '2026-07-22', lt: '13:45' },
+                    { voy: 'V2624', f: 4, date: '2026-07-23', lt: '19:00' },
+                    { voy: 'V2624', f: 2, date: '2026-07-24', lt: '06:00' },
+                    { voy: 'V2624', f: 9, date: '2026-07-25', lt: '02:37' },
+                    { voy: 'V2625', f: 4, date: '2026-07-25', lt: '03:12' },
+                    { voy: 'V2625', f: 2, date: '2026-07-25', lt: '15:45' },
+                    { voy: 'V2625', f: 4, date: '2026-07-26', lt: '09:30' },
+                    { voy: 'V2625', f: 2, date: '2026-07-26', lt: '19:18' },
+                    { voy: 'V2625', f: 3, date: '2026-07-27', lt: '08:00' },
+                    { voy: 'V2625', f: 3, date: '2026-07-28', lt: '08:28' },
+                    { voy: 'V2626', f: 4, date: '2026-07-28', lt: '12:00' },
+                    { voy: 'V2625', f: 9, date: '2026-07-28', lt: '22:30' },
+                    { voy: 'V2626', f: 2, date: '2026-07-29', lt: '15:42' },
+                    { voy: 'V2626', f: 3, date: '2026-07-30', lt: '08:00' },
+                    { voy: 'V2626', f: 4, date: '2026-07-30', lt: '17:00' }
+                ],
+                'Gimpo Shun': [
+                    { voy: 'V2641', f: 4, date: '2026-06-23', lt: '12:00' },
+                    { voy: 'V2641', f: 2, date: '2026-06-23', lt: '12:00' },
+                    { voy: 'V2641', f: 4, date: '2026-06-23', lt: '12:00' },
+                    { voy: 'V2642', f: 4, date: '2026-06-23', lt: '12:00' },
+                    { voy: 'V2642', f: 2, date: '2026-06-23', lt: '12:00' },
+                    { voy: 'V2642', f: 4, date: '2026-06-23', lt: '12:00' },
+                    { voy: 'V2641', f: 2, date: '2026-06-23', lt: '18:00' },
+                    { voy: 'V2642', f: 2, date: '2026-06-24', lt: '10:00' },
+                    { voy: 'V2642', f: 2, date: '2026-06-24', lt: '12:00' },
+                    { voy: 'V2643', f: 4, date: '2026-06-25', lt: '12:00' },
+                    { voy: 'V2643', f: 2, date: '2026-06-25', lt: '21:00' },
+                    { voy: 'V2643', f: 4, date: '2026-06-26', lt: '08:00' },
+                    { voy: 'V2643', f: 2, date: '2026-06-26', lt: '22:00' },
+                    { voy: 'V2644', f: 4, date: '2026-06-28', lt: '02:44' },
+                    { voy: 'V2644', f: 2, date: '2026-06-28', lt: '14:44' },
+                    { voy: 'V2644', f: 4, date: '2026-06-29', lt: '13:00' },
+                    { voy: 'V2644', f: 2, date: '2026-06-29', lt: '22:00' },
+                    { voy: 'V2644', f: 3, date: '2026-07-01', lt: '07:04' },
+                    { voy: 'V2645', f: 3, date: '2026-07-02', lt: '10:00' },
+                    { voy: 'V2644', f: 9, date: '2026-07-02', lt: '12:00' },
+                    { voy: 'V2645', f: 3, date: '2026-07-04', lt: '09:46' },
+                    { voy: 'V2645', f: 4, date: '2026-07-04', lt: '18:00' },
+                    { voy: 'V2645', f: 2, date: '2026-07-05', lt: '06:00' },
+                    { voy: 'V2645', f: 4, date: '2026-07-05', lt: '12:00' },
+                    { voy: 'V2645', f: 2, date: '2026-07-06', lt: '01:00' },
+                    { voy: 'V2646', f: 4, date: '2026-07-06', lt: '22:00' },
+                    { voy: 'V2646', f: 2, date: '2026-07-07', lt: '11:00' },
+                    { voy: 'V2646', f: 4, date: '2026-07-07', lt: '15:00' },
+                    { voy: 'V2646', f: 2, date: '2026-07-08', lt: '04:00' },
+                    { voy: 'V2646', f: 9, date: '2026-07-09', lt: '13:00' },
+                    { voy: 'V2647', f: 4, date: '2026-07-09', lt: '18:16' },
+                    { voy: 'V2647', f: 3, date: '2026-07-11', lt: '07:16' },
+                    { voy: 'V2647', f: 6, date: '2026-07-12', lt: '04:00' },
+                    { voy: 'V2647', f: 3, date: '2026-07-12', lt: '10:34' },
+                    { voy: 'V2647', f: 2, date: '2026-07-12', lt: '18:14' },
+                    { voy: 'V2647', f: 3, date: '2026-07-13', lt: '10:03' },
+                    { voy: 'V2647', f: 3, date: '2026-07-14', lt: '09:13' },
+                    { voy: 'V2647', f: 6, date: '2026-07-14', lt: '12:00' },
+                    { voy: 'V2647', f: 2, date: '2026-07-14', lt: '14:50' },
+                    { voy: 'V2647', f: 4, date: '2026-07-15', lt: '12:43' },
+                    { voy: 'V2647', f: 2, date: '2026-07-15', lt: '23:38' },
+                    { voy: 'V2648', f: 4, date: '2026-07-17', lt: '00:10' },
+                    { voy: 'V2648', f: 2, date: '2026-07-17', lt: '18:55' },
+                    { voy: 'V2648', f: 4, date: '2026-07-18', lt: '14:57' },
+                    { voy: 'V2648', f: 2, date: '2026-07-19', lt: '01:59' },
+                    { voy: 'V2649', f: 4, date: '2026-07-19', lt: '21:31' },
+                    { voy: 'V2649', f: 2, date: '2026-07-20', lt: '09:40' },
+                    { voy: 'V2649', f: 4, date: '2026-07-20', lt: '16:13' },
+                    { voy: 'V2649', f: 2, date: '2026-07-21', lt: '03:47' },
+                    { voy: 'V2650', f: 4, date: '2026-07-22', lt: '01:19' },
+                    { voy: 'V2650', f: 2, date: '2026-07-22', lt: '12:29' },
+                    { voy: 'V2650', f: 4, date: '2026-07-22', lt: '17:55' },
+                    { voy: 'V2650', f: 2, date: '2026-07-24', lt: '01:43' },
+                    { voy: 'V2651', f: 4, date: '2026-07-24', lt: '01:53' },
+                    { voy: 'V2651', f: 2, date: '2026-07-24', lt: '16:31' },
+                    { voy: 'V2651', f: 4, date: '2026-07-25', lt: '08:40' },
+                    { voy: 'V2651', f: 2, date: '2026-07-25', lt: '20:12' },
+                    { voy: 'V2652', f: 4, date: '2026-07-26', lt: '12:00' },
+                    { voy: 'V2651', f: 9, date: '2026-07-26', lt: '18:19' },
+                    { voy: 'V2652', f: 2, date: '2026-07-27', lt: '15:33' },
+                    { voy: 'V2652', f: 4, date: '2026-07-28', lt: '12:31' },
+                    { voy: 'V2652', f: 2, date: '2026-07-29', lt: '00:07' },
+                    { voy: 'V2652', f: 9, date: '2026-07-30', lt: '12:00' },
+                    { voy: 'V2653', f: 4, date: '2026-07-30', lt: '12:00' },
+                    { voy: 'V2653', f: 2, date: '2026-07-30', lt: '13:57' },
+                    { voy: 'V2653', f: 4, date: '2026-07-30', lt: '19:39' }
+                ]
+            };
+            // 各船穩健中位（校準自真實）：spd 航速節 / rpm 主機轉速 / slip 滑失率% / robFO,robDO 最新存量MT
+            const SHIP_STATS = {
+                'Yuan Shun': { spd: 12.7, rpm: 105, slip: 0, robFO: 134, robDO: 42 }, 'Jing Shun': { spd: 11.8, rpm: 106, slip: 6, robFO: 324, robDO: 44 },
+                'Feng Shun': { spd: 10.4, rpm: 102, slip: 9, robFO: 426, robDO: 61 }, 'Hui Shun No.1': { spd: 10.8, rpm: 103, slip: 13, robFO: 354, robDO: 22 },
+                'Gimpo Shun': { spd: 10.8, rpm: 168, slip: 3, robFO: 113, robDO: 102 }
+            };
+            // 每航次依 vo 特性組報表序列：午報/移泊 per-ship；特殊報 per-voyage(僅颱風航次)；完工報僅「完整航次(full)且該船有完工報」，短航程不含完工報
+            const voyTimeline = vo => voyageTimeline.filter(r => {
+                if (r.f === 1) return !!cfg.f1;
+                if (r.f === 5) return !!cfg.f5;
+                if (r.f === 6) return IRREG_VOYAGES[shipName] === vo.voy;
+                if (r.f === 9) return vo.j === 'full' && SHIP_HAS_COMPLETED[shipName];
+                return true;
+            });
+            // 船報原始數據明細（明細＝逐筆船報）：REAL_REPORTS 有列者(如源順輪)用真實逐筆報表忠實呈現，
+            // 含 V2628 這種「起航在觀察期前、僅單筆特殊情況報落在期內」的截斷航次；其餘船以合成時間軸鋪點。
+            let mdPlan = [];
+            const _realList = REAL_REPORTS[shipName];
+            if (_realList) {
+                const _metaByF = {}; voyageTimeline.forEach(r => { _metaByF[r.f] = r; });
+                const _voByVoy = {}; shipVoyages.forEach(vv => { _voByVoy[vv.voy] = vv; });
+                _realList.forEach((rec, ri) => mdPlan.push({ vo: _voByVoy[rec.voy] || { voy: rec.voy }, currentVoy: rec.voy, report: Object.assign({}, _metaByF[rec.f], { lt: rec.lt }), dStr: rec.date, ri: ri }));
+            } else {
+                const mdVoyages = validVoyages.length ? validVoyages : shipVoyages.filter(v => v.start);
+                for (let v = 0; v < mdVoyages.length; v++) {
+                    let vo = mdVoyages[v]; let currentDate = new Date(vo.start);
+                    voyTimeline(vo).forEach((report, ri) => {
+                        if (report.f === 1 || report.f === 3 || report.f === 4) currentDate.setDate(currentDate.getDate() + 1);
+                        mdPlan.push({ vo: vo, currentVoy: vo.voy, report: report, dStr: ymd(currentDate), ri: ri });
+                    });
+                }
+            }
+            mdPlan.forEach(({ vo, currentVoy, report, dStr, ri }) => {
+                    // 確定性微變化(取代 Math.random)：以航次號＋報表序號為種子，數值以真實船別量級為基準
+                    const st = SHIP_STATS[shipName] || { spd: 11, rpm: 102, slip: 5, robFO: 200, robDO: 30 };
+                    const seed = ((parseInt(String(vo.voy).replace(/\D/g, '')) || 0) % 100) + ri * 3;
+                    const wv = (b, a) => +(b + a * Math.sin(seed * 1.7)).toFixed(1);
+                    const wi = (b, a) => Math.round(b + a * Math.sin(seed * 1.7));
                     
-                    let dStr = currentDate.toISOString().split('T')[0];
                     let isF1 = report.f === 1;
                     let isF2 = report.f === 2;
                     let isF3 = report.f === 3;
                     let isF4 = report.f === 4;
                     let isF5 = report.f === 5;
                     let isF6 = report.f === 6;
+                    let isF9 = report.f === 9;   // 完工報
 
-                    let portName = isF1 ? '-' : 'KHH';
+                    let portName = isF1 ? '-' : (vo.disc || '—');   // 在港報所在港＝該航次卸貨港（截斷航次可能未定→—）
 
                     let rowHtml = `<tr>
                         <td class="text-info fw-bold">${shipName}</td>
                         <td>${currentVoy}</td>
                         <td><span class="badge ${report.badge}" title="${report.zh}">${report.name}</span></td>
                         <td>${dStr} ${report.lt}</td>
-                        <td>${isF1 || isF4 ? '2026-03-31' : '-'}</td>
-                        <td>${isF1 || isF4 ? 'SIN' : '-'}</td>
+                        <td>${isF1 || isF4 ? vo.start : '-'}</td>
+                        <td>${isF1 || isF4 ? (PORT_DIR[vo.load] || vo.load) : '-'}</td>
                         <td class="fw-bold">${report.status}</td>
 
-                        <td class="grp-l">${(Math.random()*200 + 100).toFixed(1)}</td>
-                        <td>${(Math.random()*20 + 10).toFixed(1)}</td>
-                        <td>${Math.floor(Math.random()*500 + 100)}</td>
-                        <td>${Math.floor(Math.random()*500 + 100)}</td>
-                        <td>${Math.floor(Math.random()*500 + 100)}</td>
-                        <td class="grp-r">${(Math.random()*100 + 100).toFixed(1)}</td>
+                        <td class="grp-l">${wv(st.robFO, 35)}</td>
+                        <td>${wv(st.robDO, 8)}</td>
+                        <td>${wi(9000, 700)}</td>
+                        <td>${wi(6000, 500)}</td>
+                        <td>${wi(4300, 300)}</td>
+                        <td class="grp-r">${wv(150, 30)}</td>
 
-                        <td class="${isF1 ? 'text-danger' : ''}">${isF1 ? (Math.random()*15 + 10).toFixed(1) : '-'}</td>
-                        <td class="${isF1 ? 'text-warning' : ''}">${isF1 ? (Math.random()*2 + 1).toFixed(1) : '-'}</td>
-                        <td>${isF1 ? Math.floor(Math.random()*20 + 10) : '-'}</td>
-                        <td>${isF1 ? Math.floor(Math.random()*5 + 1) : '-'}</td>
-                        <td>${isF1 ? Math.floor(Math.random()*5 + 1) : '-'}</td>
-                        <td class="grp-r ${isF1 ? 'text-info' : ''}">${isF1 ? (Math.random()*5 + 2).toFixed(1) : '-'}</td>
+                        <td class="${isF1 ? 'text-danger' : ''}">${isF1 ? wv(dFO || 14, 3) : '-'}</td>
+                        <td class="${isF1 ? 'text-warning' : ''}">${isF1 ? wv(dDO || 0.3, 0.4) : '-'}</td>
+                        <td>${isF1 ? wi(180, 40) : '-'}</td>
+                        <td>${isF1 ? wi(40, 10) : '-'}</td>
+                        <td>${isF1 ? wi(12, 4) : '-'}</td>
+                        <td class="grp-r ${isF1 ? 'text-info' : ''}">${isF1 ? wv(4, 1.5) : '-'}</td>
 
                         <td>${portName}</td>
                         <td>${isF2 ? report.lt : '-'}</td>
@@ -1452,50 +1869,53 @@
                         <td>${isF5 || isF6 ? report.lt : '-'}</td>
                         <td>${isF5 || isF6 ? report.lt : '-'}</td>
                         <td>${isF2 || isF5 ? report.lt : '-'}</td>
-                        <td>${isF2 ? '2026-03-30 20:00' : '-'}</td>
-                        <td>${isF2 ? '2026-03-30 22:00' : '-'}</td>
-                        <td>${isF2 ? '2026-03-31 18:00' : '-'}</td>
+                        <td>${isF2 ? dStr+' 20:00' : '-'}</td>
+                        <td>${isF2 ? dStr+' 22:00' : '-'}</td>
+                        <td>${isF2 ? dStr+' 18:00' : '-'}</td>
                         <td>${isF2 || isF5 ? report.lt : '-'}</td>
                         <td>${isF5 ? report.lt : '-'}</td>
                         <td>${isF5 ? report.lt : '-'}</td>
                         <td>${isF6 ? report.lt : '-'}</td>
-                        <td>${isF6 ? '2026-03-30 12:00' : '-'}</td>
+                        <td>${isF6 ? dStr+' 12:00' : '-'}</td>
 
-                        <td>${isF3 || isF4 ? 'Laden' : '-'}</td>
+                        <td>${isF3 || isF9 || isF4 ? 'Laden' : '-'}</td>
                         <td>${isF3 ? 'Discharging' : '-'}</td>
                         <td>${isF3 ? report.lt : '-'}</td>
-                        <td>COAL</td>
-                        <td>${isF3 ? nf(Math.floor(Math.random()*10000 + 2000)) : '-'}</td>
-                        <td>${isF3 ? nf(Math.floor(Math.random()*50000 + 10000)) : '-'}</td>
-                        <td>${isF3 ? nf(Math.floor(Math.random()*20000 + 5000)) : '-'}</td>
-                        <td>${isF3 ? Math.floor(Math.random()*3 + 1) : '-'}</td>
-                        <td>${isF3 ? '2026-03-30' : '-'}</td>
+                        <td>碎石/機制砂</td>
+                        <td>${isF3 ? nf(wi(4000, 1500)) : '-'}</td>
+                        <td>${(isF3 || isF9) ? nf(vo.cargo) : '-'}</td>
+                        <td>${isF3 ? nf(wi(3000, 1500)) : '-'}</td>
+                        <td>${isF3 ? wi(2, 1) : '-'}</td>
+                        <td>${isF3 ? dStr : '-'}</td>
 
                         <td>${isF1 ? "22 30' N" : "-"}</td>
                         <td>${isF1 ? "120 15' E" : "-"}</td>
-                        <td>${isF1 ? (Math.random()*3 + 10).toFixed(1) : '-'}</td>
-                        <td>${isF1 ? Math.floor(Math.random()*20 + 85) : '-'}</td>
-                        <td>${isF1 ? (Math.random()*5 + 10).toFixed(1) : '-'}</td>
-                        <td>${isF1 ? Math.floor(Math.random()*200 + 100) : '-'}</td>
-                        <td>${isF1 || isF4 ? nf(Math.floor(Math.random()*1000 + 500)) : '-'}</td>
+                        <td>${isF1 ? wv(st.spd, 1) : '-'}</td>
+                        <td>${isF1 ? wi(st.rpm, 3) : '-'}</td>
+                        <td>${isF1 ? wv(st.slip, 3) : '-'}</td>
+                        <td>${isF1 ? wi(180, 40) : '-'}</td>
+                        <td>${isF1 || isF4 ? nf(wi(600, 200)) : '-'}</td>
 
                         <td>${isF1 ? 'Cloudy' : '-'}</td>
-                        <td>${isF1 ? Math.floor(Math.random()*6 + 2) : '-'}</td>
-                        <td>${isF1 ? Math.floor(Math.random()*10 + 5) : '-'}</td>
+                        <td>${isF1 ? wi(3, 1) : '-'}</td>
+                        <td>${isF1 ? wi(8, 3) : '-'}</td>
                         <td>${isF1 ? 'NE' : '-'}</td>
-                        <td>${isF1 ? Math.floor(Math.random()*3 + 1) : '-'}</td>
-                        <td>${isF1 ? (Math.random()*2).toFixed(1) : '-'}</td>
+                        <td>${isF1 ? wi(3, 1) : '-'}</td>
+                        <td>${isF1 ? wv(1, 0.5) : '-'}</td>
                         <td>${isF1 ? 'NE' : '-'}</td>
                         <td>${isF1 ? 'NW 0.5kt' : '-'}</td>
                         <td>${isF6 ? 'Waiting for berth' : '-'}</td>
                         <td>${dStr} 23:59:59</td>
                     </tr>`;
                     chronologicalData.push(rowHtml);
-                });
-            }
+            });
             
             chronologicalData.reverse();
             $('#masterDataTable tbody').html(chronologicalData.join(''));
+
+            // 各真實校準圖依「目前監控船別」重繪（shipName 為權威值，確保 ?ship= 進入時正確）
+            renderVoyUtil(shipName);
+            sdAllCharts();
         }
 
         $(document).ready(function() {
