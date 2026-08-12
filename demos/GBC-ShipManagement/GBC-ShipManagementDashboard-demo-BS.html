@@ -364,11 +364,13 @@
                     <div class="card-body d-flex flex-column p-4">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">各船作業及等泊油耗比較 (Fuel Ops & Waiting)</h2>
                         <div class="desc-box">
-                            <div><span class="badge-source">資料來源</span>等泊資料：<code class="text-info">格式2-抵港報ARVL</code>。作業資料：<code class="text-info">格式4-離港報DEPT</code>。本圖表無使用DR報。</div>
-                            <div class="mt-1"><span class="badge-calc">計算邏輯</span>直接使用既有欄位彙總（單位 MT/Day）。<br>
-                            作業日均油耗 = <code class="text-warning">TotalConsumption_FO/DO</code> ÷ <code class="text-info">Total_Working_Hour</code> × 24，再依 <code class="text-info">ShoreElectronic</code> 拆有／無接岸電。<br>
-                            等泊日均油耗 = <code class="text-warning">DailyConsumption_FO/DO_Waiting</code>（已為日均，以 <code class="text-info">TotalTime_Waiting</code> 加權）。</div>
+                            <div><span class="badge-source">資料來源（真實）</span>作業：<code class="text-info">格式4-離港報DEPT</code>（62 筆，不含完工報）。等泊：<code class="text-info">格式2-抵港報ARVL</code>（70 筆）。本圖表無使用 DR 報。期間 2026-06-21 ~ 07-31。</div>
+                            <div class="mt-1"><span class="badge-calc">計算邏輯</span>單位 MT/Day，兩者皆為<b>總量比</b>——先把該船所有紀錄的油耗與時數各自加總再相除，<b>不是每筆先算日均再平均</b>（總量比等同以時數加權，長港次權重較高）。<br>
+                            作業日均油耗 ＝ Σ(<code class="text-warning">TotalConsumption_FO</code> ＋ <code class="text-warning">TotalConsumption_DO</code>) ÷ Σ<code class="text-info">Total_Working_Hour</code> × 24，並依 <code class="text-info">ShoreElectronic</code> 拆有／無接岸電兩組。<br>
+                            等泊日均油耗 ＝ Σ(<code class="text-warning">TotalConsumption_FO_Waiting</code> ＋ <code class="text-warning">TotalConsumption_DO_Waiting</code>) ÷ Σ<code class="text-info">TotalTime_Waiting</code> × 24。</div>
+                            <div class="mt-1"><span class="badge-calc">納入與排除</span>以<b>時數 &gt; 0</b> 為納入條件：作業排除 <code class="text-info">Total_Working_Hour</code> 為 0 或未填者 3 筆（含豐順輪 <code class="text-warning">TotalConsumption_FO</code>＝−199.8 之髒值，因工時為 0 自然被剔除），納入 59 筆；等泊排除 <code class="text-info">TotalTime_Waiting</code> 為 0 或未填者 46 筆，納入 24 筆。<b>油耗欄未填視為 0</b>（該筆時數仍計入分母，故會拉低結果）。</div>
                             <div class="mt-1"><span class="badge-risk">營運分析</span>若橘色等泊油耗過高，代表無效營運浪費（如進港逼近／定位機動偏多），需檢討航線或代理行效率；接岸電可顯著壓低作業油耗。</div>
+                            <div class="mt-1"><span class="badge-warn">判讀限制</span>等泊樣本普遍偏短，將數小時的實測外推為「每日」放大效應明顯：<b class="text-warning">匯順1號 11.70 MT/day 係由 Σ油耗 11.22 MT ÷ Σ等泊時僅 23.01 小時推得</b>（景順輪更僅 14.03 小時）。跨船比較時請一併看樣本時數，勿逕以日均值論斷營運效率。</div>
                         </div>
                         <div class="row g-2 mb-3 align-items-end">
                             <div class="col-6 col-md-3">
@@ -526,7 +528,8 @@
                     <div class="card-body d-flex flex-column p-4">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">主機推進效率與轉速監控 (Slip vs RPM)</h2>
                         <div class="desc-box">
-                            <div><span class="badge-calc">數據源</span>數值直接取自 <code class="text-info">格式1-船位報NR</code> 船員填報之 <code class="text-info">RPM-主機轉速</code> 與 <code class="text-info">SLIP(%)-滑失率</code> 原始數據，繪製雙軸時間序列趨勢。</div>
+                            <div><span class="badge-source">資料來源（真實）</span>數值直接取自 <code class="text-info">格式1-船位報NR（午報）</code> 船員填報之 <code class="text-warning">RPM</code> 主機轉速與 <code class="text-warning">SLIP(%)</code> 滑失率原始值，正式期 2026-06-21 ~ 07-31，繪製雙軸時間序列。</div>
+                            <div class="mt-1"><span class="badge-source">資料不足</span>X 軸為<b>該船實際發過午報的日期</b>（非連續日曆日）。全船隊僅 16 筆午報：<b class="text-warning">匯順1號、金保順整個正式期未發午報 → 顯示「資料不足」</b>；源順輪僅 1 筆。<b>RPM=0 之點（主機停俥）以空心標記標示，該日滑失率參考性低。</b></div>
                             <div class="mt-1"><span class="badge-risk">機務風險對照表</span>
                                 <table class="risk-table w-100 text-center mt-1">
                                     <thead><tr><th>RPM (轉速)</th><th>SLIP (滑失率)</th><th>狀況判定</th></tr></thead>
@@ -543,11 +546,11 @@
                         <div class="row g-2 mb-3 align-items-end">
                             <div class="col-6 col-md-3">
                                 <span class="ds-label">船報日期 (起)</span>
-                                <input type="date" class="form-control ds-select date-start" value="2026-07-10" min="2026-06-21" max="2026-07-31">
+                                <input type="date" class="form-control ds-select date-start" value="2026-06-21" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-6 col-md-3">
                                 <span class="ds-label">船報日期 (訖)</span>
-                                <input type="date" class="form-control ds-select date-end" value="2026-07-24" min="2026-06-21" max="2026-07-31">
+                                <input type="date" class="form-control ds-select date-end" value="2026-07-31" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-12 col-md-6 d-flex align-items-end gap-1">
                                 <div class="flex-grow-1">
@@ -558,7 +561,7 @@
                                         <option value="Gimpo Shun">Gimpo Shun</option>
                                     </select>
                                 </div>
-                                <button onclick="applyFilter('chart-slip', this)" class="btn btn-primary btn-sm ds-btn ds-apply">套用</button>
+                                <button onclick="renderSlipRpm(this)" class="btn btn-primary btn-sm ds-btn ds-apply">套用</button>
                             </div>
                         </div>
                         <div id="chart-slip" class="w-100" style="height: 250px;"></div>
@@ -1155,19 +1158,74 @@
             */
 
             // [圖表] 5. 主機推進效率與轉速監控 (雙 Y 軸時間序列：漸層面積圖+折線圖)
-            const dates = Array.from({length: 15}, (_, i) => `07/${String(i+10).padStart(2,'0')}`);
-            Highcharts.chart('chart-slip', {
-                xAxis: { categories: dates }, tooltip: { shared: true },
-                yAxis: [
-                    { title: { text: 'Slip (%)', style: { color: '#f97316' } }, labels: { format: '{value}%', style: { color: '#f97316' } } },
-                    { title: { text: 'RPM', style: { color: '#3b82f6' } }, labels: { style: { color: '#3b82f6' } }, opposite: true }
-                ],
-                series: [
-                    // type: 'area' 並搭配 linearGradient 製作出底部淡出的漸層效果
-                    { name: '滑失率 (Slip %)', type: 'area', yAxis: 0, data: [4.2, 4.5, 5.1, 8.2, 14.5, 16.2, 17.5, 15.1, 12.0, 7.5, 6.8, 6.5, 7.0, 7.2, 7.5], color: '#f97316', fillColor: { linearGradient: {x1:0, y1:0, x2:0, y2:1}, stops: [[0, 'rgba(249, 115, 22, 0.4)'], [1, 'rgba(249, 115, 22, 0.0)']] }, tooltip: { valueSuffix: ' %' } },
-                    { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: [102, 103, 102, 104, 105, 105, 106, 104, 102, 101, 102, 102, 103, 102, 101], color: '#3b82f6', lineWidth: 3, marker: { enabled: false }, tooltip: { valueSuffix: ' RPM' } }
-                ]
-            });
+            // 真實資料：午報 SLIP / RPM 原始值(2026-06-21~07-31)。X 軸為該船實際發報日期，非連續日曆日。
+            // 匯順1號、金保順整個正式期未發午報 → 資料不足。RPM=0＝主機停俥，該日滑失率參考性低。
+            const NR_SLIP = {
+                'Yuan Shun':     [['2026-06-29', -1.42, 105]],
+                'Jing Shun':     [['2026-07-08', -1.6, 106], ['2026-07-09', -2.3, 106], ['2026-07-10', 1.6, 106],
+                                  ['2026-07-17', 19.5, 106], ['2026-07-18', 21.0, 106], ['2026-07-19', 18.0, 106]],
+                'Feng Shun':     [['2026-06-27', 7.63, 102], ['2026-07-13', 24.85, 102], ['2026-07-14', 24.45, 0],
+                                  ['2026-07-18', 7.8, 102], ['2026-07-19', 0.0, 102], ['2026-07-20', -13.64, 0],
+                                  ['2026-07-25', 18.35, 0], ['2026-07-26', 18.11, 102], ['2026-07-27', 14.54, 102]],
+                'Hui Shun No.1': [],
+                'Gimpo Shun':    []
+            };
+            function renderSlipRpm(btn) {
+                const box = document.getElementById('chart-slip');
+                if (!box) return;
+                let from = '2026-06-21', to = '2026-07-31', ship = 'Yuan Shun';
+                if (btn) {
+                    const row = btn.closest('.row');
+                    const a = row.querySelector('.date-start'), b = row.querySelector('.date-end');
+                    const sel = row.querySelector('select');
+                    if (a && a.value) from = a.value;
+                    if (b && b.value) to = b.value;
+                    if (from > to) { const t = from; from = to; to = t; }
+                    if (sel && sel.value) ship = sel.value;
+                }
+                const rec = (NR_SLIP[ship] || []).filter(function (d) { return d[0] >= from && d[0] <= to; });
+                if (!rec.length) {
+                    const why = (NR_SLIP[ship] || []).length ? '此區間無午報紀錄' : '該船於正式期未發過午報';
+                    box.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-center" style="min-height:220px">'
+                        + '<div><div style="color:#f59e0b;font-size:1rem;font-weight:700">資料不足</div>'
+                        + '<div class="text-muted mt-1" style="font-size:.8rem">' + ship + '：' + why + '</div>'
+                        + '<div class="text-secondary mt-1" style="font-size:.72rem">滑失率與主機轉速僅存在於格式1-船位報（午報）</div></div></div>';
+                    return;
+                }
+                box.innerHTML = '';
+                const cats = rec.map(function (d) { return d[0].slice(5).replace('-', '/'); });
+                const slip = rec.map(function (d) { return { y: d[1], stopped: d[2] === 0 }; });
+                const rpm = rec.map(function (d) {
+                    // RPM=0＝停俥，以空心標記與紅框標出，避免被讀成「轉速下降」
+                    return d[2] === 0 ? { y: 0, marker: { enabled: true, symbol: 'circle', radius: 5, fillColor: '#0b1220', lineWidth: 2, lineColor: '#ef4444' } } : d[2];
+                });
+                Highcharts.chart('chart-slip', {
+                    xAxis: { categories: cats },
+                    tooltip: {
+                        shared: true,
+                        formatter: function () {
+                            const i = this.points[0].point.index, d = rec[i];
+                            let h = '<b>' + d[0] + '</b>';
+                            h += '<br><span style="color:#f97316">●</span> 滑失率 (Slip %): <b>' + d[1].toFixed(2) + ' %</b>';
+                            h += '<br><span style="color:#3b82f6">●</span> 主機轉速 (RPM): <b>' + d[2] + ' RPM</b>';
+                            if (d[2] === 0) h += '<br><span style="color:#ef4444">⚠ RPM=0（主機停俥），該日滑失率參考性低</span>';
+                            return h;
+                        }
+                    },
+                    yAxis: [
+                        { title: { text: 'Slip (%)', style: { color: '#f97316' } }, labels: { format: '{value}%', style: { color: '#f97316' } },
+                          plotLines: [{ value: 15, color: '#f59e0b', width: 1.2, dashStyle: 'Dash', zIndex: 3,
+                                        label: { text: '警戒 15%', style: { color: '#fcd34d', fontSize: '.62rem' } } }] },
+                        { title: { text: 'RPM', style: { color: '#3b82f6' } }, labels: { style: { color: '#3b82f6' } }, opposite: true }
+                    ],
+                    series: [
+                        { name: '滑失率 (Slip %)', type: 'area', yAxis: 0, data: slip, color: '#f97316',
+                          fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [[0, 'rgba(249, 115, 22, 0.4)'], [1, 'rgba(249, 115, 22, 0.0)']] } },
+                        { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: rpm, color: '#3b82f6', lineWidth: 3, marker: { enabled: false } }
+                    ]
+                });
+            }
+            renderSlipRpm();
 
             // [圖表] 6. 各類滑油消耗健康度監控 (多重堆疊長條圖)
             // 修改提示：運用 stack 屬性將不同種類的油料分群堆疊 (例如 'MECYO' 會疊在一起)
@@ -1338,29 +1396,8 @@
                         }), false);
                     }
                     
-                    // [特例處理]：主機轉速監控 (chart-slip) - TASK-3：X 軸統一以「船報日期」為基準
-                    else if (chartId === 'chart-slip') {
-                        const row = btnElement.closest('.row');
-                        let newCategories = getReportDateRange(row);
-                        if (newCategories.length === 0) newCategories = ['(無資料)'];
-                        const newDataLen = newCategories.length;
-                        chart.xAxis[0].setCategories(newCategories, false);
+                    // 註：chart-slip 已改吃真實午報，由 renderSlipRpm() 依船別與日期區間自行重繪，不走 applyFilter
 
-                        // 新 row 內 select 順序：[監控船舶 (idx 0)]
-                        const vesselSelect = row.querySelectorAll('select')[0].value;
-                        const vIdx = ships.indexOf(vesselSelect) > -1 ? ships.indexOf(vesselSelect) : 0;
-
-                        chart.series.forEach((s, idx) => {
-                            let newValues = [];
-                            for(let i=0; i<newDataLen; i++) {
-                                let slipVal = 4.5 + vIdx + det(i,1,1);
-                                if (i === Math.floor(newDataLen / 3)) slipVal += 10; // 刻意製造一次數值飆高 (模擬惡劣海象)
-                                newValues.push(idx === 0 ? parseFloat(slipVal.toFixed(1)) : detI(i,102,2));
-                            }
-                            s.setData(newValues, false);
-                        });
-                    }
-                    
                     // [特例處理]：碳排強度趨勢 (chart-eeoi) - 需要依照下拉選單增減整條線段 (Series)
                     else if (chartId === 'chart-eeoi') {
                         let newCategories = [];
