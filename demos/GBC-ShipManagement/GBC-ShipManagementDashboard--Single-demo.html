@@ -487,31 +487,22 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">機件耗損與注油成本</h2>
                         <div class="desc-box">
-                            <div class="mb-2"><span class="badge-source">資料來源（真實）</span>逐日擷取自 <code class="text-info">格式1-船位報(午報)</code> 的 <code class="text-warning">RPM</code>（主機轉速）與 <code class="text-warning">MECYO_Consumption</code>（汽缸油耗，已濾負值/&gt;500 的存量誤填）。</div>
-                            <div class="mb-2"><span class="badge-risk">營運監控</span>對照轉速與汽缸油耗：若<b>轉速調降但汽缸油耗未等比例減少</b>，提示「注油器設定可能異常」，避免過度注油浪費成本。（主機負荷 $Load\% = (RPM/MCR\_RPM)^3$ 需額定轉速，見下方資料缺口）</div>
-                            <div class="mb-2"><span class="badge-source">資料不足</span><b class="text-warning">匯順1號、金保順無船位報（午報）→ 本圖顯示「資料不足」</b>（航行汽缸油/RPM 逐日資料僅源順／景順／豐順有）。</div>
-                            <div><span class="badge-gap">資料缺口</span>負荷推算與「應耗多少油」的基準對比，需要下列主機型錄數據，目前船報未涵蓋：
-                                <ul class="mb-0 mt-1 ps-3" style="color:#fbbf24;">
-                                    <li><b>船舶主資料表 (一次性建檔)</b>：<code class="text-warning">MCR_RPM (額定最大轉速)</code>、<code class="text-warning">MCR_kW (額定功率)</code>、<code class="text-warning">Propulsion Type (FPP/CPP)</code>。</li>
-                                    <li><b>引擎台架數據</b>：<code class="text-warning">SFOC 曲線 (g/kWh @ 50/75/85/100% 負荷)</code>——用於把「應耗多少油」算出來，才能判定油耗是否過度。</li>
-                                    <li><b>注油器設定</b>：<code class="text-warning">Cylinder Oil Feed Rate 設定值 (g/kWh)</code>——MEPC / Alpha Lubricator 設定參數。</li>
-                                    <li><b>建議擴充 (選配 / 走 AMS/IoT 串接)</b>：<code class="text-warning">Scavenge Air Pressure</code>、<code class="text-warning">Exhaust Gas Temperature</code>——校正螺旋槳法則誤差，從「日級告警」升級為「即時告警」。</li>
-                                </ul>
-                            </div>
+                            <div class="mb-2"><span class="badge-source">資料來源（真實）</span>逐日擷取自 <code class="text-info">格式1-船位報(午報)</code> 與 <code class="text-info">格式3-日電報(每日報)</code> 的 <code class="text-warning">MECYO_Consumption</code>（汽缸油耗，本圖主體）及 <code class="text-warning">RPM</code>（主機轉速，僅午報有）；已濾除負值與 &gt;500 的存量誤填。以<b>汽缸油耗有值</b>為納入條件，RPM 缺值（含主機停俥 RPM=0）不影響當日注油量，該日照列，轉速線於缺值處斷開。</div>
+                            <div><span class="badge-risk">營運監控</span>對照轉速與汽缸油耗：若<b>轉速調降但汽缸油耗未等比例減少</b>，提示「注油器設定可能異常」，避免過度注油浪費成本。可用上方<b class="text-info">「資料範圍」</b>切換<b>僅航行（午報）</b>或<b>併計在港（每日報）</b>；在港汽缸油耗多為 0（主機停俥不耗），屬正常。<b class="text-warning">匯順1號、金保順無午報 → 僅航行模式顯示「資料不足」</b>，切為併計在港後可見其在港用量。</div>
                         </div>
 
                         <div class="row g-2 mb-3 align-items-end">
                             <div class="col-12 col-md-3">
-                                <span class="ds-label">對比參數</span>
-                                <select class="form-select ds-select"><option value="rpm">轉速 vs 油耗</option><option value="load">負荷 vs 油耗</option></select>
+                                <span class="ds-label">資料範圍</span>
+                                <select class="form-select ds-select cyl-scope"><option value="nr">僅航行 (午報)</option><option value="all">航行 ＋ 在港 (午報+每日報)</option></select>
                             </div>
                             <div class="col-6 col-md-3">
                                 <span class="ds-label">船報日期 (起)</span>
-                                <input type="date" class="form-control ds-select date-start" value="2026-07-15" min="2026-06-21" max="2026-07-31">
+                                <input type="date" class="form-control ds-select date-start" value="2026-06-21" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-6 col-md-3">
                                 <span class="ds-label">船報日期 (訖)</span>
-                                <input type="date" class="form-control ds-select date-end" value="2026-07-27" min="2026-06-21" max="2026-07-31">
+                                <input type="date" class="form-control ds-select date-end" value="2026-07-31" min="2026-06-21" max="2026-07-31">
                             </div>
                             <div class="col-12 col-md-3 d-flex">
                                 <button onclick="applyFilter('chart-cyl-rpm', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
@@ -1378,16 +1369,55 @@
         }
         function renderCyl() {
             if (typeof Highcharts === 'undefined') return;
-            var days = (SD_DAILY[sdShip()] || []).filter(function (o) { return o.rpm != null; });
-            if (!days.length) { sdInsuff('chart-cyl-rpm', '本船無船位報（午報），汽缸油耗/轉速逐日資料不足'); return; }
+            var r = sdRange('chart-cyl-rpm');
+            var box = document.getElementById('chart-cyl-rpm');
+            var sel = box && box.closest('.card-body') && box.closest('.card-body').querySelector('.cyl-scope');
+            var scope = (sel && sel.value) || 'nr';          // nr=僅航行(午報)、all=航行+在港
+            // 篩選以本圖主體「汽缸油耗」為準（非 RPM）——RPM 僅為輔助線。
+            // 主機停俥(RPM=0)不影響當日實際注油量，故該日仍為有效讀數，照畫；RPM 線於缺值處斷開。
+            var all = (SD_DAILY[sdShip()] || []).filter(function (o) {
+                return o.me != null && (scope === 'all' || o.t === 'NR');
+            });
+            var days = all.filter(function (o) { return sdInRange(o.d, r); });
+            if (!days.length) {
+                var hasDR = (SD_DAILY[sdShip()] || []).some(function (o) { return o.t === 'DR' && o.me != null; });
+                sdInsuff('chart-cyl-rpm', all.length
+                    ? sdShip() + ' 於 ' + r.from + ' ~ ' + r.to + ' 區間內無汽缸油耗回報（全期共 ' + all.length + ' 筆，請放寬區間）'
+                    : (scope === 'nr' && hasDR
+                        ? '本船無船位報（午報），航行汽缸油耗資料不足——可將「資料範圍」切為「航行＋在港」檢視在港汽缸油耗'
+                        : '本船無汽缸油耗回報，資料不足'));
+                return;
+            }
             sdClear('chart-cyl-rpm');
             var cats = days.map(function (o) { return o.d; });
+            var nrN = days.filter(function (o) { return o.t === 'NR'; }).length;
+            var drN = days.length - nrN, zeroN = days.filter(function (o) { return o.me === 0; }).length;
+            var sub = r.from + ' ~ ' + r.to + '｜航行(午報) ' + nrN + ' 筆'
+                + (scope === 'all' ? '、在港(每日報) ' + drN + ' 筆' : '');
+            if (days.length < all.length) sub += '（全期 ' + all.length + ' 筆）';
+            if (zeroN) sub += '｜其中 ' + zeroN + ' 筆為 0（在港主機停俥不耗，屬正常）';
             Highcharts.chart('chart-cyl-rpm', {
                 xAxis: { categories: cats, title: { text: '船報日期' } },
-                yAxis: [{ title: { text: '汽缸油耗 (L)' } }, { title: { text: '主機轉速 (RPM)' }, opposite: true }],
+                subtitle: { text: sub, align: 'left', style: { color: '#9ca3af', fontSize: '.7rem' } },
+                yAxis: [{ title: { text: '汽缸油耗 (L)' }, min: 0 }, { title: { text: '主機轉速 (RPM)' }, opposite: true }],
+                tooltip: {
+                    shared: true, useHTML: true,
+                    formatter: function () {
+                        var o = days[this.points[0].point.index];
+                        var h = '<b>' + o.d + '</b>（' + (o.t === 'NR' ? '航行·午報' : '在港·每日報') + '）'
+                            + '<br><span style="color:#c084fc">■</span> 汽缸油耗 <b>' + o.me + ' L</b>'
+                            + '<br><span style="color:#f59e0b">─</span> 主機轉速 ' + (o.rpm == null ? (o.stop ? '0（停俥）' : (o.t === 'DR' ? '在港無此欄' : '未填報')) : o.rpm + ' RPM');
+                        if (o.stop) h += '<br><span style="color:#9ca3af">主機停俥不影響當日注油量，本筆仍列入</span>';
+                        return h;
+                    }
+                },
+                plotOptions: { column: { grouping: false, borderWidth: 0 } },
                 series: [
-                    { name: '汽缸油耗 (L)', type: 'column', yAxis: 0, data: days.map(function (o) { return o.me; }), color: '#c084fc' },
-                    { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: days.map(function (o) { return o.rpm; }), color: '#f59e0b', lineWidth: 3, connectNulls: true, tooltip: { valueSuffix: ' RPM' } }
+                    { name: '航行汽缸油耗 (L)', type: 'column', yAxis: 0, color: '#c084fc',
+                      data: days.map(function (o) { return o.t === 'NR' ? o.me : null; }) },
+                    { name: '在港汽缸油耗 (L)', type: 'column', yAxis: 0, color: '#ddd6fe', visible: scope === 'all', showInLegend: scope === 'all',
+                      data: days.map(function (o) { return o.t === 'DR' ? o.me : null; }) },
+                    { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: days.map(function (o) { return o.rpm; }), color: '#f59e0b', lineWidth: 3, connectNulls: true, marker: { radius: 4 } }
                 ]
             });
         }
