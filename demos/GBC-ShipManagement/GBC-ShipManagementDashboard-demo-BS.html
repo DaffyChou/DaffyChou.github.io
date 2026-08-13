@@ -530,7 +530,13 @@
                         <div class="desc-box">
                             <div><span class="badge-source">資料來源（真實）</span>數值直接取自 <code class="text-info">格式1-船位報NR（午報）</code> 船員填報之 <code class="text-warning">RPM</code> 主機轉速與 <code class="text-warning">SLIP(%)</code> 滑失率原始值，正式期 2026-06-21 ~ 07-31，繪製雙軸時間序列。</div>
                             <div class="mt-1"><span class="badge-source">資料不足</span>X 軸為<b>該船實際發過午報的日期</b>（非連續日曆日）。全船隊僅 16 筆午報：<b class="text-warning">匯順1號、金保順整個正式期未發午報 → 顯示「資料不足」</b>；源順輪僅 1 筆。<b>RPM=0 之點（主機停俥）以空心標記標示，該日滑失率參考性低。</b></div>
-                            <div class="mt-1"><span class="badge-risk">機務風險對照表</span>
+                            <div class="mt-1"><span class="badge-warn">無警戒門檻</span>本圖<b class="text-warning">不設滑失率警戒線</b>：剔除 <code>RPM=0</code> 後僅 <b>13 筆</b>有效樣本，且集中於源順／景順／豐順三艘 2 萬噸級船。以 Tukey 上柵欄（Q3＋1.5×IQR）就海況溫和子集（蒲福風級 ≤3，n=10）試算得 <b>44.4%</b>，高於全部觀測值（最大 19.5%）而標記不到任何一筆，bootstrap 95% 信賴區間 [5.4, 48.2] 亦不具參考價值——樣本呈雙峰（低群 −2.3~7.6、高群 14.5~19.5），IQR 量到的是兩群距離而非群內離散，Tukey 的單峰假設不成立。<b>待午報累積足夠後再行推導。</b>原「機務風險對照表」之百分比同屬未經本批資料驗證之通則，一併暫時隱藏。</div>
+                            <!-- 【暫時隱藏】機務風險對照表
+                                 隱藏原因：表中 SLIP「0~15% 正常 / >15~20% 異常」等百分比屬業界通則，
+                                 無法由本批 13 筆午報佐證（Tukey 試算得 44.4%，見上方「無警戒門檻」說明）。
+                                 定性判讀邏輯本身仍有效，待資料累積可驗證後再恢復。
+                                 恢復方式：移除本註解的起訖標記即可。
+                            <div class="mt-1"><span class="badge-risk">機務風險對照表 <span class="text-secondary" style="font-weight:400;font-size:.9em;">（業界通則參考值，非由本批資料導出）</span></span>
                                 <table class="risk-table w-100 text-center mt-1">
                                     <thead><tr><th>RPM (轉速)</th><th>SLIP (滑失率)</th><th>狀況判定</th></tr></thead>
                                     <tbody>
@@ -542,6 +548,7 @@
                                     </tbody>
                                 </table>
                             </div>
+                            -->
                         </div>
                         <div class="row g-2 mb-3 align-items-end">
                             <div class="col-6 col-md-3">
@@ -556,9 +563,11 @@
                                 <div class="flex-grow-1">
                                     <span class="ds-label">監控船舶</span>
                                     <select class="form-select ds-select">
-                                        <option value="Yuan Shun">Yuan Shun</option><option value="Jing Shun">Jing Shun</option>
-                                        <option value="Feng Shun">Feng Shun</option><option value="Hui Shun No.1">Hui Shun No.1</option>
-                                        <option value="Gimpo Shun">Gimpo Shun</option>
+                                        <option value="Yuan Shun">源順輪 Yuan Shun（1 筆）</option>
+                                        <option value="Jing Shun">景順輪 Jing Shun（6 筆）</option>
+                                        <option value="Feng Shun" selected>豐順輪 Feng Shun（9 筆）</option>
+                                        <option value="Hui Shun No.1">匯順1號 Hui Shun No.1（無午報）</option>
+                                        <option value="Gimpo Shun">金保順 Gimpo Shun（無午報）</option>
                                     </select>
                                 </div>
                                 <button onclick="renderSlipRpm(this)" class="btn btn-primary btn-sm ds-btn ds-apply">套用</button>
@@ -1071,6 +1080,79 @@
                 });
             }
 
+        // [圖表] 5. 主機推進效率與轉速監控 (雙 Y 軸時間序列：漸層面積圖+折線圖)
+        // 真實資料：午報 SLIP / RPM 原始值(2026-06-21~07-31)。X 軸為該船實際發報日期，非連續日曆日。
+        // 匯順1號、金保順整個正式期未發午報 → 資料不足。RPM=0＝主機停俥，該日滑失率參考性低。
+        const NR_SLIP = {
+            'Yuan Shun':     [['2026-06-29', -1.42, 105]],
+            'Jing Shun':     [['2026-07-08', -1.6, 106], ['2026-07-09', -2.3, 106], ['2026-07-10', 1.6, 106],
+                              ['2026-07-17', 19.5, 106], ['2026-07-18', 21.0, 106], ['2026-07-19', 18.0, 106]],
+            'Feng Shun':     [['2026-06-27', 7.63, 102], ['2026-07-13', 24.85, 102], ['2026-07-14', 24.45, 0],
+                              ['2026-07-18', 7.8, 102], ['2026-07-19', 0.0, 102], ['2026-07-20', -13.64, 0],
+                              ['2026-07-25', 18.35, 0], ['2026-07-26', 18.11, 102], ['2026-07-27', 14.54, 102]],
+            'Hui Shun No.1': [],
+            'Gimpo Shun':    []
+        };
+        function renderSlipRpm(btn) {
+            const box = document.getElementById('chart-slip');
+            if (!box) return;
+            let from = '2026-06-21', to = '2026-07-31', ship = '';
+            // 不論由「套用」鈕或 initCharts 初次呼叫，一律回頭讀同卡片的控制項，
+            // 避免下拉顯示 A 船、圖卻畫 B 船（原本無 btn 時硬寫死 'Yuan Shun'）
+            const card = box.closest('.card-body');
+            const row = btn ? btn.closest('.row') : (card && card.querySelector('.row'));
+            if (row) {
+                const a = row.querySelector('.date-start'), b = row.querySelector('.date-end');
+                const sel = row.querySelector('select');
+                if (a && a.value) from = a.value;
+                if (b && b.value) to = b.value;
+                if (from > to) { const t = from; from = to; to = t; }
+                if (sel && sel.value) ship = sel.value;
+            }
+            if (!ship) ship = 'Feng Shun';   // 退路：與下拉的 selected 一致
+            const rec = (NR_SLIP[ship] || []).filter(function (d) { return d[0] >= from && d[0] <= to; });
+            if (!rec.length) {
+                const why = (NR_SLIP[ship] || []).length ? '此區間無午報紀錄' : '該船於正式期未發過午報';
+                box.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-center" style="min-height:220px">'
+                    + '<div><div style="color:#f59e0b;font-size:1rem;font-weight:700">資料不足</div>'
+                    + '<div class="text-muted mt-1" style="font-size:.8rem">' + ship + '：' + why + '</div>'
+                    + '<div class="text-secondary mt-1" style="font-size:.72rem">滑失率與主機轉速僅存在於格式1-船位報（午報）</div></div></div>';
+                return;
+            }
+            box.innerHTML = '';
+            const cats = rec.map(function (d) { return d[0].slice(5).replace('-', '/'); });
+            const slip = rec.map(function (d) { return { y: d[1], stopped: d[2] === 0 }; });
+            const rpm = rec.map(function (d) {
+                // RPM=0＝停俥，以空心標記與紅框標出，避免被讀成「轉速下降」
+                return d[2] === 0 ? { y: 0, marker: { enabled: true, symbol: 'circle', radius: 5, fillColor: '#0b1220', lineWidth: 2, lineColor: '#ef4444' } } : d[2];
+            });
+            Highcharts.chart('chart-slip', {
+                xAxis: { categories: cats },
+                tooltip: {
+                    shared: true,
+                    formatter: function () {
+                        const i = this.points[0].point.index, d = rec[i];
+                        let h = '<b>' + d[0] + '</b>';
+                        h += '<br><span style="color:#f97316">●</span> 滑失率 (Slip %): <b>' + d[1].toFixed(2) + ' %</b>';
+                        h += '<br><span style="color:#3b82f6">●</span> 主機轉速 (RPM): <b>' + d[2] + ' RPM</b>';
+                        if (d[2] === 0) h += '<br><span style="color:#ef4444">⚠ RPM=0（主機停俥），該日滑失率參考性低</span>';
+                        return h;
+                    }
+                },
+                yAxis: [
+                    // 不設警戒門檻：13 筆樣本呈雙峰，Tukey 上柵欄得 44.4%（高於所有觀測值、CI [5.4,48.2]），
+                    // 無法導出可用門檻；待資料累積後再議。
+                    { title: { text: 'Slip (%)', style: { color: '#f97316' } }, labels: { format: '{value}%', style: { color: '#f97316' } } },
+                    { title: { text: 'RPM', style: { color: '#3b82f6' } }, labels: { style: { color: '#3b82f6' } }, opposite: true }
+                ],
+                series: [
+                    { name: '滑失率 (Slip %)', type: 'area', yAxis: 0, data: slip, color: '#f97316',
+                      fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [[0, 'rgba(249, 115, 22, 0.4)'], [1, 'rgba(249, 115, 22, 0.0)']] } },
+                    { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: rpm, color: '#3b82f6', lineWidth: 3, marker: { enabled: false } }
+                ]
+            });
+        }
+
         function initCharts() {
             // 自動初始化所有圖表上方的時間篩選器
             const timeContainers = [
@@ -1157,74 +1239,8 @@
             });
             */
 
-            // [圖表] 5. 主機推進效率與轉速監控 (雙 Y 軸時間序列：漸層面積圖+折線圖)
-            // 真實資料：午報 SLIP / RPM 原始值(2026-06-21~07-31)。X 軸為該船實際發報日期，非連續日曆日。
-            // 匯順1號、金保順整個正式期未發午報 → 資料不足。RPM=0＝主機停俥，該日滑失率參考性低。
-            const NR_SLIP = {
-                'Yuan Shun':     [['2026-06-29', -1.42, 105]],
-                'Jing Shun':     [['2026-07-08', -1.6, 106], ['2026-07-09', -2.3, 106], ['2026-07-10', 1.6, 106],
-                                  ['2026-07-17', 19.5, 106], ['2026-07-18', 21.0, 106], ['2026-07-19', 18.0, 106]],
-                'Feng Shun':     [['2026-06-27', 7.63, 102], ['2026-07-13', 24.85, 102], ['2026-07-14', 24.45, 0],
-                                  ['2026-07-18', 7.8, 102], ['2026-07-19', 0.0, 102], ['2026-07-20', -13.64, 0],
-                                  ['2026-07-25', 18.35, 0], ['2026-07-26', 18.11, 102], ['2026-07-27', 14.54, 102]],
-                'Hui Shun No.1': [],
-                'Gimpo Shun':    []
-            };
-            function renderSlipRpm(btn) {
-                const box = document.getElementById('chart-slip');
-                if (!box) return;
-                let from = '2026-06-21', to = '2026-07-31', ship = 'Yuan Shun';
-                if (btn) {
-                    const row = btn.closest('.row');
-                    const a = row.querySelector('.date-start'), b = row.querySelector('.date-end');
-                    const sel = row.querySelector('select');
-                    if (a && a.value) from = a.value;
-                    if (b && b.value) to = b.value;
-                    if (from > to) { const t = from; from = to; to = t; }
-                    if (sel && sel.value) ship = sel.value;
-                }
-                const rec = (NR_SLIP[ship] || []).filter(function (d) { return d[0] >= from && d[0] <= to; });
-                if (!rec.length) {
-                    const why = (NR_SLIP[ship] || []).length ? '此區間無午報紀錄' : '該船於正式期未發過午報';
-                    box.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-center" style="min-height:220px">'
-                        + '<div><div style="color:#f59e0b;font-size:1rem;font-weight:700">資料不足</div>'
-                        + '<div class="text-muted mt-1" style="font-size:.8rem">' + ship + '：' + why + '</div>'
-                        + '<div class="text-secondary mt-1" style="font-size:.72rem">滑失率與主機轉速僅存在於格式1-船位報（午報）</div></div></div>';
-                    return;
-                }
-                box.innerHTML = '';
-                const cats = rec.map(function (d) { return d[0].slice(5).replace('-', '/'); });
-                const slip = rec.map(function (d) { return { y: d[1], stopped: d[2] === 0 }; });
-                const rpm = rec.map(function (d) {
-                    // RPM=0＝停俥，以空心標記與紅框標出，避免被讀成「轉速下降」
-                    return d[2] === 0 ? { y: 0, marker: { enabled: true, symbol: 'circle', radius: 5, fillColor: '#0b1220', lineWidth: 2, lineColor: '#ef4444' } } : d[2];
-                });
-                Highcharts.chart('chart-slip', {
-                    xAxis: { categories: cats },
-                    tooltip: {
-                        shared: true,
-                        formatter: function () {
-                            const i = this.points[0].point.index, d = rec[i];
-                            let h = '<b>' + d[0] + '</b>';
-                            h += '<br><span style="color:#f97316">●</span> 滑失率 (Slip %): <b>' + d[1].toFixed(2) + ' %</b>';
-                            h += '<br><span style="color:#3b82f6">●</span> 主機轉速 (RPM): <b>' + d[2] + ' RPM</b>';
-                            if (d[2] === 0) h += '<br><span style="color:#ef4444">⚠ RPM=0（主機停俥），該日滑失率參考性低</span>';
-                            return h;
-                        }
-                    },
-                    yAxis: [
-                        { title: { text: 'Slip (%)', style: { color: '#f97316' } }, labels: { format: '{value}%', style: { color: '#f97316' } },
-                          plotLines: [{ value: 15, color: '#f59e0b', width: 1.2, dashStyle: 'Dash', zIndex: 3,
-                                        label: { text: '警戒 15%', style: { color: '#fcd34d', fontSize: '.62rem' } } }] },
-                        { title: { text: 'RPM', style: { color: '#3b82f6' } }, labels: { style: { color: '#3b82f6' } }, opposite: true }
-                    ],
-                    series: [
-                        { name: '滑失率 (Slip %)', type: 'area', yAxis: 0, data: slip, color: '#f97316',
-                          fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [[0, 'rgba(249, 115, 22, 0.4)'], [1, 'rgba(249, 115, 22, 0.0)']] } },
-                        { name: '主機轉速 (RPM)', type: 'spline', yAxis: 1, data: rpm, color: '#3b82f6', lineWidth: 3, marker: { enabled: false } }
-                    ]
-                });
-            }
+            // [圖表] 5. 主機推進效率與轉速監控 —— 資料與繪製函式已移至全域（見 renderSlipRpm），
+            //            因 inline onclick 需在全域解析；此處僅觸發初次繪製。
             renderSlipRpm();
 
             // [圖表] 6. 各類滑油消耗健康度監控 (多重堆疊長條圖)
@@ -1826,11 +1842,18 @@
                 const all = VOY[dir][port][ship].filter(inWin), V = all.filter(usable);
                 $('pp-view').innerHTML = (V.length === 0 ? '<div class="text-danger p-3" style="font-size:.9rem;">此分組 ' + ship + ' × ' + port + ' 於區間內無可用航次。</div>' : '<div class="card bg-transparent border-0 mb-2"><div class="card-body p-0"><div id="pp-cMain"></div></div></div>');
                 if (V.length === 0) return; if (!hcGuard()) return;
-                const cats = all.map(v => v.ym);
+                // X 軸以航次標示（原為年月 ym，同月多趟時會出現一整排重複的「2026-07」而無法辨識，
+                // 例：金保順台北卸貨 14 趟只標得出兩種年月）。同一航次號在該港重複出現時（如金保順 V2644
+                // 於同港次兩趟），補上日期以區分。
+                const vnCnt = {};
+                all.forEach(v => { vnCnt[v.vn] = (vnCnt[v.vn] || 0) + 1; });
+                const cats = all.map(v => vnCnt[v.vn] > 1 ? v.vn + '（' + String(v.date).slice(5) + '）' : v.vn);
                 if (isTime) {
                     const tip = v => '<b>航次 ' + v.vn + '</b>｜' + v.date + (v.shore ? '｜接岸電' : '') + '<br>等泊 ' + fmtN(hrVal(v.wBerth), 1) + '，等作業 ' + fmtN(hrVal(v.wComm), 1) + '，作業 ' + fmtN(hrVal(v.opH), 1) + '，等離港 ' + fmtN(hrVal(v.wDep), 1) + ' ' + hrUnit();
-                    const S = k => all.map(v => usable(v) ? { y: +hrVal(v[k]).toFixed(2), tip: tip(v) } : null);
-                    charts.push(Highcharts.chart('pp-cMain', { chart: { type: 'column', height: 320, animation: false, backgroundColor: 'transparent', spacing: [12, 12, 8, 8] }, xAxis: { categories: cats, lineColor: '#4b5563', labels: { rotation: -40, style: { color: AXIS, fontSize: '.7rem' } } }, yAxis: { min: 0, title: { text: '在港時間（' + hrUnit() + '）', style: { color: AXIS } }, gridLineColor: GRID, labels: { style: { color: AXIS } } }, legend: { enabled: true, itemStyle: { color: '#cbd5e1', fontSize: '.8rem' } }, tooltip: tipOpt, plotOptions: { column: { stacking: 'normal', borderWidth: 0 } }, series: [{ name: '等泊', color: SEGC.berth, data: S('wBerth') }, { name: '等作業', color: SEGC.comm, data: S('wComm') }, { name: '作業', color: SEGC.work, data: S('opH') }, { name: '等離港', color: SEGC.dep, data: S('wDep') }] }));
+                    // v[k] 可能為 null（該段未填報，如等泊多數港次無 TotalTime_Waiting）→ 該段留空不繪，
+                    // 不可直接 toFixed（hr 模式會拋錯、day 模式因 null/24===0 會靜默畫成 0，兩者皆錯）
+                    const S = k => all.map(v => (usable(v) && v[k] != null) ? { y: +hrVal(v[k]).toFixed(2), tip: tip(v) } : null);
+                    charts.push(Highcharts.chart('pp-cMain', { chart: { type: 'column', height: 320, animation: false, backgroundColor: 'transparent', spacing: [12, 12, 8, 8] }, xAxis: { categories: cats, title: { text: '航次', style: { color: AXIS, fontSize: '.7rem' } }, lineColor: '#4b5563', labels: { rotation: -40, style: { color: AXIS, fontSize: '.7rem' } } }, yAxis: { min: 0, title: { text: '在港時間（' + hrUnit() + '）', style: { color: AXIS } }, gridLineColor: GRID, labels: { style: { color: AXIS } } }, legend: { enabled: true, itemStyle: { color: '#cbd5e1', fontSize: '.8rem' } }, tooltip: tipOpt, plotOptions: { column: { stacking: 'normal', borderWidth: 0 } }, series: [{ name: '等泊', color: SEGC.berth, data: S('wBerth') }, { name: '等作業', color: SEGC.comm, data: S('wComm') }, { name: '作業', color: SEGC.work, data: S('opH') }, { name: '等離港', color: SEGC.dep, data: S('wDep') }] }));
                     return;
                 }
                 const idxOf = v => vIdx(v, SB[ship]);
@@ -1842,7 +1865,7 @@
                 let ys = []; line.forEach(p => { if (p) ys.push(p.y); });
                 if (!ys.length) ys = [1];
                 let ylo = Math.min(1, Math.min.apply(null, ys)), yhi = Math.max(1, Math.max.apply(null, ys)); const yp = Math.max(0.03, (yhi - ylo) * 0.12); ylo = +(ylo - yp).toFixed(2); yhi = +(yhi + yp).toFixed(2);
-                charts.push(Highcharts.chart('pp-cMain', { chart: { type: 'line', height: 320, animation: false, backgroundColor: 'transparent', spacing: [12, 12, 8, 8] }, xAxis: { categories: cats, lineColor: '#4b5563', labels: { rotation: -40, style: { color: AXIS, fontSize: '.7rem' } } }, yAxis: { min: ylo, max: yhi, gridLineColor: GRID, title: { text: METRICS[state.metric].label + '指數', style: { color: AXIS } }, labels: { style: { color: AXIS } }, plotLines: [{ value: 1, color: BASE, width: 1.4, dashStyle: 'Dash', zIndex: 4, label: { text: '1.00', style: { color: BASE, fontSize: '.7rem' } } }] }, legend: { enabled: true, itemStyle: { color: '#cbd5e1', fontSize: '.8rem' } }, tooltip: tipOpt, plotOptions: { line: { lineColor: LINEC, lineWidth: 2, marker: { radius: 4, lineWidth: 1, lineColor: '#0b1220' }, connectNulls: true, zones: [{ value: 1, color: GNEG }, { color: GPOS }], zoneAxis: 'y' } }, series: [{ type: 'line', name: '指數', data: line }, { type: 'scatter', name: '資料異常', data: badS, color: '#cbd5e1', marker: { symbol: 'diamond', radius: 5, lineWidth: 1.4, lineColor: '#cbd5e1', fillColor: '#0b1220' } }] }));
+                charts.push(Highcharts.chart('pp-cMain', { chart: { type: 'line', height: 320, animation: false, backgroundColor: 'transparent', spacing: [12, 12, 8, 8] }, xAxis: { categories: cats, title: { text: '航次', style: { color: AXIS, fontSize: '.7rem' } }, lineColor: '#4b5563', labels: { rotation: -40, style: { color: AXIS, fontSize: '.7rem' } } }, yAxis: { min: ylo, max: yhi, gridLineColor: GRID, title: { text: METRICS[state.metric].label + '指數', style: { color: AXIS } }, labels: { style: { color: AXIS } }, plotLines: [{ value: 1, color: BASE, width: 1.4, dashStyle: 'Dash', zIndex: 4, label: { text: '1.00', style: { color: BASE, fontSize: '.7rem' } } }] }, legend: { enabled: true, itemStyle: { color: '#cbd5e1', fontSize: '.8rem' } }, tooltip: tipOpt, plotOptions: { line: { lineColor: LINEC, lineWidth: 2, marker: { radius: 4, lineWidth: 1, lineColor: '#0b1220' }, connectNulls: true, zones: [{ value: 1, color: GNEG }, { color: GPOS }], zoneAxis: 'y' } }, series: [{ type: 'line', name: '指數', data: line }, { type: 'scatter', name: '資料異常', data: badS, color: '#cbd5e1', marker: { symbol: 'diamond', radius: 5, lineWidth: 1.4, lineColor: '#cbd5e1', fillColor: '#0b1220' } }] }));
             }
 
             // ===== 側欄 / 麵包屑 =====
