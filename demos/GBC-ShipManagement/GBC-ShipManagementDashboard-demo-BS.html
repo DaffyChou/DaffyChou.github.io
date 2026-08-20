@@ -1528,6 +1528,29 @@
                 'Hui Shun No.1': { cls: 'big' }, 'Gimpo Shun': { cls: 'small' }
             };
             const SHIPS = Object.keys(SHIP_P), BIG = SHIPS.filter(s => SHIP_P[s].cls === 'big'), SMALL = 'Gimpo Shun';
+            // ── 船型 DWT ────────────────────────────────────────────────────────────────
+            // 【注意】DWT 不存在於任何船報，Vessel 主檔亦無此欄位；以下數值由船東提供，
+            // 屬人工建檔。日後應併入船舶主資料表（連同螺距、額定轉速等船常數）。
+            const SHIP_DWT = {
+                'Yuan Shun': 28000, 'Jing Shun': 28000, 'Feng Shun': 28000,
+                'Hui Shun No.1': 28000, 'Gimpo Shun': 8000
+            };
+            // 級距每 5,000 一階；10,000 以下併為一階。上界含、下界不含（例：25,001~30,000）
+            const DWT_BANDS = [
+                [0, 10000, 'DWT 10,000 以下'], [10000, 15000, 'DWT 10,001~15,000'],
+                [15000, 20000, 'DWT 15,001~20,000'], [20000, 25000, 'DWT 20,001~25,000'],
+                [25000, 30000, 'DWT 25,001~30,000'], [30000, 35000, 'DWT 30,001~35,000'],
+                [35000, 40000, 'DWT 35,001~40,000'], [40000, 45000, 'DWT 40,001~45,000'],
+                [45000, 50000, 'DWT 45,001~50,000']
+            ];
+            function dwtBand(sh) {
+                const d = SHIP_DWT[sh];
+                if (d == null) return 'DWT 未建檔';
+                const b = DWT_BANDS.find(x => d > x[0] && d <= x[1]);
+                return b ? b[2] : 'DWT 50,000 以上';
+            }
+            // 依級距標籤在 DWT_BANDS 中的順序排序，未建檔者置末
+            const bandOrder = lbl => { const i = DWT_BANDS.findIndex(x => x[2] === lbl); return i < 0 ? 99 : i; };
             const MINRANK = 3; // D5：樣本數 < MINRANK 的港標「僅供參考」且不參與排名
             // ===== 真實港次資料：擷取自「船報資料_清洗後_正式期」(2026-06-21 ~ 2026-07-31) =====
             // 一列＝一個實體港次。來源以離港報為主、無離港報時以完工報遞補（兩者 schema 相同，
@@ -1615,6 +1638,16 @@
             // avg/cnt 皆略過 null（未填報），不以 0 補值——否則會把「沒填」誤算成「沒花時間」
             const avg = a => { const v = a.filter(x => x != null); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : 0; };
             const cnt = a => a.filter(x => x != null).length;
+            // 四段加總：只加有值的段；全部缺則回 null。缺段時另回傳缺哪幾段，供標註「不完整」。
+            const SEGNAME = ['等泊', '等作業', '作業', '等離港'];
+            function segTotal(seg) {
+                const v = seg.filter(x => x != null);
+                return { sum: v.length ? v.reduce((a, b) => a + b, 0) : null,
+                         miss: SEGNAME.filter((nm, i) => seg[i] == null) };
+            }
+            // 總時數後綴：有段缺漏時標明，避免把不完整的加總讀成完整在港時間
+            const totTag = miss => miss.length
+                ? '<span style="color:#f59e0b">（不完整，缺 ' + miss.join('、') + '）</span>' : '';
 
             // 由 PORT_CALLS 攤平成 VOY[方向][港口][船] = [港次...]，下游圖表邏輯不變
             const VOY = { '裝': {}, '卸': {} };
@@ -1667,10 +1700,13 @@
             }
             const medIdx = (vs, base) => median(vs.map(v => vIdx(v, base)).filter(x => x != null));
             // 各段獨立平均，並回報該段實際有值筆數（nBerth 等），供 tooltip 標示未填報
+            // 各段獨立平均；該段完全無回報時回 null（不可用 0 代替——0 是「沒花時間」，
+            // null 是「不知道花多少時間」，例：豐順輪和歌山 TotalTime_Waiting 與 COAA 皆未填）
+            const segAvg = (vs, k) => cnt(vs.map(v => v[k])) ? avg(vs.map(v => v[k])) : null;
             const timeSegs = vs => ({
-                wBerth: avg(vs.map(v => v.wBerth)), wComm: avg(vs.map(v => v.wComm)),
-                opH: avg(vs.map(v => v.opH)), wDep: avg(vs.map(v => v.wDep)),
-                opFuel: avg(vs.map(v => v.opFuelMT)), n: vs.length,
+                wBerth: segAvg(vs, 'wBerth'), wComm: segAvg(vs, 'wComm'),
+                opH: segAvg(vs, 'opH'), wDep: segAvg(vs, 'wDep'),
+                opFuel: segAvg(vs, 'opFuelMT'), n: vs.length,
                 nBerth: cnt(vs.map(v => v.wBerth)), nComm: cnt(vs.map(v => v.wComm)),
                 nOp: cnt(vs.map(v => v.opH)), nDep: cnt(vs.map(v => v.wDep))
             });
@@ -1708,7 +1744,12 @@
                 if (dS != null) inner += bar(dS, 15, 's ') + lbl(dS, 15);
                 return '<div class="pp-bar-wrap" title="大船群體 ' + idx.toFixed(2) + (gold != null ? '　金保順 ' + gold.toFixed(2) : '') + '">' + inner + '</div>';
             }
-            function barCellTime(seg, maxTotal) { const cols = [SEGC.berth, SEGC.comm, SEGC.work, SEGC.dep]; let x = 0, inner = ''; seg.forEach((s, i) => { const w = s / maxTotal * 100; inner += '<div class="pp-tseg" style="left:' + x + '%;width:' + w + '%;background:' + cols[i] + '"></div>'; x += w; }); return '<div class="pp-bar-wrap" title="等泊 ' + seg[0].toFixed(1) + ' / 等作業 ' + seg[1].toFixed(1) + ' / 作業 ' + seg[2].toFixed(1) + ' / 等離港 ' + seg[3].toFixed(1) + '">' + inner + '</div>'; }
+            function barCellTime(seg, maxTotal) {
+                const cols = [SEGC.berth, SEGC.comm, SEGC.work, SEGC.dep]; let x = 0, inner = '';
+                seg.forEach((s, i) => { if (s == null) return; const w = s / maxTotal * 100; inner += '<div class="pp-tseg" style="left:' + x + '%;width:' + w + '%;background:' + cols[i] + '"></div>'; x += w; });
+                const lbl = seg.map((s, i) => SEGNAME[i] + ' ' + (s == null ? '未填報' : s.toFixed(1))).join(' / ');
+                return '<div class="pp-bar-wrap" title="' + lbl + '">' + inner + '</div>';
+            }
             const rankOf = o => o.idx != null ? o.idx : (o.gold != null ? o.gold : -Infinity);
             function sortIndex(list) { if (sortMode === 'voy') list.sort((a, b) => b.n - a.n); else if (sortMode === 'name') list.sort((a, b) => a.p.localeCompare(b.p)); else list.sort((a, b) => rankOf(b) - rankOf(a)); }
             function sortTime(list) { if (sortMode === 'voy') list.sort((a, b) => b.n - a.n); else if (sortMode === 'name') list.sort((a, b) => a.p.localeCompare(b.p)); else list.sort((a, b) => b.total - a.total); }
@@ -1720,7 +1761,7 @@
                 return '<div class="pp-panel-h">' + (dir === '裝' ? '裝貨港' : '卸貨港') + '（' + list.length + ' 港）</div><div class="pp-tblbox" style="min-height:' + minH + 'px"><table class="pp-tbl"><thead><tr><th>港口</th><th class="pp-num">航次數</th><th>效率指數（基準=1.00）</th><th class="pp-num">效率指數</th></tr></thead><tbody>' + rows + '</tbody></table></div><div class="pp-axis"><span>0.85</span><span>0.90</span><span>0.95</span><span>1.00</span><span>1.05</span><span>1.10</span><span>1.15</span></div>';
             }
             function l1TimePanel(dir, maxTotal, minH) {
-                let list = PORTS[dir].map(p => { const vs = []; SHIPS.forEach(s => vs.push(...fv(dir, p, s))); const t = timeSegs(vs); return { p: p, seg: [t.wBerth, t.wComm, t.opH, t.wDep], nseg: [t.nBerth, t.nComm, t.nOp, t.nDep], n: vs.length, total: t.wBerth + t.wComm + t.opH + t.wDep }; }).filter(o => o.n > 0);
+                let list = PORTS[dir].map(p => { const vs = []; SHIPS.forEach(s => vs.push(...fv(dir, p, s))); const t = timeSegs(vs); const sg = [t.wBerth, t.wComm, t.opH, t.wDep], tt = segTotal(sg); return { p: p, seg: sg, nseg: [t.nBerth, t.nComm, t.nOp, t.nDep], n: vs.length, total: tt.sum, miss: tt.miss }; }).filter(o => o.n > 0);
                 sortTime(list);
                 const rows = list.map((o, i) => '<tr class="pp-row" data-port="' + o.p + '" data-dir="' + dir + '"><td><span class="pp-dot"></span><span class="pp-pname">' + o.p + '</span></td><td class="pp-num">' + o.n + '</td><td style="width:50%">' + barCellTime(o.seg.map(hrVal), maxTotal) + '</td><td class="pp-num">' + fmtN(hrVal(o.total), 1) + '</td></tr>').join('');
                 return '<div class="pp-panel-h">' + (dir === '裝' ? '裝貨港' : '卸貨港') + '（' + list.length + ' 港）</div><div class="pp-tblbox" style="min-height:' + minH + 'px"><table class="pp-tbl"><thead><tr><th>港口</th><th class="pp-num">航次數</th><th>在港時間（' + hrUnit() + '）</th><th class="pp-num">總時數</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
@@ -1743,7 +1784,7 @@
                 const s = o.seg, k = o.nseg || [o.n, o.n, o.n, o.n];
                 return '<b>' + o.p + '（' + dir + '貨）</b> · 平均在港（' + o.n + ' 趟）'
                     + '<br>等泊 ' + fmtN(hrVal(s[0]), 1) + nTag(k[0], o.n) + '，等作業 ' + fmtN(hrVal(s[1]), 1) + nTag(k[1], o.n) + '，作業 ' + fmtN(hrVal(s[2]), 1) + nTag(k[2], o.n) + '，等離港 ' + fmtN(hrVal(s[3]), 1) + nTag(k[3], o.n) + ' ' + hrUnit()
-                    + '<br>總時數 ' + fmtN(hrVal(s[0] + s[1] + s[2] + s[3]), 1) + ' ' + hrUnit()
+                    + '<br>總時數 ' + fmtN(hrVal(segTotal(s).sum), 1) + ' ' + hrUnit() + totTag(segTotal(s).miss)
                     + '<br><span style="color:#9ca3af">點長條 ▸ 展開該港各船</span>';
             }
             // 點 X 軸類別標籤也可下鑽（資料柱太小不易點擊時的替代入口）
@@ -1775,11 +1816,13 @@
                 }));
             }
             function buildPortTimeChart(cid, dir) {
-                let list = PORTS[dir].map(p => { const vs = []; SHIPS.forEach(s => vs.push(...fv(dir, p, s))); const t = timeSegs(vs); const seg = [t.wBerth, t.wComm, t.opH, t.wDep]; return { p: p, seg: seg, nseg: [t.nBerth, t.nComm, t.nOp, t.nDep], n: portN(dir, p), total: seg[0] + seg[1] + seg[2] + seg[3] }; }).filter(o => o.total > 0);
+                let list = PORTS[dir].map(p => { const vs = []; SHIPS.forEach(s => vs.push(...fv(dir, p, s))); const t = timeSegs(vs); const seg = [t.wBerth, t.wComm, t.opH, t.wDep]; const tt = segTotal(seg); return { p: p, seg: seg, nseg: [t.nBerth, t.nComm, t.nOp, t.nDep], n: portN(dir, p), total: tt.sum, miss: tt.miss }; }).filter(o => o.total != null && o.total > 0);
                 if (!list.length) { $(cid).innerHTML = '<div class="text-muted p-3" style="font-size:.85rem;">此區間無資料。</div>'; return; }
                 sortTime(list);
                 list = list.filter(o => o.n >= MINRANK).concat(list.filter(o => o.n < MINRANK));
-                const S = k => list.map(o => ({ y: +hrVal(o.seg[k]).toFixed(2), port: o.p, tip: l1TimeTip(o, dir) }));
+                const S = k => list.map(o => o.seg[k] == null
+                    ? { y: null, port: o.p, tip: l1TimeTip(o, dir) }
+                    : { y: +hrVal(o.seg[k]).toFixed(2), port: o.p, tip: l1TimeTip(o, dir) });
                 charts.push(Highcharts.chart(cid, {
                     chart: Object.assign({ type: 'column', height: 300, backgroundColor: 'transparent', spacing: [8, 8, 4, 6], events: axisDrill(function (cat) { go(2, cat, null, dir); }) }, portScroll(list.length)),
                     xAxis: { categories: list.map(o => o.p), lineColor: '#4b5563', tickLength: 0, labels: Object.assign({ useHTML: true, formatter: function () { var n = portN(dir, this.value); return this.value + (n < MINRANK ? '<br><span style="color:#f59e0b;font-size:.6rem;">n=' + n + '，僅供參考</span>' : ''); } }, catLabel) },
@@ -1818,8 +1861,20 @@
                 if (!hcGuard()) return;
                 if (isTime) {
                     const items = SHIPS.map(sh => ({ sh: sh, segs: timeSegs(fv(dir, port, sh)) })).filter(o => o.segs.n > 0);
-                    const tip = o => '<b>' + o.sh + '</b>（' + port + '）· 平均一次靠港（' + o.segs.n + ' 趟）<br>等泊 ' + fmtN(hrVal(o.segs.wBerth), 1) + '，等作業 ' + fmtN(hrVal(o.segs.wComm), 1) + '，作業 ' + fmtN(hrVal(o.segs.opH), 1) + '，等離港 ' + fmtN(hrVal(o.segs.wDep), 1) + ' ' + hrUnit() + '<br><span style="color:#9ca3af">點長條 ▸ 逐航次時間軸</span>';
-                    const S = i => items.map(o => ({ y: +hrVal([o.segs.wBerth, o.segs.wComm, o.segs.opH, o.segs.wDep][i]).toFixed(2), tip: tip(o) }));
+                    const tip = o => {
+                        const g = o.segs, sg = [g.wBerth, g.wComm, g.opH, g.wDep], tt = segTotal(sg);
+                        return '<b>' + o.sh + '</b>（' + port + '）· 平均一次靠港（' + g.n + ' 趟）'
+                            + '<br>等泊 ' + fmtN(hrVal(g.wBerth), 1) + nTag(g.nBerth, g.n)
+                            + '，等作業 ' + fmtN(hrVal(g.wComm), 1) + nTag(g.nComm, g.n)
+                            + '，作業 ' + fmtN(hrVal(g.opH), 1) + nTag(g.nOp, g.n)
+                            + '，等離港 ' + fmtN(hrVal(g.wDep), 1) + nTag(g.nDep, g.n) + ' ' + hrUnit()
+                            + '<br>總時數 ' + fmtN(hrVal(tt.sum), 1) + ' ' + hrUnit() + totTag(tt.miss)
+                            + '<br><span style="color:#9ca3af">點長條 ▸ 逐航次時間軸</span>';
+                    };
+                    const S = i => items.map(o => {
+                        const v = [o.segs.wBerth, o.segs.wComm, o.segs.opH, o.segs.wDep][i];
+                        return v == null ? { y: null, tip: tip(o) } : { y: +hrVal(v).toFixed(2), tip: tip(o) };
+                    });
                     charts.push(Highcharts.chart('pp-cMain', { chart: { type: 'bar', height: items.length * 50 + 64, animation: false, backgroundColor: 'transparent', spacing: [10, 12, 6, 8], events: axisDrill(function (cat) { go(3, port, cat, dir); }) }, xAxis: { categories: items.map(o => o.sh), tickLength: 0, lineColor: '#4b5563', labels: catLabel }, yAxis: { min: 0, title: { text: hrUnit(), style: { color: AXIS } }, gridLineColor: GRID, labels: { style: { color: AXIS } } }, legend: { enabled: true, itemStyle: { color: '#cbd5e1', fontSize: '.8rem' } }, tooltip: tipOpt, plotOptions: { series: { stacking: 'normal', borderWidth: 0, cursor: 'pointer', point: { events: { click: function () { go(3, port, this.category, dir); } } } } }, series: [{ name: '等泊', color: SEGC.berth, data: S(0) }, { name: '等作業', color: SEGC.comm, data: S(1) }, { name: '作業', color: SEGC.work, data: S(2) }, { name: '等離港', color: SEGC.dep, data: S(3) }] }));
                     return;
                 }
@@ -1935,13 +1990,13 @@
             function exportRows(kind) {
                 if (kind === 'detail') {
                     // 時間戳一律輸出船報原值；EOSPTime 全期未填報，故無「抵港時間」欄
-                    const rows = [['航次號', '船名', '港口', '作業方向', '貨種', '靠妥時間', '開工時間', '完工時間', '離泊時間', '等泊(時)', '等作業(時)', '淨作業(時)', '等離港(時)', '在港總時(時)', '貨量(噸)', '裝卸速率(噸/時)', '裝卸速率(噸/天)', '作業油耗(MT)', '每噸油耗(g/噸)', '效率指數-群體', '效率指數-自身', '接岸電', '資料異常']];
+                    const rows = [['航次號', '船名', '船型級距', 'DWT', '港口', '作業方式', '貨種', '靠妥時間', '開工時間', '完工時間', '離泊時間', '等泊(時)', '等作業(時)', '淨作業(時)', '等離港(時)', '在港總時(時)', '貨量(噸)', '裝卸速率(噸/時)', '裝卸速率(噸/天)', '作業油耗(MT)', '每噸油耗(g/噸)', '效率指數-群體', '效率指數-自身', '接岸電', '資料異常']];
                     for (const dir in PORTS) PORTS[dir].forEach(p => SHIPS.forEach(sh => VOY[dir][p][sh].filter(inWin).forEach(v => {
                         const segs = [v.wBerth, v.wComm, v.opH, v.wDep].filter(x => x != null);
                         const tot = segs.length ? segs.reduce((a, b) => a + b, 0) : null;
                         const gIdx = (SHIP_P[sh].cls === 'big' && FB[dir].big.spd) ? (v.spd / FB[dir].big.spd).toFixed(3) : '—';
                         const sIdx = SB[sh].spd ? (v.spd / SB[sh].spd).toFixed(3) : '—';
-                        rows.push([v.vn, sh, p, dir === '裝' ? '裝貨' : '卸貨', orDash(v.cargo),
+                        rows.push([v.vn, sh, dwtBand(sh), SHIP_DWT[sh] == null ? '—' : SHIP_DWT[sh], p, dir === '裝' ? '裝貨' : '卸貨', orDash(v.cargo),
                             orDash(v.tFast), orDash(v.tCWCM), orDash(v.tCWCP), orDash(v.tCOAA),
                             fx(v.wBerth, 1), fx(v.wComm, 1), fx(v.opH, 1), fx(v.wDep, 1), fx(tot, 1),
                             v.ton, fx(v.spd, 1), v.spd == null ? '' : Math.round(v.spd * 24), fx(v.opFuelMT, 2), fx(v.fuelPT, 1),
@@ -1949,16 +2004,26 @@
                     })));
                     downloadCSV(rows, '靠港作業明細');
                 } else {
-                    const rows = [['港口', '作業方向', '航次數', '效率指數(群體中位)', '平均裝卸速率(噸/時)', '平均每噸油耗(g/噸)', '平均等泊(時)', '等泊有效筆數', '平均等作業(時)', '等作業有效筆數', '平均作業(時)', '平均等離港(時)', '等離港有效筆數', '平均在港總時(時)']];
-                    for (const dir in PORTS) PORTS[dir].forEach(p => {
-                        const vs = []; SHIPS.forEach(sh => vs.push(...VOY[dir][p][sh].filter(v => inWin(v) && !v.bad)));
+                    // 依「港口 × 作業方式 × 船型級距」彙總。分級距是必要的——不同 DWT 的裝卸速率
+                    // 與在港時間本就不同級，混算會被小船拉低平均（例：金保順 DWT 8,000 對上四艘 28,000）。
+                    const rows = [['港口', '作業方式', '船型級距', '船舶數', '航次數', '效率指數(同級距中位)', '平均裝卸速率(噸/時)', '平均每噸油耗(g/噸)', '平均等泊(時)', '等泊有效筆數', '平均等作業(時)', '等作業有效筆數', '平均作業(時)', '平均等離港(時)', '等離港有效筆數', '平均在港總時(時)', '總時數是否完整']];
+                    const bandsOf = () => { const b = []; SHIPS.forEach(sh => { const k = dwtBand(sh); if (b.indexOf(k) < 0) b.push(k); }); return b.sort((x, y) => bandOrder(x) - bandOrder(y)); };
+                    for (const dir in PORTS) PORTS[dir].forEach(p => bandsOf().forEach(band => {
+                        const shipsIn = SHIPS.filter(sh => dwtBand(sh) === band);
+                        const vs = []; shipsIn.forEach(sh => vs.push(...VOY[dir][p][sh].filter(v => inWin(v) && !v.bad)));
                         if (!vs.length) return;
-                        const bigVs = []; BIG.forEach(sh => bigVs.push(...VOY[dir][p][sh].filter(v => inWin(v) && !v.bad)));
-                        const gi = (FB[dir].big.spd && bigVs.length) ? median(bigVs.map(v => v.spd / FB[dir].big.spd)).toFixed(3) : '—';
+                        const nShip = shipsIn.filter(sh => VOY[dir][p][sh].some(v => inWin(v) && !v.bad)).length;
+                        // 指數以該級距所屬船型分類（大船／小船）之基準計算，否則小船級距永遠是 '—'
+                        const cls = SHIP_P[shipsIn[0]] ? SHIP_P[shipsIn[0]].cls : 'big';
+                        const base = FB[dir][cls];
+                        const gi = (base && base.spd) ? median(vs.map(v => v.spd / base.spd)).toFixed(3) : '—';
                         const t = timeSegs(vs);
-                        rows.push([p, dir === '裝' ? '裝貨' : '卸貨', vs.length, gi, Math.round(avg(vs.map(v => v.spd))), avg(vs.map(v => v.fuelPT)).toFixed(1),
-                            t.wBerth.toFixed(1), t.nBerth, t.wComm.toFixed(1), t.nComm, t.opH.toFixed(1), t.wDep.toFixed(1), t.nDep, (t.wBerth + t.wComm + t.opH + t.wDep).toFixed(1)]);
-                    });
+                        rows.push([p, dir === '裝' ? '裝貨' : '卸貨', band, nShip, vs.length, gi, Math.round(avg(vs.map(v => v.spd))), avg(vs.map(v => v.fuelPT)).toFixed(1),
+                            fx(t.wBerth, 1), t.nBerth, fx(t.wComm, 1), t.nComm, fx(t.opH, 1), fx(t.wDep, 1), t.nDep,
+                            fx(segTotal([t.wBerth, t.wComm, t.opH, t.wDep]).sum, 1),
+                            segTotal([t.wBerth, t.wComm, t.opH, t.wDep]).miss.length
+                                ? '不完整（缺 ' + segTotal([t.wBerth, t.wComm, t.opH, t.wDep]).miss.join('、') + '）' : '完整']);
+                    }));
                     downloadCSV(rows, '港口績效彙總');
                 }
             }
