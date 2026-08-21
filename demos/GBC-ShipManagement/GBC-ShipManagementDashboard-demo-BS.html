@@ -1679,7 +1679,11 @@
             const fv = (dir, port, ship) => VOY[dir][port][ship].filter(v => usable(v) && inWin(v));
             const rateVal = spd => UNIT === 'day' ? spd * 24 : spd, rateUnit = () => UNIT === 'day' ? '噸/天' : '噸/時';
             const hrVal = h => UNIT === 'day' ? h / 24 : h, hrUnit = () => UNIT === 'day' ? '天' : '小時';
-            const fmtN = (x, d) => x == null ? '—' : (+x).toFixed(d);
+            // 畫面數值格式：與匯出報表一致，一律小數第二位（第三位四捨五入）＋千分位。
+            // 呼叫端沿用的第二參數 d 刻意不採用——先前畫面用 0/1/2 位、匯出用 2 位，
+            // 同一個數字兩處顯示不同（如作業速率畫面 760、匯出 759.71），故在此收斂。
+            const fmtN = (x) => x == null ? '—' :
+                Number(x).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             // 平均值後綴：該段有值筆數不足全部時標出，避免把「未填報」讀成「沒花時間」
             const nTag = (k, all) => k === 0 ? '<span style="color:#f59e0b">未填報</span>' : (k < all ? '<span style="color:#9ca3af">(n=' + k + '/' + all + ')</span>' : '');
 
@@ -1981,6 +1985,13 @@
             // ===== 匯出（欄位對齊《匯出報表格式參考》：港口績效彙總 / 靠港作業明細）=====
             const orDash = x => (x == null || x === '') ? '—' : x;
             const fx = (x, d) => x == null ? '' : (+x).toFixed(d);
+            // 匯出數值格式：量測值一律取到小數第二位（第三位四捨五入進位）＋千分位。
+            // 固定用 en-US 以確保分隔符為逗號，不隨瀏覽器地區設定改變；
+            // CSV 每格都加引號，逗號不會切欄。
+            // 計數（船舶數／航次數／有效筆數）與 DWT 為整數，不加小數。
+            const fnum = (x, d) => (x == null || x === '') ? '' :
+                Number(x).toLocaleString('en-US', { minimumFractionDigits: d == null ? 2 : d,
+                                                    maximumFractionDigits: d == null ? 2 : d });
             function downloadCSV(rows, name) {
                 const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\r\n');
                 const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' }), url = URL.createObjectURL(blob), a = document.createElement('a');
@@ -1994,12 +2005,12 @@
                     for (const dir in PORTS) PORTS[dir].forEach(p => SHIPS.forEach(sh => VOY[dir][p][sh].filter(inWin).forEach(v => {
                         const segs = [v.wBerth, v.wComm, v.opH, v.wDep].filter(x => x != null);
                         const tot = segs.length ? segs.reduce((a, b) => a + b, 0) : null;
-                        const gIdx = (SHIP_P[sh].cls === 'big' && FB[dir].big.spd) ? (v.spd / FB[dir].big.spd).toFixed(3) : '—';
-                        const sIdx = SB[sh].spd ? (v.spd / SB[sh].spd).toFixed(3) : '—';
-                        rows.push([v.vn, sh, dwtBand(sh), SHIP_DWT[sh] == null ? '—' : SHIP_DWT[sh], p, dir === '裝' ? '裝貨' : '卸貨', orDash(v.cargo),
+                        const gIdx = (SHIP_P[sh].cls === 'big' && FB[dir].big.spd) ? fnum(v.spd / FB[dir].big.spd, 2) : '—';
+                        const sIdx = SB[sh].spd ? fnum(v.spd / SB[sh].spd, 2) : '—';
+                        rows.push([v.vn, sh, dwtBand(sh), SHIP_DWT[sh] == null ? '—' : fnum(SHIP_DWT[sh], 0), p, dir === '裝' ? '裝貨' : '卸貨', orDash(v.cargo),
                             orDash(v.tFast), orDash(v.tCWCM), orDash(v.tCWCP), orDash(v.tCOAA),
-                            fx(v.wBerth, 1), fx(v.wComm, 1), fx(v.opH, 1), fx(v.wDep, 1), fx(tot, 1),
-                            v.ton, fx(v.spd, 1), v.spd == null ? '' : Math.round(v.spd * 24), fx(v.opFuelMT, 2), fx(v.fuelPT, 1),
+                            fnum(v.wBerth), fnum(v.wComm), fnum(v.opH), fnum(v.wDep), fnum(tot),
+                            fnum(v.ton), fnum(v.spd), v.spd == null ? '' : fnum(v.spd * 24), fnum(v.opFuelMT), fnum(v.fuelPT),
                             gIdx, sIdx, v.shore ? 'Y' : 'N', v.bad ? (v.bad.report + '「' + v.bad.field + '」' + v.bad.issue) : '']);
                     })));
                     downloadCSV(rows, '靠港作業明細');
@@ -2016,11 +2027,11 @@
                         // 指數以該級距所屬船型分類（大船／小船）之基準計算，否則小船級距永遠是 '—'
                         const cls = SHIP_P[shipsIn[0]] ? SHIP_P[shipsIn[0]].cls : 'big';
                         const base = FB[dir][cls];
-                        const gi = (base && base.spd) ? median(vs.map(v => v.spd / base.spd)).toFixed(3) : '—';
+                        const gi = (base && base.spd) ? fnum(median(vs.map(v => v.spd / base.spd)), 2) : '—';
                         const t = timeSegs(vs);
-                        rows.push([p, dir === '裝' ? '裝貨' : '卸貨', band, nShip, vs.length, gi, Math.round(avg(vs.map(v => v.spd))), avg(vs.map(v => v.fuelPT)).toFixed(1),
-                            fx(t.wBerth, 1), t.nBerth, fx(t.wComm, 1), t.nComm, fx(t.opH, 1), fx(t.wDep, 1), t.nDep,
-                            fx(segTotal([t.wBerth, t.wComm, t.opH, t.wDep]).sum, 1),
+                        rows.push([p, dir === '裝' ? '裝貨' : '卸貨', band, nShip, vs.length, gi, fnum(avg(vs.map(v => v.spd))), fnum(avg(vs.map(v => v.fuelPT))),
+                            fnum(t.wBerth), t.nBerth, fnum(t.wComm), t.nComm, fnum(t.opH), fnum(t.wDep), t.nDep,
+                            fnum(segTotal([t.wBerth, t.wComm, t.opH, t.wDep]).sum),
                             segTotal([t.wBerth, t.wComm, t.opH, t.wDep]).miss.length
                                 ? '不完整（缺 ' + segTotal([t.wBerth, t.wComm, t.opH, t.wDep]).miss.join('、') + '）' : '完整']);
                     }));
