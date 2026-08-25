@@ -365,9 +365,10 @@
                         <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">各船作業及等泊油耗比較 (Fuel Ops & Waiting)</h2>
                         <div class="desc-box">
                             <div><span class="badge-source">資料來源（真實）</span>作業：<code class="text-info">格式4-離港報DEPT</code>（62 筆，不含完工報）。等泊：<code class="text-info">格式2-抵港報ARVL</code>（70 筆）。本圖表無使用 DR 報。期間 2026-06-21 ~ 07-31。</div>
-                            <div class="mt-1"><span class="badge-calc">計算邏輯</span>單位 MT/Day，兩者皆為<b>總量比</b>——先把該船所有紀錄的油耗與時數各自加總再相除，<b>不是每筆先算日均再平均</b>（總量比等同以時數加權，長港次權重較高）。<br>
-                            作業日均油耗 ＝ Σ(<code class="text-warning">TotalConsumption_FO</code> ＋ <code class="text-warning">TotalConsumption_DO</code>) ÷ Σ<code class="text-info">Total_Working_Hour</code> × 24，並依 <code class="text-info">ShoreElectronic</code> 拆有／無接岸電兩組。<br>
-                            等泊日均油耗 ＝ Σ(<code class="text-warning">TotalConsumption_FO_Waiting</code> ＋ <code class="text-warning">TotalConsumption_DO_Waiting</code>) ÷ Σ<code class="text-info">TotalTime_Waiting</code> × 24。</div>
+                            <div class="mt-1"><span class="badge-calc">計算邏輯</span>單位 MT/Day，皆為<b>總量比</b>（油耗與時數各自加總再相除，等同以時數加權）。<b class="text-info">重油 FO 與輕油 DO 分開計、每情境堆疊呈現</b>（深色＝FO、淺色＝DO）：<br>
+                            作業日均 ＝ Σ<code class="text-warning">TotalConsumption_FO</code>（或 <code class="text-warning">_DO</code>）÷ Σ<code class="text-info">Total_Working_Hour</code> × 24，依 <code class="text-info">ShoreElectronic</code> 拆有／無接岸電。<br>
+                            等泊日均 ＝ Σ<code class="text-warning">DailyConsumption_FO_Waiting</code>（或 <code class="text-warning">_DO_Waiting</code>）加權 ÷ 等泊時數。</div>
+                            <div class="mt-1"><span class="badge-source">重油/輕油判讀</span><b class="text-warning">金保順（小船）作業幾乎全燒輕油 DO</b>（1.88 MT/day，重油 0）；<b>大船幾乎全重油 FO</b>——分列後才看得出的船型差異。</div>
                             <div class="mt-1"><span class="badge-calc">納入與排除</span>以<b>時數 &gt; 0</b> 為納入條件：作業排除 <code class="text-info">Total_Working_Hour</code> 為 0 或未填者 3 筆（含豐順輪 <code class="text-warning">TotalConsumption_FO</code>＝−199.8 之髒值，因工時為 0 自然被剔除），納入 59 筆；等泊排除 <code class="text-info">TotalTime_Waiting</code> 為 0 或未填者 46 筆，納入 24 筆。<b>油耗欄未填視為 0</b>（該筆時數仍計入分母，故會拉低結果）。</div>
                             <div class="mt-1"><span class="badge-risk">營運分析</span>若橘色等泊油耗過高，代表無效營運浪費（如進港逼近／定位機動偏多），需檢討航線或代理行效率；接岸電可顯著壓低作業油耗。</div>
                             <div class="mt-1"><span class="badge-warn">判讀限制</span>等泊樣本普遍偏短，將數小時的實測外推為「每日」放大效應明顯：<b class="text-warning">匯順1號 11.70 MT/day 係由 Σ油耗 11.22 MT ÷ Σ等泊時僅 23.01 小時推得</b>（景順輪更僅 14.03 小時）。跨船比較時請一併看樣本時數，勿逕以日均值論斷營運效率。</div>
@@ -384,7 +385,7 @@
                                 <button onclick="applyFilter('chart-fuel-ops', this)" class="btn btn-primary btn-sm ds-btn ds-apply">套用</button>
                             </div>
                         </div>
-                        <div id="chart-fuel-ops" class="w-100" style="height: 220px;"></div>
+                        <div id="chart-fuel-ops" class="w-100" style="height: 360px;"></div>
                     </div>
                 </div>
             </div>
@@ -1169,16 +1170,19 @@
             // 修改顏色提示：在 series 中更改 color 屬性。如作業用油為 '#3b82f6'(藍)
             Highcharts.chart('chart-fuel-ops', {
                 chart: { type: 'column' }, xAxis: { categories: ships }, yAxis: { title: { text: 'MT/Day' } },
-                tooltip: { valueSuffix: ' MT/Day' },
-                // 依真實資料聚合(2026-06-21~07-31)，直接使用既有欄位：
-                //   作業=離港報 TotalConsumption_FO/DO ÷ Total_Working_Hour ×24(依 ShoreElectronic 拆有/無接岸電)；
-                //   等泊=抵港報 DailyConsumption_FO/DO_Waiting(已日均，以 TotalTime_Waiting 加權)。
-                //   (豐順 V2623 TotalConsumption_FO=-199.8 髒值因作業時=0，除以工時時自然被排除)
-                //   匯順1號例：作業無電 2.75、作業有電 1.00、等泊 11.70 MT/day（等泊偏高＝進港逼近/定位機動）。
+                tooltip: { shared: true, valueSuffix: ' MT/Day' },
+                plotOptions: { column: { stacking: 'normal', borderWidth: 0 } },
+                // 依真實資料聚合(2026-06-21~07-31)，重油FO/輕油DO 分列、各情境堆疊：
+                //   作業=離港報 TotalConsumption_FO / _DO ÷ Total_Working_Hour ×24(依 ShoreElectronic 拆有/無接岸電)；
+                //   等泊=抵港報 DailyConsumption_FO_Waiting / _DO_Waiting(已日均，以 TotalTime_Waiting 加權)。
+                //   3 情境並排(stack: opN/wait/opY)，每根 FO(深)+DO(淺)堆疊。金保順作業幾乎全輕油DO、大船幾乎全重油FO。
                 series: [
-                    { name: '作業用油(未接岸電)', data: [1.21, 2.04, 2.27, 2.75, 1.88], color: '#3b82f6', borderWidth: 0 },
-                    { name: '等泊/錨泊用油', data: [0.0, 1.81, 2.51, 11.70, 0.89], color: '#f59e0b', borderWidth: 0 },
-                    { name: '作業用油(有接岸電)', data: [0.0, 0.32, 0.13, 1.00, 0.30], color: '#10b981', borderWidth: 0 }
+                    { name: '作業(未接岸電)·重油FO', data: [1.16, 1.99, 1.82, 2.60, 0.00], stack: 'opN', color: '#1d4ed8' },
+                    { name: '作業(未接岸電)·輕油DO', data: [0.06, 0.05, 0.45, 0.15, 1.88], stack: 'opN', color: '#93c5fd' },
+                    { name: '等泊/錨泊·重油FO', data: [0.00, 1.71, 2.30, 11.27, 0.00], stack: 'wait', color: '#b45309' },
+                    { name: '等泊/錨泊·輕油DO', data: [0.00, 0.10, 0.21, 0.44, 0.89], stack: 'wait', color: '#fbbf24' },
+                    { name: '作業(有接岸電)·重油FO', data: [0.00, 0.22, 0.00, 0.98, 0.00], stack: 'opY', color: '#047857' },
+                    { name: '作業(有接岸電)·輕油DO', data: [0.00, 0.09, 0.13, 0.02, 0.30], stack: 'opY', color: '#6ee7b7' }
                 ]
             });
 
@@ -1383,7 +1387,7 @@
 
                     // [特例處理]：以下圖表為真實資料，套用鈕不做合成擾動——
                     //   chart-speed-oil(泡泡{x,y,z})、chart-lube(含 null 資料不足，擾動會把 null 變 0)
-                    if (chartId === 'chart-speed-oil' || chartId === 'chart-lube') {
+                    if (chartId === 'chart-speed-oil' || chartId === 'chart-lube' || chartId === 'chart-fuel-ops') {
                         btnElement.innerText = originalText;
                         btnElement.classList.remove('opacity-75');
                         btnElement.style.cursor = '';
