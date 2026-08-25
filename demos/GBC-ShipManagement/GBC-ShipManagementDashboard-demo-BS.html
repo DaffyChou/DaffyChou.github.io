@@ -475,7 +475,7 @@
                             <span class="text-warning">⚠ 僅供群體比較，不代表個別船舶的實際營運；天氣為抵港快照，屬情境參考、非因果。</span>
                         </p>
                         <div class="desc-box">
-                            <div><span class="badge-source">資料來源</span>所有船舶一次看：取自 <code class="text-info">格式2-抵港報</code>（全 5 船皆有），依所選時間區間聚合各船平均。<b>柱</b>＝平均航行日耗（<code class="text-warning">DailyConsumption_FO/DO_Sailing</code>）；<b>線</b>＝平均航速（<code class="text-warning">AverageSpeed</code>）、抵港風級（<code class="text-warning">BeaufortWindScale</code>）、抵港海況（<code class="text-warning">DouglasSeaStateScale</code>）。</div>
+                            <div><span class="badge-source">資料來源</span>所有船舶一次看：取自 <code class="text-info">格式2-抵港報</code>（全 5 船皆有），依所選時間區間聚合各船平均。<b>柱</b>＝平均航行日耗，<b class="text-info">重油FO(深)／輕油DO(淺)分列堆疊</b>（<code class="text-warning">DailyConsumption_FO_Sailing</code>／<code class="text-warning">_DO_Sailing</code>）；<b>線</b>＝平均航速（<code class="text-warning">AverageSpeed</code>）、抵港風級（<code class="text-warning">BeaufortWindScale</code>）、抵港海況（<code class="text-warning">DouglasSeaStateScale</code>）。<b class="text-warning">金保順(小船)航行仍以重油FO為主(5.1)、另有輕油DO(1.5)；大船幾乎全FO。</b></div>
                             <div class="mt-1"><span class="badge-calc">氣象怎麼對應</span>抵港報<b>本身即含風級與海況級數</b>，但那是<b>抵港/EOSP 當下的單筆快照</b>（一航段一筆，非逐日平均），全 5 船皆有故用於全隊橫比。<b class="text-warning">浪高(WaveHeight, 公尺)僅船位報（午報）有、抵港報無</b>，故總覽不放浪高；要看<b>逐日風級＋浪高</b>請用上方單船圖（午報，僅源順／景順／豐順有）。</div>
                             <div class="mt-1"><span class="badge-calc">快照可信度核對 ◆</span>有午報的船（源／景／豐）以 <b style="color:#fcd34d">◆風級</b>、<b style="color:#f9a8d4">◆海況</b> 標出「午報航程實測平均」，核對抵港快照：<b>◆ 越貼近對應快照線＝快照越能代表整段航程（可信度高）</b>；差距大＝該船抵港快照不足以代表全程。<b class="text-warning">例如景順的實測海況(4.0)遠高於抵港海況快照(2.3)→該船海況快照可信度低</b>，看該船請以單船午報圖為準。無午報的船無 ◆、僅有快照。</div>
                             <div class="mt-1"><span class="badge-risk">用途</span>橫向比較全隊：油耗高但航速不快、風級/海況又不高的船 → 效率偏低值得追蹤；再切到上方單船圖看逐日細節。某船於區間內無航段則顯示斷點。</div>
@@ -960,13 +960,13 @@
                 }
                 return def;
             }
-            // 各船抵港報逐航段[日期,航行日耗,航速,風級,海況級數]（全5船；風級BeaufortWindScale/海況DouglasSeaStateScale為抵港當下快照，抵港報無浪高WaveHeight）
+            // 各船抵港報逐航段[日期,航行FO,航行DO,航速,風級,海況]（DailyConsumption_FO/DO_Sailing 分列；風級/海況為抵港快照）
             const FLEET_LEGS = {
-                'Yuan Shun': [['2026-06-29',15.7,12.7,3,3], ['2026-06-30',15.7,12.7,3,1]],
-                'Jing Shun': [['2026-06-22',21,11.6,2,2], ['2026-06-30',18.8,12.3,3,2], ['2026-07-01',29.4,12.3,3,2], ['2026-07-02',23.2,11.8,3,3], ['2026-07-04',32,11.5,4,3], ['2026-07-11',15.5,12.9,2,3], ['2026-07-11',16,12.9,2,2], ['2026-07-20',15.4,10.4,2,2], ['2026-07-26',24.3,12.4,2,2], ['2026-07-27',22.2,11.7,1,3], ['2026-07-29',30.2,12.2,3,2], ['2026-07-30',22.6,11.6,2,2]],
-                'Feng Shun': [['2026-06-21',14,10.9,2,3], ['2026-06-21',14.2,11.2,5,3], ['2026-07-21',13.5,13.2,1,2], ['2026-07-28',13.8,10.4,4,3], ['2026-07-28',13.8,10.4,4,3], ['2026-07-29',14.4,10.0,3,2], ['2026-07-31',13.1,10.1,2,2]],
-                'Hui Shun No.1': [['2026-06-27',13,11.4,5,4], ['2026-06-28',13.3,10.8,3,3], ['2026-07-02',11.5,11.6,3,2], ['2026-07-03',14.3,10.7,2,2], ['2026-07-05',14.8,11.9,3,3], ['2026-07-07',14.2,10.8,2,2], ['2026-07-13',7.8,null,3,3], ['2026-07-14',13.7,10.8,1,3], ['2026-07-16',14.9,10.6,3,3], ['2026-07-17',12.1,10.4,3,4], ['2026-07-19',14.7,11.0,2,3], ['2026-07-21',14.3,10.6,1,3], ['2026-07-22',14.7,12.0,3,3], ['2026-07-24',14.1,10.5,2,2], ['2026-07-25',15.1,12.8,3,3], ['2026-07-26',14.7,11.2,2,3], ['2026-07-29',13.7,12.2,2,2]],
-                'Gimpo Shun': [['2026-06-23',6.5,10.8,4,3], ['2026-06-23',7.8,10.1,4,4], ['2026-06-23',7.8,11.3,1,3], ['2026-06-24',7,10.4,3,3], ['2026-06-24',7,10.4,4,4], ['2026-06-25',7,12.4,4,4], ['2026-06-26',6.9,9.6,4,3], ['2026-06-28',8.7,11.8,3,3], ['2026-06-29',6.9,10.4,3,3], ['2026-07-05',6.3,11.4,3,3], ['2026-07-06',6.5,10.0,4,3], ['2026-07-07',6.8,11.8,3,3], ['2026-07-08',7.7,10.8,3,3], ['2026-07-12',5.6,13.4,6,5], ['2026-07-14',5.6,13.4,4,3], ['2026-07-15',6,9.9,4,4], ['2026-07-17',5.8,9.4,5,4], ['2026-07-19',6.3,9.6,5,4], ['2026-07-20',5.5,10.8,3,3], ['2026-07-21',6.1,11.1,3,3], ['2026-07-22',6.1,11.8,3,3], ['2026-07-24',5.9,10.6,3,3], ['2026-07-24',6.1,12.3,4,4], ['2026-07-25',6.9,9.8,4,4], ['2026-07-27',6.2,11.6,3,3], ['2026-07-29',6.3,9.9,3,3], ['2026-07-30',5.7,11.7,3,3]]
+                'Yuan Shun': [['2026-06-29',15.6,0.1,12.7,3,3], ['2026-06-30',15.6,0.1,12.7,3,1]],
+                'Jing Shun': [['2026-06-22',19.2,1.8,11.6,2,2], ['2026-06-30',18.8,0,12.3,3,2], ['2026-07-01',29.1,0.3,12.3,3,2], ['2026-07-02',21.4,1.9,11.8,3,3], ['2026-07-04',31.8,0.2,11.5,4,3], ['2026-07-11',15.5,0,12.9,2,3], ['2026-07-11',16,0,12.9,2,2], ['2026-07-20',15.4,0,10.4,2,2], ['2026-07-26',24.1,0.1,12.4,2,2], ['2026-07-27',20.5,1.7,11.7,1,3], ['2026-07-29',29.9,0.3,12.2,3,2], ['2026-07-30',20.4,2.2,11.6,2,2]],
+                'Feng Shun': [['2026-06-21',14,0,10.9,2,3], ['2026-06-21',14.2,0,11.2,5,3], ['2026-07-21',13.5,0,13.2,1,2], ['2026-07-28',13.8,0,10.4,4,3], ['2026-07-28',13.8,0,10.4,4,3], ['2026-07-29',14.4,0,10,3,2], ['2026-07-31',13.1,0,10.1,2,2]],
+                'Hui Shun No.1': [['2026-06-27',12.9,0.1,11.4,5,4], ['2026-06-28',13,0.3,10.8,3,3], ['2026-07-02',11.2,0.4,11.6,3,2], ['2026-07-03',14,0.3,10.7,2,2], ['2026-07-05',14.5,0.3,11.9,3,3], ['2026-07-07',14.2,0,10.8,2,2], ['2026-07-13',7.7,0.1,null,3,3], ['2026-07-14',13.7,0,10.8,1,3], ['2026-07-16',14.6,0.3,10.6,3,3], ['2026-07-17',12.1,0,10.4,3,4], ['2026-07-19',14.4,0.3,11,2,3], ['2026-07-21',14,0.3,10.6,1,3], ['2026-07-22',14.4,0.4,12,3,3], ['2026-07-24',13.8,0.3,10.5,2,2], ['2026-07-25',14.7,0.4,12.8,3,3], ['2026-07-26',14.4,0.3,11.2,2,3], ['2026-07-29',13.7,0,12.2,2,2]],
+                'Gimpo Shun': [['2026-06-23',5.1,1.4,10.8,4,3], ['2026-06-23',5.9,1.8,11.3,1,3], ['2026-06-23',6.2,1.6,10.1,4,4], ['2026-06-24',5.2,1.8,10.4,3,3], ['2026-06-24',5.2,1.8,10.4,4,4], ['2026-06-25',5.4,1.6,12.4,4,4], ['2026-06-26',5.7,1.2,9.6,4,3], ['2026-06-28',6.6,2,11.8,3,3], ['2026-06-29',6,0.9,10.4,3,3], ['2026-07-05',4.6,1.6,11.4,3,3], ['2026-07-06',5,1.5,10,4,3], ['2026-07-07',5,1.8,11.8,3,3], ['2026-07-08',5.7,2,10.8,3,3], ['2026-07-12',4.1,1.5,13.4,6,5], ['2026-07-14',4.1,1.5,13.4,4,3], ['2026-07-15',4.7,1.3,9.9,4,4], ['2026-07-17',4,1.7,9.4,5,4], ['2026-07-19',5.3,0.9,9.6,5,4], ['2026-07-20',4.2,1.3,10.8,3,3], ['2026-07-21',4.8,1.3,11.1,3,3], ['2026-07-22',4.9,1.2,11.8,3,3], ['2026-07-24',4.3,1.8,12.3,4,4], ['2026-07-24',4.8,1.1,10.6,3,3], ['2026-07-25',5.7,1.3,9.8,4,4], ['2026-07-27',4.6,1.6,11.6,3,3], ['2026-07-29',4.5,1.8,9.9,3,3], ['2026-07-30',4.8,0.9,11.7,3,3]]
             };
             // 午報(格式1/船位報)逐日：柱=當日航行油耗(FO+DO)，線=船速(AverageSpeed,修>20)/風級(BeaufortWindScale)/浪高(WaveHeight)/海況(DouglasSeaStateScale)。
             // 粒度＝單日一筆；跨月依日期歸月。匯順1號、金保順無午報→資料不足。sea=道格拉斯海況級數(供總覽信心核對抵港海況)。
@@ -1019,13 +1019,15 @@
                 if (!el) return;
                 const rng = readTimeRange('fleet-time-container');
                 const avg = function (a) { return a.length ? +(a.reduce(function (x, c) { return x + c; }, 0) / a.length).toFixed(1) : null; };
-                const fuel = [], spd = [], bf = [], sea = [];
+                const foArr = [], doArr = [], fuel = [], spd = [], bf = [], sea = [];
                 ships.forEach(function (sh) {
                     const legs = (FLEET_LEGS[sh] || []).filter(function (l) { return l[0] >= rng.from && l[0] <= rng.to; });
-                    fuel.push(avg(legs.map(function (l) { return l[1]; })));
-                    spd.push(avg(legs.filter(function (l) { return l[2] != null; }).map(function (l) { return l[2]; })));
-                    bf.push(avg(legs.filter(function (l) { return l[3] != null; }).map(function (l) { return l[3]; })));
-                    sea.push(avg(legs.filter(function (l) { return l[4] != null; }).map(function (l) { return l[4]; })));
+                    var fv = avg(legs.map(function (l) { return l[1]; })), dv = avg(legs.map(function (l) { return l[2]; }));
+                    foArr.push(fv); doArr.push(dv);
+                    fuel.push(legs.length ? +((fv || 0) + (dv || 0)).toFixed(1) : null);   // 合計(供資料不足判斷/午報核對)
+                    spd.push(avg(legs.filter(function (l) { return l[3] != null; }).map(function (l) { return l[3]; })));
+                    bf.push(avg(legs.filter(function (l) { return l[4] != null; }).map(function (l) { return l[4]; })));
+                    sea.push(avg(legs.filter(function (l) { return l[5] != null; }).map(function (l) { return l[5]; })));
                 });
                 // C. 快照可信度核對：有午報的船，用「午報航程實測風級平均」核對抵港快照，◆越貼近快照虛線＝快照越可代表全程
                 const confOf = function (d) { return d == null ? '—' : (d <= 0.5 ? '高' : (d <= 1.0 ? '中' : '低')); };
@@ -1045,6 +1047,7 @@
                 });
                 Highcharts.chart('chart-fleet-fuel', {
                     chart: { backgroundColor: 'transparent' }, title: { text: null },
+                    plotOptions: { column: { stacking: 'normal', borderWidth: 0 } },
                     xAxis: { categories: ships, lineColor: '#4b5563', labels: { useHTML: true, style: { color: '#9ca3af' }, formatter: function () { var i = ships.indexOf(this.value); return this.value + (fuel[i] == null ? '<br><span style="color:#f59e0b;font-size:.62rem;">⚠ 此區間資料不足</span>' : ''); } } },
                     yAxis: [
                         { title: { text: '平均航行日耗 (MT/日)', style: { color: '#60a5fa' } }, labels: { style: { color: '#60a5fa' } }, min: 0, gridLineColor: '#374151' },
@@ -1053,7 +1056,8 @@
                     tooltip: { shared: true },
                     legend: { itemStyle: { color: '#cbd5e1', fontSize: '.8rem' } },
                     series: [
-                        { name: '平均航行日耗 (MT)', type: 'column', yAxis: 0, data: fuel, color: '#3b82f6', borderWidth: 0, tooltip: { valueSuffix: ' MT' } },
+                        { name: '航行日耗·重油FO (MT)', type: 'column', yAxis: 0, data: foArr, stack: 'fuel', color: '#1d4ed8', borderWidth: 0, tooltip: { valueSuffix: ' MT' } },
+                        { name: '航行日耗·輕油DO (MT)', type: 'column', yAxis: 0, data: doArr, stack: 'fuel', color: '#93c5fd', borderWidth: 0, tooltip: { valueSuffix: ' MT' } },
                         { name: '平均航速 (kt)', type: 'spline', yAxis: 1, data: spd, color: '#22d3ee', lineWidth: 3, marker: { radius: 4 }, tooltip: { valueSuffix: ' kt' }, connectNulls: true },
                         { name: '抵港風級 (BF·快照)', type: 'spline', yAxis: 1, data: bf, color: '#f59e0b', lineWidth: 2, dashStyle: 'ShortDash', marker: { radius: 3 }, tooltip: { valueSuffix: ' 級' }, connectNulls: true },
                         { name: '抵港海況 (道格拉斯·快照)', type: 'spline', yAxis: 1, data: sea, color: '#f472b6', lineWidth: 2, dashStyle: 'Dot', marker: { radius: 3 }, tooltip: { valueSuffix: ' 級' }, connectNulls: true },
