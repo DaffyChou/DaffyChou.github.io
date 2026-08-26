@@ -4403,7 +4403,7 @@ table.alert-table th input#ev-selall { accent-color: var(--k-4a9eff); cursor: po
 /* ─── 深/淺色（日夜）主題切換 ─────────────────────────────────
  *   狀態存 localStorage(slab_va_theme)，預設 dark。
  *   淺色值由 CSS html[data-theme="light"] 覆寫 --k-* / --wo-* tokens；
- *   地圖底圖同步 dark(CARTO) ↔ light(OSM)（海圖模式開啟時交由 setSeamapLayer 管）。
+ *   地圖底圖同步 dark(Esri Dark Gray) ↔ light(OSM)（海圖模式開啟時交由 setSeamapLayer 管）。
  *   此段刻意內聯於側邊欄之後、主 script 之前執行，先決定 data-theme，避免載入閃爍。 */
 (function () {
   var KEY = "slab_va_theme";
@@ -7950,17 +7950,20 @@ function persistRiskLayerState() {
  * 的 z=400 stacking context 內，效能上贏不過外層 z=600 toolbar）。
  * 只對「absolute 定位」的 overlay 套用 — 手機 RWD 把 overlay 改靜態 strip 時不會誤觸發。 */
 /* 底圖管理（dark / light）+ OpenSeaMap 海圖標示
- *   - 預設：CARTO Dark 暗色底圖
+ *   - 預設：Esri Canvas Dark Gray 暗色底圖（免 API key）
  *   - 海圖風格 ON：切換到亮色 OSM 標準底圖（海圖標示 PNG 在白底上才清楚可讀）
  *                  並疊上 OpenSeaMap 透明標示層
- * 取代原本的 attachSeamapLayer + 各 draw 函式內 inline 加入的 CARTO Dark tile */
+ * 取代原本的 attachSeamapLayer + 各 draw 函式內 inline 加入的暗色 tile */
 let _seamapLayerOn = sessionStorage.getItem("slab_va_seamap_layer") === "1";
 const _mapTiles = new WeakMap();  // map → { dark, light, seamap }
 function setupBaseTiles(map) {
   if (!map) return;
-  const dark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    subdomains: "abcd", maxZoom: 19,
+  // 暗色底圖：Esri Canvas Dark Gray（免 API key）。
+  // 原本用的 CARTO basemaps 已改為需 API key，匿名取用會回傳帶「API KEY REQUIRED」浮水印的圖磚。
+  // Esri 此圖層原生只到 z16，maxNativeZoom 讓 Leaflet 在更高 zoom 放大 z16 圖磚而非留白。
+  const dark = L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+    attribution: '&copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, &copy; OpenStreetMap contributors',
+    maxNativeZoom: 16, maxZoom: 19,
   });
   const light = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap contributors',

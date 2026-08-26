@@ -2284,9 +2284,12 @@ function setupMap() {
   });
   const seaChart = L.layerGroup([seaChartBase, seaChartMarks]);
 
-  const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap © CARTO',
-    subdomains: 'abcd',
+  // 暗色底圖：Esri Canvas Dark Gray（免 API key）。
+  // 原本用的 CARTO basemaps 已改為需 API key，匿名取用會回傳帶「API KEY REQUIRED」浮水印的圖磚。
+  // 此圖層原生只到 z16，maxNativeZoom 讓 Leaflet 在更高 zoom 放大 z16 圖磚而非留白。
+  const darkMap = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri, HERE, Garmin, © OpenStreetMap contributors',
+    maxNativeZoom: 16,
     maxZoom: 19,
   });
 
