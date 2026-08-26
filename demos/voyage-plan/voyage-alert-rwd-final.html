@@ -563,6 +563,21 @@ select.ev-select {
 .toolbar select:focus,
 .toolbar input:focus,
 select.ev-select:focus { border-color: var(--k-4a9eff); }
+
+/* 原生下拉展開後的 popup 配色（含 optgroup 群組標題）
+ *   Chrome / Edge on Windows 不會讓 optgroup 的 label 繼承 select 的深色配色 —
+ *   只設 option 的話，群組標題會停在瀏覽器預設的「淺底灰字」，在深色 popup 上幾乎看不見。
+ *   故 option 與 optgroup 都要明確指定；一律走 --k-* token，深/淺色主題自動跟著切換。 */
+select option { background: var(--k-0d0d0d); color: var(--k-d8dee9); }
+select optgroup {
+  background: var(--k-0d0d0d);
+  color: var(--k-e4eaf2);
+  font-style: normal;   /* 預設 italic，中文顯示不佳 */
+  font-weight: 700;     /* 加粗以與底下的選項拉開層級 */
+}
+/* optgroup 的字重/字色會被底下的 option 繼承，這裡還原成選項本身的樣式 */
+select optgroup option { font-weight: 400; color: var(--k-d8dee9); }
+
 .map-overlay-toolbar .summary-pills { margin-left: 6px; }
 .map-overlay-toolbar .summary-pill { padding: 3px 9px; font-size: 16px; }
 
