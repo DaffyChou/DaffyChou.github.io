@@ -142,11 +142,12 @@
         #masterDataTable th.grp-l, #masterDataTable td.grp-l { border-left: 2px solid #60a5fa !important; }
         #masterDataTable th.grp-r, #masterDataTable td.grp-r { border-right: 2px solid #60a5fa !important; }
 
-        /* FixedColumns 固定欄：深色主題背景與分隔線 */
-        .dtfc-fixed-start { background-color: var(--bg-card) !important; z-index: 2; }
-        table.dataTable thead .dtfc-fixed-start { background-color: var(--border-color) !important; }
-        .dtfc-fixed-start:last-of-type, th.dtfc-fixed-start:last-of-type, td.dtfc-fixed-start:last-of-type { border-right: 2px solid #4b5563 !important; }
-        div.dtfc-right-top-blocker, div.dtfc-left-top-blocker { background-color: var(--bg-card); }
+        /* 前三欄凍結（船名／航次號／船報類型）：自訂 position:sticky。
+           position 與 left 由 JS freezeFirstCols 依實際欄寬即時計算，
+           此處只負責背景、層級與右側分隔線（深色主題）。 */
+        #masterDataTable_wrapper td.k-freeze { background-color: var(--bg-card); z-index: 3; }
+        #masterDataTable_wrapper th.k-freeze { background-color: var(--border-color); z-index: 4; }
+        #masterDataTable_wrapper .k-freeze-last { border-right: 2px solid #4b5563 !important; }
 
         /* ColVis 欄位可見性下拉：深色主題 */
         div.dt-button-collection { background-color: var(--bg-card); border: 1px solid var(--border-color); max-height: 420px; overflow-y: auto; }
@@ -529,6 +530,52 @@
                 </div>
             </div>
 
+            <div class="col-12">
+                <div class="card card-custom shadow h-100">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <h2 class="h6 fw-bold text-light border-start border-4 border-primary ps-2 mb-3">油耗 × 航速 × 海象（逐日）</h2>
+                        <div class="desc-box">
+                            <div class="mb-2"><span class="badge-source">資料來源</span>對齊「油耗 × 航速 × 海象」，逐日／逐時檢視特定海況下的油耗與航速。目標架構：<b class="text-info">海象</b>＝第三方氣象 API（每 30 分鐘輪詢記錄）、<b class="text-info">船速</b>＝AIS、<b class="text-info">油耗</b>＝船報。</div>
+                            <div class="mb-2"><span class="badge-risk">取數規則</span><b class="text-light">海象（風級／浪級／浪高）＝第三方氣象 API（每 30 分鐘輪詢）、船速＝AIS，所有船一致</b>；差別只在<b class="text-light">油耗</b>來源——<b class="text-light">有午報的船</b>用<code class="text-info">午報</code>（逐日），<b class="text-light">無午報的船</b>用<code class="text-info">抵港報</code>（航段值）。<span class="text-muted">（demo 逐時 API／AIS 尚未接入，海象與航速暫以午報值示意，無午報船海象暫從缺）</span></div>
+                            <div><span class="badge-warn">呈現</span>堆疊柱＝航行油耗（重油 FO＋輕油 DO）、線＝航速、下方為海象（風級／浪級／浪高）；篩選＝日期區間＋風級／浪級／浪高（三者 AND）。<b class="text-info">「呈現粒度」可切日／小時</b>——小時＝油耗日耗÷24、海象與航速沿用當日值（待逐時資料接入後為真逐時）。</div>
+                        </div>
+
+                        <div class="row g-2 mb-3 align-items-end">
+                            <div class="col-6 col-md-2">
+                                <span class="ds-label">呈現粒度</span>
+                                <select class="form-select ds-select wx-gran"><option value="day">日</option><option value="hour">小時</option></select>
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <span class="ds-label">船報日期 (起)</span>
+                                <input type="date" class="form-control ds-select date-start" value="2026-07-01" min="2026-06-21" max="2026-07-31">
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <span class="ds-label">船報日期 (訖)</span>
+                                <input type="date" class="form-control ds-select date-end" value="2026-07-31" min="2026-06-21" max="2026-07-31">
+                            </div>
+                            <div class="col-4 col-md-2">
+                                <span class="ds-label">風級 (蒲福)</span>
+                                <select class="form-select ds-select wx-wind"><option value="">全部</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select>
+                            </div>
+                            <div class="col-4 col-md-2">
+                                <span class="ds-label">浪級 (道格拉斯)</span>
+                                <select class="form-select ds-select wx-wave"><option value="">全部</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select>
+                            </div>
+                            <div class="col-4 col-md-2">
+                                <span class="ds-label">浪高 (m)</span>
+                                <select class="form-select ds-select wx-wh"><option value="">全部</option><option value="lt1">&lt; 1m</option><option value="1-2">1–2m</option><option value="2-3">2–3m</option><option value="ge3">≥ 3m</option></select>
+                            </div>
+                            <div class="col-12 col-md-2 d-flex">
+                                <button onclick="applyFilter('chart-wx', this)" class="btn btn-primary ds-btn ds-apply">套用</button>
+                            </div>
+                        </div>
+
+                        <div class="wx-summary text-muted mb-2" style="font-size:.8rem;">&nbsp;</div>
+                        <div id="chart-wx" style="height: 480px;"></div>
+                    </div>
+                </div>
+            </div>
+
         <div class="col-12" id="sec-portops" data-sec>
             <h2 class="group-title mb-0"><span class="gt-bar"></span>港埠作業與航次周轉效能 <span class="gt-sub">Port &amp; Voyage Operations</span></h2>
         </div>
@@ -594,7 +641,7 @@
                                     <li>少工班高產出 → <span class="text-success">本區間標竿日</span></li>
                                 </ul>
                             </div>
-                            <div><span class="badge-source">資料不足</span><b class="text-warning">源順輪每日報無裝卸事件 → 顯示「資料不足」</b>。本期全船隊 15 個作業日中，卸貨 13 日（全在台北）、裝貨 2 日（和歌山、晉江各 1）。另 <code class="text-warning">CraneMethod</code> 亦為 44 筆全填 2 且無代碼對照表；若一併回報可再拆「岸吊 vs 船吊」，兩者每班產能基準不同，混算同樣會失真。</div>
+                            <div><span class="badge-source">資料不足</span><b class="text-warning">源順輪每日報無裝卸事件 → 顯示「資料不足」</b>。本期全船隊 15 個作業日中，卸貨 13 日（全在台北）、裝貨 2 日（和歌山、羅源各 1）。另 <code class="text-warning">CraneMethod</code> 亦為 44 筆全填 2 且無代碼對照表；若一併回報可再拆「岸吊 vs 船吊」，兩者每班產能基準不同，混算同樣會失真。</div>
                         </div>
 
                         <div class="row g-2 mb-3 align-items-end">
@@ -1052,7 +1099,7 @@
 
             setTimeout(() => {
                 // 以下圖表皆為真實資料（ship-aware，含資料不足提醒）；套用鈕改呼叫對應 render 函式重繪，不做合成擾動
-                const SD_RENDER = { 'chart-time-util': renderVoyUtil, 'chart-fw-balance': renderFW, 'chart-fuel-warning': renderFuelWarn, 'chart-slip-weather': renderSlip, 'chart-cyl-rpm': renderCyl, 'chart-port-ops': renderPortOps, 'chart-eeoi': renderEEOI };
+                const SD_RENDER = { 'chart-time-util': renderVoyUtil, 'chart-fw-balance': renderFW, 'chart-fuel-warning': renderFuelWarn, 'chart-slip-weather': renderSlip, 'chart-cyl-rpm': renderCyl, 'chart-wx': renderWx, 'chart-port-ops': renderPortOps, 'chart-eeoi': renderEEOI };
                 if (SD_RENDER[chartId]) {
                     SD_RENDER[chartId]();
                     btnElement.innerText = originalText;
@@ -1228,6 +1275,31 @@
             });
         }
 
+        // 直排 Y 軸標題以「自繪 overlay div」呈現，完全不依賴 Highcharts 內部標題定位
+        // （其 useHTML 標題於不同版本會被放到畫面外，難以跨版本穩定；改由我方完全掌控）。
+        // 文字方向用 writing-mode:vertical-rl + text-orientation:mixed：中文順向直立、英文/數字自動旋轉。
+        // 用法：該軸設 title.text=null 並加自訂 vTitle:{ text, color, fontSize }，
+        //       chart 設 spacingLeft/Right 預留槽，並於 chart.events.render 呼叫 vAxisTitlePos(this)。
+        function vAxisTitlePos(chart) {
+            var cont = chart.container; if (!cont) return;
+            if (!chart._vt) chart._vt = {};
+            (chart.yAxis || []).forEach(function (axis, i) {
+                var spec = axis.options && axis.options.vTitle; if (!spec) return;
+                var el = chart._vt[i];
+                if (!el || !el.parentNode) {
+                    el = document.createElement('div');
+                    el.style.cssText = 'position:absolute;z-index:5;pointer-events:none;white-space:nowrap;text-align:center;writing-mode:vertical-rl;text-orientation:mixed;';
+                    el.textContent = spec.text;
+                    cont.appendChild(el);
+                    chart._vt[i] = el;
+                }
+                el.style.color = spec.color || '#cbd5e1';
+                el.style.fontSize = (spec.fontSize || 12) + 'px';
+                el.style.top = Math.round(chart.plotTop + chart.plotHeight / 2 - el.offsetHeight / 2) + 'px';
+                el.style.left = axis.opposite ? Math.round(chart.chartWidth - el.offsetWidth - 4) + 'px' : '4px';
+            });
+        }
+
             // 逐航次時間利用率(真實聚合)：每航次四段時數[航行,作業,等泊,未歸類]，未歸類=該航次營運span−三段；圖表 stacking:'percent' 正規化。
             // 只納入有實際三段資料的航次(排除純殘差如僅完工報的截斷航次)。單位:小時。
             const SHIP_VOYUTIL = {
@@ -1285,13 +1357,55 @@
         const SD_ORDER = ['Yuan Shun','Jing Shun','Feng Shun','Hui Shun No.1','Gimpo Shun'];
         const SD_MIN = '2026-06-21', SD_MAX = '2026-07-31';   // 真實資料期間，亦為日期輸入之 min/max
         const SD_DAILY = {"Yuan Shun": [{"d": "06-29", "t": "NR", "fw": 5.0, "me": 150.0, "rpm": 105.0, "bf": 3, "sea": 2, "slip": -1.42, "stop": 0}, {"d": "07-04", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-31", "t": "DR", "fw": null, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}], "Jing Shun": [{"d": "06-22", "t": "DR", "fw": 1.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-23", "t": "DR", "fw": 6.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-24", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-25", "t": "DR", "fw": 6.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-26", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-27", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-28", "t": "DR", "fw": 6.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-29", "t": "DR", "fw": 0.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-30", "t": "DR", "fw": 6.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-08", "t": "NR", "fw": 6.0, "me": 173.0, "rpm": 106.0, "bf": 2, "sea": 3, "slip": -1.6, "stop": 0}, {"d": "07-09", "t": "NR", "fw": 6.0, "me": 210.0, "rpm": 106.0, "bf": 1, "sea": 5, "slip": -2.3, "stop": 0}, {"d": "07-10", "t": "NR", "fw": 6.0, "me": 202.0, "rpm": 106.0, "bf": 3, "sea": 5, "slip": 1.6, "stop": 0}, {"d": "07-12", "t": "DR", "fw": null, "me": null, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-13", "t": "DR", "fw": 8.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-14", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-15", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-17", "t": "NR", "fw": 7.0, "me": 255.0, "rpm": 106.0, "bf": 2, "sea": 3, "slip": 19.5, "stop": 0}, {"d": "07-18", "t": "NR", "fw": 7.0, "me": 220.0, "rpm": 106.0, "bf": 4, "sea": 4, "slip": 21.0, "stop": 0}, {"d": "07-19", "t": "NR", "fw": 7.0, "me": 210.0, "rpm": 106.0, "bf": 3, "sea": 4, "slip": 18.0, "stop": 0}], "Feng Shun": [{"d": "06-23", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-27", "t": "NR", "fw": null, "me": null, "rpm": 102.0, "bf": 0, "sea": 0, "slip": 7.63, "stop": 0}, {"d": "07-13", "t": "NR", "fw": null, "me": null, "rpm": 102.0, "bf": 5, "sea": 4, "slip": 24.85, "stop": 0}, {"d": "07-14", "t": "NR", "fw": 9.0, "me": 215.0, "rpm": null, "bf": 4, "sea": 4, "slip": 24.45, "stop": 1}, {"d": "07-16", "t": "DR", "fw": 7.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-17", "t": "DR", "fw": null, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-18", "t": "NR", "fw": 3.0, "me": 30.0, "rpm": 102.0, "bf": 6, "sea": 4, "slip": 7.8, "stop": 0}, {"d": "07-19", "t": "NR", "fw": 6.0, "me": 220.0, "rpm": 102.0, "bf": 3, "sea": 3, "slip": 0.0, "stop": 0}, {"d": "07-20", "t": "NR", "fw": 9.0, "me": 210.0, "rpm": null, "bf": 2, "sea": 3, "slip": -13.64, "stop": 1}, {"d": "07-22", "t": "DR", "fw": 7.0, "me": 5.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-23", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-24", "t": "DR", "fw": 7.0, "me": 10.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-25", "t": "NR", "fw": 3.0, "me": 190.0, "rpm": null, "bf": 3, "sea": 3, "slip": 18.35, "stop": 1}, {"d": "07-26", "t": "NR", "fw": 5.0, "me": 210.0, "rpm": 102.0, "bf": 2, "sea": 3, "slip": 18.11, "stop": 0}, {"d": "07-27", "t": "NR", "fw": 5.0, "me": 220.0, "rpm": 102.0, "bf": 3, "sea": 3, "slip": 14.54, "stop": 0}], "Hui Shun No.1": [{"d": "06-23", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-24", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-25", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-26", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "06-29", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-01", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-04", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-08", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-09", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-11", "t": "DR", "fw": 5.0, "me": 10.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-12", "t": "DR", "fw": 5.0, "me": 30.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-15", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-18", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-27", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-28", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-30", "t": "DR", "fw": 5.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}], "Gimpo Shun": [{"d": "07-01", "t": "DR", "fw": 4.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-02", "t": "DR", "fw": 4.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-04", "t": "DR", "fw": 0.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-11", "t": "DR", "fw": 4.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-12", "t": "DR", "fw": 10.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-13", "t": "DR", "fw": 12.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}, {"d": "07-14", "t": "DR", "fw": 3.0, "me": 0.0, "rpm": null, "bf": null, "sea": null, "slip": null, "stop": 0}]};
+        // ===== 油耗 × 航速 × 海象（逐日，真實午報）=====
+        // 目標架構：海象＝第三方每小時、船速＝AIS 逐時、油耗＝船報均攤每小時；本圖以「日」呈現。
+        // demo 逐時管線未接，逐日擷取自 12_午報：AverageSpeed(航速kt)、FO/DO 日耗(MT，分重/輕油)、
+        //   BeaufortWindScale(風級)、DouglasSeaStateScale(浪級)、WaveHeight(浪高m)，皆船員填報原值。
+        // 清洗（置 null）：航速 >25kt（景順07-09=122、豐順07-19=138/07-25=98 係距離誤填）；
+        //   FO >60MT／DO >10MT（豐順06-27 之 490/27 係存量誤填）。匯順1號/金保順 0 筆、源順 1 筆 → 資料不足。
+        // 註：本期各船航行以重油(FO)為主、輕油(DO) 多為 0，故 DO 分項多近於零，屬真實狀況。
+        const SD_WX = {
+            "Yuan Shun": [{ "d": "06-29", "spd": 12.9, "fo": 11.5, "do": 0.1, "bf": 3, "sea": 2, "wh": 0.76 }],
+            "Jing Shun": [
+                { "d": "07-08", "spd": 12.6, "fo": 12.2, "do": 0.0, "bf": 2, "sea": 3, "wh": 1.10 },
+                { "d": "07-09", "spd": null, "fo": 14.5, "do": 0.0, "bf": 1, "sea": 5, "wh": 2.51 },
+                { "d": "07-10", "spd": 12.6, "fo": 14.0, "do": 0.0, "bf": 3, "sea": 5, "wh": 3.26 },
+                { "d": "07-17", "spd": 10.3, "fo": 17.2, "do": 0.0, "bf": 2, "sea": 3, "wh": 0.84 },
+                { "d": "07-18", "spd": 10.0, "fo": 15.1, "do": 0.0, "bf": 4, "sea": 4, "wh": 1.42 },
+                { "d": "07-19", "spd": 10.5, "fo": 14.5, "do": 0.0, "bf": 3, "sea": 4, "wh": 1.30 }
+            ],
+            "Feng Shun": [
+                { "d": "06-27", "spd": 11.4, "fo": null, "do": null, "bf": 0, "sea": 0, "wh": null },
+                { "d": "07-13", "spd": 9.3, "fo": null, "do": null, "bf": 5, "sea": 4, "wh": 1.94 },
+                { "d": "07-14", "spd": 9.7, "fo": 13.7, "do": 0.1, "bf": 4, "sea": 4, "wh": 2.00 },
+                { "d": "07-18", "spd": 12.2, "fo": 1.8, "do": 0.0, "bf": 6, "sea": 4, "wh": 1.79 },
+                { "d": "07-19", "spd": null, "fo": 13.7, "do": 0.0, "bf": 3, "sea": 3, "wh": 1.20 },
+                { "d": "07-20", "spd": 12.9, "fo": 13.2, "do": 0.0, "bf": 2, "sea": 3, "wh": 0.74 },
+                { "d": "07-25", "spd": null, "fo": 11.9, "do": 0.0, "bf": 3, "sea": 3, "wh": 0.79 },
+                { "d": "07-26", "spd": 10.1, "fo": 13.7, "do": 0.0, "bf": 2, "sea": 3, "wh": 0.78 },
+                { "d": "07-27", "spd": 11.2, "fo": 14.2, "do": 0.1, "bf": 3, "sea": 3, "wh": 1.07 }
+            ],
+            "Hui Shun No.1": [],
+            "Gimpo Shun": []
+        };
+        // ===== 油耗×航速×海象 的「無午報」fallback：改用抵港報航段值 =====
+        // 逐航段擷取自 14_抵港報：AverageSpeed(航段均速kt)、DailyConsumption_FO/DO_Sailing(航行日均油耗MT)。
+        // 海象欄位刻意留空（本表無逐時海象；日後接第三方每小時氣象API＋AIS 船速後即補上、並可依風浪篩選）。
+        // 用途：匯順1號、金保順「未發午報」→ 原顯示資料不足，改以抵港報呈現油耗與航速。清洗同 SD_WX(spd>25/FO>60/DO>10 置空)。
+        const SD_WX_ARV = {
+            "Yuan Shun": [{ "d": "06-29", "spd": 12.7, "fo": 15.6, "do": 0.1 }, { "d": "06-30", "spd": 12.7, "fo": 15.6, "do": 0.1 }],
+            "Jing Shun": [{ "d": "06-22", "spd": 11.6, "fo": 19.2, "do": 1.8 }, { "d": "06-30", "spd": 12.3, "fo": 18.8, "do": 0.0 }, { "d": "07-01", "spd": 12.3, "fo": 29.1, "do": 0.3 }, { "d": "07-02", "spd": 11.8, "fo": 21.4, "do": 1.9 }, { "d": "07-04", "spd": 11.5, "fo": 31.8, "do": 0.2 }, { "d": "07-05", "spd": 11.5, "fo": null, "do": 1.8 }, { "d": "07-11", "spd": 12.9, "fo": 15.5, "do": 0.0 }, { "d": "07-11", "spd": 12.9, "fo": 16.0, "do": 0.0 }, { "d": "07-20", "spd": 10.4, "fo": 15.4, "do": 0.0 }, { "d": "07-26", "spd": 12.4, "fo": 24.1, "do": 0.1 }, { "d": "07-27", "spd": 11.7, "fo": 20.5, "do": 1.7 }, { "d": "07-29", "spd": 12.2, "fo": 29.9, "do": 0.3 }, { "d": "07-30", "spd": 11.6, "fo": 20.4, "do": 2.2 }],
+            "Feng Shun": [{ "d": "06-21", "spd": 11.2, "fo": 14.2, "do": 0.0 }, { "d": "06-21", "spd": 10.9, "fo": 14.0, "do": 0.0 }, { "d": "07-21", "spd": 13.2, "fo": 13.5, "do": 0.0 }, { "d": "07-28", "spd": 10.4, "fo": 13.8, "do": 0.0 }, { "d": "07-29", "spd": 10.0, "fo": 14.4, "do": 0.0 }, { "d": "07-31", "spd": 10.1, "fo": 13.1, "do": 0.0 }],
+            "Hui Shun No.1": [{ "d": "06-27", "spd": 11.4, "fo": 12.9, "do": 0.1 }, { "d": "06-28", "spd": 10.8, "fo": 13.0, "do": 0.3 }, { "d": "07-02", "spd": 11.6, "fo": 11.2, "do": 0.4 }, { "d": "07-03", "spd": 10.7, "fo": 14.0, "do": 0.3 }, { "d": "07-05", "spd": 11.9, "fo": 14.5, "do": 0.3 }, { "d": "07-07", "spd": 10.8, "fo": 14.2, "do": 0.0 }, { "d": "07-13", "spd": 5.5, "fo": 7.7, "do": 0.1 }, { "d": "07-14", "spd": 10.8, "fo": 13.7, "do": 0.0 }, { "d": "07-16", "spd": 10.6, "fo": 14.6, "do": 0.3 }, { "d": "07-17", "spd": 10.4, "fo": 12.1, "do": 0.0 }, { "d": "07-19", "spd": 11.0, "fo": 14.4, "do": 0.3 }, { "d": "07-21", "spd": 10.6, "fo": 14.0, "do": 0.3 }, { "d": "07-22", "spd": 12.0, "fo": 14.4, "do": 0.4 }, { "d": "07-24", "spd": 10.5, "fo": 13.8, "do": 0.3 }, { "d": "07-25", "spd": 12.8, "fo": 14.7, "do": 0.4 }, { "d": "07-26", "spd": 11.2, "fo": 14.4, "do": 0.3 }, { "d": "07-29", "spd": 12.2, "fo": 13.7, "do": 0.0 }],
+            "Gimpo Shun": [{ "d": "06-23", "spd": 11.3, "fo": 5.9, "do": 1.8 }, { "d": "06-23", "spd": 10.1, "fo": 6.2, "do": 1.6 }, { "d": "06-23", "spd": 10.8, "fo": 5.1, "do": 1.4 }, { "d": "06-24", "spd": 10.4, "fo": 5.2, "do": 1.8 }, { "d": "06-25", "spd": 12.4, "fo": 5.4, "do": 1.6 }, { "d": "06-26", "spd": 9.6, "fo": 5.7, "do": 1.2 }, { "d": "06-28", "spd": 11.8, "fo": 6.6, "do": 2.0 }, { "d": "06-29", "spd": 10.4, "fo": 6.0, "do": 0.9 }, { "d": "07-05", "spd": 11.4, "fo": 4.6, "do": 1.6 }, { "d": "07-06", "spd": 10.0, "fo": 5.0, "do": 1.5 }, { "d": "07-07", "spd": 11.8, "fo": 5.0, "do": 1.8 }, { "d": "07-08", "spd": 10.8, "fo": 5.7, "do": 2.0 }, { "d": "07-12", "spd": 13.4, "fo": 4.1, "do": 1.5 }, { "d": "07-15", "spd": 9.9, "fo": 4.7, "do": 1.3 }, { "d": "07-17", "spd": 9.4, "fo": 4.0, "do": 1.7 }, { "d": "07-19", "spd": 9.6, "fo": 5.3, "do": 0.9 }, { "d": "07-20", "spd": 10.8, "fo": 4.2, "do": 1.3 }, { "d": "07-21", "spd": 11.1, "fo": 4.8, "do": 1.3 }, { "d": "07-22", "spd": 11.8, "fo": 4.9, "do": 1.2 }, { "d": "07-24", "spd": 10.6, "fo": 4.8, "do": 1.1 }, { "d": "07-25", "spd": 9.8, "fo": 5.7, "do": 1.3 }, { "d": "07-27", "spd": 11.6, "fo": 4.6, "do": 1.6 }, { "d": "07-29", "spd": 9.9, "fo": 4.5, "do": 1.8 }, { "d": "07-30", "spd": 11.7, "fo": 4.8, "do": 0.9 }]
+        };
         // ===== 逐航段 EEOI（真實）：IMO MEPC.1/Circ.684，EEOI 本即為逐航次指標，不需年度資料 =====
         // 每段＝一份抵港報：航距 SeaPassage_TotalDistance、油耗 TotalConsumption_FO/DO（抵港報自帶之本航段值），
         // 承運貨量取該航段之前最近一次港次作業的 TotalCargo。碳係數 CF：FO 3.114、DO 3.206 tCO2/t。
         //   e = (FO×3.114 + DO×3.206) ×1e6 ÷ (貨量 × 航距)   單位 gCO2/(噸·海浬)
         // 已排除：缺航距/缺油耗、重複抵港報、油耗為存量誤填（景順輪 07-06 填 1006 MT／84 浬）。
-        const SD_EEOI = {"Hui Shun No.1": [{"d": "06-27", "iso": "2026-06-27", "frm": "台北", "to": "台北", "nm": 73.8, "fo": 3.47, "do": 0.03, "cg": 25480, "e": 5.8}, {"d": "06-28", "iso": "2026-06-28", "frm": "福州", "to": "台北", "nm": 86.2, "fo": 4.33, "do": 0.1, "cg": 20980, "e": 7.64}, {"d": "07-02", "iso": "2026-07-02", "frm": "台北", "to": "福州", "nm": 76.1, "fo": 3.05, "do": 0.1, "cg": 20980, "e": 6.15}, {"d": "07-03", "iso": "2026-07-03", "frm": "福州", "to": "台北", "nm": 84.3, "fo": 4.57, "do": 0.1, "cg": 21690, "e": 7.96}, {"d": "07-05", "iso": "2026-07-05", "frm": "台北", "to": "福州", "nm": 85.8, "fo": 4.34, "do": 0.1, "cg": 21690, "e": 7.44}, {"d": "07-07", "iso": "2026-07-07", "frm": "福州", "to": "台北", "nm": 84.2, "fo": 4.62, "do": 0, "cg": 21310, "e": 8.01}, {"d": "07-13", "iso": "2026-07-13", "frm": "台北", "to": "福州", "nm": 465.4, "fo": 27.1, "do": 0.4, "cg": 21310, "e": 8.64}, {"d": "07-14", "iso": "2026-07-14", "frm": "福州", "to": "台北", "nm": 83.1, "fo": 4.4, "do": 0, "cg": 22650, "e": 7.28}, {"d": "07-16", "iso": "2026-07-16", "frm": "台北", "to": "福州", "nm": 74.5, "fo": 4.25, "do": 0.1, "cg": 22650, "e": 8.03}, {"d": "07-18", "iso": "2026-07-18", "frm": "福州", "to": "台北", "nm": 96.8, "fo": 4.72, "do": 0, "cg": 22920, "e": 6.62}, {"d": "07-19", "iso": "2026-07-19", "frm": "台北", "to": "福州", "nm": 77.0, "fo": 4.19, "do": 0.1, "cg": 22920, "e": 7.58}, {"d": "07-21", "iso": "2026-07-21", "frm": "福州", "to": "台北", "nm": 86.4, "fo": 4.75, "do": 0.1, "cg": 21390, "e": 8.18}, {"d": "07-22", "iso": "2026-07-22", "frm": "台北", "to": "福州", "nm": 75.0, "fo": 3.74, "do": 0.1, "cg": 21390, "e": 7.45}, {"d": "07-24", "iso": "2026-07-24", "frm": "福州", "to": "台北", "nm": 86.4, "fo": 4.71, "do": 0.1, "cg": 19710, "e": 8.8}, {"d": "07-25", "iso": "2026-07-25", "frm": "台北", "to": "福州", "nm": 74.1, "fo": 3.54, "do": 0.1, "cg": 19710, "e": 7.77}, {"d": "07-26", "iso": "2026-07-26", "frm": "福州", "to": "台北", "nm": 86.4, "fo": 4.64, "do": 0.1, "cg": 19705, "e": 8.67}, {"d": "07-29", "iso": "2026-07-29", "frm": "台北", "to": "晉江", "nm": 80.8, "fo": 3.8, "do": 0, "cg": 19705, "e": 7.43}], "Jing Shun": [{"d": "06-22", "iso": "2026-06-22", "frm": "福州", "to": "台北", "nm": 89.8, "fo": 6.24, "do": 0.58, "cg": 21300, "e": 11.13}, {"d": "06-30", "iso": "2026-06-30", "frm": "台北", "to": "台北", "nm": 80.9, "fo": 5.14, "do": 0, "cg": 21300, "e": 9.29}, {"d": "07-01", "iso": "2026-07-01", "frm": "台北", "to": "台北", "nm": 80.9, "fo": 7.98, "do": 0.09, "cg": 21300, "e": 14.59}, {"d": "07-02", "iso": "2026-07-02", "frm": "福州", "to": "台北", "nm": 84.0, "fo": 6.32, "do": 0.55, "cg": 21850, "e": 11.69}, {"d": "07-04", "iso": "2026-07-04", "frm": "台北", "to": "福州", "nm": 74.9, "fo": 8.66, "do": 0.06, "cg": 21850, "e": 16.6}, {"d": "07-11", "iso": "2026-07-11", "frm": "台北", "to": "名古屋", "nm": 990.7, "fo": 49.5, "do": 0, "cg": 22050, "e": 7.06}, {"d": "07-11", "iso": "2026-07-11", "frm": "台北", "to": "名古屋", "nm": 990.7, "fo": 51.18, "do": 0.08, "cg": 22050, "e": 7.31}, {"d": "07-20", "iso": "2026-07-20", "frm": "名古屋", "to": "基隆", "nm": 931.8, "fo": 57.33, "do": 0, "cg": 25000, "e": 7.66}, {"d": "07-26", "iso": "2026-07-26", "frm": "台北", "to": "福州", "nm": 80.3, "fo": 6.51, "do": 0.03, "cg": 25000, "e": 10.14}, {"d": "07-27", "iso": "2026-07-27", "frm": "福州", "to": "台北", "nm": 84.3, "fo": 6.15, "do": 0.5, "cg": 20300, "e": 12.13}, {"d": "07-29", "iso": "2026-07-29", "frm": "台北", "to": "福州", "nm": 74.0, "fo": 7.57, "do": 0.08, "cg": 20300, "e": 15.86}, {"d": "07-30", "iso": "2026-07-30", "frm": "福州", "to": "台北", "nm": 84.4, "fo": 6.19, "do": 0.68, "cg": 22395, "e": 11.35}], "Yuan Shun": [{"d": "06-30", "iso": "2026-06-30", "frm": "台北", "to": "舟山", "nm": 285.5, "fo": 14.6, "do": 0.1, "cg": 25000, "e": 6.41}], "Feng Shun": [{"d": "07-21", "iso": "2026-07-21", "frm": "台北", "to": "和歌山", "nm": 892.4, "fo": 37.8, "do": 0, "cg": 25000, "e": 5.28}, {"d": "07-28", "iso": "2026-07-28", "frm": "和歌山", "to": "基隆", "nm": 878.8, "fo": 48.6, "do": 0.1, "cg": 25000, "e": 6.9}, {"d": "07-29", "iso": "2026-07-29", "frm": "和歌山", "to": "台北", "nm": 33.3, "fo": 2.0, "do": 0, "cg": 25000, "e": 7.47}, {"d": "07-31", "iso": "2026-07-31", "frm": "和歌山", "to": "台北", "nm": 36.9, "fo": 2.0, "do": 0, "cg": 25000, "e": 6.74}], "Gimpo Shun": [{"d": "06-23", "iso": "2026-06-23", "frm": "福州", "to": "花蓮", "nm": 115.7, "fo": 2.52, "do": 0.78, "cg": 8155, "e": 10.96}, {"d": "06-23", "iso": "2026-06-23", "frm": "福州", "to": "台北", "nm": 120.0, "fo": 3.08, "do": 0.8, "cg": 8155, "e": 12.41}, {"d": "06-23", "iso": "2026-06-23", "frm": "福州", "to": "福州", "nm": 90.0, "fo": 1.76, "do": 0.5, "cg": 8155, "e": 9.65}, {"d": "06-24", "iso": "2026-06-24", "frm": "福州", "to": "台北", "nm": 102.0, "fo": 2.13, "do": 0.73, "cg": 8155, "e": 10.79}, {"d": "06-25", "iso": "2026-06-25", "frm": "台北", "to": "花蓮", "nm": 123.0, "fo": 2.24, "do": 0.65, "cg": 8155, "e": 9.03}, {"d": "06-26", "iso": "2026-06-26", "frm": "花蓮", "to": "台北", "nm": 115.8, "fo": 2.86, "do": 0.6, "cg": 8322, "e": 11.24}, {"d": "06-28", "iso": "2026-06-28", "frm": "花蓮", "to": "福州", "nm": 90.0, "fo": 2.1, "do": 0.65, "cg": 8322, "e": 11.51}, {"d": "06-29", "iso": "2026-06-29", "frm": "福州", "to": "台北", "nm": 96.7, "fo": 2.34, "do": 0.35, "cg": 8165, "e": 10.65}, {"d": "07-05", "iso": "2026-07-05", "frm": "台北", "to": "花蓮", "nm": 116.0, "fo": 1.96, "do": 0.7, "cg": 8163, "e": 8.82}, {"d": "07-06", "iso": "2026-07-06", "frm": "花蓮", "to": "台北", "nm": 119.0, "fo": 2.5, "do": 0.75, "cg": 8293, "e": 10.33}, {"d": "07-07", "iso": "2026-07-07", "frm": "台北", "to": "台北", "nm": 112.1, "fo": 2.0, "do": 0.7, "cg": 8293, "e": 9.12}, {"d": "07-08", "iso": "2026-07-08", "frm": "台北", "to": "台北", "nm": 114.4, "fo": 2.5, "do": 0.9, "cg": 8250, "e": 11.31}, {"d": "07-12", "iso": "2026-07-12", "frm": "台北", "to": "福州", "nm": 410.0, "fo": 5.2, "do": 1.9, "cg": 8250, "e": 6.59}, {"d": "07-15", "iso": "2026-07-15", "frm": "福州", "to": "台北", "nm": 91.2, "fo": 1.8, "do": 0.5, "cg": 8180, "e": 9.66}, {"d": "07-17", "iso": "2026-07-17", "frm": "台北", "to": "福州", "nm": 78.5, "fo": 1.4, "do": 0.6, "cg": 8180, "e": 9.79}, {"d": "07-19", "iso": "2026-07-19", "frm": "福州", "to": "台北", "nm": 96.9, "fo": 2.25, "do": 0.4, "cg": 8210, "e": 10.42}, {"d": "07-20", "iso": "2026-07-20", "frm": "台北", "to": "花蓮", "nm": 122.1, "fo": 2.0, "do": 0.6, "cg": 8210, "e": 8.13}, {"d": "07-21", "iso": "2026-07-21", "frm": "花蓮", "to": "台北", "nm": 123.7, "fo": 2.2, "do": 0.6, "cg": 8270, "e": 8.58}, {"d": "07-22", "iso": "2026-07-22", "frm": "台北", "to": "花蓮", "nm": 120.8, "fo": 2.1, "do": 0.5, "cg": 8270, "e": 8.15}, {"d": "07-24", "iso": "2026-07-24", "frm": "台北", "to": "台北", "nm": 115.0, "fo": 2.2, "do": 0.5, "cg": 8181, "e": 8.99}, {"d": "07-24", "iso": "2026-07-24", "frm": "台北", "to": "福州", "nm": 82.7, "fo": 1.2, "do": 0.5, "cg": 8181, "e": 7.89}, {"d": "07-25", "iso": "2026-07-25", "frm": "福州", "to": "台北", "nm": 93.1, "fo": 2.25, "do": 0.5, "cg": 8000, "e": 11.56}, {"d": "07-27", "iso": "2026-07-27", "frm": "台北", "to": "福州", "nm": 78.9, "fo": 1.3, "do": 0.45, "cg": 8000, "e": 8.7}, {"d": "07-29", "iso": "2026-07-29", "frm": "福州", "to": "台北", "nm": 92.8, "fo": 1.75, "do": 0.7, "cg": 8205, "e": 10.1}, {"d": "07-30", "iso": "2026-07-30", "frm": "台北", "to": "花蓮", "nm": 120.7, "fo": 2.05, "do": 0.4, "cg": 8205, "e": 7.74}]};
-        const SD_PORT = {"Yuan Shun": [], "Jing Shun": [{"d": "06-30", "cargo": 20600.0, "L": null, "D": 20600.0, "p": "台北", "gang": 0}], "Feng Shun": [{"d": "06-23", "cargo": 17940.0, "L": null, "D": 17940.0, "p": "台北", "gang": 0}, {"d": "07-16", "cargo": 9000.0, "L": null, "D": 9000.0, "p": "台北", "gang": 0}, {"d": "07-22", "cargo": 6900.0, "L": 6900.0, "D": null, "p": "和歌山", "gang": 0}], "Hui Shun No.1": [{"d": "06-24", "cargo": 3000.0, "L": null, "D": 3000.0, "p": "台北", "gang": 0}, {"d": "06-25", "cargo": 12800.0, "L": null, "D": 12800.0, "p": "台北", "gang": 0}, {"d": "06-26", "cargo": 5200.0, "L": null, "D": 5200.0, "p": "台北", "gang": 0}, {"d": "07-01", "cargo": 16700.0, "L": null, "D": 16700.0, "p": "台北", "gang": 0}, {"d": "07-04", "cargo": 7190.0, "L": null, "D": 7190.0, "p": "台北", "gang": 0}, {"d": "07-09", "cargo": 18510.0, "L": null, "D": 18510.0, "p": "台北", "gang": 0}, {"d": "07-15", "cargo": 11500.0, "L": null, "D": 11500.0, "p": "台北", "gang": 0}, {"d": "07-18", "cargo": 7700.0, "L": null, "D": 7700.0, "p": "台北", "gang": 0}, {"d": "07-28", "cargo": 9705.0, "L": null, "D": 9705.0, "p": "台北", "gang": 0}, {"d": "07-30", "cargo": 24400.0, "L": 24400.0, "D": null, "p": "晉江", "gang": 0}], "Gimpo Shun": [{"d": "07-01", "cargo": 6000.0, "L": null, "D": 6000.0, "p": "台北", "gang": 0}]};
+        const SD_EEOI = {"Hui Shun No.1": [{"d": "06-27", "iso": "2026-06-27", "frm": "台北", "to": "台北", "nm": 73.8, "fo": 3.47, "do": 0.03, "cg": 25480, "e": 5.8}, {"d": "06-28", "iso": "2026-06-28", "frm": "福州", "to": "台北", "nm": 86.2, "fo": 4.33, "do": 0.1, "cg": 20980, "e": 7.64}, {"d": "07-02", "iso": "2026-07-02", "frm": "台北", "to": "福州", "nm": 76.1, "fo": 3.05, "do": 0.1, "cg": 20980, "e": 6.15}, {"d": "07-03", "iso": "2026-07-03", "frm": "福州", "to": "台北", "nm": 84.3, "fo": 4.57, "do": 0.1, "cg": 21690, "e": 7.96}, {"d": "07-05", "iso": "2026-07-05", "frm": "台北", "to": "福州", "nm": 85.8, "fo": 4.34, "do": 0.1, "cg": 21690, "e": 7.44}, {"d": "07-07", "iso": "2026-07-07", "frm": "福州", "to": "台北", "nm": 84.2, "fo": 4.62, "do": 0, "cg": 21310, "e": 8.01}, {"d": "07-13", "iso": "2026-07-13", "frm": "台北", "to": "福州", "nm": 465.4, "fo": 27.1, "do": 0.4, "cg": 21310, "e": 8.64}, {"d": "07-14", "iso": "2026-07-14", "frm": "福州", "to": "台北", "nm": 83.1, "fo": 4.4, "do": 0, "cg": 22650, "e": 7.28}, {"d": "07-16", "iso": "2026-07-16", "frm": "台北", "to": "福州", "nm": 74.5, "fo": 4.25, "do": 0.1, "cg": 22650, "e": 8.03}, {"d": "07-18", "iso": "2026-07-18", "frm": "福州", "to": "台北", "nm": 96.8, "fo": 4.72, "do": 0, "cg": 22920, "e": 6.62}, {"d": "07-19", "iso": "2026-07-19", "frm": "台北", "to": "福州", "nm": 77.0, "fo": 4.19, "do": 0.1, "cg": 22920, "e": 7.58}, {"d": "07-21", "iso": "2026-07-21", "frm": "福州", "to": "台北", "nm": 86.4, "fo": 4.75, "do": 0.1, "cg": 21390, "e": 8.18}, {"d": "07-22", "iso": "2026-07-22", "frm": "台北", "to": "福州", "nm": 75.0, "fo": 3.74, "do": 0.1, "cg": 21390, "e": 7.45}, {"d": "07-24", "iso": "2026-07-24", "frm": "福州", "to": "台北", "nm": 86.4, "fo": 4.71, "do": 0.1, "cg": 19710, "e": 8.8}, {"d": "07-25", "iso": "2026-07-25", "frm": "台北", "to": "福州", "nm": 74.1, "fo": 3.54, "do": 0.1, "cg": 19710, "e": 7.77}, {"d": "07-26", "iso": "2026-07-26", "frm": "福州", "to": "台北", "nm": 86.4, "fo": 4.64, "do": 0.1, "cg": 19705, "e": 8.67}, {"d": "07-29", "iso": "2026-07-29", "frm": "台北", "to": "羅源", "nm": 80.8, "fo": 3.8, "do": 0, "cg": 19705, "e": 7.43}], "Jing Shun": [{"d": "06-22", "iso": "2026-06-22", "frm": "福州", "to": "台北", "nm": 89.8, "fo": 6.24, "do": 0.58, "cg": 21300, "e": 11.13}, {"d": "06-30", "iso": "2026-06-30", "frm": "台北", "to": "台北", "nm": 80.9, "fo": 5.14, "do": 0, "cg": 21300, "e": 9.29}, {"d": "07-01", "iso": "2026-07-01", "frm": "台北", "to": "台北", "nm": 80.9, "fo": 7.98, "do": 0.09, "cg": 21300, "e": 14.59}, {"d": "07-02", "iso": "2026-07-02", "frm": "福州", "to": "台北", "nm": 84.0, "fo": 6.32, "do": 0.55, "cg": 21850, "e": 11.69}, {"d": "07-04", "iso": "2026-07-04", "frm": "台北", "to": "福州", "nm": 74.9, "fo": 8.66, "do": 0.06, "cg": 21850, "e": 16.6}, {"d": "07-11", "iso": "2026-07-11", "frm": "台北", "to": "名古屋", "nm": 990.7, "fo": 49.5, "do": 0, "cg": 22050, "e": 7.06}, {"d": "07-11", "iso": "2026-07-11", "frm": "台北", "to": "名古屋", "nm": 990.7, "fo": 51.18, "do": 0.08, "cg": 22050, "e": 7.31}, {"d": "07-20", "iso": "2026-07-20", "frm": "名古屋", "to": "基隆", "nm": 931.8, "fo": 57.33, "do": 0, "cg": 25000, "e": 7.66}, {"d": "07-26", "iso": "2026-07-26", "frm": "台北", "to": "福州", "nm": 80.3, "fo": 6.51, "do": 0.03, "cg": 25000, "e": 10.14}, {"d": "07-27", "iso": "2026-07-27", "frm": "福州", "to": "台北", "nm": 84.3, "fo": 6.15, "do": 0.5, "cg": 20300, "e": 12.13}, {"d": "07-29", "iso": "2026-07-29", "frm": "台北", "to": "福州", "nm": 74.0, "fo": 7.57, "do": 0.08, "cg": 20300, "e": 15.86}, {"d": "07-30", "iso": "2026-07-30", "frm": "福州", "to": "台北", "nm": 84.4, "fo": 6.19, "do": 0.68, "cg": 22395, "e": 11.35}], "Yuan Shun": [{"d": "06-30", "iso": "2026-06-30", "frm": "台北", "to": "舟山", "nm": 285.5, "fo": 14.6, "do": 0.1, "cg": 25000, "e": 6.41}], "Feng Shun": [{"d": "07-21", "iso": "2026-07-21", "frm": "台北", "to": "和歌山", "nm": 892.4, "fo": 37.8, "do": 0, "cg": 25000, "e": 5.28}, {"d": "07-28", "iso": "2026-07-28", "frm": "和歌山", "to": "基隆", "nm": 878.8, "fo": 48.6, "do": 0.1, "cg": 25000, "e": 6.9}, {"d": "07-29", "iso": "2026-07-29", "frm": "和歌山", "to": "台北", "nm": 33.3, "fo": 2.0, "do": 0, "cg": 25000, "e": 7.47}, {"d": "07-31", "iso": "2026-07-31", "frm": "和歌山", "to": "台北", "nm": 36.9, "fo": 2.0, "do": 0, "cg": 25000, "e": 6.74}], "Gimpo Shun": [{"d": "06-23", "iso": "2026-06-23", "frm": "福州", "to": "花蓮", "nm": 115.7, "fo": 2.52, "do": 0.78, "cg": 8155, "e": 10.96}, {"d": "06-23", "iso": "2026-06-23", "frm": "福州", "to": "台北", "nm": 120.0, "fo": 3.08, "do": 0.8, "cg": 8155, "e": 12.41}, {"d": "06-23", "iso": "2026-06-23", "frm": "福州", "to": "福州", "nm": 90.0, "fo": 1.76, "do": 0.5, "cg": 8155, "e": 9.65}, {"d": "06-24", "iso": "2026-06-24", "frm": "福州", "to": "台北", "nm": 102.0, "fo": 2.13, "do": 0.73, "cg": 8155, "e": 10.79}, {"d": "06-25", "iso": "2026-06-25", "frm": "台北", "to": "花蓮", "nm": 123.0, "fo": 2.24, "do": 0.65, "cg": 8155, "e": 9.03}, {"d": "06-26", "iso": "2026-06-26", "frm": "花蓮", "to": "台北", "nm": 115.8, "fo": 2.86, "do": 0.6, "cg": 8322, "e": 11.24}, {"d": "06-28", "iso": "2026-06-28", "frm": "花蓮", "to": "福州", "nm": 90.0, "fo": 2.1, "do": 0.65, "cg": 8322, "e": 11.51}, {"d": "06-29", "iso": "2026-06-29", "frm": "福州", "to": "台北", "nm": 96.7, "fo": 2.34, "do": 0.35, "cg": 8165, "e": 10.65}, {"d": "07-05", "iso": "2026-07-05", "frm": "台北", "to": "花蓮", "nm": 116.0, "fo": 1.96, "do": 0.7, "cg": 8163, "e": 8.82}, {"d": "07-06", "iso": "2026-07-06", "frm": "花蓮", "to": "台北", "nm": 119.0, "fo": 2.5, "do": 0.75, "cg": 8293, "e": 10.33}, {"d": "07-07", "iso": "2026-07-07", "frm": "台北", "to": "台北", "nm": 112.1, "fo": 2.0, "do": 0.7, "cg": 8293, "e": 9.12}, {"d": "07-08", "iso": "2026-07-08", "frm": "台北", "to": "台北", "nm": 114.4, "fo": 2.5, "do": 0.9, "cg": 8250, "e": 11.31}, {"d": "07-12", "iso": "2026-07-12", "frm": "台北", "to": "福州", "nm": 410.0, "fo": 5.2, "do": 1.9, "cg": 8250, "e": 6.59}, {"d": "07-15", "iso": "2026-07-15", "frm": "福州", "to": "台北", "nm": 91.2, "fo": 1.8, "do": 0.5, "cg": 8180, "e": 9.66}, {"d": "07-17", "iso": "2026-07-17", "frm": "台北", "to": "福州", "nm": 78.5, "fo": 1.4, "do": 0.6, "cg": 8180, "e": 9.79}, {"d": "07-19", "iso": "2026-07-19", "frm": "福州", "to": "台北", "nm": 96.9, "fo": 2.25, "do": 0.4, "cg": 8210, "e": 10.42}, {"d": "07-20", "iso": "2026-07-20", "frm": "台北", "to": "花蓮", "nm": 122.1, "fo": 2.0, "do": 0.6, "cg": 8210, "e": 8.13}, {"d": "07-21", "iso": "2026-07-21", "frm": "花蓮", "to": "台北", "nm": 123.7, "fo": 2.2, "do": 0.6, "cg": 8270, "e": 8.58}, {"d": "07-22", "iso": "2026-07-22", "frm": "台北", "to": "花蓮", "nm": 120.8, "fo": 2.1, "do": 0.5, "cg": 8270, "e": 8.15}, {"d": "07-24", "iso": "2026-07-24", "frm": "台北", "to": "台北", "nm": 115.0, "fo": 2.2, "do": 0.5, "cg": 8181, "e": 8.99}, {"d": "07-24", "iso": "2026-07-24", "frm": "台北", "to": "福州", "nm": 82.7, "fo": 1.2, "do": 0.5, "cg": 8181, "e": 7.89}, {"d": "07-25", "iso": "2026-07-25", "frm": "福州", "to": "台北", "nm": 93.1, "fo": 2.25, "do": 0.5, "cg": 8000, "e": 11.56}, {"d": "07-27", "iso": "2026-07-27", "frm": "台北", "to": "福州", "nm": 78.9, "fo": 1.3, "do": 0.45, "cg": 8000, "e": 8.7}, {"d": "07-29", "iso": "2026-07-29", "frm": "福州", "to": "台北", "nm": 92.8, "fo": 1.75, "do": 0.7, "cg": 8205, "e": 10.1}, {"d": "07-30", "iso": "2026-07-30", "frm": "台北", "to": "花蓮", "nm": 120.7, "fo": 2.05, "do": 0.4, "cg": 8205, "e": 7.74}]};
+        const SD_PORT = {"Yuan Shun": [], "Jing Shun": [{"d": "06-30", "cargo": 20600.0, "L": null, "D": 20600.0, "p": "台北", "gang": 0}], "Feng Shun": [{"d": "06-23", "cargo": 17940.0, "L": null, "D": 17940.0, "p": "台北", "gang": 0}, {"d": "07-16", "cargo": 9000.0, "L": null, "D": 9000.0, "p": "台北", "gang": 0}, {"d": "07-22", "cargo": 6900.0, "L": 6900.0, "D": null, "p": "和歌山", "gang": 0}], "Hui Shun No.1": [{"d": "06-24", "cargo": 3000.0, "L": null, "D": 3000.0, "p": "台北", "gang": 0}, {"d": "06-25", "cargo": 12800.0, "L": null, "D": 12800.0, "p": "台北", "gang": 0}, {"d": "06-26", "cargo": 5200.0, "L": null, "D": 5200.0, "p": "台北", "gang": 0}, {"d": "07-01", "cargo": 16700.0, "L": null, "D": 16700.0, "p": "台北", "gang": 0}, {"d": "07-04", "cargo": 7190.0, "L": null, "D": 7190.0, "p": "台北", "gang": 0}, {"d": "07-09", "cargo": 18510.0, "L": null, "D": 18510.0, "p": "台北", "gang": 0}, {"d": "07-15", "cargo": 11500.0, "L": null, "D": 11500.0, "p": "台北", "gang": 0}, {"d": "07-18", "cargo": 7700.0, "L": null, "D": 7700.0, "p": "台北", "gang": 0}, {"d": "07-28", "cargo": 9705.0, "L": null, "D": 9705.0, "p": "台北", "gang": 0}, {"d": "07-30", "cargo": 24400.0, "L": 24400.0, "D": null, "p": "羅源", "gang": 0}], "Gimpo Shun": [{"d": "07-01", "cargo": 6000.0, "L": null, "D": 6000.0, "p": "台北", "gang": 0}]};
         // ── 燃油加油預警：存量與日均耗基準（皆為真實值）────────────────────────────
         // 存量 ROB：取各船「最新一份同時具 FO 與 DO 的報表」，並取該報表中航程階段最晚的快照，
         //   使同一艘船的 FO/DO 出自同一時點，避免兩者取自不同報表而不可並比。
@@ -1335,7 +1449,133 @@
         }
         // SD_DAILY 的 d 為 'MM-DD'，補年份後才能與 input[type=date] 的值比較（資料全屬 2026 年）
         function sdInRange(d, r) { var iso = '2026-' + d; return iso >= r.from && iso <= r.to; }
-        function sdAllCharts() { renderFW(); renderFuelWarn(); renderSlip(); renderCyl(); renderPortOps(); renderEEOI(); }
+        // 油耗 × 航速 × 海象（逐日）：上排=航行油耗(重油FO+輕油DO 堆疊柱)＋航速線；
+        // 下排=海象(風級/浪級 線 + 浪高 面積)。可依風級/浪級/浪高分段(AND)篩選該海況下的表現。
+        function wxBucket(wh) { if (wh == null) return null; if (wh < 1) return 'lt1'; if (wh < 2) return '1-2'; if (wh < 3) return '2-3'; return 'ge3'; }
+        var WX_WHLBL = { '': '浪高不限', 'lt1': '浪高 <1m', '1-2': '浪高 1–2m', '2-3': '浪高 2–3m', 'ge3': '浪高 ≥3m' };
+        function renderWx() {
+            if (typeof Highcharts === 'undefined') return;
+            var ship = sdShip(), r = sdRange('chart-wx');
+            var box = document.getElementById('chart-wx').closest('.card-body');
+            var val = function (cls) { return ((box && box.querySelector(cls)) || {}).value || ''; };
+            var windV = val('.wx-wind'), waveV = val('.wx-wave'), whV = val('.wx-wh');
+            var gran = val('.wx-gran') || 'day';   // 'day' | 'hour'
+            var summary = box && box.querySelector('.wx-summary');
+            function setSum(html) { if (summary) summary.innerHTML = html; }
+            // 資料來源：優先午報(含海象)；午報 <2 筆時 fallback 抵港報航段值(無海象)。
+            var noon = (SD_WX[ship] || []).filter(function (o) { return o.bf != null || o.sea != null || o.wh != null; });
+            var src, base;
+            if (noon.length >= 2) { src = 'noon'; base = noon; }
+            else {
+                var arv = SD_WX_ARV[ship] || [];
+                if (arv.length) { src = 'arv'; base = arv.map(function (o) { return { d: o.d, fo: o.fo, do: o.do, spd: o.spd, bf: null, sea: null, wh: null }; }); }
+                else { setSum('&nbsp;'); sdInsuff('chart-wx', ship + ' 既無午報、抵港報亦無可用航段，資料不足'); return; }
+            }
+            var hasWx = (src === 'noon');
+            var srcTag = src === 'arv' ? ' <span class="text-warning">（此船無午報：油耗/航速取自抵港報航段值；海象待接第三方氣象API）</span>' : '';
+            var unit = src === 'arv' ? '航段' : '日';
+            // 抵港報 fallback 無海象，風/浪/浪高 篩選對它無效 → 提示改「全部」
+            if (src === 'arv' && (windV || waveV || whV)) {
+                setSum(r.from + ' ~ ' + r.to + srcTag);
+                sdInsuff('chart-wx', ship + ' 海象待接第三方氣象，此船無法依風/浪/浪高篩選；請將風級/浪級/浪高設為「全部」');
+                return;
+            }
+            var condTxt = (windV === '' ? '風級不限' : '風 ' + windV + ' 級') + '、'
+                + (waveV === '' ? '浪級不限' : '浪 ' + waveV + ' 級') + '、' + WX_WHLBL[whV];
+            var days = base.filter(function (o) { return sdInRange(o.d, r); });
+            var matched = days.filter(function (o) {
+                return (windV === '' || o.bf === +windV) && (waveV === '' || o.sea === +waveV) && (whV === '' || wxBucket(o.wh) === whV);
+            });
+            if (!matched.length) {
+                setSum(r.from + ' ~ ' + r.to + (hasWx ? '｜' + condTxt : '') + '｜<span class="text-warning">無符合資料</span>' + srcTag);
+                sdInsuff('chart-wx', ship + '：' + r.from + ' ~ ' + r.to + (hasWx ? '、' + condTxt : '') + ' 區間內無符合資料，請放寬條件');
+                return;
+            }
+            sdClear('chart-wx');
+            // 摘要一律以「日/航段」為統計基礎（每小時值僅為推算，避免誤導）
+            var fuelVals = matched.filter(function (o) { return o.fo != null || o.do != null; }).map(function (o) { return (o.fo || 0) + (o.do || 0); });
+            var avgFuel = sdAvg(fuelVals), avgSpd = sdAvg(matched.map(function (o) { return o.spd; }).filter(function (x) { return x != null; }));
+            setSum(r.from + ' ~ ' + r.to + (hasWx ? '｜' + condTxt : '') + '｜' + (gran === 'hour' ? '小時' : '日') + '呈現'
+                + '｜符合 <b class="text-light">' + matched.length + '</b> ' + unit
+                + '｜平均' + unit + '油耗 <b class="text-light">' + (avgFuel == null ? '—' : avgFuel.toFixed(1)) + '</b> MT'
+                + '｜平均航速 <b class="text-light">' + (avgSpd == null ? '—' : avgSpd.toFixed(1)) + '</b> kt'
+                + srcTag
+                + (gran === 'hour' ? ' <span class="text-warning">（小時為推算：油耗＝日耗÷24；海象與航速沿用當日值）</span><span class="text-info">・圖可左右捲動</span>' : ''));
+            // 依粒度組成資料列；小時＝每日展開為 00:00–23:00（油耗均攤、海象/航速沿用當日值）
+            var rows;
+            if (gran === 'hour') {
+                rows = [];
+                matched.forEach(function (o) {
+                    for (var h = 0; h < 24; h++) {
+                        rows.push({
+                            label: o.d + ' ' + (h < 10 ? '0' + h : h) + ':00',
+                            fo: o.fo == null ? null : +(o.fo / 24).toFixed(3),
+                            do: o.do == null ? null : +(o.do / 24).toFixed(3),
+                            spd: o.spd, bf: o.bf, sea: o.sea, wh: o.wh
+                        });
+                    }
+                });
+            } else {
+                rows = matched.map(function (o) { return { label: o.d, fo: o.fo, do: o.do, spd: o.spd, bf: o.bf, sea: o.sea, wh: o.wh }; });
+            }
+            var fUnit = gran === 'hour' ? 'MT/時' : 'MT';
+            // 小時模式：每小時給足寬度，plot 區可水平捲動(跨日篩選照留)；每日交替底色便於辨識日界。
+            var wxBands = [];
+            if (gran === 'hour') { for (var di = 1; di < matched.length; di += 2) wxBands.push({ from: di * 24 - 0.5, to: (di + 1) * 24 - 0.5, color: 'rgba(148,163,184,0.06)' }); }
+            // 座標軸標題用可讀亮色（預設 #666 於深色底過暗）
+            var axTS = { color: '#cbd5e1', fontSize: '.72rem' };
+            // 有海象(午報) → 兩排(油耗/航速 + 海象；副軸置右)；無海象(抵港報 fallback) → 單排(油耗/航速)
+            var yAxis = hasWx ? [
+                { title: { text: '航行油耗 (' + fUnit + ')', style: axTS }, min: 0, top: '0%', height: '56%', offset: 0 },
+                { title: { text: '航速 (kt)', style: axTS }, opposite: true, min: 0, top: '0%', height: '56%', gridLineWidth: 0, offset: 0 },
+                { title: { text: '風級 / 浪級', style: axTS }, min: 0, tickInterval: 2, top: '66%', height: '30%', offset: 0 },
+                { title: { text: '浪高 (m)', style: axTS }, opposite: true, min: 0, top: '66%', height: '30%', gridLineWidth: 0, offset: 0 }
+            ] : [
+                { title: { text: '航行油耗 (' + fUnit + ')', style: axTS }, min: 0 },
+                { title: { text: '航速 (kt)', style: axTS }, opposite: true, min: 0, gridLineWidth: 0 }
+            ];
+            var series = [
+                { name: '航行油耗·重油 FO', type: 'column', yAxis: 0, stack: 'fuel', data: rows.map(function (o) { return o.fo; }), color: '#f97316' },
+                { name: '航行油耗·輕油 DO', type: 'column', yAxis: 0, stack: 'fuel', data: rows.map(function (o) { return o.do; }), color: '#fcd34d' },
+                { name: '航速 (kt)', type: 'spline', yAxis: 1, data: rows.map(function (o) { return o.spd; }), color: '#38bdf8', lineWidth: gran === 'hour' ? 2 : 3, connectNulls: true, marker: { enabled: gran !== 'hour', radius: 3 } }
+            ];
+            if (hasWx) {
+                series.push(
+                    { name: '風級', type: 'line', yAxis: 2, data: rows.map(function (o) { return o.bf; }), color: '#94a3b8', lineWidth: 2, marker: { enabled: gran !== 'hour', radius: 3 } },
+                    { name: '浪級', type: 'line', yAxis: 2, data: rows.map(function (o) { return o.sea; }), color: '#64748b', lineWidth: 2, dashStyle: 'ShortDash', marker: { enabled: gran !== 'hour', radius: 3 } },
+                    { name: '浪高 (m)', type: 'areaspline', yAxis: 3, data: rows.map(function (o) { return o.wh; }), color: '#22d3ee', fillOpacity: 0.12, lineWidth: 2, connectNulls: true, marker: { enabled: gran !== 'hour', radius: 2 } }
+                );
+            }
+            Highcharts.chart('chart-wx', {
+                // 左右加大留白(spacing)：Highcharts 依此自動預留「軸標題+刻度」空間再外加留白，
+                // Plot Area 因而內縮、雙軸標題落在繪圖區之外且不被裁切（優先確保 Y 軸資訊清楚）。
+                chart: gran === 'hour'
+                    ? { spacing: [12, 34, 8, 26], scrollablePlotArea: { minWidth: Math.max(760, rows.length * 18), scrollPositionX: 0 } }
+                    : { spacing: [12, 30, 8, 26] },
+                xAxis: {
+                    categories: rows.map(function (o) { return o.label; }), crosshair: true, plotBands: wxBands,
+                    title: { text: gran === 'hour' ? '船報日期 / 時' : (src === 'arv' ? '船報日期（抵港報航段）' : '船報日期'), style: axTS },
+                    labels: { rotation: gran === 'hour' ? -45 : 0, style: { fontSize: gran === 'hour' ? '.6rem' : '.75rem' } }
+                },
+                yAxis: yAxis,
+                tooltip: {
+                    shared: true, useHTML: true,
+                    formatter: function () {
+                        var o = rows[this.points[0].point.index];
+                        var h = '<b>' + o.label + '</b>' + (gran === 'hour' ? ' <span style="color:#f59e0b">推算</span>' : '') + (src === 'arv' ? ' <span style="color:#f59e0b">抵港報航段</span>' : '');
+                        if (hasWx) h += '<br><span style="color:#94a3b8">■</span> 風級 <b>' + (o.bf == null ? '—' : o.bf) + '</b>　浪級 <b>' + (o.sea == null ? '—' : o.sea) + '</b>　浪高 <b>' + (o.wh == null ? '—' : o.wh + ' m') + '</b>';
+                        h += '<br><span style="color:#f97316">■</span> 航行油耗(重油) <b>' + (o.fo == null ? '—' : o.fo + ' ' + fUnit) + '</b>'
+                            + '<br><span style="color:#fcd34d">■</span> 航行油耗(輕油) <b>' + (o.do == null ? '—' : o.do + ' ' + fUnit) + '</b>'
+                            + '<br><span style="color:#38bdf8">─</span> 航速 <b>' + (o.spd == null ? '—' : o.spd + ' kt') + '</b>';
+                        if (src === 'arv') h += '<br><span style="color:#64748b">海象待接第三方氣象API</span>';
+                        return h;
+                    }
+                },
+                plotOptions: { column: { stacking: 'normal', borderWidth: 0, borderRadius: gran === 'hour' ? 0 : 1 } },
+                series: series
+            });
+        }
+        function sdAllCharts() { renderFW(); renderFuelWarn(); renderSlip(); renderCyl(); renderWx(); renderPortOps(); renderEEOI(); }
 
         function renderFW() {
             if (typeof Highcharts === 'undefined') return;
@@ -1481,9 +1721,10 @@
             if (days.length < all.length) sub += '（全期 ' + all.length + ' 筆）';
             if (zeroN) sub += '｜其中 ' + zeroN + ' 筆為 0（在港主機停俥不耗，屬正常）';
             Highcharts.chart('chart-cyl-rpm', {
+                chart: { spacingLeft: 34, spacingRight: 40, events: { render: function () { vAxisTitlePos(this); } } },
                 xAxis: { categories: cats, title: { text: '船報日期' } },
                 subtitle: { text: sub, align: 'left', style: { color: '#9ca3af', fontSize: '.7rem' } },
-                yAxis: [{ title: { text: '汽缸油耗 (L)' }, min: 0 }, { title: { text: '主機轉速 (RPM)' }, opposite: true }],
+                yAxis: [{ title: { text: null }, vTitle: { text: '汽缸油耗 (L)', color: '#cbd5e1' }, min: 0 }, { title: { text: null }, vTitle: { text: '主機轉速 (RPM)', color: '#cbd5e1' }, opposite: true }],
                 tooltip: {
                     shared: true, useHTML: true,
                     formatter: function () {
@@ -1800,8 +2041,8 @@
             const nf = v => (v == null || isNaN(v)) ? '—' : Number(v).toLocaleString('en-US');
 
             // 港口對照與角色（附錄B / 決策 D1）：台北=卸貨、境外+花蓮=裝貨、基隆=加油(不列裝卸)、舟山未證實
-            const PORT_DIR = { '福州': 'CNFOC', '花蓮': 'TWHUN', '名古屋': 'JPNGO', '和歌山': 'JPWAK', '晉江': 'CNJLY', '台北': 'TWTPE', '基隆': 'TWKEL', '舟山': 'CNDSN' };
-            const LOAD_PORTS = ['福州', '花蓮', '名古屋', '和歌山', '晉江'];
+            const PORT_DIR = { '福州': 'CNFOC', '花蓮': 'TWHUN', '名古屋': 'JPNGO', '和歌山': 'JPWAK', '羅源': 'CNJLY', '台北': 'TWTPE', '基隆': 'TWKEL', '舟山': 'CNDSN' };
+            const LOAD_PORTS = ['福州', '花蓮', '名古屋', '和歌山', '羅源'];
             const DISC_PORTS = ['台北'];
             const BUNKER_PORTS = ['基隆'];
             const portLabel = n => n ? ((PORT_DIR[n] ? PORT_DIR[n] + ' ' : '') + n) : '—';
@@ -1818,7 +2059,7 @@
                     { voy: 'V2623', j: 'full', start: '2026-07-19', load: '福州', disc: '台北', cargo: 21390, cycle: 2.3 },
                     { voy: 'V2624', j: 'full', start: '2026-07-22', load: '福州', disc: '台北', cargo: 19710, cycle: 2.5 },
                     { voy: 'V2625', j: 'full', start: '2026-07-25', load: '福州', disc: '台北', cargo: 19705, cycle: 3.2 },
-                    { voy: 'V2626', j: 'trunc', start: '2026-07-29', load: '晉江', disc: '（航行中）', cargo: 25500, cycle: null }
+                    { voy: 'V2626', j: 'trunc', start: '2026-07-29', load: '羅源', disc: '（航行中）', cargo: 25500, cycle: null }
                 ],
                 'Jing Shun': [
                     { voy: 'V2626', j: 'trunc', start: '2026-06-22', load: null, disc: '台北', cargo: null, cycle: 8.4 },
@@ -2628,7 +2869,9 @@
                 "pageLength": 10,
                 "lengthMenu": [10, 20, 35],
                 "ordering": true,
-                "fixedColumns": { start: 3 },   // 固定左側：船名、航次號、船報類型
+                // 前三欄凍結改用自訂 position:sticky（見 freezeFirstCols）；
+                // DataTables FixedColumns 於雙列群組表頭下只能凍結第一欄，故停用。
+                // "fixedColumns": { start: 3 },
                 "dom": "<'row mb-2'<'col-sm-6 d-flex align-items-center'l><'col-sm-6 text-end'B>>" +
                        "<'row'<'col-sm-12'tr>>" +
                        "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
@@ -2761,6 +3004,36 @@
                 rightAlignNumericColumns(dt);
                 dt.on('draw', function () { rightAlignNumericColumns(dt); });
             });
+
+            // 前三欄凍結（船名／航次號／船報類型）：以 position:sticky 手動實作。
+            // 因 DataTables FixedColumns 4.x 於本表雙列群組表頭下只會凍結第一欄，
+            // 改用 scrollX 分割後的 scrollHead/scrollBody 各自上 sticky，left 依實欄寬計算。
+            function freezeFirstCols() {
+                const wrap = document.getElementById('masterDataTable_wrapper');
+                if (!wrap) return;
+                function applyRow(cells) {
+                    if (!cells || cells.length < 3) return;
+                    // 先讀自然 offsetLeft（sticky 不改變排版流，值穩定），再套用
+                    const lefts = [0, cells[1].offsetLeft, cells[2].offsetLeft];
+                    for (let i = 0; i < 3; i++) {
+                        const c = cells[i];
+                        c.style.position = 'sticky';
+                        c.style.left = lefts[i] + 'px';
+                        c.classList.add('k-freeze');
+                        c.classList.toggle('k-freeze-last', i === 2);
+                    }
+                }
+                // 表頭：僅第一列（船名／航次號／船報類型為 rowspan=2，不含第二列子表頭）
+                const headRow = wrap.querySelector('.dataTables_scrollHead thead tr');
+                if (headRow) applyRow(headRow.children);
+                // 表身：每列前三格
+                wrap.querySelectorAll('.dataTables_scrollBody tbody tr').forEach(function (tr) {
+                    applyRow(tr.children);
+                });
+            }
+            masterTable.on('draw', freezeFirstCols);
+            freezeFirstCols();
+            $(window).on('resize', freezeFirstCols);
 
             // ==========================================
             // 欄位顯示彈出視窗 (勾選式) — 依群組分區，前三固定欄不列入
