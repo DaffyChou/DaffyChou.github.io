@@ -588,7 +588,16 @@
                             【航行日耗】= <code class="text-info">格式1-船位報NR（午報）</code> 的 <code class="text-warning">MECYO/MESYLO/AESYLO_Consumption</code> ÷ 午報天數（汽缸油／主機系統油／輔機系統油）。<br>
                             【在港日耗】= <code class="text-info">格式3-日電報DR（每日報）</code> 的同三欄 ÷ 每日報天數。</div>
                             <div class="mt-1"><span class="badge-source">資料處理</span>直接採 Consumption 欄，<b>僅濾掉負值與 &gt;500 的離群</b>（那是把「存量 ROB」誤填進「消耗」，如豐順午報 9960、景順每日報 −14590）。<b class="text-warning">匯順1號、金保順無午報 → 航行滑油顯示資料不足（null，柱上無航行段）</b>；在港汽缸油／主機系統油多接近 0＝在港主機停俥不耗，屬正常。</div>
-                            <div class="mt-1"><span class="badge-risk">異常排查</span>健康基準取「引擎製造商台架數據」或「近半年同負載歷史均值」。在港發電機未滿載卻輔機系統油飆升＝管路洩漏警訊；可切【日區間】檢視是航行或港內暴增。</div>
+                            <div class="mt-1"><span class="badge-gap">健康基準（目前資料不足、未畫基準線）</span>理想基準需 <b>①引擎製造商台架數據</b>（SFOC／注油率 g/kWh）——不在船報、須外部串接引擎型錄；或 <b>②近半年同負載歷史均值</b>——本正式期僅 <b>40 天（不足半年）</b>，且缺 <code class="text-warning">MCR_RPM</code> 額定轉速、無法算負載分群。<b class="text-warning">兩者目前皆取不到，故本圖只呈現實際日耗、暫不畫基準線。</b></div>
+                            <div class="mt-1"><span class="badge-risk">異常排查（相對比較，非絕對門檻）</span>因無健康基準（見上），只能做「船比船／日比日」的相對與趨勢判讀，可查看：
+                                <ul class="mb-0 mt-1 ps-3" style="color:#e5e7eb;">
+                                    <li><b>汽缸油(MECYO) 升、但 RPM／航速沒升</b> → 注油器設定過量，或汽缸／活塞環磨損加劇（對照「船體阻力」圖的 RPM）。</li>
+                                    <li><b>主機系統油(MESYLO) 航行段突增</b> → 曲軸箱循環油內漏、油底殼進水／污染、活塞環串氣。</li>
+                                    <li><b>在港輔機系統油(AESYLO) 飆升</b>（發電機未滿載時）→ 管路洩漏／軸封漏油警訊。</li>
+                                    <li><b>在港汽缸油非 0</b> → 主機應停俥不耗，&gt;0 代表靠港仍有主機動作（移泊／機動）或填報錯誤。</li>
+                                    <li><b>同型船橫向偏離</b>：4 艘 2 萬噸級大船的汽缸油日耗應相近，某船明顯偏高＝該船機況（船底結垢／燃燒效率差）。</li>
+                                    <li><b>趨勢突變</b>：切【日區間】看某船某日突升，對照加油／換油／故障事件。</li>
+                                </ul></div>
                         </div>
                         <div class="row g-2 mb-3 align-items-end">
                             <div class="col-6 col-md-3">
@@ -1559,7 +1568,7 @@
             }
             // 依級距標籤在 DWT_BANDS 中的順序排序，未建檔者置末
             const bandOrder = lbl => { const i = DWT_BANDS.findIndex(x => x[2] === lbl); return i < 0 ? 99 : i; };
-            const MINRANK = 3; // D5：樣本數 < MINRANK 的港標「僅供參考」且不參與排名
+            const MINRANK = 3; // (已停用：低樣本港不再特別標註，照常排名；常數保留以免其他引用)
             // ===== 真實港次資料：擷取自「船報資料_清洗後_正式期」(2026-06-21 ~ 2026-07-31) =====
             // 一列＝一個實體港次。來源以離港報為主、無離港報時以完工報遞補（兩者 schema 相同，
             // 同一港次常兩報皆發，已用 (船,港,開工時間,貨量) 去重，84 筆報表 → 60 個港次）。
@@ -1567,7 +1576,7 @@
             // 方向【不採用 TotalCargoType】：實測台北 6 筆標 type=1(裝) 中有 5 筆離港空載，實為卸貨，
             // 該代碼填報不可信。改以吃水判定（物理事實：裝貨後變深、卸貨後變淺）——
             // 優先取「離港吃水 − 抵港吃水」，缺配對時比對該船離港吃水中位，兩者皆缺才退回代碼。
-            // 台北為純卸貨港(29 港次)；福州/花蓮/名古屋/和歌山/晉江為裝貨港。
+            // 台北為純卸貨港(29 港次)；福州/花蓮/名古屋/和歌山/羅源為裝貨港。
             // 基隆(加油港)、舟山(停擺)無裝卸作業，不列入。
             // 欄位：[0船,1港,2方向,3年月,4日期,5航次,6作業速率(噸/時),7貨量(噸),8作業時數,
             //        9每噸油耗(g/噸),10等泊,11等作業,12等離港,13接岸電,14作業油耗(MT),15貨種,
@@ -1632,7 +1641,7 @@
     ['Jing Shun','台北','卸','2026-07','2026-07-28','V2631',804.9,20300,25.22,14.3,null,1.85,0.5,1,0.29,'机制砂和碎石','2026-07-27 19:06','2026-07-27 20:57','2026-07-28 22:10','2026-07-28 22:40',null],
     ['Gimpo Shun','台北','卸','2026-07','2026-07-30','V2653',484.9,8205,16.92,24.4,1.33,8.6,0.78,1,0.2,'CRUSHED STONES','2026-07-28 23:54','2026-07-29 08:30','2026-07-30 01:25','2026-07-30 02:12',null],
     ['Gimpo Shun','花蓮','裝','2026-07','2026-07-30','V2653',3159.3,8151,2.58,36.8,null,1.55,1.27,0,0.3,'CRUSHED STONES','2026-07-30 13:42','2026-07-30 15:15','2026-07-30 17:50','2026-07-30 19:06',null],
-    ['Hui Shun No.1','晉江','裝','2026-07','2026-07-30','V2626',1758.6,25500,14.5,90.2,5.2,2.47,6.42,0,2.3,'机制砂','2026-07-29 15:42','2026-07-29 18:10','2026-07-30 08:40','2026-07-30 15:05',null],
+    ['Hui Shun No.1','羅源','裝','2026-07','2026-07-30','V2626',1758.6,25500,14.5,90.2,5.2,2.47,6.42,0,2.3,'机制砂','2026-07-29 15:42','2026-07-29 18:10','2026-07-30 08:40','2026-07-30 15:05',null],
     ['Jing Shun','福州','裝','2026-07','2026-07-30','V2631',1677.5,22395,13.35,58.5,null,1.75,3.47,0,1.31,'碎石','2026-07-29 14:24','2026-07-29 16:09','2026-07-30 05:30','2026-07-30 08:58',null]
             ];
             // desc＝指標定義（是什麼、方向）；calc＝計算式（單次值如何算、指數如何換算）
@@ -1693,7 +1702,7 @@
             const fmtN = (x) => x == null ? '—' :
                 Number(x).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             // 平均值後綴：該段有值筆數不足全部時標出，避免把「未填報」讀成「沒花時間」
-            const nTag = (k, all) => k === 0 ? '<span style="color:#f59e0b">未填報</span>' : (k < all ? '<span style="color:#9ca3af">(n=' + k + '/' + all + ')</span>' : '');
+            const nTag = (k, all) => k === 0 ? '<span style="color:#f59e0b">未填報</span>' : '';   // 已移除 (n=k/all) 樣本比例註記，僅保留「未填報」
 
             let FB = {}, SB = {};
             function baseVal(pool, key) { const a = []; pool.forEach(v => { if (usable(v)) a.push(v[key]); }); return median(a); }
@@ -1782,8 +1791,7 @@
             function portAgg(dir, p) { const vs = []; SHIPS.forEach(s => vs.push(...fv(dir, p, s))); return { t: timeSegs(vs), spd: median(vs.map(v => v.spd)) }; }
             function l1IndexTip(o, rank, dir, which) {
                 const ml = METRICS[state.metric].label, a = portAgg(dir, o.p), t = a.t;
-                const lowN = o.n < MINRANK; // D5：樣本不足→不列名
-                const rankTag = lowN ? '<span style="color:#f59e0b;">未列名（n=' + o.n + '，僅供參考）</span> ' : 'NO.' + rank + ' ';
+                const rankTag = 'NO.' + rank + ' ';
                 const head = which === 'gold'
                     ? '<b>' + o.p + '（' + dir + '貨）</b> · 金保順 ' + ml + '指數 <b>' + (o.gold == null ? '—' : o.gold.toFixed(2)) + '</b>'
                     : '<b>' + rankTag + o.p + '（' + dir + '貨）</b> · 大船組中位 ' + ml + '指數 <b>' + (o.idx == null ? '此港無大船靠泊' : o.idx.toFixed(2)) + '</b>';
@@ -1811,15 +1819,13 @@
                 let list = PORTS[dir].map(p => ({ p: p, idx: portIndex(dir, p), gold: portGold(dir, p), n: portN(dir, p) })).filter(o => o.idx != null || o.gold != null);
                 if (!list.length) { $(cid).innerHTML = '<div class="text-muted p-3" style="font-size:.85rem;">此區間無資料。</div>'; return; }
                 sortIndex(list);
-                // D5：樣本數 < MINRANK 的港不參與排名，穩定地移到末端（保留 sortIndex 內部序）
-                list = list.filter(o => o.n >= MINRANK).concat(list.filter(o => o.n < MINRANK));
                 let dev = 0.12; list.forEach(o => { if (o.idx != null) dev = Math.max(dev, Math.abs(o.idx - 1) + 0.02); if (o.gold != null) dev = Math.max(dev, Math.abs(o.gold - 1) + 0.02); });
                 const ml = METRICS[state.metric].label;
                 const grp = list.map((o, i) => o.idx == null ? { y: null, port: o.p } : { y: +(o.idx - 1).toFixed(3), real: o.idx, color: o.idx >= 1 ? GPOS : GNEG, port: o.p, tip: l1IndexTip(o, i + 1, dir, 'group') });
                 const gold = list.map((o, i) => o.gold == null ? { y: null } : { y: +(o.gold - 1).toFixed(3), real: o.gold, color: o.gold >= 1 ? SPOS : SNEG, port: o.p, tip: l1IndexTip(o, i + 1, dir, 'gold') });
                 charts.push(Highcharts.chart(cid, {
                     chart: Object.assign({ type: 'column', height: 300, backgroundColor: 'transparent', spacing: [8, 8, 4, 6], events: axisDrill(function (cat) { go(2, cat, null, dir); }) }, portScroll(list.length)),
-                    xAxis: { categories: list.map(o => o.p), lineColor: '#4b5563', tickLength: 0, labels: Object.assign({ useHTML: true, formatter: function () { var n = portN(dir, this.value); return this.value + (n < MINRANK ? '<br><span style="color:#f59e0b;font-size:.6rem;">n=' + n + '，僅供參考</span>' : ''); } }, catLabel) },
+                    xAxis: { categories: list.map(o => o.p), lineColor: '#4b5563', tickLength: 0, labels: catLabel },
                     yAxis: Object.assign(idxYAxis(dev), { title: { text: ml + '指數（基準 1.00）', style: { color: AXIS, fontSize: '.7rem' } } }),
                     legend: { enabled: true, itemStyle: { color: '#cbd5e1', fontSize: '.8rem' } },
                     tooltip: tipOpt,
@@ -1831,13 +1837,12 @@
                 let list = PORTS[dir].map(p => { const vs = []; SHIPS.forEach(s => vs.push(...fv(dir, p, s))); const t = timeSegs(vs); const seg = [t.wBerth, t.wComm, t.opH, t.wDep]; const tt = segTotal(seg); return { p: p, seg: seg, nseg: [t.nBerth, t.nComm, t.nOp, t.nDep], n: portN(dir, p), total: tt.sum, miss: tt.miss }; }).filter(o => o.total != null && o.total > 0);
                 if (!list.length) { $(cid).innerHTML = '<div class="text-muted p-3" style="font-size:.85rem;">此區間無資料。</div>'; return; }
                 sortTime(list);
-                list = list.filter(o => o.n >= MINRANK).concat(list.filter(o => o.n < MINRANK));
                 const S = k => list.map(o => o.seg[k] == null
                     ? { y: null, port: o.p, tip: l1TimeTip(o, dir) }
                     : { y: +hrVal(o.seg[k]).toFixed(2), port: o.p, tip: l1TimeTip(o, dir) });
                 charts.push(Highcharts.chart(cid, {
                     chart: Object.assign({ type: 'column', height: 300, backgroundColor: 'transparent', spacing: [8, 8, 4, 6], events: axisDrill(function (cat) { go(2, cat, null, dir); }) }, portScroll(list.length)),
-                    xAxis: { categories: list.map(o => o.p), lineColor: '#4b5563', tickLength: 0, labels: Object.assign({ useHTML: true, formatter: function () { var n = portN(dir, this.value); return this.value + (n < MINRANK ? '<br><span style="color:#f59e0b;font-size:.6rem;">n=' + n + '，僅供參考</span>' : ''); } }, catLabel) },
+                    xAxis: { categories: list.map(o => o.p), lineColor: '#4b5563', tickLength: 0, labels: catLabel },
                     yAxis: { min: 0, title: { text: '在港時間（' + hrUnit() + '）', style: { color: AXIS, fontSize: '.7rem' } }, gridLineColor: GRID, labels: { style: { color: AXIS } } },
                     legend: { enabled: true, itemStyle: { color: '#cbd5e1', fontSize: '.8rem' } },
                     tooltip: tipOpt,
@@ -1954,10 +1959,10 @@
                 const srcBody = '<div><span class="badge-source">比較基準</span><b>群體基準</b>＝同貨向（裝／卸）× 同船型（大船／小船）之全港所有航次<b>中位數</b>，不分港口故可跨港比較；<b>自身基準</b>＝該船自己全部航次（跨港、跨貨向）之中位數。</div>'
                     + '<div class="mt-1"><span class="badge-calc">聚合</span>長條所示為<b>各航次指數的中位數</b>（L1 各港、L2 該港各船同）；L3 逐航次為單筆指數，不聚合。四項中<b>僅「在港時間」用平均數</b>，其餘三項一律中位數。</div>'
                     + '<div class="mt-1"><span class="badge-source">欄位</span>貨量＝離港報 <code>TotalCargo</code>；淨作業時數＝離港報 <code>Total_Working_Hour</code>（＝<code>CWCP</code> − <code>CWCM</code>）；作業油耗＝離港報 <code>CommencedWorking_ROB_FO/DO</code> − <code>CompletedWorking_ROB_FO/DO</code>。</div>'
-                    + '<div class="mt-1"><span class="badge-calc">裝卸方向</span>以<b>吃水變化</b>判定（裝貨後變深、卸貨後變淺）：離港吃水 − 抵港吃水，缺配對時比對該船離港吃水中位。<b>不採用 <code>TotalCargoType</code></b>——台北 6 筆標「裝」之紀錄中有 5 筆離港空載、實為卸貨，該代碼填報不可信。本期台北為<b>純卸貨港</b>，福州／花蓮／名古屋／和歌山／晉江為裝貨港。</div>'
+                    + '<div class="mt-1"><span class="badge-calc">裝卸方向</span>以<b>吃水變化</b>判定（裝貨後變深、卸貨後變淺）：離港吃水 − 抵港吃水，缺配對時比對該船離港吃水中位。<b>不採用 <code>TotalCargoType</code></b>——台北 6 筆標「裝」之紀錄中有 5 筆離港空載、實為卸貨，該代碼填報不可信。本期台北為<b>純卸貨港</b>，福州／花蓮／名古屋／和歌山／羅源為裝貨港。</div>'
                     + '<div class="mt-1"><span class="badge-calc">在港四段</span>等泊＝抵港報 <code>TotalTime_Waiting</code>；等作業＝<code>CWCM</code> − 抵港報 <code>AllLineMadeFastTime</code>（帶纜完成）；作業＝<code>Total_Working_Hour</code>；等離港＝<code>COAA</code> − <code>CWCP</code>。</div>'
                     + '<div class="mt-1"><span class="badge-warn">資料缺口</span>抵港報 <code>EOSPTime</code>（抵引水站）本期<b>0/70 筆填報</b>，故等泊改用抵港報自帶之 <code>TotalTime_Waiting</code>，該欄僅約三分之一港次有值；<b>未填報之段一律留白並標示，不以 0 補值</b>。</div>'
-                    + '<div class="mt-1"><span class="badge-risk">排除規則</span>標記資料異常之航次一律不計入；「排除接岸電航次」僅作用於<b>作業耗油</b>與<b>綜合評估</b>，對裝卸效率與在港時間不生效；航次數 &lt; ' + MINRANK + ' 之港標「僅供參考」，不參與排名。</div>'
+                    + '<div class="mt-1"><span class="badge-risk">排除規則</span>標記資料異常之航次一律不計入；「排除接岸電航次」僅作用於<b>作業耗油</b>與<b>綜合評估</b>，對裝卸效率與在港時間不生效。</div>'
                     + '<div class="mt-1"><span class="badge-source">資料來源</span>「船報資料_清洗後_正式期」(2026-06-21 ~ 2026-07-31) 之抵港報／離港報／完工報，共 ' + PORT_CALLS.length + ' 個港次（離港報與完工報同 schema、同港次常兩報皆發，已依船／港／開工時間／貨量去重）。基隆為加油港、舟山為停擺，無裝卸作業故不列入。</div>';
                 $('pp-side').innerHTML = statCards;
                 // 合併說明（指標說明 + 資料來源與計算說明）寫入標題右方的說明方塊
