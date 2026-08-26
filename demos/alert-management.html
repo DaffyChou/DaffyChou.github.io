@@ -33,6 +33,13 @@ body {
 .role-switcher label { color:#6a7080; font-size:11px; }
 .role-switcher select { background:none; border:none; color:#d8d8d8; font-size:12px; font-family:inherit; cursor:pointer; outline:none; }
 .role-switcher select option { background:#20232f; }
+/* 原生下拉的 optgroup 群組標題：Chrome / Edge on Windows 不會讓 label 繼承 select 的深色配色，
+   只設 option 會讓群組標題停在瀏覽器預設的淺底灰字，在深色 popup 上幾乎看不見。
+   標題用較亮字色 + 加粗與選項拉開層級；預設 italic 對中文顯示不佳故關掉。
+   optgroup 的字重/字色會被子 option 繼承，需一併還原。 */
+select optgroup { background:#20232f; color:#e8ecf2; font-style:normal; font-weight:700; }
+select optgroup option { background:#20232f; color:#d8d8d8; font-weight:400; }
+.form-select optgroup, .form-select optgroup option { background:#252830; }
 .user-avatar { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
 
 /* ── KPI bar ── */
