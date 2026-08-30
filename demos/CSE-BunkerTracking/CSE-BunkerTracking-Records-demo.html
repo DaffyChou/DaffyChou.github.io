@@ -116,7 +116,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 <h1 class="text-3xl font-bold text-white border-l-4 border-emerald-500 pl-4 mb-2" data-i18n="mainTitleRecords">
-                    所有船舶油耗紀錄</h1>
+                    所有船舶油耗紀錄</h1><span class="ml-2 align-middle text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-600/50" title="船舶主檔與油耗皆為實際資料">★ 真實資料</span>
             </div>
             <div class="flex items-center space-x-4">
                 <select id="lang-switcher" onchange="changeLanguage(this.value)"
@@ -143,10 +143,15 @@
                             <th class="w-5 text-left" data-i18n="thId"></th>
                             <th class="w-24 text-left" data-i18n="thImo"></th>
                             <th class="text-left" data-i18n="thVessel"></th>
-                            <th class="text-left" data-i18n="thRoute"></th>
-                            <th class="text-left" data-i18n="thDates"></th>
-                            <th class="text-left" data-i18n="thTime"></th>
+                            <th class="text-left" data-i18n="thClass"></th>
+                            <th class="text-left" data-i18n="thDwt"></th>
+                            <th class="text-left" data-i18n="thYear"></th>
+                            <th class="text-left" data-i18n="thVoy"></th>
+                            <th class="text-left" data-i18n="thDist"></th>
                             <th class="text-left" data-i18n="thEff"></th>
+                            <th class="text-left" data-i18n="thAer"></th>
+                            <th class="text-left" data-i18n="thEeoi"></th>
+                            <th class="text-left" data-i18n="thBunk"></th>
                             <th class="text-left" data-i18n="thFuel"></th>
                             <th class="text-left" data-i18n="thActions"></th>
                         </tr>
@@ -196,7 +201,18 @@
                 thRoute: renderTH('近期航線', 'Recent Voyages', '該航次起訖港口的派任路線。'),
                 thDates: renderTH('航次日期 (起迄)', 'Voyage Dates', '該航次出發與抵達的日期區間。'),
                 thTime: renderTH('航行時間', 'Sailing Time', '海上航行的總時數計算。'),
-                thEff: renderTH('燃油效率 (nm/mt)', 'Fuel Efficiency', '<b>公式：對水航距 (nm) ÷ 總耗油 (mt)</b><br><span class="text-gray-400 mt-1 block">代表每噸燃油能航行的海浬數，數值越高越好。</span>'),
+                thEff: renderTH('燃油效率 (nm/mt)', 'Fuel Efficiency', '<b>全部報表的對地航距 (nm) ÷ 全部油耗 (mt)</b><br><span class="text-gray-400 mt-1 block">2024/01–2026/08 實測值。每噸燃油能航行的海浬數，越高越好，跨船型不可直接比較。<br>註：與 Dashboard 的「燃油效率趨勢」同一定義；「船舶燃油效率比較箱型圖」的分子只計海上航行航距，數值會略低。</span>'),
+                                thClass: renderTH('船型級距', 'Vessel Class', '依實際 DWT 分級：Capesize/VLOC（15 艘）、Handysize（2 艘）、Small Bulk（4 艘）。'),
+                thDwt: renderTH('載重噸 DWT', 'Deadweight', '船舶載重噸位，取自 01_VesselParticulars 船舶主檔。'),
+                thYear: renderTH('建造年', 'Built Year', '交船年份，用於船齡診斷。'),
+                thYard: renderTH('建造船廠', 'Shipyard', '建造船廠與船殼號。'),
+                thSeaDays: renderTH('海上午報筆數', 'Sea Reports', 'NoonSea 事件筆數，代表該船在資料期間的海上航行天數。'),
+                                thVoy: renderTH('航次數', 'Voyages', '2024/01–2026/08 全期航次筆數，來自 02_DailyVoyageRecords。'),
+                thDist: renderTH('航距 (nm)', 'Distance', '2024/01–2026/08 全部報表的<b>對地航距</b>合計（含港內移泊與錨泊漂移）。展開明細可另見「其中海上航行航距」。'),
+                thAer: renderTH('AER (DWT 基準)', 'AER', '<b>AER = Σ(油耗 × CF) ÷ (DWT × 對地航距) × 10⁶</b><br><span class="text-gray-400 mt-1 block">單位 g CO₂/t-nm。IMO CII 評級採用的碳強度指標，分母用<b>載重噸</b>，不論實際載了多少貨。CF：HSFO 3.114／VLSFO 3.151／MGO-MDO 3.206。</span>'),
+                thEeoi: renderTH('EEOI (貨物噸浬)', 'EEOI', '<b>EEOI = Σ(油耗 × CF) ÷ Σ(實際貨載 × 航距) × 10⁶</b><br><span class="text-gray-400 mt-1 block">單位 g CO₂/t-nm。分母用<b>實際載貨量</b>（laden 段取排水量推估貨載、ballast 段計 0），反映真正的運輸碳效率，數值必然高於 AER。括號內為<b>貨載已知航距的涵蓋率</b>，越低代表推估基礎越薄弱。</span>'),
+                thBunk: renderTH('加油次數', 'Bunkerings', '2024/01–2026/08 實際加油次數，來自 03_BunkeringRecords。'),
+                thSeaMed: renderTH('海上日耗中位 (MT/day)', 'Median Sea Cons.', '<b>由 NoonSea 午報實際計算</b><br><span class="text-gray-400 mt-1 block">同級距船舶可直接比較；跨級距需先分群。</span>'),
                 thFuel: renderTH('總消耗油量 (mt)', 'Total Fuel Consumed', '航次累計消耗的燃油總噸數 (Metric Tons)。'),
                 thActions: renderTH('操作', 'Actions', '可展開紀錄盤點明細或發送異常警示通知。'),
 
@@ -215,16 +231,21 @@
                 btnDetail: 'View Details',
                 btnInventory: 'Inventory',
                 btnAlerts: 'Alerts',
-                
+
                 thId: '#',
-                thImo: renderTH('IMO Number', '國際海事組織編號', 'International Maritime Organization vessel identification number.'),
-                thVessel: renderTH('Vessel Name', '船舶名稱', 'The name and code of the vessel executing the voyage.'),
-                thRoute: renderTH('Recent Voyages', '近期航線', 'Departure to destination route mapping.'),
-                thDates: renderTH('Voyage Dates', '航次日期', 'Departure and arrival date range.'),
-                thTime: renderTH('Sailing Time', '航行時間', 'Total sailing hours at sea.'),
-                thEff: renderTH('Fuel Eff. (nm/mt)', '燃油效率', '<b>Formula: Distance STW (nm) ÷ Total Fuel (mt)</b><br><span class="text-gray-400 mt-1 block">Nautical miles per metric ton of fuel. Higher is better.</span>'),
-                thFuel: renderTH('Total Fuel (mt)', '總消耗油量', 'Total consumed fuel in metric tons for the voyage.'),
-                thActions: renderTH('Actions', '操作', 'Expand details for inventory checking or send alert notifications.'),
+                thImo: renderTH('IMO', 'IMO Number', 'International Maritime Organization vessel identification number.'),
+                thVessel: renderTH('Vessel Name', 'Vessel', 'Vessel name and code. Click through to the single-vessel dashboard.'),
+                thClass: renderTH('Class', 'Vessel Class', 'Banded by actual DWT: Capesize/VLOC (15), Handysize (2), Small Bulk (4).'),
+                thDwt: renderTH('DWT', 'Deadweight', 'Deadweight tonnage, from the 01_VesselParticulars master file.'),
+                thYear: renderTH('Built', 'Built Year', 'Delivery year, used for the vessel-age diagnosis.'),
+                thVoy: renderTH('Voyages', 'Voyages', 'Distinct voyage numbers, 2024/01-2026/08, from 02_DailyVoyageRecords.'),
+                thDist: renderTH('Distance (nm)', 'Distance', 'Total <b>distance over ground</b> across all reports, 2024/01-2026/08 (includes in-port shifting and anchorage drift).'),
+                thEff: renderTH('Fuel Eff. (nm/mt)', 'Fuel Efficiency', '<b>Distance over ground (nm) &divide; total fuel (mt)</b><br><span class="text-gray-400 mt-1 block">Nautical miles per tonne of fuel; higher is better. Not comparable across vessel classes.<br>Note: same definition as the dashboard trend chart. The box-plot uses sea-passage distance only and reads slightly lower.</span>'),
+                thAer: renderTH('AER (DWT basis)', 'AER', '<b>AER = &Sigma;(fuel &times; CF) &divide; (DWT &times; distance) &times; 10<sup>6</sup></b><br><span class="text-gray-400 mt-1 block">g CO<sub>2</sub>/t-nm. The carbon-intensity metric behind the IMO CII rating; the denominator is deadweight, regardless of cargo actually carried. CF: HSFO 3.114 / VLSFO 3.151 / MGO-MDO 3.206.</span>'),
+                thEeoi: renderTH('EEOI (cargo t-nm)', 'EEOI', '<b>EEOI = &Sigma;(fuel &times; CF) &divide; &Sigma;(cargo &times; distance) &times; 10<sup>6</sup></b><br><span class="text-gray-400 mt-1 block">g CO<sub>2</sub>/t-nm using actual cargo carried (laden legs from the displacement estimate, ballast legs count zero). Always higher than AER. The bracketed figure is the share of distance for which cargo is known.</span>'),
+                thBunk: renderTH('Bunkerings', 'Bunkerings', 'Actual bunkering events, 2024/01-2026/08, from 03_BunkeringRecords (stock-take records excluded).'),
+                thFuel: renderTH('Total Fuel (mt)', 'Total Fuel Consumed', 'Total fuel consumed in metric tonnes over the period.'),
+                thActions: renderTH('Actions', 'Actions', 'Expand details for inventory checking or send alert notifications.'),
 
                 dtSearch: 'Search:',
                 dtNext: 'Next',
@@ -288,69 +309,619 @@
             }
         }
 
-        // ================= 模擬資料與明細演算 =================
-        const rawMockData = [
-            { id: 1, imo: "9737814", name: "CHINA STEEL SUCCESS 中鋼成功輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1850", eff: 185, eff_trend: -10, fuel: 1850 },
-            { id: 2, imo: "9737826", name: "CHINA STEEL VISION 中鋼遠見輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1200", eff: 120, eff_trend: 3, fuel: 1200 },
-            { id: 3, imo: "9702560", name: "CHINA STEEL EXPLORATION 中鋼探索輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1600", eff: 160, eff_trend: -12, fuel: 1600 },
-            { id: 4, imo: "9702558", name: "CHINA STEEL ENDEAVOR 中鋼奮進輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1305", eff: 135, eff_trend: 8, fuel: 1305 },
-            { id: 5, imo: "9860063", name: "CSC VICTOR 中鋼勝利輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "2000", eff: 200, eff_trend: 5, fuel: 2000 },
-            { id: 6, imo: "9861768", name: "CSC LEADER 中鋼領先輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1805", eff: 185, eff_trend: 4, fuel: 1805 },
-            { id: 7, imo: "9861770", name: "CSC CREATOR 中鋼創造輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "2100", eff: 210, eff_trend: 2, fuel: 2100 },
-            { id: 8, imo: "9861782", name: "CSC PREEMINENCE 中鋼超群輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1205", eff: 125, eff_trend: -8, fuel: 1205 },
-            { id: 9, imo: "9849239", name: "C.S. BRILLIANCE 中鋼光輝輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1208", eff: 128, eff_trend: -5, fuel: 1208 },
-            { id: 10, imo: "9832987", name: "CHINA STEEL HARMONY 中鋼和諧輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1605", eff: 165, eff_trend: -11, fuel: 1605 },
-            { id: 11, imo: "9737814", name: "CHINA STEEL SUCCESS 中鋼成功輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1805", eff: 185, eff_trend: -9, fuel: 1805 },
-            { id: 12, imo: "9737826", name: "CHINA STEEL VISION 中鋼遠見輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1200", eff: 120, eff_trend: -8, fuel: 1200 },
-            { id: 13, imo: "9702560", name: "CHINA STEEL EXPLORATION 中鋼探索輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1600", eff: 160, eff_trend: -8, fuel: 1600 },
-            { id: 14, imo: "9702558", name: "CHINA STEEL ENDEAVOR 中鋼奮進輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1350", eff: 135, eff_trend: -7, fuel: 1350 },
-            { id: 15, imo: "9860063", name: "CSC VICTOR 中鋼勝利輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "2000", eff: 200, eff_trend: -5, fuel: 2000 },
-            { id: 16, imo: "9861768", name: "CSC LEADER 中鋼領先輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1850", eff: 185, eff_trend: -15, fuel: 1850 },
-            { id: 17, imo: "9861770", name: "CSC CREATOR 中鋼創造輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "2100", eff: 210, eff_trend: -6, fuel: 2100 },
-            { id: 18, imo: "9861782", name: "CSC PREEMINENCE 中鋼超群輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1205", eff: 125, eff_trend: -8, fuel: 1205 },
-            { id: 19, imo: "9849239", name: "C.S. BRILLIANCE 中鋼光輝輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1208", eff: 128, eff_trend: -5, fuel: 1208 },
-            { id: 20, imo: "9832987", name: "CHINA STEEL HARMONY 中鋼和諧輪", route: "AUDAM → TWKHH", dates: "2025/06/25-2025/06/29", time: "1650", eff: 165, eff_trend: -20, fuel: 1650 }
-        ];
+        // ================= 船隊彙總資料與明細演算 =================
+        // ================= ★真實資料（2026-08-26 版原始資料，全欄重算） =================
+        // 來源：02_DailyVoyageRecords.csv ＋ CIIFleetFuelReport_2024/2025/2026.csv ＋ 03_BunkeringRecords.csv
+        // 併接鍵：IMO ＋ 報表時間_UTC ＋ 報表類型（三鍵）→ 去重後 30,982 列，與 Dashboard 同一套基準
+        // 期間：2024-01-01 ~ 2026-08-24（全期）
+        // 欄位定義：
+        //   dist26  Σ 對地航距（全部報表，含港內移泊與錨泊漂移）
+        //   seaDist Σ 對地航距（僅 是否海上航行 = TRUE）
+        //   nmmt26  dist26 ÷ fuel
+        //   aer26   AER  = Σ(油耗 × CF) ÷ (DWT × dist26) × 1e6
+        //           CF：HSFO 3.114 / VLSFO 3.151 / ULSFO 3.151 / MGO-MDO 3.206 / Blend 3.151（暫）
+        //   eeoi    EEOI = Σ(貨載已知段油耗 × CF) ÷ Σ(貨載 × 航距) × 1e6；ccov = 貨載已知航距佔比 %
+        //   seaDays NoonSea 午報筆數（一筆午報 ＝ 海上航行一天，與離群值偵測頁同定義）
+        //   seaMed  NoonSea 午報的 Total Consum 中位數（MT/day）
+        const FLEET_ROWS = [
+            {
+                        "id": 1,
+                        "imo": "9737814",
+                        "name": "中鋼成功輪 CHINA STEEL SUCCESS",
+                        "cls": "Capesize",
+                        "dwt": 209988,
+                        "year": 2015,
+                        "yard": "JMU 5038",
+                        "seaDays": 565,
+                        "seaMed": 33.1,
+                        "fuel": 21252.8,
+                        "hfo": 0.0,
+                        "lsfo": 21192.8,
+                        "mgo": 60.0,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1374,
+                        "dist26": 160329.8,
+                        "seaDist": 157477.4,
+                        "nmmt26": 7.54,
+                        "aer26": 1.99,
+                        "eeoi": 8.13,
+                        "ccov": 71.8,
+                        "voy26": 67,
+                        "bunk26": 32
+            },
+            {
+                        "id": 2,
+                        "imo": "9737826",
+                        "name": "中鋼遠見輪 CHINA STEEL VISION",
+                        "cls": "Capesize",
+                        "dwt": 209900,
+                        "year": 2016,
+                        "yard": "JMU 5039",
+                        "seaDays": 549,
+                        "seaMed": 31.3,
+                        "fuel": 20201.5,
+                        "hfo": 0.0,
+                        "lsfo": 20100.5,
+                        "mgo": 101.0,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1410,
+                        "dist26": 159394.9,
+                        "seaDist": 155820.9,
+                        "nmmt26": 7.89,
+                        "aer26": 1.9,
+                        "eeoi": 9.96,
+                        "ccov": 66.3,
+                        "voy26": 71,
+                        "bunk26": 29
+            },
+            {
+                        "id": 3,
+                        "imo": "9702560",
+                        "name": "中鋼探索輪 CHINA STEEL EXPLORATION",
+                        "cls": "Capesize",
+                        "dwt": 209878,
+                        "year": 2015,
+                        "yard": "JMU 5009",
+                        "seaDays": 634,
+                        "seaMed": 30.8,
+                        "fuel": 22802.6,
+                        "hfo": 0.0,
+                        "lsfo": 21417.3,
+                        "mgo": 182.0,
+                        "ulsfo": 0.0,
+                        "blend": 1203.2,
+                        "unc": 0.0,
+                        "events": 1352,
+                        "dist26": 179892.6,
+                        "seaDist": 176867.7,
+                        "nmmt26": 7.89,
+                        "aer26": 1.9,
+                        "eeoi": 4.18,
+                        "ccov": 99.2,
+                        "voy26": 63,
+                        "bunk26": 22
+            },
+            {
+                        "id": 4,
+                        "imo": "9702558",
+                        "name": "中鋼奮進輪 CHINA STEEL ENDEAVOR",
+                        "cls": "Capesize",
+                        "dwt": 209749,
+                        "year": 2014,
+                        "yard": "JMU 5008",
+                        "seaDays": 566,
+                        "seaMed": 33.4,
+                        "fuel": 21415.6,
+                        "hfo": 0.0,
+                        "lsfo": 21361.3,
+                        "mgo": 54.3,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1480,
+                        "dist26": 161786.2,
+                        "seaDist": 157845.6,
+                        "nmmt26": 7.55,
+                        "aer26": 1.99,
+                        "eeoi": 9.13,
+                        "ccov": 69.9,
+                        "voy26": 75,
+                        "bunk26": 29
+            },
+            {
+                        "id": 5,
+                        "imo": "9860063",
+                        "name": "中鋼勝利輪 CSC VICTOR",
+                        "cls": "Capesize",
+                        "dwt": 208903,
+                        "year": 2020,
+                        "yard": "(未提供)",
+                        "seaDays": 591,
+                        "seaMed": 30.8,
+                        "fuel": 22429.7,
+                        "hfo": 0.0,
+                        "lsfo": 22328.6,
+                        "mgo": 100.9,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.1,
+                        "events": 1309,
+                        "dist26": 174319.6,
+                        "seaDist": 169850.2,
+                        "nmmt26": 7.77,
+                        "aer26": 1.94,
+                        "eeoi": 5.4,
+                        "ccov": 76.5,
+                        "voy26": 49,
+                        "bunk26": 22
+            },
+            {
+                        "id": 6,
+                        "imo": "9861768",
+                        "name": "中鋼領先輪 CSC LEADER",
+                        "cls": "Capesize",
+                        "dwt": 208826,
+                        "year": 2019,
+                        "yard": "JMU 5168",
+                        "seaDays": 625,
+                        "seaMed": 34.8,
+                        "fuel": 23274.1,
+                        "hfo": 0.0,
+                        "lsfo": 23057.5,
+                        "mgo": 216.5,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1361,
+                        "dist26": 184089.4,
+                        "seaDist": 180482.9,
+                        "nmmt26": 7.91,
+                        "aer26": 1.91,
+                        "eeoi": 4.48,
+                        "ccov": 91.1,
+                        "voy26": 56,
+                        "bunk26": 20
+            },
+            {
+                        "id": 7,
+                        "imo": "9861770",
+                        "name": "中鋼創造輪 CSC CREATOR",
+                        "cls": "Capesize",
+                        "dwt": 208815,
+                        "year": 2020,
+                        "yard": "JMU 5169",
+                        "seaDays": 620,
+                        "seaMed": 35.8,
+                        "fuel": 24720.2,
+                        "hfo": 0.0,
+                        "lsfo": 24586.8,
+                        "mgo": 133.4,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1439,
+                        "dist26": 190586.3,
+                        "seaDist": 187034.1,
+                        "nmmt26": 7.71,
+                        "aer26": 1.96,
+                        "eeoi": 4.69,
+                        "ccov": 86.4,
+                        "voy26": 64,
+                        "bunk26": 27
+            },
+            {
+                        "id": 8,
+                        "imo": "9861782",
+                        "name": "中鋼超群輪 CSC PREEMINENCE",
+                        "cls": "Capesize",
+                        "dwt": 208801,
+                        "year": 2020,
+                        "yard": "(未提供)",
+                        "seaDays": 589,
+                        "seaMed": 30.9,
+                        "fuel": 21039.4,
+                        "hfo": 0.0,
+                        "lsfo": 20814.1,
+                        "mgo": 225.3,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1389,
+                        "dist26": 173118.1,
+                        "seaDist": 169749.5,
+                        "nmmt26": 8.23,
+                        "aer26": 1.83,
+                        "eeoi": 3.91,
+                        "ccov": 98.8,
+                        "voy26": 61,
+                        "bunk26": 27
+            },
+            {
+                        "id": 9,
+                        "imo": "9832975",
+                        "name": "中鋼自由輪 CHINA STEEL LIBERTY",
+                        "cls": "Capesize",
+                        "dwt": 208624,
+                        "year": 2019,
+                        "yard": "CSBC 1099",
+                        "seaDays": 741,
+                        "seaMed": 36.6,
+                        "fuel": 29051.0,
+                        "hfo": 27790.3,
+                        "lsfo": 0.0,
+                        "mgo": 1260.7,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1244,
+                        "dist26": 200166.5,
+                        "seaDist": 198551.7,
+                        "nmmt26": 6.89,
+                        "aer26": 2.17,
+                        "eeoi": 6.35,
+                        "ccov": 81.5,
+                        "voy26": 42,
+                        "bunk26": 22
+            },
+            {
+                        "id": 10,
+                        "imo": "9849239",
+                        "name": "中鋼光輝輪 CHINA STEEL BRILLIANCE",
+                        "cls": "Capesize",
+                        "dwt": 208480,
+                        "year": 2019,
+                        "yard": "CSBC 1108",
+                        "seaDays": 644,
+                        "seaMed": 39.1,
+                        "fuel": 27601.6,
+                        "hfo": 25562.2,
+                        "lsfo": 1547.2,
+                        "mgo": 492.2,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1326,
+                        "dist26": 188617.6,
+                        "seaDist": 185011.4,
+                        "nmmt26": 6.83,
+                        "aer26": 2.19,
+                        "eeoi": 6.42,
+                        "ccov": 83.1,
+                        "voy26": 53,
+                        "bunk26": 24
+            },
+            {
+                        "id": 11,
+                        "imo": "9832987",
+                        "name": "中鋼和諧輪 CHINA STEEL HARMONY",
+                        "cls": "Capesize",
+                        "dwt": 208423,
+                        "year": 2019,
+                        "yard": "CSBC 1100",
+                        "seaDays": 593,
+                        "seaMed": 36.0,
+                        "fuel": 24602.8,
+                        "hfo": 21967.6,
+                        "lsfo": 1879.4,
+                        "mgo": 755.7,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1423,
+                        "dist26": 174414.1,
+                        "seaDist": 171040.0,
+                        "nmmt26": 7.09,
+                        "aer26": 2.11,
+                        "eeoi": 5.52,
+                        "ccov": 81.8,
+                        "voy26": 61,
+                        "bunk26": 32
+            },
+            {
+                        "id": 12,
+                        "imo": "9849241",
+                        "name": "中鋼榮耀輪 CHINA STEEL PRESTIGE",
+                        "cls": "Capesize",
+                        "dwt": 208389,
+                        "year": 2020,
+                        "yard": "CSBC 1109",
+                        "seaDays": 578,
+                        "seaMed": 38.0,
+                        "fuel": 24215.1,
+                        "hfo": 23414.6,
+                        "lsfo": 0.0,
+                        "mgo": 800.5,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1419,
+                        "dist26": 167254.3,
+                        "seaDist": 164939.2,
+                        "nmmt26": 6.91,
+                        "aer26": 2.17,
+                        "eeoi": 7.87,
+                        "ccov": 73.5,
+                        "voy26": 69,
+                        "bunk26": 26
+            },
+            {
+                        "id": 13,
+                        "imo": "9479230",
+                        "name": "中鋼求新輪 CHINA STEEL INNOVATOR",
+                        "cls": "Capesize",
+                        "dwt": 206629,
+                        "year": 2012,
+                        "yard": "JMU 135",
+                        "seaDays": 607,
+                        "seaMed": 34.1,
+                        "fuel": 23238.6,
+                        "hfo": 0.0,
+                        "lsfo": 22987.9,
+                        "mgo": 250.7,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1358,
+                        "dist26": 171689.0,
+                        "seaDist": 168733.3,
+                        "nmmt26": 7.39,
+                        "aer26": 2.06,
+                        "eeoi": 5.67,
+                        "ccov": 84.6,
+                        "voy26": 59,
+                        "bunk26": 26
+            },
+            {
+                        "id": 14,
+                        "imo": "9673812",
+                        "name": "中鋼挑戰輪 CHINA STEEL CHALLENGE",
+                        "cls": "Capesize",
+                        "dwt": 206378,
+                        "year": 2013,
+                        "yard": "JMU 196",
+                        "seaDays": 566,
+                        "seaMed": 30.5,
+                        "fuel": 19474.9,
+                        "hfo": 0.0,
+                        "lsfo": 19417.5,
+                        "mgo": 57.4,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1404,
+                        "dist26": 156322.7,
+                        "seaDist": 153447.9,
+                        "nmmt26": 8.03,
+                        "aer26": 1.9,
+                        "eeoi": 5.44,
+                        "ccov": 90.7,
+                        "voy26": 69,
+                        "bunk26": 28
+            },
+            {
+                        "id": 15,
+                        "imo": "9673848",
+                        "name": "中鋼永續輪 CHINA STEEL SUSTAINABILITY",
+                        "cls": "Capesize",
+                        "dwt": 206292,
+                        "year": 2013,
+                        "yard": "JMU 201",
+                        "seaDays": 572,
+                        "seaMed": 28.3,
+                        "fuel": 18405.8,
+                        "hfo": 0.0,
+                        "lsfo": 18383.8,
+                        "mgo": 22.0,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1464,
+                        "dist26": 158969.8,
+                        "seaDist": 155607.9,
+                        "nmmt26": 8.64,
+                        "aer26": 1.77,
+                        "eeoi": 7.71,
+                        "ccov": 71.0,
+                        "voy26": 77,
+                        "bunk26": 29
+            },
+            {
+                        "id": 16,
+                        "imo": "9665152",
+                        "name": "通耀輪 CSE GLORY EXPRESS",
+                        "cls": "Handysize",
+                        "dwt": 36155,
+                        "year": 2014,
+                        "yard": "CSBC 1028",
+                        "seaDays": 187,
+                        "seaMed": 12.1,
+                        "fuel": 5288.0,
+                        "hfo": 0.0,
+                        "lsfo": 5181.6,
+                        "mgo": 106.5,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1829,
+                        "dist26": 61069.6,
+                        "seaDist": 54927.1,
+                        "nmmt26": 11.55,
+                        "aer26": 7.55,
+                        "eeoi": 15.24,
+                        "ccov": 72.1,
+                        "voy26": 161,
+                        "bunk26": 23
+            },
+            {
+                        "id": 17,
+                        "imo": "9665164",
+                        "name": "通裕輪 CSE FORTUNE EXPRESS",
+                        "cls": "Handysize",
+                        "dwt": 36155,
+                        "year": 2014,
+                        "yard": "CSBC 1029",
+                        "seaDays": 264,
+                        "seaMed": 12.3,
+                        "fuel": 6004.0,
+                        "hfo": 0.0,
+                        "lsfo": 5943.1,
+                        "mgo": 60.9,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1751,
+                        "dist26": 79869.3,
+                        "seaDist": 72834.9,
+                        "nmmt26": 13.3,
+                        "aer26": 6.55,
+                        "eeoi": 12.72,
+                        "ccov": 84.2,
+                        "voy26": 144,
+                        "bunk26": 23
+            },
+            {
+                        "id": 18,
+                        "imo": "9345647",
+                        "name": "通鴻輪 CSE PROSPERITY EXPRESS",
+                        "cls": "SmallBulk",
+                        "dwt": 28440,
+                        "year": 2006,
+                        "yard": "Imabari 619",
+                        "seaDays": 299,
+                        "seaMed": 14.0,
+                        "fuel": 6511.5,
+                        "hfo": 0.0,
+                        "lsfo": 6339.1,
+                        "mgo": 172.4,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1839,
+                        "dist26": 92282.2,
+                        "seaDist": 86030.8,
+                        "nmmt26": 14.17,
+                        "aer26": 7.82,
+                        "eeoi": 14.95,
+                        "ccov": 89.8,
+                        "voy26": 142,
+                        "bunk26": 29
+            },
+            {
+                        "id": 19,
+                        "imo": "9345635",
+                        "name": "CSE CLIPPER EXPRESS CSE CLIPPER EXPRESS",
+                        "cls": "SmallBulk",
+                        "dwt": 28423,
+                        "year": 2015,
+                        "yard": "Imabari 618",
+                        "seaDays": 162,
+                        "seaMed": 12.1,
+                        "fuel": 3909.6,
+                        "hfo": 0.0,
+                        "lsfo": 3870.2,
+                        "mgo": 39.3,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.1,
+                        "events": 1336,
+                        "dist26": 48754.3,
+                        "seaDist": 45921.7,
+                        "nmmt26": 12.47,
+                        "aer26": 8.89,
+                        "eeoi": 20.78,
+                        "ccov": 80.1,
+                        "voy26": 133,
+                        "bunk26": 17
+            },
+            {
+                        "id": 20,
+                        "imo": "9730907",
+                        "name": "通勇輪 CSE BRAVERY EXPRESS",
+                        "cls": "SmallBulk",
+                        "dwt": 12418,
+                        "year": 2014,
+                        "yard": "Higaki 687",
+                        "seaDays": 348,
+                        "seaMed": 11.5,
+                        "fuel": 5714.5,
+                        "hfo": 0.0,
+                        "lsfo": 5651.2,
+                        "mgo": 63.3,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": -0.1,
+                        "events": 1680,
+                        "dist26": 116658.2,
+                        "seaDist": 110497.5,
+                        "nmmt26": 20.41,
+                        "aer26": 12.43,
+                        "eeoi": 49.2,
+                        "ccov": 55.7,
+                        "voy26": 131,
+                        "bunk26": 36
+            },
+            {
+                        "id": 21,
+                        "imo": "9730919",
+                        "name": "通智輪 CSE WISDOM EXPRESS",
+                        "cls": "SmallBulk",
+                        "dwt": 12413,
+                        "year": 2015,
+                        "yard": "Higaki 688",
+                        "seaDays": 285,
+                        "seaMed": 11.3,
+                        "fuel": 5079.7,
+                        "hfo": 0.0,
+                        "lsfo": 5050.4,
+                        "mgo": 29.3,
+                        "ulsfo": 0.0,
+                        "blend": 0.0,
+                        "unc": 0.0,
+                        "events": 1795,
+                        "dist26": 97168.5,
+                        "seaDist": 92493.1,
+                        "nmmt26": 19.13,
+                        "aer26": 13.27,
+                        "eeoi": 54.2,
+                        "ccov": 37.6,
+                        "voy26": 149,
+                        "bunk26": 28
+            }
+];
 
-        // 依據截圖比例 (120:24:4:8:4，總和 160) 自動推算各油品假數據
-        const mockData = rawMockData.map(d => {
-            let ratio = d.fuel / 160;
-            return {
-                ...d,
-                hfo: 120.0 * ratio,
-                mgo: 24.0 * ratio,
-                cy_oil: 4.0 * ratio,
-                sys_oil: 8.0 * ratio,
-                lsmgo: 4.0 * ratio
-            };
-        });
 
         // 格式化子表 HTML (加上 MT 單位)
         function formatDetails(d) {
+            const row = (label, val, note) => `
+                <tr class="border-b border-gray-700">
+                    <td class="py-2 px-2 w-1/2 tracking-wide">${label}</td>
+                    <td class="py-2 px-2 w-1/2 text-left tracking-wide ${note ? 'text-gray-500' : ''}">${val}</td>
+                </tr>`;
+            const pct = v => d.fuel > 0 ? ` <span class="text-gray-500 text-xs">(${(v / d.fuel * 100).toFixed(1)}%)</span>` : '';
             return `
                 <div class="">
-                    <div class="w-full max-w-[360px]">
+                    <div class="w-full max-w-[460px]">
+                        <div class="text-xs text-emerald-400 mb-2">★ 以下為 CIIFleetFuelReport CSV（2026-08-25 版，22 欄）實際累計值（${d.events.toLocaleString()} 筆事件）</div>
                         <table class="w-full text-base text-gray-300">
-                            <tr class="border-b border-gray-700">
-                                <td class="py-3 px-2 w-1/2 tracking-wide">HFO</td>
-                                <td class="py-3 px-2 w-1/2 text-left tracking-wide">${d.hfo.toFixed(1)} MT</td>
-                            </tr>
-                            <tr class="border-b border-gray-700">
-                                <td class="py-3 px-2 tracking-wide">MGO</td>
-                                <td class="py-3 px-2 text-left tracking-wide">${d.mgo.toFixed(1)} MT</td>
-                            </tr>
-                            <tr class="border-b border-gray-700">
-                                <td class="py-3 px-2 tracking-wide">Cylinder Oil</td>
-                                <td class="py-3 px-2 text-left tracking-wide">${d.cy_oil.toFixed(1)} MT</td>
-                            </tr>
-                            <tr class="border-b border-gray-700">
-                                <td class="py-3 px-2 tracking-wide">System Oil</td>
-                                <td class="py-3 px-2 text-left tracking-wide">${d.sys_oil.toFixed(1)} MT</td>
-                            </tr>
-                            <tr class="border-b border-gray-700">
-                                <td class="py-3 px-2 tracking-wide">LSMGO</td>
-                                <td class="py-3 px-2 text-left tracking-wide">${d.lsmgo.toFixed(1)} MT</td>
-                            </tr>
+                            ${row('HSFO 高硫重油', d.hfo.toLocaleString() + ' MT' + pct(d.hfo))}
+                            ${row('VLSFO 超低硫重油', d.lsfo.toLocaleString() + ' MT' + pct(d.lsfo))}
+                            ${row('ULSFO 極低硫重油', (d.ulsfo || 0).toLocaleString() + ' MT' + pct(d.ulsfo || 0))}
+                            ${row('Blend 混合油', (d.blend || 0).toLocaleString() + ' MT' + pct(d.blend || 0))}
+                            ${row('Unclassified 未分類', (d.unc || 0).toLocaleString() + ' MT' + pct(d.unc || 0))}
+                            ${row('MGO/MDO 輕油', d.mgo.toLocaleString() + ' MT' + pct(d.mgo))}
+                            ${row('合計', '<b class="text-white">' + d.fuel.toLocaleString() + ' MT</b>', false)}
+                            ${row('全期航距（全部報表）', (d.dist26 ? Math.round(d.dist26).toLocaleString() + ' nm（' + d.voy26 + ' 航次）' : '—'), false)}
+                            ${row('其中海上航行航距', (d.seaDist ? Math.round(d.seaDist).toLocaleString() + ' nm' : '—'), false)}
+                            ${row('海上航行天數 (NoonSea 午報筆數)', (d.seaDays ? d.seaDays.toLocaleString() + ' 天' : '—'), false)}
+                            ${row('海上日耗油中位數 (午報)', (d.seaMed ? d.seaMed.toFixed(1) + ' MT/day' : '—'), false)}
+                            ${row('貨載已知涵蓋率', (d.ccov !== undefined ? d.ccov.toFixed(1) + ' %' : '—'), true)}
+                            ${row('全期加油', (d.bunk26 ? d.bunk26 + ' 次' : '—'), false)}
+                            ${row('Cylinder Oil 汽缸油', '待中運提供', true)}
+                            ${row('System Oil 系統油', '待中運提供', true)}
                         </table>
                     </div>
                 </div>
@@ -361,10 +932,10 @@
             const tbody = document.getElementById('table-body');
             let html = '';
 
-            mockData.forEach((row, index) => {
-                let trendIcon = row.eff_trend < 0 ? '↘' : '↗';
-                let trendColor = row.eff_trend < 0 ? 'text-green-500' : 'text-red-500';
-                
+            FLEET_ROWS.forEach((row, index) => {
+                const clsLabel = { Capesize: '海岬型', Handysize: '輕便型', SmallBulk: '小型散裝' }[row.cls] || row.cls;
+                const clsColor = { Capesize: 'text-blue-300', Handysize: 'text-amber-300', SmallBulk: 'text-emerald-300' }[row.cls] || 'text-gray-300';
+                const na = v => (v === null || v === undefined) ? '<span class="text-gray-600">—</span>' : v;
                 html += `
                     <tr>
                         <td class="text-gray-400">${row.id}</td>
@@ -374,31 +945,26 @@
                                 ${row.name}
                             </a>
                         </td>
-                        <td class="text-gray-300 tracking-wide">${row.route}</td>
-                        <td class="text-gray-300 ">${row.dates}</td>
-                        <td>${row.time}</td>
-                        <td>
-                            <span>${row.eff}</span> 
-                            <span class="${trendColor} ml-1 font-bold tracking-tighter">${trendIcon} ${Math.abs(row.eff_trend)}%</span>
-                        </td>
+                        <td class="${clsColor}">${clsLabel}</td>
+                        <td class="text-gray-300">${row.dwt.toLocaleString()}</td>
+                        <td class="text-gray-300">${row.year}</td>
+                        <td class="text-gray-300">${row.voy26 || '—'}</td>
+                        <td class="text-gray-300">${row.dist26 ? Math.round(row.dist26).toLocaleString() : '—'}</td>
+                        <td class="text-gray-100 font-semibold">${na(row.nmmt26 && row.nmmt26.toFixed(2))}</td>
+                        <td class="text-gray-300">${na(row.aer26 && row.aer26.toFixed(2))}</td>
+                        <td class="text-gray-300">${row.eeoi ? row.eeoi.toFixed(2) + `<span class="text-gray-500 text-xs ml-1">(${row.ccov.toFixed(1)}%)</span>` : '<span class="text-gray-600">—</span>'}</td>
+                        <td class="text-gray-300">${row.bunk26 || '—'}</td>
                         <td>
                             <div class="flex items-center space-x-3">
-                                <span class="w-12">${row.fuel}</span>
+                                <span class="w-20">${row.fuel.toLocaleString()}</span>
                                 <button data-index="${index}" class="btn-details flex items-center space-x-1 border border-gray-500 text-gray-300 px-2 py-1 rounded hover:bg-gray-700 hover:text-white transition">
                                     <svg class="w-3 h-3 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                     <span class="btn-expand-text text-[14px]">${i18n.zh.btnExpand}</span>
                                 </button>
                             </div>
                         </td>
-                        <td>
-                            <div class="flex items-center space-x-2">
-                                <a href="CSE-BunkerTracking-RecordsSingle-demo.html?vesselId=${row.imo}&from=records" class="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded font-bold transition shadow text-[14px]"><span class="btn-detail-text">${i18n.zh.btnDetail || '查看詳情'}</span></a>
-                                <button class="bg-[#facc15] hover:bg-yellow-500 text-black px-2 py-1 rounded font-bold transition shadow text-[14px]"><span class="btn-inv-text">${i18n.zh.btnInventory}</span></button>
-                                <button class="border border-gray-500 text-gray-300 hover:text-white px-2 py-1 rounded hover:bg-gray-700 transition shadow text-[14px]"><span class="btn-alt-text">${i18n.zh.btnAlerts}</span></button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                        <td></td>
+                    </tr>`;
             });
             tbody.innerHTML = html;
 
@@ -425,7 +991,7 @@
                 const tr = $(this).closest('tr');
                 const row = table.row(tr);
                 const dataIndex = $(this).data('index');
-                const rowData = mockData[dataIndex];
+                const rowData = FLEET_ROWS[dataIndex];
 
                 if (row.child.isShown()) {
                     // 已開啟則關閉
