@@ -1790,12 +1790,12 @@
                     const cats = daily.map(r => r.date);
                     const mk = fam => daily.map(r => Math.round((r[fam] || 0) * 10) / 10);
                     _vdChart = Highcharts.chart('chart-voyage-daily', {
-                        chart: { type: 'column', backgroundColor: 'transparent' },
+                        chart: { type: 'line', backgroundColor: 'transparent' },
                         title: { text: null },
                         xAxis: { categories: cats, labels: { style: { color: '#94a3b8', fontSize: '10px' } } },
                         yAxis: { title: { text: '耗油 (MT)', style: { color: '#94a3b8' } }, min: 0,
                             labels: { style: { color: '#94a3b8' } }, gridLineColor: '#334155' },
-                        plotOptions: { column: { stacking: 'normal',
+                        plotOptions: { line: { marker: { enabled: true, radius: 3 },
                             dataLabels: { enabled: true, formatter: function () { return this.y ? Highcharts.numberFormat(this.y, 1) : null; },
                                 style: { color: '#f1f5f9', fontSize: '9px', textOutline: '1px #111827', fontWeight: '500' } } } },
                         legend: { itemStyle: { color: '#cbd5e1' } },
