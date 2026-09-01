@@ -3117,6 +3117,12 @@ table.alert-table td.cell-status .ais-status {
 }
 .rz-src-legend b { color: var(--k-c4cdda); margin-right: 6px; }
 .rz-src-legend .rz-src-kind { margin: 0 4px; vertical-align: 1px; }
+/* 徽章語意的但書：與上方三個標籤同區塊，但排成獨立一行且更低調 */
+.rz-src-note {
+  margin-top: 6px; padding-top: 6px;
+  border-top: 1px dashed var(--k-2a2a2a);
+  font-size: 12.5px; line-height: 1.7; color: var(--k-7c8a9e);
+}
 .rz-src-kind {
   display: inline-flex; align-items: center; gap: 3px;
   padding: 0 6px; height: 16px;
@@ -4832,14 +4838,28 @@ function fmt(v, d) {
 /* ResizeObserver: 容器尺寸變化時連續呼叫 invalidateSize，
  * 讓 fleet-split 比例切換 / 側邊欄 hover 展開時，地圖跟著平順縮放，避免延遲或破圖。
  * rAF 節流避免短時間連續觸發太頻繁。 */
-function attachMapResize(map, container) {
+/* 世界寬度 = 256 × 2^z。回傳「讓世界至少填滿容器寬度」的最小 zoom —— 低於這個值，
+ * 畫面就會同時容納一份以上的世界，跨經度 ±360 的副本會並排出現，看起來像資料重複。 */
+function worldFitMinZoom(container) {
+  const w = (container && container.clientWidth) || 0;
+  if (!w) return 2;                     // 容器尚未佈局時給保守值，之後由 resize 校正
+  return Math.max(0, Math.min(6, Math.ceil(Math.log2(w / 256))));
+}
+function attachMapResize(map, container, fitWorldMinZoom) {
   if (!container || !window.ResizeObserver || !map) return;
   let rafId = 0;
   const ro = new ResizeObserver(() => {
     if (rafId) return;
     rafId = requestAnimationFrame(() => {
       rafId = 0;
-      try { map.invalidateSize({ animate: false, pan: false }); } catch (e) {}
+      try {
+        map.invalidateSize({ animate: false, pan: false });
+        // 視窗變寬時同步提高縮放下限（Leaflet 會自動把當前 zoom 夾回範圍內）
+        if (fitWorldMinZoom) {
+          const mz = worldFitMinZoom(container);
+          if (map.getMinZoom() !== mz) map.setMinZoom(mz);
+        }
+      } catch (e) {}
     });
   });
   ro.observe(container);
@@ -7071,6 +7091,7 @@ function renderUpperArea(enriched) {
           <label><input type="checkbox" id="fly-planned"> 計畫航線<span class="en" style="color:var(--k-5e6b80);margin-left:4px">Planned</span></label>
           <label><input type="checkbox" id="fly-corridor"> Safety Frame 走廊 <span class="en" style="color:var(--k-5e6b80);margin-left:4px">Corridor</span></label>
           <label><input type="checkbox" id="fly-ais"> AIS 航跡<span class="en" style="color:var(--k-5e6b80);margin-left:4px">AIS Track</span></label>
+          <label><input type="checkbox" id="fly-geofence"> 電子圍籬<span class="en" style="color:var(--k-5e6b80);margin-left:4px">Geofence</span></label>
         </div>
       </div>
       <aside class="fleet-detail-panel">
@@ -7404,6 +7425,7 @@ function renderFleet() {
     injectAnchorNotifyBanner(mapWrap);
     setTimeout(maybeShowAnchorForcePrompt, 60);   // 進入錨泊狀態 → 強制提醒監管人員設定（每船本 session 一次）
     injectRiskTogglePanel(mapWrap);
+    injectGeofenceTogglePanel(mapWrap);   // 總覽地圖沒有 layer-toggle，圍籬開關獨立注入
     injectExtraLayerPanel(mapWrap);
   }
 
@@ -7568,6 +7590,8 @@ function renderFleet() {
         setFleetLayer(k, el.checked);
       });
     });
+    // 電子圍籬圖層（RISK_ZONES / cat:"military"）— 與 _riskLayerState 共用狀態
+    wireGeofenceToggle(document.getElementById("fly-geofence"));
 
     // 圖層面板摺疊狀態（session 持久化，預設 desktop 展開、mobile 收合）
     // mutex：開啟前先關閉同層的 risk-toggle，避免互相遮蔽
@@ -7689,6 +7713,7 @@ function drawFleetDetailMap(v) {
 
   // 單船 detail 視角也保留全球風險區圖層（依 _riskLayerState 顯示）
   drawRiskZones(map);
+  drawAnchorages(map);   // merge 時漏掉：沒有這行，圖層面板的「港口錨地」勾了不會有反應
   drawWxLayers(map);
 
   // 自訂 pane 控制疊放順序（值越大越上層）
@@ -8140,8 +8165,15 @@ function attachPopupDimOverlays(map) {
  * _riskLayersByMap : WeakMap<map, { [catKey]: layerGroup }> — 設定切換時針對每個 map 各自 add/remove。
  * _fleetRiskLayers 保留為「最後一個畫的」reference，供舊呼叫處兼容。 */
 const _riskLayersByMap = new WeakMap();
+/* 以 id 找 zone，供 parent_id（高威脅子區）解析用 */
+function zoneById(id) { return (window.RISK_ZONES || []).find(z => z.id === id) || null; }
+/* 區域在畫面上短邊小於此像素數時視為「看不見」，改用加粗邊框 + 中心點標記補強。
+ * 台灣 NAVTEX 四區跨度僅 0.17°–0.75°，世界視角下只有 2px。 */
+const RZ_TINY_PX = 14;
 function drawRiskZones(map) {
   const layers = {};
+  // { group, polys, dots, sw, ne } — 每個 zone 一筆，供 _rzZoomSync 依畫面尺寸調整
+  const zoneAids = [];
   if (!window.RISK_ZONES || !window.RISK_ZONE_CATEGORIES) {
     _fleetRiskLayers = layers;
     _riskLayersByMap.set(map, layers);
@@ -8166,6 +8198,8 @@ function drawRiskZones(map) {
                        : z.level === "high"     ? 0.22
                        : z.level === "medium"   ? 0.16
                        :                          0.12;
+      // 高威脅子區：z.parent_id 指向所屬母區；找不到時當一般區域處理
+      const parentZone = z.parent_id ? zoneById(z.parent_id) : null;
 
       // 邊界 bbox：從 coords 算 min/max lat/lon，給 popup 顯示用
       const lats = z.coords.map(p => p[0]), lons = z.coords.map(p => p[1]);
@@ -8192,6 +8226,7 @@ function drawRiskZones(map) {
           <div class="rz-desc">${escapeHtml(z.desc || "")}</div>
           ${z.desc_en ? `<div class="rz-desc-en">${escapeHtml(z.desc_en)}</div>` : ""}
           <div class="rz-meta">
+            ${parentZone ? `<div class="rz-kv"><span class="rz-k">所屬區域 Within</span><span class="rz-v">${escapeHtml(parentZone.name)} <span style="color:var(--k-7c8a9e)">— 本區為其高威脅子區</span></span></div>` : ""}
             <div class="rz-kv"><span class="rz-k">區域類型 Type</span><span class="rz-v">${escapeHtml(z.type_en || cat.label_en)}</span></div>
             <div class="rz-kv"><span class="rz-k">生效 Effective</span><span class="rz-v">${effective}</span></div>
             <div class="rz-kv"><span class="rz-k">邊界 Bounds</span><span class="rz-v rz-bbox">${bboxStr}</span></div>
@@ -8204,14 +8239,17 @@ function drawRiskZones(map) {
       const zs = z.style;     // 使用者自訂樣式（可能不存在）
       const lineTypeMap = { solid: null, dashed: "6 4", dotted: "2 4", "dash-dot": "6 3 2 3" };
       const polyColor = (zs && zs.color) || cat.color;
+      /* 高威脅子區（parent_id）：只畫外框不填色，避免與母區顏色疊加 */
       const polyStyle = {
         color: polyColor,
-        weight: zs && zs.lineWidth != null ? zs.lineWidth : (sem === "corridor" ? 2 : 1.2),
-        opacity: sem === "reporting" ? 0.55 : 0.85,
+        weight: parentZone ? 2.6 : (zs && zs.lineWidth != null ? zs.lineWidth : (sem === "corridor" ? 2 : 1.2)),
+        opacity: parentZone ? 1 : (sem === "reporting" ? 0.55 : 0.85),
         fillColor: polyColor,
-        fillOpacity: zs && zs.opacity != null ? zs.opacity
+        fillOpacity: parentZone ? 0
+                  : zs && zs.opacity != null ? zs.opacity
                   : (sem === "reporting" ? 0.04 : (sem === "corridor" ? 0.18 : fillOpacity)),
-        dashArray: zs && zs.lineType ? lineTypeMap[zs.lineType]
+        dashArray: parentZone ? "3 3"
+                : zs && zs.lineType ? lineTypeMap[zs.lineType]
                 : sem === "reporting" ? "10 6"
                 : sem === "corridor"  ? "6 4"
                 : (cat.key === "eca" || cat.key === "protected") ? "4 3"
@@ -8223,20 +8261,57 @@ function drawRiskZones(map) {
       //   maxHeight: 手機 180 / 桌面 360 — popup 太高時啟用內部 scroll，不會被 map
       //              容器的 overflow:hidden 裁掉；240px 高小地圖能塞下 popup + tip。
       //   autoPanPadding: 自動 pan 時保留 16px 邊距，避免 popup 緊貼邊緣。
+      const popupOpts = {
+        maxWidth: IS_MOBILE ? 280 : 320,
+        maxHeight: IS_MOBILE ? 180 : 360,
+        autoPanPadding: L.point(16, 16),
+      };
+      const zonePolys = [];
       group.eachLayer(layer => {
         if (!layer._rzBound && layer instanceof L.Polygon) {
-          layer.bindPopup(popupHtml, {
-            maxWidth: IS_MOBILE ? 280 : 320,
-            maxHeight: IS_MOBILE ? 180 : 360,
-            autoPanPadding: L.point(16, 16),
-          });
+          layer.bindPopup(popupHtml, popupOpts);
           layer._rzBound = true;
+          layer._rzBaseWeight = polyStyle.weight;   // 加粗後要能還原成使用者設定的線寬
+          zonePolys.push(layer);
         }
       });
+
+      // 太小看不見時的替身：中心點標記（同樣畫跨經度 3 份）。由 _rzZoomSync 按實際
+      // 螢幕尺寸決定掛不掛進 group，放大後移除，避免遮住實際邊界。
+      const cLat = (minLat + maxLat) / 2, cLon = (minLon + maxLon) / 2;
+      const zoneDots = [-360, 0, 360].map(dx => {
+        const dot = L.circleMarker([cLat, cLon + dx], {
+          radius: 5, color: polyColor, weight: 2, opacity: 0.95,
+          fillColor: polyColor, fillOpacity: 0.35,
+        });
+        dot.bindPopup(popupHtml, popupOpts);
+        return dot;
+      });
+      zoneAids.push({ group, polys: zonePolys, dots: zoneDots,
+                      sw: [minLat, minLon], ne: [maxLat, maxLon] });
     });
     layers[cat.key] = group;
     if (_riskLayerState[cat.key]) group.addTo(map);
   });
+
+  /* 小區補強：以「該區在畫面上的實際像素尺寸」判斷，不用固定 zoom 門檻，
+   *   縮到小於 RZ_TINY_PX 才加粗邊框並顯示中心點。
+   * 重畫（userZonesChanged）時舊 handler 仍抓著上一批 layer，必須先解除再重掛。 */
+  if (map._rzZoomSync) map.off("zoomend", map._rzZoomSync);
+  map._rzZoomSync = () => {
+    zoneAids.forEach(a => {
+      const p1 = map.latLngToLayerPoint(a.sw), p2 = map.latLngToLayerPoint(a.ne);
+      const tiny = Math.max(Math.abs(p2.x - p1.x), Math.abs(p2.y - p1.y)) < RZ_TINY_PX;
+      a.polys.forEach(p => p.setStyle({ weight: tiny ? Math.max(2, p._rzBaseWeight) : p._rzBaseWeight }));
+      a.dots.forEach(d => {
+        if (tiny) { if (!a.group.hasLayer(d)) a.group.addLayer(d); }
+        else if (a.group.hasLayer(d)) a.group.removeLayer(d);
+      });
+    });
+  };
+  map.on("zoomend", map._rzZoomSync);
+  map._rzZoomSync();
+
   _fleetRiskLayers = layers;
   _riskLayersByMap.set(map, layers);
 }
@@ -8251,6 +8326,66 @@ function setRiskLayer(key, enabled) {
     if (enabled) { if (!map.hasLayer(g)) g.addTo(map); }
     else { if (map.hasLayer(g)) map.removeLayer(g); }
   });
+}
+
+/* 「圖層 / Layers」面板的電子圍籬開關（船隊 detail 的 fly-geofence 與單船頁的 ly-geofence 共用）。
+ * 本檔的 RISK_ZONES 全部是 cat:"military" 的使用者電子圍籬，因此一個 checkbox 即可代表整層；
+ * 狀態沿用 _riskLayerState 並持久化到 sessionStorage，換頁重繪後仍記得。 */
+function wireGeofenceToggle(el) {
+  if (!el) return;
+  el.checked = !!_riskLayerState.military;
+  el.addEventListener("change", () => {
+    _riskLayerState.military = el.checked;
+    setRiskLayer("military", el.checked);
+    persistRiskLayerState();
+  });
+}
+
+/* 船隊總覽地圖沒有「圖層 / Layers」面板（該面板只存在於船隊 detail 與單船頁），
+ * 但圍籬在總覽最需要看得見，且狀態是三張地圖共用的 —— 若只在 detail 給開關，
+ * 使用者關掉後回到總覽就無從打開。此處補一個右下角小面板，沿用 .risk-toggle
+ * 既有樣式（收合時 36×36 icon、手機自動變整條 strip），預設收合不擋地圖。 */
+function injectGeofenceTogglePanel(mapWrap) {
+  if (!mapWrap) return;
+  const old = mapWrap.querySelector(".geofence-toggle");
+  if (old) old.remove();
+
+  const count = (window.RISK_ZONES || []).length;
+  const isOpen = sessionStorage.getItem("slab_va_geofence_panel_open") === "1";
+  const panel = document.createElement("div");
+  panel.className = "risk-toggle geofence-toggle" + (isOpen ? " open" : "");
+  panel.innerHTML = `
+    <div class="rt-head" title="圖層 / Layers">
+      <span class="rt-icon" style="color:var(--k-9ec5ff)" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span>
+      <span class="rt-title">圖層<span class="en">/ Layers</span></span>
+      <span class="rt-chev">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+      </span>
+    </div>
+    <div class="rt-body">
+      <label>
+        <input type="checkbox" id="gfly-geofence">
+        <span class="rt-swatch" style="background:rgba(255,0,0,0.2);border-color:#ff0000;border-style:dashed"></span>
+        <span>電子圍籬<span style="color:var(--k-7c8a9e);font-size:14px;display:block">Geofence</span></span>
+        <span class="rt-cnt">${count}</span>
+      </label>
+    </div>`;
+  mapWrap.appendChild(panel);
+
+  // 展開時收合警示 banner（兩者同錨右側，避免上下交疊）
+  panel.querySelector(".rt-head").addEventListener("click", () => {
+    const willOpen = !panel.classList.contains("open");
+    panel.classList.toggle("open");
+    if (willOpen) {
+      const banner = mapWrap.querySelector(".map-overlay-banner:not(.hidden)");
+      if (banner && !banner.classList.contains("collapsed")) {
+        banner.classList.add("collapsed");
+        sessionStorage.setItem("slab_va_alert_banner_collapsed", "1");
+      }
+    }
+    sessionStorage.setItem("slab_va_geofence_panel_open", panel.classList.contains("open") ? "1" : "0");
+  });
+  wireGeofenceToggle(panel.querySelector("#gfly-geofence"));
 }
 
 /* 港口錨地圖層 — 獨立於 RISK_ZONES，對應 anchorage 監控維度。
@@ -8301,7 +8436,8 @@ function setAnchorageLayer(enabled) {
 /* 風險區、錨地與氣象資料圖層皆已移除，此面板不再注入（保留函式以相容呼叫處）。 */
 function injectRiskTogglePanel(mapWrap) {
   if (!mapWrap) return;
-  const old = mapWrap.querySelector(".risk-toggle");
+  // :not(.geofence-toggle) — 別把共用 .risk-toggle 樣式的電子圍籬面板一起清掉
+  const old = mapWrap.querySelector(".risk-toggle:not(.geofence-toggle)");
   if (old) old.remove();
   return;
   // 以下為舊版氣象面板，已停用。
@@ -8418,15 +8554,21 @@ function injectExtraLayerPanel(mapWrap) {
 function drawFleetMap(enriched) {
   if (_fleetMap) { _fleetMap.remove(); _fleetMap = null; }
   // zoom control 改到右下，避開左上的浮動 toolbar
-  const map = L.map("fleet-map", { zoomControl: false, worldCopyJump: true }).setView([20, 60], 2);
+  // minZoom 依容器寬度動態決定：世界永遠至少填滿畫面寬，才不會看到並排的跨經度副本
+  const fleetEl = document.getElementById("fleet-map");
+  const map = L.map("fleet-map", {
+    zoomControl: false, worldCopyJump: true,
+    minZoom: worldFitMinZoom(fleetEl),
+  }).setView([20, 60], 2);
   _fleetMap = map;
   L.control.zoom({ position: "bottomright" }).addTo(map);
   attachPopupDimOverlays(map);
   setupBaseTiles(map);
-  attachMapResize(map, document.getElementById("fleet-map"));
+  attachMapResize(map, fleetEl, true);
 
   // 全球風險區圖層：每類一個 layerGroup，依 _riskLayerState 決定是否掛上 map
   drawRiskZones(map);
+  drawAnchorages(map);   // merge 時漏掉：沒有這行，圖層面板的「港口錨地」勾了不會有反應
   drawWxLayers(map);
 
   const points = [];
@@ -8942,6 +9084,7 @@ function renderDetail(vesselId) {
           <label><input type="checkbox" id="ly-planned"> 計畫航線（含 Waypoints）<span class="en" style="color:var(--k-5e6b80);margin-left:4px">Planned</span></label>
           <label><input type="checkbox" id="ly-corridor"> Safety Frame 走廊 <span class="en" style="color:var(--k-5e6b80);margin-left:4px">Corridor</span></label>
           <label><input type="checkbox" id="ly-ais"> AIS 航跡（${v.ais_track.length}）<span class="en" style="color:var(--k-5e6b80);margin-left:4px">AIS Track</span></label>
+          <label><input type="checkbox" id="ly-geofence"> 電子圍籬（${(window.RISK_ZONES || []).length}）<span class="en" style="color:var(--k-5e6b80);margin-left:4px">Geofence</span></label>
         </div>
         <div class="legend">
           <span class="legend-item"><span class="legend-swatch" style="background:var(--k-4a9eff)"></span>計畫航線</span>
@@ -9012,12 +9155,15 @@ function renderDetail(vesselId) {
 
   ["planned","corridor","ais","ship","mails"].forEach(k => {
     const el = document.getElementById("ly-"+k);
+    if (!el) return;   // ship / mails 已無對應 checkbox；不擋掉後面的面板接線
     el.checked = _layerState[k];
     el.addEventListener("change", () => {
       _layerState[k] = el.checked;
       setLayer(k, el.checked);
     });
   });
+  // 電子圍籬圖層（RISK_ZONES / cat:"military"）— 與 _riskLayerState 共用狀態
+  wireGeofenceToggle(document.getElementById("ly-geofence"));
 
   // 圖層面板摺疊狀態（session 持久化，預設 desktop 展開、mobile 收合）
   // mutex：開啟前先關閉同地圖容器內的 risk-toggle，避免互相遮蔽
@@ -9079,6 +9225,7 @@ function drawMap(v, vesselMails) {
 
   // 單船頁也帶上全球風險區 + 港口錨地圖層（per-map layerGroup 副本）
   drawRiskZones(map);
+  drawAnchorages(map);   // merge 時漏掉：沒有這行，圖層面板的「港口錨地」勾了不會有反應
   drawWxLayers(map);
 
   // 單船頁面 — 圖層面板（風險區 / 其他圖層 / 海圖風格）注入到地圖右上+左下
@@ -9721,14 +9868,16 @@ function renderRiskZoneCatalog() {
     const c = lvlColor[lvl] || "#7c8a9e";
     return `<span class="rz-lvl" style="color:${c};border-color:${c}66;background:${c}1a">${lvl}</span>`;
   };
-  /* 資料來源類別徽章：標出每筆 zone 的資料源屬性
-   *   doc      = 來自「圖層資訊」資料夾內的 PDF（BMP5 / ITF / MC(18)48 / GCPG / Marine Security Advisory）
+  /* 資料來源類別徽章：標出每筆 zone 的「資料源載體」，不是可信度分級 —
+   *   ITF 與 IMO 同樣是官方，差別只在建置時是否取得該份文件本身。
+   *   doc      = 依建置時取得的權威文件（BMP5 / ITF / MC(18)48 / GCPG / Marine Security Advisory）整理
    *   official = 官方公開資料庫 / 機構公告（OFAC、IMO、各國 NAVAREA、ReCAAP、NOAA、JMA 等）
-   *   web      = 新聞 / Wikipedia / 第三方分析（補充最新動態用） */
+   *   web      = 新聞 / Wikipedia / 第三方分析（補充最新動態用）
+   *   註：上述文件與資料庫皆不隨 Demo 附上，徽章僅標示整理依據；查證請走 source_url。 */
   const srcKindBadge = (kind) => {
     const meta = {
-      doc:      { lbl: "文件",   en: "Doc",       color: "#6ee094", tip: "來自圖層資訊資料夾內的權威文件（BMP5 / ITF / MC(18)48 / GCPG / MSA）" },
-      official: { lbl: "官方",   en: "Official",  color: "#9ec5ff", tip: "官方公開資料庫或機構公告（OFAC / EU / UN / IMO / NAVAREA / ReCAAP / NOAA 等），未直接附 PDF" },
+      doc:      { lbl: "文件",   en: "Doc",       color: "#6ee094", tip: "依建置時取得的權威文件（BMP5 / ITF / MC(18)48 / GCPG / MSA）整理；文件本身未隨 Demo 附上" },
+      official: { lbl: "官方",   en: "Official",  color: "#9ec5ff", tip: "依官方公開資料庫或機構公告（OFAC / EU / UN / IMO / NAVAREA / ReCAAP / NOAA 等）整理" },
       web:      { lbl: "網路爬",  en: "Web",       color: "#f5b753", tip: "由網路新聞、Wikipedia 或第三方分析整理；用於補充最新動態" },
     };
     const m = meta[kind]; if (!m) return "";
@@ -9854,11 +10003,12 @@ function renderRiskZoneCatalog() {
       <div class="rz-src-legend">
         <b>資料來源類別：</b>
         <span class="rz-src-kind" data-kind="doc" style="color:var(--k-6ee094);border-color:#6ee09466;background:#6ee0941a">文件<span class="en">/ Doc</span></span>
-        圖層資訊資料夾內 PDF（BMP5 / ITF 2026-03-13 / MC(18)48 / GCPG / Liberia MSA 09/2023）
+        依權威文件整理（BMP5 / ITF 2026-03-13 / MC(18)48 / GCPG / Liberia MSA 09/2023）
         <span class="rz-src-kind" data-kind="official" style="color:var(--k-9ec5ff);border-color:#9ec5ff66;background:#9ec5ff1a">官方<span class="en">/ Official</span></span>
         官方公開資料庫（OFAC / EU Council / UN SC / IMO MEPC / NAVAREA / ReCAAP / NOAA / JMA 等）
         <span class="rz-src-kind" data-kind="web" style="color:var(--k-f5b753);border-color:#f5b75366;background:#f5b7531a">網路爬<span class="en">/ Web</span></span>
         新聞 / Wikipedia / 第三方分析（補最新動態）
+        <div class="rz-src-note">徽章標示的是整理依據，非可信度分級；來源文件與資料庫不隨 Demo 附上，逐筆查證請點各列的「官方資料連結」。</div>
       </div>
       <ul class="rz-sources">
         <li>海盜：IMB Piracy Reporting Centre · ReCAAP · MDAT-GoG · BMP5 / BMP West Africa</li>

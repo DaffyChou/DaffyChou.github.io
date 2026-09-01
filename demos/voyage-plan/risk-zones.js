@@ -361,8 +361,9 @@ window.RISK_ZONES = [
 
 /* ─────────────────────────────────────────────────────────────────
  * 港口錨地 / Anchorage Areas — 獨立於 RISK_ZONES，對應 anchorage 維度監控
- * 涵蓋亞洲 East Asia / Southeast Asia / South Asia 主要商港 41 個
- * Demo 資料：邊界為近似值（港口中心 ±0.08° 5 點多邊形）
+ * 涵蓋亞洲 East Asia / Southeast Asia / South Asia 主要商港 50 個
+ * Demo 資料：邊界為近似值。其中 26 個為「港口中心 ±0.08°」的樣板方框，
+ *            另 24 個為依海圖概略描出的多邊形（4–7 點）；皆非法定錨地界線。
  * ───────────────────────────────────────────────────────────────── */
 window.ANCHORAGE_AREAS = [
   { id: "ANC-CNSHA", port_code: "CNSHA",
