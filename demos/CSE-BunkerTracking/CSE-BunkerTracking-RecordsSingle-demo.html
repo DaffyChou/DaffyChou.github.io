@@ -1562,10 +1562,8 @@
                         if (detail) {
                             let html = `<b>${detail.label}</b>`;
                             detail.families.forEach(f => {
-                                const gtxt = f.grades.map(g => `${g.grade} ${g.count}次 ${Highcharts.numberFormat(g.qty, 1)}MT`).join('、');
                                 html += `<br>${f.name}: <b>${Highcharts.numberFormat(f.qty, 1)} MT</b>`
-                                    + `${f.pct != null ? ` (${f.pct}%)` : ''}，${f.count} 次`
-                                    + `<br><span style="color:#94a3b8;font-size:11px">　└ ${gtxt}</span>`;
+                                    + `${f.pct != null ? ` (${f.pct}%)` : ''}，${f.count} 次`;
                             });
                             if (detail.events.length) {
                                 const riskN = detail.events.filter(e => e.risk).length;
