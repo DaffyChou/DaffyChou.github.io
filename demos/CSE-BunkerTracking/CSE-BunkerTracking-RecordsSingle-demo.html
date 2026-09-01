@@ -1567,9 +1567,8 @@
                             });
                             if (detail.events.length) {
                                 const riskN = detail.events.filter(e => e.risk).length;
-                                html += `<br><span style="color:#94a3b8">共 ${detail.events.length} 次加油`
-                                    + (riskN ? `，<span style="color:#ef4444">其中 ${riskN} 次低於安全庫存線</span>` : '')
-                                    + `<br>點擊圓點可切換到該港逐次明細（含下方加油紀錄表自動篩選到此港）</span>`;
+                                html += (riskN ? `<br><span style="color:#ef4444">其中 ${riskN} 次低於安全庫存線</span>` : '')
+                                    + `<br><span style="color:#94a3b8">點圖表看逐次明細</span>`;
                             }
                             return html;
                         }
