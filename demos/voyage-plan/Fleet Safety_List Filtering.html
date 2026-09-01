@@ -136,6 +136,9 @@
   .hitem .hdesc{font-size:.86em;color:var(--ink);font-weight:600;line-height:1.45}
   .hitem .hstate{font-size:.68em;font-weight:800;padding:3px 8px;border-radius:8px;flex:none;margin-top:2px;white-space:nowrap}
   .hstate.on{background:rgba(229,72,77,.1);color:#c62a2f}.hstate.off{background:#EEF2F6;color:#7c8b98}
+  .hdim{font-size:.65em;font-weight:800;color:#fff;padding:1px 7px;border-radius:6px;margin-right:6px;white-space:nowrap;display:inline-block}
+  .hdim.ais{background:#0B2942}.hdim.risk{background:#5B4B8A}.hdim.crew{background:#0E7C7B}.hdim.cargo{background:#8A5A15}
+  .chip2.tap{cursor:pointer}.chip2.tap:active{opacity:.7}
   .others{display:flex;gap:8px;margin:12px 2px 2px}
   .chip2{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:#F3F6F9;border-radius:10px;padding:10px 4px}
   .chip2 .lb{font-size:.72em;color:#94a3b0;font-weight:700}
@@ -152,7 +155,7 @@
     <h1>船隊安全<br><span>清單＋分頁＋篩選</span></h1>
     <p class="lead">結果改用<b style="color:#c3b0ec">清單</b>呈現（比單船卡好讀）；清單太長時用 carousel 分頁、橫向滑換頁——無內部捲軸。航安含 <b>AIS</b> 與 <b>風險管理</b>兩個燈號，並提供<b>船型</b>與<b>風險</b>篩選。</p>
     <div class="legend"><span class="k"><span class="dot g"></span>正常</span><span class="k"><span class="dot y"></span>注意</span><span class="k"><span class="dot r"></span>警示</span></div>
-    <div class="note">人安・貨安為二元（🟢安全／🔴異常＋說明，取自對照表回報）；航安 <b>AIS 燈依 AIS 航行狀態判定</b>（綠＝航行中/錨泊/繫泊；紅＝失去操縱/操縱受限/吃水受限/擱淺＝優先避讓；黃＝其餘或不明）＋風險管理另一燈。船型＝Excel 的 Type 艦級代碼。</div>
+    <div class="note">人安・貨安為二元（🟢安全／🔴異常＋說明，取自對照表回報）；航安 <b>AIS 燈依 AIS 航行狀態判定</b>（綠＝航行中/錨泊/繫泊；紅＝失去操縱/操縱受限/吃水受限/擱淺＝優先避讓；黃＝其餘或不明）＋風險管理另一燈。船型＝Excel 的 Type 艦級代碼。三個清單顯示規則統一：列＝燈號（航安兩燈／人安貨安各一燈）＋點列看詳情，說明文字僅於詳情卡顯示，清單不重複列出。</div>
     <div class="note">👵 <b>長者放大</b>：上方「文字大小」可切標準／大／特大，文字放大時卡片自動換行加高、不破版。</div>
     <div class="flow">
       <div class="step"><b>1 · 船隊安全</b><small>選 航安 / 人安 / 貨安</small></div>
@@ -229,17 +232,32 @@ const AISNOTE={'達明':'AIS 訊號中斷','碩明':'AIS 訊號中斷逾 8 分�
 SHIPS.forEach(s=>s.aisNote=AISNOTE[s.cn]||null);
 /* 風險歷程（示意）：w=距今小時；lv=等級；s=狀態 */
 const HIST={
- '碩明':[{t:'今日 06:10',d:'偏離計畫航線，接近淺水區',lv:'r',s:'持續中',w:9},{t:'昨日 23:40',d:'AIS 訊號中斷 8 分鐘',lv:'r',s:'已解除',w:15}],
- '達明':[{t:'今日 05:40',d:'與鄰船 CPA 距離縮短',lv:'y',s:'持續中',w:9},{t:'今日 03:05',d:'AIS 訊號中斷',lv:'r',s:'已解除',w:12}],
- '震明':[{t:'今日 04:15',d:'壓載水系統滲漏，監控中',lv:'r',s:'監控中',w:11}],
- '英明':[{t:'今日 07:20',d:'主機轉速異常，減速航行',lv:'r',s:'持續中',w:8}],
- '菊明':[{t:'今日 02:20',d:'接近港區交通管制範圍',lv:'y',s:'已解除',w:13}],
- '動明':[{t:'今日 08:10',d:'AIS 訊號不穩定',lv:'y',s:'持續中',w:7}],
- '創明':[{t:'昨日 20:30',d:'進入夜航密集區',lv:'y',s:'已解除',w:19}],
- '盛明':[{t:'今日 01:30',d:'短暫偏離航線，已修正',lv:'y',s:'已解除',w:14}],
- '精明':[{t:'昨日 18:40',d:'濃霧能見度不足警示',lv:'y',s:'已解除',w:20}]
+ '碩明':[{t:'今日 06:10',d:'偏離計畫航線，接近淺水區',lv:'r',s:'持續中',w:9,dim:'risk'},{t:'昨日 23:40',d:'AIS 訊號中斷 8 分鐘',lv:'r',s:'已解除',w:15,dim:'ais'}],
+ '達明':[{t:'今日 05:40',d:'與鄰船 CPA 距離縮短',lv:'y',s:'持續中',w:9,dim:'risk'},{t:'今日 03:05',d:'AIS 訊號中斷',lv:'r',s:'已解除',w:12,dim:'ais'}],
+ '震明':[{t:'今日 04:15',d:'壓載水系統滲漏，監控中',lv:'r',s:'監控中',w:11,dim:'risk'}],
+ '英明':[{t:'今日 07:20',d:'主機轉速異常，減速航行',lv:'r',s:'持續中',w:8,dim:'risk'}],
+ '菊明':[{t:'今日 02:20',d:'接近港區交通管制範圍',lv:'y',s:'已解除',w:13,dim:'risk'}],
+ '動明':[{t:'今日 08:10',d:'AIS 訊號不穩定',lv:'y',s:'持續中',w:7,dim:'ais'}],
+ '創明':[{t:'昨日 20:30',d:'進入夜航密集區',lv:'y',s:'已解除',w:19,dim:'risk'}],
+ '盛明':[{t:'今日 01:30',d:'短暫偏離航線，已修正',lv:'y',s:'已解除',w:14,dim:'risk'}],
+ '精明':[{t:'昨日 18:40',d:'濃霧能見度不足警示',lv:'y',s:'已解除',w:20,dim:'risk'}]
 };
 SHIPS.forEach(s=>s.hist=HIST[s.cn]||[]);
+/* 人安／貨安 事件歷程（示意，與 HIST 同一套 t/d/lv/s/w 結構，另加 dim 標記） */
+const PPLHIST={
+ '碩明':[{t:'今日 05:50',d:'輪機部大管輪發燒 38.5°C，隔離觀察中',lv:'r',s:'監控中',w:9,dim:'crew'}],
+ '達明':[{t:'今日 04:30',d:'船長腰部拉傷，行動受限',lv:'r',s:'持續中',w:10,dim:'crew'}],
+ '團明':[{t:'昨日 22:10',d:'甲板部一員手部割傷，已包紮',lv:'y',s:'已解除',w:16,dim:'crew'}]
+};
+SHIPS.forEach(s=>s.pplHist=PPLHIST[s.cn]||[]);
+const CARGOHIST={
+ '碩明':[{t:'今日 06:40',d:'甲板貨櫃綁紮鬆動，複查中',lv:'r',s:'監控中',w:8,dim:'cargo'}],
+ '源明':[{t:'今日 03:20',d:'貨櫃輕微變形，待靠港檢查',lv:'y',s:'監控中',w:12,dim:'cargo'}],
+ '英明':[{t:'今日 02:10',d:'第 3 艙冷藏櫃溫度偏高',lv:'y',s:'持續中',w:13,dim:'cargo'}],
+ '震明':[{t:'昨日 21:00',d:'危險品櫃文件待補確認',lv:'y',s:'已解除',w:17,dim:'cargo'}]
+};
+SHIPS.forEach(s=>s.cargoHist=CARGOHIST[s.cn]||[]);
+const DIMLABEL={ais:'AIS',risk:'風險',crew:'人安',cargo:'貨安'};
 /* AIS 航行狀態（Navigational Status）→ 燈號判定
    綠：Under way using engine / At anchor / Moored
    紅：Not under command / Restricted manoeuvrability / Constrained by her draught / Aground
@@ -312,20 +330,20 @@ function detailCard(s){
   const badge=(v,t)=>`<span class="badge ${v}">${dot(v)} ${t}</span>`;
   const aisTxt={g:'訊號穩定',y:'訊號不穩',r:'訊號中斷'}[s.ais];
   const riskTxt={g:'低風險',y:'中度注意',r:'高風險警示'}[s.risk];
-  const hItem=e=>`<div class="hitem"><span class="hd">${dot(e.lv)}</span><div class="hbody"><div class="htime">${e.t}</div><div class="hdesc">${e.d}</div></div><span class="hstate ${e.s==='已解除'?'off':'on'}">${e.s}</span></div>`;
+  const hItem=e=>`<div class="hitem"><span class="hd">${dot(e.lv)}</span><div class="hbody"><div class="htime">${e.dim?`<span class="hdim ${e.dim}">${DIMLABEL[e.dim]}</span>`:''}${e.t}</div><div class="hdesc">${e.d}</div></div><span class="hstate ${e.s==='已解除'?'off':'on'}">${e.s}</span></div>`;
   const h12=s.hist.filter(e=>e.w<=12), h24=s.hist.filter(e=>e.w>12&&e.w<=24);
   const grp=(t,a)=>a.length?`<div class="ht">${t}</div>${a.map(hItem).join('')}`:'';
-  const hist=s.hist.length?grp('近 12 小時',h12)+grp('12–24 小時',h24):`<div class="hnone">近 24 小時無風險紀錄 🟢</div>`;
+  const hist=s.hist.length?grp('近 12 小時',h12)+grp('12–24 小時',h24):`<div class="hnone">近 24 小時無異常紀錄 🟢</div>`;
   return `<div class="flex"><div class="flex-hero nav">
       <div class="kicker">船舶詳細狀況 · ${s.co}</div><h2>${s.cn}</h2><div class="sub">${s.en} · 船型 ${s.type}</div>
     </div><div class="flex-body"><div class="dsec">
       <div class="drow"><span class="dl">AIS 狀態</span><span class="dv">${badge(s.ais,AIS_CAT[s.ais])}　${s.navStatus}</span></div>
       <div class="drow"><span class="dl">風險管理</span><span class="dv">${badge(s.risk,riskTxt)}${s.risk!=='g'&&s.riskNote?'　'+s.riskNote:''}</span></div>
-      <div class="ht" style="margin-top:12px">風險歷程（近 24 小時）</div>
+      <div class="ht" style="margin-top:12px">事件歷程（AIS + 風險，近 24 小時）</div>
       ${hist}
       <div class="others">
-        <div class="chip2"><span class="lb">人安</span><span class="st ${s.ppl?'r':'g'}">${s.ppl?'🔴異常':'🟢安全'}</span></div>
-        <div class="chip2"><span class="lb">貨安</span><span class="st ${s.cargo?'r':'g'}">${s.cargo?'🔴異常':'🟢安全'}</span></div>
+        <div class="chip2 tap" onclick="binDetail('ppl',${s.id})"><span class="lb">人安</span><span class="st ${s.ppl?'r':'g'}">${s.ppl?'🔴異常':'🟢安全'}</span></div>
+        <div class="chip2 tap" onclick="binDetail('cargo',${s.id})"><span class="lb">貨安</span><span class="st ${s.cargo?'r':'g'}">${s.cargo?'🔴異常':'🟢安全'}</span></div>
       </div>
     </div></div><div class="flex-foot"><div class="updated">🕘 ${UPDATED}</div></div></div>`;
 }
@@ -349,14 +367,40 @@ function navFilters(type,ais,risk){
 }
 
 /* ---- 人安 / 貨安：二元 + 說明 ---- */
-function binRow(domain){return s=>{
+function binRow(domain){const label=domain==="ppl"?"人安":"貨安";return s=>{
   const bad=!!s[domain];
-  const rk=bad?`<div class="rowremark">${s[domain].r}</div>`:'';
-  return `<div class="row">
-      <div class="id"><div class="nm">${s.cn}</div><div class="en">${s.en} · ${s.type}</div></div>
-      <div class="st ${bad?'r':'g'}">${bad?'🔴 異常':'🟢 安全'}</div>
-    </div>${rk}`;
+  const h=s[domain==='ppl'?'pplHist':'cargoHist']||[];
+  const recent=h.length?`<span class="hbadge ${h.some(e=>e.w<=12)?'r':'y'}">⏱ ${h.some(e=>e.w<=12)?'12':'24'}h曾警示</span>`:'';
+  return `<div class="row tap" onclick="binDetail('${domain}',${s.id})">
+      <div class="id"><div class="nm">${s.cn}${recent}</div><div class="en">${s.en} · ${s.type}</div></div>
+      <div class="lights"><div class="lw">${dot(bad?'r':'g')}<small>${label}</small></div></div>
+      <span class="chev">›</span>
+    </div>`;
 };}
+/* ---- 人安 / 貨安：詳情卡（含近 24 小時事件歷程，與航安詳情同一套呈現方式） ---- */
+function binDetail(domain,id){
+  const label=domain==='ppl'?'人安':'貨安';
+  const s=SHIPS[id];meMsg(s.cn+' '+label+'詳細狀況');setTimeout(()=>botMsg(binDetailCard(domain,s)),300);
+}
+function binDetailCard(domain,s){
+  const label=domain==='ppl'?'人安':'貨安';const cls=domain==='ppl'?'ppl':'cargo';
+  const bad=!!s[domain];
+  const badge=(v,t)=>`<span class="badge ${v}">${dot(v)} ${t}</span>`;
+  const h=s[domain==='ppl'?'pplHist':'cargoHist']||[];
+  const hItem=e=>`<div class="hitem"><span class="hd">${dot(e.lv)}</span><div class="hbody"><div class="htime">${e.dim?`<span class="hdim ${e.dim}">${DIMLABEL[e.dim]}</span>`:''}${e.t}</div><div class="hdesc">${e.d}</div></div><span class="hstate ${e.s==='已解除'?'off':'on'}">${e.s}</span></div>`;
+  const h12=h.filter(e=>e.w<=12), h24=h.filter(e=>e.w>12&&e.w<=24);
+  const grp=(t,a)=>a.length?`<div class="ht">${t}</div>${a.map(hItem).join('')}`:'';
+  const hist=h.length?grp('近 12 小時',h12)+grp('12–24 小時',h24):`<div class="hnone">近 24 小時無異常紀錄 🟢</div>`;
+  return `<div class="flex"><div class="flex-hero ${cls}">
+      <div class="kicker">船舶詳細狀況 · ${s.co}</div><h2>${s.cn}</h2><div class="sub">${s.en} · 船型 ${s.type}</div>
+    </div><div class="flex-body"><div class="dsec">
+      <div class="drow"><span class="dl">${label}</span><span class="dv">${badge(bad?'r':'g',bad?'異常':'安全')}${bad&&s[domain].r?'　'+s[domain].r:''}</span></div>
+      <div class="ht" style="margin-top:12px">事件歷程（${label}，近 24 小時）</div>
+      ${hist}
+    </div></div><div class="flex-foot"><div class="updated">🕘 ${UPDATED}</div></div>
+    <div class="flex-foot" style="padding-top:0"><button class="fbtn ${cls}" style="width:100%" onclick="binResult('${domain}','全部','全部')">‹ 返回${label}清單</button></div>
+    </div>`;
+}
 function binResult(domain,type,status){
   const label=domain==='ppl'?'人安':'貨安';const cls=domain==='ppl'?'ppl':'cargo';
   let list=SHIPS.filter(s=>(type==='全部'||s.type===type)&&(status==='全部'|| (status==='異常'?!!s[domain]:!s[domain])));
