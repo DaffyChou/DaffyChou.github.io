@@ -160,7 +160,7 @@
                         </div>
                         <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                     </div>
-                    <div id="chart-fuel-by-type" class="chart-container flex-grow" style="height: 280px;"></div>
+                    <div id="chart-fuel-by-type" class="chart-container" style="height: 280px;"></div>
                     <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expF2"></div>
                 </div>
 
@@ -173,7 +173,7 @@
                         </div>
                         <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                     </div>
-                    <div id="chart-fuel-by-equip" class="chart-container flex-grow" style="height: 280px;"></div>
+                    <div id="chart-fuel-by-equip" class="chart-container" style="height: 280px;"></div>
                     <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expF3"></div>
                 </div>
             </div>
@@ -231,7 +231,7 @@
 
             <div class="flex flex-wrap items-center space-x-2 md:space-x-3 bg-gray-900 p-3 rounded-lg border border-gray-700 mb-6">
                 <span class="text-gray-400 text-sm font-semibold pl-2" data-i18n="fThisSection">本區篩選：</span>
-                <span class="text-gray-400 text-sm" data-i18n="fBnkPort">加油港口：</span>
+                <span class="text-gray-400 text-sm" data-i18n="fBnkPort">加油港口篩選：</span>
                 <select id="bunker-port" class="bg-gray-700 text-white text-sm border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500 w-36">
                     <option value="" data-i18n="optAll">全部</option>
                 </select>
@@ -244,13 +244,19 @@
                 <div class="relative bg-gray-900 p-4 rounded-lg border border-gray-700 flex flex-col">
                     <div class="flex flex-col mb-2">
                         <div class="flex justify-between items-center mb-1">
-                            <h3 id="bunker-inv-title" class="text-sm font-semibold text-gray-300">各港口加油量與抵港庫存 (Volume & Arrival ROB)</h3><span class="ml-2 align-middle text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-600/50" title="本圖使用實際 CSV 資料，非模擬">★ 真實資料</span>
-                            <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
-                                class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                            <div class="flex items-center">
+                                <h3 id="bunker-inv-title" class="text-sm font-semibold text-gray-300">各港口加油量（依油品）與加油前庫存 (Volume by Grade &amp; Pre-bunker ROB)</h3><span class="ml-2 align-middle text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-600/50" title="本圖使用實際 CSV 資料，非模擬">★ 真實資料</span>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <button id="bunker-inv-back" onclick="clearFilter('bunker')" style="display:none"
+                                    class="text-sm text-blue-300 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow">&larr; 返回全部港口</button>
+                                <button onclick="$(this).closest('.relative').find('.explanation-wrapper').slideToggle();"
+                                    class="text-sm text-gray-400 hover:text-white bg-gray-700 px-3 py-1.5 rounded transition shadow" data-i18n="btnToggleExp">說明</button>
+                            </div>
                         </div>
                         <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                     </div>
-                    <div id="chart-bunker-inventory" class="chart-container flex-grow" style="height: 280px;"></div>
+                    <div id="chart-bunker-inventory" class="chart-container" style="height: 280px;"></div>
                     <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expB1"></div>
                 </div>
 
@@ -263,11 +269,12 @@
                         </div>
                         <div class="text-sm text-blue-300 font-mono bg-gray-800 border border-gray-700 inline-block px-2 py-1 rounded date-filter-display self-start transition-all duration-300"></div>
                     </div>
-                    <div id="chart-voyage-bunker" class="chart-container flex-grow" style="height: 280px;"></div>
+                    <div id="chart-voyage-bunker" class="chart-container" style="height: 280px;"></div>
                     <div class="explanation-wrapper mt-4 bg-gray-800 rounded-lg p-5 border border-gray-600" style="display: none;" data-i18n="expB2"></div>
                 </div>
             </div>
 
+            <h3 class="text-sm font-semibold text-gray-300 mb-3" data-i18n="tblBunkerTitle">加油紀錄表 Bunkering Log Records</h3>
             <div class="overflow-x-auto w-full pb-4">
                 <table id="table-bunkering-log" class="display w-full">
                     <thead>
@@ -439,11 +446,7 @@
                         <select id="plan-period" class="bg-gray-700 text-white text-xs border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-blue-500"></select>
                     </div>
                 </div>
-                <div id="plan-chart-bridge" class="chart-container" style="height: 300px;"></div>
-                <div class="mt-2 text-xs text-gray-500 leading-relaxed">
-                    往右每一段把油耗推高或壓低，<b class="text-gray-300">最後一段是效率損失（原因待查）</b>——
-                    前面幾段找營運部門，最後一段原因待查，需輪機部門協助排查。
-                </div>
+                <div id="plan-chart-bridge"></div>
             </div>
 
             <!-- ── 第 3 層：證據（預設收合）─────────────────────────── -->
@@ -532,10 +535,10 @@
                 secCapacityTrend: '總運力與能耗趨勢 Capacity & Energy Trend',
                 ctCaption: '單船總運力 × 燃油消耗 × EEOI 趨勢',
                 secFuel: '油耗紀錄 Fuel Consumption Records',
-                secBunker: '加油紀錄 Bunkering Log',
+                secBunker: '加油紀錄 Bunkering Log', tblBunkerTitle: '加油紀錄表 Bunkering Log Records',
                 secAdvanced: '進階風險與營運分析 Advanced Risk & Operations',
                 btnToggleExp: '說明', btnApply: '套用篩選', btnClear: '清空', currRange: '當前區間：',
-                fRange: '區間：', fNavRange: '航行區間：', fTo: '至', noteFuelTable: '<span class="text-gray-400 font-semibold">列表說明：</span>本列表<b>跟隨上方「區間」篩選</b>（已無獨立日期輸入框），判斷依據是<b>航次起始日</b>落在所選期間內，跨月航次以起始日歸屬。<b>燃油效率</b>旁的百分比為與<b>上一個航次</b>相比的變化，以顯示用的 1 位小數值計算；<span class="text-emerald-400">綠色 ↗</span> 代表效率提升（nm/mt 越高越好），<span class="text-red-400">紅色 ↘</span> 代表下滑。<br><span class="text-yellow-400">⚠</span> <b>總滑油</b>與<b>總消耗油量</b>顯示「待提供」——來源三個 CSV <b>完全沒有滑油／汽缸油／系統油欄位</b>，而總消耗油量 ＝ 總燃油 ＋ 總滑油，因此一併無法計算，需中運提供滑油消耗紀錄後補上。', gRange: '全頁日期區間：', gRangeHint: '本頁所有圖表與列表的時間條件皆以此為準；各區塊的其餘篩選（港口、吃水狀態等）僅影響該區塊。', fThisSection: '本區篩選：', fFollowTop: '（跟隨最上方的全頁日期區間）', fDep: '起拖港：', fArr: '目的港：', fBnkPort: '加油港口：', fDraft: '吃水狀態：', fDraftHint: '(僅連動圖表 1 與 2)',
+                fRange: '區間：', fNavRange: '航行區間：', fTo: '至', noteFuelTable: '<span class="text-gray-400 font-semibold">列表說明：</span>本列表<b>跟隨上方「區間」篩選</b>（已無獨立日期輸入框），判斷依據是<b>航次起始日</b>落在所選期間內，跨月航次以起始日歸屬。<b>燃油效率</b>旁的百分比為與<b>上一個航次</b>相比的變化，以顯示用的 1 位小數值計算；<span class="text-emerald-400">綠色 ↗</span> 代表效率提升（nm/mt 越高越好），<span class="text-red-400">紅色 ↘</span> 代表下滑。<br><span class="text-yellow-400">⚠</span> <b>總滑油</b>與<b>總消耗油量</b>顯示「待提供」——來源三個 CSV <b>完全沒有滑油／汽缸油／系統油欄位</b>，而總消耗油量 ＝ 總燃油 ＋ 總滑油，因此一併無法計算，需中運提供滑油消耗紀錄後補上。', gRange: '全頁日期區間：', gRangeHint: '本頁所有圖表與列表的時間條件皆以此為準；各區塊的其餘篩選（港口、吃水狀態等）僅影響該區塊。', fThisSection: '本區篩選：', fFollowTop: '（跟隨最上方的全頁日期區間）', fDep: '起拖港：', fArr: '目的港：', fBnkPort: '加油港口篩選：', fDraft: '吃水狀態：', fDraftHint: '(僅連動圖表 1 與 2)',
                 optMonth: '月', optQuarter: '季', optYear: '年', optAll: '全部',
 
                 thDateRange: '航行區間', thDep: '起拖港', thArr: '目的港', thDur: '時間 (hr)', thDist: '距離 (nm)',
@@ -558,7 +561,7 @@
                 
                 expF3: '<h4 class="text-blue-400 font-bold mb-1">這張圖在看什麼</h4><p class="text-gray-300 text-xs leading-relaxed">把該月油耗依<b>設備</b>拆成三層堆疊面積：主機、發電機、鍋爐。一眼看出這艘船這個月是在「跑船」還是在「停著」。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">數列定義（★皆為 CSV 實際累計值）</h4><p class="text-gray-300 text-xs leading-relaxed"><span class="text-emerald-400 font-semibold">● 主機 Main Engine</span> ＝ HSFO_ME ＋ VLSFO_ME ＋ MGO/MDO_ME<br><span class="text-emerald-400 font-semibold">● 發電機 Aux Engine</span> ＝ HSFO_AE ＋ VLSFO_AE ＋ MGO/MDO_AE<br><span class="text-emerald-400 font-semibold">● 鍋爐 Boiler</span> ＝ HSFO_Boiler ＋ VLSFO_Boiler ＋ MGO/MDO_Boiler<br>三層相加＋Unclassified ＝ 該月總油耗。<br><span class="text-gray-400">參考值：本船隊 Capesize 的輔機＋鍋爐日耗油中位數約 2.0 MT／day；裝洗滌塔的 4 艘約 4.0 MT／day（洗滌塔本身要耗電）。</span></p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">判讀</h4><p class="text-gray-300 text-xs leading-relaxed"><b>主機（藍）面積大</b> → 該月多在海上航行，正常。<br><b>主機萎縮、發電機比重上升</b> → 該月大量時間在港內或錨泊；可到「進階風險與營運分析」的主機負荷圖與 Dashboard 的港外空等圖交叉確認。<br><b>鍋爐（紫）突然增加</b>的合理原因：① <b>高緯度寒冷海域</b>——重油遇冷會凝結，鍋爐需全功率加熱油艙維持流動性；② <b>特殊貨物保溫</b>——載運易凝結貨物時鍋爐需持續替貨艙加熱。若兩者皆非，需查是否鍋爐效率衰退或蒸汽管路洩漏。</p></div>',
                 
-                expB1: '<h4 class="text-blue-400 font-bold mb-1">這張圖在看什麼</h4><p class="text-gray-300 text-xs leading-relaxed">左軸藍柱是<b>該港的累計加油量</b>，右軸橘線是<b>抵達該港時的平均剩餘油量 (Arrival ROB)</b>。看的是補油點的選擇與庫存安全。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">數列定義（★真實加油事件）</h4><p class="text-gray-300 text-xs leading-relaxed">資料取自 <code>03_BunkeringRecords.csv</code> 中 <b>是否實際加油 = 1</b> 的事件；存油盤點類記錄（加油量 0）已排除，僅保留在下方表格。<br><span class="text-emerald-400 font-semibold">● 該港加油量</span> ＝ 該港所有實際加油事件的 <code>加油量_合計_t</code> 加總。<br><span class="text-emerald-400 font-semibold">● 抵港剩餘油量</span> ＝ 該港所有事件的 <code>抵港存油ROB_t</code> <b>平均值</b>。<br>若在上方選了單一港口，X 軸會改成<b>該港逐次加油的時間序列</b>，標題也會同步改變。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">⚠ 安全庫存參考線是假設值，不是資料</h4><p class="text-gray-300 text-xs leading-relaxed">紅虛線 ＝ <b>本船海上日耗油中位數 × 10 天</b>，隨船別自動換算（例：中鋼成功輪 33.50 MT／day × 10 ≈ 335 MT）。<br>其中<b>「10 天」是公司安全餘裕的假設值</b>，來源資料裡沒有這個欄位；<b>「底部不可泵送油量」也沒有欄位</b>，目前未計入。<br><span class="text-amber-400">需客戶提供：</span>公司規定的最低安全餘裕天數，以及各油櫃的不可泵送量，才能把這條線變成真正的合規紅線。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">安全與合規風險</h4><p class="text-gray-300 text-xs leading-relaxed">橘線<b>低於</b>紅虛線，代表該船曾在低油位狀態下航行——若遇惡劣海象需繞航或減速，極易發生斷油失去動力。應稽核當時的排程與補油決策。<br>橘線<b>長期遠高於</b>紅虛線也不是好事：多帶的油就是多帶的重量，會推升日耗油，且佔用可載貨的載重噸。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">篩選規則</h4><p class="text-gray-300 text-xs leading-relaxed"><b>日期一律以頁面最上方的「全頁日期區間」為準</b>，本圖不再有自己的時間條件；本區塊的「加油港口」下拉只影響加油紀錄的兩張圖與下方表格。<br>橫軸的港口標籤為 <b>港口名稱 (UN/LOCODE)</b>，例如 <code>KAOHSIUNG (TWKHH)</code>。柱高為該期間內該港的加油量加總，折線為該期間內該港的<b>平均</b>抵港剩餘油量。</p></div>',
+                expB1: '<h4 class="text-blue-400 font-bold mb-1">這張圖在看什麼</h4><p class="text-gray-300 text-xs leading-relaxed">左軸堆疊柱是<b>該港的加油量，依重油／輕油分色堆疊</b>；右軸的每個點是<b>一次加油事件的加油前庫存</b>（逐次真實值，不是平均）。看的是補油點的選擇、加了重油還是輕油、以及每次加油當下的庫存安全。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">數列定義（★真實加油事件）</h4><p class="text-gray-300 text-xs leading-relaxed">資料取自 <code>03_BunkeringRecords.csv</code> 中 <b>是否實際加油 = 1</b> 的事件；存油盤點類記錄（加油量 0、未實際加油）已從圖表與下方表格中一併排除。<br><span class="text-emerald-400 font-semibold">● 加油量（柱）</span> ＝ 該港的 <code>加油量_合計_t</code> 加總，依<b>油品家族</b>（重油 Residual／輕油 MGO-MDO）分色堆疊；滑到柱子分段可看該家族實際的 ISO 8217 代碼明細（例如 RMG380、RMD80）與各代碼的加油量、次數。<br><span class="text-emerald-400 font-semibold">● 加油前庫存（點）</span> ＝ 每一次加油事件各自的 <code>抵港存油ROB_t</code>，<b>逐次真實值，不取平均</b>——同一港若有一次庫存很低、其他幾次很高，舊版取平均會把這次風險蓋掉，現在每次加油都各自畫一個點。<br>若在上方選了單一港口，X 軸會改成<b>該港逐次加油的時間序列</b>，柱子與點都變成該港每一次事件，標題也會同步改變。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">⚠ 只能分「重油／輕油」，不是 HSFO/VLSFO/ULSFO</h4><p class="text-gray-300 text-xs leading-relaxed"><code>grade</code> 欄位是 ISO 8217 黏度代碼（如 RMG380、RMD80、DMA），不是硫含量分類；資料<b>沒有硫含量或洗滌塔欄位</b>，同一個黏度代碼在不同船上可能是 HSFO 也可能是 VLSFO，沒辦法可靠反推。<br>目前只用 <code>res</code>／<code>dist</code>（殘油／蒸餾油，兩欄互斥）這個可靠判定的欄位分成<b>重油</b>與<b>輕油 MGO/MDO</b> 兩色；「油品結構與輕油用量佔比」那張圖的 HSFO/VLSFO/ULSFO 細分是<b>另一份月度耗油資料</b>，沒有港口欄位，無法對到這張圖的港口與事件上。<br><span class="text-amber-400">需客戶提供：</span>加油紀錄若能補上硫含量或洗滌塔欄位，才能把重油再細分成 HSFO/VLSFO/ULSFO。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">⚠ 安全庫存參考線是假設值，不是資料</h4><p class="text-gray-300 text-xs leading-relaxed">紅虛線 ＝ <b>本船海上日耗油中位數 × 10 天</b>，隨船別自動換算（例：中鋼成功輪 33.50 MT／day × 10 ≈ 335 MT）。<br>其中<b>「10 天」是公司安全餘裕的假設值</b>，來源資料裡沒有這個欄位；<b>「底部不可泵送油量」也沒有欄位</b>，目前未計入。<br><span class="text-amber-400">需客戶提供：</span>公司規定的最低安全餘裕天數，以及各油櫃的不可泵送量，才能把這條線變成真正的合規紅線。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">安全與合規風險</h4><p class="text-gray-300 text-xs leading-relaxed">哪個點<b>低於</b>紅虛線，該點會用<b>紅框</b>標出——代表那一次抵港時庫存已經逼近或低於安全線，若遇惡劣海象需繞航或減速，極易發生斷油失去動力，應稽核當時的排程與補油決策。<br>因為現在是逐次真實值而非港口平均，<b>單一一次的壓線加油不會再被同港其他幾次的高庫存平均掉</b>。<br>點<b>長期遠高於</b>紅虛線也不是好事：多帶的油就是多帶的重量，會推升日耗油，且佔用可載貨的載重噸。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">篩選規則</h4><p class="text-gray-300 text-xs leading-relaxed"><b>日期一律以頁面最上方的「全頁日期區間」為準</b>，本圖不再有自己的時間條件；本區塊的「加油港口」下拉只影響加油紀錄的兩張圖與下方表格。<br>橫軸的港口標籤為 <b>港口名稱 (UN/LOCODE)</b>，例如 <code>KAOHSIUNG (TWKHH)</code>。滑到柱子任何地方可綜合看該港各油品家族的加油量、佔比、次數，以及低於安全線的次數；<b>點擊</b>任一點會把上方「加油港口」篩選切到該港，圖表切換成逐次時間序列、下方加油紀錄表也會自動篩選到同一港，逐次的日期／航次／油品／加油量／加油前後庫存都在那裡看，不佔用 tooltip 空間。</p></div>',
                 
                 expB2: '<h4 class="text-blue-400 font-bold mb-1">這張圖在看什麼</h4><p class="text-gray-300 text-xs leading-relaxed">每一點是<b>一次實際加油</b>：X 是<b>抵港時還剩多少油</b>，Y 是<b>這次加了多少</b>。用兩條中位數線切成四象限，判斷這艘船的補油行為模式。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">⚠ 門檻改為依船別動態計算</h4><p class="text-gray-300 text-xs leading-relaxed">原本兩條分界線寫死在 <b>ROB 600 MT／加油 1,000 MT</b>，這對 Capesize 勉強可用，但對 Handysize 與小型散裝（單次加油常在 100～300 MT）完全不適用，會把所有點都判成同一類。<br>現已改為<b>本船自己的中位數</b>：<code>庫存中位數 = median(抵港 ROB)</code>、<code>加油量中位數 = median(加油量)</code>，每艘船的分界線都不同，圖上會直接標出數值（例：中鋼成功輪 ROB 680 MT／加油 700 MT）。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">四象限的意義</h4><p class="text-gray-300 text-xs leading-relaxed"><span class="text-emerald-400 font-semibold">● 常規補給 Normal（藍）</span>——落在對角兩區：庫存低就多加、庫存高就少加。這是健康的補油節奏，多數點應該在這裡。<br><span class="text-emerald-400 font-semibold">● 趁機加滿 Tankering（綠三角）</span>——<b>庫存還很高卻加了大量油</b>。通常是該港油價便宜或油品品質好，刻意灌滿以避開下游高價港。合理，但要留意多帶的重量會推升日耗油。<br><span class="text-emerald-400 font-semibold">● 過渡保命 Bunker Call（紅）</span>——<b>庫存已經很低卻只加一點</b>。代表被迫在非計畫港補少量油「撐到下一港」，通常是排程失誤或油價談判失敗，單位成本最高，應列為稽核重點。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">判讀提醒</h4><p class="text-gray-300 text-xs leading-relaxed">綠、紅兩類<b>本來就應該很少</b>——因為抵港庫存與加油量是負相關（油少就多加），多數點自然落在對角的「常規」區。<br>以中鋼成功輪為例，31 次實際加油中僅 <b>1 次 Tankering、1 次 Bunker Call</b>，其餘 29 次都是常規補給，代表這艘船的補油排程相當穩定。<br>若某艘船紅點明顯增加，就要回頭查該期間的航線變更或港口壅塞紀錄。</p></div><div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-blue-400 font-bold mb-1">⚠ 門檻用全期中位數，不隨日期區間變動</h4><p class="text-gray-300 text-xs leading-relaxed">兩條分界線是<b>本船全期</b>（2024-01 ~ 2026-08）實際加油紀錄的中位數，<b>不會</b>隨上方的日期區間改變——否則區間一縮小、中位數就跟著飄，同一筆加油在不同區間會被歸到不同象限。<br>圖上的點<b>會</b>隨日期區間增減，但每一點的分類始終以同一組門檻判定。<br>若工程師系統的分界線位置與此不同（例如以安全庫存量或固定基準值當分水嶺），兩邊的象限歸類就會不一致，但<b>點的座標（抵港 ROB、加油量）完全相同</b>，可逐點核對。</p></div>',
                 
@@ -575,10 +578,10 @@
                 secCapacityTrend: 'Capacity & Energy Trend',
                 ctCaption: 'Vessel Capacity × Fuel Consumption × EEOI Trend',
                 secFuel: 'Fuel Consumption Records',
-                secBunker: 'Bunkering Log',
+                secBunker: 'Bunkering Log', tblBunkerTitle: 'Bunkering Log Records',
                 secAdvanced: 'Advanced Risk & Operations',
                 btnToggleExp: 'Details', btnApply: 'Apply Filter', btnClear: 'Clear', currRange: 'Current Range: ',
-                fRange: 'Range:', fNavRange: 'Voyage Dates:', fTo: 'to', noteFuelTable: '<span class="text-gray-400 font-semibold">About this table:</span> it <b>follows the period filter above</b> (there is no separate date box); a voyage is included when its <b>start date</b> falls inside the selected period. The percentage beside <b>Fuel Eff.</b> is the change <b>versus the previous voyage</b>, computed on the displayed one-decimal values; <span class="text-emerald-400">green &#8599;</span> means efficiency improved (higher nm/mt is better), <span class="text-red-400">red &#8600;</span> means it fell.<br><span class="text-yellow-400">&#9888;</span> <b>Total Lube Oil</b> and <b>Total Consumption</b> show &ldquo;pending&rdquo; &mdash; the three source CSVs contain <b>no lube / cylinder / system oil field at all</b>, and total consumption = total fuel + total lube oil, so neither can be computed until the client supplies lube oil records.', gRange: 'Page date range:', gRangeHint: 'Every chart and table on this page uses this period. Other filters (port, draft condition) affect only their own section.', fThisSection: 'This section:', fFollowTop: '(follows the page-level date range at the top)', fDep: 'Dep:', fArr: 'Arr:', fBnkPort: 'Port:', fDraft: 'Draft:', fDraftHint: '(Syncs Chart 1 & 2)',
+                fRange: 'Range:', fNavRange: 'Voyage Dates:', fTo: 'to', noteFuelTable: '<span class="text-gray-400 font-semibold">About this table:</span> it <b>follows the period filter above</b> (there is no separate date box); a voyage is included when its <b>start date</b> falls inside the selected period. The percentage beside <b>Fuel Eff.</b> is the change <b>versus the previous voyage</b>, computed on the displayed one-decimal values; <span class="text-emerald-400">green &#8599;</span> means efficiency improved (higher nm/mt is better), <span class="text-red-400">red &#8600;</span> means it fell.<br><span class="text-yellow-400">&#9888;</span> <b>Total Lube Oil</b> and <b>Total Consumption</b> show &ldquo;pending&rdquo; &mdash; the three source CSVs contain <b>no lube / cylinder / system oil field at all</b>, and total consumption = total fuel + total lube oil, so neither can be computed until the client supplies lube oil records.', gRange: 'Page date range:', gRangeHint: 'Every chart and table on this page uses this period. Other filters (port, draft condition) affect only their own section.', fThisSection: 'This section:', fFollowTop: '(follows the page-level date range at the top)', fDep: 'Dep:', fArr: 'Arr:', fBnkPort: 'Bunker Port Filter:', fDraft: 'Draft:', fDraftHint: '(Syncs Chart 1 & 2)',
                 optMonth: 'Month', optQuarter: 'Quarter', optYear: 'Year', optAll: 'All',
 
                 thDateRange: 'Date Range', thDep: 'Dep', thArr: 'Arr', thDur: 'Dur (hr)', thDist: 'Dist (nm)',
@@ -986,8 +989,40 @@
             dt.draw();
         }
 
+        // ★加油紀錄的油品欄位是 ISO 8217 黏度代碼（RMG380/RMD80/DMA...），資料沒有硫含量／洗滌塔欄位，
+        //   無法可靠細分 HSFO/VLSFO/ULSFO；只用 res/dist（互斥）分「重油／輕油」兩個真實可判定的家族，
+        //   輕油沿用「油品結構」圖的 MGO/MDO 綠色，重油刻意不用該圖的 HSFO 藍色，避免誤讀成真的是 HSFO
+        const FAMILY_LABEL = { residual: '重油 Residual', distillate: '輕油 MGO/MDO' };
+        const FAMILY_COLOR = { residual: '#64748b', distillate: '#10b981' };
+        const FAMILY_ORDER = ['residual', 'distillate'];
+        // ★ chart.update({series:[...]}) 只會照 index 覆蓋既有的 series，不會新增——
+        //   油品種類（series 數量）每次篩選都可能不同，改用 add/remove 對齊數量再逐一 update
+        function setChartSeries(chart, seriesDefs, categories) {
+            while (chart.series.length > seriesDefs.length) chart.series[chart.series.length - 1].remove(false);
+            seriesDefs.forEach((def, i) => {
+                if (chart.series[i]) chart.series[i].update(def, false);
+                else chart.addSeries(def, false);
+            });
+            if (categories !== undefined) chart.xAxis[0].setCategories(categories, false);
+            chart.redraw();
+        }
+
+        // ★ 點擊「各港口加油量」圖上的加油前庫存點時呼叫：把上方「加油港口」篩選切到該港，
+        //   applyFilter('bunker') 本來就會同時重繪圖表（切到逐次檢視）與加油紀錄表格
+        //   （表格的 DataTables 搜尋擴充已經吃 window._bnkPort，見 918-924 行），兩邊自動同步。
+        function jumpToBunkerPort(port) {
+            const portSel = document.getElementById('bunker-port');
+            if (!portSel || !port) return;
+            let matched = false;
+            for (const opt of portSel.options) {
+                if (opt.value === port) { portSel.value = opt.value; matched = true; break; }
+            }
+            if (!matched) portSel.appendChild(new Option(port, port, true, true));
+            applyFilter('bunker');
+        }
+
         function applyFilter(section, onlyUpdateLabels = false) {
-            
+
             // 處理專屬列表的過濾
             if (section === 'fuel-table') {
                 drawFuelTable();
@@ -1133,38 +1168,97 @@
                 const cInv = $('#chart-bunker-inventory').highcharts();
                 if (cInv) {
                     const titleEl = document.getElementById('bunker-inv-title');
-                    if (portFilter && filtered.length > 0) {
-                        // Single port: show time-series for that port
-                        const cats = filtered.map(r => r.date);
-                        const qtyVals = filtered.map(r => parseFloat(r.qty));
-                        const robVals = filtered.map(r => parseFloat(r.arrRob));
-                        cInv.xAxis[0].setCategories(cats);
-                        cInv.series[0].setData(qtyVals);
-                        cInv.series[1].setData(robVals);
-                        if (titleEl) titleEl.textContent = `${portFilter} — 各次加油時間序列`;
-                    } else if (portFilter && filtered.length === 0) {
+                    const backBtn = document.getElementById('bunker-inv-back');
+                    if (backBtn) backBtn.style.display = portFilter ? 'inline-block' : 'none';
+                    const safety = window._bkSafety || null;
+                    if (portFilter && filtered.length === 0) {
                         // Filtered port has no records — clear the chart
-                        cInv.xAxis[0].setCategories([]);
-                        cInv.series[0].setData([]);
-                        cInv.series[1].setData([]);
-                        if (titleEl) titleEl.textContent = '各港口加油量與抵港庫存 (無資料)';
-                    } else {
-                        // No filter: aggregate by port from actual data
-                        const portAgg = {};
-                        allData.forEach(r => {
-                            if (!portAgg[r.port]) portAgg[r.port] = { qty: 0, rob: [], count: 0 };
-                            portAgg[r.port].qty += parseFloat(r.qty);
-                            portAgg[r.port].rob.push(parseFloat(r.arrRob));
-                            portAgg[r.port].count++;
+                        window._bnkPortDetail = null;
+                        setChartSeries(cInv, [], []);
+                        if (titleEl) titleEl.textContent = '各港口加油量（依油品）與加油前庫存 (無資料)';
+                    } else if (portFilter) {
+                        // Single port: per-event time series — one bar per event (colour = residual/distillate family), ROB as points
+                        window._bnkPortDetail = null;
+                        const cats = filtered.map(r => r.date);
+                        const qtyData = filtered.map(r => ({ y: parseFloat(r.qty),
+                            color: FAMILY_COLOR[r._family],
+                            custom: { port: r.port, portName: r._portName, family: r._family, grade: r.type, count: 1, total: parseFloat(r.qty), grades: [{ grade: r.type, qty: r.qty, count: 1 }] } }));
+                        const robData = filtered.map((r, i) => {
+                            const rob = parseFloat(r.arrRob);
+                            const risk = safety != null && rob < safety;
+                            return { x: i, y: rob,
+                                marker: { radius: risk ? 8 : 7, lineWidth: risk ? 2.5 : 2, lineColor: risk ? '#ef4444' : FAMILY_COLOR[r._family], fillColor: '#f59e0b' },
+                                custom: { date: r.date, voyage: r.voyage, port: r.port, portName: r._portName, family: r._family, grade: r.type, qty: r.qty, depRob: r.depRob, risk } };
                         });
-                        const ports = Object.keys(portAgg);
-                        const qtyVals = ports.map(p => portAgg[p].qty);
-                        const robVals = ports.map(p => Math.round(portAgg[p].rob.reduce((a, b) => a + b, 0) / portAgg[p].rob.length * 10) / 10);
-                        const _pname = {}; (window._bunkerData || []).forEach(r => { if (r.port && r._portName) _pname[r.port] = r._portName; });
-                        cInv.xAxis[0].setCategories(ports.map(p => _pname[p] ? (_pname[p] + ' (' + p + ')') : p));
-                        cInv.series[0].setData(qtyVals);
-                        cInv.series[1].setData(robVals);
-                        if (titleEl) titleEl.textContent = '各港口加油量與抵港庫存 (Volume & Arrival ROB)';
+                        setChartSeries(cInv, [
+                            { name: '加油量', type: 'column', yAxis: 0, showInLegend: false, data: qtyData },
+                            { name: '加油前庫存', type: 'scatter', yAxis: 1, color: '#f59e0b', marker: { symbol: 'circle', radius: 7, states: { hover: { radiusPlus: 3 } } }, zIndex: 5, data: robData }
+                        ], cats);
+                        if (titleEl) titleEl.textContent = `${portFilter} — 各次加油時間序列`;
+                    } else {
+                        // No filter: stack qty by fuel family (residual/distillate) per port; one ROB point per bunkering event.
+                        // ★油品欄位是 ISO 8217 黏度代碼，資料無硫含量欄位無法細分 HSFO/VLSFO/ULSFO，
+                        //   柱子只分「重油／輕油」兩個可靠家族，實際代碼明細留在 tooltip
+                        const ports = [], portIndex = {}, agg = {}, _pname = {};
+                        (window._bunkerData || []).forEach(r => { if (r.port && r._portName) _pname[r.port] = r._portName; });
+                        allData.forEach(r => {
+                            if (!(r.port in portIndex)) { portIndex[r.port] = ports.length; ports.push(r.port); agg[r.port] = {}; }
+                            const fam = r._family;
+                            if (!agg[r.port][fam]) agg[r.port][fam] = { qty: 0, count: 0, grades: {} };
+                            agg[r.port][fam].qty += parseFloat(r.qty);
+                            agg[r.port][fam].count++;
+                            if (!agg[r.port][fam].grades[r.type]) agg[r.port][fam].grades[r.type] = { qty: 0, count: 0 };
+                            agg[r.port][fam].grades[r.type].qty += parseFloat(r.qty);
+                            agg[r.port][fam].grades[r.type].count++;
+                        });
+                        const portTotal = {};
+                        ports.forEach(p => { portTotal[p] = FAMILY_ORDER.reduce((s, f) => s + (agg[p][f] ? agg[p][f].qty : 0), 0); });
+                        const familySeries = FAMILY_ORDER.map(fam => ({
+                            name: FAMILY_LABEL[fam], type: 'column', yAxis: 0, stacking: 'normal', color: FAMILY_COLOR[fam], cursor: 'pointer',
+                            data: ports.map(p => {
+                                const cell = agg[p][fam];
+                                if (!cell) return 0;
+                                const grades = Object.entries(cell.grades).map(([g, c]) => ({ grade: g, qty: Math.round(c.qty * 10) / 10, count: c.count }));
+                                return { y: Math.round(cell.qty * 10) / 10,
+                                    events: { click: function () { jumpToBunkerPort(p); } },
+                                    custom: { port: p, portName: _pname[p], family: fam, count: cell.count, total: portTotal[p], grades } };
+                            })
+                        }));
+                        const robData = allData.map(r => {
+                            const rob = parseFloat(r.arrRob);
+                            const risk = safety != null && rob < safety;
+                            return { x: portIndex[r.port], y: rob,
+                                marker: { radius: risk ? 8 : 7, lineWidth: risk ? 2.5 : 2, lineColor: risk ? '#ef4444' : FAMILY_COLOR[r._family], fillColor: '#f59e0b' },
+                                events: { click: function () { jumpToBunkerPort(r.port); } },
+                                custom: { date: r.date, voyage: r.voyage, port: r.port, portName: r._portName, family: r._family, grade: r.type, qty: r.qty, depRob: r.depRob, risk } };
+                        });
+                        const cats = ports.map(p => _pname[p] ? (_pname[p] + ' (' + p + ')') : p);
+                        // ★ hover 到同一港口任何地方，tooltip 綜合顯示該港所有油品家族＋每次加油前庫存
+                        //   （不是靠 Highcharts 對每個 series 各自找最近點，因為 ROB 同一港常有好幾個點疊在同一個 x）
+                        const portDetail = {};
+                        ports.forEach(p => {
+                            const label = _pname[p] ? (_pname[p] + ' (' + p + ')') : p;
+                            const families = FAMILY_ORDER.filter(f => agg[p][f]).map(f => {
+                                const cell = agg[p][f];
+                                const grades = Object.entries(cell.grades).map(([g, c]) => ({ grade: g, qty: Math.round(c.qty * 10) / 10, count: c.count }));
+                                return { name: FAMILY_LABEL[f], qty: Math.round(cell.qty * 10) / 10,
+                                    pct: portTotal[p] ? Math.round(cell.qty / portTotal[p] * 1000) / 10 : null, count: cell.count, grades };
+                            });
+                            const events = allData.filter(r => r.port === p).map(r => {
+                                const rob = parseFloat(r.arrRob);
+                                return { date: r.date, family: FAMILY_LABEL[r._family], grade: r.type, qty: r.qty,
+                                    arrRob: rob, risk: safety != null && rob < safety };
+                            }).sort((a, b) => a.date < b.date ? -1 : 1);
+                            // ★ 用數字索引存查，不要用港口標籤字串——Highcharts 的 tooltip formatter 拿到的
+                            //   this.x 對 category 軸來說是「索引」，不是標籤文字，用字串當 key 會查不到
+                            portDetail[portIndex[p]] = { label, families, events };
+                        });
+                        window._bnkPortDetail = portDetail;
+                        setChartSeries(cInv, familySeries.concat([
+                            { name: '加油前庫存', type: 'scatter', yAxis: 1, color: '#f59e0b', cursor: 'pointer',
+                              marker: { symbol: 'circle', radius: 7, states: { hover: { radiusPlus: 3 } } }, zIndex: 5, data: robData }
+                        ]), cats);
+                        if (titleEl) titleEl.textContent = '各港口加油量（重油／輕油）與加油前庫存 (Volume by Fuel Family & Pre-bunker ROB)';
                     }
                 }
                 
@@ -1409,10 +1503,53 @@
 
             Highcharts.chart('chart-bunker-inventory', {
                 chart: { zoomType: 'xy' }, xAxis: { categories: ['SGSIN', 'NLRTM', 'CNZOS', 'TWKHH', 'USHOU'], crosshair: true },
-                yAxis: [ { title: { text: '加油量 (MT)' }, min: 0 }, { title: { text: '抵港剩餘油量 (MT)', style: { color: '#f59e0b' } }, opposite: true, min: 0 } ], tooltip: { shared: true },
+                yAxis: [ { title: { text: '加油量 (MT)' }, min: 0 }, { title: { text: '加油前庫存 (MT)', style: { color: '#f59e0b' } }, opposite: true, min: 0 } ],
+                plotOptions: { column: { stacking: 'normal' } },
+                tooltip: {
+                    shared: true, useHTML: true,
+                    formatter: function () {
+                        // ★ 港口彙總模式：不倚賴 Highcharts 逐 series 找最近點（同一港常有多個 ROB 點疊在同一個 x，
+                        //   Highcharts 的 shared tooltip 每個 series 只會挑一個最近點），改用 window._bnkPortDetail
+                        //   直接查表，把該港所有油品家族與每一次加油前庫存一次列完整。
+                        const detail = (window._bnkPortDetail || {})[this.x];
+                        if (detail) {
+                            let html = `<b>${detail.label}</b>`;
+                            detail.families.forEach(f => {
+                                const gtxt = f.grades.map(g => `${g.grade} ${g.count}次 ${Highcharts.numberFormat(g.qty, 1)}MT`).join('、');
+                                html += `<br>${f.name}: <b>${Highcharts.numberFormat(f.qty, 1)} MT</b>`
+                                    + `${f.pct != null ? ` (${f.pct}%)` : ''}，${f.count} 次`
+                                    + `<br><span style="color:#94a3b8;font-size:11px">　└ ${gtxt}</span>`;
+                            });
+                            if (detail.events.length) {
+                                const riskN = detail.events.filter(e => e.risk).length;
+                                html += `<br><span style="color:#94a3b8">共 ${detail.events.length} 次加油`
+                                    + (riskN ? `，<span style="color:#ef4444">其中 ${riskN} 次低於安全庫存線</span>` : '')
+                                    + `<br>點擊圓點可切換到該港逐次明細（含下方加油紀錄表自動篩選到此港）</span>`;
+                            }
+                            return html;
+                        }
+                        // 單港逐次模式：this.points 本來就只有這個日期的一根柱子＋一個點，直接合併顯示
+                        if (!this.points || !this.points.length) return false;
+                        // ★ this.x 對 category 軸是數字索引，不是日期字串本身；真正的類別文字要用 point.key
+                        const xLabel = this.points[0].key != null ? this.points[0].key : this.x;
+                        let html = `<b>${xLabel}</b>`;
+                        this.points.forEach(p => {
+                            const c = p.point.options.custom || {};
+                            const famTxt = FAMILY_LABEL[c.family] || c.family || '';
+                            if (p.series.type === 'scatter') {
+                                html += `<br>加油前庫存: <b>${Highcharts.numberFormat(p.y, 1)} MT</b>`
+                                    + `　離港庫存: ${Highcharts.numberFormat(parseFloat(c.depRob), 1)} MT`;
+                                if (c.risk) html += ` <span style="color:#ef4444">&#9888; 低於安全庫存線 ${Highcharts.numberFormat(window._bkSafety, 0)} MT</span>`;
+                            } else {
+                                html += `<br>加油量: <b>${Highcharts.numberFormat(p.y, 1)} MT</b>　油品: ${famTxt}（${c.grade}）`;
+                            }
+                        });
+                        return html;
+                    }
+                },
                 series: [
                     { name: '該港加油量 (MT)', type: 'column', yAxis: 0, data: [1200, 450, 1500, 300, 950], color: 'rgba(16, 185, 129, 0.8)' },
-                    { name: '抵港剩餘油量 (MT)', type: 'spline', yAxis: 1, data: [250, 180, 220, 450, 210], color: '#f59e0b', marker: { lineWidth: 2, lineColor: '#f59e0b', fillColor: '#1e293b', symbol: 'circle' } }
+                    { name: '加油前庫存 (MT)', type: 'scatter', yAxis: 1, data: [250, 180, 220, 450, 210], marker: { lineWidth: 2, lineColor: '#f59e0b', fillColor: '#f59e0b', symbol: 'circle', radius: 5 } }
                 ]
             });
 
@@ -1420,7 +1557,10 @@
                 chart: { type: 'scatter', zoomType: 'xy' }, title: { text: null },
                 xAxis: { title: { text: '抵港剩餘油量 Arrival ROB (MT)' }, min: 0 },
                 yAxis: { title: { text: '實際加油量 Bunkered Qty (MT)' }, min: 0 },
-                plotOptions: { scatter: { dataLabels: { enabled: true, format: '{point.name}', style: { color: '#cbd5e1', textOutline: 'none', fontWeight: 'normal', fontSize: '10px' }, y: -15 } } }, tooltip: { useHTML: true, headerFormat: '<b>{point.key}</b><br>', pointFormat: '庫存: {point.x} MT<br>加油: {point.y} MT' },
+                plotOptions: { scatter: { dataLabels: { enabled: false } } },
+                // ★ 常駐文字標籤在點多時會互相重疊看不清楚（32 次真實加油事件擠在一起），
+                //   改成只靠 tooltip 顯示港口／航次／庫存／加油量，不管點有多少都不會互相蓋住
+                tooltip: { useHTML: true, headerFormat: '<b>{point.key}</b><br>', pointFormat: '庫存: {point.x} MT<br>加油: {point.y} MT' },
                 series: [
                     { name: '常規補給 (Normal)', color: '#3b82f6', data: [{ x: 350, y: 1200, name: 'TWKHH' }, { x: 450, y: 1400, name: 'CNSHA' }, { x: 500, y: 1100, name: 'BRTUB' }], marker: { radius: 5 } },
                     { name: '趁機加滿 (Tankering)', color: '#10b981', data: [{ x: 950, y: 1900, name: 'SGSIN' }, { x: 1100, y: 1600, name: 'NLRTM' }], marker: { radius: 6, symbol: 'triangle' } },
@@ -1603,7 +1743,9 @@
                 const cInv = $('#chart-bunker-inventory').highcharts();
                 if (cInv && window._bkSafety) {
                     cInv.yAxis[1].update({ plotLines: [{ value: window._bkSafety, color: '#ef4444', dashStyle: 'Dash', width: 2,
-                        label: { text: '安全庫存參考線 ' + window._bkSafety + ' MT（10 天續航）', style: { color: '#ef4444' }, y: -5 }, zIndex: 5 }] }, false);
+                        label: { text: '安全庫存線 ' + window._bkSafety + ' MT（10 天續航）', align: 'right', x: -6, y: -6,
+                            style: { color: '#fecaca', fontSize: '12px', fontWeight: '700', textOutline: '3px rgba(17,24,39,0.95)' } },
+                        zIndex: 8 }] }, false);
                 }
                 const cSt = $('#chart-voyage-bunker').highcharts();
                 if (cSt) {
@@ -1650,11 +1792,14 @@
                 type: r.grade || '—', qty: r.qty.toFixed(1),
                 arrRob: r.arrRob.toFixed(1), depRob: r.depRob.toFixed(1),
                 remark: r.actual ? (r.type === 'DeBunkering' ? '卸油' : '') : '未實際加油',
+                // ★油品家族：由 res/dist 欄位（互斥）判斷重油／輕油，資料沒有硫含量欄位，無法細分 HSFO/VLSFO/ULSFO
+                _family: (parseFloat(r.dist) || 0) > 0 ? 'distillate' : 'residual',
                 _actual: r.actual, _portName: r.portName
             }));
 
             $('#table-bunkering-log').DataTable({
-                data: window._bunkerData,
+                // ★列表只顯示實際發生的事件（加油或卸油）；未實際加油的存油盤點記錄不顯示於此列表
+                data: window._bunkerData.filter(r => r._actual),
                 columns: [
                     { data: 'date' }, { data: 'voyage' }, { data: 'port' },
                     { data: 'type' }, { data: 'qty' }, { data: 'arrRob' }, { data: 'depRob' }, { data: 'remark' }
@@ -1692,27 +1837,11 @@
 
                 // 2. 套用加油港口篩選 (Bunkering Log DataTable)
                 if (port) {
-                    const portSel = document.getElementById('bunker-port');
-                    if (portSel) {
-                        let matched = false;
-                        for (const opt of portSel.options) {
-                            if (opt.value === port || opt.text.includes(port)) {
-                                portSel.value = opt.value;
-                                matched = true;
-                                break;
-                            }
-                        }
-                        if (!matched) {
-                            // Port not in dropdown — add it dynamically so the filter can show it
-                            const newOpt = new Option(port, port, true, true);
-                            portSel.appendChild(newOpt);
-                        }
-                        applyFilter('bunker');
-                        setTimeout(() => {
-                            const el = document.getElementById('section-bunker');
-                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 300);
-                    }
+                    jumpToBunkerPort(port);
+                    setTimeout(() => {
+                        const el = document.getElementById('section-bunker');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 300);
                 }
 
                 // 3. 帶入 fuel-table 時間範圍 (來自離群值導頁的 startDate / endDate)
@@ -1824,6 +1953,24 @@
             // 基準回看期數（依粒度）
             const WIN = { m: 12, q: 4, y: 3 };
 
+            // ── 期別完整性（預備邏輯，目前不會啟動）──────────────────
+            // DATA_ASOF＝資料實際更新到哪一天，必須由真實資料匯出流程提供，不能用今天日期代替、
+            // 也不能靠掃資料猜。demo 沒有真實來源，維持 null；為 null 時 isPeriodComplete()
+            // 永遠回傳 true，calHours() 走原本邏輯，現有畫面與計算完全不受影響。
+            const DATA_ASOF = null;   // 之後接真實資料時，改成一個 Date（例如 new Date(2026, 7, 15)）
+
+            // 期別（月/季/年）的最後一天，純日曆計算，跟 DATA_ASOF 無關
+            function periodEndDate(cat, gran) {
+                if (gran === 'q') { const y = +cat.slice(0, 4), q = +cat.charAt(6); return new Date(y, q * 3, 0); }
+                if (gran === 'y') { return new Date(+cat, 12, 0); }
+                const y = +cat.slice(0, 4), m = +cat.slice(5, 7);
+                return new Date(y, m, 0);
+            }
+            // 期別是否已完整：DATA_ASOF ≥ 期別結束日。DATA_ASOF 未設定時一律視為完整。
+            function isPeriodComplete(cat, gran) {
+                return !DATA_ASOF || DATA_ASOF >= periodEndDate(cat, gran);
+            }
+
             let planMode = 'attr';   // 預設就是綜合歸因檢視
 
             // 確定性亂數：hashString 對連續月份字串會產生等差序列，必須再做雪崩混合，
@@ -1841,7 +1988,17 @@
             function calHours(mi) {
                 const c = R2.cats.m[mi]; if (!c) return 720;
                 const y = +c.slice(0, 4), m = +c.slice(5, 7);
-                return new Date(y, m, 0).getDate() * 24;
+                const daysInMonth = new Date(y, m, 0).getDate();
+                if (DATA_ASOF) {
+                    const monthEnd = periodEndDate(c, 'm');
+                    if (DATA_ASOF < monthEnd) {   // 本月未完整：分母改用「已過天數」，不是整月天數
+                        const monthStart = new Date(y, m - 1, 1);
+                        const elapsedDays = DATA_ASOF < monthStart ? 0
+                            : Math.min(daysInMonth, Math.floor((DATA_ASOF - monthStart) / 86400000) + 1);
+                        return elapsedDays * 24;
+                    }
+                }
+                return daysInMonth * 24;
             }
             // 該類別（月／季／年）涵蓋的月份索引
             function monthsOf(cat) { return Array.from(advMonthIdx([cat])).sort(function (a, b) { return a - b; }); }
@@ -1951,16 +2108,21 @@
                     const i = R2.cats[gran].indexOf(cat); if (i < 0) return null;
                     const r = ser[i]; if (!r || r.act == null) return null;
 
-                    const base = trailAvg(ser, i, w, function (x) { return x.act; });
+                    // 本期若未完整，不把自己算進自己的參考基準——回看窗整組往前推一格。
+                    // DATA_ASOF 未設定時 isPeriodComplete() 恆真，refIdx 恆等於 i，行為不變。
+                    const incomplete = !isPeriodComplete(cat, gran);
+                    const refIdx = incomplete ? i - 1 : i;
+
+                    const base = trailAvg(ser, refIdx, w, function (x) { return x.act; });
                     if (base == null || base <= 0) return null;
                     const devs = [];
-                    for (let k = Math.max(0, i - w + 1); k <= i; k++) if (ser[k].act != null) devs.push(ser[k].act);
+                    for (let k = Math.max(0, refIdx - w + 1); k <= refIdx; k++) if (ser[k].act != null) devs.push(ser[k].act);
                     const sd = devs.length > 1
                         ? Math.sqrt(devs.reduce(function (a, v) { return a + (v - base) * (v - base); }, 0) / devs.length)
                         : base * 0.08;
 
                     const o = {
-                        cat: cat, act: r.act, base: base, sd: sd, low: r.low, cal: r.cal, seaH: r.seaH,
+                        cat: cat, act: r.act, base: base, sd: sd, low: r.low, incomplete: incomplete, cal: r.cal, seaH: r.seaH,
                         seaShare: r.seaShare, bf: r.bf, wave: r.wave, cur: r.cur, draft: r.draft, ops: r.ops,
                         dist: r.dist, fuel: r.fuel, mix: r.mix, gi: i, gran: gran,
                         // ISO 19030 精神的「近似平靜海況」樣本：有風級且 ≤ BF4
@@ -1972,11 +2134,11 @@
                         o.cOps = o.cWx = o.cWave = o.cCur = o.cDrf = o.cRes = 0;
                         return o;
                     }
-                    const sRef = trailAvg(ser, i, w, function (x) { return x.low ? null : x.seaShare; }),
-                          bRef = trailAvg(ser, i, w, function (x) { return x.bf; }),
-                          wvRef = trailAvg(ser, i, w, function (x) { return x.wave; }),
-                          dRef = trailAvg(ser, i, w, function (x) { return x.draft; }),
-                          cRef = trailAvg(ser, i, w, function (x) { return x.cur; });
+                    const sRef = trailAvg(ser, refIdx, w, function (x) { return x.low ? null : x.seaShare; }),
+                          bRef = trailAvg(ser, refIdx, w, function (x) { return x.bf; }),
+                          wvRef = trailAvg(ser, refIdx, w, function (x) { return x.wave; }),
+                          dRef = trailAvg(ser, refIdx, w, function (x) { return x.draft; }),
+                          cRef = trailAvg(ser, refIdx, w, function (x) { return x.cur; });
                     const eRef = sRef == null ? 0 : eff(sRef);
 
                     o.cOps  = eRef > 0 ? (eff(r.seaShare) - eRef) / eRef * 100 : 0;
@@ -2097,9 +2259,9 @@
             }
 
             // ── 船況總覽：船齡、累計航行海浬、貨物噸浬效率 EEOI 走勢，均為真實資料 ──
-            // 跟頭條的「本期」不同，這裡固定看「最近真實 12 個月」與「全期累計」，不隨上方日期篩選連動，
-            // 目的是給一眼就能懂的整體印象，不需要先選期別。
-            function renderOverview() {
+            // 累計航行與 EEOI 的區間跟隨最上方「全頁日期篩選」，不論那裡選的是月/季/年都展開成月份計算；
+            // 船齡是船舶主檔的固定值，本來就跟日期篩選無關。
+            function renderOverview(cats) {
                 const el = document.getElementById('plan-overview'); if (!el) return;
                 const imo = planImo(); if (!imo) { el.innerHTML = ''; return; }
                 const v = (typeof VBYIMO !== 'undefined') ? VBYIMO[imo] : null;
@@ -2107,15 +2269,30 @@
 
                 const mCats = (R2.cats && R2.cats.m) ? R2.cats.m : [];
                 const shipM = (R2.ships && R2.ships[imo]) ? R2.ships[imo].m : null;
-                const distTotal = (shipM && shipM.dist) ? shipM.dist.reduce(function (a, b) { return a + (b || 0); }, 0) : null;
 
-                const yCats = (R2.cats && R2.cats.y) ? R2.cats.y : [];
-                const shipY = (R2.ships && R2.ships[imo]) ? R2.ships[imo].y : null;
-                const distByYear = (shipY && shipY.dist) ? yCats.map(function (y, i) { return { y: y, d: shipY.dist[i] }; }) : [];
+                // 跟最上方「全頁日期區間」一致：把選到的區間（不論月/季/年）展開成月份索引，
+                // 沒有選取範圍時（極少數初始狀態）才退回全部月份，不是預設行為。
+                const idxSet = (cats && cats.length && typeof advMonthIdx === 'function') ? advMonthIdx(cats) : null;
+                const monthIdx = (idxSet && idxSet.size) ? Array.from(idxSet).sort(function (a, b) { return a - b; })
+                    : mCats.map(function (_, i) { return i; });
+                const rangeCats = monthIdx.map(function (i) { return mCats[i]; });
 
-                const last12 = mCats.slice(-12);
-                const eeoiArr = (typeof r2Ship === 'function') ? (r2Ship(last12, 'ceeoi') || []) : [];
-                const pts = last12.map(function (c, i) { return { cat: c, v: eeoiArr[i] == null ? null : eeoiArr[i] }; });
+                const distTotal = (shipM && shipM.dist)
+                    ? monthIdx.reduce(function (a, i) { return a + (shipM.dist[i] || 0); }, 0) : null;
+
+                // 依年份分組加總，只計區間內涵蓋到的月份，不是整年（避免區間只選半年卻顯示全年數字）
+                const distByYear = [];
+                if (shipM && shipM.dist) {
+                    const byYear = {};
+                    monthIdx.forEach(function (i) {
+                        const y = mCats[i].slice(0, 4);
+                        byYear[y] = (byYear[y] || 0) + (shipM.dist[i] || 0);
+                    });
+                    Object.keys(byYear).sort().forEach(function (y) { distByYear.push({ y: y, d: byYear[y] }); });
+                }
+
+                const eeoiArr = (typeof r2Ship === 'function') ? (r2Ship(rangeCats, 'ceeoi') || []) : [];
+                const pts = rangeCats.map(function (c, i) { return { cat: c, v: eeoiArr[i] == null ? null : eeoiArr[i] }; });
                 const valid = pts.filter(function (p) { return p.v != null; });
                 const curEEOI = valid.length ? valid[valid.length - 1].v : null;
                 const avgEEOI = valid.length ? valid.reduce(function (a, p) { return a + p.v; }, 0) / valid.length : null;
@@ -2154,26 +2331,31 @@
 
                 el.innerHTML =
                     '<div class="bg-gray-800 p-4 rounded-lg border border-gray-700">'
-                    + '<h3 class="text-sm font-semibold text-gray-300 mb-3">船況總覽<span class="ml-2 text-xs font-normal text-gray-500">船齡／累計航行／貨物噸浬效率，均為真實資料，不隨上方日期篩選變動</span></h3>'
+                    + '<h3 class="text-sm font-semibold text-gray-300 mb-3">船況總覽<span class="ml-2 text-xs font-normal text-gray-500">船齡為船舶主檔固定值；航行與 EEOI 均為真實資料，區間跟隨最上方的全頁日期篩選</span></h3>'
                     + '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">'
                     + card('船齡',
                            (age == null ? '—' : age) + '<span class="text-base text-gray-500"> 年</span>',
                            v ? (v.year + ' 年建造・' + v.cls) : '無船舶主檔資料')
-                    + card('累計航行（' + (mCats.length ? mCats[0] : '—') + '~' + (mCats.length ? mCats[mCats.length - 1] : '—') + '）',
+                    + card('累計航行（' + (rangeCats.length ? rangeCats[0] : '—') + '~' + (rangeCats.length ? rangeCats[rangeCats.length - 1] : '—') + '）',
                            distTotal == null ? '—' : Math.round(distTotal).toLocaleString() + '<span class="text-base text-gray-500"> nm</span>',
                            distByYear.map(function (x) { return x.y + '：' + (x.d == null ? '—' : Math.round(x.d).toLocaleString()); }).join('　'))
-                    + card('貨物噸浬效率 EEOI（最近有值月份）',
-                           curEEOI == null ? '—' : curEEOI.toFixed(2),
-                           avgEEOI == null ? '無足夠有效月份可比較'
-                               : ('近 ' + valid.length + ' 個有效月均值 ' + avgEEOI.toFixed(2) + '・'
-                                  + (eeoiDelta <= 0
-                                     ? '<span class="text-emerald-400">優於常態約 ' + Math.abs(eeoiDelta).toFixed(0) + '%</span>'
-                                     : '<span class="text-amber-400">劣於常態約 ' + Math.abs(eeoiDelta).toFixed(0) + '%</span>')))
-                    + '<div class="bg-gray-900 border border-gray-700 rounded-lg p-4">'
-                    + '<div class="text-xs text-gray-500 mb-1">EEOI 近 ' + pts.length + ' 期走勢</div>'
+                    + '<div class="bg-gray-900 border border-gray-700 rounded-lg p-4 md:col-span-2">'
+                    + '<div class="flex flex-col sm:flex-row sm:items-center gap-3">'
+                    + '<div class="flex-1">'
+                    + '<div class="text-xs text-gray-500 mb-1">貨物噸浬效率 EEOI（最近有值月份）</div>'
+                    + '<div class="text-2xl font-mono font-bold text-gray-100 leading-tight">' + (curEEOI == null ? '—' : curEEOI.toFixed(2)) + '</div>'
+                    + '<div class="text-xs text-gray-500 mt-1 leading-snug">'
+                    + (avgEEOI == null ? '無足夠有效月份可比較'
+                        : ('近 ' + valid.length + ' 個有效月均值 ' + avgEEOI.toFixed(2) + '・'
+                           + (eeoiDelta <= 0
+                              ? '<span class="text-emerald-400">優於常態約 ' + Math.abs(eeoiDelta).toFixed(0) + '%</span>'
+                              : '<span class="text-amber-400">劣於常態約 ' + Math.abs(eeoiDelta).toFixed(0) + '%</span>')))
+                    + '</div></div>'
+                    + '<div class="flex-1 sm:border-l sm:border-gray-700 sm:pl-3">'
+                    + '<div class="text-xs text-gray-500 mb-1">近 ' + pts.length + ' 期走勢・資料涵蓋率 ' + cov + '%</div>'
                     + '<svg viewBox="0 0 ' + W + ' ' + H + '" class="w-full mt-1" style="height:40px">' + spark + '</svg>'
-                    + '<div class="text-xs text-gray-500 mt-1 leading-snug">資料涵蓋率 ' + cov + '%（缺值月份為斷點，不補值）</div>'
-                    + '</div>'
+                    + '<div class="text-xs text-gray-500 mt-1 leading-snug">缺值月份為斷點，不補值</div>'
+                    + '</div></div></div>'
                     + '</div>'
                     + '<div class="mt-2 text-xs text-gray-500 leading-relaxed">'
                     + 'EEOI 的「優於／劣於常態」是跟本船自己近期均值比較，不是跟船隊或法規基準比較，覆蓋率偏低時（如低於 70%）判讀要保守。'
@@ -2198,7 +2380,6 @@
                 for (let i = si; i > 0; i--) { if (ok[i].cRes < ok[i - 1].cRes) streak++; else break; }
                 const lamp = lampOf(r, streak);
                 const ch = fuelChain(r);
-                const conf = confidence(rows);
                 const hullMT = ch ? ch.segs[ch.segs.length - 1].dMT : null;   // 五因子解釋不了的超額油耗（原因待查）
 
                 const card = function (label, big, sub, cls, tip) {
@@ -2210,14 +2391,18 @@
 
                 const hullCls = hullMT == null ? 'text-gray-400' : hullMT > 0 ? 'text-red-300' : 'text-emerald-300';
 
+                const fmtD = function (d) { return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0'); };
+
                 el.innerHTML =
                     '<div class="flex flex-wrap items-center gap-2 mb-3">'
                     + '<span class="text-xs font-bold px-2.5 py-1 rounded ' + lamp.pill + '">' + lamp.t + '</span>'
                     + '<span class="text-[10px] font-mono text-gray-500" title="判定門檻">（依據：' + lamp.def + '）</span>'
                     + '<span class="text-sm font-mono text-blue-300">' + r.cat + '</span>'
                     + '<span class="text-xs text-gray-500">' + (r.dist ? '航距 ' + Math.round(r.dist).toLocaleString() + ' nm' : '') + '</span>'
+                    + (r.incomplete ? '<span class="text-[10px] px-2 py-0.5 rounded bg-slate-700/60 text-slate-300 border border-slate-500/50">'
+                        + '本期資料更新至 ' + fmtD(DATA_ASOF) + '，' + fmtD(periodEndDate(r.cat, r.gran)) + ' 才算完整，數字仍會變動</span>' : '')
                     + '</div>'
-                    + '<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">'
+                    + '<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">'
                     + card('效率損失（原因待查）',
                            (r.cRes >= 0 ? '+' : '') + r.cRes.toFixed(1) + '%',
                            '扣除營運、天候、浪高、洋流、吃水之後仍存在的效率落差',
@@ -2229,12 +2414,6 @@
                                : (hullMT < 0 ? '<span class="text-emerald-400">優於基準</span>' : '本期實際航距下的燃油增減量'),
                            hullCls,
                            '本期實際航距下，效率損失（原因待查）所對應的燃油增減')
-                    + card('信心度',
-                           conf.score + '<span class="text-base text-gray-500">/100</span>',
-                           '<span class="' + conf.cls + ' font-semibold">' + conf.label + '</span>　'
-                               + (conf.score >= 50 ? '證據足以支持上述判讀' : '證據偏弱，判讀可信度較低'),
-                           conf.cls,
-                           '由有效期別覆蓋、航行樣本量、風級覆蓋、殘差穩定度四項加權')
                     + '</div>'
                     + (ok.length > 1
                         ? (function () {
@@ -2251,8 +2430,8 @@
                                 + '<div class="flex items-end gap-1.5">'
                                 + slice.map(function (x) {
                                     return '<div class="plan-tl-dot flex flex-col items-center cursor-pointer" data-cat="' + x.cat
-                                        + '" title="' + x.cat + '　殘差 ' + (x.cRes >= 0 ? '+' : '') + x.cRes.toFixed(1) + '%">'
-                                        + '<div class="w-4 h-4 rounded ' + dotCls(x.cRes)
+                                        + '" title="' + x.cat + (x.incomplete ? '　進行中，數字仍會變動' : '　殘差 ' + (x.cRes >= 0 ? '+' : '') + x.cRes.toFixed(1) + '%') + '">'
+                                        + '<div class="w-4 h-4 rounded ' + (x.incomplete ? 'border-2 border-dashed border-slate-400 bg-transparent' : dotCls(x.cRes))
                                         + (x.cat === r.cat ? ' ring-2 ring-white' : ' opacity-50 hover:opacity-80') + '"></div>'
                                         + '<div class="text-[9px] text-gray-600 mt-0.5">' + x.cat.slice(-2) + '</div></div>';
                                   }).join('')
@@ -2305,8 +2484,9 @@
             // ── 第 2 層：歸因橋接。單位是<b>燃油噸</b>而非抽象的 %，
             //    因為業界（ISO 19030／ZeroNorth／Nautilus）一律把結論落到「超額油耗」上——
             //    噸可以換算成錢，% 不行。
-            //    以「透明底柱＋可見柱」堆疊手工做出 waterfall，不引入額外的 Highcharts 模組
-            //    （waterfall 不在已載入的 highcharts-more 內，modules/waterfall.js 亦無法取得）。
+            //    改用橫向長條＋兩把獨立比例尺（總量兩塊 vs 六段因子），不用 Highcharts 浮動瀑布圖——
+            //    小因子（天候 <1 MT）跟大因子（殘差可能 50+ MT）畫在同一把尺上時，小的完全看不見；
+            //    拆成「總量」跟「因子相對大小」兩組各自的比例尺，才能同時看清楚兩者。
             function renderBridge(rows, sel) {
                 const host = document.getElementById('plan-chart-bridge'); if (!host) return;
                 const ok = usable(rows);
@@ -2317,60 +2497,64 @@
 
                 const META = FACTORS.concat([{ k: 'cRes', n: '效率損失（原因待查）', c: RES_COLOR, who: '待查・需輪機部門排查', src: '五因子扣除後的殘差（計算所得）',
                     hint: function () { return '五項因子都解釋不了的部分'; } }]);
-                const steps = [{ n: '基準油耗', v: ch.baseMT, type: 'total', c: '#64748b' }];
-                META.forEach(function (f, i) {
+                const deltaSteps = META.map(function (f, i) {
                     const g = ch.segs[i];
-                    steps.push({ n: f.n, type: 'delta', c: g.dMT > 0 ? (f.k === 'cRes' ? RES_COLOR : f.c) : RES_POS,
-                                 from: g.from, to: g.to, dMT: g.dMT, pct: r[f.k], hint: f.hint(r), who: f.who, src: f.src });
+                    return { n: f.n, from: g.from, to: g.to, dMT: g.dMT, pct: r[f.k], hint: f.hint(r), who: f.who, src: f.src };
                 });
-                steps.push({ n: '實際油耗', v: ch.actMT, type: 'total', c: '#3b82f6' });
+                const maxAbs = Math.max.apply(null, deltaSteps.map(function (st) { return Math.abs(st.dMT); })) || 1;
 
-                const lo = [], hi = [];
-                steps.forEach(function (st) {
-                    if (st.type === 'total') { lo.push(0); hi.push(st.v); }
-                    else { lo.push(Math.min(st.from, st.to)); hi.push(Math.abs(st.to - st.from)); }
-                });
-                const pts = steps.map(function (st) { return st.type === 'total' ? st.v : Math.min(st.from, st.to); });
-                const tops = steps.map(function (st) { return st.type === 'total' ? st.v : Math.max(st.from, st.to); });
-                const vmin = Math.min.apply(null, pts), vmax = Math.max.apply(null, tops);
-                const pad = Math.max(1, (vmax - vmin) * 0.25);
-                // 橋接圖慣例不從 0 起算，否則各段落差會被壓扁看不見
-                const yMin = Math.max(0, vmin - pad);
+                const totalBox = function (label, v, tip) {
+                    return '<div class="bg-gray-800 rounded px-3 py-2" title="' + (tip || '').replace(/"/g, '&quot;') + '">'
+                        + '<div class="text-[11px] text-gray-500">' + label + '</div>'
+                        + '<div class="text-lg font-mono text-gray-200">' + v.toFixed(1) + ' MT</div></div>';
+                };
+                const baseTip = '用這艘船近期自身常態效率（過去回看窗平均；本期未完整時不含本期自己）× 本期實際航距，換算成理論油耗——不是外部訂的目標，是這艘船自己的歷史平均。';
+                const isExcess = ch.excessMT >= 0;
 
-                Highcharts.chart('plan-chart-bridge', {
-                    chart: { type: 'column' }, title: { text: null },
-                    xAxis: { categories: steps.map(function (st) { return st.n; }), labels: { style: { fontSize: '11px' } } },
-                    yAxis: { title: { text: '燃油 (MT)' }, min: yMin,
-                             plotLines: [{ value: ch.baseMT, color: '#64748b', width: 1, dashStyle: 'Dash', zIndex: 4,
-                                           label: { text: '基準 ' + ch.baseMT.toFixed(0) + ' MT', style: { color: '#94a3b8', fontSize: '10px' } } }] },
-                    legend: { enabled: false },
-                    plotOptions: { column: { stacking: 'normal', borderWidth: 0, groupPadding: 0.06, pointPadding: 0.02 } },
-                    tooltip: {
-                        formatter: function () {
-                            const st = steps[this.point.index];
-                            if (st.type === 'total') return '<b>' + st.n + '</b>：' + st.v.toFixed(0) + ' MT';
-                            return '<b>' + st.n + '</b>　' + (st.dMT >= 0 ? '多燒 ' : '省下 ') + Math.abs(st.dMT).toFixed(1) + ' MT'
-                                + '<br>' + st.from.toFixed(0) + ' → ' + st.to.toFixed(0) + ' MT'
-                                + '<br>效率影響 ' + (st.pct >= 0 ? '+' : '') + st.pct.toFixed(1) + '%'
-                                + '<br><span style="color:#94a3b8">' + st.hint(r) + '　｜　歸屬：' + st.who + '　｜　資料：' + st.src + '</span>';
-                        }
-                    },
-                    series: [
-                        { name: 'base', data: lo, color: 'rgba(0,0,0,0)', enableMouseTracking: false,
-                          showInLegend: false, dataLabels: { enabled: false }, stacking: 'normal' },
-                        { name: 'value', stacking: 'normal',
-                          data: steps.map(function (st, i) { return { y: hi[i], color: st.c }; }),
-                          dataLabels: {
-                              enabled: true, style: { fontSize: '10px', textOutline: 'none', fontWeight: 'bold' },
-                              formatter: function () {
-                                  const st = steps[this.point.index];
-                                  if (st.type === 'total') return '<span style="color:#e2e8f0">' + st.v.toFixed(0) + ' MT</span>';
-                                  return '<span style="color:' + (st.dMT > 0 ? '#fca5a5' : '#6ee7b7') + '">'
-                                      + (st.dMT >= 0 ? '+' : '') + st.dMT.toFixed(1) + '</span>';
-                              }
-                          } }
-                    ]
-                });
+                // 雙向長條（tornado chart）：中線為 0，右邊＝耗油、左邊＝省油，方向靠位置看，不用先讀顏色或數字。
+                // 顏色統一語意化（紅＝耗油、綠＝省油），不再用各因子自己的識別色——因子名稱本來就寫在標籤上，
+                // 顏色只需要負責「方向」這一件事，兩件事混在一起才是原本不夠直覺的原因。
+                const deltaRow = function (st, isLast) {
+                    const widthPct = Math.max(1.5, Math.abs(st.dMT) / maxAbs * 50).toFixed(1);
+                    const isCost = st.dMT > 0;
+                    const valCls = isCost ? 'text-red-300' : 'text-emerald-400';
+                    const barStyle = isCost
+                        ? 'left:50%;width:' + widthPct + '%;background:#ef4444;border-radius:0 4px 4px 0;'
+                        : 'right:50%;width:' + widthPct + '%;background:#10b981;border-radius:4px 0 0 4px;';
+                    const tip = st.hint + '　｜　歸屬：' + st.who + '　｜　資料：' + st.src;
+                    return '<div class="flex items-center gap-2 text-xs' + (isLast ? ' border-t border-gray-700 pt-1.5' : '') + '" title="' + tip.replace(/"/g, '&quot;') + '">'
+                        + '<div class="w-28 shrink-0 truncate ' + (isLast ? 'text-gray-200 font-semibold' : 'text-gray-400') + '">' + st.n + '</div>'
+                        + '<div class="flex-1 relative h-5 bg-gray-800 rounded">'
+                        + '<div class="absolute inset-y-0 left-1/2 w-px bg-gray-600"></div>'
+                        + '<div class="absolute inset-y-0" style="' + barStyle + '"></div></div>'
+                        + '<div class="w-16 text-right font-mono ' + valCls + '">' + (st.dMT >= 0 ? '+' : '') + st.dMT.toFixed(1) + '</div></div>';
+                };
+                const dirHeader = '<div class="flex items-center gap-2 text-[10px] text-gray-500 mb-1">'
+                    + '<div class="w-28 shrink-0"></div>'
+                    + '<div class="flex-1 flex justify-between px-1"><span class="text-emerald-400">◄ 省油</span><span class="text-red-300">耗油 ►</span></div>'
+                    + '<div class="w-16 shrink-0"></div></div>';
+
+                host.innerHTML =
+                    '<div class="grid grid-cols-3 gap-2 mb-1 items-stretch">'
+                    + totalBox('基準油耗（若維持自身常態效率）', ch.baseMT, baseTip)
+                    + '<div class="bg-gray-800 rounded px-3 py-2 flex flex-col items-center justify-center">'
+                    + '<div class="text-[11px] text-gray-500">差額</div>'
+                    + '<div class="text-lg font-mono font-bold ' + (isExcess ? 'text-red-300' : 'text-emerald-400') + '">'
+                    + (isExcess ? '+' : '') + ch.excessMT.toFixed(1) + '</div>'
+                    + '<div class="text-[11px] ' + (isExcess ? 'text-red-300' : 'text-emerald-400') + '">' + (isExcess ? '耗油' : '省油') + '</div></div>'
+                    + totalBox('實際油耗（本期真的燒了多少）', ch.actMT)
+                    + '</div>'
+                    + '<div class="text-[11px] text-gray-500 mb-1.5">逐段拆給誰（長條長度＝影響大小，跟上面三個總量不是同一把尺）</div>'
+                    + dirHeader
+                    + '<div class="space-y-1.5">' + deltaSteps.map(function (st, i) { return deltaRow(st, i === deltaSteps.length - 1); }).join('') + '</div>'
+                    + '<div class="mt-2 text-xs text-gray-500 leading-relaxed">'
+                    + (isExcess
+                        ? '本期整體<b class="text-red-300">耗油</b>：往下找哪幾段是紅色（拖累效率），那些是元兇，前面幾段找營運部門。'
+                        : '本期整體<b class="text-emerald-400">省油</b>：往下找哪幾段是綠色（推高效率），但要多問一句——是稼動率、吃水這種操作改善，還是天候、浪高、洋流這種運氣好？')
+                    + '<b class="text-gray-300">效率損失（原因待查）這一段不論整體方向都要單獨看</b>——即使整體省油，這段若是紅色，代表好天氣蓋住了真正的船況警訊，需輪機部門協助排查。'
+                    + '滑鼠停在長條上可看歸屬與資料來源。'
+                    + (r.incomplete ? '　<span class="text-slate-400">本期尚未結束，以上數字仍會持續變動。</span>' : '')
+                    + '</div>';
             }
 
             function renderCharts(rows) {
@@ -2604,7 +2788,7 @@
                 const sel = document.getElementById('plan-period'); if (!sel) return;
                 const ok = usable(rows);
                 sel.innerHTML = '';
-                ok.forEach(function (r) { sel.add(new Option(r.cat, r.cat)); });
+                ok.forEach(function (r) { sel.add(new Option(r.cat + (r.incomplete ? '（進行中）' : ''), r.cat)); });
                 if (!ok.length) { sel.add(new Option('無可用期別', '')); sel.disabled = true; return; }
                 sel.disabled = false;
                 // 區間變動後若原選期別已不在範圍內，退回最新一期
@@ -2617,7 +2801,7 @@
                 const cats = (typeof getCategoriesInRange === 'function') ? getCategoriesInRange('plan') : defaultMonths;
                 window._planCats = cats;
 
-                renderOverview();   // 船況總覽不隨區間篩選變動，ADV 無資料時也照樣嘗試呈現
+                renderOverview(cats);   // 區間跟隨全頁日期篩選；ADV 無資料時也照樣嘗試呈現
 
                 let rows = planBuild(cats);
                 if (!rows) {
@@ -2699,6 +2883,15 @@
                 + '這類期別<b class="text-amber-300">以空心方塊標示、不做歸因、不計入燈號</b>。<br>'
                 + '這正是現行圖表最大的誤判來源：例如通鴻輪 2026-01 的 nm/mt 只有 3.93（全期最低），'
                 + '看起來像重大異常，實際上該月海上航行報表僅 1 小時、主機油耗只佔 3.2%——船根本沒出海。</p></div>'
+                + '<div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-amber-400 font-bold mb-1">本期若還沒結束，怎麼算（預備邏輯，目前未啟動）</h4>'
+                + '<p class="text-gray-300 text-xs leading-relaxed">「基準油耗」「實際油耗」「省油或耗油」這幾個數字用的是<b>本期至今實際航距</b>除以<b>基準效率</b>，'
+                + '跟本期有沒有走完無關，<b class="text-amber-300">隨時都有效，不需要等月份結束</b>。<br>'
+                + '真正需要完整期別才準的，只有<b>海上時數佔比</b>這個分母——現有 <code>calHours()</code> 固定用「整月天數」，'
+                + '若本期只回報到月中，分母比分子大一截，會拖累船舶稼動率因子。修法是本期未完整時，分母改用「已回報的天數」而非整月天數，'
+                + '下游的稼動率因子與樣本門檻判斷就會自動修正，不用另外隱藏任何數字。<br>'
+                + '基準效率本身也不會把本期自己算進自己的參考基準——未完整時回看窗整組往前推一格，只用「已經走完」的歷史期別。<br>'
+                + '判斷「本期是否完整」需要一個真實的「資料更新到哪一天」時間戳記（<code>DATA_ASOF</code>），這個值目前完全沒有真實來源，'
+                + '程式碼已經把判斷式接好但<b class="text-amber-300">恆定視為完整</b>，這份 demo 不會出現「本期進行中」的畫面。</p></div>'
                 + '<div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-amber-400 font-bold mb-1">正規化切換的意義</h4>'
                 + '<p class="text-gray-300 text-xs leading-relaxed"><b>原始</b>＝現行圖表的那條線。<b>只計海上</b>＝扣掉船舶稼動率影響。'
                 + '<b>天候校正</b>＝扣掉風級＋浪高影響。<b>全校正</b>＝五因子全扣，等同殘差線——<b class="text-amber-300">這條線在掉，才需要動船</b>。</p></div>'
@@ -2715,7 +2908,8 @@
                 + '・<b>港內無法再細分</b>：缺 <code>泊位 Berth</code>，「裝卸中」與「靠泊未作業」分不出來<br>'
                 + '・<b>殘差只能說「疑似船況」</b>：缺進出塢／洗船日期，無法確認是船底結垢<br>'
                 + '・<b>潮汐與淺水效應做不了</b>：資料無經緯度，且潮汐改變的是水深不是吃水；潮流的影響已包含在流效應內<br>'
-                + '・<b>海上時數用 ADV.wx 推得</b>：僅涵蓋有風級回報的海上報表，非海上時數以日曆時數相減，含「未發報表」的缺口</p></div>'
+                + '・<b>海上時數用 ADV.wx 推得</b>：僅涵蓋有風級回報的海上報表，非海上時數以日曆時數相減，含「未發報表」的缺口<br>'
+                + '・<b>「本期進行中」偵測尚未生效</b>：需要真實的資料更新時間戳記（<code>DATA_ASOF</code>），目前完全沒有這個欄位，判斷式已預先寫好但恆定視為期別完整</p></div>'
                 + '<div class="mt-3 pt-3 border-t border-gray-600"><h4 class="text-amber-400 font-bold mb-1">常見問題</h4>'
                 + '<p class="text-gray-300 text-xs leading-relaxed"><b class="text-gray-100">Q：這代表這艘船「壞了」嗎？</b><br>'
                 + 'A：不必然。殘差過大只代表目前五個因子解釋不了這段落差，可能是船體或主機性能真的衰退，也可能是模擬因子的係數還沒校準、或有效樣本不足。系統只標示狀態（如「模型待校準」「警告」），不直接判定船況。</p>'
@@ -2732,7 +2926,11 @@
                 + '<p class="text-gray-300 text-xs leading-relaxed mt-2"><b class="text-gray-100">Q：切換「原始／只計海上／天候校正／全校正」，看到的數字為什麼不一樣？</b><br>'
                 + 'A：這是同一條線分別扣掉不同因子後的畫法，各模式扣的因子不是累加關係：「原始」完全不扣；「只計海上」只扣船舶稼動率；「天候校正」只扣風級＋浪高；「全校正」五個因子一次扣完，等於只剩殘差，是最接近「船況」的一條線。</p>'
                 + '<p class="text-gray-300 text-xs leading-relaxed mt-2"><b class="text-gray-100">Q：「信心度」是在講船況好壞嗎？</b><br>'
-                + 'A：不是。信心度只反映這次分析的證據強不強——資料夠不夠完整、航行時間夠不夠、風級資料齊不齊、殘差穩不穩定，跟船況本身是兩件事。分數低不代表船有問題，只代表目前的結論還不夠可靠。</p></div>';
+                + 'A：不是。信心度只反映這次分析的證據強不強——資料夠不夠完整、航行時間夠不夠、風級資料齊不齊、殘差穩不穩定，跟船況本身是兩件事。分數低不代表船有問題，只代表目前的結論還不夠可靠。</p>'
+                + '<p class="text-gray-300 text-xs leading-relaxed mt-2"><b class="text-gray-100">Q：本期還沒結束，這些數字準嗎？</b><br>'
+                + 'A：基準油耗、實際油耗、省油或耗油這三個數字準——它們用的是本期至今真的跑了多遠、真的燒了多少油，跟月份有沒有走完無關，隨時都可以看、可以信。'
+                + '會受影響的只有海上時數佔比這個分母，正式接上真實資料後會自動修正，不用因為月份還沒過完就不敢看這幾個數字。'
+                + '目前這份 demo 因為沒有真實的「資料更新到哪一天」時間戳記，不會出現「本期進行中」的畫面，等於這個情境還沒真正被觸發過。</p></div>';
 
             $(document).ready(function () {
                 if (!document.getElementById('section-plan')) return;
