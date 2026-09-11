@@ -149,7 +149,7 @@
                     <div class="show-date-range date-filter-display inline-block"></div>
                 </div>
                 <div id="macro-trend-chart" class="chart-container"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: block;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fEEOI">
                         <span class="text-blue-400 font-bold">EEOI 計算公式與燃油涵蓋範圍：</span><br>
                         <b>公式：</b>EEOI = Σ 耗油量 (MT) × CF / (DWT × Σ 航距 nm)　　⚠ 來源系統的貨載量欄位僅 3.7% 有值，真正的 EEOI 無法計算，故改用 IMO CII 所採的 DWT 基準 EEOI。兩者定義、分母、單位皆不同，不可互相比對。<br>
@@ -182,7 +182,7 @@
                     <div class="show-date-range date-filter-display inline-block"></div>
                 </div>
                 <div id="operational-waste-chart" class="chart-container"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: block;">
                     <div class="mb-4 pb-4 border-b border-gray-700">
                         <h4 class="text-blue-400 font-bold mb-2">這張圖在看什麼</h4>
                         <p class="text-gray-300 text-xs leading-relaxed">
@@ -208,7 +208,7 @@
                 </div>
             </div>
 
-            <div class="bg-gray-800 p-6 rounded-md shadow-2xl border border-gray-700 flex flex-col lg:col-span-2">
+            <div class="bg-gray-800 p-6 rounded-md shadow-2xl border border-gray-700 flex flex-col lg:col-span-2 hidden" id="section-1b">
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-semibold text-white flex items-center">
@@ -220,7 +220,7 @@
                     <div class="show-date-range date-filter-display inline-block"></div>
                 </div>
                 <div id="cargo-aer-chart" class="chart-container" style="height: 340px;"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: block;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fCargoAer"><span class="text-blue-400 font-bold">本圖與圖 1 的差別：分母不同</span><br><b>圖 1（工程師系統定義）：</b>貨運周轉量 = Σ (DWT × 航距)，取的是<b>運力</b>；碳強度標為 EEOI。<br><b>本圖：</b>貨物噸浬 = Σ (該筆推估貨載量 × 航距)，<b>壓艙 ballast 航段計 0</b>，取的是<b>實際載了多少貨</b>。<br><b>兩條碳強度線：</b><span class="text-green-400">AER = Σ 耗油 × CF ÷ (DWT × 航距)</span>（IMO CII 基準，與圖 1 綠線同值）；<span class="text-purple-400">EEOI = Σ 耗油 × CF ÷ 貨物噸浬</span>（真正的貨物噸浬基準）。<br><span class="text-yellow-400">⚠ 資料限制：</span>來源的 <code>載貨量_t_來源直接</code> 僅 3.7% 有值，本圖的貨載量改用 <code>排水量 − 輕船重量</code> 推估，該值<b>包含壓艙水與存油</b>，因此 EEOI 為<b>估算值，不可對外引用或與法規基準比對</b>。AER 則完全乾淨（只需 DWT 與航距）。<br><b>缺值規則：</b>某期間若<b>貨載推估覆蓋率 &lt; 60%</b>（該期間有航距但貨載未知的比例過高），或<b>載貨佔比 &lt; 10%</b>（幾乎全程壓艙、EEOI 會發散），則該點的貨物噸浬與 EEOI <b>留空不畫</b>，AER 仍照常顯示。船隊層級 32 個月的覆蓋率為 66&ndash;92%，全部通過。</div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -299,7 +299,7 @@
                     </div>
                 </div>
 
-                <div class="explanation-wrapper mt-2 bg-gray-900 rounded-lg p-4 " style="display: none;">
+                <div class="explanation-wrapper mt-2 bg-gray-900 rounded-lg p-4 " style="display: block;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fEff">
                         <span class="text-blue-400 font-bold">防偏誤聲明 (Baseline Correction)：</span><br>
                         請透過右上角下拉選單篩選同級距別之船舶進行比較。不同噸位船舶之推進基準不同，切勿跨級比較以免產生判讀誤差。
@@ -397,7 +397,7 @@
                     <span class="flex items-center gap-1"><i class="inline-block w-2 h-2 rounded-sm bg-amber-400"></i><span data-i18n="caLegend3">−3% ~ −10% 略低於級距</span></span>
                     <span class="flex items-center gap-1"><i class="inline-block w-2 h-2 rounded-sm bg-red-400"></i><span data-i18n="caLegend4">≤ −10% 效率落後</span></span>
                 </div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display:none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: block;">
                     <div class="mb-4 pb-4 border-b border-gray-700">
                         <h4 class="text-amber-400 font-bold mb-2">這張圖在看什麼</h4>
                         <p class="text-gray-300 text-xs leading-relaxed">
@@ -451,7 +451,7 @@
                     <div class="show-date-range date-filter-display inline-block"></div>
                 </div>
                 <div id="fuel-consumption-chart" class="chart-container" style="height: 360px;"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: block;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fFuel">
                         <span class="text-blue-400 font-bold">燃油結構分析：</span><br>
                         區間總燃油消耗 ＝ HSFO 高硫殘油 ＋ VLSFO 低硫殘油 ＋ LSMGO 低硫餾分油 ＋ 混合油 Blend ＋ 未分類<br>
@@ -485,7 +485,7 @@
                     <div class="show-date-range date-filter-display inline-block"></div>
                 </div>
                 <div id="bunker-ports-chart" class="chart-container" style="height: 360px;"></div>
-                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
+                <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: block;">
                     <div class="mb-4 pb-4 border-b border-gray-700 text-sm text-gray-300 font-mono" data-i18n="fBunker">
                         <span class="text-blue-400 font-bold">採購集中度評估：</span><br>
                         統計該區間內，各港口之燃油交付單(BDN)總量 (MT)。
@@ -636,7 +636,7 @@
                 <div class="bg-gray-900 p-4 rounded-lg overflow-y-auto border border-gray-700 flex flex-col" style="max-height: 460px;">
                     <div class="flex justify-between items-end mb-4">
                         <h3 class="text-gray-300 text-sm" data-i18n="mOpsDetail">逐航次明細（該區間啟航、且有港外空等的航次，每航次一列）</h3>
-                        <div class="explanation-wrapper" style="display: none;">
+                        <div class="explanation-wrapper" style="display: block;">
                             <div class="text-[11px] text-gray-300 bg-gray-900/60 p-2 rounded border border-gray-700 leading-relaxed" data-i18n="mOpsLogic">
                                 <b class="text-emerald-400">★ 全部為實測值，非公式推估。</b><br>
                                 <b class="text-gray-200">空等認定：</b>02_DailyVoyageRecords 的 <code>是否海上航行 = False</code> 且 <code>航行狀態 ∉ {Port, River}</code>（全期 6,475 筆，主要為 Anchoring 5,316 / Drifting 1,096，另含擱淺、停俥等少量狀態）。<b>此判準與圖 2 的第 ③ 段（港外錨泊空等）完全一致</b>，明細加總 = 圖 2 黃虛線。<br>
