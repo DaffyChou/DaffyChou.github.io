@@ -184,15 +184,21 @@
                 <div id="operational-waste-chart" class="chart-container"></div>
                 <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display: none;">
                     <div class="mb-4 pb-4 border-b border-gray-700">
-                        <h4 class="text-blue-400 font-bold mb-2">這張圖在看什麼</h4>
+                        <h4 class="text-blue-400 font-bold mb-2">五種營運狀態怎麼分（★真實資料）</h4>
                         <p class="text-gray-300 text-xs leading-relaxed">
-                            把船隊的作業時間分成幾種狀態：正常的<span class="text-emerald-400 font-semibold">海上航行</span>、必要的<span class="text-blue-400 font-semibold">港內作業</span>（裝卸靠泊）、<span class="text-purple-400 font-semibold">河道航行</span>，以及港外的<span class="text-amber-400 font-semibold">錨泊等待</span>與<span class="text-orange-400 font-semibold">漂流等待</span>——後兩項合計就是可以透過排程改善的浪費。
+                            主判準是來源欄位 <code>是否海上航行</code>，非海上的部分再依 <code>航行狀態</code> 細分成四類，五段互斥且必定加總為 100%：<br><br>
+                            <span class="text-emerald-400 font-semibold">● 運營能耗 (海上航行)</span> ＝ <code>是否海上航行 = TRUE</code>。真正在跑船，是有產值的能耗。<br>
+                            <span class="text-blue-400 font-semibold">● 必要能耗 (港內作業)</span> ＝ 非海上 且 <code>航行狀態 = Port</code>。靠泊、裝卸、移泊，屬必要成本。<br>
+                            <span class="text-purple-400 font-semibold">● 河道航行</span> ＝ 非海上 且 <code>航行狀態 = River</code>。內河／水道航段，速度受限但仍在移動，故獨立成一類，不算浪費也不併入港內作業。<br>
+                            <span class="text-amber-400 font-semibold">● 錨泊等待 (浪費)</span> ＝ 非海上 且 <code>航行狀態 = Anchoring</code>。在港外下錨排隊，最典型的可議價等待。<br>
+                            <span class="text-orange-400 font-semibold">● 漂流等待 (浪費)</span> ＝ 其餘非海上狀態（Drifting、to Low Sulphur 換油、Grounding、Ordered by operator／authority 等停俥狀態）。這些「其他狀態」只占非海上油耗的 <b>0.3%</b>，性質同為港外靜止等待，故一併歸在浪費側。
                         </p>
                     </div>
                     <div class="mb-4 pb-4 border-b border-gray-700">
-                        <h4 class="text-blue-400 font-bold mb-2">紅線代表什麼</h4>
+                        <h4 class="text-blue-400 font-bold mb-2">紅線「港外空等總耗油 (MT)」</h4>
                         <p class="text-gray-300 text-xs leading-relaxed">
-                            紅線是港外等待（錨泊＋漂流）的實際耗油噸數。柱狀是<b>佔比</b>、紅線是<b>絕對量</b>，兩者要一起看：淡季時佔比可能被放大，但絕對耗油不見得增加；旺季塞港時佔比可能沒變，但絕對量會明顯上升。
+                            ＝ <b>錨泊等待 ＋ 漂流等待</b> 的絕對油耗（右軸，MT），也就是兩根浪費柱加起來的實際噸數。<br>
+                            柱狀是<b>佔比</b>、紅線是<b>絕對量</b>，兩者要一起看：淡季總油耗分母變小時佔比會被放大，但絕對量未必增加；旺季塞港時佔比可能沒動、絕對量卻明顯上升。
                         </p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -225,11 +231,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="guideTitle">判讀指南</h4>
-                            <p class="text-gray-400 text-sm leading-relaxed" data-i18n="c1bGuide">藍色柱是船隊實際載貨的運輸量（空船壓艙的航段不計入），<span class="text-green-400">綠線</span>與<span class="text-purple-400">紫線</span>是兩種角度的碳排強度。兩條線走勢出現落差時，代表原因是<b>載重率</b>改變，而不是船隻能效本身變化。</p>
+                            <p class="text-gray-400 text-sm leading-relaxed" data-i18n="c1bGuide">藍色柱為各期間實際載貨的貨物噸浬（壓艙段計 0，所以會比圖 1 的運力噸浬低很多，且波動較大）。<span class="text-green-400">綠線 AER</span> 為 IMO CII 基準，<span class="text-purple-400">紫線 EEOI</span> 為貨物噸浬基準。兩線走勢分歧時，代表<b>載重率</b>改變而非能效改變。</p>
                         </div>
                         <div>
                             <h4 class="text-blue-400 font-bold mb-1" data-i18n="expertTitle">診斷觀察</h4>
-                            <p class="text-gray-300 text-sm leading-relaxed" data-i18n="c1bExpert">如果紫線（EEOI）下降幅度遠大於綠線（AER），代表改善主要來自<b>載得更滿</b>，不是船本身變省油。要判斷船隻真正的能效進步，請以 AER 與燃油效率趨勢為準。</p>
+                            <p class="text-gray-300 text-sm leading-relaxed" data-i18n="c1bExpert">AER 三年為 2.19 → 2.11 → 2.07（穩定改善）；EEOI 為 9.29 → 7.15 → 6.44，降幅遠大於 AER。差額主要來自<b>載重率提升</b>而非主機效率。要判斷真實能效，請以 AER 與 nm/mt 為準；EEOI 僅供內部參考。</p>
                         </div>
                     </div>
                 </div>
@@ -399,40 +405,54 @@
                 </div>
                 <div class="explanation-wrapper mt-4 bg-gray-900 rounded-lg p-4" style="display:none;">
                     <div class="mb-4 pb-4 border-b border-gray-700">
-                        <h4 class="text-amber-400 font-bold mb-2">這張圖在看什麼</h4>
+                        <h4 class="text-amber-400 font-bold mb-2">這張圖跟上方那張差在哪</h4>
                         <p class="text-gray-300 text-xs leading-relaxed">
-                            這是上方燃油效率比較的進階版本，改用官方工程分類分組（而非籠統的載重噸級距），評比基準也更一致——不管怎麼篩選，同一艘船的評比結果都不會變，方便更精準地比較同類型船隻。
+                            上方原圖表<b>維持不變</b>，級距沿用 DWT 粗分級（Capesize 15 艘／Handysize 2 艘／SmallBulk 4 艘），基準線是<b>全船隊</b>中位數。<br>
+                            本圖表是提案版本，兩個關鍵差異：<br>
+                            <span class="text-amber-400 font-semibold">① 改用官方工程分類</span> — 六個級距。原本的 SmallBulk 把 28K 散裝與 12K 雜貨綁在一起，組內極差達 8.89 nm/mt；拆開後 GC-12K 極差只剩 0.63。<br>
+                            <span class="text-amber-400 font-semibold">② 基準一律用同級距中位數</span> — 不是「篩選後才切換」。篩選只決定顯示哪些船，不決定數字的意思，因此同一艘船在任何篩選狀態下的判定都一致。<b>基準值不畫在圖上</b>，只出現在下方清單的「同級距中位數」欄與箱體 tooltip 內，避免圖面被階梯線切碎。<br>
+                            <span class="text-gray-500">清單中的載重噸 DWT、建造年、建造船廠一律取自<b>船舶主檔</b>（與上方原圖表同一來源）；官方船隊表只用來決定「工程級距」。建造年兩邊不一致時，該欄右上角會出現 <span class="text-amber-400">▲</span>，滑過可看兩個值。</span>
                         </p>
                     </div>
+                    
                     <div class="mb-4 pb-4 border-b border-gray-700">
-                        <h4 class="text-amber-400 font-bold mb-2">怎麼看</h4>
+                        <h4 class="text-amber-400 font-bold mb-2">離群值怎麼看</h4>
                         <p class="text-gray-300 text-xs leading-relaxed">
-                            <span class="text-red-400">紅點</span>代表明顯偏離常態的異常值，點擊可展開明細，查看發生期間與偏離幅度，並可連結到離群值排查頁進一步追蹤。
+                            紅點 ＝ 落在 Tukey 柵欄（<span class="font-mono">Q1 − 1.5×IQR</span> ／ <span class="font-mono">Q3 + 1.5×IQR</span>）之外的點。每船最多標 <b>3 低 ＋ 3 高</b>；同方向若超過 3 筆，tooltip 與明細面板會寫出完整筆數，清單的中位數欄也會出現 <span class="text-red-400">▲N</span>。<br>
+                            點紅點會展開下方明細（流程比照上方原圖表），內容包含來源期間、超出柵欄的幅度、樣本數與 Tukey 界，並可按「查看離群值排查」進入離群值分析頁。<br>
+                            <span class="text-amber-400">兩種視角的「一個點」意義不同：</span>營運視角一個點 ＝ 該月一整月；工程視角一個點 ＝ 該月的某一筆報表。<br>
+                            <span class="text-gray-500">「異常判斷依據」全部由實際數值推導（方向、柵欄、偏離幅度、樣本數），不做情境模擬。</span>
                         </p>
                     </div>
                     <div class="mb-4 pb-4 border-b border-gray-700">
                         <h4 class="text-amber-400 font-bold mb-2">為什麼要「洗滌塔分群」</h4>
                         <p class="text-gray-300 text-xs leading-relaxed">
-                            同一個工程級距裡，有裝洗滌塔和沒裝的船，燃油效率天生就有落差。勾選「洗滌塔分群」可以把兩種船分開比較，避免因為有沒有裝洗滌塔就誤判船況好壞。
+                            CAPE-208K 共 8 艘，其中 4 艘裝洗滌塔。2026-03~08 實測：<b>有洗滌塔中位數 6.80</b>、<b>無洗滌塔 7.70</b>，差 0.90（約 12%），遠大於 ±3% 的判定門檻。<br>
+                            若不分群，4 艘裝洗滌塔的會全部被判「落後」、4 艘沒裝的全部「領先」——診斷變成在偵測有沒有裝洗滌塔，不是在偵測船況。勾選「洗滌塔分群」後，基準線會在 CAPE-208K 內部再依配備分開計算。
                         </p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-amber-400 font-bold mb-1">偏離度是什麼</h4>
                             <p class="text-gray-300 text-xs leading-relaxed">
-                                偏離度是這艘船跟同級距其他船相比，比較省油還是比較耗油，用百分比表示。<span class="text-amber-400">正值好、負值差</span>。<br>
+                                <b>偏離度 ＝（本船中位數 − 同級距中位數）÷ 同級距中位數</b>，用百分比表示這艘船比同級距的同儕省油還是耗油。<br>
+                                以中鋼成功輪為例：本船中位數 8.65、CAPE-209K 同級距中位數 8.31 →
+                                (8.65 − 8.31) ÷ 8.31 = <b class="text-emerald-400">+4.1%</b>，代表同樣燒一噸油比同級距中位多跑 4.1% 的距離。<br>
+                                <span class="text-amber-400">正值好、負值差</span>（nm/mt 越高越省）。清單裡數字右邊的雙向長條以 0% 為中心，右綠左紅，±20% 滿格。<br>
                                 判定門檻：<br>
-                                <span class="text-emerald-400">≥ +3%</span> 級距領先
-                                <span class="text-gray-300">±3%</span> 符合級距
-                                <span class="text-amber-400">−3% ~ −10%</span> 略低於級距
+                                <span class="text-emerald-400">≥ +3%</span> 級距領先　
+                                <span class="text-gray-300">±3%</span> 符合級距　
+                                <span class="text-amber-400">−3% ~ −10%</span> 略低於級距　
                                 <span class="text-red-400">≤ −10%</span> 效率落後，建議追查
                             </p>
                         </div>
                         <div>
-                            <h4 class="text-amber-400 font-bold mb-1">變異度是什麼</h4>
+                            <h4 class="text-amber-400 font-bold mb-1">變異度 IQR 與變異係數 CV%</h4>
                             <p class="text-gray-300 text-xs leading-relaxed">
-                                中位數看的是「跑得好不好」，變異係數 CV% 看的是「穩不穩」——中位數達標但 CV% 偏高，代表這艘船在期間內表現起伏大，值得深入了解原因。<br>
-                                <span class="text-emerald-400">CV% 低</span>代表穩定　<span class="text-red-400">CV% 高</span>代表值得留意
+                                <b>IQR ＝ Q3 − Q1</b>，箱體的高度，單位同為 nm/mt。<b>CV% ＝ 樣本標準差 ÷ 平均 × 100</b>，母體取 Tukey 上下界之內的值，與箱體同一批資料。<br>
+                                中位數看的是「跑得好不好」，這兩欄看的是「穩不穩」——中位數達標但 CV% 偏高，代表操船或裝況在期間內起伏大，值得跟航次比對。<br>
+                                <span class="text-emerald-400">CV &lt; 8%</span> 穩定　<span class="text-amber-400">8~15%</span> 波動偏大　<span class="text-red-400">≥ 15%</span> 起伏顯著<br>
+                                <span class="text-gray-500">兩欄的定義與上方原圖表的 IQR／CV% 完全相同，可逐格對照。</span>
                             </p>
                         </div>
                     </div>
@@ -714,21 +734,21 @@
                 optAllDwt: '所有載重噸', optAllYear: '所有年份', opsByVoyage: '期間內航次', thMgoShort: '輕油', opsAttrNote: '每筆報表依時間計入所屬月份；航次若跨月，會拆分至不同月份顯示，本表僅呈現所選期間內的部分。', fleetMedLbl: '船隊中位', ttVsFleet: '差距', ttTotalFuel: '區間總油耗', ttClickOps: '▶ 點擊查看港外空等明細',
                 c1bTitle: '1b. 貨物噸浬與 AER 碳強度（對照圖）',
                 axCargoTM: '貨物噸浬 (Ton-nm)', sCargoTM: '貨物噸浬 (推估)', axAERVal2: 'AER (g CO₂/dwt-nm)', sAER2: 'AER (DWT 基準)', sEEOIcargo: 'EEOI (貨物噸浬基準)',
-                fCargoAer: '藍色柱是船隊實際載貨的運輸量（空船壓艙的航段不計入），兩條線是兩種角度的碳排強度。兩條線走勢出現落差時，通常代表原因是<b>載重率</b>改變，而不是船隻能效本身變化。',
-                c1bGuide: '藍色柱是船隊實際載貨的運輸量（空船壓艙的航段不計入），<span class="text-green-400">綠線</span>與<span class="text-purple-400">紫線</span>是兩種角度的碳排強度。兩條線走勢出現落差時，代表原因是<b>載重率</b>改變，而不是船隻能效本身變化。',
-                c1bExpert: '如果紫線（EEOI）下降幅度遠大於綠線（AER），代表改善主要來自<b>載得更滿</b>，不是船本身變省油。要判斷船隻真正的能效進步，請以 AER 與燃油效率趨勢為準。',
-                fEEOI: '這張圖同時看三件事：船隊這段期間做了多少運輸工作（藍柱）、燒了多少油（橘線），以及每單位運輸工作排放了多少碳。用來判斷船隊整體效率有沒有隨著業務量成長一起變好，<span class="text-green-400">數值越低代表碳排強度越小、能效越佳</span>。',
+                fCargoAer: '<span class="text-blue-400 font-bold">本圖與圖 1 的差別：分母不同</span><br><b>圖 1（工程師系統定義）：</b>貨運周轉量 = Σ (DWT × 航距)，取的是<b>運力</b>；碳強度標為 EEOI。<br><b>本圖：</b>貨物噸浬 = Σ (該筆推估貨載量 × 航距)，<b>壓艙 ballast 航段計 0</b>，取的是<b>實際載了多少貨</b>。<br><b>兩條碳強度線：</b><span class="text-green-400">AER = Σ 耗油 × CF ÷ (DWT × 航距)</span>（IMO CII 基準，與圖 1 綠線同值）；<span class="text-purple-400">EEOI = Σ 耗油 × CF ÷ 貨物噸浬</span>（真正的貨物噸浬基準）。<br><span class="text-yellow-400">⚠ 資料限制：</span>來源的 <code>載貨量_t_來源直接</code> 僅 3.7% 有值，本圖的貨載量改用 <code>排水量 − 輕船重量</code> 推估，該值<b>包含壓艙水與存油</b>，因此 EEOI 為<b>估算值，不可對外引用或與法規基準比對</b>。AER 則完全乾淨（只需 DWT 與航距）。<br><b>缺值規則：</b>某期間若<b>貨載推估覆蓋率 &lt; 60%</b>（該期間有航距但貨載未知的比例過高），或<b>載貨佔比 &lt; 10%</b>（幾乎全程壓艙、EEOI 會發散），則該點的貨物噸浬與 EEOI <b>留空不畫</b>，AER 仍照常顯示。船隊層級 32 個月的覆蓋率為 66&ndash;92%，全部通過。',
+                c1bGuide: '藍色柱為各期間實際載貨的貨物噸浬（壓艙段計 0，所以會比圖 1 的運力噸浬低很多，且波動較大）。<span class="text-green-400">綠線 AER</span> 為 IMO CII 基準，<span class="text-purple-400">紫線 EEOI</span> 為貨物噸浬基準。兩線走勢分歧時，代表<b>載重率</b>改變而非能效改變。',
+                c1bExpert: 'AER 三年為 2.19 → 2.11 → 2.07（穩定改善）；EEOI 為 9.29 → 7.15 → 6.44，降幅遠大於 AER。差額主要來自<b>載重率提升</b>而非主機效率。要判斷真實能效，請以 AER 與 nm/mt 為準；EEOI 僅供內部參考。',
+                fEEOI: '<span class="text-blue-400 font-bold">碳強度與貨運周轉量計算公式：</span><br><b>貨運周轉量 (Ton-nm)：</b>Σ (載重噸 DWT × 該筆對地航距 nm)　—— 與工程師系統定義一致，取的是<b>運力</b>噸浬。<br><b>EEOI (g CO₂/t-nm)：</b>Σ 耗油量 (MT) × CF ÷ 貨運周轉量<br><b>CF 排放係數：</b>HSFO 3.114　VLSFO 3.151　MGO/MDO 3.206　未分類暫以 VLSFO 3.151 估算<br><b>燃油涵蓋範圍：</b>主機 ME ＋ 發電機 AE ＋ 鍋爐 Boiler <b>全部計入</b>，四種油品全計。<br><span class="text-yellow-400">⚠ 定義說明：</span>來源系統的貨載量欄位僅 3.7% 有值，本欄位分母採 <b>DWT × 航距</b>（即 IMO CII 的 EEOI/AER Proxy 基準），非實際貨物噸浬。<b>不可與其他船東或法規基準的 EEOI 直接比對。</b><br><span class="text-green-400">數值越低代表單位運輸工作的碳排強度越小、能效越佳。</span>',
                 axEEOIVal: 'EEOI (g CO₂/t-nm)', sEEOI: 'EEOI (碳強度)',
-                fWaste: '把船隊的時間分成三種狀態：<b>海上航行</b>（正常營運）、<b>港內作業</b>（裝卸靠泊，必要成本）、<b>港外錨泊空等</b>（塞港或排程延宕，真正可改善的浪費）。<span class="text-red-300 font-bold">紅線</span>是港內＋港外合計的耗油，<span class="text-yellow-300 font-bold">黃虛線</span>單獨抓出港外空等這部分——這才是排程改善能省下來的油。點擊紅線或黃線任一節點可展開該期間的逐船空等明細。',
-                                fEff: '這張圖比較船隊各船的燃油效率（每燒一噸油能跑幾海浬，數字越高越好），一次看出哪些船表現落後、哪些船穩定。右上角可切換兩種角度：<span class="text-emerald-400 font-bold">營運視角</span>（預設）貼近日常成本，包含港內作業與港外空等的耗油；<span class="text-amber-400 font-bold">工程視角</span>只看船隻在海上航行時的推進效率，反映船體與主機的實際狀態。',
-                fFuel: '看船隊在這段期間燒了哪些等級的油，重油主要供主機使用、成本較貴的輕油多用於發電，這張圖用來掌握燃油成本結構是否合理。',
-                fBunker: '看船隊在哪些港口加油最頻繁，幫助採購單位評估燃油合約與供應商布局是否集中。',
+                fWaste: '<span class="text-red-400 font-bold">營運狀態三分法與兩條耗油線：</span><br>判準取自航次檔的 <code>是否海上航行</code> 與 <code>航行狀態</code>，與工程師系統同一來源。<br><b>① 海上航行（營運）</b>＝ 是否海上航行 = True<br><b>② 港內作業（必要）</b>＝ 非海上航行 且 航行狀態 ∈ {Port, River}（裝卸、靠泊、河道）<br><b>③ 港外錨泊空等（浪費）</b>＝ 其餘非海上航行（Anchoring / Drifting / 擱淺 / 停俥等）<br>三者相加 = 100%（全期 30,593 筆：① 14,330 筆 338,345.4 MT ｜ ② 9,788 筆 19,987.8 MT ｜ ③ 6,475 筆 13,901.2 MT）。<br><span class="text-gray-400">註：<code>是否海上航行</code> 是來源欄位，不是我推導的；同一個 <code>航行狀態</code> 會依此旗標落在不同段（例如 Anchoring 有 5,316 筆為非海上航行→③，另 4 筆被來源標為海上航行→①）。</span><br><br><span class="text-red-300 font-bold">紅線 非海上航行總耗油 (MT)</span> = ②＋③ —— <b>這條與工程師系統的紅線同值</b>（例：2024-08 為 1,136.6 MT）。<br><span class="text-yellow-300 font-bold">黃虛線 其中港外錨泊空等 (MT)</span> = 僅 ③（與紅色柱段同值，只是換成 MT 刻度） —— 這才是<b>真正可透過排程改善的塞港等待</b>（2024-08 為 496.0 MT）。<br><span class="text-gray-400">兩者相差約 2.3 倍，差額是港內裝卸作業的必要能耗，不應視為浪費。點擊紅線或黃線任一節點可展開該期間的逐船空等明細。</span>',
+                                fEff: '<span class="text-blue-400 font-bold">兩種視角：同一批資料，兩種問法</span><br>右上角可切換。<b>兩者沒有對錯，量的是不同東西。</b><br><br><span class="text-emerald-400 font-bold">① 營運視角（預設）</span>　<b>一個月一個點</b><br><code>nm/mt = 該月 Σ(海上航距) ÷ 該月 Σ(全部油耗)</code>　—— 分母<b>含港內作業與港外空等的油</b>。<br>回答的是「這個月每燒一噸油，船實際推進了幾浬」，把塞港與在泊損耗一併算進成本。與工程師系統同一算法，驗收數字對得上。每艘船最多 32 個點（2024-01 ~ 2026-08）。<br><br><span class="text-amber-400 font-bold">② 工程視角</span>　<b>一筆報表一個點</b><br><code>nm/mt = 該筆航距 ÷ 該筆油耗</code>，<b>只取 <code>是否海上航行 = True</code> 的列</b>，分母不含港內與空等。<br>回答的是「船在航行當下的推進效率如何」，是船體阻力與主機狀態的直接反映。全船隊共 14,140 個點。<br><br><b>為什麼兩者數值不同：</b>①的分母多了約 9.1% 的非海上航行油耗，數值會系統性偏低；②因為顆粒度細，單筆報表區間短、比值跳動大，箱子明顯較寬（中鋼挑戰輪 IQR：① 1.0 vs ② 1.6）。<br><br><b>共同規則：</b>兩者都依<b>當前區間</b>即時重算，都採 Tukey 1.5×IQR 判離群（箱體為 Q1~Q3，觸鬚為界內最大最小，紅點為界外值），四分位數採線性內插。<br><span class="text-gray-400">篩選器的值全部取自主檔 01_VesselParticulars.csv：載重噸＝逐艘實際 DWT；年份＝建造年；船廠＝依船殼號推定之廠區（JMU 5xxx→有明、1xx–2xx→津；CSBC 20 萬噸級→高雄、3.6 萬噸級→基隆；勝利輪與超群輪無船殼號，依主尺寸推定為有明）。<span class="text-yellow-400">廠區為推定值，待中運確認。</span></span>',
+                fFuel: '<span class="text-blue-400 font-bold">燃油結構分析：</span><br>區間總耗油量 = 常規重油 VLSFO (主機使用) + 昂貴輕油 LSMGO (發電機使用)',
+                fBunker: '<span class="text-blue-400 font-bold">採購集中度評估：</span><br>統計該區間內，各港口之燃油交付單(BDN)總量 (MT)。',
                 guideTitle: '判讀指南', expertTitle: '診斷觀察',
                 c1Guide: '藍色柱狀圖為各期間貨運周轉量 (Ton-nm)，橘色折線為船隊總油耗 (MT)。兩線<b>脫鉤</b>代表運能成長但油耗受控，是船隊效率提升之訊號。<span class="text-blue-300">點擊任一資料點</span>可展開單船能耗細部資訊。', c1Expert: '當前區間貨運周轉量穩定成長，總油耗保持平穩。<b>點擊圖表任一時間點</b>可進一步識別各船 EEOI 排名，<span class="text-red-400 font-bold">紅色標示</span>為高於船隊平均、<span class="text-yellow-300">拖低整體效率</span>之關鍵船舶。',
                 c2Guide: '最上方<span class="text-red-400">紅色區塊</span>代表在港外空等時消耗的浪費。佔比激增代表塞港或排程延宕。點擊紅區可下鑽。', c2Expert: '請注意圖表中 <span class="text-red-400 font-bold">紅色區塊凸起</span> 的區間。建議點擊該柱狀圖紅區調閱明細追查責任。',
-                c3Guide: '每艘船一個箱型圖，呈現這艘船的效率分布區間，<span class="text-red-400">紅點</span>是明顯偏離常態的異常值（可點擊查看詳情）。<span class="text-amber-400">橘色虛線＝船隊中位</span>，用來快速看出哪些船落後於船隊整體水準。', c3Expert: '<b>看兩件事：</b>中位數是否低於船隊平均（效率偏低），以及變異度（CV%）是否偏高（表現不穩定）。<span class="text-emerald-400">CV% 低</span>代表這艘船表現穩定；<span class="text-red-400">CV% 高</span>代表同一艘船有時很好、有時很差，值得深入了解原因。<b>中位數低於船隊平均、CV% 又偏高的船，優先安排檢視。</b>',
+                c3Guide: '箱體為 Q1~Q3、中線為中位數，觸鬚為 Tukey 1.5×IQR 界內的最大最小值，<span class="text-red-400">紅點</span>為界外離群值（可點擊查看詳情）。<span class="text-amber-400">橘色虛線＝船隊中位</span>，取當前篩選範圍內<b>各船中位數的中位數</b>，會隨區間、視角與三個篩選器一起重算。<br>右上角可切換<b>營運視角</b>（每月一點，分母含全部油耗，與工程師系統同算法）與<b>工程視角</b>（每筆報表一點，分母僅海上航行油耗）。', c3Expert: '<b>兩個變異指標一起看：</b><br><b>IQR（變異度）</b>＝ Q3 − Q1，單位 nm/mt，是<b>絕對</b>離散程度；<b>CV%（變異係數）</b>＝ 樣本標準差 ÷ 平均 × 100，是<b>相對</b>離散程度，已除以自身水準，因此<b>可跨船型比較</b>——這正是 IQR 做不到的（小船效率基數大，IQR 天生就大）。<br>門檻：<span class="text-emerald-400">CV &lt; 8% 穩定</span>｜<span class="text-amber-400">8–15% 需留意</span>｜<span class="text-red-400">≥ 15% 不穩定，優先追查</span>。<br><b>中位數低於船隊中位、CV% 又偏高的船，優先安排檢視。</b>切到工程視角後 CV% 普遍上升是正常的——顆粒度變細，單筆報表的波動不再被月彙總抹平。',
                 c4Guide: '柱狀圖堆疊顯示船隊在各區間的重油(VLSFO)與輕油(LSMGO)耗量，折線圖對應當期總耗油量。', c4Expert: '請密切關注紅色的 <span class="text-red-400">輕油(LSMGO)</span> 佔比變化。若輕油總量異常攀升，通常代表船隊港內待命時間拉長，需留意高昂的發電成本。',
-                c5Guide: '顯示<b>當前區間</b>內加油次數前 10 名的港口。<span class="text-blue-300">點擊任一柱狀圖</span>可展開該港的逐船加油明細。', c5Expert: '加油次數集中度反映船隊對特定港口之依賴程度。掌握高頻港口有助採購單位以<span class="text-blue-300">頻次優勢</span>，向供應商爭取長約優惠及優先服務窗口。',
+                c5Guide: '顯示<b>當前區間</b>內加油次數前 10 名的港口。<span class="text-blue-300">點擊任一柱狀圖</span>可展開該港的逐船加油明細。<br><b>母體：</b>03_BunkeringRecords.csv 中 <code>是否實際加油 = 1</code> 的事件，全期 543 筆（原檔 708 筆，已排除 165 筆加油量為 0 的<b>存油盤點</b>；不排除會使次數膨脹約 30%）。<br><b>排序：</b>次數多到少，同次數再比加注量。<br><span class="text-yellow-400">⚠ 本圖隨上方時間區間變動</span>——高雄港全期 253 次，但 2026-03 ~ 2026-08 只有 <b>35 次</b>。比對數字前請先確認兩邊區間一致。', c5Expert: '加油次數集中度反映船隊對特定港口之依賴程度。掌握高頻港口有助採購單位以<span class="text-blue-300">頻次優勢</span>，向供應商爭取長約優惠及優先服務窗口。',
                 thVessel: '船舶', thDwt: '載重噸 (MT)', thYear: '年份', thShipyard: '船廠', thMedian: '效率中位數 (nm/mt)', thVar: '變異度 IQR', thCV: '變異度(CV%)', thStatus: '狀態', stTBD: '待定義', ttMax: '最大值', ttMin: '最小值', ttMedian: '中位數', ttMean: '平均值', ttAge: '船齡', ttYears: '年', ttSample: '樣本', ttRows: '筆', ttFence: 'Tukey 界', ttOut: '離群', thAdvice: '診斷觀察',
                 bmOps: '營運視角', bmEng: '工程視角', ttMonths: '個月',
                 bmOpsFull: '營運視角：每月一點，分母含全部油耗', bmEngFull: '工程視角：每筆報表一點，分母僅海上航行油耗',
@@ -740,9 +760,9 @@
                 c1DrillTitle: '船隊能耗細部資訊',
                 c1DrillHint: '⚠ EEOI 數值越高代表碳排強度越大，<span class="text-red-400 font-bold">紅色標示</span>為拖低船隊平均之關鍵船舶（高於船隊均值）',
                 thEEOI: 'EEOI 碳強度', thFuelAmt: '燃油消耗 (MT)', thCargoAmt: '貨運周轉 (MTm)',
-                fBunker: '看船隊在哪些港口加油最頻繁，幫助採購單位評估燃油合約與供應商布局是否集中。點擊港口柱狀圖可查看各船加油明細。',
+                fBunker: '<span class="text-blue-400 font-bold">加油次數統計：</span><br>統計該區間內，各港口之燃油作業次數 (BDN Count)，反映採購頻率集中度。點擊港口柱狀圖可查看各船加油明細。',
                 btnClose: '關閉視窗', btnViewAllRecords: '查看所有船舶油耗紀錄',
-                mOpsRank: '空等時數排行 — 前 10 名船舶（該區間啟航之航次合併計算）', mOpsDetail: '逐航次明細（該區間啟航、且有港外空等的航次，每航次一列）', mOpsLogic: '估算該航次因港外空等（塞港、候引水、候泊位）多消耗的輕油，用來評估待港效率不佳造成的燃油損失。', thPort: '擁擠港口 / 泊位', thHours: '空等時數', thMgo: '浪費輕油',
+                mOpsRank: '空等時數排行 — 前 10 名船舶（該區間啟航之航次合併計算）', mOpsDetail: '逐航次明細（該區間啟航、且有港外空等的航次，每航次一列）', mOpsLogic: '公式: 浪費 MGO = 空等時數 × (AE日耗/24)', thPort: '擁擠港口 / 泊位', thHours: '空等時數', thMgo: '浪費輕油',
                 axFuelTotal: '總耗油 (MT)', axTonMiles: '貨運周轉量 (Ton-nm)', axRatio: '佔比 (%)', axEff: '燃油效率 (nm/mt)', axAge: '船齡 (Years)', axVol: '加注總量 (MT)', axIdleMT: '港外空等總油耗 (MT)',
                 sCargo: '貨運周轉量', sFuel: '總燃油消耗', sIdle: '港外空等 (浪費)', sIdleMT: '港外空等總耗油 (MT)', sAnchMT: '其中港外錨泊空等 (MT)', sPort: '必要能耗 (港內作業)', sSea: '運營能耗 (海上航行)', sRiver: '河道航行', sAnch: '錨泊等待 (浪費)', sDrift: '漂流等待 (浪費)', sLSMGO: 'LSMGO (輕油)', sVLSFO: 'VLSFO (重油)', sHSFO: 'HSFO 高硫殘油', sLSFO: 'VLSFO 低硫殘油', sMGO: 'LSMGO 低硫餾分油', sBlend: '混合油 Blend', sUNC: '未分類', sVol: '加注總量',
                 ship_0: '成功輪', ship_1: '創新輪', ship_2: '自由輪', ship_3: '勝利輪', ship_4: '光輝輪', ship_5: '遠見輪', ship_6: '領航輪', ship_7: '卓越輪', ship_8: '奮進輪', ship_9: '堅韌輪', ship_10: '探索輪', ship_11: '永續輪', ship_12: '奮發輪', ship_13: '誠信輪', ship_14: '和平輪', ship_15: '勇氣輪', ship_16: '智慧輪', ship_17: '傳奇輪', ship_18: '宏偉輪', ship_19: '榮耀輪',
@@ -785,21 +805,21 @@
                 optAllDwt: 'All DWT', optAllYear: 'All Years', opsByVoyage: 'voyages in period', thMgoShort: 'MGO', opsAttrNote: 'Each report is attributed to the month of its own timestamp　|　A voyage spanning two months is split; this table shows only the portion falling inside the selected period', fleetMedLbl: 'Fleet median', ttVsFleet: 'vs fleet', ttTotalFuel: 'Total fuel in period', ttClickOps: '▶ Click for anchorage detail',
                 c1bTitle: '1b. Cargo Tonne-Miles &amp; AER (Reference)',
                 axCargoTM: 'Cargo Tonne-Miles (Ton-nm)', sCargoTM: 'Cargo Tonne-Miles (est.)', axAERVal2: 'AER (g CO₂/dwt-nm)', sAER2: 'AER (DWT basis)', sEEOIcargo: 'EEOI (cargo tonne-mile basis)',
-                fCargoAer: 'Blue bars are the fleet&rsquo;s actual cargo carried (ballast legs count as zero), and the two lines show carbon intensity from two angles. When the two lines diverge, it usually reflects a change in <b>load factor</b>, not a change in vessel efficiency itself.',
-                c1bGuide: 'Blue bars are cargo actually carried by the fleet (ballast legs count as zero). <span class="text-green-400">Green</span> and <span class="text-purple-400">purple</span> are two angles on carbon intensity. When the two lines diverge, the cause is a change in <b>load factor</b>, not efficiency itself.',
-                c1bExpert: 'If the purple line (EEOI) falls much faster than the green line (AER), the improvement is mostly from <b>carrying fuller loads</b>, not the vessels burning less fuel. For real efficiency gains, refer to AER and the Fuel Efficiency Trend chart.',
-                fEEOI: 'This chart shows three things at once: how much transport work the fleet performed (blue columns), how much fuel it burned (orange line), and how much carbon per unit of transport work (right axis). Use it to see whether fleet-wide efficiency is keeping pace with business growth — <span class="text-green-400">lower means less carbon per unit of work, i.e. better efficiency</span>.',
+                fCargoAer: '<span class="text-blue-400 font-bold">How this differs from Chart 1: the denominator</span><br><b>Chart 1 (source-system definition):</b> Transport Work = &Sigma; (DWT &times; Distance) — <b>capacity</b>; intensity labelled EEOI.<br><b>This chart:</b> Cargo Tonne-Miles = &Sigma; (estimated cargo &times; Distance), with <b>ballast legs counted as 0</b> — what was actually carried.<br><b>Two intensity lines:</b> <span class="text-green-400">AER = &Sigma; Fuel &times; CF &divide; (DWT &times; Distance)</span> (IMO CII basis, same values as the green line in Chart 1); <span class="text-purple-400">EEOI = &Sigma; Fuel &times; CF &divide; Cargo Tonne-Miles</span>.<br><span class="text-yellow-400">&#9888; Data limitation:</span> the source cargo field is only 3.7% populated, so cargo here is estimated as <code>displacement &minus; lightweight</code>, which <b>includes ballast water and bunkers</b>. EEOI is therefore an <b>estimate and must not be quoted externally or compared with regulatory benchmarks</b>. AER is clean (DWT and distance only).<br><b>Missing-value rule:</b> a period is left blank for cargo tonne-miles and EEOI when <b>cargo coverage &lt; 60%</b> or <b>laden share &lt; 10%</b> (EEOI diverges on near-ballast periods); AER is always shown. Fleet-level coverage across the 32 months is 66&ndash;92%.',
+                c1bGuide: 'Blue bars are cargo tonne-miles with ballast legs at zero — much lower and more volatile than Chart 1&#39;s capacity tonne-miles. <span class="text-green-400">Green = AER</span> (IMO CII basis); <span class="text-purple-400">purple = EEOI</span> (cargo basis). Divergence between the two reflects a change in <b>load factor</b>, not efficiency.',
+                c1bExpert: 'AER by year: 2.19 &rarr; 2.11 &rarr; 2.07. EEOI: 9.29 &rarr; 7.15 &rarr; 6.44 — a far steeper drop, driven mostly by <b>higher load factor</b> rather than engine efficiency. Use AER and nm/mt for real efficiency; treat EEOI as internal reference only.',
+                fEEOI: '<span class="text-blue-400 font-bold">Carbon Intensity &amp; Transport Work Formula:</span><br><b>Transport Work (Ton-nm):</b> &Sigma; (DWT &times; Distance over ground nm) — matches the source system definition; this is <b>capacity</b> tonne-miles.<br><b>EEOI (g CO&#8322;/t-nm):</b> &Sigma; Fuel (MT) &times; CF &divide; Transport Work<br><b>CF factors:</b> HSFO 3.114, VLSFO 3.151, MGO/MDO 3.206; Unclassified estimated at VLSFO 3.151<br><b>Fuel scope:</b> Main Engine + Aux Engine + Boiler, <b>all included</b>; all four fuel types counted.<br><span class="text-yellow-400">&#9888; Definition note:</span> the source cargo field is only 3.7% populated, so the denominator uses <b>DWT &times; Distance</b> (the IMO CII EEOI/AER proxy basis), not actual cargo tonne-miles. <b>Not comparable with other owners&#39; or regulatory EEOI figures.</b><br><span class="text-green-400">Lower = less carbon per unit of transport work = better efficiency.</span>',
                 axEEOIVal: 'EEOI (g CO₂/t-nm)', sEEOI: 'EEOI (Carbon Intensity)',
-                fWaste: 'Splits fleet time into three states: <b>sea passage</b> (normal operation), <b>port operations</b> (loading/berthing, a required cost), and <b>anchorage idling</b> (congestion or scheduling delay — the waste that can actually be reduced). The <span class="text-red-300 font-bold">red line</span> is total fuel for port + anchorage combined; the <span class="text-yellow-300 font-bold">yellow dashed line</span> isolates anchorage idling alone — the portion scheduling improvements can actually save. Click either line to open the per-vessel breakdown.',
-                                fEff: 'This chart compares fuel efficiency (nautical miles per tonne of fuel — higher is better) across the fleet, making it easy to spot which vessels are lagging and which are consistent. Toggle top-right between two views: <span class="text-emerald-400 font-bold">Operational</span> (default) reflects day-to-day cost, including port and anchorage fuel; <span class="text-amber-400 font-bold">Engineering</span> looks only at propulsion efficiency while under way, a direct read on hull and engine condition.',
-                fFuel: 'Shows which fuel grades the fleet burned in this period — residual fuel mainly powers the main engine, while the more expensive distillate is mostly used for power generation. Use this to check whether the fuel cost mix looks reasonable.',
-                fBunker: 'Shows which ports the fleet bunkers at most often, helping procurement assess whether fuel contracts and supplier coverage are too concentrated.',
+                fWaste: '<span class="text-red-400 font-bold">Three-way operating split and two fuel lines:</span><br>Classified from the voyage file&#39;s <code>at-sea flag</code> and <code>navigation status</code> — the same source the engineering system uses.<br><b>&#9312; Sea passage (operating)</b> = at-sea flag True<br><b>&#9313; Port operations (required)</b> = not at sea, status &#8712; {Port, River}<br><b>&#9314; Anchorage idling (waste)</b> = all other not-at-sea rows (Anchoring / Drifting / etc.)<br>The three sum to 100%.<br><br><span class="text-red-300 font-bold">Red line: non-sea fuel total (MT)</span> = &#9313;+&#9314; — <b>matches the engineering system&#39;s red line</b> (e.g. 1,136.6 MT for 2024-08).<br><span class="text-yellow-300 font-bold">Yellow dashed: of which anchorage idling (MT)</span> = &#9314; only (same as the red bar segment, in MT) — the portion actually addressable by scheduling (496.0 MT for 2024-08).<br><span class="text-gray-400">The ~2.3&times; gap is required cargo-handling energy in port and should not be counted as waste. Click either line to open the per-vessel breakdown.</span>',
+                                fEff: '<span class="text-blue-400 font-bold">Two views of the same data</span><br>Toggle at the top right. <b>Neither is wrong — they measure different things.</b><br><br><span class="text-emerald-400 font-bold">&#9312; Operational (default)</span>　<b>one point per month</b><br><code>nm/mt = &Sigma;(sea distance) &divide; &Sigma;(all fuel)</code> for that month — the denominator <b>includes port and anchorage fuel</b>. Answers &quot;how far did the ship actually move per tonne of fuel burned this month&quot;. Matches the engineering system&#39;s method. Up to 32 points per vessel.<br><br><span class="text-amber-400 font-bold">&#9313; Engineering</span>　<b>one point per report</b><br><code>nm/mt = distance &divide; fuel</code> for each row where <code>at-sea flag = True</code>; port and anchorage excluded. Answers &quot;how efficient is propulsion while under way&quot; — a direct read on hull resistance and engine condition. 14,140 points fleet-wide.<br><br><b>Why they differ:</b> &#9312; adds ~9.1% non-sea fuel to the denominator, so values run systematically lower; &#9313; is finer-grained, so short report intervals make the ratio swing and the box is visibly wider.<br><br><b>Shared rules:</b> both recompute live for the selected period, both use Tukey 1.5&times;IQR (box = Q1&ndash;Q3, whiskers = min/max within the fence, red dots = outside), linear interpolation for quartiles.<br><span class="text-gray-400">Filter values come from 01_VesselParticulars.csv. Shipyard is inferred from the hull number and is <span class="text-yellow-400">pending confirmation</span>.</span>',
+                fFuel: '<span class="text-blue-400 font-bold">Fuel Structure Analysis:</span><br>Total Fuel = VLSFO (Main Engine) + LSMGO (Aux Engine)',
+                fBunker: '<span class="text-blue-400 font-bold">Procurement Concentration:</span><br>Total Bunker Delivery Note (BDN) volumes (MT) per port in the selected period.',
                 guideTitle: 'Interpretation Guide', expertTitle: 'Expert Diagnostics',
                 c1Guide: 'Blue bars show transport work (Ton-nm) per period; orange line shows total fleet fuel (MT). <b>Decoupling</b> — rising cargo with stable fuel — signals improving fleet efficiency. <span class="text-blue-300">Click any data point</span> to expand per-vessel energy detail.', c1Expert: 'Transport work is growing steadily while fuel remains contained. <b>Click any time point</b> to drill into per-vessel EEOI rankings — <span class="text-red-400 font-bold">red-highlighted</span> vessels are above the fleet average and <span class="text-yellow-300">dragging down overall efficiency</span>.',
                 c2Guide: 'The top <span class="text-red-400">red blocks</span> represent wasted LSMGO during anchorage. Surges indicate congestion. Click red bar to drill down.', c2Expert: 'Note the periods with <span class="text-red-400 font-bold">red block surges</span>. Click the red bar to view details and implement JIT strategies.',
-                c3Guide: 'One box per vessel, showing the spread of that vessel&rsquo;s efficiency; <span class="text-red-400">red dots</span> are values that stand out as unusual (clickable for detail). <span class="text-amber-400">The orange dashed line is the fleet median</span>, making it easy to spot vessels lagging behind the fleet.', c3Expert: '<b>Watch two things:</b> whether the median sits below the fleet average (low efficiency), and whether CV% is high (unstable performance). <span class="text-emerald-400">Low CV%</span> means the vessel performs consistently; <span class="text-red-400">high CV%</span> means performance swings a lot and is worth investigating. <b>Vessels with both a below-average median and a high CV% should be reviewed first.</b>',
+                c3Guide: 'Box = Q1–Q3 with the median line; whiskers are the min/max inside the Tukey 1.5×IQR fence; <span class="text-red-400">red dots</span> are outliers (clickable). <span class="text-amber-400">The orange dashed line is the fleet median</span> — the median of each vessel&#39;s median within the current filter, recomputed with the period, view and filters.<br>Toggle top-right between <b>Operational</b> and <b>Engineering</b> views.', c3Expert: '<b>Read both dispersion metrics together:</b> <b>IQR</b> = Q3 − Q1 in nm/mt — <b>absolute</b> spread. <b>CV%</b> = sample SD ÷ mean × 100 — <b>relative</b> spread, normalised by the vessel&#39;s own level, so it is <b>comparable across ship sizes</b>, which IQR is not.<br>Thresholds: <span class="text-emerald-400">CV &lt; 8% stable</span> | <span class="text-amber-400">8–15% watch</span> | <span class="text-red-400">&ge; 15% unstable, investigate first</span>.<br><b>Prioritise vessels below the fleet median with a high CV%.</b> CV% rises in the Engineering view by design.',
                 c4Guide: 'Stacked columns show VLSFO and LSMGO usage. The spline shows the total fuel consumption.', c4Expert: 'Monitor the <span class="text-red-400">LSMGO (Red)</span> ratio. Abnormal increases suggest prolonged port idling and high auxiliary engine costs.',
-                c5Guide: 'Top 10 bunkering ports by event count <b>within the selected period</b>. <span class="text-blue-300">Click a bar</span> for the per-vessel breakdown.', c5Expert: 'Bunkering frequency concentration reveals the fleet\'s reliance on specific ports. High-frequency ports give procurement the leverage to negotiate <span class="text-blue-300">priority service windows and long-term pricing advantages</span>.',
+                c5Guide: 'Top 10 bunkering ports by event count <b>within the selected period</b>. <span class="text-blue-300">Click a bar</span> for the per-vessel breakdown.<br><b>Population:</b> events in 03_BunkeringRecords.csv with <code>actual bunkering = 1</code> — 543 fleet-wide (708 raw rows minus 165 zero-quantity ROB stock counts; including them inflates counts by ~30%).<br><b>Sort:</b> count desc, then volume.<br><span class="text-yellow-400">&#9888; This chart follows the period selector</span> — Kaohsiung is 253 over the full range but only <b>35</b> for 2026-03 to 2026-08.', c5Expert: 'Bunkering frequency concentration reveals the fleet\'s reliance on specific ports. High-frequency ports give procurement the leverage to negotiate <span class="text-blue-300">priority service windows and long-term pricing advantages</span>.',
                 thVessel: 'Vessel', thDwt: 'DWT (MT)', thYear: 'Year', thShipyard: 'Shipyard', thMedian: 'Median', thVar: 'IQR', thCV: 'CV%', thStatus: 'Status', stTBD: 'TBD', ttMax: 'Max', ttMin: 'Min', ttMedian: 'Median', ttMean: 'Mean', ttAge: 'Age', ttYears: 'yrs', ttSample: 'Sample', ttRows: 'rows', ttFence: 'Tukey fence', ttOut: 'outliers', thAdvice: 'Expert Diagnosis & Advice',
                 bmOps: 'Operational', bmEng: 'Engineering', ttMonths: 'months',
                 bmOpsFull: 'Operational view: one point per month, denominator includes all fuel', bmEngFull: 'Engineering view: one point per report, denominator = sea-passage fuel only',
@@ -811,9 +831,9 @@
                 c1DrillTitle: 'Fleet Energy Detail',
                 c1DrillHint: '⚠ Higher Higher EEOI = greater carbon intensity. <span class="text-red-400 font-bold">Red rows</span> are above the fleet average and are the key vessels dragging down overall efficiency.',
                 thEEOI: 'EEOI Index', thFuelAmt: 'Fuel (MT)', thCargoAmt: 'Transport (MTm)',
-                fBunker: 'Shows which ports the fleet bunkers at most often, helping procurement assess whether fuel contracts and supplier coverage are too concentrated. Click a bar to view vessel details.',
+                fBunker: '<span class="text-blue-400 font-bold">Bunkering Count Analysis:</span><br>Counts BDN (Bunker Delivery Notes) per port in the selected period, reflecting procurement frequency concentration. Click a bar to view vessel details.',
                 btnClose: 'Close', btnViewAllRecords: 'View All Fuel Records',
-                mOpsRank: 'Idle Hours — Top 10 Vessels (all ports & stays combined)', mOpsDetail: 'Per-Voyage Detail (voyages with anchorage waiting, one row each)', mOpsLogic: 'Estimates the extra distillate burned by that voyage while idling outside port (congestion, waiting for a pilot or berth), to gauge the fuel cost of poor port turnaround.', thPort: 'Congested Port / Berth', thHours: 'Idle Hrs', thMgo: 'Wasted MGO',
+                mOpsRank: 'Idle Hours — Top 10 Vessels (all ports & stays combined)', mOpsDetail: 'Per-Voyage Detail (voyages with anchorage waiting, one row each)', mOpsLogic: 'Logic: Wasted MGO = Idle Hrs × (AE Daily Cons / 24)', thPort: 'Congested Port / Berth', thHours: 'Idle Hrs', thMgo: 'Wasted MGO',
                 axFuelTotal: 'Total Fuel (MT)', axTonMiles: 'Transport Work (Ton-nm)', axRatio: 'Ratio (%)', axEff: 'Fuel Efficiency (nm/mt)', axAge: 'Age (Years)', axVol: 'Volume (MT)', axIdleMT: 'Anchorage Waste Fuel (MT)',
                 sCargo: 'Transport Work', sFuel: 'Total Fuel', sIdle: 'Idle Anchorage (Waste)', sIdleMT: 'Anchorage Waste Fuel Total (MT)', sAnchMT: 'of which Anchorage Idling (MT)', sRiver: 'River Transit', sAnch: 'Anchorage Waiting (waste)', sDrift: 'Drifting / Stoppage (waste)', sPort: 'Port Ops (Required)', sSea: 'Sea Passage (Ops)', sLSMGO: 'LSMGO', sVLSFO: 'VLSFO', sHSFO: 'HSFO (high-sulphur residual)', sLSFO: 'VLSFO (low-sulphur residual)', sMGO: 'LSMGO (low-sulphur distillate)', sBlend: 'Blend', sUNC: 'Unclassified', sVol: 'Bunker Vol',
                 ship_0: 'Success', ship_1: 'Innovation', ship_2: 'Liberty', ship_3: 'Victory', ship_4: 'Glory', ship_5: 'Vision', ship_6: 'Pioneer', ship_7: 'Excellence', ship_8: 'Endeavor', ship_9: 'Resilience', ship_10: 'Explorer', ship_11: 'Sustainability', ship_12: 'Strive', ship_13: 'Integrity', ship_14: 'Peace', ship_15: 'Courage', ship_16: 'Wisdom', ship_17: 'Legend', ship_18: 'Grand', ship_19: 'Glory',
@@ -2821,7 +2841,6 @@
         updateDateDropdowns('global');
         initCharts();
         applyDateFilter();
-        changeLanguage('zh');
 
     </script>
 </body>
