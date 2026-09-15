@@ -945,21 +945,25 @@ const CONFIG = {
       spd: {
         name: '船速異常下降',
         parts: [
-          {k:'_',type:'label',text:'SOG < 預期航速達'},
+          {k:'_',type:'label',text:'SOG < 預期航速'},
+          {k:'kts',type:'number',def:13,unit:'節'},
+          {k:'_2',type:'label',text:'達'},
           {k:'n',type:'number',def:15,unit:'%'}
         ],
-        desc: d => `SOG < 預期航速達 ${d.n}%`,
+        desc: d => `SOG < 預期航速${d.kts}節達${d.n}%`,
         freq: '觸發後每隔 4 小時提醒，限制 3 次',
-        hint: '僅以 AIS / GPS 取得對地速度（SOG），比對摯陞自有演算法之預期航速。因無 RPM 資料，無法直接區分主機減速、船體效能下降或外部因素；建議搭配船端通報核實。預設 15% 對應 CP speed/consumption claim 業界常用審查門檻。'
+        hint: '僅以 AIS / GPS 取得對地速度（SOG），比對設定之預期航速。因無 RPM 資料，無法直接區分主機減速、船體效能下降或外部因素；建議搭配船端通報核實。預期航速可依 CP 約定或船型服務航速填入，預設 15% 對應 CP speed/consumption claim 業界常用審查門檻。'
       },
       spd_rpm: {
         hidden: true,
         name: '船速異常下降（含 RPM）',
         parts: [
-          {k:'_',type:'label',text:'SOG < 預期航速達'},
+          {k:'_',type:'label',text:'SOG < 預期航速'},
+          {k:'kts',type:'number',def:13,unit:'節'},
+          {k:'_2',type:'label',text:'達'},
           {k:'n',type:'number',def:15,unit:'%'}
         ],
-        desc: d => `SOG < 預期航速達 ${d.n}%（RPM 未大幅變動）`,
+        desc: d => `SOG < 預期航速${d.kts}節達${d.n}%（RPM 未大幅變動）`,
         freq: '觸發後每隔 4 小時提醒，限制 3 次',
         hint: '結合 AIS 之 SOG 與 Engine Datalogger 之 RPM 進行雙因子判定：當 SOG 偏低但 RPM 維持正常時觸發，可鎖定船體／推進效率問題（排除人為減速與主機故障）。需船端 RPM 資料源支援；散裝輪因 CP performance clause 對此特別敏感。'
       },
@@ -1770,16 +1774,20 @@ const EMAIL_TEMPLATES = {
       hintLine: '條件持續存在時將再次發送。'
     })
   }),
-  spd: (v, ctx) => ({
-    subject: `【航次警報】${ctx.shipName} 船速異常下降 ${v.n||15}%`,
+  spd: (v, ctx) => {
+    const kts = Number(v.kts) || 13;
+    const pct = Number(v.n) || 15;
+    const act = (kts * (1 - pct / 100)).toFixed(1);
+    return {
+    subject: `【航次警報】${ctx.shipName} 船速異常下降 ${pct}%`,
     body: emailTpl('spd', {
       category: '航次警報 / VOYAGE ALERT · 船速異常 (AIS)',
-      headline: `${ctx.shipName} 船速異常下降 ${v.n||15}%`,
-      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」對地速度（SOG）較預期下降 <strong>${v.n||15}%</strong>（門檻 ${v.n||15}%）。本警報僅以 AIS / GPS 資料判定，無法直接區分原因。</p>`,
+      headline: `${ctx.shipName} 船速異常下降 ${pct}%`,
+      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」對地速度（SOG）較預期航速 ${kts.toFixed(1)} kn 下降 <strong>${pct}%</strong>（門檻 ${pct}%）。本警報僅以 AIS / GPS 資料判定，無法直接區分原因。</p>`,
       dataTitle: '航行資訊',
       dataRows: [
-        ['預期 SOG', '14.0 kn（摯陞自有演算法）'],
-        ['實際 SOG', '11.8 kn'],
+        ['預期 SOG', `${kts.toFixed(1)} kn（設定值）`],
+        ['實際 SOG', `${act} kn`],
         ['海流／風向', '北流 0.8 kn / 西北風 4 級'],
         ['可能原因', '主機減速、Hull fouling、海流逆向、載重變化（待船端確認）']
       ],
@@ -1799,17 +1807,22 @@ const EMAIL_TEMPLATES = {
       ],
       hintLine: '本警報每 4 小時提醒一次，限制 3 次。'
     })
-  }),
-  spd_rpm: (v, ctx) => ({
-    subject: `【航次警報】${ctx.shipName} 船速異常下降 ${v.n||15}%（含 RPM 判定）`,
+    };
+  },
+  spd_rpm: (v, ctx) => {
+    const kts = Number(v.kts) || 13;
+    const pct = Number(v.n) || 15;
+    const act = (kts * (1 - pct / 100)).toFixed(1);
+    return {
+    subject: `【航次警報】${ctx.shipName} 船速異常下降 ${pct}%（含 RPM 判定）`,
     body: emailTpl('spd_rpm', {
       category: '航次警報 / VOYAGE ALERT · 船速異常 (含 RPM)',
-      headline: `${ctx.shipName} 船速異常下降 ${v.n||15}%（RPM 正常）`,
-      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」主機 RPM 維持正常，但對地速度（SOG）較預期下降 <strong>${v.n||15}%</strong>（門檻 ${v.n||15}%），疑似船體阻力異常。</p>`,
+      headline: `${ctx.shipName} 船速異常下降 ${pct}%（RPM 正常）`,
+      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」主機 RPM 維持正常，但對地速度（SOG）較預期航速 ${kts.toFixed(1)} kn 下降 <strong>${pct}%</strong>（門檻 ${pct}%），疑似船體阻力異常。</p>`,
       dataTitle: '運轉資訊',
       dataRows: [
-        ['預期 SOG', '14.0 kn'],
-        ['實際 SOG', '11.8 kn'],
+        ['預期 SOG', `${kts.toFixed(1)} kn（設定值）`],
+        ['實際 SOG', `${act} kn`],
         ['主機 RPM', '98（變動 -1.2%）'],
         ['海流／風向', '北流 0.8 kn / 西北風 4 級']
       ],
@@ -1829,7 +1842,8 @@ const EMAIL_TEMPLATES = {
       ],
       hintLine: '本警報每 4 小時提醒一次，限制 3 次。'
     })
-  }),
+    };
+  },
   zone: (v, ctx) => ({
     subject: `【航次警報】${ctx.shipName} 即將進入 ${v.area||'ECA 排放控制區'} — 距邊界 ${v.n||50} 海浬`,
     body: emailTpl('zone', {
