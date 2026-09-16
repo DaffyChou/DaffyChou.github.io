@@ -1083,15 +1083,15 @@ const FREQ_PRESETS = {
   spd_rpm: { detect:{mode:'scheduled',from:'00:00',n:1,unit:'hour'}, alert:{mode:'repeat',n:4,unit:'hour',max:3} },
   zone: { detect:{mode:'scheduled',from:'00:00',n:5,unit:'min'},  alert:{mode:'repeat',n:30,unit:'min',max:99} },
   // CII 評等
-  thism:{ detect:{mode:'monthly',day:1,time:'08:00'},             alert:{mode:'monthly',day:1,time:'08:00'} },
-  nexty:{ detect:{mode:'monthly',day:1,time:'08:00'},             alert:{mode:'monthly',day:1,time:'08:00'} },
+  thism:{ detect:{mode:'monthly',day:1,time:'07:00'},             alert:{mode:'monthly',day:1,time:'08:00'} },
+  nexty:{ detect:{mode:'monthly',day:1,time:'07:00'},             alert:{mode:'monthly',day:1,time:'08:00'} },
   // Bunker
-  low:  { detect:{mode:'daily',time:'08:00'},                     alert:{mode:'daily-fixed',time:'08:00'} },
-  high: { detect:{mode:'monthly',day:1,time:'08:00'},             alert:{mode:'monthly',day:1,time:'08:00'} },
+  low:  { detect:{mode:'daily',time:'07:00'},                     alert:{mode:'daily-fixed',time:'08:00'} },
+  high: { detect:{mode:'daily',time:'07:00'},                     alert:{mode:'monthly',day:1,time:'08:00'} },
   // 船員
-  cert: { detect:{mode:'weekly',days:[1],time:'08:00'},           alert:{mode:'weekly',day:1,time:'08:00'} },
-  age:  { detect:{mode:'weekly',days:[1],time:'08:00'},           alert:{mode:'weekly',day:1,time:'08:00'} },
-  svc:  { detect:{mode:'weekly',days:[1],time:'08:00'},           alert:{mode:'weekly',day:1,time:'08:00'} }
+  cert: { detect:{mode:'weekly',days:[1],time:'07:00'},           alert:{mode:'weekly',day:1,time:'08:00'} },
+  age:  { detect:{mode:'weekly',days:[1],time:'07:00'},           alert:{mode:'weekly',day:1,time:'08:00'} },
+  svc:  { detect:{mode:'weekly',days:[1],time:'07:00'},           alert:{mode:'weekly',day:1,time:'08:00'} }
 };
 
 // ===== 偵測／警報頻率的設計理由 =====
@@ -1133,12 +1133,12 @@ const FREQ_REASONS = {
     alert: '戰略性指標，月度檢視即可規劃節能改善、租船策略與 dry-docking 排程。'
   },
   low: {
-    detect: '油耗為日累積數值，前日資料於每日 08:00 結算後最完整，再做安全庫存比對。',
-    alert: '對齊船岸晨報時段（08:00），方便當班輪機長與運務組同步處理補油規劃。'
+    detect: '油耗為日累積數值，前日資料於每日 07:00 結算後最完整，再做安全庫存比對。',
+    alert: '偵測後於 08:00 發送，對齊船岸晨報時段，方便當班輪機長與運務組同步處理補油規劃。'
   },
   high: {
-    detect: '須月度資料量才能與歷史同月平均做有意義的統計比對，避免短期波動誤判。',
-    alert: '油耗異常通常為慢性問題（hull fouling、主機效能衰退），月度回顧即足以即時介入。'
+    detect: '每日 07:00 以前日午報計算單日偏差，可及早看出 fouling 或主機效能衰退的趨勢轉折。',
+    alert: '油耗異常屬慢性問題，單日數值雜訊大；每日偵測累積、以月報彙整回顧即足以及時介入。'
   },
   cert: {
     detect: '證書到期日為慢變化指標，每週掃描足夠；對齊 STCW 換證 4–8 週前置作業節奏。',
@@ -1216,7 +1216,7 @@ const FIELD_DETAILS = {
     ['觸發邏輯', '計算本月累計 AER / cgDIST，比對 IMO 評等門檻（A–E 五等）。'],
     ['資料來源', '船端日報（燃油消耗）、AIS（航行距離）、IMO DCS 標準排放因子表。'],
     ['計算方式', 'AER = (CO₂ 總排放) / (DWT × 航行 nm)；CO₂ = 燃油消耗 × 燃油碳排因子。'],
-    ['誤報情境', '月初資料未齊全；對策：每月 1 日 08:00 結算，T−1 完整資料才產報。'],
+    ['誤報情境', '月初資料未齊全；對策：每月 1 日 07:00 結算，T−1 完整資料才產報。'],
     ['業界依據', 'IMO MEPC.328(76)、MARPOL Annex VI 第 28 條 CII 評等規定。'],
     ['注意事項', '散裝/雜貨 AER（gCO₂/dwt·nm）；貨櫃 cgDIST（gCO₂/teu·nm）；計算口徑不同須注意。']
   ],
@@ -1237,7 +1237,7 @@ const FIELD_DETAILS = {
     ['注意事項', '散裝遠洋係數 1.3–1.5；班輪固定航線 1.15–1.25；可依航線風險微調。']
   ],
   high: [
-    ['觸發邏輯', '月度實際油耗 vs 本船性能曲線預期，偏差 > N% 時觸發；再拆 Hull/Propeller/Engine。'],
+    ['觸發邏輯', '每日 07:00 以前日午報計算實際油耗 vs 本船性能曲線預期，偏差 > N% 時觸發；月報彙整並拆 Hull/Propeller/Engine。'],
     ['資料來源', '船端午報、本船性能曲線（baseline 每 6 個月校準）、ISO 19030 風浪修正模組。'],
     ['計算方式', 'Performance gap = (actual − expected) / expected；分解模型計算三項貢獻度。'],
     ['誤報情境', '性能曲線老舊未更新；對策：每 6 個月以 sea trial 或乾塢後資料重新校準 baseline。'],
