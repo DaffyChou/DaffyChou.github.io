@@ -403,114 +403,11 @@ body {
   margin-top: 10px; padding-top: 10px;
   border-top: 1px dashed #d1d5da;
 }
+/* Email 預覽容器：信件本身為 100% inline CSS（比照實際寄出格式），此處僅提供底色與捲動，不覆寫信件樣式 */
 .ep-body {
-  padding: 22px 26px;
-  font-size: 14px; line-height: 1.7;
-  color: #24292e;
+  padding: 0;
+  background: #f4f6fb;
   max-height: 60vh; overflow-y: auto;
-}
-.ep-body p { margin: 0 0 12px; }
-.ep-body .section {
-  font-size: 13px; font-weight: 600; color: #1a1a1a;
-  margin: 16px 0 8px;
-  padding-left: 8px;
-  border-left: 3px solid #4078c0;
-}
-.ep-body ul { margin: 0 0 12px; padding-left: 22px; }
-.ep-body ul li { margin-bottom: 4px; }
-.ep-body table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 13px; }
-.ep-body table th, .ep-body table td { border: 1px solid #e1e4e8; padding: 7px 10px; text-align: left; }
-.ep-body table th { background: #f6f8fa; font-weight: 600; }
-.ep-body .var-tag {
-  color: #d73a49; background: #fff5f5;
-  padding: 1px 4px; border-radius: 3px;
-  font-family: "SFMono-Regular",Consolas,monospace;
-  font-size: 0.9em;
-}
-.ep-body .badge {
-  display: inline-block; padding: 2px 10px; border-radius: 12px;
-  font-size: 11px; font-weight: 600; margin-right: 6px;
-}
-.ep-body .badge-info  { background: #dbedff; color: #0366d6; }
-.ep-body .badge-warn  { background: #fff5b1; color: #735c0f; }
-.ep-body .badge-alert { background: #ffeef0; color: #d73a49; }
-.ep-body .badge-report{ background: #dcffe4; color: #22863a; }
-.ep-body .hint-line { font-size: 12px; color: #6a737d; margin-top: 14px; }
-.ep-body .ai-risk {
-  background: #fff8e6;
-  border: 1px solid #ffd966;
-  border-left: 3px solid #d29922;
-  border-radius: 4px;
-  padding: 12px 14px;
-  margin: 16px 0;
-  font-size: 13px;
-  line-height: 1.6;
-}
-.ep-body .ai-risk .ai-title {
-  color: #b45309;
-  font-weight: 600;
-  margin-bottom: 8px;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.ep-body .ai-risk .risk-row {
-  display: grid;
-  grid-template-columns: 110px 1fr;
-  gap: 10px;
-  padding: 3px 0;
-  font-size: 13px;
-}
-.ep-body .ai-risk .risk-label { color: #735c0f; font-size: 12px; }
-.ep-body .ai-risk .risk-value { color: #1a1a1a; }
-.ep-body .ai-risk .ai-conclusion {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px dashed #d4a017;
-  font-size: 12px;
-  color: #735c0f;
-  font-style: italic;
-}
-.ep-body .unsubscribe-block {
-  margin-top: 24px;
-  padding: 16px;
-  background: #fafbfc;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
-  text-align: center;
-}
-.ep-body .unsubscribe-btn {
-  display: inline-block;
-  padding: 10px 24px;
-  background: #fff;
-  border: 1px solid #d73a49;
-  color: #d73a49;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-}
-.ep-body .unsubscribe-btn:hover {
-  background: #d73a49;
-  color: #fff;
-}
-.ep-body .unsubscribe-note {
-  margin-top: 8px;
-  font-size: 11px;
-  color: #6a737d;
-  line-height: 1.5;
-}
-.ep-body .ack-msg {
-  padding: 14px;
-  background: #dcffe4;
-  border: 1px solid #28a745;
-  color: #176f2c;
-  border-radius: 4px;
-  font-size: 13px;
-  text-align: center;
-  font-weight: 500;
 }
 .ep-footer {
   background: #f6f8fa;
@@ -860,7 +757,7 @@ body.internal-mode .field-details-card { display: block; }
       <span class="close" id="ep-close">×</span>
     </div>
     <div class="ep-meta">
-      <div class="row-meta"><span class="label">From:</span><span class="value">alerts@srp.example.com</span></div>
+      <div class="row-meta"><span class="label">From:</span><span class="value">SRP 警報通知系統 &lt;alerts@srp.example.com&gt;</span></div>
       <div class="row-meta"><span class="label">To:</span><span class="value" id="ep-to">—</span></div>
       <div class="ep-subject" id="ep-subject"></div>
     </div>
@@ -879,11 +776,20 @@ body.internal-mode .field-details-card { display: block; }
 const IS_INTERNAL = true;
 
 // ===== Demo data =====
+// imo / en 供 Email 預覽的「船舶」欄使用（格式：IMO / 中文船名 / 英文船名）
 const SHIPS = [
-  {id:'s1',text:'慶豐輪'},{id:'s2',text:'台海明德號'},{id:'s3',text:'海洋之星'},
-  {id:'s4',text:'彩虹輪'},{id:'s5',text:'台灣精神號'},{id:'s6',text:'興順輪'},
-  {id:'s7',text:'寶成輪'},{id:'s8',text:'光明輪'},{id:'s9',text:'中海輪'},
-  {id:'s10',text:'東方之星'},{id:'s11',text:'宏達輪'},{id:'s12',text:'永昌輪'}
+  {id:'s1', text:'慶豐輪',    imo:'9234567', en:'CHING FENG'},
+  {id:'s2', text:'台海明德號', imo:'9248913', en:'TAI HAI MING TE'},
+  {id:'s3', text:'海洋之星',   imo:'9301442', en:'OCEAN STAR'},
+  {id:'s4', text:'彩虹輪',    imo:'9318665', en:'RAINBOW'},
+  {id:'s5', text:'台灣精神號', imo:'9345128', en:'TAIWAN SPIRIT'},
+  {id:'s6', text:'興順輪',    imo:'9366574', en:'HSING SHUN'},
+  {id:'s7', text:'寶成輪',    imo:'9402318', en:'PAO CHENG'},
+  {id:'s8', text:'光明輪',    imo:'9433729', en:'KUANG MING'},
+  {id:'s9', text:'中海輪',    imo:'9455081', en:'CHUNG HAI'},
+  {id:'s10',text:'東方之星',   imo:'9487236', en:'ORIENT STAR'},
+  {id:'s11',text:'宏達輪',    imo:'9512904', en:'HONG DA'},
+  {id:'s12',text:'永昌輪',    imo:'9548317', en:'YUNG CHANG'}
 ];
 const USERS = [
   {id:'u1',text:'系統管理員'},{id:'u2',text:'Chen Wei-Han'},
@@ -1533,594 +1439,626 @@ function genericDesc(field) {
 }
 
 // ===== Email templates =====
-const V = s => `<span class="var-tag">${s}</span>`;
-const NOW_SAMPLE = '2026-05-13 14:32';
+// 版型比照 SRP 實際寄出之警報信件：漸層 header（警報名稱）+ 單一彙整表格（觸發時間／對象／該警報資訊）+ 機密聲明
+const MAIL_FONT = "Arial,'Noto Sans TC',sans-serif";
+const MAIL_CONFIDENTIAL = '** 本信件包含機密資料，非指定收件者，請勿使用或揭露本信件內容';
+const TRIGGER_TIME = '2026/05/13 14:32:01';
+// 實際越過地理圍欄的時間：早於系統掃描到的觸發時間
+const GATE_CROSS_TIME = '2026/05/13 14:28:35';
 
 // ===== 電子報切版工具：table-based + 100% inline CSS，相容 Gmail / Outlook / Thunderbird =====
 
-// 主框架：建立完整一封 email 的 HTML（外層灰底 + 中央 600px 白底卡片）
+// 警報名稱由使用者輸入、條件文字可能含 < >，一律逸出後再放進信件 HTML
+const esc = x => escapeHtml(String(x == null ? '' : x));
+
+// 資料表：表頭 + 首欄 34%，主表格與附表共用同一套樣式
+function mailTable(cols, rows) {
+  const headCells = (cols || []).map(function(c) {
+    return `<td style="background:#f9fafb; padding:12px 14px; border-bottom:1px solid #e5e7eb;"><div style="font-weight:700;">${esc(c)}</div></td>`;
+  }).join('');
+  const bodyRows = (rows || []).map(function(r) {
+    return '<tr>' + r.map(function(c, i) {
+      return i === 0
+        ? `<td width="34%" style="padding:12px 14px; background:#fcfcfd; color:#374151;">${esc(c)}</td>`
+        : `<td style="padding:12px 14px; color:#111827;">${esc(c)}</td>`;
+    }).join('') + '</tr>';
+  }).join('');
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #e5e7eb; border-radius:12px; overflow:hidden;">
+                <tr>${headCells}</tr>
+                ${bodyRows}
+              </table>`;
+}
+
+// 附表：主表格之外的補充清單（例：年齡警示的「個人生日資料未填」），含標題與說明註解
+function extraTables(list) {
+  if (!list || !list.length) return '';
+  return list.map(function(t) {
+    return `
+              <div style="margin-top:22px;">
+                <div style="font-weight:700; margin-bottom:10px;">${esc(t.title)}</div>
+                ${mailTable(t.cols, t.rows)}
+                ${t.note ? `<p style="margin:10px 0 0 0; font-size:13px; color:#6b7280;">${esc(t.note)}</p>` : ''}
+              </div>`;
+  }).join('');
+}
+
 function emailTpl(fieldKey, opts) {
   const o = opts || {};
-  const category = o.category || '';
-  const headline = o.headline || '';
-  const intro = o.intro || '';
-  const dataTitle = o.dataTitle || '事件資訊';
-  const dataRows = o.dataRows || [];
-  const ai = o.ai;
-  const actionItems = o.actionItems;
-  const hintLine = o.hintLine || '';
   const alertId = o.alertId || ('ALT-' + Date.now().toString(36).toUpperCase().slice(-8));
-  const dataSection = dataRows.length ? `
-        <tr>
-          <td style="padding:14px 24px 4px 24px;">
-            <div style="font-size:13px;font-weight:600;color:#1a1a1a;border-left:3px solid #4078c0;padding:0 0 0 10px;margin-bottom:10px;">${dataTitle}</div>
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:13px;line-height:1.6;color:#24292e;border-collapse:collapse;">
-              ${dataRows.map(function(r){return '<tr><td width="130" valign="top" style="padding:5px 0;color:#6a737d;font-size:12px;">' + r[0] + '</td><td valign="top" style="padding:5px 0;">' + r[1] + '</td></tr>';}).join('')}
-            </table>
-          </td>
-        </tr>` : '';
-  const hintRow = hintLine ? `<tr><td style="padding:8px 24px 18px 24px;font-size:12px;color:#6a737d;line-height:1.5;">${hintLine}</td></tr>` : '';
+  const hasExtras = !!(o.extras && o.extras.length);
   return `
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f4f5f7;font-family:'Microsoft JhengHei','PingFang TC',Arial,sans-serif;margin:0;padding:0;border-collapse:collapse;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f6fb;">
   <tr>
-    <td align="center" style="padding:24px 12px;">
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #e1e4e8;border-radius:6px;border-collapse:separate;">
+    <td align="center" style="padding:0;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; background:#ffffff;">
+
+        <!-- Header 滿版（background-color 為不支援漸層之郵件客戶端的退回色） -->
         <tr>
-          <td style="background-color:#1e1e1e;padding:18px 24px;">
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-              <tr>
-                <td style="font-size:11px;font-weight:600;color:#9aa0a6;letter-spacing:0.06em;text-transform:uppercase;font-family:Arial,sans-serif;">${category}</td>
-                <td align="right" style="font-size:11px;color:#9aa0a6;font-family:Arial,sans-serif;">${NOW_SAMPLE} UTC</td>
-              </tr>
-            </table>
-            <div style="font-size:17px;font-weight:600;color:#ffffff;margin-top:8px;line-height:1.4;">${headline}</div>
+          <td style="padding:26px 18px; background-color:#2563eb; background:linear-gradient(135deg,#2563eb,#7c3aed);">
+            <div style="font-family:${MAIL_FONT}; color:#ffffff;">
+              <div style="font-size:24px; font-weight:700; margin-top:6px; line-height:1.25;">${esc(o.title)}</div>
+            </div>
           </td>
         </tr>
+
+        <!-- 內容區 -->
         <tr>
-          <td style="padding:22px 24px 4px 24px;font-size:14px;line-height:1.7;color:#24292e;">${intro}</td>
+          <td style="padding:22px 18px;">
+            <div style="font-family:${MAIL_FONT}; color:#111827; font-size:14px; line-height:1.7;">
+              ${mailTable(o.cols, o.rows)}
+              ${extraTables(o.extras)}
+              <p style="margin:${hasExtras ? 22 : 10}px 0 0 0; color:#374151;">${MAIL_CONFIDENTIAL}</p>
+              ${aiBlock(o.ai)}
+              ${actionsBlock(o.actionItems)}
+            </div>
+          </td>
         </tr>
-        ${dataSection}
-        ${aiBlock(ai)}
-        ${actionsBlock(actionItems)}
-        ${hintRow}
         ${unsubBlock(fieldKey)}
-        <tr>
-          <td style="background-color:#f6f8fa;padding:14px 24px;border-top:1px solid #e1e4e8;font-size:11px;color:#959da5;line-height:1.6;text-align:center;font-family:Arial,sans-serif;">
-            本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生<br>
-            警報 ID：${alertId} ｜ <a href="https://srp.example.com/alerts" style="color:#0366d6;text-decoration:none;">管理介面</a>
-          </td>
-        </tr>
+        ${footerBlock(alertId)}
       </table>
     </td>
   </tr>
 </table>`;
 }
 
-// AI 風險研判（內部版專屬，table-based 黃色提示框）
+// AI 風險研判（內部版專屬；客戶版信件比照實際格式不含此區塊）
 function aiBlock(ai) {
   if (!IS_INTERNAL || !ai) return '';
   const items = ai.items || [];
   const conclusion = ai.conclusion || '';
   return `
-        <tr>
-          <td style="padding:8px 24px 0 24px;">
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#fff8e6;border:1px solid #ffd966;border-left:3px solid #d29922;border-radius:4px;border-collapse:separate;">
-              <tr>
-                <td style="padding:12px 14px;">
-                  <div style="font-size:11px;font-weight:600;color:#b45309;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;font-family:Arial,sans-serif;">AI 風險研判 — 內部判讀</div>
-                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:13px;line-height:1.6;border-collapse:collapse;">
-                    ${items.map(function(r){return '<tr><td width="110" valign="top" style="padding:3px 0;color:#735c0f;font-size:12px;">' + r[0] + '</td><td valign="top" style="padding:3px 0;color:#1a1a1a;">' + r[1] + '</td></tr>';}).join('')}
-                  </table>
-                  ${conclusion ? `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #d4a017;font-size:12px;color:#735c0f;font-style:italic;">${conclusion}</div>` : ''}
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>`;
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:16px; background:#fffbeb; border:1px solid #fcd34d; border-left:3px solid #d97706; border-radius:8px;">
+                <tr>
+                  <td style="padding:12px 14px;">
+                    <div style="font-size:12px; font-weight:700; color:#b45309; letter-spacing:0.06em; margin-bottom:8px;">AI 風險研判 — 內部判讀</div>
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:13px; line-height:1.6;">
+                      ${items.map(function(r){return '<tr><td width="110" valign="top" style="padding:3px 0; color:#92400e;">' + r[0] + '</td><td valign="top" style="padding:3px 0; color:#111827;">' + r[1] + '</td></tr>';}).join('')}
+                    </table>
+                    ${conclusion ? `<div style="margin-top:8px; padding-top:8px; border-top:1px dashed #d97706; font-size:13px; color:#92400e;">${conclusion}</div>` : ''}
+                  </td>
+                </tr>
+              </table>`;
 }
 
-// 建議動作（內部版專屬，客戶版隱藏）
+// 建議動作（內部版專屬）
 function actionsBlock(items) {
   if (!IS_INTERNAL || !items || !items.length) return '';
   return `
-        <tr>
-          <td style="padding:14px 24px 4px 24px;">
-            <div style="font-size:13px;font-weight:600;color:#1a1a1a;border-left:3px solid #4078c0;padding:0 0 0 10px;margin-bottom:8px;">建議動作</div>
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:13px;line-height:1.6;color:#24292e;border-collapse:collapse;">
-              ${items.map(function(i){return '<tr><td valign="top" style="padding:3px 0 3px 10px;">· ' + i + '</td></tr>';}).join('')}
-            </table>
-          </td>
-        </tr>`;
+              <div style="margin-top:16px;">
+                <div style="font-size:13px; font-weight:700; color:#111827; border-left:3px solid #2563eb; padding-left:10px; margin-bottom:8px;">建議動作</div>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:13px; line-height:1.6; color:#374151;">
+                  ${items.map(function(i){return '<tr><td valign="top" style="padding:3px 0 3px 10px;">· ' + i + '</td></tr>';}).join('')}
+                </table>
+              </div>`;
 }
 
-// 解除通報：使用連結（非 JS 按鈕，相容所有郵件客戶端）；only for repeat / daily / weekly / monthly
+// 解除通報（內部版專屬）：使用連結而非 JS 按鈕，相容所有郵件客戶端；僅持續發送類警報顯示
 function unsubBlock(fieldKey) {
+  if (!IS_INTERNAL) return '';
   const preset = FREQ_PRESETS[fieldKey];
   if (!preset || preset.alert.mode === 'once') return '';
   const token = fieldKey + '-' + Date.now().toString(36).toUpperCase();
   const unsubUrl = 'https://srp.example.com/alerts/unsubscribe?token=' + token;
   return `
         <tr>
-          <td style="padding:18px 24px;">
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#fafbfc;border:1px solid #e1e4e8;border-radius:6px;border-collapse:separate;">
+          <td align="center" style="padding:0 18px 22px 18px;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;">
               <tr>
-                <td align="center" style="padding:18px 16px;">
-                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;border-collapse:collapse;">
-                    <tr>
-                      <td align="center" style="background-color:#ffffff;border:1px solid #d73a49;border-radius:4px;">
-                        <a href="${unsubUrl}" target="_blank" style="display:inline-block;padding:10px 28px;font-family:Arial,sans-serif;font-size:14px;font-weight:500;color:#d73a49;text-decoration:none;">解除通報</a>
-                      </td>
-                    </tr>
-                  </table>
-                  <p style="margin:10px 0 0 0;font-size:11px;color:#6a737d;line-height:1.5;font-family:'Microsoft JhengHei',Arial,sans-serif;">本警報設定為持續發送類型。點選連結將導向管理介面確認停止後續通報；亦可登入後重新啟用。</p>
+                <td align="center" style="background:#ffffff; border:1px solid #dc2626; border-radius:6px;">
+                  <a href="${unsubUrl}" target="_blank" style="display:inline-block; padding:10px 28px; font-family:${MAIL_FONT}; font-size:14px; font-weight:500; color:#dc2626; text-decoration:none;">解除通報</a>
                 </td>
               </tr>
             </table>
+            <p style="margin:10px 0 0 0; font-family:${MAIL_FONT}; font-size:12px; color:#6b7280; line-height:1.5;">本警報設定為持續發送類型。點選連結將導向管理介面確認停止後續通報；亦可登入後重新啟用。</p>
           </td>
         </tr>`;
 }
 
+// 頁尾警報 ID（內部版專屬）
+function footerBlock(alertId) {
+  if (!IS_INTERNAL) return '';
+  return `
+        <tr>
+          <td style="background:#f9fafb; padding:14px 18px; border-top:1px solid #e5e7eb; font-family:${MAIL_FONT}; font-size:12px; color:#6b7280; line-height:1.6; text-align:center;">
+            本警報由 摯陞 SRP 船隊戰情室監控系統 自動產生<br>
+            警報 ID：${alertId} ｜ <a href="https://srp.example.com/alerts" style="color:#2563eb; text-decoration:none;">管理介面</a>
+          </td>
+        </tr>`;
+}
+
+// ===== Email 範例資料 =====
+const CREW_SAMPLE = [
+  {code:'ET3382', en:'Chen Wei-Han',  zh:'陳威漢', rank:'船長'},
+  {code:'ET3433', en:'Lin Mei-Ling',  zh:'林美玲', rank:'大副'},
+  {code:'ET3434', en:'Wang Da-Ming',  zh:'王大明', rank:'輪機長'}
+];
+// 生日欄位空白、系統無法計算年齡之人員（年齡警示附表用）；部分人員無英文姓名
+const CREW_NO_BIRTHDAY = [
+  {code:'ET2994', en:'',              zh:'魏永春'},
+  {code:'ET3030', en:'LI CHANG SHAN', zh:'李長山'}
+];
+
+// 依「警報範圍」取示範船舶：單船模式取使用者實際勾選的船，全船隊取前 n 艘
+function getSampleShips(n) {
+  if (state.scope === 'ships') {
+    try {
+      const picked = jQuery('#sel-ships').select2('data')
+        .map(function(d){ return SHIPS.find(function(s){ return s.id === d.id; }); })
+        .filter(Boolean);
+      if (picked.length) return picked.slice(0, n);
+    } catch(e) {}
+  }
+  return SHIPS.slice(0, n);
+}
+const shipCell = s => `${s.imo} / ${s.text} / ${s.en}`;
+const crewCell = c => `${c.code} / ${c.en} / ${c.zh}`;
+const crewName = c => c.en ? `${c.en} / ${c.zh}` : c.zh;
+const num = (x, d) => Number(x) || d;
+// 蒲福風級 → 風速 m/s（級數中位值近似）
+const bftToMs = b => 0.836 * Math.pow(b, 1.5);
+// 由門檻等級往下取 N 個評等（皆符合「≥ 門檻」）
+function gradesFrom(g, n) {
+  const order = 'ABCDE';
+  const i = Math.max(0, order.indexOf((g || 'C 級')[0]));
+  const out = [];
+  for (let k = 0; k < n; k++) out.push(order[Math.min(order.length - 1, i + k)]);
+  return out;
+}
+// 以 2026-05-13 為基準推算日期
+function sampleDate(offsetDays) {
+  const d = new Date(Date.UTC(2026, 4, 13));
+  d.setUTCDate(d.getUTCDate() + offsetDays);
+  return d.toISOString().slice(0, 10);
+}
+
 const EMAIL_TEMPLATES = {
   // ---- 航次警報 ----
-  gate: (v, ctx) => ({
-    subject: `【航次警報】${ctx.shipName} 已${v.dir||'進入'}地理圍欄 — 高雄港 PIL`,
-    body: emailTpl('gate', {
-      category: '航次警報 / VOYAGE ALERT · 進／出港',
-      headline: `${ctx.shipName} 已${v.dir||'進入'}地理圍欄`,
-      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」（IMO：9234567）已於 <strong>${NOW_SAMPLE} UTC</strong> ${v.dir||'進入'}預設地理圍欄「高雄港 PIL」。</p>`,
-      dataRows: [
-        ['位置', 'Lat 22.6273 / Lon 120.2706'],
-        ['SOG / Heading', '5.2 kn / 315°'],
-        ['下一港', '基隆港（ETA 2026-05-15 08:00）']
-      ],
-      ai: {
-        items: [
-          ['風險等級', '低（例行事件）'],
-          ['歷史對照', '本船 6 個月內進港 38 次，平均逗留 18.5 小時'],
-          ['預估裝卸時間', '約 22 小時']
-        ],
-        conclusion: 'AI 建議：無需特殊干預，依例行排程處理。'
-      },
-      actionItems: [
-        '確認 Port Agent 已收到 NOR 通知',
-        '檢查靠泊／離泊作業排程'
-      ]
-    })
-  }),
-  eta: (v, ctx) => ({
-    subject: `【航次警報】${ctx.shipName} ETA ${v.ba||'前'} ${v.n||24} 小時提醒`,
-    body: emailTpl('eta', {
-      category: '航次警報 / VOYAGE ALERT · ETA',
-      headline: `${ctx.shipName} 距 ETA 約 ${v.n||24} 小時`,
-      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」目前距預估抵達 <strong>新加坡港</strong> 尚有 ${v.n||24} 小時，已進入「ETA ${v.ba||'前'} ${v.n||24} 小時」之警示區間。</p>`,
-      dataRows: [
-        ['目的港', '新加坡港'],
-        ['原訂 ETA', '2026-05-14 22:00 UTC'],
-        ['最新 ETA', '2026-05-14 23:30 UTC（變動 +1.5h）'],
-        ['目前位置', 'Lat 1.2655 / Lon 103.8240，SOG 14.2 kn']
-      ],
-      ai: {
-        items: [
-          ['風險等級', '中'],
-          ['ETA 變動信心度', '87%（高）'],
-          ['demurrage 風險', '若延誤超過 6h，預估費用 USD 12,500'],
-          ['類似案例', '上次 ETA 偏差 +3.5h 時，最終延誤 4.2h']
-        ],
-        conclusion: 'AI 建議：優先通知 Port Agent 與貨主，並評估是否需加速。'
-      },
-      actionItems: [
-        '與 Port Agent 再次確認泊位安排',
-        '通知貨主／傭船人最新 ETA'
-      ],
-      hintLine: '本警報每 1 小時提醒一次，限制 3 次。'
-    })
-  }),
-  off: (v, ctx) => ({
-    subject: `【航次警報】${ctx.shipName} 偏離航線 ${v.n||5} 海浬`,
-    body: emailTpl('off', {
-      category: '航次警報 / VOYAGE ALERT · 航線偏移',
-      headline: `${ctx.shipName} 偏離航線 ${v.n||5} 海浬`,
-      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」目前位置已偏離預計航線 <strong>${v.n||5} 海浬</strong>（門檻 ${v.n||5} 海浬），請即時確認。</p>`,
-      dataTitle: '位置資訊',
-      dataRows: [
-        ['目前位置', 'Lat 14.5832 / Lon 120.9762'],
-        ['預計航點', 'Lat 14.6105 / Lon 120.8540'],
-        ['COG / SOG', '082° / 13.8 kn'],
-        ['偏離時間', '自 14:02 起持續 30 分鐘']
-      ],
-      ai: {
-        items: [
-          ['風險等級', '中–高'],
-          ['AI 研判原因', '模式比對顯示與「東北季風避風繞航」相似度 82%'],
-          ['燃油影響預估', '+1.2 MT'],
-          ['ETA 影響預估', '+45 分鐘']
-        ],
-        conclusion: 'AI 建議：若為避風繞航且氣象條件穩定後續 6h 內，可維持當前航線。'
-      },
-      actionItems: [
-        '與船長確認偏航原因（避風／避碰／海流？）',
-        '評估燃油與 ETA 影響'
-      ],
-      hintLine: '本警報每 30 分鐘提醒一次，直到船舶回到航線。'
-    })
-  }),
-  sea: (v, ctx) => ({
-    subject: `【航次警報】${ctx.shipName} 前方海域氣象惡劣`,
-    body: emailTpl('sea', {
-      category: '航次警報 / VOYAGE ALERT · 海況預警',
-      headline: `${ctx.shipName} 前方海域氣象惡劣`,
-      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」未來 12 小時內航經海域，氣象條件已達警示門檻。</p>`,
-      dataTitle: '氣象資訊',
-      dataRows: [
-        ['預測浪高', `5.2 m（門檻 &gt; ${v.wave||4} m）`],
-        ['預測風力', `BF 8（門檻 &gt; ${v.wind||7} 級）`],
-        ['預測時間／位置', '2026-05-14 02:00 UTC @ Lat 25.1234 / Lon 122.8765'],
-        ['資料來源', 'ECMWF / StormGeo']
-      ],
-      ai: {
-        items: [
-          ['風險等級', '高'],
-          ['預測強度', '浪高峰值 5.8 m，風力 BF 8'],
-          ['持續時間', '約 8 小時'],
-          ['結構應力減壓', '減速至 11 kn 可降低 30%']
-        ],
-        conclusion: 'AI 建議：啟動 heavy weather plan，並評估減速 / 繞航的燃油與 ETA 取捨。'
-      },
-      actionItems: [
-        '通知船長加強瞭望與固縛',
-        '評估減速、繞航或避風方案',
-        '提前向傭船人／貨主預警可能延誤'
-      ],
-      hintLine: '條件持續存在時將再次發送。'
-    })
-  }),
-  spd: (v, ctx) => {
-    const kts = Number(v.kts) || 13;
-    const pct = Number(v.n) || 15;
-    const act = (kts * (1 - pct / 100)).toFixed(1);
+  gate: (v, ctx) => {
+    const ships = getSampleShips(1);
+    const dir = v.dir || '進入';
     return {
-    subject: `【航次警報】${ctx.shipName} 船速異常下降 ${pct}%`,
-    body: emailTpl('spd', {
-      category: '航次警報 / VOYAGE ALERT · 船速異常 (AIS)',
-      headline: `${ctx.shipName} 船速異常下降 ${pct}%`,
-      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」對地速度（SOG）較預期航速 ${kts.toFixed(1)} kn 下降 <strong>${pct}%</strong>（門檻 ${pct}%）。本警報僅以 AIS / GPS 資料判定，無法直接區分原因。</p>`,
-      dataTitle: '航行資訊',
-      dataRows: [
-        ['預期 SOG', `${kts.toFixed(1)} kn（設定值）`],
-        ['實際 SOG', `${act} kn`],
-        ['海流／風向', '北流 0.8 kn / 西北風 4 級'],
-        ['可能原因', '主機減速、Hull fouling、海流逆向、載重變化（待船端確認）']
-      ],
-      ai: {
-        items: [
-          ['風險等級', '中（無 RPM 資料）'],
-          ['原因機率分布', 'Hull fouling 55% / 海流逆向 28% / 主機減速 17%'],
-          ['預測累積影響', '若為 fouling 且不處理，30 天油耗 +4.5%'],
-          ['資料缺口', '無 RPM，無法直接確診主機 vs 船體因素']
-        ],
-        conclusion: 'AI 建議：請船端回傳當前 RPM 與引擎負載資料以縮小判定範圍。'
-      },
-      actionItems: [
-        '聯繫船端取得 RPM 與運轉數據以區分主機 vs 船體因素',
-        '比對近 7 天能耗趨勢',
-        '必要時安排下次入塢清底評估'
-      ],
-      hintLine: '本警報每 4 小時提醒一次，限制 3 次。'
-    })
+      subject: `[SRP]${ctx.alertName} 符合船舶：${ships.length} 艘`,
+      body: emailTpl('gate', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶', '進出港狀態'],
+        rows: ships.map(s => [TRIGGER_TIME, shipCell(s), `${dir} PORT_TWKHH（TWKHH） 預設地理圍欄，${dir === '離開' ? '離港' : '進港'}時間 ${GATE_CROSS_TIME}`]),
+        ai: {
+          items: [
+            ['風險等級', '低（例行事件）'],
+            ['歷史對照', '本船 6 個月內進港 38 次，平均逗留 18.5 小時'],
+            ['預估裝卸時間', '約 22 小時']
+          ],
+          conclusion: 'AI 建議：無需特殊干預，依例行排程處理。'
+        },
+        actionItems: [
+          '確認 Port Agent 已收到 NOR 通知',
+          '檢查靠泊／離泊作業排程'
+        ]
+      })
+    };
+  },
+  eta: (v, ctx) => {
+    const ships = getSampleShips(2);
+    const ports = ['SGSIN', 'CNFAN'];
+    const times = ['2026/05/14 22:00', '2026/05/15 06:30'];
+    return {
+      subject: `[SRP]${ctx.alertName} 符合船舶：${ships.length} 艘`,
+      body: emailTpl('eta', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶', '預估抵港資訊'],
+        rows: ships.map((s, i) => [TRIGGER_TIME, shipCell(s), `預估抵港：${times[i]}（台北） / 目的港：${ports[i]}`]),
+        ai: {
+          items: [
+            ['風險等級', '中'],
+            ['ETA 變動信心度', '87%（高）'],
+            ['demurrage 風險', '若延誤超過 6h，預估費用 USD 12,500'],
+            ['類似案例', '上次 ETA 偏差 +3.5h 時，最終延誤 4.2h']
+          ],
+          conclusion: 'AI 建議：優先通知 Port Agent 與貨主，並評估是否需加速。'
+        },
+        actionItems: [
+          '與 Port Agent 再次確認泊位安排',
+          '通知貨主／傭船人最新 ETA'
+        ]
+      })
+    };
+  },
+  off: (v, ctx) => {
+    const ships = getSampleShips(2);
+    const n = num(v.n, 5);
+    const dists = [n * 2.4, n * 1.13];
+    return {
+      subject: `[SRP]${ctx.alertName} 符合船舶：${ships.length} 艘`,
+      body: emailTpl('off', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶', '偏離航線距離'],
+        rows: ships.map((s, i) => [TRIGGER_TIME, shipCell(s), `${dists[i].toFixed(3)} 海浬`]),
+        ai: {
+          items: [
+            ['風險等級', '中–高'],
+            ['AI 研判原因', '模式比對顯示與「東北季風避風繞航」相似度 82%'],
+            ['燃油影響預估', '+1.2 MT'],
+            ['ETA 影響預估', '+45 分鐘']
+          ],
+          conclusion: 'AI 建議：若為避風繞航且氣象條件穩定後續 6h 內，可維持當前航線。'
+        },
+        actionItems: [
+          '與船長確認偏航原因（避風／避碰／海流？）',
+          '評估燃油與 ETA 影響'
+        ]
+      })
+    };
+  },
+  sea: (v, ctx) => {
+    const ships = getSampleShips(2);
+    const wave = num(v.wave, 4);
+    const wind = num(v.wind, 7);
+    const waves = [wave + 0.31, wave + 1.24];
+    const winds = [wind + 1, wind + 2];
+    return {
+      subject: `[SRP]${ctx.alertName} 符合船舶：${ships.length} 艘`,
+      body: emailTpl('sea', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶', '預測海況'],
+        rows: ships.map((s, i) => [
+          TRIGGER_TIME,
+          shipCell(s),
+          `預測時間：2026/05/13 19:00（台北） / 浪高：${waves[i].toFixed(6)} 米 / 風力：${winds[i]} 級（${bftToMs(winds[i]).toFixed(6)} m/s） / 目前位置預測`
+        ]),
+        ai: {
+          items: [
+            ['風險等級', '高'],
+            ['預測強度', '浪高峰值 5.8 m，風力 BF 8'],
+            ['持續時間', '約 8 小時'],
+            ['結構應力減壓', '減速至 11 kn 可降低 30%']
+          ],
+          conclusion: 'AI 建議：啟動 heavy weather plan，並評估減速 / 繞航的燃油與 ETA 取捨。'
+        },
+        actionItems: [
+          '通知船長加強瞭望與固縛',
+          '評估減速、繞航或避風方案',
+          '提前向傭船人／貨主預警可能延誤'
+        ]
+      })
+    };
+  },
+  spd: (v, ctx) => {
+    const ships = getSampleShips(3);
+    const kts = num(v.kts, 13);
+    const pct = num(v.n, 15);
+    const drops = [Math.min(pct * 3, 95), pct + 2.67, pct + 1.85];
+    const dists = ['100.0', '1068.0', '946.0'];
+    return {
+      subject: `[SRP]${ctx.alertName} 符合船舶：${ships.length} 艘`,
+      body: emailTpl('spd', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶', '船速下降資訊'],
+        rows: ships.map((s, i) => [
+          TRIGGER_TIME,
+          shipCell(s),
+          `目前 SOG ${(kts * (1 - drops[i] / 100)).toFixed(2)} 節，預期航速 ${kts.toFixed(2)} 節，下降 ${drops[i].toFixed(2)}%，警報門檻 ${pct.toFixed(2)}%，距離目的港 ${dists[i]} 海浬`
+        ]),
+        ai: {
+          items: [
+            ['風險等級', '中（無 RPM 資料）'],
+            ['原因機率分布', 'Hull fouling 55% / 海流逆向 28% / 主機減速 17%'],
+            ['預測累積影響', '若為 fouling 且不處理，30 天油耗 +4.5%'],
+            ['資料缺口', '無 RPM，無法直接確診主機 vs 船體因素']
+          ],
+          conclusion: 'AI 建議：請船端回傳當前 RPM 與引擎負載資料以縮小判定範圍。'
+        },
+        actionItems: [
+          '聯繫船端取得 RPM 與運轉數據以區分主機 vs 船體因素',
+          '比對近 7 天能耗趨勢',
+          '必要時安排下次入塢清底評估'
+        ]
+      })
     };
   },
   spd_rpm: (v, ctx) => {
-    const kts = Number(v.kts) || 13;
-    const pct = Number(v.n) || 15;
-    const act = (kts * (1 - pct / 100)).toFixed(1);
+    const ships = getSampleShips(2);
+    const kts = num(v.kts, 13);
+    const pct = num(v.n, 15);
+    const drops = [pct + 7.67, pct + 2.31];
+    const rpms = ['98（變動 -1.2%）', '102（變動 +0.4%）'];
+    const dists = ['946.0', '1068.0'];
     return {
-    subject: `【航次警報】${ctx.shipName} 船速異常下降 ${pct}%（含 RPM 判定）`,
-    body: emailTpl('spd_rpm', {
-      category: '航次警報 / VOYAGE ALERT · 船速異常 (含 RPM)',
-      headline: `${ctx.shipName} 船速異常下降 ${pct}%（RPM 正常）`,
-      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」主機 RPM 維持正常，但對地速度（SOG）較預期航速 ${kts.toFixed(1)} kn 下降 <strong>${pct}%</strong>（門檻 ${pct}%），疑似船體阻力異常。</p>`,
-      dataTitle: '運轉資訊',
-      dataRows: [
-        ['預期 SOG', `${kts.toFixed(1)} kn（設定值）`],
-        ['實際 SOG', `${act} kn`],
-        ['主機 RPM', '98（變動 -1.2%）'],
-        ['海流／風向', '北流 0.8 kn / 西北風 4 級']
-      ],
-      ai: {
-        items: [
-          ['風險等級', '中'],
-          ['因素拆解', 'Hull fouling +9.2% / Propeller +2.8% / Engine 0%'],
-          ['累積預測', '若不處理，30 天油耗 +5.8%'],
-          ['CP claim 風險', '預估 USD 28,000（90 天累計）'],
-          ['ROI 估算', '潛水清底 USD 15,000 → 預期回本 < 2 個月']
-        ],
-        conclusion: 'AI 建議：優先安排潛水清底；下次入塢時程可同步排入大規模處理。'
-      },
-      actionItems: [
-        '安排下次入塢清底評估',
-        '比對近 7 天能耗趨勢'
-      ],
-      hintLine: '本警報每 4 小時提醒一次，限制 3 次。'
-    })
+      subject: `[SRP]${ctx.alertName} 符合船舶：${ships.length} 艘`,
+      body: emailTpl('spd_rpm', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶', '船速下降資訊（含 RPM）'],
+        rows: ships.map((s, i) => [
+          TRIGGER_TIME,
+          shipCell(s),
+          `目前 SOG ${(kts * (1 - drops[i] / 100)).toFixed(2)} 節，預期航速 ${kts.toFixed(2)} 節，下降 ${drops[i].toFixed(2)}%，警報門檻 ${pct.toFixed(2)}%，主機 RPM ${rpms[i]}，距離目的港 ${dists[i]} 海浬`
+        ]),
+        ai: {
+          items: [
+            ['風險等級', '中'],
+            ['因素拆解', 'Hull fouling +9.2% / Propeller +2.8% / Engine 0%'],
+            ['累積預測', '若不處理，30 天油耗 +5.8%'],
+            ['CP claim 風險', '預估 USD 28,000（90 天累計）'],
+            ['ROI 估算', '潛水清底 USD 15,000 → 預期回本 < 2 個月']
+          ],
+          conclusion: 'AI 建議：優先安排潛水清底；下次入塢時程可同步排入大規模處理。'
+        },
+        actionItems: [
+          '安排下次入塢清底評估',
+          '比對近 7 天能耗趨勢'
+        ]
+      })
     };
   },
-  zone: (v, ctx) => ({
-    subject: `【航次警報】${ctx.shipName} 即將進入 ${v.area||'ECA 排放控制區'} — 距邊界 ${v.n||50} 海浬`,
-    body: emailTpl('zone', {
-      category: '航次警報 / VOYAGE ALERT · 區域進入',
-      headline: `${ctx.shipName} 即將進入 ${v.area||'ECA 排放控制區'}`,
-      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」距 ${v.area||'ECA 排放控制區'} 邊界僅 <strong>${v.n||50} 海浬</strong>（門檻 ${v.op||'&lt;'} ${v.n||50} 海浬），請確認進入該區域所需準備事項。</p>`,
-      dataTitle: '航行資訊',
-      dataRows: [
-        ['目前位置', 'Lat 32.4865 / Lon -117.8420'],
-        ['航向／速度', '045° / 14.5 kn'],
-        ['預估抵達區域', '2026-05-13 17:50 UTC'],
-        ['目標區域', v.area||'ECA 排放控制區'],
-        ['區域進入準備', 'ECA：≤0.10% 低硫油切換 ｜ HRA：PCASP / Citadel ｜ JWLA：加保 War Risk']
-      ],
-      ai: {
-        items: [
-          ['風險等級', '高（合規關鍵）'],
-          ['距邊界時間', '剩餘 3.5 小時'],
-          ['違規成本', '若越界使用高硫油，單次罰款 USD 25,000+'],
-          ['AI 檢核項', '低硫油準備狀態（待船端確認）']
-        ],
-        conclusion: 'AI 建議：立即聯繫船端確認油料切換準備，並請船長回傳切換時間與位置。'
-      },
-      actionItems: [
-        '立即電聯船長確認低硫油切換時程',
-        '預先建立 Oil Record Book 範本，避免船端事後補登疏漏',
-        '通知合規單位準備事後抽查'
-      ],
-      hintLine: '說明：本警報為位置型提醒。因油耗資料由船端午報（T+1）提供，系統無法即時驗證實際油料切換動作；合規執行須由船端 Oil Record Book、午報資料事後核對。'
-    })
-  }),
+  zone: (v, ctx) => {
+    const ships = getSampleShips(2);
+    const area = v.area || 'ECA 排放控制區';
+    const n = num(v.n, 50);
+    const dists = [n * 0.77, n * 0.42];
+    return {
+      subject: `[SRP]${ctx.alertName} 符合船舶：${ships.length} 艘`,
+      body: emailTpl('zone', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶', '區域邊界距離'],
+        rows: ships.map((s, i) => [
+          TRIGGER_TIME,
+          shipCell(s),
+          `距 ${area} 邊界 ${dists[i].toFixed(3)} 海浬，警報門檻 ${v.op || '<'} ${n} 海浬`
+        ]),
+        ai: {
+          items: [
+            ['風險等級', '高（合規關鍵）'],
+            ['距邊界時間', '剩餘 3.5 小時'],
+            ['違規成本', '若越界使用高硫油，單次罰款 USD 25,000+'],
+            ['AI 檢核項', '低硫油準備狀態（待船端確認）']
+          ],
+          conclusion: 'AI 建議：立即聯繫船端確認油料切換準備，並請船長回傳切換時間與位置。'
+        },
+        actionItems: [
+          '立即電聯船長確認低硫油切換時程',
+          '預先建立 Oil Record Book 範本，避免船端事後補登疏漏',
+          '通知合規單位準備事後抽查'
+        ]
+      })
+    };
+  },
   // ---- CII ----
-  thism: (v) => ({
-    subject: `【CII 月報】5 月 — 3 艘船舶評等達 ${v.g||'C 級'}以上`,
-    body: emailTpl('thism', {
-      category: 'CII 評等月報 / MONTHLY CII REPORT',
-      headline: `5 月 — 3 艘船舶評等達 ${v.g||'C 級'}以上`,
-      intro: `<p style="margin:0 0 14px 0;">依據本月航行資料計算，以下船舶 CII 評等已達或低於設定門檻（門檻：${v.op||'≥'} ${v.g||'C 級'}），請相關單位檢視改善計畫。</p>
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:13px;border-collapse:collapse;margin-top:8px;">
-          <thead>
-            <tr style="background-color:#f6f8fa;">
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">船舶</th>
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">評等</th>
-              <th align="right" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">AER 值</th>
-              <th align="right" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">較上月</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td style="padding:8px;border:1px solid #e1e4e8;">慶豐輪</td><td style="padding:8px;border:1px solid #e1e4e8;">${v.g||'C 級'}</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">8.42</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">+0.3</td></tr>
-            <tr><td style="padding:8px;border:1px solid #e1e4e8;">台海明德號</td><td style="padding:8px;border:1px solid #e1e4e8;">D 級</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">9.05</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">+0.5</td></tr>
-            <tr><td style="padding:8px;border:1px solid #e1e4e8;">海洋之星</td><td style="padding:8px;border:1px solid #e1e4e8;">${v.g||'C 級'}</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">8.38</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">+0.1</td></tr>
-          </tbody>
-        </table>`,
-      dataRows: [],
-      ai: {
-        items: [
-          ['風險等級', '中'],
-          ['預測年度評等', 'D 級（信心度 79%）'],
-          ['拐點分析', '若航速降 5%，可改善至 C 級'],
-          ['改善槓桿', '航線最佳化 -4%、清底 -3%、減速 -5%']
-        ],
-        conclusion: 'AI 建議：優先對「台海明德號」啟動 SEEMP Part III 改善，因預測明年將降至 E 級。'
-      },
-      actionItems: [
-        '啟動 SEEMP Part III 改善措施',
-        '評估速度最佳化／路徑優化',
-        '必要時提交 Corrective Action Plan'
-      ],
-      hintLine: '完整報表：<a href="https://srp.example.com/reports/cii-2026-05" style="color:#0366d6;text-decoration:none;">https://srp.example.com/reports/cii-2026-05</a>'
-    })
-  }),
-  nexty: (v) => ({
-    subject: `【CII 月報】明年度（2027）預測 — 4 艘船舶恐降至 ${v.g||'C 級'}`,
-    body: emailTpl('nexty', {
-      category: 'CII 評等預測 / NEXT YEAR FORECAST',
-      headline: `明年度（2027）預測 — 4 艘船舶恐降至 ${v.g||'C 級'}`,
-      intro: `<p style="margin:0 0 14px 0;">依目前航行軌跡推估，下列船舶於 <strong>2027</strong> 年度 CII 評等預測將達到 ${v.op||'≥'} ${v.g||'C 級'}，建議提早規劃改善方案。</p>`,
-      dataTitle: '預測降級清單',
-      dataRows: [
-        ['慶豐輪', `B 級 → 預測 ${v.g||'C 級'}（信心度 87%）`],
-        ['台海明德號', 'C 級 → 預測 D 級（信心度 92%）']
-      ],
-      ai: {
-        items: [
-          ['風險等級', '高（戰略性）'],
-          ['主要降級原因', 'IMO reduction factor 累積至 9%（2027）'],
-          ['可行改善槓桿', '航線最佳化 -8%、清底 -3%、節能裝置 -5%'],
-          ['投資回收期', '節能裝置 PBCF 估 USD 60k，回本期約 14 個月']
-        ],
-        conclusion: 'AI 建議：將節能裝置投資納入年度資本支出規劃；單純減速無法達標。'
-      },
-      actionItems: [
-        '加裝節能裝置（PBCF / ESD）',
-        '重新規劃航速曲線',
-        '啟用替代燃料試點'
-      ],
-      hintLine: '完整模擬報表：<a href="https://srp.example.com/reports/cii-forecast-2027" style="color:#0366d6;text-decoration:none;">https://srp.example.com/reports/cii-forecast-2027</a>'
-    })
-  }),
+  thism: (v, ctx) => {
+    const ships = getSampleShips(2);
+    const grades = gradesFrom(v.g, ships.length);
+    return {
+      subject: `[SRP]${ctx.alertName} 符合船舶：${ships.length} 艘`,
+      body: emailTpl('thism', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶', '目前評等'],
+        rows: ships.map((s, i) => [TRIGGER_TIME, shipCell(s), grades[i]]),
+        ai: {
+          items: [
+            ['風險等級', '中'],
+            ['預測年度評等', 'D 級（信心度 79%）'],
+            ['拐點分析', '若航速降 5%，可改善至 C 級'],
+            ['改善槓桿', '航線最佳化 -4%、清底 -3%、減速 -5%']
+          ],
+          conclusion: 'AI 建議：優先對評等最差之船舶啟動 SEEMP Part III 改善。'
+        },
+        actionItems: [
+          '啟動 SEEMP Part III 改善措施',
+          '評估速度最佳化／路徑優化',
+          '必要時提交 Corrective Action Plan'
+        ]
+      })
+    };
+  },
+  nexty: (v, ctx) => {
+    const ships = getSampleShips(2);
+    const grades = gradesFrom(v.g, ships.length);
+    return {
+      subject: `[SRP]${ctx.alertName} 符合船舶：${ships.length} 艘`,
+      body: emailTpl('nexty', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶', '明年度預測評等'],
+        rows: ships.map((s, i) => [TRIGGER_TIME, shipCell(s), grades[i]]),
+        ai: {
+          items: [
+            ['風險等級', '高（戰略性）'],
+            ['主要降級原因', 'IMO reduction factor 累積至 9%（2027）'],
+            ['可行改善槓桿', '航線最佳化 -8%、清底 -3%、節能裝置 -5%'],
+            ['投資回收期', '節能裝置 PBCF 估 USD 60k，回本期約 14 個月']
+          ],
+          conclusion: 'AI 建議：將節能裝置投資納入年度資本支出規劃；單純減速無法達標。'
+        },
+        actionItems: [
+          '加裝節能裝置（PBCF / ESD）',
+          '重新規劃航速曲線',
+          '啟用替代燃料試點'
+        ]
+      })
+    };
+  },
   // ---- Bunker ----
-  low: (v, ctx) => ({
-    subject: `【Bunker】${ctx.shipName} 油料 ROB 已低於安全庫存`,
-    body: emailTpl('low', {
-      category: 'BUNKER 警報 · 低庫存',
-      headline: `${ctx.shipName} 油料 ROB 已低於安全庫存`,
-      intro: `<p style="margin:0 0 14px 0;">船舶「<strong>${ctx.shipName}</strong>」目前剩餘油量（ROB）已低於系統推估之動態安全庫存，請儘速規劃補油。</p>`,
-      dataTitle: '庫存資訊',
-      dataRows: [
-        ['油種', 'VLSFO'],
-        ['目前 ROB', '142.5 MT'],
-        ['動態安全庫存', '180.0 MT'],
-        ['預估可航行', '6.5 天 / 1,820 nm']
-      ],
-      ai: {
-        items: [
-          ['風險等級', '高'],
-          ['距斷油預估', '6.5 天'],
-          ['AI 建議補油量', '380 MT（含 20% 安全係數）'],
-          ['補油港比價', '新加坡 USD 545/MT vs 釜山 USD 612/MT'],
-          ['節省潛力', '新加坡補油可節省 USD 25,460']
-        ],
-        conclusion: 'AI 建議：優先選擇新加坡補油；如航線無法配合，釜山為次佳。'
-      },
-      actionItems: [
-        '與 Bunker Trader 確認下次補油量',
-        '評估是否需就近補油'
-      ],
-      hintLine: '本警報每日提醒 1 次，直到 ROB 高於安全庫存。'
-    })
-  }),
-  high: (v) => ({
-    subject: `【Bunker 月報】5 月 — 2 艘船舶油耗效能偏差`,
-    body: emailTpl('high', {
-      category: 'BUNKER 月報 · 油耗效能偏差',
-      headline: '5 月 — 2 艘船舶油耗效能偏差',
-      intro: `<p style="margin:0 0 14px 0;">下列船舶上月實際油耗已超過本船性能曲線預期（門檻：&gt; ${v.n||10}%）。基準採 SOG-RPM-Draft 性能曲線並依 ISO 19030 對風浪修正，已排除航線與海況差異；偏差再拆解為 Hull / Propeller / Engine 三項貢獻度。</p>
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:13px;border-collapse:collapse;margin-top:8px;">
-          <thead>
-            <tr style="background-color:#f6f8fa;">
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">船舶</th>
-              <th align="right" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">實際 g/kWh</th>
-              <th align="right" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">曲線預期</th>
-              <th align="right" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">偏差 %</th>
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">主要貢獻</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td style="padding:8px;border:1px solid #e1e4e8;">慶豐輪</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">198.5</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">175.2</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">+13.3%</td><td style="padding:8px;border:1px solid #e1e4e8;">Hull +9.2%、Engine +4.1%</td></tr>
-            <tr><td style="padding:8px;border:1px solid #e1e4e8;">彩虹輪</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">205.3</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">182.7</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">+12.3%</td><td style="padding:8px;border:1px solid #e1e4e8;">Propeller +7.5%、Hull +4.8%</td></tr>
-          </tbody>
-        </table>`,
-      dataRows: [],
-      ai: {
-        items: [
-          ['風險等級', '中'],
-          ['主要貢獻來源', 'Hull fouling +9.2%、Engine +4.1%'],
-          ['累積預測', '未來 90 天若不處理，CP claim 風險 USD 28,000'],
-          ['ROI 估算', '潛水清底 USD 15,000 → 預期回本 < 2 個月'],
-          ['類似船隊比對', '同型船平均偏差 +6.5%，本船高於均值']
-        ],
-        conclusion: 'AI 建議：優先安排潛水清底；同步排程入塢時間以處理結構性問題。'
-      },
-      actionItems: [
-        'Hull 偏差為主：安排下次入塢時程、評估船底清洗',
-        'Propeller 偏差為主：考慮螺槳清磨或拋光（polishing）',
-        'Engine 偏差為主：燃油噴射、增壓器、缸壓量測診斷',
-        '持續監測：對照近 6 個月 baseline 確認趨勢'
-      ],
-      hintLine: '完整分析：<a href="https://srp.example.com/reports/performance-2026-05" style="color:#0366d6;text-decoration:none;">https://srp.example.com/reports/performance-2026-05</a>'
-    })
-  }),
+  low: (v, ctx) => {
+    const s = getSampleShips(1)[0];
+    // 最低庫存警示僅比對燃油，不含汽缸油等系統用油
+    const fuels = [
+      {name:'MGO',   rob:'24.1',  min:'100.0'},
+      {name:'VLSFO', rob:'142.5', min:'180.0'}
+    ];
+    return {
+      subject: `[SRP]${ctx.alertName} 符合油品項目：${fuels.length} 筆`,
+      body: emailTpl('low', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶 / IMO', '最低庫存資訊'],
+        rows: fuels.map(f => [
+          TRIGGER_TIME,
+          shipCell(s),
+          `${f.name} 剩餘油量 ${f.rob} ton，最低庫存門檻 ${f.min} ton，資料時間 UTC 2026/05/12 15:12:00`
+        ]),
+        ai: {
+          items: [
+            ['風險等級', '高'],
+            ['距斷油預估', '6.5 天'],
+            ['AI 建議補油量', '380 MT（含 20% 安全係數）'],
+            ['補油港比價', '新加坡 USD 545/MT vs 釜山 USD 612/MT'],
+            ['節省潛力', '新加坡補油可節省 USD 25,460']
+          ],
+          conclusion: 'AI 建議：優先選擇新加坡補油；如航線無法配合，釜山為次佳。'
+        },
+        actionItems: [
+          '與 Bunker Trader 確認下次補油量',
+          '評估是否需就近補油'
+        ]
+      })
+    };
+  },
+  high: (v, ctx) => {
+    const ships = getSampleShips(3);
+    const n = num(v.n, 10);
+    const devs = [n + 4.11, n + 1.32, n + 3.66];
+    const lasts = [0.051541, 0.137567, 0.126063];
+    return {
+      subject: `[SRP]${ctx.alertName} 符合船舶：${ships.length} 艘`,
+      body: emailTpl('high', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船舶 / IMO', '單位里程油耗資訊'],
+        rows: ships.map((s, i) => [
+          TRIGGER_TIME,
+          shipCell(s),
+          `當月 2026-05 單位里程油耗 ${(lasts[i] * (1 + devs[i] / 100)).toFixed(6)} MT/NM，上月 2026-04 單位里程油耗 ${lasts[i].toFixed(6)} MT/NM，偏差 ${devs[i].toFixed(2)}%`
+        ]),
+        ai: {
+          items: [
+            ['風險等級', '中'],
+            ['主要貢獻來源', 'Hull fouling +9.2%、Engine +4.1%'],
+            ['累積預測', '未來 90 天若不處理，CP claim 風險 USD 28,000'],
+            ['ROI 估算', '潛水清底 USD 15,000 → 預期回本 < 2 個月'],
+            ['類似船隊比對', '同型船平均偏差 +6.5%，本船高於均值']
+          ],
+          conclusion: 'AI 建議：優先安排潛水清底；同步排程入塢時間以處理結構性問題。'
+        },
+        actionItems: [
+          'Hull 偏差為主：安排下次入塢時程、評估船底清洗',
+          'Propeller 偏差為主：考慮螺槳清磨或拋光（polishing）',
+          'Engine 偏差為主：燃油噴射、增壓器、缸壓量測診斷',
+          '持續監測：對照近 6 個月 baseline 確認趨勢'
+        ]
+      })
+    };
+  },
   // ---- 船員 ----
-  cert: (v) => ({
-    subject: `【船員週報】2026-05-13 ~ 2026-05-19 — 3 位船員證書即將／已逾期`,
-    body: emailTpl('cert', {
-      category: '船員週報 / CREW WEEKLY · 證書到期',
-      headline: '2026-05-13 ~ 2026-05-19 — 3 位船員證書即將／已逾期',
-      intro: `<p style="margin:0 0 14px 0;">依據人事資料庫檢核，下列船員證書已落入「逾期${v.ba||'前'} ${v.n||30} 天」之警示範圍，請人資與船員部門儘速處理換證／補件作業。</p>
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:13px;border-collapse:collapse;margin-top:8px;">
-          <thead>
-            <tr style="background-color:#f6f8fa;">
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">姓名</th>
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">職位</th>
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">證書類別</th>
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">到期日</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td style="padding:8px;border:1px solid #e1e4e8;">Chen Wei-Han</td><td style="padding:8px;border:1px solid #e1e4e8;">船長</td><td style="padding:8px;border:1px solid #e1e4e8;">STCW II/2</td><td style="padding:8px;border:1px solid #e1e4e8;">2026-06-08</td></tr>
-            <tr><td style="padding:8px;border:1px solid #e1e4e8;">Lin Mei-Ling</td><td style="padding:8px;border:1px solid #e1e4e8;">大副</td><td style="padding:8px;border:1px solid #e1e4e8;">GMDSS</td><td style="padding:8px;border:1px solid #e1e4e8;">2026-06-12</td></tr>
-            <tr><td style="padding:8px;border:1px solid #e1e4e8;">Wang Da-Ming</td><td style="padding:8px;border:1px solid #e1e4e8;">輪機長</td><td style="padding:8px;border:1px solid #e1e4e8;">STCW III/2</td><td style="padding:8px;border:1px solid #e1e4e8;">2026-05-30</td></tr>
-          </tbody>
-        </table>`,
-      dataRows: [],
-      ai: {
-        items: [
-          ['風險等級', '中'],
-          ['PSC 滯留風險', '高（3 位船員逾期，含 2 位高階）'],
-          ['平均換證時程', '38 天（培訓 + 體檢 + 文件）'],
-          ['AI 替換建議', '從儲備人員池已匹配 2 位候選船長／輪機長'],
-          ['類似案例', '上次高階逾期未及時處理導致港口滯留 36 小時']
-        ],
-        conclusion: 'AI 建議：優先處理 Wang Da-Ming（輪機長），到期日最近且無備用人選。'
-      },
-      actionItems: [
-        '安排換證所需訓練／體檢',
-        '評估替換船員調度方案',
-        '通知船長確認船上 STCW 合規'
-      ]
-    })
-  }),
-  age: (v) => ({
-    subject: `【船員週報】2026-05-13 ~ 2026-05-19 — 2 位船員年齡達 ${v.n||65} 歲`,
-    body: emailTpl('age', {
-      category: '船員週報 / CREW WEEKLY · 年齡警示',
-      headline: `2026-05-13 ~ 2026-05-19 — 2 位船員年齡達 ${v.n||65} 歲`,
-      intro: `<p style="margin:0 0 14px 0;">依生日計算，下列現役船員年齡已達警示門檻（≥ ${v.n||65} 歲），建議人資部門評估健康檢查、輪替或退休規劃。</p>`,
-      dataTitle: '名單',
-      dataRows: [
-        ['Chen Wei-Han', `${v.n||65} 歲，船長，現任船舶 慶豐輪`],
-        ['Wang Da-Ming', '66 歲，輪機長，現任船舶 台海明德號']
-      ],
-      ai: {
-        items: [
-          ['風險等級', '低–中'],
-          ['儲備人員池', '2 位儲備船長可啟動接班程序'],
-          ['預估接班時程', '6 個月（含培訓與認證）'],
-          ['保險影響', '65+ 船員 P&I 保費調升 15–20%'],
-          ['體檢風險', '依過往資料，65+ 體檢不通過率約 12%']
-        ],
-        conclusion: 'AI 建議：與人資啟動接班對話，並提前安排深度體檢。'
-      },
-      actionItems: [
-        '加強年度健康檢查項目',
-        '啟動接班人才培訓',
-        '確認保險條款承保範圍'
-      ]
-    })
-  }),
-  svc: (v) => ({
-    subject: `【船員週報】2026-05-13 ~ 2026-05-19 — 2 位船員累計任職達 ${v.n||270} 天`,
-    body: emailTpl('svc', {
-      category: '船員週報 / CREW WEEKLY · 任職累計',
-      headline: `2026-05-13 ~ 2026-05-19 — 2 位船員累計任職達 ${v.n||270} 天`,
-      intro: `<p style="margin:0 0 14px 0;">依 MLC 2006 規範及公司輪休政策，下列船員在船累計任職天數已達 ${v.n||270} 天，請安排換班作業。</p>
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:13px;border-collapse:collapse;margin-top:8px;">
-          <thead>
-            <tr style="background-color:#f6f8fa;">
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">姓名</th>
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">職位</th>
-              <th align="right" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">累計天數</th>
-              <th align="left" style="padding:8px;border:1px solid #e1e4e8;font-weight:600;">登船日</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td style="padding:8px;border:1px solid #e1e4e8;">Chen Wei-Han</td><td style="padding:8px;border:1px solid #e1e4e8;">船長</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">${v.n||270}</td><td style="padding:8px;border:1px solid #e1e4e8;">2025-08-15</td></tr>
-            <tr><td style="padding:8px;border:1px solid #e1e4e8;">Lin Mei-Ling</td><td style="padding:8px;border:1px solid #e1e4e8;">大副</td><td align="right" style="padding:8px;border:1px solid #e1e4e8;">275</td><td style="padding:8px;border:1px solid #e1e4e8;">2025-08-10</td></tr>
-          </tbody>
-        </table>`,
-      dataRows: [],
-      ai: {
-        items: [
-          ['風險等級', '高（MLC 合規）'],
-          ['距 MLC 上限', '剩餘 55–60 天（11 個月／~330 天上限）'],
-          ['AI 接班窗口', '下個港口（新加坡）為最佳換班點'],
-          ['機票簽證準備', '建議立即啟動，平均前置 21 天'],
-          ['違規成本', 'MLC 違規可被 PSC 滯留 + flag state 紀錄']
-        ],
-        conclusion: 'AI 建議：以新加坡為換班港，並於本週內完成接班船員機票簽證辦理。'
-      },
-      actionItems: [
-        '排定下個港口換班計畫',
-        '通知替補船員提前報到',
-        '確認 MLC 工時／休息合規記錄'
-      ]
-    })
-  })
+  cert: (v, ctx) => {
+    const crew = CREW_SAMPLE.slice(0, 2);
+    const n = num(v.n, 30);
+    const sign = (v.ba || '前') === '前' ? 1 : -1;
+    const certs = ['STCW II/2 適任證書', 'GMDSS 適任證書'];
+    return {
+      subject: `[SRP]${ctx.alertName} 符合人數：${crew.length} 人`,
+      body: emailTpl('cert', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船員', '證書／到期日'],
+        rows: crew.map((c, i) => [
+          TRIGGER_TIME,
+          crewCell(c),
+          `${certs[i]} / 到期日：${sampleDate(sign * (n - i * 3))}`
+        ]),
+        ai: {
+          items: [
+            ['風險等級', '中'],
+            ['PSC 滯留風險', '高（含高階船員）'],
+            ['平均換證時程', '38 天（培訓 + 體檢 + 文件）'],
+            ['AI 替換建議', '從儲備人員池已匹配 2 位候選船長／輪機長'],
+            ['類似案例', '上次高階逾期未及時處理導致港口滯留 36 小時']
+          ],
+          conclusion: 'AI 建議：優先處理到期日最近且無備用人選者。'
+        },
+        actionItems: [
+          '安排換證所需訓練／體檢',
+          '評估替換船員調度方案',
+          '通知船長確認船上 STCW 合規'
+        ]
+      })
+    };
+  },
+  age: (v, ctx) => {
+    const crew = CREW_SAMPLE.slice(0, 2);
+    const n = num(v.n, 65);
+    const ages = [n + 1, n + 6];
+    return {
+      subject: `[SRP]${ctx.alertName} 符合人數：${crew.length} 人`,
+      body: emailTpl('age', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船員', '年齡'],
+        rows: crew.map((c, i) => [TRIGGER_TIME, crewCell(c), `${ages[i]} 歲`]),
+        extras: [{
+          title: `個人生日資料未填（共 ${CREW_NO_BIRTHDAY.length} 筆）`,
+          cols: ['員工編號', '姓名'],
+          rows: CREW_NO_BIRTHDAY.map(c => [c.code, crewName(c)]),
+          note: '「個人生日資料未填」這批人員因為系統無法計算年齡，不會出現在上方的年齡警報比對結果中，需要人工確認補齊生日資料。'
+        }],
+        ai: {
+          items: [
+            ['風險等級', '低–中'],
+            ['儲備人員池', '2 位儲備船長可啟動接班程序'],
+            ['預估接班時程', '6 個月（含培訓與認證）'],
+            ['保險影響', '65+ 船員 P&I 保費調升 15–20%'],
+            ['體檢風險', '依過往資料，65+ 體檢不通過率約 12%']
+          ],
+          conclusion: 'AI 建議：與人資啟動接班對話，並提前安排深度體檢。'
+        },
+        actionItems: [
+          '加強年度健康檢查項目',
+          '啟動接班人才培訓',
+          '確認保險條款承保範圍'
+        ]
+      })
+    };
+  },
+  svc: (v, ctx) => {
+    const crew = CREW_SAMPLE.slice(0, 2);
+    const n = num(v.n, 270);
+    const days = [n + 60, n + 31];
+    return {
+      subject: `[SRP]${ctx.alertName} 符合人數：${crew.length} 人`,
+      body: emailTpl('svc', {
+        title: ctx.alertName,
+        cols: ['觸發時間', '船員', '本次連續在船天數'],
+        rows: crew.map((c, i) => [TRIGGER_TIME, crewCell(c), `${days[i]} 天`]),
+        ai: {
+          items: [
+            ['風險等級', '高（MLC 合規）'],
+            ['距 MLC 上限', '剩餘 55–60 天（11 個月／~330 天上限）'],
+            ['AI 接班窗口', '下個港口（新加坡）為最佳換班點'],
+            ['機票簽證準備', '建議立即啟動，平均前置 21 天'],
+            ['違規成本', 'MLC 違規可被 PSC 滯留 + flag state 紀錄']
+          ],
+          conclusion: 'AI 建議：以新加坡為換班港，並於本週內完成接班船員機票簽證辦理。'
+        },
+        actionItems: [
+          '排定下個港口換班計畫',
+          '通知替補船員提前報到',
+          '確認 MLC 工時／休息合規記錄'
+        ]
+      })
+    };
+  }
 };
 
 function getRecipientsList() {
@@ -2136,30 +2074,19 @@ function getRecipientsList() {
   return list.length ? list.join(', ') : '（尚未設定收件人）';
 }
 
-function getSampleShipName() {
-  if (state.scope === 'ships') {
-    try {
-      const ships = jQuery('#sel-ships').select2('data');
-      if (ships.length) return ships[0].text;
-    } catch(e) {}
-  }
-  if (state.type === 'crew') return '—';
-  return '慶豐輪';
-}
-
 function showEmailPreview() {
   const fieldKey = state.fieldKey;
   const tpl = EMAIL_TEMPLATES[fieldKey];
   if (!tpl) return;
   const field = CONFIG[state.type].fields[fieldKey];
+  // 信件 header 標題與主旨皆使用警報名稱（未命名時以「欄位：條件」代替），比照實際寄出格式
   const ctx = {
-    shipName: getSampleShipName(),
     alertName: el('f-name').value || `${field.name}：${field.desc(state.vals)}`
   };
   const result = tpl(state.vals || {}, ctx);
   el('ep-to').textContent = getRecipientsList();
   el('ep-subject').textContent = result.subject;
-  // emailTpl 已內含解除通報連結（持續發送類）；email 內容採 table-based + inline CSS 相容 Gmail/Outlook/Thunderbird
+  // email 內容採 table-based + 100% inline CSS，相容 Gmail / Outlook / Thunderbird
   el('ep-body').innerHTML = result.body;
   el('ep-time').textContent = new Date().toLocaleString('zh-TW');
   el('email-overlay').classList.add('show');
