@@ -1,0 +1,428 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>閾值分層規則與判斷流程</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F5F7FA; --paper:#FFFFFF; --ink:#1B2A41; --ink-2:#4A5A70; --mute:#7A879A; --line:#D5DCE6;
+  --accent:#1F6FB2; --accent-soft:#E4EFF9;
+  --l1:#FBE9D6; --l2:#E4EFF9; --l3:#E7F1E8; --l4:#ECEEF2;
+  --warn:#C77A00; --crit:#B8352C; --ok:#2E7D4F;
+  --code-bg:#EEF2F7;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1620; --paper:#172130; --ink:#E3E8EF; --ink-2:#B4BFCE; --mute:#8593A6; --line:#2C3A4E;
+    --accent:#6FB1EA; --accent-soft:#1E3550;
+    --l1:#4A3520; --l2:#1E3550; --l3:#1F3A29; --l4:#243040;
+    --warn:#F0A83A; --crit:#F07A6F; --ok:#6CC78F;
+    --code-bg:#1E2A3A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1620; --paper:#172130; --ink:#E3E8EF; --ink-2:#B4BFCE; --mute:#8593A6; --line:#2C3A4E;
+  --accent:#6FB1EA; --accent-soft:#1E3550;
+  --l1:#4A3520; --l2:#1E3550; --l3:#1F3A29; --l4:#243040;
+  --warn:#F0A83A; --crit:#F07A6F; --ok:#6CC78F;
+  --code-bg:#1E2A3A;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;font-size:15.5px;line-height:1.8;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:40px 24px 80px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;gap:24px;padding:24px 16px 60px}}
+nav.toc{position:sticky;top:24px;align-self:start;font-size:13px;line-height:1.6}
+@media (max-width:860px){nav.toc{position:static;border-bottom:1px solid var(--line);padding-bottom:12px}}
+nav.toc .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:10px}
+nav.toc a{display:block;color:var(--ink-2);text-decoration:none;padding:4px 0 4px 10px;border-left:2px solid var(--line)}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent);border-left-color:var(--accent);outline:none}
+main{min-width:0}
+header.doc{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:36px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+h1{font-family:"Noto Serif TC","Noto Sans TC",serif;font-size:32px;line-height:1.3;margin:8px 0 10px;font-weight:700;text-wrap:balance}
+h2{font-family:"Noto Serif TC","Noto Sans TC",serif;font-size:22px;margin:52px 0 14px;padding-top:8px;font-weight:700;text-wrap:balance}
+h2 .num{font-family:"IBM Plex Mono",monospace;color:var(--accent);font-size:14px;margin-right:10px;vertical-align:2px}
+h3{font-size:16px;margin:28px 0 8px;font-weight:700;color:var(--ink)}
+p{margin:0 0 14px;max-width:72ch}
+.lede{font-size:17px;color:var(--ink-2);max-width:72ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--mute);margin-top:10px}
+.rule{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--accent);padding:14px 18px;margin:18px 0 22px;max-width:76ch}
+.rule b{color:var(--accent)}
+figure{margin:20px 0 28px;background:var(--paper);border:1px solid var(--line);padding:18px 18px 12px;overflow-x:auto}
+figure svg{display:block;max-width:100%;height:auto;min-width:520px;color:var(--ink)}
+figcaption{font-size:13px;color:var(--mute);margin-top:10px;max-width:80ch}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--paper)}
+.tbl{overflow-x:auto;border:1px solid var(--line);margin:14px 0 24px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:12.5px;letter-spacing:.04em;color:var(--mute);font-weight:500;background:var(--bg)}
+tr:last-child td{border-bottom:none}
+td.c,th.c{text-align:center}
+.tag{display:inline-block;white-space:nowrap;font-size:12px;padding:1px 8px;border-radius:3px;font-family:"IBM Plex Mono",monospace;line-height:1.6}
+.t-l1{background:var(--l1)} .t-l2{background:var(--l2)} .t-l3{background:var(--l3)} .t-l4{background:var(--l4)}
+.yes{color:var(--ok);font-weight:700} .no{color:var(--mute)} .own{color:var(--accent);font-weight:700}
+code{font-family:"IBM Plex Mono",monospace;font-size:13px;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+pre{font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.6;background:var(--code-bg);padding:14px 16px;overflow-x:auto;border:1px solid var(--line);margin:12px 0 22px}
+ol.steps{padding-left:0;list-style:none;counter-reset:s;max-width:76ch;margin:0 0 18px}
+ol.steps li{position:relative;padding:8px 0 8px 40px;border-bottom:1px dashed var(--line)}
+ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:10px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-family:"IBM Plex Mono",monospace;font-size:13px;display:flex;align-items:center;justify-content:center}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0 20px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.box{background:var(--paper);border:1px solid var(--line);padding:14px 16px}
+.box h4{margin:0 0 6px;font-size:14px;color:var(--mute);font-weight:500;letter-spacing:.04em}
+.box ul{margin:0;padding-left:18px}
+.box li{margin:3px 0}
+.mvp{color:var(--ok);font-family:"IBM Plex Mono",monospace;font-size:12px}
+.later{color:var(--mute);font-family:"IBM Plex Mono",monospace;font-size:12px}
+.callout{background:var(--accent-soft);border:1px solid var(--line);padding:12px 16px;margin:14px 0 20px;max-width:76ch;font-size:14.5px}
+</style></head><body>
+
+<div class="wrap">
+<nav class="toc" aria-label="目錄">
+  <div class="eyebrow">目錄</div>
+  <a href="#s0">總則</a>
+  <a href="#s1">層級與航段（規則圖）</a>
+  <a href="#s2">判斷流程</a>
+  <a href="#s3">角色與權限</a>
+  <a href="#s4">寫入與影響規則</a>
+  <a href="#s5">威明輪範例驗證</a>
+  <a href="#s6">最小可行介面流程</a>
+  <a href="#s7">與 final 版的落差</a>
+  <a href="#s8">系統預設值的依據</a>
+</nav>
+
+<main>
+<header class="doc">
+  <div class="eyebrow">航行監控與警示 · 規劃說明</div>
+  <h1>閾值分層規則與判斷流程</h1>
+  <p class="lede">給船舶管理部門主管、組員與工程團隊的共同依據：閾值有哪幾層、哪一層優先、誰能改哪一層、改了影響誰，以及最小可行的介面流程。先定規則，再動示意介面。</p>
+  <div class="meta"><span>版本 v0.4 · 2026-09-16（限期設定併入維度列、介面精簡）</span><span>摯陞數位科技 SLAB</span><span>對應 SDD：threshold-priority-rbac</span></div>
+</header>
+
+<h2 id="s0"><span class="num">§0</span>一句話總則</h2>
+<div class="rule"><b>越具體的設定越優先，命中即停，不疊加。</b><br>系統判斷某艘船、某個維度該用什麼閾值時，是「找到最貼近這艘船當下情境的那一層就用它」；各層的值不加總，同一維度同一時間只發一則事件。</div>
+<p>「具體」有兩個方向：對象（針對這一艘船 ＞ 針對這片海域 ＞ 針對全船隊）與時間／航段（此刻有效的臨時設定 ＞ 常設；該航段專屬 ＞ 全航段通用）。兩者合起來就是下一節的八格查找順序。</p>
+
+<h2 id="s1"><span class="num">§1</span>層級與航段：需求規則圖</h2>
+<p>閾值分四層，由上到下越來越「通用」。每一層裡再分「該航段專屬」與「全航段通用」兩格。查找時先看層級、再看航段，所以編號 1 到 8 就是查找順序。</p>
+
+<figure>
+<svg viewBox="0 0 780 470" role="img" aria-label="四層閾值（時效單船、單船常設、區域、全船隊預設）各分該航段專屬與全航段通用兩格，查找順序由 1 到 8 蛇行向下，最後落到系統原廠值">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+    <marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1F6FB2"/></marker>
+  </defs>
+  <!-- column headers -->
+  <text x="300" y="30" font-size="12" text-anchor="middle" fill="currentColor" opacity=".7">該航段專屬（海上／錨泊漂流／進出港）</text>
+  <text x="560" y="30" font-size="12" text-anchor="middle" fill="currentColor" opacity=".7">全航段通用（fallback）</text>
+  <!-- layer rows -->
+  <g font-size="12.5" fill="currentColor">
+    <!-- L1 -->
+    <rect x="20" y="48" width="670" height="72" rx="6" fill="#FBE9D6" fill-opacity=".55" stroke="currentColor" stroke-opacity=".35"/>
+    <text x="34" y="74" font-weight="700">L1 時效性單船覆寫</text>
+    <text x="34" y="94" font-size="11" opacity=".75">有效起迄 · 軍演／颱風／本航次</text>
+    <text x="34" y="110" font-size="11" opacity=".75">到期自動失效 → 回到下一層</text>
+    <rect x="230" y="60" width="190" height="48" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+    <rect x="470" y="60" width="190" height="48" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+    <!-- L2 -->
+    <rect x="20" y="132" width="670" height="72" rx="6" fill="#DCE9F7" fill-opacity=".55" stroke="currentColor" stroke-opacity=".35"/>
+    <text x="34" y="158" font-weight="700">L2 單船常設覆寫</text>
+    <text x="34" y="178" font-size="11" opacity=".75">無期限 · 高價值船收緊航線偏移等</text>
+    <text x="34" y="194" font-size="11" opacity=".75">手動清除才失效</text>
+    <rect x="230" y="144" width="190" height="48" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+    <rect x="470" y="144" width="190" height="48" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+    <!-- L3 -->
+    <rect x="20" y="216" width="670" height="72" rx="6" fill="#DFF0E2" fill-opacity=".55" stroke="currentColor" stroke-opacity=".35"/>
+    <text x="34" y="242" font-weight="700">L3 區域覆寫</text>
+    <text x="34" y="262" font-size="11" opacity=".75">船當下位置命中的可編輯風險區</text>
+    <text x="34" y="278" font-size="11" opacity=".75">離開區域即不適用 · 多區取最嚴重</text>
+    <rect x="230" y="228" width="190" height="48" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+    <rect x="470" y="228" width="190" height="48" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+    <!-- L4 -->
+    <rect x="20" y="300" width="670" height="72" rx="6" fill="#E3E6EC" fill-opacity=".6" stroke="currentColor" stroke-opacity=".35"/>
+    <text x="34" y="326" font-weight="700">L4 全船隊預設</text>
+    <text x="34" y="346" font-size="11" opacity=".75">所有船的基準線 · 主管維護</text>
+    <text x="34" y="362" font-size="11" opacity=".75">常設、必有值</text>
+    <rect x="230" y="312" width="190" height="48" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+    <rect x="470" y="312" width="190" height="48" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+    <!-- system default -->
+    <rect x="230" y="396" width="430" height="40" rx="4" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-dasharray="5 4"/>
+    <text x="445" y="421" text-anchor="middle" font-size="12" opacity=".8">系統原廠值（程式內建保底，永遠找得到）</text>
+  </g>
+  <!-- order numbers -->
+  <g font-family="IBM Plex Mono, monospace" font-size="13" font-weight="700" text-anchor="middle">
+    <g fill="#1F6FB2">
+      <circle cx="252" cy="84" r="12" fill="#1F6FB2"/><text x="252" y="88.5" fill="#fff">1</text>
+      <circle cx="492" cy="84" r="12" fill="#1F6FB2"/><text x="492" y="88.5" fill="#fff">2</text>
+      <circle cx="252" cy="168" r="12" fill="#1F6FB2"/><text x="252" y="172.5" fill="#fff">3</text>
+      <circle cx="492" cy="168" r="12" fill="#1F6FB2"/><text x="492" y="172.5" fill="#fff">4</text>
+      <circle cx="252" cy="252" r="12" fill="#1F6FB2"/><text x="252" y="256.5" fill="#fff">5</text>
+      <circle cx="492" cy="252" r="12" fill="#1F6FB2"/><text x="492" y="256.5" fill="#fff">6</text>
+      <circle cx="252" cy="336" r="12" fill="#1F6FB2"/><text x="252" y="340.5" fill="#fff">7</text>
+      <circle cx="492" cy="336" r="12" fill="#1F6FB2"/><text x="492" y="340.5" fill="#fff">8</text>
+    </g>
+  </g>
+  <!-- cell labels -->
+  <g font-size="11.5" fill="currentColor" opacity=".85">
+    <text x="275" y="88">W · C · 持續時間</text><text x="515" y="88">W · C · 持續時間</text>
+    <text x="275" y="172">W · C · 持續時間</text><text x="515" y="172">W · C · 持續時間</text>
+    <text x="275" y="256">W · C · 持續時間</text><text x="515" y="256">W · C · 持續時間</text>
+    <text x="275" y="340">W · C · 持續時間</text><text x="515" y="340">W · C · 持續時間</text>
+  </g>
+  <!-- snake arrows -->
+  <g stroke="#1F6FB2" stroke-width="1.6" fill="none" marker-end="url(#ahb)">
+    <line x1="420" y1="84" x2="466" y2="84"/>
+    <path d="M660,84 L672,84 L672,126 L218,126 L218,168 L226,168"/>
+    <line x1="420" y1="168" x2="466" y2="168"/>
+    <path d="M660,168 L672,168 L672,210 L218,210 L218,252 L226,252"/>
+    <line x1="420" y1="252" x2="466" y2="252"/>
+    <path d="M660,252 L672,252 L672,294 L218,294 L218,336 L226,336"/>
+    <line x1="420" y1="336" x2="466" y2="336"/>
+    <path d="M660,336 L672,336 L672,384 L445,384 L445,392"/>
+  </g>
+  <!-- right annotation -->
+  <g font-size="11.5" fill="currentColor">
+    <line x1="735" y1="60" x2="735" y2="360" stroke="currentColor" stroke-opacity=".5" marker-end="url(#ah)"/>
+    <text x="748" y="110" transform="rotate(90 748 110)" opacity=".75">查找方向 → 越往下越通用</text>
+  </g>
+</svg>
+<figcaption>圖 1｜四層 × 兩格 = 八格查找順序。先看層級（對象／時間的具體程度），再看航段；命中即停。注意編號 4（單船 × 全航段通用）仍先於編號 7（全船隊 × 該航段專屬）：監管針對這艘船做的任何設定，意圖都比船隊層級明確。</figcaption>
+</figure>
+
+<h3>三條補充規則</h3>
+<p><b>欄位各自補齊。</b>Warning、Critical、持續時間三個欄位是各自沿八格順序往下找的。單船覆寫可以只填 W 不填 C，沒填的 C 由下一層補上；來源標示因此可能是「W＝單船、C＝全船隊」。</p>
+<p><b>通知與啟用開關比照分層。</b>Mail／LINE 通知方式與「是否啟用偵測」使用同一套查找，但「啟用偵測」是目前介面缺的欄位，須新增；關閉時該維度顯示 N/A、不立案。</p>
+<p><b>圍籬（到離區域）是共用的工作物。</b>圍籬本體屬船隊層，<b>所有人都可以繪製、編輯、刪除、啟停、設船速</b>，系統記錄最後修改者並寫入變更紀錄（2026-09-16 客戶確認）；單船層另可「停用此船」或覆寫提醒距離，只影響自己那艘船。全球唯讀風險區只顯示、不參與 L3。</p>
+
+<h2 id="s2"><span class="num">§2</span>判斷流程</h2>
+<p>每一輪資料更新（AIS、氣象、IoT 輪詢），對每艘船的每個維度跑一次下面的流程。閾值修改不觸發即時全船重算，等下一輪自然套用。</p>
+
+<figure>
+<svg viewBox="0 0 820 640" role="img" aria-label="判斷流程：資料更新後由狀態機判定航段，對每個維度先檢查是否啟用，再依八格順序取得 W、C、持續時間，比較實際值決定 Critical、Warning 或正常，持續時間達標才立案並通知，同維度同時只有一則事件">
+  <defs><marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+  <g font-size="12.5" fill="currentColor" text-anchor="middle">
+    <!-- start -->
+    <rect x="290" y="16" width="240" height="40" rx="20" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="410" y="41">資料更新（AIS／氣象／IoT 輪詢）</text>
+    <line x1="410" y1="56" x2="410" y2="80" stroke="currentColor" marker-end="url(#fa)"/>
+    <!-- segment -->
+    <rect x="270" y="82" width="280" height="44" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="410" y="101">狀態機判定當前航段 seg</text>
+    <text x="410" y="118" font-size="11" opacity=".75">海上 ／ 錨泊漂流 ／ 進出港</text>
+    <line x1="410" y1="126" x2="410" y2="150" stroke="currentColor" marker-end="url(#fa)"/>
+    <!-- for each dim -->
+    <rect x="290" y="152" width="240" height="40" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6" stroke-dasharray="5 4"/>
+    <text x="410" y="177">對每個維度 dim（10 項）</text>
+    <line x1="410" y1="192" x2="410" y2="216" stroke="currentColor" marker-end="url(#fa)"/>
+    <!-- enabled? -->
+    <polygon points="410,218 500,258 410,298 320,258" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="410" y="254">啟用偵測？</text>
+    <text x="410" y="272" font-size="11" opacity=".75">（依八格順序取 enabled）</text>
+    <path d="M320,258 L175,258 L175,300" fill="none" stroke="currentColor" marker-end="url(#fa)"/>
+    <text x="262" y="252" font-size="11">否</text>
+    <rect x="110" y="302" width="130" height="36" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="175" y="325">顯示 N/A，不立案</text>
+    <line x1="410" y1="298" x2="410" y2="322" stroke="currentColor" marker-end="url(#fa)"/>
+    <text x="424" y="314" font-size="11">是</text>
+    <!-- resolve -->
+    <rect x="250" y="324" width="320" height="60" rx="4" fill="#1F6FB2" fill-opacity=".12" stroke="#1F6FB2"/>
+    <text x="410" y="347" font-weight="700">依八格順序取 W、C、持續時間</text>
+    <text x="410" y="366" font-size="11" opacity=".8">三個欄位各自查找 · 記下來源層與航段供 UI 標示</text>
+    <line x1="410" y1="384" x2="410" y2="408" stroke="currentColor" marker-end="url(#fa)"/>
+    <!-- >= C ? -->
+    <polygon points="410,410 490,446 410,482 330,446" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="410" y="450">實際值 ≥ C？</text>
+    <path d="M490,446 L600,446" fill="none" stroke="currentColor" marker-end="url(#fa)"/>
+    <text x="545" y="440" font-size="11">是</text>
+    <rect x="602" y="428" width="120" height="36" rx="4" fill="#B8352C" fill-opacity=".15" stroke="#B8352C"/>
+    <text x="662" y="451" fill="#B8352C" font-weight="700">Critical</text>
+    <line x1="410" y1="482" x2="410" y2="506" stroke="currentColor" marker-end="url(#fa)"/>
+    <text x="424" y="498" font-size="11">否</text>
+    <!-- >= W ? -->
+    <polygon points="410,508 490,544 410,580 330,544" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="410" y="548">實際值 ≥ W？</text>
+    <path d="M490,544 L600,544" fill="none" stroke="currentColor" marker-end="url(#fa)"/>
+    <text x="545" y="538" font-size="11">是</text>
+    <rect x="602" y="526" width="120" height="36" rx="4" fill="#C77A00" fill-opacity=".15" stroke="#C77A00"/>
+    <text x="662" y="549" fill="#C77A00" font-weight="700">Warning</text>
+    <path d="M330,544 L200,544 L200,570" fill="none" stroke="currentColor" marker-end="url(#fa)"/>
+    <text x="262" y="538" font-size="11">否</text>
+    <rect x="130" y="572" width="140" height="36" rx="4" fill="#2E7D4F" fill-opacity=".12" stroke="#2E7D4F"/>
+    <text x="200" y="595" fill="#2E7D4F" font-weight="700">正常</text>
+    <text x="200" y="626" font-size="11" opacity=".75">既有事件標「警報已解除」，仍待人工結案</text>
+    <!-- duration + open event -->
+    <line x1="635" y1="562" x2="635" y2="586" stroke="currentColor" marker-end="url(#fa)"/>
+    <rect x="540" y="588" width="190" height="46" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="635" y="607">持續達標時間 → 立案＋通知</text>
+    <text x="635" y="624" font-size="11" opacity=".75">同維度同時僅一則事件；等級可升降</text>
+    <path d="M722,446 L748,446 L748,611 L732,611" fill="none" stroke="currentColor" stroke-opacity=".6" marker-end="url(#fa)"/>
+  </g>
+</svg>
+<figcaption>圖 2｜單一維度的判斷流程。藍框是本規範新增的核心：八格查找＋來源標示。Critical 與 Warning 都經過「持續時間」閘門才立案，避免瞬時抖動；條件消失時事件標「警報已解除」而非自動結案。</figcaption>
+</figure>
+
+<h3>解析虛擬碼</h3>
+<pre>resolve(vessel, dim, field, now):
+  seg = stateMachine.segment(vessel)                 # sea | anchor | port
+  layers = [ temporalVessel(vessel, now),            # L1  valid_from ≤ now ≤ valid_to
+             vessel(vessel),                          # L2
+             region(vessel.position),                 # L3  多區命中取風險最高者
+             fleet() ]                                # L4
+  for layer in layers:
+    for s in [seg, "all"]:
+      row = layer.find(segment=s, dimension=dim)
+      if row and row[field] is not null:
+        return { value: row[field], source: layer.name, segment: s }
+  return { value: SYSTEM_DEFAULT[dim][field], source: "system", segment: "all" }
+
+# field ∈ { enabled, warning, critical, warningDuration, criticalDuration, notifyMail, notifyLine }</pre>
+
+<h2 id="s3"><span class="num">§3</span>角色與權限</h2>
+<p>誰管哪些船來自既有系統（只讀取、不維護）；能做什麼功能另用權限碼管理。判斷順序：先看功能權限碼 → 再看船舶指派（own／any）→ 才允許寫入對應層級。</p>
+<div class="tbl"><table>
+<thead><tr><th>角色</th><th>可見範圍</th><th class="c">L4 全船隊</th><th class="c">L3 區域</th><th class="c">L2 單船常設</th><th class="c">L1 時效單船</th><th class="c">清除 L2／L1／圍籬單船覆寫</th><th class="c">圍籬本體</th><th class="c">事件結案</th><th class="c">變更紀錄</th></tr></thead>
+<tbody>
+<tr><td><b>系統管理員</b></td><td>全部</td><td class="c yes">編輯</td><td class="c yes">編輯</td><td class="c yes">任一船（改值、新增）</td><td class="c yes">任一船（新增）</td><td class="c no">不可（同主管）</td><td class="c yes">增刪改</td><td class="c yes">任一船</td><td class="c yes">全部</td></tr>
+<tr><td><b>主管</b></td><td>全部船、全部組員設定</td><td class="c yes">編輯</td><td class="c yes">編輯</td><td class="c yes">任一船（改值、新增）</td><td class="c yes">任一船（新增）</td><td class="c no">不可（9/16 確認）</td><td class="c yes">增刪改</td><td class="c yes">任一船</td><td class="c yes">全部</td></tr>
+<tr><td><b>組員</b></td><td>指派給自己的船 ＋ 有效授權的船</td><td class="c no">唯讀</td><td class="c no">唯讀</td><td class="c own">自己的船</td><td class="c own">自己的船</td><td class="c own">自己的船</td><td class="c yes">增刪改（記錄最後修改者）</td><td class="c own">自己的船</td><td class="c own">自己的操作</td></tr>
+<tr><td><b>代理人（有效授權）</b></td><td>授權者名下範圍內的船</td><td class="c no">唯讀</td><td class="c no">唯讀</td><td class="c own">授權期間內可編輯</td><td class="c own">授權期間內可編輯</td><td class="c own">授權期間內可清除</td><td class="c yes">同組員</td><td class="c own">授權期間內</td><td class="c own">自己的操作（標「代 授權者」）</td></tr>
+</tbody></table></div>
+<p>權限碼建議：<code>threshold.fleet.edit</code>、<code>threshold.region.edit</code>、<code>threshold.vessel.edit.own</code>、<code>threshold.vessel.edit.any</code>、<code>threshold.temporal.edit.own</code>、<code>threshold.temporal.edit.any</code>、<code>threshold.vessel.clear.own</code>（組員／代理人；不設 <code>.any</code>，主管即無法清組員覆寫）、<code>fence.fleet.manage</code>、<code>fence.vessel.toggle</code>、<code>event.resolve.own</code>、<code>event.resolve.any</code>、<code>audit.view.own</code>、<code>audit.view.all</code>、<code>vessel.view.all</code>。角色是權限碼的預設組合，允許對個人加減。</p>
+<div class="callout"><b>代理授權（2026-09-16 確認）</b>：授權資料為「授權者 → 代理人、船舶範圍（全部或部分）、起迄（上限 30 天）、事由」。只有授權者本人與該部門主管可建立、撤銷；代理人不能自建或延長。有效期間內代理人可編輯授權者名下範圍內船舶的 L2／L1 與圍籬單船層，設定者記為「代理人（代 授權者）」；到期自動失效、撤銷立即失效，皆寫變更紀錄。右上角「代理檢視」只顯示有效授權涵蓋的船，沒有授權時停用。同一船可有多筆有效授權。</div>
+
+<div class="callout"><b>主管不清組員的覆寫（2026-09-16 確認，選項 C）</b>：組經理實務上管的是監管人員而非船，因此主管畫面不出現任何「清除組員個別設定」的入口——集體設定「依監管人員的船隊」範圍下沒有「清除此航段所有設定」；單船設定看組員的船時沒有「清除此航段所有設定」、每列「復原」、時效「移除」、圍籬「清除覆寫」。主管仍可改值、新增時效覆寫、停用此船（設定者記為主管）。「全船隊預設」的「清除此航段所有設定」保留，只把 L4 重置回系統預設，不碰下層。要撤掉組員的設定，由該船監管組員或其代理人自行操作。</div>
+
+<h2 id="s4"><span class="num">§4</span>寫入與影響規則</h2>
+<ol class="steps">
+<li><b>明確儲存＋二次確認。</b>不採自動儲存。確認框顯示：影響船數、其中因上層覆寫而「不受影響」的船數、生效航段。</li>
+<li><b>改 L4 不動 L1～L3。</b>主管修改全船隊預設，只有「沒有覆寫」的船跟著變。要讓全船隊統一，由各船的監管組員自行「復原」；主管沒有清除組員覆寫的入口。</li>
+<li><b>從未設定的 L4 通用格顯示「系統預設」。</b>L4 通用格記錄是否曾由人設定（有設定者記錄，或值與原廠值不同）；未設定時解析器來源為 <code>system</code>，徽章顯示灰色虛線「系統預設·通用」，「預設」欄標「系統預設 ⓘ」（tooltip 為該值的依據），集體設定頁首提示「本航段 N 個維度尚未設定全船隊預設」。主管設定後才變「全船隊」；「清除此航段所有設定」把 L4 重置時同時移除設定者，來源回到系統預設。系統預設值為 Demo 假設，依據見 §8；上線前由公司 SMS／船隊營運手冊確認後寫入 L4。</li>
+<li><b>集體套用到「我的船」實為逐船寫入 L2。</b>介面須明示「這將成為單船覆寫，之後不隨全船隊預設變動」。</li>
+<li><b>時效覆寫（L1）必填有效起迄與事由，入口在該維度列的「限期調整」。</b>同一維度×航段同時只允許一筆生效／排定（期間重疊即拒絕）；到期由系統自動失效並寫一筆變更紀錄（by system）。</li>
+<li><b>同船多人指派時後寫者覆蓋</b>，變更紀錄保留前值與前一位設定者。</li>
+<li><b>每次寫入都留紀錄：</b>who、when、layer、scope、segment、dimension、field、old、new、reason。</li>
+<li><b>閾值變更不觸發即時重算</b>；由下一輪資料週期套用。Demo 端的即時重繪只是畫面反映。</li>
+</ol>
+
+<h2 id="s5"><span class="num">§5</span>威明輪範例驗證</h2>
+<p>船在海上航段，航線偏移實際值 1.5 NM。全船隊預設海上航段 W≥1、C≥3。</p>
+<div class="tbl"><table>
+<thead><tr><th>情境</th><th>命中格</th><th>生效 W／C</th><th>結果</th><th>來源標示</th></tr></thead>
+<tbody>
+<tr><td>無任何單船設定</td><td><span class="tag t-l4">7 · L4 × 海上</span></td><td>1 ／ 3</td><td style="color:var(--warn);font-weight:700">Warning</td><td>W＝全船隊·海上；C＝全船隊·海上</td></tr>
+<tr><td>單船常設「海上航段」W≥2</td><td><span class="tag t-l2">3 · L2 × 海上</span></td><td>2 ／ 3</td><td style="color:var(--ok);font-weight:700">正常</td><td>W＝單船·海上；C＝全船隊·海上</td></tr>
+<tr><td>單船常設只設「全航段通用」W≥2</td><td><span class="tag t-l2">4 · L2 × 通用</span></td><td>2 ／ 3</td><td style="color:var(--ok);font-weight:700">正常</td><td>W＝單船·通用；C＝全船隊·海上（單船通用仍先於全船隊專屬）</td></tr>
+<tr><td>單船只填 C≥1.2，未填 W</td><td>W→<span class="tag t-l4">7</span>　C→<span class="tag t-l2">3</span></td><td>1 ／ 1.2</td><td style="color:var(--crit);font-weight:700">Critical</td><td>W＝全船隊；C＝單船（欄位各自補齊）</td></tr>
+<tr><td>軍演期間時效覆寫 W≥3（有效中）</td><td><span class="tag t-l1">1 · L1 × 海上</span></td><td>3 ／ 3 → 需 C&gt;W，介面阻擋</td><td>—</td><td>驗證規則：Critical 必須大於 Warning</td></tr>
+<tr><td>軍演期間時效覆寫 W≥2.5、C≥4（有效中）</td><td><span class="tag t-l1">1 · L1 × 海上</span></td><td>2.5 ／ 4</td><td style="color:var(--ok);font-weight:700">正常</td><td>W、C 皆＝時效·海上；到期後回到第二列</td></tr>
+<tr><td>船進入台海軍演區，該區覆寫 W≥0.8</td><td><span class="tag t-l3">5 · L3 × 海上</span></td><td>0.8 ／ 3</td><td style="color:var(--warn);font-weight:700">Warning</td><td>W＝區域；若同時有單船設定則單船優先，區域不生效</td></tr>
+</tbody></table></div>
+
+<h2 id="s6"><span class="num">§6</span>最小可行介面流程（MVP）</h2>
+<p>目標是用最少的畫面讓組員「看得懂目前生效的是哪一層」、「改自己的船不會誤傷別人」，讓主管「改全船隊前知道影響誰」。三個畫面、兩條流程。</p>
+
+<figure>
+<svg viewBox="0 0 820 330" role="img" aria-label="兩條操作流程：組員從閾值設定頁選船、看生效值與來源、選常設或時效覆寫、確認影響後儲存並留紀錄；主管在同一頁切到全船隊預設，看影響預覽後套用並留紀錄，另可依組員檢視">
+  <defs><marker id="ua" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+  <g font-size="12" fill="currentColor">
+    <!-- lanes -->
+    <rect x="10" y="20" width="800" height="130" rx="6" fill="none" stroke="currentColor" stroke-opacity=".3"/>
+    <text x="24" y="42" font-weight="700">組員</text>
+    <rect x="10" y="170" width="800" height="140" rx="6" fill="none" stroke="currentColor" stroke-opacity=".3"/>
+    <text x="24" y="192" font-weight="700">主管</text>
+    <!-- operator flow -->
+    <g text-anchor="middle">
+      <rect x="70" y="70" width="110" height="50" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+      <text x="125" y="91">閾值設定頁</text><text x="125" y="108" font-size="10.5" opacity=".75">只列自己的船</text>
+      <line x1="180" y1="95" x2="204" y2="95" stroke="currentColor" marker-end="url(#ua)"/>
+      <rect x="206" y="70" width="130" height="50" rx="4" fill="#1F6FB2" fill-opacity=".12" stroke="#1F6FB2"/>
+      <text x="271" y="91" font-weight="700">生效值＋來源</text><text x="271" y="108" font-size="10.5" opacity=".8">每維度標 L1–L4 與航段</text>
+      <line x1="336" y1="95" x2="360" y2="95" stroke="currentColor" marker-end="url(#ua)"/>
+      <rect x="362" y="70" width="130" height="50" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+      <text x="427" y="91">新增／修改覆寫</text><text x="427" y="108" font-size="10.5" opacity=".75">常設 或 同列限期調整（起迄＋事由）</text>
+      <line x1="492" y1="95" x2="516" y2="95" stroke="currentColor" marker-end="url(#ua)"/>
+      <rect x="518" y="70" width="120" height="50" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+      <text x="578" y="91">確認框</text><text x="578" y="108" font-size="10.5" opacity=".75">影響 1 艘 · 生效航段</text>
+      <line x1="638" y1="95" x2="662" y2="95" stroke="currentColor" marker-end="url(#ua)"/>
+      <rect x="664" y="70" width="120" height="50" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+      <text x="724" y="91">儲存＋留紀錄</text><text x="724" y="108" font-size="10.5" opacity=".75">下一輪資料週期生效</text>
+    </g>
+    <!-- supervisor flow -->
+    <g text-anchor="middle">
+      <rect x="70" y="220" width="110" height="50" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+      <text x="125" y="241">閾值設定頁</text><text x="125" y="258" font-size="10.5" opacity=".75">全船隊預設分頁</text>
+      <line x1="180" y1="245" x2="204" y2="245" stroke="currentColor" marker-end="url(#ua)"/>
+      <rect x="206" y="220" width="130" height="50" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+      <text x="271" y="241">編輯 L4 或 L3</text><text x="271" y="258" font-size="10.5" opacity=".75">選航段 · 多維度</text>
+      <line x1="336" y1="245" x2="360" y2="245" stroke="currentColor" marker-end="url(#ua)"/>
+      <rect x="362" y="220" width="130" height="50" rx="4" fill="#1F6FB2" fill-opacity=".12" stroke="#1F6FB2"/>
+      <text x="427" y="241" font-weight="700">影響預覽</text><text x="427" y="258" font-size="10.5" opacity=".8">影響 N 艘 · M 艘有覆寫不受影響</text>
+      <line x1="492" y1="245" x2="516" y2="245" stroke="currentColor" marker-end="url(#ua)"/>
+      <rect x="518" y="220" width="120" height="50" rx="4" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+      <text x="578" y="241">套用＋留紀錄</text><text x="578" y="258" font-size="10.5" opacity=".75">不碰組員覆寫</text>
+      <!-- side branch -->
+      <path d="M125,270 L125,292 L206,292" fill="none" stroke="currentColor" stroke-opacity=".6" marker-end="url(#ua)"/>
+      <rect x="208" y="278" width="284" height="26" rx="13" fill="none" stroke="currentColor" stroke-opacity=".6" stroke-dasharray="4 3"/>
+      <text x="350" y="295" font-size="11">依組員檢視：該組員的船與其覆寫、設定者、時間</text>
+    </g>
+  </g>
+</svg>
+<figcaption>圖 3｜MVP 兩條流程。藍框是必須新增的兩個資訊點：組員端的「生效值＋來源」，主管端的「影響預覽」。其餘畫面沿用 final 版既有的分航段集體設定與單船設定。</figcaption>
+</figure>
+
+<h3>三個畫面的最小內容</h3>
+<div class="two">
+  <div class="box"><h4>畫面 A · 分航段集體設定（主管）</h4><ul>
+    <li><span class="mvp">MVP</span> 範圍：全船隊預設 ／ 依組員的船隊（後者明示「寫入單船覆寫」）</li>
+    <li><span class="mvp">MVP</span> 航段分頁：海上／錨泊漂流／進出港／全航段通用</li>
+    <li><span class="mvp">MVP</span> 套用前 confirm：影響 N 艘、M 艘不受影響、生效航段</li>
+    <li><span class="mvp">MVP</span> 修正「依組員的船隊」套用無效的既有 bug</li>
+    <li><span class="later">後續</span> 區域覆寫（L3）編輯入口（目前無 UI）</li>
+  </ul></div>
+  <div class="box"><h4>畫面 B · 單船設定（組員／主管）</h4><ul>
+    <li><span class="mvp">MVP</span> 每維度一列：生效 W／C／持續時間 ＋ 來源徽章（L1–L4 × 航段）</li>
+    <li><span class="mvp">MVP</span> 每維度列自帶「有效期間」：長期（常設）／限期調整子面板（起迄、事由必填；同維度同時一筆）</li>
+    <li><span class="mvp">MVP</span> 改為明確「儲存」，不再 blur 即存</li>
+    <li><span class="mvp">MVP</span> 圍籬列（單船頁）：「停用此船」與覆寫距離；圍籬本體在集體設定頁全員可增刪改（記錄最後修改者）</li>
+    <li><span class="later">後續</span> 啟用偵測開關（需先新增欄位）</li>
+  </ul></div>
+  <div class="box"><h4>畫面 C · 變更紀錄</h4><ul>
+    <li><span class="mvp">MVP</span> 列表：時間、操作者、層級、對象、維度、舊值→新值、事由</li>
+    <li><span class="mvp">MVP</span> 組員只看自己的操作；主管可依組員篩選</li>
+    <li><span class="mvp">MVP</span> 時效到期由系統寫入一筆</li>
+    <li><span class="later">後續</span> 匯出、還原到某一筆</li>
+  </ul></div>
+  <div class="box"><h4>共用</h4><ul>
+    <li><span class="mvp">MVP</span> 帳號帶角色：系統管理員／主管／組員；組員看不到 L4／L3 的編輯控制</li>
+    <li><span class="mvp">MVP</span> 船舶詳情頁的警示表也顯示來源徽章，讓「為什麼這艘船沒警報」一眼可查</li>
+    <li><span class="mvp">MVP</span> 代理授權面板（授權者／主管建立與撤銷，上限 30 天）；「代理檢視」只顯示有效授權的船</li>
+  </ul></div>
+</div>
+
+<h2 id="s7"><span class="num">§7</span>與 final 版的落差摘要</h2>
+<div class="tbl"><table>
+<thead><tr><th>項目</th><th>final 現況</th><th>本規範</th></tr></thead>
+<tbody>
+<tr><td>層級</td><td>單船 ＞ 區域 ＞ 全船隊（三層）；僅航線偏移、速度可單船覆寫</td><td>時效單船 ＞ 單船 ＞ 區域 ＞ 全船隊（四層）；所有可設維度皆可覆寫</td></tr>
+<tr><td>航段</td><td>只存欄位，不參與判斷；海上與通用寫同一值</td><td>該航段專屬 ＞ 全航段通用，參與判斷</td></tr>
+<tr><td>時效設定</td><td>無</td><td>L1，起迄＋事由，到期自動失效</td></tr>
+<tr><td>儲存方式</td><td>集體設定有套用＋confirm；單船 blur 即存</td><td>一律明確儲存＋影響預覽</td></tr>
+<tr><td>權限</td><td>isAdmin 二分；代理檢視勾選即可編輯他人船</td><td>角色 × 權限碼；代理為授權者或主管建立的有期限授權（上限 30 天）</td></tr>
+<tr><td>圍籬</td><td>單一份，單船頁可刪、影響全船隊，無修改者紀錄</td><td>船隊層全員可增刪改、記錄最後修改者並寫紀錄；單船層可停用此船／覆寫距離</td></tr>
+<tr><td>變更紀錄</td><td>無（事件有 history）</td><td>每次寫入必留</td></tr>
+<tr><td>既有 bug</td><td>主管「依監管人員的船隊」套用無任何寫入</td><td>MVP 一併修正</td></tr>
+</tbody></table></div>
+<p style="color:var(--mute);font-size:13.5px">final 版依專案鐵則不修改；以上調整只做在 merged 版。實作順序建議：先做規則（來源徽章、八格查找、時效層、影響預覽、既有 bug），再做權限與紀錄。</p>
+<h2 id="s8"><span class="num">§8</span>系統預設值的依據</h2>
+<p>介面「系統預設 ⓘ」的 tooltip 即下表依據。這些是業界慣例與相關規範的<b>建議來源</b>，數值本身為 Demo 假設，上線前請依公司 SMS（安全管理系統）或船隊營運手冊確認後寫入全船隊預設並記錄設定者；系統原廠值只作為安裝後的保底。</p>
+<div class="tbl"><table>
+<thead><tr><th>維度</th><th>Demo 預設</th><th>建議依據</th></tr></thead>
+<tbody>
+<tr><td>航線偏移</td><td>W 1.5／C 3 NM</td><td>IMO Res. A.893(21) 航行計畫指南要求為每段航線訂 XTD（cross-track）安全限值；業界常以 Safety Frame 的 50%／100% 作 W／C。船舶上報的航線計畫若帶有建議值，另以「計畫」標示供參考。</td></tr>
+<tr><td>速度異常</td><td>W 20%／C 40%</td><td>租約（charter party）速度條款與 Noon Report 慣例：偏離配速 10–20% 即需說明；本值為營運端經驗值，非法規。</td></tr>
+<tr><td>海氣象預警</td><td>W 0.65／C 0.85（海況指數）</td><td>對應 StormGeo／WMO 海況等級與公司「重風險天氣迴避」內規（例：顯著波高 4 m／6 m、蒲福風級 7／9），指數化後由公司對照。</td></tr>
+<tr><td>主機異常</td><td>W 78／C 93（分數）</td><td>依主機廠商 OEM 警戒值（RPM、排氣溫度、滑油壓）與 PMS 規範；分數為 Demo 抽象值，正式需對接輪機資料。</td></tr>
+<tr><td>漂航圈半徑</td><td>W 10／C 20 NM</td><td>拖錨判定慣例：迴旋半徑 ≈ 船長 ＋ 出鏈長度（水深 × 3–5 倍）；W 取迴旋圈外緣、C 取其 1.5–2 倍。參考 IMO 錨泊操作指引與船長常規。</td></tr>
+<tr><td>到離港</td><td>W 5／C 0.5 NM</td><td>以港區界線／引水登船點距離為準（各港不同）：W 為預先通報距離、C 為進入港界。</td></tr>
+<tr><td>到離區域</td><td>到達提醒 5 NM</td><td>依 NAVTEX／NOTAM 警戒區慣例，接近邊界前 N 海浬預警；軍演區以公告範圍為準。</td></tr>
+<tr><td>持續時間</td><td>W 60／C 3 分</td><td>AIS 回報週期（航行中 2–10 秒、慢速 3 分）與位置抖動：Warning 需持續一段時間避免瞬時尖峰誤報，Critical 較短以利即時處置。</td></tr>
+</tbody></table></div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,400 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>主管與組員操作流程</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F5F7FA; --paper:#FFFFFF; --ink:#1B2A41; --ink-2:#4A5A70; --mute:#7A879A; --line:#D5DCE6;
+  --accent:#1F6FB2; --accent-soft:#E4EFF9;
+  --sup:#6B4FBB; --op:#1F6FB2; --adm:#B8352C;
+  --l1:#FBE9D6; --l2:#E4EFF9; --l3:#E7F1E8; --l4:#ECEEF2;
+  --warn:#C77A00; --crit:#B8352C; --ok:#2E7D4F; --code-bg:#EEF2F7;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1620; --paper:#172130; --ink:#E3E8EF; --ink-2:#B4BFCE; --mute:#8593A6; --line:#2C3A4E;
+    --accent:#6FB1EA; --accent-soft:#1E3550; --sup:#B39DF0; --op:#6FB1EA; --adm:#F07A6F;
+    --l1:#4A3520; --l2:#1E3550; --l3:#1F3A29; --l4:#243040;
+    --warn:#F0A83A; --crit:#F07A6F; --ok:#6CC78F; --code-bg:#1E2A3A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1620; --paper:#172130; --ink:#E3E8EF; --ink-2:#B4BFCE; --mute:#8593A6; --line:#2C3A4E;
+  --accent:#6FB1EA; --accent-soft:#1E3550; --sup:#B39DF0; --op:#6FB1EA; --adm:#F07A6F;
+  --l1:#4A3520; --l2:#1E3550; --l3:#1F3A29; --l4:#243040;
+  --warn:#F0A83A; --crit:#F07A6F; --ok:#6CC78F; --code-bg:#1E2A3A;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;font-size:15.5px;line-height:1.8;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:40px 24px 80px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;gap:24px;padding:24px 16px 60px}}
+nav.toc{position:sticky;top:24px;align-self:start;font-size:13px;line-height:1.6}
+@media (max-width:860px){nav.toc{position:static;border-bottom:1px solid var(--line);padding-bottom:12px}}
+nav.toc .eyebrow{margin-bottom:10px}
+nav.toc a{display:block;color:var(--ink-2);text-decoration:none;padding:4px 0 4px 10px;border-left:2px solid var(--line)}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent);border-left-color:var(--accent);outline:none}
+main{min-width:0}
+header.doc{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:36px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+h1{font-family:"Noto Serif TC","Noto Sans TC",serif;font-size:32px;line-height:1.3;margin:8px 0 10px;font-weight:700;text-wrap:balance}
+h2{font-family:"Noto Serif TC","Noto Sans TC",serif;font-size:22px;margin:52px 0 14px;padding-top:8px;font-weight:700;text-wrap:balance}
+h2 .num{font-family:"IBM Plex Mono",monospace;color:var(--accent);font-size:14px;margin-right:10px;vertical-align:2px}
+h3{font-size:16px;margin:28px 0 8px;font-weight:700}
+p{margin:0 0 14px;max-width:72ch}
+.lede{font-size:17px;color:var(--ink-2);max-width:72ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--mute);margin-top:10px}
+figure{margin:20px 0 28px;background:var(--paper);border:1px solid var(--line);padding:18px 18px 12px;overflow-x:auto}
+figure svg{display:block;max-width:100%;height:auto;min-width:560px;color:var(--ink)}
+figcaption{font-size:13px;color:var(--mute);margin-top:10px;max-width:80ch}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--paper)}
+.tbl{overflow-x:auto;border:1px solid var(--line);margin:14px 0 24px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:12.5px;letter-spacing:.04em;color:var(--mute);font-weight:500;background:var(--bg)}
+tr:last-child td{border-bottom:none}
+td.c,th.c{text-align:center}
+.ui{font-family:"IBM Plex Mono",monospace;font-size:13px;background:var(--code-bg);padding:1px 6px;border-radius:3px;white-space:nowrap}
+.tag{display:inline-block;white-space:nowrap;font-size:12px;padding:1px 8px;border-radius:3px;font-family:"IBM Plex Mono",monospace;line-height:1.6}
+.t-l1{background:var(--l1)} .t-l2{background:var(--l2)} .t-l3{background:var(--l3)} .t-l4{background:var(--l4)}
+.role{display:inline-block;font-size:12px;padding:1px 8px;border-radius:3px;border:1px solid;white-space:nowrap;font-weight:700}
+.r-op{color:var(--op);border-color:var(--op)} .r-sup{color:var(--sup);border-color:var(--sup)} .r-adm{color:var(--adm);border-color:var(--adm)}
+.yes{color:var(--ok);font-weight:700} .no{color:var(--mute)} .own{color:var(--accent);font-weight:700}
+ol.steps{padding-left:0;list-style:none;counter-reset:s;max-width:80ch;margin:0 0 18px}
+ol.steps li{position:relative;padding:8px 0 8px 40px;border-bottom:1px dashed var(--line)}
+ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:10px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-family:"IBM Plex Mono",monospace;font-size:13px;display:flex;align-items:center;justify-content:center}
+ol.steps.sup li::before{background:var(--sup)}
+ol.steps li b{color:var(--ink)}
+ol.steps li .see{display:block;font-size:13px;color:var(--mute)}
+.callout{background:var(--accent-soft);border:1px solid var(--line);padding:12px 16px;margin:14px 0 20px;max-width:76ch;font-size:14.5px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0 20px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.box{background:var(--paper);border:1px solid var(--line);padding:14px 16px}
+.box h4{margin:0 0 6px;font-size:14px;color:var(--mute);font-weight:500;letter-spacing:.04em}
+.box ul{margin:0;padding-left:18px} .box li{margin:3px 0}
+</style></head><body>
+
+<div class="wrap">
+<nav class="toc" aria-label="目錄">
+  <div class="eyebrow">目錄</div>
+  <a href="#s0">角色、畫面與層級的關係</a>
+  <a href="#s1">組員操作流程</a>
+  <a href="#s2">主管操作流程</a>
+  <a href="#s3">兩者互動的情境</a>
+  <a href="#s4">誰看得到、誰改得動</a>
+  <a href="#s5">畫面元件對照</a>
+</nav>
+
+<main>
+<header class="doc">
+  <div class="eyebrow">航行監控與警示 · 操作說明</div>
+  <h1>主管與組員操作流程</h1>
+  <p class="lede">依 merged 版示意介面整理：組員如何為自己的船調閾值、主管如何維護全船隊基準並監看組員的設定，以及兩者的設定如何互相作用。</p>
+  <div class="meta"><span>v0.3 · 2026-09-16（主管不清組員覆寫、「系統預設」顯示修訂）</span><span>對應規範：閾值分層規則與判斷流程</span><span>介面：voyage-alert-rwd-merged.html</span></div>
+</header>
+
+<h2 id="s0"><span class="num">§0</span>角色、畫面與層級的關係</h2>
+<p>三個角色、兩個設定畫面、四層閾值加一組圍籬。角色決定進得了哪個畫面、畫面決定寫得到哪一層；船舶指派（誰管哪些船）來自既有系統，介面只讀取，用右上角帳號切換器模擬。</p>
+
+<figure>
+<svg viewBox="0 0 860 420" role="img" aria-label="角色（系統管理員、主管、組員）透過警示設定頁的兩個分頁與變更紀錄，對應到四層閾值與圍籬的編輯或唯讀關係">
+  <defs><marker id="ra" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+  <g font-size="12.5" fill="currentColor">
+    <text x="90" y="26" text-anchor="middle" opacity=".7">角色（帳號切換器）</text>
+    <text x="380" y="26" text-anchor="middle" opacity=".7">畫面（警示設定頁）</text>
+    <text x="740" y="26" text-anchor="middle" opacity=".7">寫入的層級</text>
+    <!-- roles -->
+    <rect x="20" y="48" width="140" height="44" rx="6" fill="none" stroke="#B8352C"/><text x="90" y="70" text-anchor="middle" font-weight="700" fill="#B8352C">系統管理員</text><text x="90" y="85" text-anchor="middle" font-size="10.5" opacity=".75">＝主管＋帳號管理</text>
+    <rect x="20" y="118" width="140" height="44" rx="6" fill="none" stroke="#6B4FBB"/><text x="90" y="140" text-anchor="middle" font-weight="700" fill="#6B4FBB">主管</text><text x="90" y="155" text-anchor="middle" font-size="10.5" opacity=".75">看全部船、全部組員</text>
+    <rect x="20" y="188" width="140" height="44" rx="6" fill="none" stroke="#1F6FB2"/><text x="90" y="210" text-anchor="middle" font-weight="700" fill="#1F6FB2">組員</text><text x="90" y="225" text-anchor="middle" font-size="10.5" opacity=".75">只看指派給自己的船</text>
+    <text x="20" y="262" font-size="10.5" opacity=".75">實線＝完整權限　虛線＝受限</text>
+    <text x="20" y="278" font-size="10.5" opacity=".75">組員在集體設定只有「我的全部船」</text>
+    <text x="20" y="294" font-size="10.5" opacity=".75">有效代理授權時，代理人可編輯授權者的船</text>
+    <!-- screens -->
+    <rect x="270" y="48" width="220" height="70" rx="6" fill="#1F6FB2" fill-opacity=".08" stroke="currentColor" stroke-opacity=".5"/>
+    <text x="380" y="70" text-anchor="middle" font-weight="700">分航段集體設定</text>
+    <text x="380" y="88" text-anchor="middle" font-size="11" opacity=".8">套用對象：全船隊預設／依組員船隊／我的全部船</text>
+    <text x="380" y="104" text-anchor="middle" font-size="11" opacity=".8">航段：海上／進出港／全航段通用 · 圍籬本體</text>
+    <rect x="270" y="140" width="220" height="86" rx="6" fill="#1F6FB2" fill-opacity=".08" stroke="currentColor" stroke-opacity=".5"/>
+    <text x="380" y="162" text-anchor="middle" font-weight="700">單船設定</text>
+    <text x="380" y="180" text-anchor="middle" font-size="11" opacity=".8">選船 → 航段分頁 → 每維度生效徽章</text>
+    <text x="380" y="196" text-anchor="middle" font-size="11" opacity=".8">常設覆寫 · 時效性覆寫 · 圍籬停用此船</text>
+    <text x="380" y="212" text-anchor="middle" font-size="11" opacity=".8">主管另有：組員篩選、覆寫總覽</text>
+    <rect x="270" y="252" width="220" height="44" rx="6" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-dasharray="5 4"/>
+    <text x="380" y="274" text-anchor="middle" font-weight="700">變更紀錄</text>
+    <text x="380" y="289" text-anchor="middle" font-size="11" opacity=".8">組員看自己 · 主管看全部（可依操作者篩選）</text>
+    <rect x="270" y="318" width="220" height="44" rx="6" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-dasharray="5 4"/>
+    <text x="380" y="340" text-anchor="middle" font-weight="700">船舶詳情 → 事件列</text>
+    <text x="380" y="355" text-anchor="middle" font-size="11" opacity=".8">顯示「閾值 W／C ＋ 生效來源」供驗證</text>
+    <!-- layers -->
+    <rect x="650" y="48" width="190" height="34" rx="5" fill="#E3E6EC" fill-opacity=".6" stroke="currentColor" stroke-opacity=".35"/><text x="745" y="70" text-anchor="middle" font-weight="700">L4 全船隊預設 × 航段</text>
+    <rect x="650" y="92" width="190" height="34" rx="5" fill="#DFF0E2" fill-opacity=".6" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="4 3"/><text x="745" y="107" text-anchor="middle" font-weight="700">L3 區域覆寫</text><text x="745" y="121" text-anchor="middle" font-size="10" opacity=".7">尚無編輯入口（預載資料）</text>
+    <rect x="650" y="136" width="190" height="34" rx="5" fill="#DCE9F7" fill-opacity=".6" stroke="currentColor" stroke-opacity=".35"/><text x="745" y="158" text-anchor="middle" font-weight="700">L2 單船常設 × 航段</text>
+    <rect x="650" y="180" width="190" height="34" rx="5" fill="#FBE9D6" fill-opacity=".6" stroke="currentColor" stroke-opacity=".35"/><text x="745" y="202" text-anchor="middle" font-weight="700">L1 時效單船 × 航段</text>
+    <rect x="650" y="236" width="190" height="34" rx="5" fill="none" stroke="currentColor" stroke-opacity=".5"/><text x="745" y="252" text-anchor="middle" font-weight="700">圍籬 · 船隊層</text><text x="745" y="265" text-anchor="middle" font-size="10" opacity=".7">全員可增刪改</text>
+    <rect x="650" y="280" width="190" height="34" rx="5" fill="none" stroke="currentColor" stroke-opacity=".5"/><text x="745" y="302" text-anchor="middle" font-weight="700">圍籬 · 單船層</text>
+    <rect x="650" y="324" width="190" height="34" rx="5" fill="none" stroke="currentColor" stroke-opacity=".3"/><text x="745" y="339" text-anchor="middle" font-size="11">持續時間 · 通知方式</text><text x="745" y="353" text-anchor="middle" font-size="10" opacity=".7">屬 L4，組員唯讀</text>
+  </g>
+  <!-- role -> screen -->
+  <g fill="none" marker-end="url(#ra)" stroke-width="1.4">
+    <path d="M160,70 L200,70 L200,118" stroke="#B8352C" stroke-opacity=".7"/>
+    <path d="M160,134 L226,134 L226,76 L268,76" stroke="#6B4FBB"/>
+    <path d="M160,146 L232,146 L232,176 L268,176" stroke="#6B4FBB"/>
+    <path d="M160,204 L240,204 L240,196 L268,196" stroke="#1F6FB2"/>
+    <path d="M160,214 L220,214 L220,104 L268,104" stroke="#1F6FB2" stroke-dasharray="4 3"/>
+  </g>
+  <text x="204" y="100" font-size="10.5" fill="#B8352C">同主管</text>
+  <!-- screen -> layer -->
+  <g stroke="currentColor" fill="none" marker-end="url(#ra)" stroke-width="1.3">
+    <path d="M490,62 L648,62"/>
+    <path d="M490,96 L600,96 L600,150 L648,150"/>
+    <path d="M490,110 L580,110 L580,250 L648,250"/>
+    <path d="M490,168 L560,168 L560,156 L648,156"/>
+    <path d="M490,190 L570,190 L570,197 L648,197"/>
+    <path d="M490,212 L590,212 L590,297 L648,297"/>
+  </g>
+  <g font-size="10.5" fill="currentColor" opacity=".85">
+    <text x="494" y="57">全船隊預設 → L4</text>
+    <text x="494" y="91">依組員／我的船 → 逐船 L2</text>
+    <text x="494" y="128">圍籬增刪改（全員，記最後修改者）</text>
+    <text x="500" y="164">常設 W／C</text>
+    <text x="500" y="186">時效</text>
+    <text x="500" y="226">停用此船／距離</text>
+  </g>
+</svg>
+<figcaption>圖 A｜角色 → 畫面 → 層級。要點：集體設定選「全船隊預設」才寫 L4，選「依組員船隊」或「我的全部船」其實是逐船寫 L2；單船設定永遠只動該船的 L2／L1 與圍籬單船層；圍籬本體所有人都能增刪改（記錄最後修改者）；區域覆寫（L3）目前只有預載資料、沒有編輯入口。</figcaption>
+</figure>
+
+<h2 id="s1"><span class="num">§1</span>組員操作流程</h2>
+<p>組員的原則是「預設都跟船隊走，有需要才為自己的船另設」。介面上組員看不到全船隊預設的編輯控制，所有可寫的東西都只影響自己被指派的船。</p>
+
+<figure>
+<svg viewBox="0 0 860 330" role="img" aria-label="組員流程：從船隊頁或事件察覺需要調整，進入警示設定的單船設定，選船與航段，看生效徽章後選擇常設覆寫、時效覆寫或圍籬停用此船，儲存並確認，最後在變更紀錄與船舶詳情驗證">
+  <defs><marker id="oa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+  <g font-size="12" fill="currentColor" text-anchor="middle">
+    <rect x="16" y="60" width="120" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="76" y="81">察覺需要調整</text><text x="76" y="98" font-size="10.5" opacity=".75">事件誤報／船況特殊</text>
+    <line x1="136" y1="85" x2="160" y2="85" stroke="currentColor" marker-end="url(#oa)"/>
+    <rect x="162" y="60" width="130" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="227" y="81">警示設定 › 單船設定</text><text x="227" y="98" font-size="10.5" opacity=".75">船舶下拉只有自己的船</text>
+    <line x1="292" y1="85" x2="316" y2="85" stroke="currentColor" marker-end="url(#oa)"/>
+    <rect x="318" y="60" width="120" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="378" y="81">選航段分頁</text><text x="378" y="98" font-size="10.5" opacity=".75">海上／錨泊／進出港／通用</text>
+    <line x1="438" y1="85" x2="462" y2="85" stroke="currentColor" marker-end="url(#oa)"/>
+    <rect x="464" y="60" width="150" height="50" rx="6" fill="#1F6FB2" fill-opacity=".12" stroke="#1F6FB2"/>
+    <text x="539" y="81" font-weight="700">看每維度「生效」徽章</text><text x="539" y="98" font-size="10.5" opacity=".8">全船隊·海上／單船·通用…</text>
+    <!-- three branches -->
+    <path d="M614,85 L640,85 L640,40 L664,40" fill="none" stroke="currentColor" marker-end="url(#oa)"/>
+    <path d="M614,85 L664,85" fill="none" stroke="currentColor" marker-end="url(#oa)"/>
+    <path d="M614,85 L640,85 L640,130 L664,130" fill="none" stroke="currentColor" marker-end="url(#oa)"/>
+    <rect x="666" y="18" width="180" height="44" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="756" y="36">常設覆寫（L2）</text><text x="756" y="52" font-size="10.5" opacity=".75">改 W／C → 儲存變更 → 確認</text>
+    <rect x="666" y="63" width="180" height="44" rx="6" fill="none" stroke="#C77A00"/>
+    <text x="756" y="81" fill="#C77A00">時效覆寫（L1）</text><text x="756" y="97" font-size="10.5" opacity=".75">維度、W／C、起迄、事由 → 新增</text>
+    <rect x="666" y="108" width="180" height="44" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="756" y="126">圍籬「停用此船」</text><text x="756" y="142" font-size="10.5" opacity=".75">或覆寫到達／離開距離</text>
+    <!-- down to verify -->
+    <path d="M756,152 L756,190" fill="none" stroke="currentColor" marker-end="url(#oa)"/>
+    <rect x="606" y="192" width="240" height="44" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="726" y="210">確認框：影響 1 艘、舊 → 新</text><text x="726" y="226" font-size="10.5" opacity=".75">此船之後不隨全船隊預設變動</text>
+    <path d="M606,214 L580,214" fill="none" stroke="currentColor" marker-end="url(#oa)"/>
+    <rect x="420" y="192" width="158" height="44" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6" stroke-dasharray="5 4"/>
+    <text x="499" y="210">變更紀錄留一筆</text><text x="499" y="226" font-size="10.5" opacity=".75">組員只看到自己的</text>
+    <path d="M420,214 L394,214" fill="none" stroke="currentColor" marker-end="url(#oa)"/>
+    <rect x="236" y="192" width="156" height="44" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="314" y="210">船舶詳情 › 事件列</text><text x="314" y="226" font-size="10.5" opacity=".75">閾值 W／C ＋ 來源 驗證</text>
+    <!-- alt: batch my vessels -->
+    <path d="M227,110 L227,272 L318,272" fill="none" stroke="currentColor" stroke-dasharray="4 3" marker-end="url(#oa)"/>
+    <rect x="320" y="250" width="290" height="44" rx="6" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-dasharray="5 4"/>
+    <text x="465" y="268">替代：分航段集體設定 › 我的全部船</text><text x="465" y="284" font-size="10.5" opacity=".75">同一組值逐船寫入 L2（確認框會明說）</text>
+    <text x="16" y="322" font-size="11" opacity=".7" text-anchor="start">圍籬本體、持續時間、通知方式在組員畫面為唯讀（船隊層）。</text>
+  </g>
+</svg>
+<figcaption>圖 B｜組員流程。三個分支都只寫自己那艘船的層級；「生效」徽章是判斷要不要動手的依據，儲存前的確認框會提醒此船之後不再隨全船隊預設變動。</figcaption>
+</figure>
+
+<h3>逐步操作（組員）</h3>
+<ol class="steps">
+<li><b>登入後確認身份。</b>右上角帳號切換器顯示「組員」徽章；船隊監控與事件處理只列自己的船。勾「代理檢視」可以看到同事的船，但到警示設定頁仍只能改自己的船。<span class="see">畫面：右上角 <span class="ui">帳號切換器</span>、<span class="ui">全部船舶</span> 勾選</span></li>
+<li><b>進入警示設定 › 單船設定。</b>先看「維度總覽」了解各維度掛在哪個航段；船舶下拉只有指派給自己的船，右側顯示該船目前風險等級。<span class="see">畫面：<span class="ui">單船設定</span> 分頁、<span class="ui">船舶 / Vessel</span> 下拉</span></li>
+<li><b>切到要調的航段。</b>海上、錨泊／漂流、進出港、全航段通用四個分頁，各自一格設定；船當下在哪個航段就用哪一格，找不到才用通用。<span class="see">畫面：<span class="ui">航段分頁</span></span></li>
+<li><b>先看「生效」徽章再決定。</b>每個維度列標示目前實際套用的層級與航段，例如 <span class="tag t-l4">全船隊·通用</span> 表示還沒有任何覆寫；<span class="tag t-l2">單船·海上航段</span> 表示本船已設；W 與 C 來源不同會分開標。<span class="see">畫面：維度列的 <span class="ui">生效 ○○·○○</span> 徽章、<span class="ui">★ 已調整</span>＋設定者·時間</span></li>
+<li><b>常設調整：改 W／C 後按「儲存變更」。</b>列左側橙條與「N 項未儲存」提示尚未寫入；確認框列出舊→新，並說明此船之後不隨全船隊預設變動。要回到船隊值就按該列「復原」或「清除此航段所有設定」。<span class="see">畫面：<span class="ui">儲存變更</span>／<span class="ui">放棄</span>／<span class="ui">復原</span></span></li>
+<li><b>臨時情況用「時效性覆寫」。</b>軍演、颱風、本航次等有期限的需求，在區塊表單填維度、W／C（可只填一項）、起迄與事由；有效期間內優先於常設，到期自動失效並在列表標「已到期」。<span class="see">畫面：<span class="ui">時效性覆寫</span> 區塊</span></li>
+<li><b>圍籬：本船不要就「停用此船」，要改大家的就到集體設定頁。</b>單船設定頁只影響自己那艘船（停用此船、覆寫提醒距離）；圍籬本體（繪製、編輯、刪除、啟停、船速）在集體設定頁，所有人都能改，列上會顯示「最後修改 誰 · 時間」，並寫入變更紀錄。<span class="see">畫面：單船頁圍籬列的 <span class="ui">停用此船</span>／<span class="ui">清除覆寫</span>；集體設定頁的 <span class="ui">繪製新區域</span>／<span class="ui">編輯</span>／<span class="ui">×</span></span></li>
+<li><b>驗證。</b>到船舶詳情的事件列看「閾值 W／C ＋ 來源」是否如預期；變更紀錄面板可回看自己做過的每一筆。</li>
+</ol>
+
+<h2 id="s2"><span class="num">§2</span>主管操作流程</h2>
+<p>主管維護全船隊的基準線，並能看到、也能代改任一組員的船。主管的關鍵動作是「改全船隊預設前先看影響預覽」，因為有覆寫的船不會跟著動。</p>
+
+<figure>
+<svg viewBox="0 0 860 340" role="img" aria-label="主管流程：集體設定選全船隊預設或依組員船隊，套用前看影響預覽；單船設定用組員篩選與覆寫總覽檢視或代改；變更紀錄依操作者篩選">
+  <defs><marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+  <g font-size="12" fill="currentColor" text-anchor="middle">
+    <!-- lane A: fleet default -->
+    <rect x="10" y="14" width="840" height="110" rx="6" fill="none" stroke="#6B4FBB" stroke-opacity=".35"/>
+    <text x="24" y="34" text-anchor="start" font-weight="700" fill="#6B4FBB">A · 維護全船隊基準（L4）</text>
+    <rect x="30" y="52" width="140" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="100" y="73">分航段集體設定</text><text x="100" y="90" font-size="10.5" opacity=".75">套用對象＝全船隊預設</text>
+    <line x1="170" y1="77" x2="194" y2="77" stroke="currentColor" marker-end="url(#sa)"/>
+    <rect x="196" y="52" width="130" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="261" y="73">選航段、改 W／C</text><text x="261" y="90" font-size="10.5" opacity=".75">海上／進出港／通用</text>
+    <line x1="326" y1="77" x2="350" y2="77" stroke="currentColor" marker-end="url(#sa)"/>
+    <rect x="352" y="52" width="190" height="50" rx="6" fill="#6B4FBB" fill-opacity=".12" stroke="#6B4FBB"/>
+    <text x="447" y="73" font-weight="700">套用變更 → 影響預覽</text><text x="447" y="90" font-size="10.5" opacity=".8">影響 N 艘 · M 艘有覆寫不受影響</text>
+    <line x1="542" y1="77" x2="566" y2="77" stroke="currentColor" marker-end="url(#sa)"/>
+    <rect x="568" y="52" width="120" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="628" y="73">確認寫入 L4</text><text x="628" y="90" font-size="10.5" opacity=".75">下一輪資料週期生效</text>
+    <line x1="688" y1="77" x2="712" y2="77" stroke="currentColor" marker-end="url(#sa)"/>
+    <rect x="714" y="52" width="120" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6" stroke-dasharray="5 4"/>
+    <text x="774" y="73">要全隊一致？</text><text x="774" y="90" font-size="10.5" opacity=".75">請組員自行「復原」</text>
+    <!-- lane B: per operator -->
+    <rect x="10" y="136" width="840" height="110" rx="6" fill="none" stroke="#6B4FBB" stroke-opacity=".35"/>
+    <text x="24" y="156" text-anchor="start" font-weight="700" fill="#6B4FBB">B · 監看與代改組員的船（L2／L1）</text>
+    <rect x="30" y="174" width="140" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="100" y="195">單船設定</text><text x="100" y="212" font-size="10.5" opacity=".75">「組員」下拉篩選</text>
+    <line x1="170" y1="199" x2="194" y2="199" stroke="currentColor" marker-end="url(#sa)"/>
+    <rect x="196" y="174" width="170" height="50" rx="6" fill="#6B4FBB" fill-opacity=".12" stroke="#6B4FBB"/>
+    <text x="281" y="195" font-weight="700">覆寫總覽</text><text x="281" y="212" font-size="10.5" opacity=".8">常設＋時效 · 含設定者·時間</text>
+    <line x1="366" y1="199" x2="390" y2="199" stroke="currentColor" marker-end="url(#sa)"/>
+    <rect x="392" y="174" width="150" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="467" y="195">點列跳到該船該航段</text><text x="467" y="212" font-size="10.5" opacity=".75">與組員相同的編輯畫面</text>
+    <line x1="542" y1="199" x2="566" y2="199" stroke="currentColor" marker-end="url(#sa)"/>
+    <rect x="568" y="174" width="120" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="628" y="195">檢視或代改</text><text x="628" y="212" font-size="10.5" opacity=".75">儲存後紀錄設定者＝主管</text>
+    <line x1="688" y1="199" x2="712" y2="199" stroke="currentColor" marker-end="url(#sa)"/>
+    <rect x="714" y="174" width="120" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6" stroke-dasharray="5 4"/>
+    <text x="774" y="195">替代：集體設定</text><text x="774" y="212" font-size="10.5" opacity=".75">依組員船隊 → 逐船 L2</text>
+    <!-- lane C -->
+    <rect x="10" y="258" width="840" height="70" rx="6" fill="none" stroke="#6B4FBB" stroke-opacity=".35"/>
+    <text x="24" y="278" text-anchor="start" font-weight="700" fill="#6B4FBB">C · 稽核與圍籬</text>
+    <text x="40" y="304" text-anchor="start" font-size="11.5">變更紀錄：依操作者篩選，看誰在何時改了哪一層（含系統自動寫入的時效到期）。</text>
+    <text x="40" y="320" text-anchor="start" font-size="11.5">圍籬本體：只有主管／系統管理員能在集體設定頁繪製、編輯、刪除、全部啟停、設船速；刪除會影響所有船。</text>
+  </g>
+</svg>
+<figcaption>圖 C｜主管三條線。A 線的紫框「影響預覽」是本規範新增的關鍵防呆；B 線讓主管不用逐船點開就能看到組員設了什麼；C 線是事後稽核。</figcaption>
+</figure>
+
+<h3>逐步操作（主管）</h3>
+<ol class="steps sup">
+<li><b>切到主管帳號。</b>徽章顯示「主管」，船隊監控列出全部船並標示各船的監管；代理檢視勾選隱藏（主管本來就看全部）。組員請假時，主管可在「代理授權」面板代該組員建立授權給代理人（上限 30 天）。</li>
+<li><b>維護全船隊預設：集體設定 › 套用對象「全船隊預設」。</b>選航段分頁後改 W／C；「全航段通用」分頁是所有航段的 fallback，「海上航段」等分頁只在該航段生效、留空＝沿用通用。持續時間與通知方式也在這裡改（屬 L4）。<span class="see">畫面：<span class="ui">套用對象</span> radio、<span class="ui">航段分頁</span>、維度列</span></li>
+<li><b>按「套用變更」，先讀影響預覽再確認。</b>確認框列出每維度舊→新、影響幾艘（目前處於該航段幾艘）、幾艘因單船／時效／區域覆寫不受影響，並提醒下一輪資料週期才生效。系統不會覆蓋組員的設定，主管也沒有清除組員覆寫的按鈕；若要全隊真的一致，請通知那幾艘船的監管組員自行「復原」。頁尾「清除此航段所有設定」只把全船隊預設重置回系統預設。<span class="see">畫面：<span class="ui">套用變更</span> → confirm；<span class="ui">清除此航段所有設定</span></span></li>
+<li><b>要對某組員的所有船一次設定：套用對象「依監管人員的船隊」。</b>下拉選組員後套用，介面會明說這是「逐船寫入單船覆寫（L2）」，之後這些船不再隨全船隊預設變動——這是與 A 線最重要的差別。此範圍下只有「套用變更」，沒有「清除此航段所有設定」。<span class="see">畫面：<span class="ui">依監管人員的船隊</span>＋組員下拉</span></li>
+<li><b>監看組員的設定：單船設定 › 「組員」下拉 › 覆寫總覽。</b>總覽列出該組員所有船的常設與時效覆寫（維度、航段、閾值、設定者·時間），點列直接跳到那艘船那個航段，畫面與組員看到的一樣，可代改值、新增時效覆寫、停用此船，儲存後設定者記為主管；但看不到「復原」、「清除此航段所有設定」、時效「移除」、圍籬「清除覆寫」——主管不能清組員的個別設定（9/16 確認）。<span class="see">畫面：<span class="ui">組員 / Operator</span> 下拉、<span class="ui">覆寫總覽</span> 摺疊表</span></li>
+<li><b>圍籬本體在集體設定頁維護，全員可改。</b>繪製新區域、編輯、刪除、全部啟用／停用、設定船速三種角色都能做；刪除確認會註明影響所有船；每個圍籬顯示最後修改者，變更紀錄可查誰改了什麼。組員若只是不想監控某圍籬，在自己船的單船設定按「停用此船」即可。</li>
+<li><b>稽核：變更紀錄面板依操作者篩選。</b>每一筆有層級（L1–L4／圍籬／通知／持續時間）、對象、航段、維度、舊→新、事由；時效到期由 system 自動寫入。</li>
+</ol>
+
+<h2 id="s3"><span class="num">§3</span>兩者互動的情境</h2>
+<p>四個最常見的交會點，說明「誰的設定壓過誰」以及介面怎麼提示。</p>
+
+<figure>
+<svg viewBox="0 0 860 300" role="img" aria-label="時間軸：主管設全船隊海上 W1，組員為威明輪設單船海上 W2，主管再把全船隊改為 W0.8 時威明輪不受影響，組員加時效 W3 於軍演期間優先，到期後回到單船 W2">
+  <defs><marker id="ta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+  <g font-size="12" fill="currentColor">
+    <text x="20" y="40" font-weight="700" fill="#6B4FBB">主管</text>
+    <text x="20" y="120" font-weight="700" fill="#1F6FB2">組員</text>
+    <text x="20" y="215" font-weight="700">威明輪</text>
+    <text x="20" y="231" font-size="10.5" opacity=".75">生效 W（海上）</text>
+    <line x1="90" y1="36" x2="840" y2="36" stroke="currentColor" stroke-opacity=".25"/>
+    <line x1="90" y1="116" x2="840" y2="116" stroke="currentColor" stroke-opacity=".25"/>
+    <line x1="90" y1="211" x2="840" y2="211" stroke="currentColor" stroke-opacity=".25"/>
+    <!-- events -->
+    <g text-anchor="middle">
+      <rect x="100" y="16" width="130" height="40" rx="5" fill="#6B4FBB" fill-opacity=".12" stroke="#6B4FBB"/><text x="165" y="33">全船隊·海上 W≥1</text><text x="165" y="49" font-size="10.5" opacity=".8">影響 9 艘</text>
+      <rect x="270" y="96" width="140" height="40" rx="5" fill="#1F6FB2" fill-opacity=".12" stroke="#1F6FB2"/><text x="340" y="113">威明輪 單船·海上 W≥2</text><text x="340" y="129" font-size="10.5" opacity=".8">確認：之後不隨全船隊變動</text>
+      <rect x="440" y="16" width="150" height="40" rx="5" fill="#6B4FBB" fill-opacity=".12" stroke="#6B4FBB"/><text x="515" y="33">全船隊·海上改 W≥0.8</text><text x="515" y="49" font-size="10.5" opacity=".8">預覽：8 艘影響、1 艘不受影響</text>
+      <rect x="620" y="96" width="140" height="40" rx="5" fill="#C77A00" fill-opacity=".12" stroke="#C77A00"/><text x="690" y="113">時效 W≥3（軍演 3 天）</text><text x="690" y="129" font-size="10.5" opacity=".8">事由必填</text>
+      <!-- effective values -->
+      <rect x="100" y="196" width="130" height="30" rx="4" fill="#E3E6EC" fill-opacity=".6" stroke="currentColor" stroke-opacity=".3"/><text x="165" y="216">1 · 全船隊·海上</text>
+      <rect x="270" y="196" width="140" height="30" rx="4" fill="#DCE9F7" fill-opacity=".6" stroke="currentColor" stroke-opacity=".3"/><text x="340" y="216">2 · 單船·海上</text>
+      <rect x="440" y="196" width="150" height="30" rx="4" fill="#DCE9F7" fill-opacity=".6" stroke="currentColor" stroke-opacity=".3"/><text x="515" y="216">2 · 單船·海上（不變）</text>
+      <rect x="620" y="196" width="140" height="30" rx="4" fill="#FBE9D6" fill-opacity=".6" stroke="currentColor" stroke-opacity=".3"/><text x="690" y="216">3 · 時效·海上</text>
+      <rect x="770" y="196" width="80" height="30" rx="4" fill="#DCE9F7" fill-opacity=".6" stroke="currentColor" stroke-opacity=".3"/><text x="810" y="216">2 · 到期回 L2</text>
+    </g>
+    <g stroke="currentColor" fill="none" marker-end="url(#ta)" stroke-opacity=".7">
+      <line x1="165" y1="56" x2="165" y2="194"/>
+      <line x1="340" y1="136" x2="340" y2="194"/>
+      <line x1="515" y1="56" x2="515" y2="194" stroke-dasharray="4 3"/>
+      <line x1="690" y1="136" x2="690" y2="194"/>
+      <path d="M760,116 L810,116 L810,194"/>
+    </g>
+    <text x="508" y="172" text-anchor="end" font-size="10.5" fill="#B8352C">被單船覆寫遮蔽</text>
+    <text x="803" y="172" text-anchor="end" font-size="10.5" opacity=".75">系統寫紀錄</text>
+    <text x="20" y="272" font-size="11.5">其他 8 艘（無覆寫）：1 → 0.8 跟著主管變；威明輪只有在組員（或其代理人）按「復原」清除單船覆寫後才會回到 0.8；主管沒有這個按鈕。</text>
+  </g>
+</svg>
+<figcaption>圖 D｜一條時間軸看完所有交會：主管的全船隊值是基準，組員的單船覆寫一旦存在就把主管後續的變更擋在外面（介面用影響預覽告知主管），時效覆寫再壓過常設但會自己到期。</figcaption>
+</figure>
+
+<div class="two">
+  <div class="box"><h4>情境 1 · 主管改全船隊，組員的船不動</h4><ul>
+    <li>主管：套用前的確認框顯示「M 艘有覆寫，不受影響」。</li>
+    <li>組員：該船維度列徽章仍是「單船·○○」，不會被通知。</li>
+    <li>要讓它跟上：組員（或其代理人）按「復原」；主管畫面沒有復原／清除鈕，不能代清。</li>
+  </ul></div>
+  <div class="box"><h4>情境 2 · 主管用「依組員船隊」批次設定</h4><ul>
+    <li>結果與組員自己逐船設一樣：寫入每艘船的 L2，設定者記為主管。</li>
+    <li>組員在單船設定看到「★ 已調整 · 主管 · 時間」，可自行再改或復原；主管自己反而清不掉，只能再改值。</li>
+    <li>這批船從此不隨全船隊預設變動——確認框會明說。</li>
+  </ul></div>
+  <div class="box"><h4>情境 3 · 組員設了時效覆寫</h4><ul>
+    <li>有效期間內徽章顯示「時效·○○」，優先於主管與組員的常設值。</li>
+    <li>主管在覆寫總覽看得到（含事由、生效中／未開始），但不能移除；可另加一筆或請組員移除。</li>
+    <li>到期自動失效、列表標「已到期」、變更紀錄多一筆 system。</li>
+  </ul></div>
+  <div class="box"><h4>情境 4 · 圍籬</h4><ul>
+    <li>任何人在集體設定頁刪除圍籬 → 所有船都不再監控；列與 popup 顯示最後修改者，變更紀錄留一筆。</li>
+    <li>組員在單船頁「停用此船」→ 只有自己那艘船不監控，圍籬本體仍啟用。</li>
+    <li>組員在單船頁改到達距離 5→8 → 只影響該船；在集體設定頁改 → 影響所有船並記錄修改者。</li>
+  </ul></div>
+  <div class="box"><h4>情境 5 · 代理授權</h4><ul>
+    <li>組員 A 休假前授權 B（全部或部分船、上限 30 天、事由）；或由主管代 A 建立。</li>
+    <li>B 勾「代理檢視」看到 A 的船，閾值頁可編輯，設定者記為「B（代 A）」。</li>
+    <li>到期自動失效／主管或 A 撤銷立即失效；B 設過的值保留。B 不能自己延長。</li>
+  </ul></div>
+</div>
+
+<h2 id="s4"><span class="num">§4</span>誰看得到、誰改得動</h2>
+<div class="tbl"><table>
+<thead><tr><th>介面元件</th><th class="c"><span class="role r-op">組員</span></th><th class="c"><span class="role r-sup">主管</span></th><th class="c"><span class="role r-adm">系統管理員</span></th><th>寫到哪一層</th></tr></thead>
+<tbody>
+<tr><td>集體設定 · 套用對象「全船隊預設」</td><td class="c no">不顯示</td><td class="c yes">可用</td><td class="c yes">可用</td><td><span class="tag t-l4">L4</span> × 航段</td></tr>
+<tr><td>集體設定 · 「依監管人員的船隊」</td><td class="c no">不顯示</td><td class="c yes">可用</td><td class="c yes">可用</td><td><span class="tag t-l2">L2</span> 逐船</td></tr>
+<tr><td>集體設定 · 「我的全部船」</td><td class="c own">鎖定為此</td><td class="c no">—</td><td class="c no">—</td><td><span class="tag t-l2">L2</span> 逐船</td></tr>
+<tr><td>持續時間、通知方式（Mail／LINE）</td><td class="c no">唯讀</td><td class="c yes">可改</td><td class="c yes">可改</td><td><span class="tag t-l4">L4</span></td></tr>
+<tr><td>單船設定 · 船舶下拉</td><td class="c own">自己的船</td><td class="c yes">全部（可依組員篩選）</td><td class="c yes">全部</td><td>—</td></tr>
+<tr><td>單船設定 · W／C 儲存變更</td><td class="c own">自己的船</td><td class="c yes">任一船</td><td class="c yes">任一船</td><td><span class="tag t-l2">L2</span> × 航段</td></tr>
+<tr><td>單船設定 · 復原、清除此航段所有設定</td><td class="c own">自己的船</td><td class="c no">不顯示</td><td class="c no">不顯示</td><td><span class="tag t-l2">L2</span> 清除</td></tr>
+<tr><td>單船設定 · 時效性覆寫 新增</td><td class="c own">自己的船</td><td class="c yes">任一船</td><td class="c yes">任一船</td><td><span class="tag t-l1">L1</span> × 航段</td></tr>
+<tr><td>單船設定 · 時效性覆寫 移除</td><td class="c own">自己的船</td><td class="c no">不顯示</td><td class="c no">不顯示</td><td><span class="tag t-l1">L1</span> 清除</td></tr>
+<tr><td>單船設定 · 覆寫總覽</td><td class="c no">不顯示</td><td class="c yes">可用</td><td class="c yes">可用</td><td>唯讀</td></tr>
+<tr><td>圍籬 · 繪製／編輯／刪除／全部啟停／船速</td><td class="c yes">可用（記錄最後修改者）</td><td class="c yes">可用</td><td class="c yes">可用</td><td>圍籬船隊層</td></tr>
+<tr><td>圍籬 · 停用此船、覆寫到達／離開距離</td><td class="c own">自己的船</td><td class="c yes">任一船</td><td class="c yes">任一船</td><td>圍籬單船層</td></tr>
+<tr><td>圍籬 · 清除此船的距離覆寫</td><td class="c own">自己的船</td><td class="c no">不顯示</td><td class="c no">不顯示</td><td>圍籬單船層 清除</td></tr>
+<tr><td>「系統預設」標示（頁首提示、預設欄 ⓘ、徽章）</td><td class="c yes">看得到徽章與預設欄</td><td class="c yes">另有頁首「N 個維度尚未設定」提示</td><td class="c yes">同主管</td><td><span class="tag t-l4">L4</span> 未設定</td></tr>
+<tr><td>變更紀錄</td><td class="c own">自己的操作</td><td class="c yes">全部，可依操作者篩選</td><td class="c yes">全部</td><td>—</td></tr>
+<tr><td>代理檢視（右上角勾選）</td><td class="c own">顯示有效授權的船，可編輯</td><td class="c no">隱藏</td><td class="c no">隱藏</td><td>—</td></tr>
+<tr><td>代理授權面板</td><td class="c own">我授權給誰（可建立／撤銷）、誰授權給我（唯讀）</td><td class="c yes">全部門，可代建與撤銷</td><td class="c yes">同主管</td><td>授權資料</td></tr>
+</tbody></table></div>
+<div class="callout">系統管理員在閾值功能上與主管完全相同，差別只在帳號與權限碼管理（本示意介面未展開）。</div>
+
+<h2 id="s5"><span class="num">§5</span>畫面元件對照</h2>
+<div class="tbl"><table>
+<thead><tr><th>元件</th><th>在哪裡</th><th>它告訴使用者什麼</th></tr></thead>
+<tbody>
+<tr><td>角色徽章（組員／主管／系統管理員）</td><td>右上角帳號切換器</td><td>目前身份，決定下面所有畫面能做什麼</td></tr>
+<tr><td>生效徽章 <span class="tag t-l4">全船隊·通用</span> <span class="tag t-l2">單船·海上航段</span> <span class="tag t-l1">時效·海上航段</span></td><td>單船設定每維度列；船舶詳情事件列</td><td>此維度現在用的是哪一層、哪個航段的值；W 與 C 不同來源時分開標</td></tr>
+<tr><td>★ 已調整 · 設定者 · 時間</td><td>維度列（集體與單船）</td><td>這一格有人設過值、是誰、何時</td></tr>
+<tr><td>橙色未儲存條 ＋「N 項未儲存」</td><td>維度列左側、footer</td><td>輸入尚未寫入；離開會被詢問是否放棄</td></tr>
+<tr><td>影響預覽確認框</td><td>集體設定「套用變更」</td><td>影響幾艘、幾艘不受影響、生效航段；或「將逐船寫入單船覆寫」</td></tr>
+<tr><td>組員下拉 ＋ 覆寫總覽</td><td>單船設定（主管）</td><td>某組員所有船的常設與時效覆寫一覽，點列跳轉</td></tr>
+<tr><td>時效性覆寫區塊</td><td>單船設定（錨泊分頁除外）</td><td>有期限的覆寫：生效中／未開始／已到期</td></tr>
+<tr><td>停用此船／清除覆寫／「單船」距離徽章</td><td>單船設定的圍籬列</td><td>此船對圍籬的個別處置，不影響船隊層；「清除覆寫」僅組員／代理人可見</td></tr>
+<tr><td>「系統預設 ⓘ」／「全船隊」預設欄標籤、「系統預設·通用」徽章</td><td>集體設定與單船設定的維度列</td><td>區分「主管設過的全船隊值」與「沒人設過的系統原廠值」；ⓘ 的 tooltip 為該值的依據（法規與營運慣例），上線前由公司確認</td></tr>
+<tr><td>「全船隊層 · 唯讀」註記</td><td>組員畫面的持續時間、通知方式</td><td>這些項目要找主管改</td></tr>
+<tr><td>最後修改 誰 · 時間</td><td>圍籬列名稱下方、地圖 popup</td><td>圍籬全員可改，這裡看是誰最後動的</td></tr>
+<tr><td>代理授權面板 ／ 代理 · 授權者 徽章</td><td>警示設定頁上方；單船設定的船舶下拉與頂部</td><td>誰授權給誰、到何時；現在改的是別人的船</td></tr>
+<tr><td>變更紀錄面板</td><td>警示設定頁底部</td><td>誰、何時、哪一層、舊→新、事由</td></tr>
+</tbody></table></div>
+</main>
+</div>
+</body></html>
