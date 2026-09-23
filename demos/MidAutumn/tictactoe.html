@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中秋翻牌圈叉搶答</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+:root{ --wrap:1280px }
+
+.head-right{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; justify-content:flex-end}
+.head-left{display:flex; flex-direction:column}
+.tabs{display:flex; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:4px}
+.tabs button{border:0; background:transparent; padding:.5rem 1.2rem; border-radius:999px; cursor:pointer; font-weight:500}
+.tabs button[aria-selected="true"]{background:var(--moon); color:var(--moon-ink); font-weight:700}
+select{padding:.35rem .6rem; border-radius:8px; border:1px solid var(--line); background:var(--panel)}
+.center{text-align:center}
+.small{font-size:.9rem}
+
+/* 比賽畫面 */
+.ttt-top{display:flex; flex-wrap:wrap; gap:1rem; justify-content:space-between; align-items:center; margin-bottom:1rem}
+.ttt-top label{display:flex; gap:.4rem; align-items:center}
+.banner{text-align:center; font-family:var(--serif); font-weight:900; font-size:clamp(1.3rem,3vw,2rem); padding:.6rem 1rem; border-radius:12px; margin:0 0 1.2rem}
+.banner.win{background:var(--moon); color:var(--moon-ink)}
+.banner.tie{border:2px dashed var(--moon-lo)}
+.ttt-layout{display:grid; grid-template-columns:1fr minmax(300px,560px) 1fr; gap:1.5rem; align-items:center}
+@media (max-width:1000px){ .ttt-layout{grid-template-columns:1fr 1fr} .board-wrap{grid-column:1 / -1; order:-1} }
+.side{background:var(--panel); border:1px solid var(--line); border-top:8px solid var(--tc); border-radius:16px; padding:1rem; text-align:center}
+.side.turn{box-shadow:0 0 0 4px var(--moon)}
+.side.winner{box-shadow:0 0 0 4px var(--moon), 0 0 50px var(--glow)}
+.side .mark{font-size:clamp(3rem,7vw,5rem); line-height:1; color:var(--tc); font-weight:900}
+.side h2{font-family:var(--serif); margin:.3rem 0; font-size:1.5rem}
+.side p{margin:0; color:var(--muted)}
+.board{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:0 auto; width:100%}
+.sq{
+  aspect-ratio:1; border-radius:14px; border:2px solid var(--line); background:var(--panel); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-weight:900;
+  font-size:clamp(1.8rem,5vw,3.4rem); font-variant-numeric:tabular-nums;
+  background-image:radial-gradient(circle at 30% 25%, var(--moon-hi), transparent 60%);
+}
+.sq:hover:not(:disabled){border-color:var(--moon-lo)}
+.sq.taken{cursor:pointer; background:var(--tc); background-image:none; border-color:transparent; color:var(--cell-ink); font-size:clamp(2.6rem,7vw,5rem)}
+.sq.winline{box-shadow:inset 0 0 0 6px var(--moon)}
+.sq:disabled:not(.taken){opacity:.5; cursor:not-allowed}
+
+/* 出題對話框 */
+.dialog{background:var(--panel); border-radius:20px; padding:1.5rem 2rem; width:min(900px,100%); max-height:92vh; overflow:auto; border-top:10px solid var(--moon)}
+.dialog .qno{color:var(--muted); font-weight:700}
+.dialog .qtext{font-family:var(--serif); font-weight:900; font-size:clamp(1.6rem,4vw,2.8rem); line-height:1.35; margin:.4rem 0 1rem; overflow-wrap:anywhere}
+.dialog .answer{font-size:clamp(1.2rem,3vw,1.8rem); font-weight:700; background:color-mix(in srgb, var(--moon) 35%, transparent); padding:.4rem .8rem; border-radius:10px; margin:0 0 1rem}
+.dialog .claim{display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin:1rem 0}
+.claim button{padding:1rem; font-size:1.2rem; font-weight:700; border-radius:14px; border:0; background:var(--tc); color:var(--cell-ink); cursor:pointer}
+
+/* 題目後台 */
+.admin-head{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:1rem; margin-bottom:1rem}
+.admin-title{font-family:var(--serif); margin:0; font-size:1.7rem}
+.admin-head p{margin:.2rem 0 0}
+.progress{display:flex; gap:.8rem; align-items:center; flex-wrap:wrap}
+.admin-grid{display:grid; grid-template-columns:minmax(280px,1fr) 2fr; gap:1.5rem; align-items:start}
+@media (max-width:900px){ .admin-grid{grid-template-columns:1fr} }
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:1rem 1.2rem}
+.panel h3{margin:0 0 .6rem; font-size:1.15rem}
+.panel h3.gap{margin-top:1.4rem}
+.field{display:flex; flex-direction:column; gap:.25rem; margin-bottom:.7rem; font-weight:500}
+.panel textarea,.panel input[type=text],.qlist textarea,.qlist input{
+  width:100%; padding:.55rem .7rem; border-radius:10px; border:1px solid var(--line); background:var(--bg); line-height:1.6; resize:vertical
+}
+.list-head{display:flex; justify-content:space-between; align-items:center; gap:.6rem}
+.btn.small{padding:.3rem .7rem; font-size:.9rem}
+.qlist{margin:0; padding-left:2.2rem; max-height:70vh; overflow:auto}
+.qlist li{padding:.6rem 0; border-bottom:1px solid var(--line)}
+.qlist li::marker{font-weight:700; color:var(--muted)}
+.qitem{display:flex; gap:.8rem; justify-content:space-between; align-items:flex-start}
+.qitem .q{font-weight:500; overflow-wrap:anywhere}
+.qitem .a{color:var(--muted); font-size:.95rem; overflow-wrap:anywhere}
+.qitem .used{font-size:.8rem; border:1px solid var(--line); border-radius:999px; padding:0 .5rem; margin-left:.4rem; color:var(--muted); white-space:nowrap}
+.qactions{display:flex; gap:.3rem; flex-shrink:0}
+.qactions button{padding:.25rem .5rem; font-size:.85rem}
+.qedit{display:flex; flex-direction:column; gap:.4rem}
+.panel.now{margin-bottom:1.5rem; border-top:6px solid var(--moon)}
+.now-q{font-family:var(--serif); font-weight:900; font-size:1.5rem; line-height:1.4; overflow-wrap:anywhere}
+.now-a{font-size:1.3rem; font-weight:700; margin-top:.4rem; background:color-mix(in srgb, var(--moon) 35%, transparent); padding:.3rem .7rem; border-radius:8px; display:inline-block}
+label.btn{display:inline-block}
+.empty-state{color:var(--muted); padding:1rem 0; list-style:none; margin-left:-2.2rem}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-left">
+    <h1>⭕ 中秋翻牌圈叉搶答</h1>
+    <a class="home-link" href="index.html">← 中秋活動</a>
+  </div>
+  <div class="head-right">
+    <span class="status" id="statusBadge" data-state="loading">連線中…</span>
+    <div class="tabs" role="tablist" aria-label="切換畫面">
+      <button role="tab" id="tab-game" aria-controls="panel-game" aria-selected="true">比賽畫面</button>
+      <button role="tab" id="tab-admin" aria-controls="panel-admin" aria-selected="false">題目後台</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="panel-game" role="tabpanel" aria-labelledby="tab-game">
+    <div class="ttt-top">
+      <div class="row">
+        <label>場次
+          <select id="round"><option>第 1 場</option><option>第 2 場</option><option>決賽</option></select>
+        </label>
+        <label>○ <select id="teamA"></select></label>
+        <label>✕ <select id="teamB"></select></label>
+        <label>猜拳贏、先選號 <select id="first"></select></label>
+      </div>
+      <div class="row">
+        <button class="btn" id="undoTtt">撤銷上一步</button>
+        <button class="btn danger" id="newTtt">重新開始本場</button>
+      </div>
+    </div>
+    <p class="banner" id="banner" role="status"></p>
+    <div class="ttt-layout">
+      <div class="side" id="side0"></div>
+      <div class="board-wrap"><div class="board" id="board"></div></div>
+      <div class="side" id="side1"></div>
+    </div>
+    <p class="muted center">空白格點下去會出題;已經標記的格子點一下,可以人工改成另一隊或清除。</p>
+    <p class="muted center" id="bankInfo"></p>
+  </section>
+
+  <section id="panel-admin" role="tabpanel" aria-labelledby="tab-admin" hidden>
+    <div class="admin-head">
+      <div>
+        <h2 class="admin-title">題目後台</h2>
+        <p class="muted" id="storeInfo"></p>
+      </div>
+      <div class="progress">
+        <span id="progressText"></span>
+        <button class="btn" id="resetUsed">從頭重新出題</button>
+      </div>
+    </div>
+
+    <div class="panel now" id="nowPanel">
+      <h3>投影中的題目</h3>
+      <div id="nowBody" class="muted">目前沒有開啟的題目。</div>
+    </div>
+
+    <div class="admin-grid">
+      <div class="panel">
+        <h3>新增題目</h3>
+        <label class="field">題目
+          <textarea id="newQ" rows="3" placeholder="例如:嫦娥的丈夫是誰?"></textarea>
+        </label>
+        <label class="field">答案
+          <input id="newA" type="text" placeholder="例如:后羿(可留白,由主持人判定)">
+        </label>
+        <button class="btn primary" id="addQ">新增題目</button>
+
+        <h3 class="gap">批次匯入</h3>
+        <p class="muted small">每行一題,題目和答案用「|」分隔。</p>
+        <textarea id="bulk" rows="7" placeholder="中秋節是農曆幾月幾日?|八月十五日&#10;月宮裡搗藥的動物是?|玉兔"></textarea>
+        <div class="row">
+          <button class="btn" id="bulkAppend">加到題庫最後</button>
+          <button class="btn danger" id="bulkReplace">取代整個題庫</button>
+        </div>
+        <h3 class="gap">備份與搬移</h3>
+        <p class="muted small">匯出成文字檔留底;檔案也可以用「匯入檔案」載回來。</p>
+        <div class="row">
+          <button class="btn" id="exportQ">匯出題目</button>
+          <label class="btn" for="importFile">匯入檔案(取代題庫)</label>
+          <input type="file" id="importFile" accept=".txt,text/plain" hidden>
+        </div>
+        <p class="msg" id="adminMsg" role="status"></p>
+      </div>
+
+      <div class="panel">
+        <div class="list-head">
+          <h3>題庫(<span id="qTotal">0</span> 題)</h3>
+          <button class="btn danger small" id="clearAll">清空題庫</button>
+        </div>
+        <ol class="qlist" id="qList"></ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="qText2">
+    <div class="qno" id="qNo"></div>
+    <div class="qtext" id="qText2"></div>
+    <p class="answer" id="qAnswer" hidden></p>
+    <div class="row">
+      <button class="btn" id="showAns">顯示答案</button>
+      <button class="btn" id="nextQ">兩隊都答錯,換一題</button>
+    </div>
+    <div class="claim" id="claim"></div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn" id="closeQ">先關閉(不算)</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="confirmBox" hidden>
+  <div class="dialog confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirmMsg">
+    <p class="confirm-msg" id="confirmMsg"></p>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn" id="confirmNo">取消</button>
+      <button class="btn primary" id="confirmYes">確定</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="fixBox" hidden>
+  <div class="dialog confirm" role="dialog" aria-modal="true" aria-labelledby="fixMsg">
+    <p class="confirm-msg" id="fixMsg"></p>
+    <div class="row" id="fixBtns" style="justify-content:flex-end"></div>
+  </div>
+</div>
+<script src="firebase-config.js"></script>
+<script src="shared.js"></script>
+<script src="cloud.js"></script>
+<script>
+const TEAMS = [
+  { name: '玉兔隊', emoji: '🐇', color: 'var(--t0)' },
+  { name: '嫦娥隊', emoji: '🌙', color: 'var(--t1)' },
+  { name: '吳剛隊', emoji: '🪓', color: 'var(--t2)' },
+  { name: '李白隊', emoji: '🍶', color: 'var(--t3)' },
+];
+const MARKS = ['○', '✕'];
+const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+/* 全部狀態都來自雲端(離線時來自 localStorage),本機只留一份鏡像 */
+let bank = [];        // [{id, q, a}]
+let used = [];        // 已出過的題目 id
+let G = null;         // 棋盤
+let current = null;   // 投影中的題目 {cell, q, a, no, at, show}
+let editingId = null;
+let lastShownAt = null;
+let ready = false;
+
+/* ---------- 分頁 ---------- */
+function showTab(w) {
+  const g = w === 'game';
+  $('#tab-game').setAttribute('aria-selected', g);
+  $('#tab-admin').setAttribute('aria-selected', !g);
+  $('#panel-game').hidden = !g;
+  $('#panel-admin').hidden = g;
+}
+$('#tab-game').onclick = () => showTab('game');
+$('#tab-admin').onclick = () => showTab('admin');
+
+/* ---------- 題庫 ---------- */
+function storeInfoText() {
+  if (!ready) return '正在連線雲端…';
+  if (Cloud.online) return '題庫、抽籤、棋盤都存在雲端。任何一台電腦開同一個網址都會即時同步,不用匯出匯入。';
+  return '目前是離線模式,題庫只存在這台電腦的瀏覽器。同一台電腦開兩個視窗會自動同步;要跨電腦請填好 firebase-config.js,或用「匯出題目」與「匯入檔案」搬。';
+}
+
+let flashTimer = null;
+function flash(t) {
+  $('#adminMsg').textContent = t;
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { $('#adminMsg').textContent = ''; }, 5000);
+}
+
+function setBank(items) {
+  bank = items;
+  renderAll();
+  Cloud.write('bank', items);
+}
+function setUsed(ids) {
+  used = ids;
+  Cloud.write('used', ids);
+}
+
+function parseLines(text) {
+  return text.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+    const i = l.indexOf('|');
+    return i < 0 ? { id: uid(), q: l, a: '' } : { id: uid(), q: l.slice(0, i).trim(), a: l.slice(i + 1).trim() };
+  }).filter((x) => x.q);
+}
+
+$('#addQ').onclick = () => {
+  const q = $('#newQ').value.trim(); const a = $('#newA').value.trim();
+  if (!q) { flash('請先輸入題目'); $('#newQ').focus(); return; }
+  setBank([...bank, { id: uid(), q, a }]);
+  $('#newQ').value = ''; $('#newA').value = ''; $('#newQ').focus();
+};
+$('#bulkAppend').onclick = () => {
+  const items = parseLines($('#bulk').value);
+  if (!items.length) { flash('批次匯入的內容是空的'); return; }
+  setBank([...bank, ...items]);
+  $('#bulk').value = ''; flash(`已加入 ${items.length} 題`);
+};
+$('#bulkReplace').onclick = async () => {
+  const items = parseLines($('#bulk').value);
+  if (!items.length) { flash('批次匯入的內容是空的'); return; }
+  if (!(await askConfirm(`確定要用這 ${items.length} 題取代目前的 ${bank.length} 題嗎?`, '取代'))) return;
+  setBank(items);
+  $('#bulk').value = ''; flash(`題庫已換成 ${items.length} 題`);
+};
+$('#clearAll').onclick = async () => {
+  if (!bank.length) return;
+  if (!(await askConfirm(`確定要刪除全部 ${bank.length} 題嗎?`, '全部刪除'))) return;
+  setBank([]);
+};
+$('#resetUsed').onclick = () => { setUsed([]); renderAll(); flash('出題進度已重設,下一題從第 1 題開始'); };
+
+$('#qList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-act]');
+  if (!btn) return;
+  const id = btn.closest('li').dataset.id;
+  const idx = bank.findIndex((x) => x.id === id);
+  if (idx < 0) return;
+  const act = btn.dataset.act;
+  if (act === 'edit') { editingId = id; renderAdmin(); const t = document.querySelector(`li[data-id="${id}"] textarea`); if (t) t.focus(); return; }
+  if (act === 'cancel') { editingId = null; renderAdmin(); return; }
+  const next = bank.slice();
+  if (act === 'save') {
+    const li = btn.closest('li');
+    const q = li.querySelector('textarea').value.trim();
+    const a = li.querySelector('input').value.trim();
+    if (!q) { flash('題目不能是空的'); return; }
+    next[idx] = { ...next[idx], q, a };
+    editingId = null;
+  } else if (act === 'del') {
+    if (!(await askConfirm('確定要刪除這一題嗎?', '刪除'))) return;
+    const j = bank.findIndex((x) => x.id === id);
+    if (j < 0) return;
+    const after = bank.slice(); after.splice(j, 1);
+    setBank(after);
+    return;
+  } else if (act === 'up' && idx > 0) {
+    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+  } else if (act === 'down' && idx < next.length - 1) {
+    [next[idx + 1], next[idx]] = [next[idx], next[idx + 1]];
+  } else return;
+  setBank(next);
+});
+
+function renderAdmin() {
+  $('#storeInfo').textContent = storeInfoText();
+  $('#qTotal').textContent = bank.length;
+  const usedSet = new Set(used);
+  const usedCount = bank.filter((x) => usedSet.has(x.id)).length;
+  $('#progressText').textContent = `已出 ${usedCount} / ${bank.length} 題`;
+  ['#addQ', '#bulkAppend', '#bulkReplace', '#clearAll'].forEach((s) => { $(s).disabled = !ready; });
+  if (!bank.length) {
+    $('#qList').innerHTML = `<li class="empty-state">${ready ? '題庫還是空的,從左邊新增題目或批次匯入。' : '讀取中…'}</li>`;
+    return;
+  }
+  $('#qList').innerHTML = bank.map((x, i) => {
+    if (x.id === editingId) {
+      return `<li data-id="${esc(x.id)}"><div class="qedit">
+        <textarea rows="2" aria-label="題目">${esc(x.q)}</textarea>
+        <input type="text" value="${esc(x.a)}" aria-label="答案" placeholder="答案">
+        <div class="row"><button class="btn primary small" data-act="save">儲存</button><button class="btn small" data-act="cancel">取消</button></div>
+      </div></li>`;
+    }
+    return `<li data-id="${esc(x.id)}"><div class="qitem">
+      <div><div class="q">${esc(x.q)}${usedSet.has(x.id) ? '<span class="used">已出</span>' : ''}</div>
+      <div class="a">答案:${x.a ? esc(x.a) : '(未設定)'}</div></div>
+      <div class="qactions">
+        <button class="btn" data-act="up" ${i === 0 || !ready ? 'disabled' : ''} aria-label="上移">↑</button>
+        <button class="btn" data-act="down" ${i === bank.length - 1 || !ready ? 'disabled' : ''} aria-label="下移">↓</button>
+        <button class="btn" data-act="edit" ${!ready ? 'disabled' : ''}>編輯</button>
+        <button class="btn danger" data-act="del" ${!ready ? 'disabled' : ''}>刪除</button>
+      </div>
+    </div></li>`;
+  }).join('');
+}
+
+function nextQuestion() {
+  if (!bank.length) return { q: '題庫還沒有題目,請主持人直接唸題', a: '', no: null };
+  const usedSet = new Set(used);
+  let idx = bank.findIndex((x) => !usedSet.has(x.id));
+  if (idx < 0) { idx = 0; setUsed([bank[0].id]); }
+  else setUsed(used.concat([bank[idx].id]));
+  renderAdmin(); renderBankInfo();
+  return { q: bank[idx].q, a: bank[idx].a, no: idx + 1 };
+}
+function renderBankInfo() {
+  if (!ready) { $('#bankInfo').textContent = '正在讀取題庫…'; return; }
+  const usedSet = new Set(used);
+  const left = bank.filter((x) => !usedSet.has(x.id)).length;
+  $('#bankInfo').textContent = `題庫共 ${bank.length} 題,還有 ${left} 題沒出過`;
+}
+
+/* ---------- 棋盤 ---------- */
+function freshGame(prev) {
+  return {
+    round: prev ? prev.round : '第 1 場',
+    teams: prev ? prev.teams : [0, 1],
+    first: prev ? prev.first : 0,
+    board: Array(9).fill(null),
+    turn: prev ? prev.first : 0,
+    history: [],
+    tiebreak: null,
+  };
+}
+function normalizeGame(v) {
+  if (!v || !Array.isArray(v.board) || v.board.length !== 9 || !Array.isArray(v.teams)) return freshGame(null);
+  const t0 = Number(v.teams[0]); const t1 = Number(v.teams[1]);
+  return {
+    round: typeof v.round === 'string' ? v.round : '第 1 場',
+    teams: [t0 >= 0 && t0 < 4 ? t0 : 0, t1 >= 0 && t1 < 4 ? t1 : 1],
+    first: v.first === 1 ? 1 : 0,
+    board: v.board.map((x) => (x === 0 || x === 1 ? x : null)),
+    turn: v.turn === 1 ? 1 : 0,
+    history: Array.isArray(v.history) ? v.history : [],
+    tiebreak: v.tiebreak === 0 || v.tiebreak === 1 ? v.tiebreak : null,
+  };
+}
+function saveGame(next) { G = next; Cloud.write('game', G); renderGame(); }
+
+function result() {
+  for (const l of LINES) {
+    const v = G.board[l[0]];
+    if (v !== null && l.every((i) => G.board[i] === v)) return { state: 'win', side: v, line: l };
+  }
+  if (G.board.every((v) => v !== null)) {
+    if (G.tiebreak !== null) return { state: 'win', side: G.tiebreak, line: [] };
+    return { state: 'full' };
+  }
+  return { state: 'play' };
+}
+const teamOf = (s) => TEAMS[G.teams[s]];
+
+function fillSelects() {
+  const opts = TEAMS.map((t, i) => `<option value="${i}">${t.emoji} ${t.name}</option>`).join('');
+  $('#teamA').innerHTML = opts; $('#teamB').innerHTML = opts;
+}
+function renderGame() {
+  const r = result();
+  $('#round').value = G.round;
+  $('#teamA').value = G.teams[0];
+  $('#teamB').value = G.teams[1];
+  $('#first').innerHTML = [0, 1].map((s) => `<option value="${s}">${MARKS[s]} ${teamOf(s).name}</option>`).join('');
+  $('#first').value = G.first;
+  const lock = G.history.length > 0;
+  ['#teamA', '#teamB', '#first'].forEach((s) => { $(s).disabled = lock || !ready; });
+  $('#undoTtt').disabled = (!lock && G.tiebreak === null) || !ready;
+  $('#newTtt').disabled = !ready;
+
+  [0, 1].forEach((s) => {
+    const el = $('#side' + s); const tm = teamOf(s);
+    el.style.setProperty('--tc', tm.color);
+    el.classList.toggle('turn', r.state === 'play' && G.turn === s);
+    el.classList.toggle('winner', r.state === 'win' && r.side === s);
+    const got = G.board.filter((v) => v === s).length;
+    el.innerHTML = `<div class="mark">${MARKS[s]}</div><h2>${tm.emoji} ${tm.name}</h2><p>已拿下 ${got} 格</p>`;
+  });
+
+  const winSet = new Set(r.state === 'win' ? r.line : []);
+  $('#board').innerHTML = G.board.map((v, i) => {
+    if (v === null) return `<button class="sq" data-i="${i}" ${r.state !== 'play' || !ready ? 'disabled' : ''} aria-label="${i + 1} 號">${i + 1}</button>`;
+    return `<button class="sq taken ${winSet.has(i) ? 'winline' : ''}" data-i="${i}" style="--tc:${teamOf(v).color}" title="點一下可人工修正" aria-label="${i + 1} 號,${teamOf(v).name},點一下可修正">${MARKS[v]}</button>`;
+  }).join('');
+
+  const b = $('#banner'); b.className = 'banner';
+  if (r.state === 'win') {
+    b.classList.add('win');
+    b.textContent = `🏆 ${G.round}:${teamOf(r.side).name}獲勝!`;
+  } else if (r.state === 'full') {
+    b.classList.add('tie');
+    b.innerHTML = `9 格已滿,沒有人連線,加賽一題決勝負 <button class="btn primary" id="tbBtn">出加賽題</button>`;
+    $('#tbBtn').onclick = () => openQuestion(-1);
+  } else {
+    b.textContent = `${G.round}:輪到 ${MARKS[G.turn]} ${teamOf(G.turn).name} 選號碼`;
+  }
+}
+
+function openFix(cell) {
+  const cur = G.board[cell];
+  if (cur === null) return;
+  const other = 1 - cur;
+  const box = document.getElementById('fixBox');
+  document.getElementById('fixMsg').innerHTML =
+    `${cell + 1} 號格目前是 ${MARKS[cur]} ${teamOf(cur).name},要怎麼修正?`;
+  const btns = document.getElementById('fixBtns');
+  btns.innerHTML = `<button class="btn primary" data-fix="${other}">改成 ${MARKS[other]} ${teamOf(other).name}</button>`
+    + `<button class="btn danger" data-fix="clear">清除這格</button>`
+    + `<button class="btn" data-fix="cancel">取消</button>`;
+  box.hidden = false;
+  const onKey = (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } };
+  function done() { box.hidden = true; btns.onclick = null; document.removeEventListener('keydown', onKey, true); }
+  btns.onclick = (e) => {
+    const b = e.target.closest('button[data-fix]');
+    if (!b) return;
+    const v = b.dataset.fix;
+    done();
+    if (v === 'cancel') return;
+    const next = clone(G);
+    next.history.push({ cell, prev: cur, prevTurn: next.turn });
+    next.board[cell] = v === 'clear' ? null : parseInt(v, 10);
+    saveGame(next);
+  };
+  document.addEventListener('keydown', onKey, true);
+}
+
+/* ---------- 出題對話框(跟著雲端的 current 走,兩台電腦看到同一題) ---------- */
+function openQuestion(cell) {
+  const q = nextQuestion();
+  Cloud.write('current', { cell, q: q.q, a: q.a, no: q.no, at: Date.now(), show: false });
+}
+function renderDialog() {
+  const box = $('#overlay');
+  if (!current) { box.hidden = true; lastShownAt = null; return; }
+  const cell = current.cell;
+  $('#qNo').textContent = cell < 0 ? '加賽題' : `${cell + 1} 號格${current.no ? `(題庫第 ${current.no} 題)` : ''}`;
+  $('#qText2').textContent = current.q;
+  $('#qAnswer').hidden = !current.show;
+  $('#qAnswer').textContent = current.a ? `答案:${current.a}` : '(未設定答案,由主持人判定)';
+  $('#nextQ').textContent = cell < 0 ? '兩隊都答錯,再出一題' : '兩隊都答錯,換一題';
+  $('#claim').innerHTML = [0, 1].map((s) =>
+    `<button style="--tc:${teamOf(s).color}" data-side="${s}">${MARKS[s]} ${teamOf(s).name} 答對</button>`).join('');
+  const wasHidden = box.hidden;
+  box.hidden = false;
+  if (current.at !== lastShownAt) {
+    lastShownAt = current.at;
+    pop($('#qText2'));
+    if (wasHidden) $('#showAns').focus();
+  }
+}
+function renderNow() {
+  const el = $('#nowBody');
+  if (!current) { el.className = 'muted'; el.textContent = '目前沒有開啟的題目。'; return; }
+  el.className = '';
+  el.innerHTML = `<div class="muted">${current.cell < 0 ? '加賽題' : `${current.cell + 1} 號格`}${current.no ? `(題庫第 ${current.no} 題)` : ''}</div>
+    <div class="now-q">${esc(current.q)}</div>
+    <div class="now-a">答案:${current.a ? esc(current.a) : '(未設定,由主持人判定)'}</div>`;
+}
+
+$('#board').addEventListener('click', (e) => {
+  const btn = e.target.closest('.sq');
+  if (!btn || btn.disabled) return;
+  const i = parseInt(btn.dataset.i, 10);
+  if (G.board[i] !== null) { openFix(i); return; }
+  openQuestion(i);
+});
+$('#showAns').onclick = () => { if (current) Cloud.write('current', { ...current, show: true }); };
+$('#nextQ').onclick = () => {
+  if (!current) return;
+  const q = nextQuestion();
+  Cloud.write('current', { cell: current.cell, q: q.q, a: q.a, no: q.no, at: Date.now(), show: false });
+};
+$('#closeQ').onclick = () => Cloud.write('current', null);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && current) Cloud.write('current', null); });
+$('#claim').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-side]');
+  if (!btn || !current) return;
+  const side = parseInt(btn.dataset.side, 10);
+  const next = clone(G);
+  if (current.cell < 0) next.tiebreak = side;
+  else {
+    next.history.push({ cell: current.cell, prev: null, prevTurn: next.turn });
+    next.board[current.cell] = side;
+    next.turn = 1 - next.turn;
+  }
+  Cloud.write('current', null);
+  saveGame(next);
+});
+
+$('#undoTtt').onclick = () => {
+  const next = clone(G);
+  if (next.tiebreak !== null) next.tiebreak = null;
+  else {
+    const h = next.history.pop();
+    if (!h) return;
+    next.board[h.cell] = h.prev === undefined ? null : h.prev;
+    next.turn = h.prevTurn;
+  }
+  saveGame(next);
+};
+$('#newTtt').onclick = async () => {
+  if ((G.history.length || G.tiebreak !== null) && !(await askConfirm('確定要清空棋盤、重新開始本場嗎?(兩台電腦都會一起換)', '重新開始'))) return;
+  saveGame(freshGame(G));
+};
+$('#round').onchange = (e) => { const n = clone(G); n.round = e.target.value; saveGame(n); };
+function setTeam(side, v) {
+  v = parseInt(v, 10);
+  const n = clone(G);
+  if (n.teams[1 - side] === v) n.teams[1 - side] = n.teams[side];
+  n.teams[side] = v;
+  saveGame(n);
+}
+$('#teamA').onchange = (e) => setTeam(0, e.target.value);
+$('#teamB').onchange = (e) => setTeam(1, e.target.value);
+$('#first').onchange = (e) => { const n = clone(G); n.first = parseInt(e.target.value, 10); n.turn = n.first; saveGame(n); };
+
+function renderAll() { renderAdmin(); renderBankInfo(); }
+
+/* ---------- 題目匯出/匯入 ---------- */
+$('#exportQ').onclick = () => {
+  const text = bank.map((x) => `${x.q.replace(/\n/g, ' ')}|${x.a.replace(/\n/g, ' ')}`).join('\n');
+  const blob = new Blob(['﻿' + text], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '翻牌圈叉題庫.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  flash(`已匯出 ${bank.length} 題`);
+};
+$('#importFile').addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  let text = '';
+  try { text = (await file.text()).replace(/^﻿/, '').replace(/\r/g, ''); } catch (err) { flash('讀取檔案失敗'); return; }
+  const items = parseLines(text);
+  if (!items.length) { flash('檔案裡沒有找到題目'); return; }
+  if (!(await askConfirm(`確定要用檔案中的 ${items.length} 題取代目前的 ${bank.length} 題嗎?`, '匯入'))) return;
+  setBank(items);
+  flash(`已匯入 ${items.length} 題`);
+});
+
+/* ---------- 啟動 ---------- */
+const DEFAULT_BANK = [
+  ['嫦娥奔月的故事中,嫦娥的丈夫是誰?', '后羿'],
+  ['傳說中在月亮上砍桂樹、怎麼砍都砍不倒的人是誰?', '吳剛'],
+  ['傳說中在月宮搗藥的動物是什麼?', '玉兔'],
+  ['中秋節是農曆幾月幾日?', '八月十五日'],
+  ['「但願人長久,千里共嬋娟」出自哪位詩人?', '蘇軾'],
+  ['「舉頭望明月,低頭思故鄉」是哪位詩人的作品?', '李白'],
+  ['「海上生明月,天涯共此時」是哪位詩人寫的?', '張九齡'],
+  ['台灣中秋常吃的文旦,最有名的產地是哪裡?', '台南麻豆'],
+  ['月餅裡常見的蛋黃,是用什麼蛋做的?', '鹹鴨蛋'],
+  ['中秋節晚上的月亮是什麼月相?', '滿月'],
+  ['請說出中秋節的另一個別稱(任一個即可)', '月夕、秋節、團圓節、拜月節等'],
+  ['今年(2026 年)中秋節是國曆幾月幾日?', '9 月 25 日'],
+].map(([q, a], i) => ({ id: 's' + (i + 1), q, a }));
+
+G = freshGame(null);
+fillSelects();
+renderGame();
+renderAll();
+renderNow();
+
+Cloud.bindBadge($('#statusBadge'));
+Cloud.onError(flash);
+Cloud.onStatus((s) => {
+  ready = s !== 'loading';
+  renderGame(); renderAll();
+});
+Cloud.watch('bank', (v) => {
+  bank = Array.isArray(v) ? v : [];
+  if (editingId && !bank.some((x) => x.id === editingId)) editingId = null;
+  renderAll();
+});
+Cloud.watch('used', (v) => { used = Array.isArray(v) ? v : []; renderAll(); });
+Cloud.watch('game', (v) => { G = normalizeGame(v); renderGame(); renderDialog(); });
+Cloud.watch('current', (v) => { current = v || null; renderDialog(); renderNow(); });
+
+Cloud.init().then(() => {
+  // 這間房還沒有題庫才塞預設題目;有人清空過(空陣列)就尊重他的清空
+  return Cloud.transact('bank', (cur) => (cur === null || cur === undefined ? DEFAULT_BANK : undefined));
+}).catch((e) => { console.error(e); flash('題庫初始化失敗,請重新整理'); });
+</script>
+</body>
+</html>

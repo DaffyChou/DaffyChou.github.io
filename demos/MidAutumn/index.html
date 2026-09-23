@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中秋活動</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.lead{text-align:center; color:var(--muted); margin:0 auto 2rem; max-width:36rem}
+.logos{display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; margin:0 0 1.6rem}
+.logos img{width:min(21vw,110px)}
+
+.flow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.2rem; align-items:stretch}
+@media (max-width:900px){ .flow{grid-template-columns:1fr} }
+.card{
+  display:flex; flex-direction:column; text-decoration:none; color:inherit;
+  background:var(--panel); border:1px solid var(--line); border-top:8px solid var(--moon);
+  border-radius:16px; padding:1.3rem 1.4rem; transition:transform .15s ease, box-shadow .15s ease;
+}
+a.card:hover{transform:translateY(-3px); box-shadow:0 10px 30px var(--glow)}
+.card.offsite{border-top-color:var(--line); background:color-mix(in srgb, var(--panel) 60%, var(--bg))}
+.card .step{color:var(--muted); font-weight:700; font-size:.85rem; letter-spacing:.1em}
+.card h2{font-family:var(--serif); font-weight:900; font-size:1.5rem; margin:.2rem 0 .5rem}
+.card p{margin:0 0 .8rem}
+.card ul{margin:0; padding-left:1.3rem; color:var(--muted); font-size:.95rem}
+.card .go{margin-top:auto; padding-top:.9rem; font-weight:700; color:var(--moon-lo)}
+.card.offsite .go{color:var(--muted); font-weight:500}
+@media (prefers-reduced-motion: reduce){ .card{transition:none} a.card:hover{transform:none} }
+
+.notes{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:1.2rem 1.5rem; margin-top:2rem}
+.notes h3{margin:0 0 .6rem; font-size:1.1rem}
+.notes ul{margin:0; padding-left:1.4rem}
+.notes li{margin-bottom:.4rem}
+.notes code{background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:0 .35rem; font-size:.9em}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌕 中秋活動</h1>
+  <span class="status" id="statusBadge" data-state="loading">連線中…</span>
+</header>
+<main>
+  <div class="logos">
+    <img src="assets/rabbit.webp" alt="玉兔隊">
+    <img src="assets/change.webp" alt="嫦娥隊">
+    <img src="assets/wugang.webp" alt="吳剛隊">
+    <img src="assets/libai.webp" alt="李白隊">
+  </div>
+  <p class="lead">活動分三段:先抽籤把大家分成四隊,接著進行實體三關卡搶烤肉食材,最後才是翻牌圈叉搶答。</p>
+
+  <div class="flow">
+    <a class="card" href="draw.html">
+      <div class="step">STEP 1</div>
+      <h2>🐇 抽籤分隊</h2>
+      <p>按月亮抽籤,自動分進玉兔、嫦娥、吳剛、李白四隊,決定後面兩段的組別。</p>
+      <ul>
+        <li>不限人數,每次補進目前人最少的那一隊</li>
+        <li>姓名可填可不填,填了會列在隊伍名單裡</li>
+        <li>可撤銷上一位、也可全部重抽</li>
+      </ul>
+      <div class="go">開啟抽籤頁 →</div>
+    </a>
+
+    <div class="card offsite">
+      <div class="step">STEP 2</div>
+      <h2>🔥 實體三關卡</h2>
+      <p>分好隊之後到現場闖三個關卡,贏得烤肉食材。</p>
+      <ul>
+        <li>線下進行,沒有對應的網頁</li>
+        <li>隊伍就用 STEP 1 抽出來的四隊</li>
+        <li>食材成績帶進晚上的烤肉</li>
+      </ul>
+      <div class="go">現場進行</div>
+    </div>
+
+    <a class="card" href="tictactoe.html">
+      <div class="step">STEP 3</div>
+      <h2>⭕ 翻牌圈叉搶答</h2>
+      <p>兩隊對戰 3×3 圈叉,點格子出題,答對的隊伍拿下該格。</p>
+      <ul>
+        <li>題目後台可新增、編輯、排序、批次匯入題庫</li>
+        <li>點已標記的格子可人工改判或清除</li>
+        <li>九格滿了沒連線,會出加賽題決勝負</li>
+      </ul>
+      <div class="go">開啟比賽頁 →</div>
+    </a>
+  </div>
+
+  <div class="notes">
+    <h3>現場使用注意</h3>
+    <ul>
+      <li>抽籤結果、題庫、棋盤、投影中的題目<strong>全部存在雲端</strong>。兩台電腦開同一個網址就會即時同步,一台投影、一台當後台都可以。</li>
+      <li>右上角的狀態燈是綠色「雲端同步中」才代表有連上。如果是黃色「離線」或紅色,資料只會留在那台電腦。</li>
+      <li>網址後面加 <code>?room=test</code> 可以另開一間不干擾正式資料的房間,排練時用。</li>
+      <li>題目後台的「匯出題目」可以存一份文字檔留底,萬一現場網路不通也有備案。</li>
+    </ul>
+  </div>
+</main>
+<script src="firebase-config.js"></script>
+<script src="shared.js"></script>
+<script src="cloud.js"></script>
+<script>
+Cloud.bindBadge($('#statusBadge'));
+Cloud.init();
+</script>
+</body>
+</html>

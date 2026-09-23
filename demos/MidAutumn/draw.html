@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中秋活動:抽籤分隊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* 月亮按鈕 */
+.moon{
+  position:relative; width:min(70vw,300px); aspect-ratio:1; border-radius:50%; border:10px solid transparent; cursor:pointer; margin:0 auto;
+  background:
+    radial-gradient(circle at 70% 68%, rgba(0,0,0,.06) 0 9%, transparent 10%),
+    radial-gradient(circle at 28% 62%, rgba(0,0,0,.05) 0 6%, transparent 7%),
+    radial-gradient(circle at 35% 30%, var(--moon-hi), var(--moon) 58%, var(--moon-lo));
+  box-shadow:0 0 70px var(--glow); color:var(--moon-ink);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:1rem;
+  transition:transform .15s ease, border-color .3s ease;
+}
+.moon:hover:not(:disabled){transform:scale(1.02)}
+.moon:active:not(:disabled){transform:scale(.97)}
+.moon:disabled{cursor:progress}
+.moon-main{font-family:var(--serif); font-weight:900; font-size:clamp(2rem,6vw,3.4rem); line-height:1.15}
+.moon-sub{font-size:1rem; margin-top:.4rem; opacity:.8; max-width:85%}
+.moon-logo{width:min(52%,170px); display:block; margin:0 auto .2rem}
+.moon-name{font-family:var(--serif); font-weight:900; font-size:clamp(1.5rem,4.2vw,2.4rem); display:block}
+@media (prefers-reduced-motion: reduce){ .moon{transition:none} }
+
+/* 抽籤區 */
+.head-right{display:flex; flex-direction:column; align-items:flex-end; gap:.4rem}
+.draw-side{display:flex; flex-direction:column; gap:.9rem; align-items:center; text-align:center; max-width:520px; margin:0 auto 2.2rem; padding-bottom:1.6rem; border-bottom:1px solid var(--line)}
+.draw-side .moon{width:min(52vw,230px)}
+.draw-side .moon-main{font-size:clamp(1.7rem,4.5vw,2.4rem)}
+.draw-side .moon-logo{width:min(52%,120px)}
+.draw-side .moon-name{font-size:clamp(1.2rem,3.2vw,1.7rem)}
+.name-field{display:flex; gap:.5rem; width:100%; max-width:340px}
+.name-field input{flex:1; min-width:0; padding:.6rem .8rem; border-radius:10px; border:1px solid var(--line); background:var(--panel)}
+.total{font-size:1.1rem}
+.total strong{font-family:var(--serif); font-size:1.8rem}
+
+/* 隊伍名單 */
+.teams{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem}
+@media (max-width:760px){ .teams{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:420px){ .teams{grid-template-columns:1fr} }
+.team{background:var(--panel); border:1px solid var(--line); border-top:8px solid var(--tc); border-radius:14px; padding:.9rem 1rem; min-height:12rem}
+.team h2{font-family:var(--serif); margin:0; font-size:1.35rem; display:flex; justify-content:center; align-items:baseline; gap:.6rem}
+.team h2 small{font-family:var(--sans); font-size:1.05rem; color:var(--muted); font-weight:700; white-space:nowrap}
+.team ol{margin:.6rem 0 0; padding-left:1.6rem; max-height:40vh; overflow:auto}
+.team li.new{font-weight:700; background:color-mix(in srgb, var(--tc) 25%, transparent); border-radius:6px}
+.team .empty{color:var(--muted); font-size:.9rem; margin-top:.6rem}
+.team-logo{width:100%; max-width:150px; display:block; margin:0 auto .3rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐇 中秋活動:抽籤分隊</h1>
+  <div class="head-right">
+    <span class="status" id="statusBadge" data-state="loading">連線中…</span>
+    <a class="home-link" href="index.html">← 中秋活動</a>
+  </div>
+</header>
+<main>
+  <div class="draw-layout">
+    <div class="draw-side">
+      <button class="moon" id="drawMoon" aria-live="polite">
+        <span class="moon-main" id="drawMain">抽籤</span>
+        <span class="moon-sub" id="drawSub">按月亮或 Enter 抽隊伍</span>
+      </button>
+      <div class="name-field">
+        <input id="nameInput" type="text" placeholder="輸入姓名(可不填)" autocomplete="off" aria-label="姓名">
+        <button class="btn primary" id="drawBtn">抽籤</button>
+      </div>
+      <div class="total" id="drawTotal"></div>
+      <div class="muted">不限人數,會自動分到目前人數最少的隊伍</div>
+      <div class="msg" id="drawMsg" role="status"></div>
+      <div class="row">
+        <button class="btn" id="undoDraw">撤銷上一位</button>
+        <button class="btn danger" id="resetDraw">全部重抽</button>
+      </div>
+    </div>
+    <div class="teams" id="teams"></div>
+  </div>
+</main>
+<div class="overlay" id="confirmBox" hidden>
+  <div class="dialog confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirmMsg">
+    <p class="confirm-msg" id="confirmMsg"></p>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn" id="confirmNo">取消</button>
+      <button class="btn primary" id="confirmYes">確定</button>
+    </div>
+  </div>
+</div>
+<script src="firebase-config.js"></script>
+<script src="shared.js"></script>
+<script src="cloud.js"></script>
+<script>
+const TEAMS = [
+  { name: '玉兔隊', emoji: '🐇', color: 'var(--t0)', logo: 'assets/rabbit.webp' },
+  { name: '嫦娥隊', emoji: '🌙', color: 'var(--t1)', logo: 'assets/change.webp' },
+  { name: '吳剛隊', emoji: '🪓', color: 'var(--t2)', logo: 'assets/wugang.webp' },
+  { name: '李白隊', emoji: '🍶', color: 'var(--t3)', logo: 'assets/libai.webp' },
+];
+function rnd(n) { try { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; } catch (e) { return Math.floor(Math.random() * n); } }
+
+/* ---------- 抽籤分隊(不限人數,補到最少的隊) ---------- */
+let log = [];
+let drawBusy = false, lastNo = null;
+
+function counts(list) { const c = [0, 0, 0, 0]; (list || []).forEach((e) => { if (c[e.team] !== undefined) c[e.team]++; }); return c; }
+function pickTeam(list) {
+  const c = counts(list); const min = Math.min(...c);
+  const cand = [0, 1, 2, 3].filter((t) => c[t] === min);
+  return cand[rnd(cand.length)];
+}
+function setDrawMoon(main, sub, team) {
+  if (team == null) $('#drawMain').textContent = main;
+  else $('#drawMain').innerHTML = `<img class="moon-logo" src="${TEAMS[team].logo}" alt=""><span class="moon-name">${TEAMS[team].name}</span>`;
+  $('#drawSub').textContent = sub;
+  $('#drawMoon').style.borderColor = team == null ? 'transparent' : TEAMS[team].color;
+}
+function setBusy(b) {
+  drawBusy = b;
+  $('#drawMoon').disabled = b;
+  $('#drawBtn').disabled = b;
+  $('#undoDraw').disabled = b || log.length === 0;
+  $('#resetDraw').disabled = b;
+}
+function renderDraw() {
+  $('#drawTotal').innerHTML = `目前已報到 <strong>${log.length}</strong> 人`;
+  $('#undoDraw').disabled = drawBusy || log.length === 0;
+  const c = counts(log);
+  $('#teams').innerHTML = TEAMS.map((tm, t) => {
+    const members = log.filter((e) => e.team === t);
+    const items = members.map((e) => `<li class="${e.no === lastNo ? 'new' : ''}">${e.name ? esc(e.name) : '(未填姓名)'}</li>`).join('');
+    return `<div class="team" style="--tc:${tm.color}">
+      <img class="team-logo" src="${tm.logo}" alt="${tm.name}">
+      <h2><span>${tm.name}</span><small>${c[t]} 人</small></h2>
+      ${members.length ? `<ol>${items}</ol>` : '<p class="empty">還沒有人抽到這隊</p>'}
+    </div>`;
+  }).join('');
+}
+
+async function doDraw() {
+  if (drawBusy) return;
+  $('#drawMsg').textContent = '';
+  setBusy(true);
+  const name = $('#nameInput').value.trim();
+  $('#nameInput').value = '';
+
+  const startedAt = Date.now();
+  let timer = null, i = 0;
+  if (!reduceMotion) {
+    timer = setInterval(() => { setDrawMoon(TEAMS[i % 4].name, '抽籤中…', i % 4); i++; }, 70);
+  }
+
+  let entry = null;
+  try {
+    // 用交易讀「當下最新的名單」再決定隊伍,兩台電腦同時抽也不會撞到同一個號碼
+    const next = await Cloud.transact('draw', (cur) => {
+      const list = Array.isArray(cur) ? cur : [];
+      entry = { no: list.length + 1, name, team: pickTeam(list) };
+      return list.concat([entry]);
+    });
+    if (Array.isArray(next)) log = next;
+  } catch (e) {
+    console.error(e);
+    if (timer) clearInterval(timer);
+    setBusy(false);
+    setDrawMoon('抽籤', '按月亮或 Enter 抽隊伍', null);
+    $('#drawMsg').textContent = '這一抽沒有存進雲端,請再按一次';
+    $('#nameInput').value = name;
+    renderDraw();
+    return;
+  }
+
+  // 轉場至少跑滿 1 秒,網路快也不會一閃而過
+  const wait = reduceMotion ? 0 : Math.max(0, 1000 - (Date.now() - startedAt));
+  setTimeout(() => {
+    if (timer) clearInterval(timer);
+    lastNo = entry.no;
+    setDrawMoon(`${TEAMS[entry.team].emoji} ${TEAMS[entry.team].name}`, `第 ${entry.no} 位${name ? ':' + name : ''}`, entry.team);
+    pop($('#drawMoon'));
+    setBusy(false);
+    renderDraw();
+    $('#nameInput').focus();
+  }, wait);
+}
+
+$('#drawMoon').onclick = doDraw;
+$('#drawBtn').onclick = doDraw;
+$('#nameInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); doDraw(); } });
+
+$('#undoDraw').onclick = async () => {
+  if (drawBusy || !log.length) return;
+  const last = log[log.length - 1];
+  setBusy(true);
+  try {
+    const next = await Cloud.transact('draw', (cur) => (Array.isArray(cur) ? cur : []).slice(0, -1));
+    if (Array.isArray(next)) log = next;
+  } catch (e) {
+    console.error(e);
+    setBusy(false);
+    $('#drawMsg').textContent = '撤銷沒有存進雲端,請再試一次';
+    return;
+  }
+  lastNo = null;
+  setDrawMoon('抽籤', `已撤銷第 ${last.no} 位,可以重新抽`, null);
+  setBusy(false);
+  renderDraw();
+};
+
+$('#resetDraw').onclick = async () => {
+  if (drawBusy) return;
+  if (log.length && !(await askConfirm('確定要清除所有抽籤結果並重新開始嗎?(兩台電腦都會一起清掉)', '全部重抽'))) return;
+  setBusy(true);
+  try { await Cloud.write('draw', []); log = []; } catch (e) { console.error(e); }
+  lastNo = null;
+  setDrawMoon('抽籤', '按月亮或 Enter 抽隊伍', null);
+  setBusy(false);
+  renderDraw();
+};
+
+/* ---------- 雲端 ---------- */
+Cloud.bindBadge($('#statusBadge'));
+Cloud.onError((msg) => { $('#drawMsg').textContent = msg; });
+Cloud.watch('draw', (v) => {
+  log = Array.isArray(v) ? v : [];
+  if (log.length && lastNo !== null && !log.some((e) => e.no === lastNo)) lastNo = null;
+  renderDraw();
+});
+renderDraw();
+Cloud.init();
+</script>
+</body>
+</html>

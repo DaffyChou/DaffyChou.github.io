@@ -1,0 +1,59 @@
+/* 中秋活動共用樣式：色彩 token、按鈕、版心、連線狀態、確認對話框
+   統一淺色，不跟隨系統深色模式（投影用，畫面要可預期） */
+:root{
+  color-scheme:light;
+  --bg:#EEF1F8; --panel:#FFFFFF; --ink:#1B2A4A; --muted:#5A6785; --line:#D5DBE8;
+  --moon:#F2D27A; --moon-hi:#FFF4C9; --moon-lo:#D9A93F; --moon-ink:#3A2A08; --glow:rgba(242,210,122,.45);
+  --t0:#E88AA6; --t1:#9C8CE0; --t2:#4FAE7B; --t3:#E9A23B; --cell-ink:#1B1B2F;
+  --ok:#2F7D5B; --warn:#9A6B12; --danger:#C2413B; --scrim:rgba(27,42,74,.55);
+  --serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --wrap:1100px; /* 各頁可覆寫版心寬度 */
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.6; min-height:100vh; overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--moon-lo); outline-offset:3px}
+[hidden]{display:none !important}
+
+header{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem; max-width:var(--wrap); margin:0 auto; padding:1.25rem 1.5rem .5rem}
+h1{font-family:var(--serif); font-weight:900; font-size:clamp(1.5rem,3vw,2.1rem); margin:0; letter-spacing:.04em}
+main{max-width:var(--wrap); margin:0 auto; padding:1rem 1.5rem 3rem}
+
+.btn{border:1px solid var(--line); background:var(--panel); padding:.5rem 1rem; border-radius:10px; cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--muted)}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+.btn.danger{color:var(--danger)}
+.btn.primary{background:var(--moon); color:var(--moon-ink); border-color:var(--moon-lo); font-weight:700}
+.muted{color:var(--muted)}
+.row{display:flex; flex-wrap:wrap; gap:.6rem; align-items:center}
+.msg{min-height:1.5rem; color:var(--danger); font-weight:500}
+
+/* 回首頁 */
+.home-link{color:var(--muted); text-decoration:none; font-size:.95rem}
+.home-link:hover{color:var(--ink); text-decoration:underline}
+
+/* 連線狀態徽章 */
+.status{
+  display:inline-flex; align-items:center; gap:.45rem; white-space:nowrap;
+  border:1px solid var(--line); background:var(--panel); border-radius:999px;
+  padding:.25rem .8rem; font-size:.9rem; color:var(--muted);
+}
+.status::before{content:''; width:.55rem; height:.55rem; border-radius:50%; background:currentColor; flex:none}
+.status[data-state="cloud"]{color:var(--ok); border-color:color-mix(in srgb, var(--ok) 35%, var(--line))}
+.status[data-state="local"]{color:var(--warn); border-color:color-mix(in srgb, var(--warn) 35%, var(--line))}
+.status[data-state="error"]{color:var(--danger); border-color:color-mix(in srgb, var(--danger) 40%, var(--line))}
+.status[data-state="loading"]::before{animation:blink 1s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+
+/* 強調動畫 */
+.pop{animation:pop .45s ease}
+@keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.06)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){ .pop{animation:none} .status[data-state="loading"]::before{animation:none} }
+
+/* 確認對話框（askConfirm 用） */
+.overlay{position:fixed; inset:0; background:var(--scrim); display:flex; align-items:center; justify-content:center; padding:1rem; z-index:10}
+#confirmBox{z-index:20}
+.dialog.confirm{background:var(--panel); border-radius:18px; padding:1.4rem 1.6rem; width:min(460px,100%); border-top:8px solid var(--moon)}
+.confirm-msg{font-size:1.2rem; font-weight:700; margin:0 0 1.2rem}
