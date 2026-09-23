@@ -2546,6 +2546,8 @@ table.alert-table tr:last-child td { border-bottom: none; }
 }
 .zsp-link-btn.is-custom { background: transparent; border: 1px solid var(--k-4a5568); color: var(--k-9aa5b8); }
 .zsp-link-btn.is-unavail { opacity: 0.45; cursor: not-allowed; border-style: dashed; }
+.zone-speed-modal .zsp-card.is-unavail .zsp-card-head { opacity: 0.55; }
+.zone-speed-modal .zsp-card.is-unavail .zsp-switch { pointer-events: none; }
 .zsp-src { font-size: 11.5px; color: var(--k-7c8a9e); line-height: 1.5; margin-top: 4px; }
 .zsp-src.is-warn { color: var(--k-f5b753); }
 .zsp-cond { margin: 6px 0; font-size: 13px; color: var(--k-c4cdda); }
@@ -6335,9 +6337,9 @@ function saveThresholds() {
  *     arrive:  { enabled, nm },             到達提醒（0=跨入邊界當下；>0=外側 N NM 提前預告）
  *     depart:  { enabled, nm },             離開提醒（0=跨出邊界當下；>0=內側 N NM 提前預告）
  *     speed:   {                            各空間帶船速門檻（SOG）；不存在=未設定船速
- *       approach:{ enabled, bufferNm(null=連動到達距離), up, down, max:{w,c}, min:{w,c}, dur:{w,c} },
+ *       approach:{ enabled, bufferNm(恆為 null＝強制連動到達提醒距離), up, down, max:{w,c}, min:{w,c}, dur:{w,c} },
  *       inside:  { enabled,                 up, down, max:{w,c}, min:{w,c}, dur:{w,c} },
- *       preExit: { enabled, bufferNm(null=連動離開距離), up, down, max:{w,c}, min:{w,c}, dur:{w,c} },
+ *       preExit: { enabled, bufferNm(恆為 null＝強制連動離開提醒距離), up, down, max:{w,c}, min:{w,c}, dur:{w,c} },
  *       postExit:{ enabled, bandNm, cutoffNm, up, down, max:{w,c}, min:{w,c}, dur:{w,c} }
  *     }
  * } }
@@ -6385,7 +6387,7 @@ function normZoneSpeedBand(o, kind) {
     dur: { w: _zioNum(o.dur && o.dur.w, d.dur.w),  c: _zioNum(o.dur && o.dur.c, d.dur.c) },
   };
   if (kind === "approach" || kind === "preExit") {
-    r.bufferNm = (o.bufferNm === null) ? null : _zioNum(o.bufferNm, d.bufferNm);
+    r.bufferNm = null;   // 2026-09-23 強制連動：接近帶＝到達提醒距離、離開前帶＝離開提醒距離，不再允許自訂（舊資料的自訂值一律忽略）
   }
   if (kind === "postExit") {
     r.bandNm   = _zioNum(o.bandNm, d.bandNm);
@@ -13848,7 +13850,8 @@ function wireZoneIoFences(root) {
 /* ─────────────────────────────────────────────────────────────────
  * 船速監控（SOG）設定彈窗 #zone-speed-modal
  *   四張手風琴卡片（接近時 / 區域內 / 離開前 / 離開後），句子式門檻，
- *   接近↔到達提醒距離、離開前↔離開提醒距離可連動或自訂。
+ *   接近帶距離＝到達提醒距離、離開前帶距離＝離開提醒距離（強制連動，2026-09-23）：
+ *   同一條線只產生一筆事件；提醒未啟用或為 0 NM 時，對應的帶不可啟用。
  *   本彈窗僅負責 UI 呈現、互動與設定持久化；不涉判定 / 立案 / 通知。
  * ───────────────────────────────────────────────────────────────── */
 let _zoneSpeedModalRef = null;   // { primaryId, refresh(side) }，供清單修改提醒距離時同步
@@ -13878,7 +13881,6 @@ function openZoneSpeedModal(zoneIds) {
   const st = normZoneSpeed(primaryCfg.speed
     ? JSON.parse(JSON.stringify(primaryCfg.speed))
     : { approach: {}, inside: {}, preExit: {}, postExit: {} });
-  const lastBuf = { approach: null, preExit: null };   // 解除連動時保留的最後顯示值
 
   // ── 連動來源（以主圍籬的到達 / 離開提醒為準）──
   const sideOf   = kind => (kind === "approach" ? "arrive" : "depart");
@@ -13887,12 +13889,10 @@ function openZoneSpeedModal(zoneIds) {
   const srcAvail = side => { const r = sideCfg(side); return r.enabled && r.nm > 0; };
 
   const linkedTxt = (side, n) => side === "arrive"
-    ? `🔗 距離來源：本圍籬「到達提醒」目前設定的 ${n} 海浬。修改到達提醒距離時，此處同步更新；點按鈕解除連動後可自行輸入，兩者互不影響。`
-    : `🔗 距離來源：本圍籬「離開提醒」目前設定的 ${n} 海浬（即「離開前 ${n} 海浬預告」的同一條內側界線）。修改離開提醒距離時，此處同步更新；點按鈕解除連動後可自行輸入，兩者互不影響。`;
-  const releasedTxt = (side, n) =>
-    `⛓ 已解除連動：此距離為自訂值，與「${remOf(side)}」的距離互相獨立，修改提醒不會影響此處。點按鈕可恢復連動（將改回提醒距離的 ${n} 海浬）。`;
+    ? `🔗 與「到達提醒」同一條線（${n} 海浬）：船跨過到達線即開始比對船速，到達提醒與超速記在同一筆事件。要改距離請於清單修改到達提醒。`
+    : `🔗 與「離開提醒」同一條線（內側 ${n} 海浬）：船進入離開預告帶即開始比對船速，離開提醒與超速記在同一筆事件。要改距離請於清單修改離開提醒。`;
   const unavailTxt = side =>
-    `${remOf(side)}目前為跨界即通知（0 NM）或未啟用，距離已改為自訂。`;
+    `${remOf(side)}未啟用或為跨界即通知（0 NM），此帶沒有距離線可用，暫不可啟用；請先於清單啟用${remOf(side)}並設定距離。`;
 
   // 名稱 tag
   const tags = zoneIds.map(id => {
@@ -13918,7 +13918,6 @@ function openZoneSpeedModal(zoneIds) {
     return `
       <div class="zsp-space">
         ${sentence}
-        <button type="button" class="zsp-link-btn"></button>
         <div class="zsp-src"></div>
       </div>`;
   };
@@ -13966,7 +13965,7 @@ function openZoneSpeedModal(zoneIds) {
       <button type="button" class="modal-close" data-zsp-close>×</button>
       <h3>船速監控（SOG） <span class="en">/ Zone Speed</span></h3>
       <div class="zsp-tags">${tags}</div>
-      <div class="zsp-hint">純到離通知請於清單的「到達提醒／離開提醒」設定；此處僅設定各空間帶的船速門檻。各帶獨立啟用，可多帶並存。</div>
+      <div class="zsp-hint">純到離通知請於清單的「到達提醒／離開提醒」設定；此處僅設定各空間帶的船速門檻。「接近時」與到達提醒、「離開前」與離開提醒共用同一條距離線（不可分開設定），同一條線上的到達／離開與超速記為同一筆事件；「區域內」「離開後」為獨立的帶。各帶可獨立啟用。</div>
       ${ZONE_SPEED_BANDS.map(cardHtml).join("")}
       <div class="modal-actions">
         <button type="button" class="trans-btn secondary" data-zsp-close>取消 / Cancel</button>
@@ -13982,37 +13981,26 @@ function openZoneSpeedModal(zoneIds) {
     if (kind !== "approach" && kind !== "preExit") return;
     const card = cardOf(kind);
     const inp = card.querySelector(".zsp-buffer");
-    const btn = card.querySelector(".zsp-link-btn");
     const srcEl = card.querySelector(".zsp-src");
-    if (!inp || !btn || !srcEl) return;
+    if (!inp || !srcEl) return;
     const side = sideOf(kind);
     const band = st[kind];
     const avail = srcAvail(side);
     const src = sideCfg(side);
-    let linked = band.bufferNm === null;
-    if (linked && !avail) {   // §4-3.3：來源不可用 → 自動轉自訂（保留最後顯示值）
-      linked = false;
-      band.bufferNm = (lastBuf[kind] != null) ? lastBuf[kind] : (src.nm > 0 ? src.nm : 3);
-    }
-    if (linked) {
-      inp.value = src.nm; inp.disabled = true; lastBuf[kind] = src.nm;
-      btn.className = "zsp-link-btn is-linked"; btn.disabled = false;
-      btn.textContent = side === "arrive" ? "🔗 連動到達提醒距離" : "🔗 連動離開提醒距離";
+    band.bufferNm = null;                 // 強制連動：永遠跟隨提醒距離
+    inp.disabled = true;
+    const cb = card.querySelector(".zsp-enable");
+    if (avail) {
+      inp.value = src.nm;
+      card.classList.remove("is-unavail");
+      if (cb) cb.disabled = false;
       srcEl.className = "zsp-src"; srcEl.textContent = linkedTxt(side, src.nm);
-    } else if (!avail) {
-      inp.disabled = false;
-      if (band.bufferNm != null) inp.value = band.bufferNm;
-      lastBuf[kind] = parseFloat(inp.value) || 0;
-      btn.className = "zsp-link-btn is-unavail"; btn.disabled = true;
-      btn.textContent = "🔗 連動" + remOf(side) + "距離";
-      srcEl.className = "zsp-src is-warn"; srcEl.textContent = unavailTxt(side);
     } else {
-      inp.disabled = false;
-      if (band.bufferNm != null) inp.value = band.bufferNm;
-      lastBuf[kind] = parseFloat(inp.value) || 0;
-      btn.className = "zsp-link-btn is-custom"; btn.disabled = false;
-      btn.textContent = "⛓ 已解除連動（自訂）";
-      srcEl.className = "zsp-src"; srcEl.textContent = releasedTxt(side, src.nm);
+      inp.value = "";
+      card.classList.add("is-unavail");
+      if (band.enabled) setEnabled(kind, false);   // 沒有距離線 → 此帶不可啟用
+      if (cb) cb.disabled = true;
+      srcEl.className = "zsp-src is-warn"; srcEl.textContent = unavailTxt(side);
     }
   }
   function updateSummary(kind) {
@@ -14021,6 +14009,7 @@ function openZoneSpeedModal(zoneIds) {
     if (s) s.textContent = _zsBandSummary(st[kind]);
   }
   function setEnabled(kind, on) {
+    if (on && (kind === "approach" || kind === "preExit") && !srcAvail(sideOf(kind))) on = false;   // 提醒未啟用 → 不可開
     st[kind].enabled = on;
     const card = cardOf(kind);
     card.classList.toggle("is-open", on);
@@ -14066,25 +14055,7 @@ function openZoneSpeedModal(zoneIds) {
     });
     // 空間帶距離
     if (kind === "approach" || kind === "preExit") {
-      const inp = card.querySelector(".zsp-buffer");
-      const btn = card.querySelector(".zsp-link-btn");
-      inp.addEventListener("input", () => {
-        if (inp.disabled) return;
-        const v = parseFloat(inp.value);
-        band.bufferNm = isNaN(v) ? 0 : v;
-        lastBuf[kind] = band.bufferNm;
-      });
-      btn.addEventListener("click", () => {
-        const side = sideOf(kind);
-        if (btn.classList.contains("is-unavail")) return;
-        if (band.bufferNm === null) {                 // 連動 → 自訂
-          band.bufferNm = sideCfg(side).nm;
-        } else if (srcAvail(side)) {                  // 自訂 → 恢復連動（改回來源值）
-          band.bufferNm = null;
-        }
-        refreshBuffer(kind);
-      });
-      refreshBuffer(kind);
+      refreshBuffer(kind);   // 強制連動：距離欄唯讀、無解除按鈕
     }
     if (kind === "postExit") {
       const bandInp = card.querySelector(".zsp-band"), cutInp = card.querySelector(".zsp-cutoff");
@@ -14117,6 +14088,7 @@ function openZoneSpeedModal(zoneIds) {
     const enabledBands = ZONE_SPEED_BANDS.filter(k => st[k].enabled);
     enabledBands.forEach(kind => {
       const b = st[kind];
+      if ((kind === "approach" || kind === "preExit") && !srcAvail(sideOf(kind))) { showErr(kind, `此帶與${remOf(sideOf(kind))}同一條線；請先於清單啟用${remOf(sideOf(kind))}並設定距離 > 0。`); ok = false; return; }
       if (!b.up && !b.down) { showErr(kind, "請至少勾選一項監控條件（太快 / 太慢）。"); ok = false; return; }
       if (b.up) {
         if (b.max.w == null || b.max.c == null) { showErr(kind, "「太快」的警告 / 嚴重船速皆為必填。"); ok = false; return; }
