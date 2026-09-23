@@ -4836,9 +4836,17 @@ table.alert-table th input#ev-selall { accent-color: var(--k-4a9eff); cursor: po
 <script>
 /* ─── 版本旗標（2026-09-17 customer-build）────────────────────────────
  *   merged（內部）＝ false；final（客戶版）由 build_final.py 產出時改為 true。
- *   客戶版關閉：海氣象預警、主機異常兩個維度，以及全球風險區唯讀圖層；其餘規則兩版共用。 */
+ *   客戶版關閉：海氣象預警、主機異常兩個維度、全球風險區唯讀圖層，以及
+ *   「風險區清單」頁（側欄入口＋#/risk-zones 路由）；其餘規則兩版共用。 */
 window.CUSTOMER_BUILD = /*@CUSTOMER_BUILD@*/false;
 window.INTERNAL_ONLY_DIMS = ["sea", "engine"];
+/* ─── 客戶版隱藏「風險區清單」入口（2026-09-23）──────────────────────
+ *   本 script 位在 <aside> 之後，DOM 已可取得；直接 remove 而非 display:none，
+ *   客戶端不留殘節點。路由擋門另見 route() 的 #/risk-zones 分支。 */
+if (window.CUSTOMER_BUILD) {
+  const _rzNav = document.querySelector('nav a[data-route="risk-zones"]');
+  if (_rzNav) _rzNav.remove();
+}
 /* ─── 一次性重置示範資料（2026-09-16 使用者驗收前）──────────────────
  *   清掉本瀏覽器內所有 slab_va_* 的歷程與設定（變更紀錄、單船／時效覆寫、全船隊預設、圍籬設定、
  *   代理授權、事件、示範錨泊資料…），讓人工測試從乾淨狀態開始；只執行一次（以旗標記錄）。
@@ -6048,6 +6056,14 @@ function route() {
     setMainMode("th-mode");
     renderThresholds(); navHighlight("thresholds");
   } else if (h === "#/risk-zones") {
+    /* 客戶版不開放風險區清單頁（2026-09-23）：直接導回船隊監控，網址一併正規化。
+     *   replaceState 在 file:// 下可能被擋，包 try／catch；失敗也只是網址留著，畫面仍是船隊監控。 */
+    if (window.CUSTOMER_BUILD) {
+      try { history.replaceState(null, "", "#/fleet"); } catch (e) {}
+      setMainMode("fleet-mode");
+      renderFleet(); navHighlight("fleet");
+      return;
+    }
     setMainMode("");
     renderRiskZoneCatalog(); navHighlight("risk-zones");
   } else {
@@ -9837,8 +9853,12 @@ function injectRiskTogglePanel(mapWrap) {
     { label: "合規／航行注意 / Compliance",    sems: ["compliance", "advisory"] },
   ];
   const rows = SEM_GROUPS.map(g => {
-    const cats = window.RISK_ZONE_CATEGORIES.filter(c => g.sems.includes(c.semantic || "risk"));
-    if (!cats.length) return "";
+    let cats = window.RISK_ZONE_CATEGORIES.filter(c => g.sems.includes(c.semantic || "risk"));
+    /* 客戶版隱藏零筆類別（2026-09-23）：唯讀全球風險區不載入，且 4 筆 NAVTEX 區都是 editable
+     *   → 由 zoneLayerKey 歸到「電子圍籬」桶，因此「軍演／臨時禁航區」恆為 0，留著只會讓人
+     *   以為資料漏了。內部版維持全列顯示，方便確認 risk-zones-global.js 有沒有載進來。 */
+    if (window.CUSTOMER_BUILD) cats = cats.filter(c => (buckets[c.key] || 0) > 0);
+    if (!cats.length) return "";   // 整組都空 → 連分節標題一起不輸出
     return `<div class="rt-section-divider">${g.label}</div>` + cats.map(rowFor).join("");
   }).join("");
   /* 使用者自訂電子圍籬：與上方系統匯入的唯讀風險區分開一節，
@@ -14794,7 +14814,7 @@ function applyBatchChanges() {
       const imp = fleetImpactSummary(i.dim, seg);
       lines.push(`・${getDimDisplayMeta(i.dim).label}：W ${fmtVal(i.dim, cur?.warning)} → ${fmtVal(i.dim, i.w)}、C ${fmtVal(i.dim, cur?.critical)} → ${fmtVal(i.dim, i.c)}${i.isClear ? "（清除，回上一層）" : ""}\n　影響 ${imp.affected} 艘${seg !== "all" ? `（目前處於${segLabel} ${imp.inSeg} 艘）` : ""}；${imp.shielded} 艘有單船／時效／區域覆寫，不受影響`);
     });
-    tail = "\n變更於下一輪資料週期生效；有覆寫的船不會跟著改，請由該船監管人員（或其代理人）自行「復原」；主管不會、也不能覆蓋組員的設定。";
+    tail = "\n生效時機：正式環境於下一輪資料週期（AIS 更新）批次重算生效，不逐筆即時重算；本 Demo 為便於展示，套用後立即重算。有覆寫的船不會跟著改，請由該船監管人員（或其代理人）自行「復原」；主管不會、也不能覆蓋組員的設定。";
   } else {
     const targets = _batchScope === "my" ? VESSELS.filter(v => v.manager === _currentUser)
                   : _batchScope === "byMgr" ? VESSELS.filter(v => v.manager === _batchScopeManager)
@@ -14803,7 +14823,7 @@ function applyBatchChanges() {
     const who = _batchScope === "byMgr" ? `「${_batchScopeManager}」船隊` : (_batchScope === "my" ? "我的全部船" : (targets[0]?.vessel_name || "個別船舶"));
     head = `即將對 ${who}（${targets.length} 艘）逐船寫入單船覆寫（L2）· ${segLabel}\n`;
     items.forEach(i => lines.push(`・${getDimDisplayMeta(i.dim).label}：W ${fmtVal(i.dim, i.w)}、C ${fmtVal(i.dim, i.c)}${i.isClear ? "（清除該航段格）" : ""}`));
-    tail = "\n注意：這些船之後不再隨全船隊預設變動；要回到預設請用「清除」。";
+    tail = "\n注意：這些船之後不再隨全船隊預設變動；要回到預設請用「清除」。\n生效時機：正式環境於下一輪資料週期生效；本 Demo 套用後立即重算。";
   }
   if (!confirm(head + lines.join("\n") + "\n" + tail + "\n\n確認套用？")) return;
   rows.forEach(row => {
@@ -14838,7 +14858,7 @@ function applyVesselChanges() {
     const durTxt = (i.wd != null || i.cd != null || cur.warningDuration != null || cur.criticalDuration != null) ? `、持續 W ${cur.warningDuration ?? "沿用"}→${i.wd ?? "沿用"} 分／C ${cur.criticalDuration ?? "沿用"}→${i.cd ?? "沿用"} 分` : "";
     return `・${getDimDisplayMeta(i.dim).label}：W ${fmtVal(i.dim, cur.warning)} → ${fmtVal(i.dim, i.w)}、C ${fmtVal(i.dim, cur.critical)} → ${fmtVal(i.dim, i.c)}${durTxt}${i.isClear ? "（清除，回上一層）" : ""}`;
   });
-  if (!confirm(`即將寫入「${v.vessel_name}」單船覆寫（L2）· ${segLabel}\n${lines.join("\n")}\n\n影響 1 艘。此船之後不再隨全船隊預設變動；要回到預設請按「復原」。\n\n確認儲存？`)) return;
+  if (!confirm(`即將寫入「${v.vessel_name}」單船覆寫（L2）· ${segLabel}\n${lines.join("\n")}\n\n影響 1 艘。此船之後不再隨全船隊預設變動；要回到預設請按「復原」。\n生效時機：正式環境於下一輪資料週期生效；本 Demo 套用後立即重算。\n\n確認儲存？`)) return;
   items.forEach(i => {
     const cur = getVesselOverrideRaw(v.vessel_id, i.dim, seg) || {};
     setVesselOverride(v.vessel_id, i.dim, i.w, i.c, seg, { warningDuration: i.wd, criticalDuration: i.cd });
@@ -15920,7 +15940,7 @@ function renderThresholds() {
       <summary>使用說明 <span class="en">/ Help</span>　<span class="th-help-hint">點此展開</span></summary>
       <div class="th-help-body">
     <div class="th-help-section" style="color:var(--k-9aa5b8)">
-      閾值即警示觸發條件：達到 <span style="color:var(--k-f5b753)">Warning</span> 門檻時建立警示事件、進入事件處理流程；達到 <span style="color:var(--k-ff8a8a)">Critical</span> 門檻時升級。儲存後立即重算所有船舶並自動補立 / 升級 / 解除對應事件。
+      閾值即警示觸發條件：達到 <span style="color:var(--k-f5b753)">Warning</span> 門檻時建立警示事件、進入事件處理流程；達到 <span style="color:var(--k-ff8a8a)">Critical</span> 門檻時升級。套用後由系統重算受影響船舶並自動補立 / 升級 / 解除對應事件（正式環境於下一輪資料週期批次生效；Demo 為即時）。
       可設定的維度為<b style="color:var(--k-c8d4e0)">航線偏移</b>（NM）、<b style="color:var(--k-c8d4e0)">速度異常</b>（超速 %）、${window.CUSTOMER_BUILD ? "" : `<b style="color:var(--k-c8d4e0)">海氣象預警</b>（海況指數 0–1）、<b style="color:var(--k-c8d4e0)">主機異常</b>（異常分數 0–100）、`}<b style="color:var(--k-c8d4e0)">漂航圈半徑</b>（NM）、<b style="color:var(--k-c8d4e0)">到離港</b>／<b style="color:var(--k-c8d4e0)">到離區域</b>（距離 NM）；
       速度異常採超過配速比例判定；船舶進入港區後自動暫停航線偏移監控。
     </div>
@@ -15928,7 +15948,7 @@ function renderThresholds() {
           <b>閾值 ＝ 警示觸發條件</b>
           <ul>
             <li>每個維度設定 <b style="color:var(--k-f5b753)">Warning（W）</b> 與 <b style="color:var(--k-ff8a8a)">Critical（C）</b> 兩個門檻。船舶實測值達到門檻時，系統自動建立事件並進入事件處理流程。</li>
-            <li>儲存後立即重算全船隊：超過門檻 → 自動<b>新立案</b>；數值改善回正常 → 事件標記【警報已解除】。</li>
+            <li>套用後重算受影響船舶：超過門檻 → 自動<b>新立案</b>；數值改善回正常 → 事件標記【警報已解除】。<b>生效時機</b>：正式環境不逐筆即時重算，變更於下一輪資料週期（AIS 更新）批次生效，同一輪內多筆修改一次結算；本 Demo 為便於展示，套用後立即重算。</li>
             <li>事件可在 <a href="#/events" style="color:var(--k-4a9eff);text-decoration:none">事件處理</a> 頁面進行指派、備註、狀態流轉（新立案 → 處理中 → 已解決）。</li>
           </ul>
         </div>
@@ -15936,7 +15956,7 @@ function renderThresholds() {
         <div class="th-help-section">
           <b>兩種設定模式</b>
           <ul>
-            <li><b>分航段集體設定</b>：選航段（海上 / 錨泊 / 全航段）＋ 套用對象，多維度同時編輯，Enter 或 blur 自動儲存並套用到所選船隊範圍。</li>
+            <li><b>分航段集體設定</b>：選航段（海上 / 錨泊 / 全航段）＋ 套用對象，多維度同時編輯，修改後列標黃（未儲存），按「套用」並確認影響摘要後才寫入所選船隊範圍；不會自動儲存。</li>
             <li><b>單船設定</b>：選一艘船逐維度細調；已調整的維度標 ★ 並可個別復原；右側即時顯示目前實測值與等級，以及是否已有進行中事件（<span class="th-ev-badge" style="font-size:13px;display:inline-flex;gap:3px">● 新立案</span>）。</li>
           </ul>
         </div>
