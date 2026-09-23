@@ -1508,7 +1508,7 @@
             if (link) {
                 const dr = getCurrentDateRange();
                 const dp = dr.start ? `&startDate=${dr.start}&endDate=${dr.end}` : '';
-                link.href = `CSE-BunkerTracking-Outlier Detection.html?vesselId=${p.imo}`
+                link.href = `CSE-BunkerTracking-Outlier-Detection.html?vesselId=${p.imo}`
                           + `&outlierType=${oType}&outlierValue=${encodeURIComponent(p.y)}`
                           + `&anomalyPeriod=${encodeURIComponent(p.ym)}&isHigh=${isHigh ? 1 : 0}&from=dashboard${dp}`;
             }
@@ -1918,7 +1918,7 @@
                                     if (odLink && si) {
                                         const dr = getCurrentDateRange();
                                         const dateParams = dr.start ? `&startDate=${dr.start}&endDate=${dr.end}` : '';
-                                        odLink.href = `CSE-BunkerTracking-Outlier Detection.html?vesselId=ship_${si.idx}&outlierType=${_sc.type}&outlierValue=${encodeURIComponent(this.y)}&anomalyPeriod=${encodeURIComponent(anomalyPeriod)}&isHigh=${isHigh ? 1 : 0}${dateParams}`;
+                                        odLink.href = `CSE-BunkerTracking-Outlier-Detection.html?vesselId=ship_${si.idx}&outlierType=${_sc.type}&outlierValue=${encodeURIComponent(this.y)}&anomalyPeriod=${encodeURIComponent(anomalyPeriod)}&isHigh=${isHigh ? 1 : 0}${dateParams}`;
                                     }
                                     document.getElementById('outlier-detail').classList.remove('hidden');
                                 }
