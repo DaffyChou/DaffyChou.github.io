@@ -11,7 +11,6 @@
 <style>
 :root{ --wrap:1280px }
 
-.head-right{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; justify-content:flex-end}
 .head-left{display:flex; flex-direction:column}
 .tabs{display:flex; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:4px}
 .tabs button{border:0; background:transparent; padding:.5rem 1.2rem; border-radius:999px; cursor:pointer; font-weight:500}
@@ -93,12 +92,9 @@ label.btn{display:inline-block}
     <h1>⭕ 中秋翻牌圈叉搶答</h1>
     <a class="home-link" href="index.html">← 中秋活動</a>
   </div>
-  <div class="head-right">
-    <span class="status" id="statusBadge" data-state="loading">連線中…</span>
-    <div class="tabs" role="tablist" aria-label="切換畫面">
-      <button role="tab" id="tab-game" aria-controls="panel-game" aria-selected="true">比賽畫面</button>
-      <button role="tab" id="tab-admin" aria-controls="panel-admin" aria-selected="false">題目後台</button>
-    </div>
+  <div class="tabs" role="tablist" aria-label="切換畫面">
+    <button role="tab" id="tab-game" aria-controls="panel-game" aria-selected="true">比賽畫面</button>
+    <button role="tab" id="tab-admin" aria-controls="panel-admin" aria-selected="false">題目後台</button>
   </div>
 </header>
 
@@ -215,9 +211,8 @@ label.btn{display:inline-block}
     <div class="row" id="fixBtns" style="justify-content:flex-end"></div>
   </div>
 </div>
-<script src="firebase-config.js"></script>
 <script src="shared.js"></script>
-<script src="cloud.js"></script>
+<script src="store.js"></script>
 <script>
 const TEAMS = [
   { name: '玉兔隊', emoji: '🐇', color: 'var(--t0)' },
@@ -230,14 +225,13 @@ const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 function clone(o) { return JSON.parse(JSON.stringify(o)); }
 
-/* 全部狀態都來自雲端(離線時來自 localStorage),本機只留一份鏡像 */
+/* 全部狀態都存在 localStorage,畫面只留一份鏡像;開多個視窗會互相同步 */
 let bank = [];        // [{id, q, a}]
 let used = [];        // 已出過的題目 id
 let G = null;         // 棋盤
 let current = null;   // 投影中的題目 {cell, q, a, no, at, show}
 let editingId = null;
 let lastShownAt = null;
-let ready = false;
 
 /* ---------- 分頁 ---------- */
 function showTab(w) {
@@ -252,9 +246,7 @@ $('#tab-admin').onclick = () => showTab('admin');
 
 /* ---------- 題庫 ---------- */
 function storeInfoText() {
-  if (!ready) return '正在連線雲端…';
-  if (Cloud.online) return '題庫、抽籤、棋盤都存在雲端。任何一台電腦開同一個網址都會即時同步,不用匯出匯入。';
-  return '目前是離線模式,題庫只存在這台電腦的瀏覽器。同一台電腦開兩個視窗會自動同步;要跨電腦請填好 firebase-config.js,或用「匯出題目」與「匯入檔案」搬。';
+  return '題庫存在這台電腦的瀏覽器。同一台電腦開兩個視窗(一個投影、一個後台)會自動同步;換電腦或清掉瀏覽器資料就會不見,建議先用「匯出題目」留一份。';
 }
 
 let flashTimer = null;
@@ -267,11 +259,11 @@ function flash(t) {
 function setBank(items) {
   bank = items;
   renderAll();
-  Cloud.write('bank', items);
+  Store.write('bank', items);
 }
 function setUsed(ids) {
   used = ids;
-  Cloud.write('used', ids);
+  Store.write('used', ids);
 }
 
 function parseLines(text) {
@@ -345,9 +337,8 @@ function renderAdmin() {
   const usedSet = new Set(used);
   const usedCount = bank.filter((x) => usedSet.has(x.id)).length;
   $('#progressText').textContent = `已出 ${usedCount} / ${bank.length} 題`;
-  ['#addQ', '#bulkAppend', '#bulkReplace', '#clearAll'].forEach((s) => { $(s).disabled = !ready; });
   if (!bank.length) {
-    $('#qList').innerHTML = `<li class="empty-state">${ready ? '題庫還是空的,從左邊新增題目或批次匯入。' : '讀取中…'}</li>`;
+    $('#qList').innerHTML = '<li class="empty-state">題庫還是空的,從左邊新增題目或批次匯入。</li>';
     return;
   }
   $('#qList').innerHTML = bank.map((x, i) => {
@@ -362,10 +353,10 @@ function renderAdmin() {
       <div><div class="q">${esc(x.q)}${usedSet.has(x.id) ? '<span class="used">已出</span>' : ''}</div>
       <div class="a">答案:${x.a ? esc(x.a) : '(未設定)'}</div></div>
       <div class="qactions">
-        <button class="btn" data-act="up" ${i === 0 || !ready ? 'disabled' : ''} aria-label="上移">↑</button>
-        <button class="btn" data-act="down" ${i === bank.length - 1 || !ready ? 'disabled' : ''} aria-label="下移">↓</button>
-        <button class="btn" data-act="edit" ${!ready ? 'disabled' : ''}>編輯</button>
-        <button class="btn danger" data-act="del" ${!ready ? 'disabled' : ''}>刪除</button>
+        <button class="btn" data-act="up" ${i === 0 ? 'disabled' : ''} aria-label="上移">↑</button>
+        <button class="btn" data-act="down" ${i === bank.length - 1 ? 'disabled' : ''} aria-label="下移">↓</button>
+        <button class="btn" data-act="edit">編輯</button>
+        <button class="btn danger" data-act="del">刪除</button>
       </div>
     </div></li>`;
   }).join('');
@@ -381,7 +372,6 @@ function nextQuestion() {
   return { q: bank[idx].q, a: bank[idx].a, no: idx + 1 };
 }
 function renderBankInfo() {
-  if (!ready) { $('#bankInfo').textContent = '正在讀取題庫…'; return; }
   const usedSet = new Set(used);
   const left = bank.filter((x) => !usedSet.has(x.id)).length;
   $('#bankInfo').textContent = `題庫共 ${bank.length} 題,還有 ${left} 題沒出過`;
@@ -412,7 +402,7 @@ function normalizeGame(v) {
     tiebreak: v.tiebreak === 0 || v.tiebreak === 1 ? v.tiebreak : null,
   };
 }
-function saveGame(next) { G = next; Cloud.write('game', G); renderGame(); }
+function saveGame(next) { G = next; Store.write('game', G); renderGame(); }
 
 function result() {
   for (const l of LINES) {
@@ -439,9 +429,8 @@ function renderGame() {
   $('#first').innerHTML = [0, 1].map((s) => `<option value="${s}">${MARKS[s]} ${teamOf(s).name}</option>`).join('');
   $('#first').value = G.first;
   const lock = G.history.length > 0;
-  ['#teamA', '#teamB', '#first'].forEach((s) => { $(s).disabled = lock || !ready; });
-  $('#undoTtt').disabled = (!lock && G.tiebreak === null) || !ready;
-  $('#newTtt').disabled = !ready;
+  ['#teamA', '#teamB', '#first'].forEach((s) => { $(s).disabled = lock; });
+  $('#undoTtt').disabled = !lock && G.tiebreak === null;
 
   [0, 1].forEach((s) => {
     const el = $('#side' + s); const tm = teamOf(s);
@@ -454,7 +443,7 @@ function renderGame() {
 
   const winSet = new Set(r.state === 'win' ? r.line : []);
   $('#board').innerHTML = G.board.map((v, i) => {
-    if (v === null) return `<button class="sq" data-i="${i}" ${r.state !== 'play' || !ready ? 'disabled' : ''} aria-label="${i + 1} 號">${i + 1}</button>`;
+    if (v === null) return `<button class="sq" data-i="${i}" ${r.state !== 'play' ? 'disabled' : ''} aria-label="${i + 1} 號">${i + 1}</button>`;
     return `<button class="sq taken ${winSet.has(i) ? 'winline' : ''}" data-i="${i}" style="--tc:${teamOf(v).color}" title="點一下可人工修正" aria-label="${i + 1} 號,${teamOf(v).name},點一下可修正">${MARKS[v]}</button>`;
   }).join('');
 
@@ -499,10 +488,10 @@ function openFix(cell) {
   document.addEventListener('keydown', onKey, true);
 }
 
-/* ---------- 出題對話框(跟著雲端的 current 走,兩台電腦看到同一題) ---------- */
+/* ---------- 出題對話框(跟著 current 走,多個視窗看到同一題) ---------- */
 function openQuestion(cell) {
   const q = nextQuestion();
-  Cloud.write('current', { cell, q: q.q, a: q.a, no: q.no, at: Date.now(), show: false });
+  Store.write('current', { cell, q: q.q, a: q.a, no: q.no, at: Date.now(), show: false });
 }
 function renderDialog() {
   const box = $('#overlay');
@@ -539,14 +528,14 @@ $('#board').addEventListener('click', (e) => {
   if (G.board[i] !== null) { openFix(i); return; }
   openQuestion(i);
 });
-$('#showAns').onclick = () => { if (current) Cloud.write('current', { ...current, show: true }); };
+$('#showAns').onclick = () => { if (current) Store.write('current', { ...current, show: true }); };
 $('#nextQ').onclick = () => {
   if (!current) return;
   const q = nextQuestion();
-  Cloud.write('current', { cell: current.cell, q: q.q, a: q.a, no: q.no, at: Date.now(), show: false });
+  Store.write('current', { cell: current.cell, q: q.q, a: q.a, no: q.no, at: Date.now(), show: false });
 };
-$('#closeQ').onclick = () => Cloud.write('current', null);
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && current) Cloud.write('current', null); });
+$('#closeQ').onclick = () => Store.write('current', null);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && current) Store.write('current', null); });
 $('#claim').addEventListener('click', (e) => {
   const btn = e.target.closest('button[data-side]');
   if (!btn || !current) return;
@@ -558,7 +547,7 @@ $('#claim').addEventListener('click', (e) => {
     next.board[current.cell] = side;
     next.turn = 1 - next.turn;
   }
-  Cloud.write('current', null);
+  Store.write('current', null);
   saveGame(next);
 });
 
@@ -574,7 +563,7 @@ $('#undoTtt').onclick = () => {
   saveGame(next);
 };
 $('#newTtt').onclick = async () => {
-  if ((G.history.length || G.tiebreak !== null) && !(await askConfirm('確定要清空棋盤、重新開始本場嗎?(兩台電腦都會一起換)', '重新開始'))) return;
+  if ((G.history.length || G.tiebreak !== null) && !(await askConfirm('確定要清空棋盤、重新開始本場嗎?', '重新開始'))) return;
   saveGame(freshGame(G));
 };
 $('#round').onchange = (e) => { const n = clone(G); n.round = e.target.value; saveGame(n); };
@@ -629,6 +618,46 @@ const DEFAULT_BANK = [
   ['中秋節晚上的月亮是什麼月相?', '滿月'],
   ['請說出中秋節的另一個別稱(任一個即可)', '月夕、秋節、團圓節、拜月節等'],
   ['今年(2026 年)中秋節是國曆幾月幾日?', '9 月 25 日'],
+  ['北極熊的皮膚是什麼顏色', '黑色'],
+  ['越南中秋節相當於當地的什麼節', '兒童節'],
+  ['後羿射日的神話中，天空中同時出現了幾顆太陽', '十顆'],
+  ['「吳剛伐桂」中，吳剛在什麼宮受罰', '廣寒宮'],
+  ['「但願人長久，千里共嬋娟」詞牌名是什麼', '水調歌頭'],
+  ['生肉烤到產生誘人焦香與金黃色澤的化學反應，統稱為什麼？', '梅納反應'],
+  ['「松阪豬」是什麼部位？', '豬頸肉（臉頰與下巴連接脖子）'],
+  ['一個月三十天，哪天月亮最圓？', '農曆16號'],
+  ['月球上的引力大約是地球引力的幾分之幾？', '1/6'],
+  ['踏上月球的第二人叫什麼名子', '伯茲·艾德林（Buzz Aldrin）'],
+  ['請問鋁箔紙亮面和霧面，哪一面應該朝外？', '霧面'],
+  ['請現場唱出一句歌詞裡面包含「月亮」的歌？', ''],
+  ['跟兩位老闆自拍', ''],
+  ['說出三個同事的優點', ''],
+  ['跟主持人猜拳，贏了才得分', ''],
+  ['茂登碳中和環保有限公司總共幾個字', '11 個字'],
+  ['摯陞數位科技總共幾筆畫', '摯15陞10數15位7科9技7合計63 畫'],
+  ['摯陞跟茂登的統編，數字拆成個位數，累加總是多少', '9+0+0+5+8+6+0+9+5+0+9+5+0+1+1+9 = 67'],
+  ['不看你賺多少，只看你排多少，排越多繳越多。', '碳稅'],
+  ['高碳商品想進歐洲，要在邊境先「補票」，英文縮寫四個字母。', 'CBAM（碳邊境調整機制）'],
+  ['哪一種船最不怕碳稅？', '帆船，靠風就能走，一點碳都不排。'],
+  ['船一靠岸就插上電，引擎熄火不冒煙', '岸電'],
+  ['開得慢反而更環保，省油又少排碳。（打一航行方式）', '減速航行（Slow Steaming）'],
+  ['船兒每年領成績單，從 A 到 E 分五級，拿到 E 要檢討。（打一指標）', 'CII（碳強度指標）'],
+  ['海草、紅樹林和鹽沼幫忙存起來的碳，顏色像大海。（打一名詞）', '藍碳'],
+  ['自己的煙囪、買來的電、上下游供應鏈，碳排分三層算。（打一盤查分類）', '範疇一、二、三（Scope 1、2、3）'],
+  ['平常用來做肥料，味道很刺鼻，燒起來卻不排二氧化碳。（打一船用燃料）', '氨（阿摩尼亞）'],
+  ['計算貨櫃的單位，一個長度大約 20 呎。（打一英文縮寫）', 'TEU（20 呎標準貨櫃）'],
+  ['新船有 EEDI，舊船也要考這個設計能效指標。（打一英文縮寫）', 'EEXI（現有船舶能效指數）'],
+  ['吃完的柚子皮不丟掉，戴在頭上當帽子。（打一環保觀念）', '再利用（循環經濟）'],
+  ['月圓時海水漲得特別高，大船常挑這時候進出淺港。（打一海象名詞）', '大潮'],
+  ['大船中秋回港前，有位專家會先上船帶路，好讓船平安團圓。（打一職業）', '引水人（領港）'],
+  ['船和月亮有什麼共同點？', '都會漂，一個漂在海上，一個飄在天上。'],
+  ['沒有衛星的年代，船員抬頭看月亮和星星，手裡拿著它量角度找船位。（打一航海儀器）', '六分儀'],
+  ['中秋夜航行，船身左邊掛紅燈、右邊掛綠燈，跟月光互相輝映。（打一船上設備）', '舷燈（航行燈）'],
+  ['一顆月餅穿了三層外衣，吃完只剩一堆垃圾，碳足跡跟著變大。（打一現象）', '過度包裝'],
+  ['月餅禮盒從遠方漂洋過海來，一路上都在排碳。（打一環保名詞）', '食物里程'],
+  ['嫦娥在天上看得到每艘船，岸上的人要靠三個英文字母才看得到。（打一船舶系統）', 'AIS（船舶自動識別系統）'],
+  ['「舉頭望明月」（打一航海技術）', '天文航海'],
+  ['「江楓漁火對愁眠」（打一船舶種類）', '漁船'],
 ].map(([q, a], i) => ({ id: 's' + (i + 1), q, a }));
 
 G = freshGame(null);
@@ -637,25 +666,19 @@ renderGame();
 renderAll();
 renderNow();
 
-Cloud.bindBadge($('#statusBadge'));
-Cloud.onError(flash);
-Cloud.onStatus((s) => {
-  ready = s !== 'loading';
-  renderGame(); renderAll();
-});
-Cloud.watch('bank', (v) => {
+Store.onError(flash);
+Store.watch('bank', (v) => {
   bank = Array.isArray(v) ? v : [];
   if (editingId && !bank.some((x) => x.id === editingId)) editingId = null;
   renderAll();
 });
-Cloud.watch('used', (v) => { used = Array.isArray(v) ? v : []; renderAll(); });
-Cloud.watch('game', (v) => { G = normalizeGame(v); renderGame(); renderDialog(); });
-Cloud.watch('current', (v) => { current = v || null; renderDialog(); renderNow(); });
+Store.watch('used', (v) => { used = Array.isArray(v) ? v : []; renderAll(); });
+Store.watch('game', (v) => { G = normalizeGame(v); renderGame(); renderDialog(); });
+Store.watch('current', (v) => { current = v || null; renderDialog(); renderNow(); });
 
-Cloud.init().then(() => {
-  // 這間房還沒有題庫才塞預設題目;有人清空過(空陣列)就尊重他的清空
-  return Cloud.transact('bank', (cur) => (cur === null || cur === undefined ? DEFAULT_BANK : undefined));
-}).catch((e) => { console.error(e); flash('題庫初始化失敗,請重新整理'); });
+Store.init();
+// 這台電腦還沒有題庫才塞預設題目;自己清空過(空陣列)就尊重那個清空
+Store.transact('bank', (cur) => (cur === null || cur === undefined ? DEFAULT_BANK : undefined));
 </script>
 </body>
 </html>

@@ -8,97 +8,46 @@
 | STEP 2 | 實體三關卡、贏烤肉食材 | 線下進行，沒有頁面 |
 | STEP 3 | 翻牌圈叉搶答 | `tictactoe.html` |
 
-`index.html` 是導覽頁。
+`index.html` 是導覽頁。線上網址：<https://daffychou.github.io/demos/MidAutumn/>
 
 ## 檔案
 
 ```
-index.html           導覽頁
-draw.html            抽籤分隊
-tictactoe.html       翻牌圈叉搶答（含題目後台）
-shared.css           共用樣式（統一淺色）
-shared.js            共用工具函式
-cloud.js             雲端同步層
-firebase-config.js   ← 只有這一個檔要你填
-assets/              四張隊徽
+index.html          導覽頁
+draw.html           抽籤分隊
+tictactoe.html      翻牌圈叉搶答（含題目後台）
+shared.css          共用樣式（統一淺色）
+shared.js           共用工具函式
+store.js            本機儲存層（localStorage）
+question-bank.txt   題庫備份，52 題，可用後台「匯入檔案」載入
+assets/             四張隊徽
 ```
 
-## 設定 Firebase（跨電腦同步）
+## 資料存在哪
 
-沒設定也能用，只是資料只留在當下那台電腦。要「兩台電腦開同一個網址、資料互通」就要做這一段，約 3 分鐘。
+**存在當下這台電腦的瀏覽器裡（localStorage）**，沒有伺服器、沒有帳號、不用網路也能跑。
 
-### 1. 建專案
+| 項目 | localStorage key |
+| --- | --- |
+| 抽籤名單 | `mf-draw2` |
+| 題庫 | `mf-bank` |
+| 已出過的題目 | `mf-used` |
+| 棋盤 | `mf-ttt` |
+| 投影中的題目 | `mf-current` |
 
-到 <https://console.firebase.google.com> → 建立專案。免費的 Spark 方案就夠，不用綁信用卡。Google Analytics 可以關掉。
+同一台電腦開**多個視窗**會自動同步，所以可以一個視窗接投影、另一個視窗自己操作：在操作的視窗點格子出題，投影那個視窗會跳出同一題，按「顯示答案」兩邊一起顯示。
 
-### 2. 拿設定值
-
-專案設定（齒輪）→ 一般 → 你的應用程式 → 點 `</>`（網頁）→ 取個暱稱 → 註冊應用程式。
-
-畫面會給你一段 `firebaseConfig`，把六個值抄進 `firebase-config.js`：
-
-```js
-window.FIREBASE_CONFIG = {
-  apiKey: 'AIza...',
-  authDomain: '你的專案.firebaseapp.com',
-  projectId: '你的專案',
-  storageBucket: '你的專案.appspot.com',
-  messagingSenderId: '123456789',
-  appId: '1:123456789:web:abcdef',
-};
-```
-
-### 3. 建 Firestore
-
-建置 → Firestore Database → 建立資料庫 → 選離台灣近的區域（`asia-east1` 台灣）→ 先選「以正式版模式啟動」。
-
-### 4. 貼安全性規則
-
-Firestore Database → 規則，整段換成：
-
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /events/{room} {
-      // 活動期間開放，時間一到自動關閉，不用記得回來改
-      allow read, write: if request.time < timestamp.date(2026, 10, 15);
-    }
-  }
-}
-```
-
-按發布。
-
-**這條規則是全開的** —— 任何人只要知道你的 `projectId` 和房間名稱，就能讀寫這份資料。因為 repo 是公開的，`firebase-config.js` 裡的值等於公開（Firebase 的網頁設定值本來就不是密鑰，防護全靠規則）。所以：
-
-- 日期設在活動後幾天，過期後規則自動鎖死，不用記得回來關
-- 真的在意的話，活動結束直接把整個 Firebase 專案刪掉
-- 不要把這個專案拿來放其他資料
-
-### 5. 推上去測
-
-`git push` 之後開 <https://daffychou.github.io/demos/MidAutumn/>，右上角狀態燈變綠色「雲端同步中」就成功了。
-
-拿兩台電腦（或同一台開兩個瀏覽器視窗）開同一個網址，一邊抽籤，另一邊應該一秒內跟著跳。
+換電腦、換瀏覽器、清除瀏覽器資料，這些資料都會不見。**活動前先在題目後台按「匯出題目」存一份 txt**，就算資料掉了也能用「匯入檔案」救回來。
 
 ## 現場操作
 
-- **狀態燈**在三頁的右上角。綠色＝雲端同步中；黃色＝離線，只存這台電腦；紅色＝連線出問題，這時系統會自動改存本機讓活動繼續，但兩台電腦的資料會各走各的。
-- **兩台電腦的分工**：一台接投影、一台當主持人後台都可以。翻牌圈叉的出題視窗是同步的，主持人這邊點開題目，投影那台也會跟著跳出同一題，按「顯示答案」兩邊一起顯示。
-- **排練**：網址後面加 `?room=test`，例如 `tictactoe.html?room=test`，會開到另一間房，不會動到正式資料。排練完換回沒有參數的網址就好。
-- **備案**：題目後台的「匯出題目」會存成一個 txt，現場網路不通時至少題庫還在。
+- **抽籤**：按月亮或 Enter 抽一位，自動補進目前人數最少的隊伍。姓名可填可不填。可撤銷上一位，也可全部重抽。
+- **翻牌圈叉**：上方先選兩隊和先攻方（一旦下了第一步就鎖住，避免中途被改）。點空白格出題，答對那隊拿下該格。點**已標記**的格子可以人工改判或清除。九格滿了沒連線會出加賽題決勝負。
+- **題目後台**：新增、編輯、上下移動、刪除、批次匯入（每行一題，用 `|` 分隔題目和答案）。答案留白代表由主持人判定。
+- **重跑一輪**：後台「從頭重新出題」會把出題進度歸零，題庫不變。排練完用這個重置。
 
-## 資料長怎樣
+## 題庫
 
-Firestore 只有一份文件 `events/{room}`，五個欄位：
+內建 52 題，第一次開啟時自動載入。內容和 `question-bank.txt` 完全一致。
 
-| 欄位 | 內容 |
-| --- | --- |
-| `draw` | 抽籤名單 `[{no, name, team}]` |
-| `bank` | 題庫 `[{id, q, a}]` |
-| `used` | 已出過的題目 id |
-| `game` | 棋盤 `{round, teams, first, board, turn, history, tiebreak}` |
-| `current` | 投影中的題目 `{cell, q, a, no, at, show}`，沒開題目時是 `null` |
-
-寫入都是欄位級合併，所以一台在改題庫、另一台在下棋不會互蓋。抽籤用交易寫入，兩台同時抽也不會撞號碼。
+**已經開過這個網站的電腦不會自動更新題庫** —— 因為程式只在「題庫完全不存在」時才塞預設值，免得把你手動清空或修改過的結果蓋掉。要換成最新的 52 題，用後台的「匯入檔案」選 `question-bank.txt`，或「批次匯入」貼上內容後按「取代整個題庫」。

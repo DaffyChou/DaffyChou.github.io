@@ -29,18 +29,11 @@ a.card:hover{transform:translateY(-3px); box-shadow:0 10px 30px var(--glow)}
 .card .go{margin-top:auto; padding-top:.9rem; font-weight:700; color:var(--moon-lo)}
 .card.offsite .go{color:var(--muted); font-weight:500}
 @media (prefers-reduced-motion: reduce){ .card{transition:none} a.card:hover{transform:none} }
-
-.notes{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:1.2rem 1.5rem; margin-top:2rem}
-.notes h3{margin:0 0 .6rem; font-size:1.1rem}
-.notes ul{margin:0; padding-left:1.4rem}
-.notes li{margin-bottom:.4rem}
-.notes code{background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:0 .35rem; font-size:.9em}
 </style>
 </head>
 <body>
 <header>
   <h1>🌕 中秋活動</h1>
-  <span class="status" id="statusBadge" data-state="loading">連線中…</span>
 </header>
 <main>
   <div class="logos">
@@ -88,23 +81,6 @@ a.card:hover{transform:translateY(-3px); box-shadow:0 10px 30px var(--glow)}
       <div class="go">開啟比賽頁 →</div>
     </a>
   </div>
-
-  <div class="notes">
-    <h3>現場使用注意</h3>
-    <ul>
-      <li>抽籤結果、題庫、棋盤、投影中的題目<strong>全部存在雲端</strong>。兩台電腦開同一個網址就會即時同步,一台投影、一台當後台都可以。</li>
-      <li>右上角的狀態燈是綠色「雲端同步中」才代表有連上。如果是黃色「離線」或紅色,資料只會留在那台電腦。</li>
-      <li>網址後面加 <code>?room=test</code> 可以另開一間不干擾正式資料的房間,排練時用。</li>
-      <li>題目後台的「匯出題目」可以存一份文字檔留底,萬一現場網路不通也有備案。</li>
-    </ul>
-  </div>
 </main>
-<script src="firebase-config.js"></script>
-<script src="shared.js"></script>
-<script src="cloud.js"></script>
-<script>
-Cloud.bindBadge($('#statusBadge'));
-Cloud.init();
-</script>
 </body>
 </html>

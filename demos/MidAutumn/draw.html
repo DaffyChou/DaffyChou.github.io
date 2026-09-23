@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <style>
+:root{ --wrap:1280px }
+
 /* 月亮按鈕 */
 .moon{
   position:relative; width:min(70vw,300px); aspect-ratio:1; border-radius:50%; border:10px solid transparent; cursor:pointer; margin:0 auto;
@@ -29,10 +31,12 @@
 .moon-name{font-family:var(--serif); font-weight:900; font-size:clamp(1.5rem,4.2vw,2.4rem); display:block}
 @media (prefers-reduced-motion: reduce){ .moon{transition:none} }
 
-/* 抽籤區 */
-.head-right{display:flex; flex-direction:column; align-items:flex-end; gap:.4rem}
-.draw-side{display:flex; flex-direction:column; gap:.9rem; align-items:center; text-align:center; max-width:520px; margin:0 auto 2.2rem; padding-bottom:1.6rem; border-bottom:1px solid var(--line)}
-.draw-side .moon{width:min(52vw,230px)}
+/* 抽籤區（左）與隊伍名單（右）左右並排 */
+.draw-layout{display:grid; grid-template-columns:minmax(300px,1fr) 2fr; gap:2.5rem; align-items:start}
+@media (max-width:900px){ .draw-layout{grid-template-columns:1fr; gap:2rem} }
+.draw-side{display:flex; flex-direction:column; gap:.9rem; align-items:center; text-align:center; position:sticky; top:1rem}
+@media (max-width:900px){ .draw-side{position:static; padding-bottom:1.6rem; border-bottom:1px solid var(--line)} }
+.draw-side .moon{width:min(30vw,260px)}
 .draw-side .moon-main{font-size:clamp(1.7rem,4.5vw,2.4rem)}
 .draw-side .moon-logo{width:min(52%,120px)}
 .draw-side .moon-name{font-size:clamp(1.2rem,3.2vw,1.7rem)}
@@ -42,9 +46,8 @@
 .total strong{font-family:var(--serif); font-size:1.8rem}
 
 /* 隊伍名單 */
-.teams{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem}
-@media (max-width:760px){ .teams{grid-template-columns:repeat(2,minmax(0,1fr))} }
-@media (max-width:420px){ .teams{grid-template-columns:1fr} }
+.teams{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem}
+@media (max-width:520px){ .teams{grid-template-columns:1fr} }
 .team{background:var(--panel); border:1px solid var(--line); border-top:8px solid var(--tc); border-radius:14px; padding:.9rem 1rem; min-height:12rem}
 .team h2{font-family:var(--serif); margin:0; font-size:1.35rem; display:flex; justify-content:center; align-items:baseline; gap:.6rem}
 .team h2 small{font-family:var(--sans); font-size:1.05rem; color:var(--muted); font-weight:700; white-space:nowrap}
@@ -57,10 +60,7 @@
 <body>
 <header>
   <h1>🐇 中秋活動:抽籤分隊</h1>
-  <div class="head-right">
-    <span class="status" id="statusBadge" data-state="loading">連線中…</span>
-    <a class="home-link" href="index.html">← 中秋活動</a>
-  </div>
+  <a class="home-link" href="index.html">← 中秋活動</a>
 </header>
 <main>
   <div class="draw-layout">
@@ -93,9 +93,8 @@
     </div>
   </div>
 </div>
-<script src="firebase-config.js"></script>
 <script src="shared.js"></script>
-<script src="cloud.js"></script>
+<script src="store.js"></script>
 <script>
 const TEAMS = [
   { name: '玉兔隊', emoji: '🐇', color: 'var(--t0)', logo: 'assets/rabbit.webp' },
@@ -158,8 +157,8 @@ async function doDraw() {
 
   let entry = null;
   try {
-    // 用交易讀「當下最新的名單」再決定隊伍,兩台電腦同時抽也不會撞到同一個號碼
-    const next = await Cloud.transact('draw', (cur) => {
+    // 先讀「當下最新的名單」再決定隊伍,開兩個視窗同時抽也不會撞到同一個號碼
+    const next = await Store.transact('draw', (cur) => {
       const list = Array.isArray(cur) ? cur : [];
       entry = { no: list.length + 1, name, team: pickTeam(list) };
       return list.concat([entry]);
@@ -170,7 +169,7 @@ async function doDraw() {
     if (timer) clearInterval(timer);
     setBusy(false);
     setDrawMoon('抽籤', '按月亮或 Enter 抽隊伍', null);
-    $('#drawMsg').textContent = '這一抽沒有存進雲端,請再按一次';
+    $('#drawMsg').textContent = '這一抽沒有存下來,請再按一次';
     $('#nameInput').value = name;
     renderDraw();
     return;
@@ -198,12 +197,12 @@ $('#undoDraw').onclick = async () => {
   const last = log[log.length - 1];
   setBusy(true);
   try {
-    const next = await Cloud.transact('draw', (cur) => (Array.isArray(cur) ? cur : []).slice(0, -1));
+    const next = await Store.transact('draw', (cur) => (Array.isArray(cur) ? cur : []).slice(0, -1));
     if (Array.isArray(next)) log = next;
   } catch (e) {
     console.error(e);
     setBusy(false);
-    $('#drawMsg').textContent = '撤銷沒有存進雲端,請再試一次';
+    $('#drawMsg').textContent = '撤銷沒有存下來,請再試一次';
     return;
   }
   lastNo = null;
@@ -214,25 +213,24 @@ $('#undoDraw').onclick = async () => {
 
 $('#resetDraw').onclick = async () => {
   if (drawBusy) return;
-  if (log.length && !(await askConfirm('確定要清除所有抽籤結果並重新開始嗎?(兩台電腦都會一起清掉)', '全部重抽'))) return;
+  if (log.length && !(await askConfirm('確定要清除所有抽籤結果並重新開始嗎?', '全部重抽'))) return;
   setBusy(true);
-  try { await Cloud.write('draw', []); log = []; } catch (e) { console.error(e); }
+  try { await Store.write('draw', []); log = []; } catch (e) { console.error(e); }
   lastNo = null;
   setDrawMoon('抽籤', '按月亮或 Enter 抽隊伍', null);
   setBusy(false);
   renderDraw();
 };
 
-/* ---------- 雲端 ---------- */
-Cloud.bindBadge($('#statusBadge'));
-Cloud.onError((msg) => { $('#drawMsg').textContent = msg; });
-Cloud.watch('draw', (v) => {
+/* ---------- 啟動 ---------- */
+Store.onError((msg) => { $('#drawMsg').textContent = msg; });
+Store.watch('draw', (v) => {
   log = Array.isArray(v) ? v : [];
   if (log.length && lastNo !== null && !log.some((e) => e.no === lastNo)) lastNo = null;
   renderDraw();
 });
 renderDraw();
-Cloud.init();
+Store.init();
 </script>
 </body>
 </html>
