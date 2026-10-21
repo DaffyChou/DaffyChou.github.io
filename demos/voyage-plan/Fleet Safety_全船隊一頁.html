@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全船隊一頁總覽</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: 左側說明＋流程＋待確認事項，右側 LINE 手機模擬（可點互動）。單一深色展示底，手機內為 LINE 畫面。 */
+:root{
+  color-scheme:dark;
+  --page:#0d1622; --panel:#13202f; --line:#24384d; --txt:#e4ecf4; --soft:#9bb0c4; --mute:#6f879d; --accent:#c3b0ec;
+  --navy:#0B2942; --teal:#0E7C7B; --amber:#8A5A15; --plum:#2b2f4a;
+  --red:#E5484D; --red-d:#c62a2f; --red-bg:#FFF1F1;
+  --grn:#06C755; --grn-d:#0a8a42; --grn-bg:#E4F6EB;
+  --gry:#9aa6b2; --gry-bg:#EDF0F3;
+  --ink:#16222E; --ink-soft:#5B6B78; --hair:#EEF2F6; --card:#ffffff;
+  --chat:#1b1b1d; --bubble-me:#3a3a3d;
+  --f-body:"Noto Sans TC",-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1100px 600px at 10% -10%,#1c3a5c 0,transparent 55%),var(--page);color:var(--txt);font-family:var(--f-body);
+  padding-block:28px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;max-width:1180px;margin:0 auto}
+/* ---------- brief ---------- */
+.brief{flex:1 1 360px;max-width:520px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-size:12px;letter-spacing:.24em;color:#7fa8cf;font-weight:700}
+h1{font-size:26px;line-height:1.3;margin:0;font-weight:900;text-wrap:balance}
+h1 span{color:var(--accent)}
+.lead{font-size:14px;line-height:1.75;color:var(--soft);margin:0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.box h3{margin:0 0 10px;font-size:13px;letter-spacing:.06em;color:#cfe0f0}
+.flow{display:flex;flex-direction:column;gap:2px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:8px 8px;border-radius:9px;cursor:pointer;border:0;background:none;color:inherit;text-align:left;font:inherit;width:100%}
+.step:hover,.step:focus-visible{background:rgba(195,176,236,.08);outline:none}
+.step .n{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#1b1530;font-size:12px;font-weight:900;display:grid;place-items:center;flex:none;margin-top:1px}
+.step b{display:block;font-size:13.5px}
+.step small{display:block;font-size:12px;color:var(--soft);line-height:1.55;margin-top:2px}
+.tag-new{font-size:10px;font-weight:900;background:#6fd0a3;color:#08351f;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+table.def{width:100%;border-collapse:collapse;font-size:12.5px}
+table.def th,table.def td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+table.def th{color:var(--soft);font-weight:700;font-size:11.5px}
+table.def td.c{text-align:center;white-space:nowrap}
+.yes{color:#6fd0a3;font-weight:700}.no{color:var(--mute)}
+.seg2{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg2 button{background:none;border:0;color:var(--soft);font:inherit;font-size:12.5px;font-weight:700;padding:7px 12px;cursor:pointer}
+.seg2 button.on{background:var(--accent);color:#1b1530}
+.seg2 button:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+.vnote{font-size:12px;color:var(--soft);line-height:1.6;margin-top:8px}
+ol.q{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:9px;font-size:12.8px;line-height:1.6;color:#d3dfea}
+ol.q b{color:#fff}
+ol.q .df{display:block;color:var(--mute);font-size:11.5px}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--soft)}
+.lg i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:5px}
+/* ---------- device ---------- */
+.device{width:390px;max-width:100%;flex:none;background:#0a0f16;border-radius:46px;padding:12px;box-shadow:0 40px 80px -20px rgba(0,0,0,.7),0 0 0 2px #1c2733;position:sticky;top:20px}
+.screen{--fs:1;background:var(--chat);border-radius:36px;overflow:hidden;height:820px;display:flex;flex-direction:column;position:relative}
+.statusbar{height:40px;background:#2a2a2c;display:flex;align-items:center;justify-content:space-between;padding:0 26px;color:#fff;font-size:13px;font-weight:700;flex:none}
+.appbar{height:50px;background:#2a2a2c;display:flex;align-items:center;gap:10px;padding:0 16px;color:#fff;flex:none;border-bottom:1px solid #000}
+.appbar b{font-size:15px}
+.appbar .ic{margin-left:auto;display:flex;gap:14px;font-size:15px;opacity:.85}
+.appbar button{background:none;border:0;color:#fff;font-size:15px;cursor:pointer;padding:0}
+.fsbar{flex:none;background:#232325;color:#c9d3dc;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;padding:5px 8px}
+.fschip{border:1px solid #4a4f55;border-radius:14px;padding:2px 10px;cursor:pointer;background:none;color:inherit;font:inherit}
+.fschip.on{background:#e9eef3;color:#111;border-color:#e9eef3}
+.chat{flex:1;overflow-y:auto;padding:14px 10px 24px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.chat::-webkit-scrollbar{width:0}
+.msg{display:flex;gap:7px;align-items:flex-end;max-width:100%;animation:pop .28s ease both}
+@media (prefers-reduced-motion:reduce){.msg{animation:none}.chat{scroll-behavior:auto}}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.av{width:30px;height:30px;border-radius:50%;background:#000;border:1px solid #333;flex:none;display:grid;place-items:center;font-size:14px;align-self:flex-start}
+.tm{font-size:10px;color:#8d8d92;align-self:flex-end;white-space:nowrap}
+.msg.me{align-self:flex-end;flex-direction:row-reverse}
+.txt{background:#3a3a3d;color:#fff;padding:9px 14px;border-radius:18px;font-size:14px;line-height:1.45}
+.sys{align-self:center;font-size:11px;color:#9a9aa0;background:#2a2a2c;border-radius:12px;padding:3px 12px}
+/* flex bubble */
+.fx{width:300px;background:var(--card);border-radius:16px;overflow:hidden;flex:none;font-size:calc(14px*var(--fs));color:var(--ink)}
+.fx.wide{width:310px}
+.hero{padding:12px 14px 12px;color:#fff;background:linear-gradient(135deg,#232a45,#3a2d58)}
+.hero.nav{background:linear-gradient(135deg,var(--navy),#123a5e)}
+.hero .k{font-size:.7em;letter-spacing:.12em;font-weight:700;opacity:.85}
+.hero h2{margin:4px 0 0;font-size:1.3em;font-weight:900;line-height:1.25}
+.hero .s{font-size:.76em;opacity:.88;margin-top:4px;line-height:1.4}
+.seg{display:flex;gap:6px;padding:10px 12px 4px}
+.seg button{flex:1;border:1px solid #cdd8e3;background:#fff;color:#3f5165;font:inherit;font-size:.86em;font-weight:900;padding:7px 0;border-radius:9px;cursor:pointer}
+.seg button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.seg button:focus-visible{outline:2px solid #3a7bd5;outline-offset:1px}
+.rng{font-size:.72em;color:#7c8b98;text-align:center;padding:2px 12px 6px;line-height:1.4}
+.alertline{margin:2px 12px 8px;border-radius:9px;padding:8px 10px;font-size:.84em;line-height:1.5;background:var(--red-bg);color:#8f1d22;font-weight:700}
+.alertline .cnt{display:inline-block;background:var(--red);color:#fff;border-radius:6px;padding:0 7px;margin-right:6px;font-weight:900}
+.alertline.ok{background:#EEF9F2;color:#0a6b35}
+.sec{padding:6px 12px 10px;border-top:1px solid var(--hair)}
+.sh{display:flex;align-items:center;gap:7px;margin:4px 0 7px}
+.sh .dm{font-size:.72em;font-weight:900;color:#fff;border-radius:6px;padding:2px 8px}
+.dm.nav{background:var(--navy)}.dm.ppl{background:var(--teal)}.dm.cargo{background:var(--amber)}
+.sh .ab{font-size:.8em;color:var(--ink-soft);font-weight:700}
+.sh .ab em{font-style:normal;color:var(--red-d);font-weight:900}
+.sh .names{font-size:.74em;color:#8f1d22;margin-left:auto;text-align:right;line-height:1.35}
+.grid{display:flex;flex-wrap:wrap;gap:5px}
+.cell{min-width:2.05em;height:2.05em;padding:0 .35em;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;gap:.2em;font-weight:900;font-size:1.02em;border:0;cursor:pointer;font-family:inherit;line-height:1}
+.cell:focus-visible{outline:2px solid #3a7bd5;outline-offset:1px}
+.cell.r{background:var(--red);color:#fff}
+.cell.g{background:var(--grn-bg);color:var(--grn-d)}
+.cell.x{background:var(--gry-bg);color:var(--gry)}
+.cell sup{font-size:.62em;font-weight:900;background:#fff;color:var(--red-d);border-radius:5px;padding:1px 4px;line-height:1.1}
+.cell.g sup,.cell.x sup{display:none}
+.cell .dots{display:flex;gap:2px}
+.cellB{flex-direction:column;gap:3px;height:auto;padding:5px .3em 4px;min-width:2.3em}
+.cellB .dots i{width:.42em;height:.42em;border-radius:50%;display:block;background:#fff}
+.cellB.g .dots i,.cellB.x .dots i{opacity:1}
+.dots i.r{background:var(--red)!important}.dots i.g{background:var(--grn)!important}.dots i.x{background:#c4ccd4!important}.dots i.na{background:transparent!important;border:1px dashed #c4ccd4}
+.cellB.r .dots i.r{background:#fff!important}
+.cellB.r .dots{background:rgba(0,0,0,.18);border-radius:6px;padding:2px 3px}
+.na-box{font-size:.8em;color:#7c8b98;background:#F5F7F9;border:1px dashed #d4dce4;border-radius:9px;padding:9px 10px;line-height:1.5}
+.ft{padding:8px 12px 12px;border-top:1px solid var(--hair)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:.7em;color:#6b7b88;justify-content:center}
+.legend i{display:inline-block;width:.95em;height:.95em;border-radius:3px;vertical-align:-1px;margin-right:3px}
+.upd{font-size:.68em;color:#9aa6b2;text-align:center;margin-top:5px}
+/* overview buttons */
+.ob{padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.fbtn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:13px 14px;border-radius:12px;border:0;font:inherit;font-size:1em;font-weight:900;cursor:pointer;text-align:left;color:#fff}
+.fbtn.nav{background:var(--navy)}.fbtn.ppl{background:var(--teal)}.fbtn.cargo{background:var(--amber)}
+.fbtn.all{background:#fff;color:var(--navy);border:2px solid var(--navy);position:relative}
+.fbtn.all .nw{font-size:.66em;background:#6fd0a3;color:#08351f;border-radius:6px;padding:1px 6px}
+.fbtn:focus-visible{outline:3px solid #3a7bd5;outline-offset:2px}
+.fbtn small{font-weight:700;font-size:.72em;opacity:.8}
+/* detail */
+.dsec{padding:8px 12px}
+.drow{display:flex;align-items:center;gap:8px;padding:9px 2px;border-bottom:1px solid var(--hair)}
+.drow .dl{font-size:.8em;color:var(--ink-soft);font-weight:700;width:52px;flex:none}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:.76em;font-weight:900;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.badge.r{background:rgba(229,72,77,.12);color:var(--red-d)}.badge.g{background:rgba(6,199,85,.12);color:var(--grn-d)}.badge.x{background:#EEF2F6;color:#7c8b98}
+.drow .dv{font-size:.8em;color:var(--ink);flex:1;min-width:0;line-height:1.45}
+.ht{font-size:.78em;font-weight:900;color:#3f5165;margin:10px 2px 4px}
+.hitem{display:flex;gap:8px;align-items:flex-start;padding:8px 2px;border-bottom:1px dashed var(--hair)}
+.hitem .hb{flex:1;min-width:0}
+.hitem .hti{font-size:.7em;color:#94a3b0}
+.hitem .hd{font-size:.84em;font-weight:700;line-height:1.45}
+.hdim{font-size:.64em;font-weight:900;color:#fff;padding:1px 6px;border-radius:5px;margin-right:5px;display:inline-block}
+.hdim.nav{background:var(--navy)}.hdim.ppl{background:var(--teal)}.hdim.cargo{background:var(--amber)}
+.hst{font-size:.66em;font-weight:900;padding:3px 7px;border-radius:7px;flex:none;white-space:nowrap}
+.hst.on{background:rgba(229,72,77,.1);color:var(--red-d)}.hst.off{background:#EEF2F6;color:#7c8b98}
+.hnone{font-size:.84em;color:var(--grn-d);background:#F1FBF5;border:1px solid #CFEEDB;border-radius:9px;padding:10px;text-align:center}
+.more{font-size:.72em;color:#7c8b98;text-align:center;padding:6px}
+.lbtn{display:block;width:100%;border:0;background:none;color:#2f6db5;font:inherit;font-weight:900;font-size:.9em;padding:11px;cursor:pointer;border-top:1px solid var(--hair)}
+.lbtn:focus-visible{outline:2px solid #3a7bd5;outline-offset:-2px}
+.reuse{font-size:.66em;background:#FFF7E6;color:#8a5a10;border-radius:6px;padding:2px 7px;font-weight:900;display:inline-block;margin-top:6px}
+/* rich menu */
+.menubar{flex:none;height:36px;background:#232325;color:#c9d3dc;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;cursor:pointer;border:0;font-family:inherit;width:100%}
+.rich{flex:none;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;background:#0b2f63;height:196px;transition:height .25s}
+.rich.collapsed{height:0;padding:0;overflow:hidden}
+.tile{background:#eef3f9;border:0;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-family:inherit;color:#0b2942;position:relative}
+.tile .e{font-size:26px}.tile b{font-size:14px}.tile small{font-size:9.5px;color:#334}
+.tile.hl{outline:3px solid #6fd0a3;outline-offset:-3px}
+.tile:focus-visible{outline:3px solid #3a7bd5;outline-offset:-3px}
+@media(max-width:900px){.device{position:static;order:-1}.brief{max-width:100%}}
+@media(max-width:430px){.device{padding:6px;border-radius:30px}.screen{border-radius:26px;height:760px}.fx,.fx.wide{width:min(300px,calc(100vw - 100px))}}
+.fbtn .cnt{background:rgba(255,255,255,.22);font-size:.78em;padding:3px 10px;border-radius:20px;flex:none}
+.hero.ppl{background:linear-gradient(135deg,var(--teal),#12938f)}
+.hero.cargo{background:linear-gradient(135deg,#7a4a12,#a5701f)}
+.qr{display:flex;gap:8px;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding:4px 0 2px;flex:none;animation:pop .28s ease both}
+.qchip{flex:none;white-space:nowrap;background:#2a2a2c;border:1px solid #444;color:#ddd;font:inherit;font-size:calc(14px*var(--fs));font-weight:700;padding:9px 16px;border-radius:22px;cursor:pointer}
+.qchip:focus-visible{outline:2px solid #3a7bd5}
+.car{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;max-width:calc(100% - 40px);padding-bottom:6px}
+.car::-webkit-scrollbar{height:4px}.car::-webkit-scrollbar-thumb{background:#555;border-radius:4px}
+.car .fx{width:262px;scroll-snap-align:start}
+.lrow{display:flex;align-items:center;gap:8px;padding:10px 6px;border:0;background:none;width:100%;text-align:left;font:inherit;cursor:pointer;color:var(--ink)}
+.lrow+.lrow{border-top:1px solid var(--hair)}
+.lrow:active{background:#F3F6F9}.lrow:focus-visible{outline:2px solid #3a7bd5;outline-offset:-2px}
+.lrow .id{flex:1;min-width:0}
+.lrow .nm{font-size:1em;font-weight:900;line-height:1.3}
+.lrow .en{font-size:.74em;color:#94a3b0;line-height:1.3;word-break:break-word}
+.lights{display:flex;gap:12px;flex:none}
+.lw{display:flex;flex-direction:column;align-items:center;gap:3px}
+.lw small{font-size:.6em;color:#9aa9b6}
+.dot{width:.85em;height:.85em;border-radius:50%;display:inline-block}
+.dot.g{background:var(--grn)}.dot.y{background:#F5A623}.dot.r{background:var(--red)}.dot.x{background:#c4ccd4}
+.chev{color:#c3ccd5;font-size:1.1em;flex:none}
+.hbadge{font-size:.6em;font-weight:900;padding:2px 6px;border-radius:7px;margin-left:5px;white-space:nowrap;display:inline-block;vertical-align:2px}
+.hbadge.r{background:rgba(229,72,77,.12);color:var(--red-d)}.hbadge.y{background:rgba(245,166,35,.16);color:#b9760a}
+.lempty{text-align:center;color:var(--grn-d);font-weight:700;padding:24px 0;font-size:.9em}
+.pg{font-size:.7em;color:#9aa6b2;text-align:center;padding:6px 0 10px}
+.hero.big{padding:16px 16px 14px}.hero .k2{font-size:.82em;font-weight:900;opacity:.92}.hero.big h2{font-size:1.55em;margin-top:6px}.hero .s2{font-size:.86em;opacity:.92;margin-top:4px}
+.dbody{padding:12px 14px 10px}
+.srow{display:flex;gap:10px;align-items:flex-start;padding:6px 4px}
+.srow .sl{font-size:.92em;color:var(--ink-soft);font-weight:700;width:2.6em;flex:none;padding-top:.05em}
+.sd{display:inline-flex;align-items:center;gap:6px;font-size:.95em}
+.sdesc{font-size:.92em;font-weight:900;color:var(--ink);line-height:1.5;margin-top:4px}
+.hr{border-top:1px solid #e3e8ee;margin:10px 0 12px}
+.eh{font-size:.95em;font-weight:900;color:#3f5165;margin-bottom:6px}
+.es{font-size:.88em;font-weight:900;color:#5b6b78;margin:8px 0 4px}
+.enone{text-align:center;font-size:.88em;font-weight:900;color:var(--ink);padding:4px 0 6px}
+.ev{display:flex;gap:7px;align-items:flex-start;padding:4px 0 6px 6px}
+.ev .hb{flex:1;min-width:0}.ev .hti{font-size:.82em;color:#94a3b0}.ev .hd{font-size:.9em;font-weight:900;line-height:1.5;margin-top:3px}
+.ev .hdim{font-size:.8em;padding:2px 6px}
+.prop{font-size:.62em;background:#FFF7E6;color:#8a5a10;border-radius:6px;padding:2px 6px;margin-left:6px;vertical-align:2px}
+.gbtn{display:block;width:100%;margin-top:12px;background:#dfe3ea;color:var(--ink);border:0;border-radius:10px;font:inherit;font-size:1em;font-weight:500;padding:12px 6px;cursor:pointer}
+.gbtn:disabled{opacity:.45;cursor:default}.gbtn:focus-visible{outline:2px solid #3a7bd5}
+.pager{display:flex;gap:8px;padding:0 8px 10px}.pager .gbtn{margin-top:4px}
+.dbody .upd{margin-top:6px}
+</style><style>
+.sum-sec{padding:10px 12px;border-top:1px solid var(--hair)}
+.sum-h{display:flex;align-items:baseline;gap:8px;margin-bottom:7px}
+.sum-h b{font-size:.92em;color:var(--ink)}
+.sum-h .n{font-size:.78em;font-weight:900;color:#fff;background:var(--red);border-radius:6px;padding:1px 7px}
+.sum-h .n.zero{background:#c4ccd4}
+.sum-h small{font-size:.7em;color:#7c8b98;margin-left:auto;text-align:right}
+.sum-names{font-size:.76em;color:#5b6b78;margin-top:6px;line-height:1.45}
+.sum-none{font-size:.8em;color:var(--grn-d);font-weight:700}
+.sum-foot{padding:8px 12px 4px;font-size:.76em;color:#5b6b78;border-top:1px solid var(--hair);line-height:1.6}
+.pbtn{display:block;width:calc(100% - 24px);margin:8px 12px 12px;background:var(--navy);color:#fff;border:0;border-radius:10px;font:inherit;font-weight:900;font-size:.95em;padding:12px;cursor:pointer}
+.pbtn.ppl{background:var(--teal)}.pbtn.cargo{background:var(--amber)}
+.pbtn:focus-visible{outline:3px solid #3a7bd5;outline-offset:2px}
+.tier{font-size:.6em;font-weight:900;padding:2px 6px;border-radius:7px;margin-left:5px;white-space:nowrap;display:inline-block;vertical-align:2px}
+.tier.now{background:var(--red);color:#fff}
+.tier.h12{background:rgba(229,72,77,.14);color:var(--red-d)}
+.tier.h24{background:rgba(229,72,77,.09);color:#b5474b}
+.tier.d30{background:#EEF2F6;color:#5b6b78}
+.tier.x{background:#EEF2F6;color:#8a97a3}
+table.def td.tl{white-space:nowrap}
+</style>
+<div class="wrap">
+  <aside class="brief">
+    <div>
+      <div class="eyebrow">LINE 船隊安全 · 流程調整 v6</div>
+      <h1>航安狀態警示<br><span>異常摘要 → 全部清單</span></h1>
+    </div>
+    <p class="lead">點「航安狀態警示」先看一張<b>異常摘要</b>：即時、24 小時內、30 日內各有哪些船出過狀況。要看全部的船，再點「全部清單」，清單依異常遠近排序。人安、貨安流程相同，沒有即時這一段。</p>
+
+    <div class="box">
+      <h3>操作流程（點選可跳到該畫面）</h3>
+      <div class="flow">
+        <button class="step" onclick="go(1)"><span class="n">1</span><span><b>圖文選單「船隊安全」</b><small>沿用現有入口</small></span></button>
+        <button class="step" onclick="go(2)"><span class="n">2</span><span><b>安全總覽：航安／人安／貨安</b><small>三個選項不變</small></span></button>
+        <button class="step" onclick="go(3)"><span class="n">3</span><span><b>航安異常摘要</b><small>即時異常／24 小時內／30 日內 三段，船名以單字格排列；底部「全部清單」</small></span></button>
+        <button class="step" onclick="go(4)"><span class="n">4</span><span><b>全部清單（32 艘）</b><small>依 即時 → 12 小時 → 24 小時 → 30 日 → 無資料 → 正常 排序，每頁 8 艘、上一頁／下一頁</small></span></button>
+        <button class="step" onclick="go(5)"><span class="n">5</span><span><b>點船名 → 單船明細</b><small>正式版單頁；事件歷程分 近 12 小時／12–24 小時／1–30 日</small></span></button>
+        <button class="step" onclick="go(6)"><span class="n">6</span><span><b>人安異常摘要</b><small>24 小時內／30 日內 兩段（人安、貨安無即時）</small></span></button>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3>全部清單樣式（請擇一）</h3>
+      <div class="seg2" role="group" aria-label="清單樣式">
+        <button id="lsA" class="on" onclick="setLStyle('list')">A 列表</button>
+        <button id="lsB" onclick="setLStyle('grid')">B 方格單字</button>
+      </div>
+      <p class="vnote" id="lsnote"></p>
+    </div>
+
+    <div class="box">
+      <h3>分段與排序規則</h3>
+      <table class="def">
+        <tr><th>順位</th><th>分段</th><th>定義</th><th>清單標記</th></tr>
+        <tr><td class="c">1</td><td class="tl"><b>即時異常</b></td><td>最新一筆資料 AIS 或風險為紅燈／黃燈（僅航安）</td><td><span class="tier now">即時</span></td></tr>
+        <tr><td class="c">2</td><td class="tl"><b>12 小時內</b></td><td>最近一次異常在 12 小時內</td><td><span class="tier h12">⏱12h</span></td></tr>
+        <tr><td class="c">3</td><td class="tl"><b>24 小時內</b></td><td>最近一次異常在 12–24 小時</td><td><span class="tier h24">⏱24h</span></td></tr>
+        <tr><td class="c">4</td><td class="tl"><b>30 日內</b></td><td>最近一次異常在 1–30 日</td><td><span class="tier d30">⏱30日</span></td></tr>
+        <tr><td class="c">5</td><td class="tl">無資料</td><td>AIS 中斷／未回報</td><td><span class="tier x">無資料</span></td></tr>
+        <tr><td class="c">6</td><td class="tl">正常</td><td>30 日內無異常</td><td>—</td></tr>
+      </table>
+      <p class="vnote">異常摘要的三段<b>由短到長累計</b>：24 小時內包含即時異常的船，30 日內包含前兩段的全部，所以艘數會遞增（航安 4 → 6 → 8）。格內數字只出現在 30 日內那段，代表 30 日內異常次數。全部清單仍用左表的順位排序，每艘只出現一次。</p>
+    </div>
+
+    <div class="box">
+      <h3>待與陽明確認</h3>
+      <ol class="q">
+        <li><b>摘要三段採累計</b>：24 小時內包含即時異常的船、30 日內包含全部，與「往前 24 小時／30 日內是否有異常」的定義一致。</li>
+        <li><b>人安／貨安當日回報仍為異常</b>：沒有即時，原型依回報時間歸到 12 或 24 小時段。是否另外標「未解除」？</li>
+        <li><b>黃燈（Warning）算異常</b>：已確定。紅燈、黃燈都列入即時異常與次數計算。<span class="df">示範：盛明風險黃燈（濃霧）列為即時異常</span></li>
+        <li><b>30 日</b>是否含當日（原型：含）。</li>
+        <li>原本客戶提的「即時／一日／一月切換」改由這張摘要一次呈現，是否同意不再需要切換？</li>
+      </ol>
+    </div>
+  </aside>
+
+<div class="device"><div class="screen">
+    <div class="statusbar"><span>17:15</span><span>4G ▮▮▮</span></div>
+    <div class="appbar"><b>船隊資訊查詢系統</b><span class="ic"><button onclick="resetChat()" aria-label="重新開始">↺</button></span></div>
+    <div class="fsbar">文字大小
+      <button class="fschip on" onclick="setFS(this,1)">標準</button>
+      <button class="fschip" onclick="setFS(this,1.3)">大</button>
+      <button class="fschip" onclick="setFS(this,1.6)">特大</button>
+    </div>
+    <div class="chat" id="chat"></div>
+    <button class="menubar" onclick="toggleMenu()"><span>選單</span><span id="tri">▾</span></button>
+    <div class="rich" id="rich">
+      <button class="tile" onclick="tileMsg('船員資訊')"><span class="e">👨‍✈️</span><b>船員資訊</b><small>Crew Information</small></button>
+      <button class="tile" onclick="tileMsg('船位資訊')"><span class="e">🚢</span><b>船位資訊</b><small>Vessel Tracking</small></button>
+      <button class="tile" onclick="tileMsg('船期資訊')"><span class="e">📅</span><b>船期資訊</b><small>Vessel Schedule</small></button>
+      <button class="tile" onclick="tileMsg('監管人員')"><span class="e">🧑‍💼</span><b>監管人員</b><small>Supervisory Personnel</small></button>
+      <button class="tile hl" onclick="openSafety()"><span class="e">🛡️</span><b>船隊安全</b><small>Fleet Safety</small></button>
+      <button class="tile" onclick="tileMsg('相關連結')"><span class="e">🔗</span><b>相關連結</b><small>Related Links</small></button>
+    </div>
+  </div></div>
+</div>
+
+<script>
+/* ===== 示範資料（32 艘主檔；燈號與事件為示意） ===== */
+const SHIPS=[["常明","YM UPWARD","U"],["安明","YM UTILITY","U"],["團明","YM UNIFORM","U"],["結明","YM UNIFORMITY","U+"],["恆明","YM UBIQUITY","U+"],["續明","YM UNANIMITY","U+"],["震明","YM MUTUALITY","M+"],["動明","YM MOBILITY","M+"],["盛明","YM MILESTONE","M+"],["菊明","YM COSMOS","M"],["達明","YM SUCCESS","M"],["源明","YM FOUNTAIN","M"],["財明","YM WEALTH","M"],["梅明","YM PLUM","M"],["創明","YM EVOLUTION","E+"],["實明","YM ESSENCE","E+"],["卓明","YM EXCELLENCE","E+"],["發明","YM EFFICIENCY","E"],["展明","YM ETERNITY","E"],["碩明","YM CELEBRITY","C"],["川明","YM CAPACITY","C"],["永明","YM CONSTANCY","C"],["百明","YM CENTENNIAL","C"],["英明","YM IDEALS","I"],["精明","YM INTELLIGENT","I"],["集明","YM INCREMENT","I"],["近明","YM INSTRUCTION","I"],["通明","YM INVENTIVE","I"],["鎮明","YM HARMONY","H"],["環明","YM HORIZON","H"],["宇明","YM HEIGHTS","H"],["威明","YM HAWK","H"]];
+const TITLE={nav:"航安",ppl:"人安",cargo:"貨安"};
+/* w＝最近一次異常距今小時；n＝30 日內異常次數；now＝目前仍異常 */
+const EV={
+ nav:{"碩明":{now:1,w:2,n:7,d:"偏離計畫航線並接近淺水區"},"英明":{now:1,w:3,n:5,d:"主機轉速異常，減速航行中"},"達明":{now:1,w:5,n:4,d:"AIS：Not under command（失去操縱）"},"震明":{now:1,w:6,n:3,d:"壓載水系統滲漏，監控中"},
+      "盛明":{now:1,w:1,n:1,d:"濃霧能見度不足（風險中度注意）"},"動明":{w:7,n:2,d:"AIS 訊號不穩定"},"菊明":{w:15,n:2,d:"接近港區交通管制範圍"},"創明":{w:6*24,n:1,d:"進入夜航密集區"},"川明":{w:12*24,n:1,d:"短暫偏離計畫航線"},"威明":{x:1,d:"AIS 訊號中斷逾時，無最新資料"}},
+ ppl:{"碩明":{w:9,n:3,d:"輪機部大管輪發燒 38.5°C，隔離觀察中"},"達明":{w:10,n:2,d:"船長腰部拉傷，行動受限"},"團明":{w:16,n:1,d:"甲板部一員手部割傷，已包紮"},"集明":{w:9*24,n:1,d:"船員暈眩送醫評估"},"宇明":{x:1,d:"今日尚未送出每日安全回報"}},
+ cargo:{"碩明":{w:8,n:3,d:"甲板貨櫃綁紮鬆動，複查中"},"源明":{w:11,n:1,d:"貨櫃輕微變形，待靠港檢查"},"英明":{w:13,n:4,d:"第 3 艙冷藏櫃溫度偏高"},"震明":{w:17,n:2,d:"危險品櫃文件待補確認"},"財明":{w:15*24,n:1,d:"冷藏櫃插電異常"},"宇明":{x:1,d:"今日尚未送出每日安全回報"}}
+};
+const AIS={"碩明":"r","達明":"r","震明":"y","威明":"x"};
+const RISK={"震明":"r","碩明":"r","英明":"r","達明":"y","盛明":"y"};
+const aisOf=cn=>AIS[cn]||"g", riskOf=cn=>RISK[cn]||"g";
+const TIER_RANK={now:0,h12:1,h24:2,d30:3,x:4,ok:5};
+const TIER_LBL={now:"即時",h12:"⏱12h",h24:"⏱24h",d30:"⏱30日",x:"無資料",ok:""};
+function tier(dom,cn){
+  const e=EV[dom][cn]; if(!e) return "ok"; if(e.x) return "x";
+  if(dom==="nav"&&[aisOf(cn),riskOf(cn)].some(v=>v==="r"||v==="y")) return "now";
+  return e.w<=12?"h12":e.w<=24?"h24":"d30";
+}
+function ranked(dom){
+  return SHIPS.map((sh,i)=>({sh,i,t:tier(dom,sh[0]),n:(EV[dom][sh[0]]||{}).n||0}))
+    .sort((a,b)=>TIER_RANK[a.t]-TIER_RANK[b.t]||b.n-a.n||a.i-b.i);
+}
+
+/* ===== chat engine ===== */
+const chat=document.getElementById("chat");
+let t=15;
+function clock(){t++;return "下午7:"+String(40+t%20).padStart(2,"0");}
+function clearQR(){const q=document.getElementById("qr");if(q)q.remove();}
+function add(html,isMe){
+  clearQR();
+  const d=document.createElement("div"); d.className="msg"+(isMe?" me":"");
+  d.innerHTML=(isMe?"":'<div class="av">🐟</div>')+html+'<span class="tm">'+clock()+'</span>';
+  chat.appendChild(d); requestAnimationFrame(()=>d.scrollIntoView({block:"start"})); return d;
+}
+function me(text){add('<div class="txt">'+text+'</div>',true);}
+function sys(text){const d=document.createElement("div");d.className="sys";d.textContent=text;chat.appendChild(d);}
+function qr(items){
+  const d=document.createElement("div");d.id="qr";d.className="qr";
+  d.innerHTML=items.map(i=>`<button class="qchip" onclick="${i.f}">${i.l}</button>`).join("");
+  chat.appendChild(d);requestAnimationFrame(()=>d.scrollIntoView({block:"end"}));
+}
+function tileMsg(n){me(n);add('<div class="txt">（現有功能，流程不變，原型略過）</div>');}
+
+function openSafety(){
+  me("船隊安全");
+  const c=d=>ranked(d).filter(x=>x.t!=="ok"&&x.t!=="x").length;
+  add(`<div class="fx"><div class="hero"><div class="k">FLEET SAFETY</div><h2>船隊安全</h2><div class="s">請選擇要查看的安全狀態警示</div></div>
+  <div class="ob">
+    <button class="fbtn nav" onclick="openSummary('nav')">🧭 航安狀態警示<span class="cnt">異常 ${c('nav')}</span></button>
+    <button class="fbtn ppl" onclick="openSummary('ppl')">👥 人安狀態警示<span class="cnt">異常 ${c('ppl')}</span></button>
+    <button class="fbtn cargo" onclick="openSummary('cargo')">📦 貨安狀態警示<span class="cnt">異常 ${c('cargo')}</span></button>
+  </div><div class="ft"><div class="upd">異常數＝近 30 日內曾異常艘數 · 🕘 2026/10/21 19:40</div></div></div>`);
+}
+
+/* ===== 異常摘要 ===== */
+function chips(dom,list,showN){return `<div class="grid">${list.map(x=>`<button class="cell r" title="${x.sh[0]}" onclick="openShip('${x.sh[0]}','${dom}','sum')">${x.sh[0][0]}${showN&&x.n?x.n:""}</button>`).join("")}</div>`;}
+function sec(dom,title,hint,list,showN,tagUpTo){
+  const TAG={now:"即時",h12:"12h",h24:"24h"};
+  const names=list.map(x=>x.sh[0]+(tagUpTo&&TAG[x.t]&&TIER_RANK[x.t]<=TIER_RANK[tagUpTo]?`（${TAG[x.t]}）`:"")).join("、");
+  return `<div class="sum-sec"><div class="sum-h"><b>${title} ${list.length} 艘</b></div>
+    ${list.length?chips(dom,list,showN)+(tagUpTo?`<div class="sum-names">${names}</div>`:""):`<div class="sum-none">🟢 無</div>`}</div>`;
+}
+function openSummary(dom){
+  me(TITLE[dom]+"狀態警示");
+  const r=ranked(dom);
+  const now=r.filter(x=>x.t==="now"), h24=r.filter(x=>["now","h12","h24"].includes(x.t)), d30=r.filter(x=>["now","h12","h24","d30"].includes(x.t)), nx=r.filter(x=>x.t==="x"), ok=r.filter(x=>x.t==="ok");
+  let body="";
+  if(dom==="nav") body+=sec(dom,"即時異常","最新一筆資料",now,false,null);
+  body+=sec(dom,"24 小時內","10/20 19:40 起",h24,false,"h24");
+  body+=sec(dom,"30 日內","09/22 起 · 格內＝異常次數",d30,true,null);
+  add(`<div class="fx wide"><div class="hero ${dom}"><div class="k">${TITLE[dom].toUpperCase()} · 全船隊 ${SHIPS.length} 艘</div><h2>${TITLE[dom]}異常摘要</h2><div class="s">🕘 查詢時間 2026/10/21 19:40 · 點船名看明細</div></div>
+    ${body}
+    <div class="sum-foot">${nx.length?`⚪ 無資料：${nx.map(x=>x.sh[0]).join("、")}<br>`:""}🟢 其餘 ${ok.length} 艘近 30 日無異常<br>30 日內格中數字＝異常次數</div>
+    <button class="pbtn ${dom}" onclick="openList('${dom}')">≡ 全部清單（${SHIPS.length} 艘）</button></div>`);
+}
+
+/* ===== 全部清單（正式版版型：每頁 8 艘、上一頁／下一頁；篩選走快速回覆） ===== */
+const TYPES=[...new Set(SHIPS.map(s=>s[2]))];
+const LVL={r:"🔴",y:"🟡",g:"🟢"};
+let LF={dom:"nav",type:"全部",ais:"全部",risk:"全部",status:"全部"}, LP=1;
+function rowTier(dom,x){const e=EV[dom][x.sh[0]]||{};if(x.t==="ok")return "";return `<span class="tier ${x.t}">${TIER_LBL[x.t]}${x.t==="d30"&&e.n?" "+e.n+"次":""}</span>`;}
+function listRow(dom,x){
+  const cn=x.sh[0];
+  const cur=x.t==="now"?"r":x.t==="x"?"x":(x.t==="h12"||x.t==="h24")&&dom!=="nav"?"r":"g";
+  const lights=dom==="nav"
+    ?`<div class="lw"><span class="dot ${aisOf(cn)}"></span><small>AIS</small></div><div class="lw"><span class="dot ${riskOf(cn)}"></span><small>風險</small></div>`
+    :`<div class="lw"><span class="dot ${cur}"></span><small>${TITLE[dom]}</small></div>`;
+  return `<button class="lrow" onclick="openShip('${cn}','${dom}','list')"><div class="id"><div class="nm">${cn}${rowTier(dom,x)}</div><div class="en">${x.sh[1]} · ${x.sh[2]}</div></div><div class="lights">${lights}</div><span class="chev">›</span></button>`;
+}
+function listData(){
+  const d=LF.dom;
+  return ranked(d).filter(x=>{
+    if(LF.type!=="全部"&&x.sh[2]!==LF.type) return false;
+    if(d==="nav") return (LF.ais==="全部"||aisOf(x.sh[0])===LF.ais)&&(LF.risk==="全部"||riskOf(x.sh[0])===LF.risk);
+    return LF.status==="全部"||(LF.status==="異常"?x.t!=="ok"&&x.t!=="x":x.t==="ok");
+  });
+}
+function filterText(){
+  if(LF.dom==="nav") return `船型:${LF.type}｜AIS:${LF.ais==="全部"?"全部":LVL[LF.ais]}｜風險:${LF.risk==="全部"?"全部":LVL[LF.risk]}`;
+  return `船型:${LF.type}｜狀態:${LF.status==="異常"?"30 日內曾異常":LF.status==="安全"?"30 日內無異常":"全部"}`;
+}
+function listCard(){
+  const d=LF.dom,l=listData(),P=8;
+  const n=Math.max(1,Math.ceil(l.length/P)); if(LP>n)LP=n;
+  const hero=`<div class="hero ${d}"><div class="k">${filterText()}</div><h2>${TITLE[d]}全部清單</h2><div class="s">共 ${l.length} 艘 · 第 ${LP}/${n} 頁 · 依 即時→12h→24h→30日 排序</div></div>`;
+  if(!l.length) return `<div class="fx">${hero}<div class="lempty">🟢 此條件下無符合船舶</div></div>`;
+  return `<div class="fx">${hero}<div style="padding:4px 8px">${l.slice((LP-1)*P,LP*P).map(x=>listRow(d,x)).join("")}</div>
+   <div class="pager"><button class="gbtn" ${LP<=1?"disabled":""} onclick="turn(-1)">⬅️ 上一頁</button><button class="gbtn" ${LP>=n?"disabled":""} onclick="turn(1)">下一頁 ➡️</button></div></div>`;
+}
+function listQR(){
+  const d=LF.dom;
+  const it=[{l:"◎ 異常摘要",f:`openSummary('${d}')`}].concat(d==="nav"?[{l:"🚢 船型",f:"pickType()"},{l:"📟 AIS",f:"pickLight('ais')"},{l:"🚨 風險",f:"pickLight('risk')"}]:[{l:"🚢 船型",f:"pickType()"},{l:"🔎 狀態",f:"pickStatus()"}]);
+  qr(it);
+}
+let LSTYLE="list";
+const GLBL={now:"即時異常",h12:"12 小時內",h24:"12–24 小時",d30:"1–30 日",x:"無資料",ok:"正常"};
+function gridCard(){
+  const d=LF.dom,l=listData();
+  const hero=`<div class="hero ${d}"><div class="k">${filterText()}</div><h2>${TITLE[d]}全部清單</h2><div class="s">共 ${l.length} 艘 · 點船名看明細</div></div>`;
+  if(!l.length) return `<div class="fx wide">${hero}<div class="lempty">🟢 此條件下無符合船舶</div></div>`;
+  const body=["now","h12","h24","d30","x","ok"].map(k=>{
+    const g=l.filter(x=>x.t===k); if(!g.length) return "";
+    const c=k==="ok"?"g":k==="x"?"x":"r";
+    return `<div class="sum-sec"><div class="sum-h"><b>${GLBL[k]} ${g.length} 艘</b></div><div class="grid">${g.map(x=>`<button class="cell ${c}" title="${x.sh[0]}" onclick="openShip('${x.sh[0]}','${d}','list')">${x.sh[0][0]}</button>`).join("")}</div></div>`;
+  }).join("");
+  return `<div class="fx wide">${hero}${body}<div class="upd" style="padding:8px 0 10px">紅＝30 日內曾異常　綠＝正常　灰＝無資料</div></div>`;
+}
+function showList(){add(LSTYLE==="grid"?gridCard():listCard());listQR();}
+function setLStyle(s){
+  LSTYLE=s;document.getElementById("lsA").classList.toggle("on",s==="list");document.getElementById("lsB").classList.toggle("on",s==="grid");
+  document.getElementById("lsnote").textContent=s==="list"
+    ?"A 列表：沿用正式版，每頁 8 艘、上一頁／下一頁。可看到英文船名、船型與 AIS／風險燈號。全船隊要翻 4 頁。"
+    :"B 方格單字：32 艘一張卡片看完、不分頁，依 即時→12h→24h→30 日→無資料→正常 分段。看不到燈號細節，需點進明細。篩選一樣用快速回覆鈕。";
+  if(chat.querySelector(".lrow")||chat.querySelector(".fx.wide .cell.g")){sys(s==="list"?"清單樣式：A 列表":"清單樣式：B 方格單字");LP=1;me(TITLE[LF.dom]+"全部清單");showList();}
+}
+function openList(dom){LP=1;LF={dom,type:"全部",ais:"全部",risk:"全部",status:"全部"};me(TITLE[dom]+"全部清單");showList();}
+function turn(k){LP+=k;me(k<0?"上一頁":"下一頁");showList();}
+function pickType(){me("船型");add('<div class="txt">請選擇船型</div>');qr(["全部",...TYPES].map(v=>({l:v,f:`setF('type','${v}')`})));}
+function pickLight(k){me(k==="ais"?"AIS":"風險");add(`<div class="txt">請選擇${k==="ais"?"AIS":"風險"}燈號</div>`);qr([{l:"全部",f:`setF('${k}','全部')`},{l:"🔴 紅",f:`setF('${k}','r')`},{l:"🟡 黃",f:`setF('${k}','y')`},{l:"🟢 綠",f:`setF('${k}','g')`}]);}
+function pickStatus(){me("狀態");add('<div class="txt">請選擇狀態</div>');qr([{l:"全部",f:"setF('status','全部')"},{l:"🔴 30 日內曾異常",f:"setF('status','異常')"},{l:"🟢 30 日內無異常",f:"setF('status','安全')"}]);}
+function setF(k,v){LF[k]=v;LP=1;me(k==="type"?"船型 "+v:k==="status"?"狀態 "+v:(k==="ais"?"AIS ":"風險 ")+(v==="全部"?"全部":LVL[v]));showList();}
+function clearFilter(){LP=1;LF={dom:LF.dom,type:"全部",ais:"全部",risk:"全部",status:"全部"};me("清除篩選");showList();}
+
+/* ===== 單船明細（正式版版型；事件歷程三段） ===== */
+function fmt(w){
+  let m=19*60+40-Math.round(w*60)-((w*37)%50);
+  let day=21; while(m<0){m+=1440;day--;}
+  const dd=day===21?"今日":day===20?"昨日":(day>0?`10/${String(day).padStart(2,"0")}`:`09/${String(30+day).padStart(2,"0")}`);
+  return dd+" "+String(Math.floor(m/60)).padStart(2,"0")+":"+String(Math.round(m%60)).padStart(2,"0");
+}
+const OLD={nav:["AIS 訊號中斷 8 分鐘","與鄰船 CPA 距離縮短","進入 NAVTEX 軍演區","偏離計畫航線 XTD 超過閾值","主機轉速異常"],ppl:["船員暈眩送醫評估","水手長手部扭傷"],cargo:["冷藏櫃溫度偏高","貨櫃綁紮複查"]};
+function eventsOf(dom,cn){
+  const e=EV[dom][cn]; if(!e||e.x) return [];
+  const out=[{w:e.w,d:e.d,on:!!e.now||(dom!=="nav"&&e.w<=12)}];
+  for(let i=1;i<e.n;i++) out.push({w:24+i*(26*24/Math.max(e.n,2))+((cn.charCodeAt(0)+i*13)%20),d:OLD[dom][(cn.charCodeAt(0)+i)%OLD[dom].length],on:false});
+  return out.sort((a,b)=>a.w-b.w);
+}
+function sdot(v,txt){const c=v==="r"?"var(--red-d)":v==="g"?"var(--grn-d)":v==="y"?"#b9760a":"#8a97a3";return `<span class="sd"><span class="dot ${v}"></span><b style="color:${c}">${txt}</b></span>`;}
+function evItem(dom,e){return `<div class="ev"><div class="hb"><div class="hti">${fmt(e.w)}　${e.on?'<b style="color:var(--red-d)">持續中</b>':'已解除'}</div><div class="hd">${e.d}</div></div></div>`;}
+function openShip(cn,dom,from){
+  const sh=SHIPS.find(s=>s[0]===cn), L=TITLE[dom], e=EV[dom][cn], tt=tier(dom,cn);
+  me(cn+" "+L+"詳細狀況");
+  let stRow;
+  if(dom==="nav"){
+    const a=aisOf(cn),r=riskOf(cn);
+    if(a==="g"&&r==="g") stRow=`<div class="srow"><span class="sl">目前</span><div><b style="color:var(--grn-d)">正常</b><span style="font-size:.82em;color:#5b6b78">（AIS、風險皆正常）</span></div></div>`; else stRow=`<div class="srow"><span class="sl">AIS</span><div>${sdot(a,{r:"優先避讓",y:"其餘／不明",g:"正常",x:"無資料"}[a])}</div></div>
+           <div class="srow"><span class="sl">風險</span><div>${sdot(r,{r:"高風險警示",y:"中度注意",g:"低風險"}[r])}${e&&e.now?`<div class="sdesc">${e.d}</div>`:""}</div></div>`;
+  }else{
+    const v=tt==="x"?"x":(tt==="h12"||tt==="h24")?"r":"g";
+    stRow=`<div class="srow"><span class="sl">${L}</span><div>${sdot(v,v==="r"?"異常":v==="x"?"無資料":"正常")}${e&&(v!=="g")?`<div class="sdesc">${e.d}</div>`:""}</div></div>`;
+  }
+  const ev=eventsOf(dom,cn), none=`<div class="enone">無${L}事件</div>`;
+  const seg=(t,a)=>a.length?`<div class="es">${t}</div>${a.map(x=>evItem(dom,x)).join("")}`:"";
+  const hist=!ev.length?"":`<div class="hr"></div><div class="eh">事件歷程（${L}，近 30 日 · 共 ${ev.length} 次）</div>`
+    +seg("近 12 小時",ev.filter(x=>x.w<=12))+seg("12–24 小時",ev.filter(x=>x.w>12&&x.w<=24))+seg("1–30 日",ev.filter(x=>x.w>24));
+  const back=from==="list"?`<button class="gbtn" onclick="me('返回${L}全部清單');showList()">‹ 返回${L}全部清單</button>`:`<button class="gbtn" onclick="openSummary('${dom}')">‹ 返回${L}異常摘要</button>`;
+  add(`<div class="fx"><div class="hero ${dom} big"><div class="k2">船舶詳細狀況・${L}${tt!=="ok"?`　<span class="tier ${tt}" style="font-size:.85em">${TIER_LBL[tt]}</span>`:""}</div><h2>${cn}</h2><div class="s2">${sh[1]} · 船型 ${sh[2]}</div></div>
+  <div class="dbody">${stRow}${hist}${back}<div class="upd">🕘 2026/10/21 19:40</div></div></div>`);
+}
+
+/* ===== controls ===== */
+function resetChat(){chat.innerHTML="";t=15;sys("今天");add('<div class="txt">帳號已與戰情室綁定，請由下方選單選擇功能。</div>');}
+function setFS(el,v){document.querySelector(".screen").style.setProperty("--fs",v);document.querySelectorAll(".fschip").forEach(c=>c.classList.toggle("on",c===el));}
+function toggleMenu(){const r=document.getElementById("rich");r.classList.toggle("collapsed");document.getElementById("tri").textContent=r.classList.contains("collapsed")?"▴":"▾";}
+function go(n){
+  resetChat();
+  const rich=document.getElementById("rich");
+  if(n>=2) openSafety();
+  if(n===3) openSummary("nav");
+  if(n===4){openSummary("nav");openList("nav");}
+  if(n===5){openSummary("nav");openShip("川明","nav","sum");}
+  if(n===6) openSummary("ppl");
+  if(n>=3&&!rich.classList.contains("collapsed")) toggleMenu();
+  if(n<3&&rich.classList.contains("collapsed")) toggleMenu();
+}
+setLStyle("list");
+go(3);
+</script>
+
+</html>
