@@ -212,6 +212,12 @@ ol.q .df{display:block;color:var(--mute);font-size:11.5px}
 .pbtn{display:block;width:calc(100% - 24px);margin:8px 12px 12px;background:var(--navy);color:#fff;border:0;border-radius:10px;font:inherit;font-weight:900;font-size:.95em;padding:12px;cursor:pointer}
 .pbtn.ppl{background:var(--teal)}.pbtn.cargo{background:var(--amber)}
 .pbtn:focus-visible{outline:3px solid #3a7bd5;outline-offset:2px}
+.lsty{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;border-top:1px solid var(--hair);font-size:.82em;color:#5b6b78;font-weight:700}
+.lseg{display:inline-flex;border:1px solid #c4ccd4;border-radius:8px;overflow:hidden;flex:none}
+.lseg button{background:#fff;border:0;color:#5b6b78;font:inherit;font-weight:800;padding:6px 11px;cursor:pointer}
+.lseg button+button{border-left:1px solid #c4ccd4}
+.lseg button.on{background:var(--navy);color:#fff}
+.lseg button:focus-visible{outline:2px solid #3a7bd5;outline-offset:-2px}
 .tier{font-size:.6em;font-weight:900;padding:2px 6px;border-radius:7px;margin-left:5px;white-space:nowrap;display:inline-block;vertical-align:2px}
 .tier.now{background:var(--red);color:#fff}
 .tier.h12{background:rgba(229,72,77,.14);color:var(--red-d)}
@@ -232,7 +238,7 @@ table.def td.tl{white-space:nowrap}
       <h3>操作流程（點選可跳到該畫面）</h3>
       <div class="flow">
         <button class="step" onclick="go(1)"><span class="n">1</span><span><b>圖文選單「船隊安全」</b><small>沿用現有入口</small></span></button>
-        <button class="step" onclick="go(2)"><span class="n">2</span><span><b>安全總覽：航安／人安／貨安</b><small>三個選項不變</small></span></button>
+        <button class="step" onclick="go(2)"><span class="n">2</span><span><b>安全總覽：航安／人安／貨安</b><small>三個選項不變；卡片下方可切換全部清單樣式 A／B</small></span></button>
         <button class="step" onclick="go(3)"><span class="n">3</span><span><b>航安異常摘要</b><small>即時異常／24 小時內／30 日內 三段，船名以單字格排列；底部「全部清單」</small></span></button>
         <button class="step" onclick="go(4)"><span class="n">4</span><span><b>全部清單（32 艘）</b><small>依 即時 → 12 小時 → 24 小時 → 30 日 → 無資料 → 正常 排序，每頁 8 艘、上一頁／下一頁</small></span></button>
         <button class="step" onclick="go(5)"><span class="n">5</span><span><b>點船名 → 單船明細</b><small>正式版單頁；事件歷程分 近 12 小時／12–24 小時／1–30 日</small></span></button>
@@ -350,7 +356,15 @@ function openSafety(){
     <button class="fbtn nav" onclick="openSummary('nav')">🧭 航安狀態警示<span class="cnt">異常 ${c('nav')}</span></button>
     <button class="fbtn ppl" onclick="openSummary('ppl')">👥 人安狀態警示<span class="cnt">異常 ${c('ppl')}</span></button>
     <button class="fbtn cargo" onclick="openSummary('cargo')">📦 貨安狀態警示<span class="cnt">異常 ${c('cargo')}</span></button>
-  </div><div class="ft"><div class="upd">異常數＝近 30 日內曾異常艘數 · 🕘 2026/10/21 19:40</div></div></div>`);
+  </div>
+  <div class="lsty"><span>全部清單樣式</span><div class="lseg" role="group" aria-label="全部清單樣式"><button data-s="list" class="${LSTYLE==="list"?"on":""}" onclick="pickLStyle('list')">A 列表</button><button data-s="grid" class="${LSTYLE==="grid"?"on":""}" onclick="pickLStyle('grid')">B 方格</button></div></div>
+  <div class="ft"><div class="upd">異常數＝近 30 日內曾異常艘數 · 🕘 2026/10/21 19:40</div></div></div>`);
+}
+/* 船隊安全卡上直接切換全部清單樣式（與左側說明欄同步） */
+function pickLStyle(s){
+  if(s===LSTYLE) return;
+  setLStyle(s);
+  if(!chat.querySelector(".lrow")&&!chat.querySelector(".fx.wide .cell.g")) sys(s==="list"?"清單樣式：A 列表（進入全部清單時套用）":"清單樣式：B 方格單字（進入全部清單時套用）");
 }
 
 /* ===== 異常摘要 ===== */
@@ -429,6 +443,7 @@ function gridCard(){
 function showList(){add(LSTYLE==="grid"?gridCard():listCard());listQR();}
 function setLStyle(s){
   LSTYLE=s;document.getElementById("lsA").classList.toggle("on",s==="list");document.getElementById("lsB").classList.toggle("on",s==="grid");
+  document.querySelectorAll(".lseg button").forEach(b=>b.classList.toggle("on",b.dataset.s===s));
   document.getElementById("lsnote").textContent=s==="list"
     ?"A 列表：沿用正式版，每頁 8 艘、上一頁／下一頁。可看到英文船名、船型與 AIS／風險燈號。全船隊要翻 4 頁。"
     :"B 方格單字：32 艘一張卡片看完、不分頁，依 即時→12h→24h→30 日→無資料→正常 分段。看不到燈號細節，需點進明細。篩選一樣用快速回覆鈕。";
