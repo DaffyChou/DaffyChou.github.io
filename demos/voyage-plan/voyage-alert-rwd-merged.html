@@ -5487,8 +5487,8 @@ const DIM_META = {
             desc:    "依船舶當前位置與所有風險區域邊界（含 RISK_ZONES 多邊形）的最近距離判定；距離 ≤ Warning → 接近邊界、距離 ≤ Critical 或已在區域內 → 已進入 / 跨越邊界。",
             desc_en: "Evaluates the minimum distance between the vessel and any RISK_ZONES boundary. Within Warning → approaching; within Critical or already inside → entered / crossed the zone boundary." },
   dest:   { label: "目的地一致性", short: "Destination Check", icon: iconDest,
-            desc:    "比對三項來源：AIS Destination、實際船位所在港區、航行計畫目的港。三者不一致即提示監管人員研判（可能改港、AIS 誤植、或計畫未更新）；一致或資料不足不告警。",
-            desc_en: "Cross-checks three sources — AIS Destination, the port area of the actual position, and the voyage-plan destination port. If they disagree, an advisory prompts the officer to investigate (possible port change, AIS mis-entry, or outdated plan)." },
+            desc:    "比對三項來源：AIS Destination、實際船位所在港區（依 AIS 位置對照系統定義之港區圍籬，15 NM 外不納入）、航行計畫目的港。AIS Destination 為人工填寫，採模糊比對（UN/LOCODE、港名、縮寫皆可對上）；不一致、AIS 未填或計畫缺目的港皆提示監管人員研判。",
+            desc_en: "Cross-checks three sources — AIS Destination (fuzzy-matched, as it is entered manually), the port area of the actual position, and the voyage-plan destination port. A mismatch, a blank AIS Destination or a missing plan destination prompts the officer to investigate." },
 };
 
 // Risk dot icons (header)
@@ -5659,7 +5659,42 @@ function vesselPortIoDistance(v) {
 const AIS_DEST = {
   // 示意：YM HAWK 的 AIS 目的地填成 Chennai，與其實際所在港區/計畫目的港（Chittagong）不符 → 觸發提示。
   "YM HAWK": { code: "INMAA", name: "CHENNAI" },
+  // 示意：AIS Destination 未填（人工漏填）→ 亦提示。
+  "YM MUTUALITY": { code: "", name: "" },
+  // 示意：人工填寫的縮寫／不規範格式（以計畫目的港名前 4 碼模擬）→ 模糊比對視為一致。
+  "YM CREDENTIAL": { fuzzyOfPlan: true },
 };
+/* 2026-09-23：AIS Destination 為船上人工填寫，格式不一（UN/LOCODE、港名、縮寫、含國名、多港連寫），採模糊比對。
+ *   正規化：轉大寫、去除非英數字。命中任一即視為一致：代碼相等｜名稱相等｜一方包含另一方（≥4 字）｜共同前綴 ≥4 字｜相似度 ≥ 0.8（Dice bigram） */
+function _destNorm(s) { return String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); }
+function _destSim(a, b) {
+  if (a.length < 2 || b.length < 2) return 0;
+  const bg = x => { const m = new Map(); for (let i = 0; i < x.length - 1; i++) { const k = x.slice(i, i + 2); m.set(k, (m.get(k) || 0) + 1); } return m; };
+  const A = bg(a), B = bg(b); let hit = 0;
+  A.forEach((n, k) => { if (B.has(k)) hit += Math.min(n, B.get(k)); });
+  return (2 * hit) / ((a.length - 1) + (b.length - 1));
+}
+/* 港名別名（改名／慣用舊稱／常見縮寫）；正式版由港口主檔維護 */
+const DEST_ALIASES = [["CHATTOGRAM", "CHITTAGONG", "CTG"], ["KAOHSIUNG", "KHH"], ["KEELUNG", "KEL", "CHILUNG"], ["TAICHUNG", "TXG"], ["HOCHIMINH", "SAIGON", "SGN", "HCMC"], ["PORTKLANG", "PKG", "KLANG"], ["TANJUNGPELEPAS", "PTP"], ["SINGAPORE", "SGSIN", "SIN"]];
+function _destAliasGroup(t) { return DEST_ALIASES.find(g => g.some(x => x === t || (x.length >= 4 && t.includes(x)))) || null; }   // 含國名／後綴亦可對上（CHITTAGONG BD）
+function destFuzzyMatch(x, y) {
+  if (!x || !y) return { match: false, how: null };
+  const xc = _destNorm(x.code), yc = _destNorm(y.code), xn = _destNorm(x.name), yn = _destNorm(y.name);
+  if (xc && yc && xc === yc) return { match: true, how: "code" };
+  const xs = [xc, xn].filter(Boolean), ys = [yc, yn].filter(Boolean);
+  for (const a of xs) for (const b of ys) {
+    if (a === b) return { match: true, how: "exact" };
+    const ga = _destAliasGroup(a), gb = _destAliasGroup(b);
+    if (ga && ga === gb) return { match: true, how: "fuzzy" };                                  // 別名／舊稱
+    const [sh, lo] = a.length <= b.length ? [a, b] : [b, a];
+    if (sh.length >= 3 && lo.includes(sh)) return { match: true, how: "fuzzy" };                // 縮寫或代碼片段（CGP ⊂ BDCGP、CHAT ⊂ CHATTOGRAM）
+    if (lo.length >= 5 && lo.endsWith(sh) === false && sh.length >= 3 && lo.slice(2) === sh) return { match: true, how: "fuzzy" };  // 去國碼後相等（CGP vs BDCGP）
+    let k = 0; while (k < a.length && k < b.length && a[k] === b[k]) k++;
+    if (k >= 4) return { match: true, how: "fuzzy" };                                             // 共同前綴 ≥4
+    if (_destSim(a, b) >= 0.75) return { match: true, how: "fuzzy" };                           // 拼寫相近
+  }
+  return { match: false, how: null };
+}
 function planArrivalPort(v) {
   const pts = v.planned_track || [];
   const arr = pts.filter(p => p.position_type === "Arrival").pop() || pts[pts.length - 1];
@@ -5687,8 +5722,10 @@ function vesselCurrentPortArea(v) {
   return best;
 }
 function vesselAisDest(v) {
-  if (AIS_DEST[v.vessel_name]) return AIS_DEST[v.vessel_name];
+  const m = AIS_DEST[v.vessel_name];
   const arr = planArrivalPort(v);          // 未特別 mock 者，AIS 目的地＝計畫目的港（視為一致）
+  if (m && m.fuzzyOfPlan) return arr ? { code: "", name: String(arr.name || arr.code).slice(0, 4) } : { code: "", name: "" };
+  if (m) return m;
   return arr ? { code: arr.code, name: arr.name } : null;
 }
 /* 回傳 { level:'normal'|'warning'|'na', ais, area, plan, allSame } */
@@ -5696,10 +5733,18 @@ function destConsistency(v) {
   const plan = planArrivalPort(v);
   const ais  = vesselAisDest(v);
   const area = vesselCurrentPortArea(v);   // 可能為 null（航行中，不納入不一致判定）
-  if (!plan || !ais) return { level: "na", ais, area, plan };
-  const codes = [ais.code, plan.code].concat(area ? [area.code] : []);
-  const allSame = codes.every(c => c === codes[0]);
-  return { level: allSame ? "normal" : "warning", ais, area, plan, allSame };
+  const aisBlank = !ais || (!_destNorm(ais.code) && !_destNorm(ais.name));
+  if (!plan) return { level: "warning", ais, area, plan, allSame: false, reason: "航行計畫無目的港", reason_en: "no plan destination" };
+  if (aisBlank) return { level: "warning", ais, area, plan, allSame: false, reason: "AIS 目的地未填", reason_en: "AIS destination blank" };
+  const m1 = destFuzzyMatch(ais, plan);
+  const m2 = area ? destFuzzyMatch(area, plan) : { match: true, how: null };
+  const allSame = m1.match && m2.match;
+  const fuzzy = allSame && (m1.how === "fuzzy" || m2.how === "fuzzy");
+  let reason = null, reason_en = null;
+  if (!m1.match && !m2.match) { reason = "AIS 目的地與實際港區皆與計畫不符"; reason_en = "AIS and port area both differ from plan"; }
+  else if (!m1.match) { reason = "AIS 目的地與計畫不符"; reason_en = "AIS destination differs from plan"; }
+  else if (!m2.match) { reason = "實際港區與計畫不符"; reason_en = "port area differs from plan"; }
+  return { level: allSame ? "normal" : "warning", ais, area, plan, allSame, fuzzy, reason, reason_en };
 }
 
 /* 到離區域監控：逐圍籬掃描所有被「啟用監控」的 RISK_ZONES。
@@ -6686,6 +6731,10 @@ loadAnchorConfig();
  *   監管人員事後「確認」即寫成單船設定（L2）；離開錨泊狀態即清除快照。 */
 const ANCHOR_FLEET_DEFAULT_KEY = "slab_va_anchor_fleet_default_v1";
 const ANCHOR_AUTO_KEY = "slab_va_anchor_auto_v1";
+const ANCHOR_LAST_KEY = "slab_va_anchor_last_v1";   // 2026-09-23：記錄各船上一輪是否在錨，用於「離錨即清除錨位設定」
+let _anchorLastAt = {};
+function loadAnchorLast() { try { _anchorLastAt = JSON.parse(localStorage.getItem(ANCHOR_LAST_KEY)) || {}; } catch (e) { _anchorLastAt = {}; } }
+function saveAnchorLast() { try { localStorage.setItem(ANCHOR_LAST_KEY, JSON.stringify(_anchorLastAt)); } catch (e) {} }
 const ANCHOR_FLEET_SYSTEM_DEFAULT = { mode: "anchor", anchorW: 0.15, anchorC: 0.30, driftW: 10, driftC: 20, duration: 5, centerMethod: "first", avgMinutes: 10, autoApply: true };
 const ANCHOR_FLEET_BASIS = {
   mode: "AIS nav_status 1 的語意為「在錨」，故預設錨泊；漂航（主機待命、非在錨）由監管人員逐船改。之後與客戶訪談再定。",
@@ -6712,7 +6761,7 @@ function getAnchorAuto(vid) { return _anchorAutoSnapshot[vid] || null; }
 /* 掃描：切入錨泊且未設定 → 建快照；離開錨泊 → 清快照。回傳是否有變更。 */
 function sweepAnchorAutoSnapshots() {
   const def = getAnchorFleetDefault();
-  let changed = false;
+  let changed = false, lastChanged = false;
   const vesselsAll = (typeof VESSELS !== "undefined") ? VESSELS : (window.VESSELS || []);
   vesselsAll.forEach(v => {
     const vid = v.vessel_id;
@@ -6728,8 +6777,22 @@ function sweepAnchorAutoSnapshots() {
       delete _anchorAutoSnapshot[vid]; changed = true;
       if (typeof logThresholdChange === "function") logThresholdChange({ who: "system", layer: "vessel", scope: vid, segment: "anchor", dimension: snap.mode === "anchor" ? "anchor" : "driftAnchor", field: "自動套用結束", old: "自動監控", new: null, reason: "船舶離開錨泊狀態" });
     }
+    // 2026-09-23 客戶確認：船離開錨泊狀態即清除該船錨泊／漂航設定（含已確認者），下次進錨重新自動套用；
+    //   只在「上一輪在錨、本輪不在錨」時清除，避免人員預先設定時被誤清。
+    const wasAt = _anchorLastAt[vid] === 1;
+    if (!atAnchor && wasAt && isAnchorConfigured(vid)) {
+      const geo = getAnchorGeo(vid), dro = getDriftOverride(vid, "driftAnchor");
+      const desc = geo ? `錨泊 · W ${geo.warning}／C ${geo.critical} NM` : (dro ? `漂航 · W ${dro.warning}／C ${dro.critical} NM` : "已設定");
+      setAnchorGeo(vid, null); setDriftOverride(vid, "driftAnchor", null, null); setAnchorState(vid, null);
+      if (typeof setAnchorAck === "function") setAnchorAck(vid, false);
+      if (typeof logThresholdChange === "function") logThresholdChange({ who: "system", layer: "vessel", scope: vid, segment: "anchor", dimension: geo ? "anchor" : "driftAnchor", field: "離錨清除錨泊設定", old: desc, new: null, reason: "船舶離開錨泊狀態；下次進錨重新自動套用" });
+      changed = true;
+    }
+    const nowAt = atAnchor ? 1 : 0;
+    if (_anchorLastAt[vid] !== nowAt) { _anchorLastAt[vid] = nowAt; lastChanged = true; }
   });
   if (changed) saveAnchorAutoSnapshot();
+  if (lastChanged) saveAnchorLast();
   return changed;
 }
 /* 自動套用中且尚未確認 → 有效設定（供 computeAlerts 與面板） */
@@ -6750,7 +6813,7 @@ function confirmAnchorAuto(vid) {
   if (typeof logThresholdChange === "function") logThresholdChange({ who: _currentUser, layer: "vessel", scope: vid, segment: "anchor", dimension: eff.mode === "anchor" ? "anchor" : "driftAnchor", field: "確認自動套用預設", old: "自動（全船隊預設）", new: `單船 · ${eff.mode === "anchor" ? "錨泊" : "漂航"} · W ${eff.warning}／C ${eff.critical} NM`, reason: `${vn}` });
   return true;
 }
-loadAnchorFleetDefault(); loadAnchorAutoSnapshot();
+loadAnchorFleetDefault(); loadAnchorAutoSnapshot(); loadAnchorLast();
 
 /* ── 錨泊設定通知流程 ────────────────────────────────────────────
  *   規格：船舶進入 AIS 錨泊狀態(nav_status 1)時，先「通知監管人員」，
@@ -8141,7 +8204,7 @@ function statusBadge(status) {
 }
 /* 事件狀態徽章：條件已消失（cleared）時顯示【警報已解除】，否則顯示處理流程狀態。 */
 function eventStatusBadge(e) {
-  if (e && e.cleared) {
+  if (e && e.cleared && e.status !== "resolved") {   // 2026-09-23：已由人員結案者顯示「已解決」，不再覆蓋為「警報已解除」
     return `<span class="ev-status" style="background:rgba(110,224,148,0.15);color:var(--k-6ee094)">警報已解除 / Alarm Cleared</span>`;
   }
   return statusBadge(e ? e.status : null);
@@ -8333,12 +8396,12 @@ function dimDescription(v, k, a) {
     case "dest": {
       const d = a._dest;
       if (!d || d.level === "na") return `目的地資料不足 / insufficient data`;
-      const fmt = p => p ? `${escapeHtml(p.code)}${p.name ? ` ${escapeHtml(p.name)}` : ""}` : "—";
+      const fmt = p => p && (p.code || p.name) ? `${escapeHtml(p.code || "")}${p.name ? ` ${escapeHtml(p.name)}` : ""}`.trim() : "（未填）";
       const areaTxt = d.area ? fmt(d.area) : "航行中（未在港區）/ underway";
       const body = `<span style="color:var(--k-5e6b80)">AIS 目的地 ${fmt(d.ais)}｜實際港區 ${areaTxt}｜計畫目的港 ${fmt(d.plan)}</span>`;
       if (d.level === "warning")
-        return `<span style="color:var(--k-f5b753)">⚠ 三者不一致，請研判（可能改港 / AIS 誤植 / 計畫未更新）</span><br>${body}`;
-      return `<span style="color:var(--k-6ee094)">✓ 一致</span><br>${body}`;
+        return `<span style="color:var(--k-f5b753)">⚠ ${escapeHtml(d.reason || "不一致")}，請研判（可能改港 / AIS 誤植或漏填 / 計畫未更新）</span><br>${body}`;
+      return `<span style="color:var(--k-6ee094)">✓ 一致${d.fuzzy ? "（模糊比對）" : ""}</span><br>${body}`;
     }
     default: return "";
   }
@@ -8503,10 +8566,10 @@ function renderUpperArea(enriched) {
 
         <h3>目的地一致性 <span style="color:var(--k-5e6b80);text-transform:none;font-weight:400">/ Destination Check</span></h3>
         <div class="kv">
-          <span class="k">AIS 目的地 / AIS Dest</span><span class="v mono">${a._dest && a._dest.ais ? escapeHtml(a._dest.ais.code) + (a._dest.ais.name ? " " + escapeHtml(a._dest.ais.name) : "") : "—"}</span>
+          <span class="k">AIS 目的地 / AIS Dest</span><span class="v mono">${a._dest && a._dest.ais && (a._dest.ais.code || a._dest.ais.name) ? escapeHtml(a._dest.ais.code || "") + (a._dest.ais.name ? " " + escapeHtml(a._dest.ais.name) : "") : "—"}</span>
           <span class="k">實際港區 / Port Area</span><span class="v mono">${a._dest && a._dest.area ? escapeHtml(a._dest.area.code) + (a._dest.area.name ? " " + escapeHtml(a._dest.area.name) : "") : "航行中 / underway"}</span>
           <span class="k">計畫目的港 / Plan Dest</span><span class="v mono">${a._dest && a._dest.plan ? escapeHtml(a._dest.plan.code) + (a._dest.plan.name ? " " + escapeHtml(a._dest.plan.name) : "") : "—"}</span>
-          <span class="k">一致性 / Match</span><span class="v">${a._dest && a._dest.level === "warning" ? '<span style="color:var(--k-f5b753);font-weight:600">⚠ 不一致，請研判</span>' : (a._dest && a._dest.level === "normal") ? '<span style="color:var(--k-6ee094);font-weight:600">✓ 一致</span>' : '<span style="color:var(--k-7c8a9e)">N/A</span>'}</span>
+          <span class="k">一致性 / Match</span><span class="v">${a._dest && a._dest.level === "warning" ? `<span style="color:var(--k-f5b753);font-weight:600">⚠ ${escapeHtml(a._dest.reason || "不一致")}，請研判</span>` : (a._dest && a._dest.level === "normal") ? `<span style="color:var(--k-6ee094);font-weight:600">✓ 一致${a._dest.fuzzy ? "（模糊比對）" : ""}</span>` : '<span style="color:var(--k-7c8a9e)">N/A</span>'}</span>
         </div>
 
       </aside>
@@ -10602,10 +10665,10 @@ function renderDetail(vesselId) {
     } else if (k === "dest") {
       const d = a._dest;
       if (!d || d.level === "na") metaText = "目的地資料不足";
-      else { const fmt = p => p ? p.code : "—";
+      else { const fmt = p => p && (p.code || p.name) ? (p.code || p.name) : "未填";
         metaText = d.level === "warning"
-          ? `⚠ 不一致：AIS ${fmt(d.ais)} / 港區 ${d.area ? fmt(d.area) : "航行中"} / 計畫 ${fmt(d.plan)}`
-          : `✓ 目的地一致（${fmt(d.plan)}）`;
+          ? `⚠ ${d.reason || "不一致"}：AIS ${fmt(d.ais)} / 港區 ${d.area ? fmt(d.area) : "航行中"} / 計畫 ${fmt(d.plan)}`
+          : `✓ 目的地一致${d.fuzzy ? "（模糊）" : ""}（${fmt(d.plan)}）`;
       }
     }
     const ev = vEventsMap[k];
@@ -10989,7 +11052,7 @@ function renderEvents() {
   //   狀態順序（升序）：新立案 > 處理中 > 已解決 > 警報已解除（警報已解除自成一個層級，置於最後）
   const statusRank = { new: 0, in_progress: 1, resolved: 2 };
   const levelRank  = { critical: 0, warning: 1 };
-  const erank = e => e.cleared ? 3 : (statusRank[e.status] ?? 9);  // 警報已解除 → tier 3
+  const erank = e => (e.cleared && e.status !== "resolved") ? 3 : (statusRank[e.status] ?? 9);  // 警報已解除 → tier 3（已解決者維持 tier 2）
   // 代理檢視（顯示全部船舶）時：自己管理船舶的事件排在前面，其他人的排在後面
   const myIds = new Set(VESSELS.filter(v => v.manager === _currentUser).map(v => v.vessel_id));
   const mineRank = e => myIds.has(e.vessel_id) ? 0 : 1;
@@ -11327,7 +11390,7 @@ window.openEventModal = function(evId) {
     <h3>${dim.icon()} ${dim.label} <span style="color:var(--k-7c8a9e);font-size:16px;font-weight:400">/ ${dim.short}</span></h3>
     <div class="modal-sub">
       ${e.id} · ${escapeHtml(e.vessel_name)} (IMO ${v?.imo || "-"})
-      ${e.cleared ? `<span style="margin-left:8px;color:var(--k-6ee094)">· 警報已解除 / Alarm Cleared</span>` : ""}
+      ${e.cleared && e.status !== "resolved" ? `<span style="margin-left:8px;color:var(--k-6ee094)">· 警報已解除 / Alarm Cleared</span>` : ""}
     </div>
 
     <h4>當前狀態 / Current Status</h4>
@@ -16932,6 +16995,33 @@ function wireAlertSettings() {
 loadThresholds();
 loadAlertSettings();
 loadEvents();
+/* 2026-09-23 Demo 範例事件：預置一筆「人工已解決」與一筆「警報已解除」，供事件處理頁展示兩種樣式。
+ *   選一艘目前航線偏移／速度異常皆正常的船，開立上月事件 → 同步時條件不成立即標 cleared；resolved 者顯示已解決。 */
+(function seedDemoEvents() {
+  const KEY = "slab_va_demo_ev_v1";
+  try { if (localStorage.getItem(KEY)) return; } catch (e) { return; }
+  const cand = VESSELS.find(v => { const a = computeAlerts(v); return a.route !== "critical" && a.route !== "warning" && a.speed !== "critical" && a.speed !== "warning"; });
+  if (!cand) return;
+  const mgr = cand.manager || null, vid = cand.vessel_id;
+  const idR = `${vid}-route-202605`, idS = `${vid}-speed-202605`;
+  if (!_events.find(e => e.id === idR)) _events.push({
+    id: idR, vessel_id: vid, vessel_name: cand.vessel_name, dimension: "route", level: "warning", opened_at: "2026-05-18 06:40",
+    status: "new", assignee: mgr, notes: [],
+    history: [{ from: null, to: "new", at: "2026-05-18 06:40", by: "system", note: mgr ? `auto-assigned to ${mgr}` : undefined }],
+  });
+  if (!_events.find(e => e.id === idS)) _events.push({
+    id: idS, vessel_id: vid, vessel_name: cand.vessel_name, dimension: "speed", level: "warning", opened_at: "2026-05-12 14:10",
+    status: "resolved", assignee: mgr,
+    notes: [{ at: "2026-05-12 15:02", by: mgr || "operator", text: "已聯繫船長，配合避風減速；確認後結案。" }],
+    history: [
+      { from: null, to: "new", at: "2026-05-12 14:10", by: "system", note: mgr ? `auto-assigned to ${mgr}` : undefined },
+      { from: "new", to: "in_progress", at: "2026-05-12 14:25", by: mgr || "operator" },
+      { from: "in_progress", to: "resolved", at: "2026-05-12 15:02", by: mgr || "operator" },
+    ],
+  });
+  saveEvents();
+  try { localStorage.setItem(KEY, "1"); } catch (e) {}
+})();
 syncEventsFromAlerts();
 applySidebarState();
 initUserSwitcher();
