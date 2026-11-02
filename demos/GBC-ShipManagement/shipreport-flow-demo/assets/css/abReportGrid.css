@@ -1,0 +1,15 @@
+.tooltip-btn.btn {
+  box-shadow: none;
+  outline: none;
+}
+.tooltip-btn.btn:focus {
+  box-shadow: none !important;
+  outline: none !important;
+}.tooltip-btn.btn {
+  box-shadow: none;
+  outline: none;
+}
+.tooltip-btn.btn:focus {
+  box-shadow: none !important;
+  outline: none !important;
+}

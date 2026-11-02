@@ -1,0 +1,115 @@
+.loading-wrap {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  background: rgba(0, 0, 0, 0.99);
+}
+
+.lading-LineWrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-bottom: 0.5rem;
+}
+.lading-LineWrap .line {
+  color: white;
+  width: 3px;
+  height: 15px;
+  background: white;
+  margin: 0 2px;
+  display: inline-block;
+  animation: Line-opacity 1000ms infinite ease-in-out;
+}
+.lading-LineWrap .line-1 {
+  animation-delay: 800ms;
+}
+.lading-LineWrap .line-2 {
+  animation-delay: 600ms;
+}
+.lading-LineWrap .line-3 {
+  animation-delay: 400ms;
+}
+.lading-LineWrap .line-4 {
+  animation-delay: 200ms;
+}
+.lading-LineWrap .line-6 {
+  animation-delay: 200ms;
+}
+.lading-LineWrap .line-7 {
+  animation-delay: 400ms;
+}
+.lading-LineWrap .line-8 {
+  animation-delay: 600ms;
+}
+.lading-LineWrap .line-9 {
+  animation-delay: 800ms;
+}
+
+.loader-text {
+  width: 100%;
+  text-align: center;
+  color: white;
+  font-family: "Arial", sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.loader-text::after {
+  display: block;
+  width: 100%;
+  content: "loading";
+  animation: load-txt 2s linear infinite;
+}
+
+div.dataTables_processing {
+  background: transparent;
+  border: 0;
+  box-shadow: 0 0 0 0 transparent;
+}
+div.dataTables_processing > div:last-child {
+  display: none;
+}
+
+.DataTable-processing {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.95);
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  min-height: 90px;
+}
+
+@keyframes Line-opacity {
+  0% {
+    opacity: 1;
+    height: 18px;
+  }
+  50% {
+    opacity: 0;
+    height: 15px;
+  }
+  100% {
+    opacity: 1;
+    height: 18px;
+  }
+}
+@keyframes load-txt {
+  0% {
+    content: "loading";
+  }
+  33% {
+    content: "loading.";
+  }
+  67% {
+    content: "loading..";
+  }
+  100% {
+    content: "loading...";
+  }
+}
