@@ -203,81 +203,69 @@ ol.q .df{display:block;color:var(--mute);font-size:11.5px}
 .sum-sec{padding:10px 12px;border-top:1px solid var(--hair)}
 .sum-h{display:flex;align-items:baseline;gap:8px;margin-bottom:7px}
 .sum-h b{font-size:.92em;color:var(--ink)}
-.sum-h .n{font-size:.78em;font-weight:900;color:#fff;background:var(--red);border-radius:6px;padding:1px 7px}
-.sum-h .n.zero{background:#c4ccd4}
-.sum-h small{font-size:.7em;color:#7c8b98;margin-left:auto;text-align:right}
-.sum-names{font-size:.76em;color:#5b6b78;margin-top:6px;line-height:1.45}
-.sum-none{font-size:.8em;color:var(--grn-d);font-weight:700}
-.sum-foot{padding:8px 12px 4px;font-size:.76em;color:#5b6b78;border-top:1px solid var(--hair);line-height:1.6}
-.pbtn{display:block;width:calc(100% - 24px);margin:8px 12px 12px;background:var(--navy);color:#fff;border:0;border-radius:10px;font:inherit;font-weight:900;font-size:.95em;padding:12px;cursor:pointer}
-.pbtn.ppl{background:var(--teal)}.pbtn.cargo{background:var(--amber)}
-.pbtn:focus-visible{outline:3px solid #3a7bd5;outline-offset:2px}
-.lsty{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;border-top:1px solid var(--hair);font-size:.82em;color:#5b6b78;font-weight:700}
-.lseg{display:inline-flex;border:1px solid #c4ccd4;border-radius:8px;overflow:hidden;flex:none}
-.lseg button{background:#fff;border:0;color:#5b6b78;font:inherit;font-weight:800;padding:6px 11px;cursor:pointer}
-.lseg button+button{border-left:1px solid #c4ccd4}
-.lseg button.on{background:var(--navy);color:#fff}
-.lseg button:focus-visible{outline:2px solid #3a7bd5;outline-offset:-2px}
+.cum{margin:10px 12px 2px;border-radius:9px;padding:8px 10px;font-size:.84em;line-height:1.5;background:var(--red-bg);color:#8f1d22;font-weight:700}
 .tier{font-size:.6em;font-weight:900;padding:2px 6px;border-radius:7px;margin-left:5px;white-space:nowrap;display:inline-block;vertical-align:2px}
-.tier.now{background:var(--red);color:#fff}
 .tier.h12{background:rgba(229,72,77,.14);color:var(--red-d)}
 .tier.h24{background:rgba(229,72,77,.09);color:#b5474b}
 .tier.d30{background:#EEF2F6;color:#5b6b78}
 .tier.x{background:#EEF2F6;color:#8a97a3}
+.hero .tier{font-size:.85em;background:rgba(255,255,255,.2);color:#fff}
 table.def td.tl{white-space:nowrap}
+.srcrow{display:flex;gap:8px;align-items:flex-start;margin-top:6px}
+.srcl{flex:none;width:2.6em;font-size:.78em;font-weight:900;color:#5b6b78;padding-top:.55em}
+.srcrow .grid{flex:1;min-width:0}
+</style>
+<style>
+.secd{margin-left:auto;font-size:.7em;color:#7c8b98;white-space:nowrap}
+.ev .st-on{color:var(--red-d);font-weight:900}
 </style>
 <div class="wrap">
   <aside class="brief">
     <div>
-      <div class="eyebrow">LINE 船隊安全 · 流程調整 v6</div>
-      <h1>航安狀態警示<br><span>異常摘要 → 全部清單</span></h1>
+      <div class="eyebrow">LINE 船隊安全 · 全部清單 v15（2026-11-13）</div>
+      <h1>船隊安全<br><span>近 12 小時／12～24 小時／24 小時～30 天</span></h1>
     </div>
-    <p class="lead">點「航安狀態警示」先看一張<b>異常摘要</b>：即時、24 小時內、30 日內各有哪些船出過狀況。要看全部的船，再點「全部清單」，清單依異常遠近排序。人安、貨安流程相同，沒有即時這一段。</p>
+    <p class="lead">航安、人安、貨安點進去直接是<b>全部清單</b>：頂端一行累計艘數，下方依最近一次異常的時間分段，每艘船只出現一次；航安、人安、貨安畫面相同，AIS／風險在單船明細區分。篩選只有船型。</p>
 
     <div class="box">
       <h3>操作流程（點選可跳到該畫面）</h3>
       <div class="flow">
         <button class="step" onclick="go(1)"><span class="n">1</span><span><b>圖文選單「船隊安全」</b><small>沿用現有入口</small></span></button>
-        <button class="step" onclick="go(2)"><span class="n">2</span><span><b>安全總覽：航安／人安／貨安</b><small>三個選項不變；卡片下方可切換全部清單樣式 A／B</small></span></button>
-        <button class="step" onclick="go(3)"><span class="n">3</span><span><b>航安異常摘要</b><small>即時異常／24 小時內／30 日內 三段，船名以單字格排列；底部「全部清單」</small></span></button>
-        <button class="step" onclick="go(4)"><span class="n">4</span><span><b>全部清單（32 艘）</b><small>依 即時 → 12 小時 → 24 小時 → 30 日 → 無資料 → 正常 排序，每頁 8 艘、上一頁／下一頁</small></span></button>
-        <button class="step" onclick="go(5)"><span class="n">5</span><span><b>點船名 → 單船明細</b><small>正式版單頁；事件歷程分 近 12 小時／12–24 小時／1–30 日</small></span></button>
-        <button class="step" onclick="go(6)"><span class="n">6</span><span><b>人安異常摘要</b><small>24 小時內／30 日內 兩段（人安、貨安無即時）</small></span></button>
+        <button class="step" onclick="go(2)"><span class="n">2</span><span><b>安全總覽：航安／人安／貨安</b><small>三個選項不變，右側＝30 天內曾異常艘數</small></span></button>
+        <button class="step" onclick="go(3)"><span class="n">3</span><span><b>航安全部清單</b><small>近 12 小時 → 12～24 小時 → 24 小時～30 天 → 無資料 → 正常；每段標題旁寫實際日期；每艘只出現一次，AIS／風險不分排，點進明細看</small></span></button>
+        <button class="step" onclick="go(4)"><span class="n">4</span><span><b>篩選：🚢 船型</b><small>三個面向相同。示範：船型 C</small></span></button>
+        <button class="step" onclick="go(5)"><span class="n">5</span><span><b>點船名 → 單船明細</b><small>碩明：AIS、風險各有持續中事件</small></span></button>
+        <button class="step" onclick="go(6)"><span class="n">6</span><span><b>人安全部清單</b><small>單一來源，一排</small></span></button>
       </div>
     </div>
 
     <div class="box">
-      <h3>全部清單樣式（請擇一）</h3>
-      <div class="seg2" role="group" aria-label="清單樣式">
-        <button id="lsA" class="on" onclick="setLStyle('list')">A 列表</button>
-        <button id="lsB" onclick="setLStyle('grid')">B 方格單字</button>
-      </div>
-      <p class="vnote" id="lsnote"></p>
-    </div>
-
-    <div class="box">
-      <h3>分段與排序規則</h3>
+      <h3>時間分段（以 11/13 11:00 為現在）</h3>
       <table class="def">
-        <tr><th>順位</th><th>分段</th><th>定義</th><th>清單標記</th></tr>
-        <tr><td class="c">1</td><td class="tl"><b>即時異常</b></td><td>最新一筆資料 AIS 或風險為紅燈／黃燈（僅航安）</td><td><span class="tier now">即時</span></td></tr>
-        <tr><td class="c">2</td><td class="tl"><b>12 小時內</b></td><td>最近一次異常在 12 小時內</td><td><span class="tier h12">⏱12h</span></td></tr>
-        <tr><td class="c">3</td><td class="tl"><b>24 小時內</b></td><td>最近一次異常在 12–24 小時</td><td><span class="tier h24">⏱24h</span></td></tr>
-        <tr><td class="c">4</td><td class="tl"><b>30 日內</b></td><td>最近一次異常在 1–30 日</td><td><span class="tier d30">⏱30日</span></td></tr>
-        <tr><td class="c">5</td><td class="tl">無資料</td><td>AIS 中斷／未回報</td><td><span class="tier x">無資料</span></td></tr>
-        <tr><td class="c">6</td><td class="tl">正常</td><td>30 日內無異常</td><td>—</td></tr>
+        <tr><th>頂端累計</th><th>期間</th></tr>
+        <tr><td>12 小時內</td><td>11/12 23:00～11/13 11:00</td></tr>
+        <tr><td>24 小時內</td><td>11/12 11:00～11/13 11:00</td></tr>
+        <tr><td>30 天內</td><td>10/14 11:00～11/13 11:00</td></tr>
       </table>
-      <p class="vnote">異常摘要的三段<b>由短到長累計</b>：24 小時內包含即時異常的船，30 日內包含前兩段的全部，所以艘數會遞增（航安 4 → 6 → 8）。格內數字只出現在 30 日內那段，代表 30 日內異常次數。全部清單仍用左表的順位排序，每艘只出現一次。</p>
+      <table class="def" style="margin-top:10px">
+        <tr><th>順位</th><th>分段</th><th>條件</th></tr>
+        <tr><td class="c">1</td><td class="tl"><b>近 12 小時</b></td><td>最近一次異常在 11/12 23:00～11/13 11:00，或目前仍持續</td></tr>
+        <tr><td class="c">2</td><td class="tl"><b>12～24 小時</b></td><td>最近一次異常在 11/12 11:00～23:00</td></tr>
+        <tr><td class="c">3</td><td class="tl"><b>24 小時～30 天</b></td><td>最近一次異常在 10/14 11:00～11/12 11:00</td></tr>
+        <tr><td class="c">4</td><td class="tl">無資料</td><td>AIS 中斷／未回報</td></tr>
+        <tr><td class="c">5</td><td class="tl">正常</td><td>30 天內無異常</td></tr>
+      </table>
+      <p class="vnote"><b>每艘船只列在最近一次異常的時段</b>：近 12 小時有事件的船，不會再出現在 12～24 小時或 24 小時～30 天。三段艘數相加＝頂端「30 天內」艘數。航安與人安、貨安相同，每段一排；是 AIS 還是風險，點進單船明細看（事件前綴「AIS｜」「風險｜」）。每段標題旁寫實際日期，避免把時間段誤會成未來。格子只有船名、不顯示次數；持續中的事件算在「近 12 小時」。紅、黃燈都算異常。</p>
     </div>
 
     <div class="box">
       <h3>待與陽明確認</h3>
       <ol class="q">
-        <li><b>摘要三段採累計</b>：24 小時內包含即時異常的船、30 日內包含全部，與「往前 24 小時／30 日內是否有異常」的定義一致。</li>
-        <li><b>人安／貨安當日回報仍為異常</b>：沒有即時，原型依回報時間歸到 12 或 24 小時段。是否另外標「未解除」？</li>
-        <li><b>黃燈（Warning）算異常</b>：已確定。紅燈、黃燈都列入即時異常與次數計算。<span class="df">示範：盛明風險黃燈（濃霧）列為即時異常</span></li>
-        <li><b>30 日</b>是否含當日（原型：含）。</li>
-        <li>原本客戶提的「即時／一日／一月切換」改由這張摘要一次呈現，是否同意不再需要切換？</li>
+        <li><b>清單不顯示次數</b>：原需求「一月檢視在船名旁顯示 30 日內異常次數」改為在單船明細顯示「近 30 天・共 N 次」。</li>
+        <li><b>30 天</b>是否含當日（原型：從現在往回推 30×24 小時）。</li>
+        <li>後端航安每筆事件需記錄來源（AIS／風險），供單船明細顯示。</li>
       </ol>
+      <p class="vnote">「尚未解除（狀況持續中／已恢復・未結案）」功能已規劃但暫不開放，原型中隱藏。示範事件皆為系統監控項目。前版保留：_20261113_AIS風險兩排.html、_20261112.html、_20261021.html。</p>
     </div>
   </aside>
 
@@ -303,213 +291,218 @@ table.def td.tl{white-space:nowrap}
 </div>
 
 <script>
-/* ===== 示範資料（32 艘主檔；燈號與事件為示意） ===== */
+/* ===== 示範資料（32 艘主檔；事件皆為系統監控項目，示意用） ===== */
 const SHIPS=[["常明","YM UPWARD","U"],["安明","YM UTILITY","U"],["團明","YM UNIFORM","U"],["結明","YM UNIFORMITY","U+"],["恆明","YM UBIQUITY","U+"],["續明","YM UNANIMITY","U+"],["震明","YM MUTUALITY","M+"],["動明","YM MOBILITY","M+"],["盛明","YM MILESTONE","M+"],["菊明","YM COSMOS","M"],["達明","YM SUCCESS","M"],["源明","YM FOUNTAIN","M"],["財明","YM WEALTH","M"],["梅明","YM PLUM","M"],["創明","YM EVOLUTION","E+"],["實明","YM ESSENCE","E+"],["卓明","YM EXCELLENCE","E+"],["發明","YM EFFICIENCY","E"],["展明","YM ETERNITY","E"],["碩明","YM CELEBRITY","C"],["川明","YM CAPACITY","C"],["永明","YM CONSTANCY","C"],["百明","YM CENTENNIAL","C"],["英明","YM IDEALS","I"],["精明","YM INTELLIGENT","I"],["集明","YM INCREMENT","I"],["近明","YM INSTRUCTION","I"],["通明","YM INVENTIVE","I"],["鎮明","YM HARMONY","H"],["環明","YM HORIZON","H"],["宇明","YM HEIGHTS","H"],["威明","YM HAWK","H"]];
 const TITLE={nav:"航安",ppl:"人安",cargo:"貨安"};
-/* w＝最近一次異常距今小時；n＝30 日內異常次數；now＝目前仍異常 */
-const EV={
- nav:{"碩明":{now:1,w:2,n:7,d:"偏離計畫航線並接近淺水區"},"英明":{now:1,w:3,n:5,d:"主機轉速異常，減速航行中"},"達明":{now:1,w:5,n:4,d:"AIS：Not under command（失去操縱）"},"震明":{now:1,w:6,n:3,d:"壓載水系統滲漏，監控中"},
-      "盛明":{now:1,w:1,n:1,d:"濃霧能見度不足（風險中度注意）"},"動明":{w:7,n:2,d:"AIS 訊號不穩定"},"菊明":{w:15,n:2,d:"接近港區交通管制範圍"},"創明":{w:6*24,n:1,d:"進入夜航密集區"},"川明":{w:12*24,n:1,d:"短暫偏離計畫航線"},"威明":{x:1,d:"AIS 訊號中斷逾時，無最新資料"}},
- ppl:{"碩明":{w:9,n:3,d:"輪機部大管輪發燒 38.5°C，隔離觀察中"},"達明":{w:10,n:2,d:"船長腰部拉傷，行動受限"},"團明":{w:16,n:1,d:"甲板部一員手部割傷，已包紮"},"集明":{w:9*24,n:1,d:"船員暈眩送醫評估"},"宇明":{x:1,d:"今日尚未送出每日安全回報"}},
- cargo:{"碩明":{w:8,n:3,d:"甲板貨櫃綁紮鬆動，複查中"},"源明":{w:11,n:1,d:"貨櫃輕微變形，待靠港檢查"},"英明":{w:13,n:4,d:"第 3 艙冷藏櫃溫度偏高"},"震明":{w:17,n:2,d:"危險品櫃文件待補確認"},"財明":{w:15*24,n:1,d:"冷藏櫃插電異常"},"宇明":{x:1,d:"今日尚未送出每日安全回報"}}
+const NOW="2026/11/13 11:00";
+/* 「尚未解除」功能：已規劃，暫不開放（設 true 即顯示） */
+const SHOW_OPEN=false;
+/* 每筆「最近事件」：w＝立案距今小時；n＝30 天內發生次數；on＝狀況仍持續；open＝尚未結案 */
+const SRC={
+ nav:{
+  "碩明":{ais:{w:4,n:3,on:1,open:1,d:"航行狀態：Aground（擱淺）"},risk:{w:2,n:4,on:1,open:1,d:"航線偏移（XTD 超過閾值）"}},
+  "英明":{risk:{w:3,n:5,on:1,open:1,d:"主機異常（轉速偏低）"}},
+  "達明":{ais:{w:5,n:3,on:1,open:1,d:"航行狀態：Not under command（失去操縱）"},risk:{w:8,n:1,open:1,d:"速度異常（低於建議航速）"}},
+  "震明":{risk:{w:6,n:2,on:1,open:1,d:"漂航圈偏移"},ais:{w:9,n:1,d:"訊號間歇中斷"}},
+  "盛明":{risk:{w:1,n:1,on:1,open:1,d:"海氣象預警（浪高超過閾值）"}},
+  "動明":{ais:{w:7,n:2,open:1,d:"訊號不穩定"}},
+  "卓明":{risk:{w:5,n:1,d:"速度異常（港區超速）"}},
+  "菊明":{risk:{w:15,n:2,d:"到港提醒（進入港區電子圍籬）"}},
+  "創明":{risk:{w:144,n:1,d:"進入軍演電子圍籬"}},
+  "川明":{ais:{w:288,n:1,d:"訊號中斷 8 分鐘"}},
+  "環明":{ais:{w:18*24,n:1,on:1,open:1,d:"目的地未填"}},
+  "精明":{ais:{w:35*24,n:0,open:1,d:"目的地與航行計畫不一致"}}
+ },
+ ppl:{
+  "碩明":{main:{w:9,n:3,on:1,open:1,d:"輪機部大管輪發燒 38.5°C，隔離觀察中"}},
+  "達明":{main:{w:10,n:2,on:1,open:1,d:"船長腰部拉傷，行動受限"}},
+  "近明":{main:{w:21*24,n:1,on:1,open:1,d:"船員腿部骨折，等候靠港下船"}},
+  "團明":{main:{w:16,n:1,d:"甲板部一員手部割傷，已包紮"}},
+  "集明":{main:{w:216,n:1,d:"船員暈眩送醫評估"}}
+ },
+ cargo:{
+  "碩明":{main:{w:8,n:3,on:1,open:1,d:"甲板貨櫃綁紮鬆動，複查中"}},
+  "源明":{main:{w:11,n:1,on:1,open:1,d:"貨櫃輕微變形，待靠港檢查"}},
+  "英明":{main:{w:13,n:4,open:1,d:"第 3 艙冷藏櫃溫度偏高"}},
+  "震明":{main:{w:17,n:2,d:"危險品櫃文件待補確認"}},
+  "財明":{main:{w:360,n:1,d:"冷藏櫃插電異常"}}
+ }
 };
-const AIS={"碩明":"r","達明":"r","震明":"y","威明":"x"};
-const RISK={"震明":"r","碩明":"r","英明":"r","達明":"y","盛明":"y"};
+const NODATA={nav:{"威明":"AIS 訊號中斷逾時，無最新資料"},ppl:{"宇明":"今日尚未送出每日安全回報"},cargo:{"宇明":"今日尚未送出每日安全回報"}};
+const AIS={"碩明":"r","達明":"r","環明":"y","威明":"x"};
+const RISK={"碩明":"r","英明":"r","震明":"r","盛明":"y"};
 const aisOf=cn=>AIS[cn]||"g", riskOf=cn=>RISK[cn]||"g";
-const TIER_RANK={now:0,h12:1,h24:2,d30:3,x:4,ok:5};
-const TIER_LBL={now:"即時",h12:"⏱12h",h24:"⏱24h",d30:"⏱30日",x:"無資料",ok:""};
-function tier(dom,cn){
-  const e=EV[dom][cn]; if(!e) return "ok"; if(e.x) return "x";
-  if(dom==="nav"&&[aisOf(cn),riskOf(cn)].some(v=>v==="r"||v==="y")) return "now";
-  return e.w<=12?"h12":e.w<=24?"h24":"d30";
+const SRCN={ais:"AIS",risk:"風險",main:""};
+const SEC={h12:"近 12 小時",h24:"12～24 小時",d30:"24 小時～30 天",x:"無資料",ok:"正常"};
+const SECDATE={h12:"11/12 23:00～現在",h24:"11/12 11:00～23:00",d30:"10/14 11:00～11/12 11:00"};
+const RANK={open:0,h12:1,h24:2,d30:3,x:4,ok:5};
+const parts=(dom,cn)=>Object.entries(SRC[dom][cn]||{});
+/* 單一來源（或人安／貨安）所屬時段 */
+const tierOf=e=>!e?"ok":(e.on||e.w<=12)?"h12":e.w<=24?"h24":e.w<=720?"d30":"ok";
+function shipState(dom,cn){
+  if(NODATA[dom][cn]) return {t:"x"};
+  const p=parts(dom,cn); if(!p.length) return {t:"ok"};
+  const open=p.filter(([,e])=>e.open);
+  if(SHOW_OPEN&&open.length) return {t:"open",sub:open.some(([,e])=>e.on)?"on":"cleared",cnt:open.length,age:Math.max(...open.map(([,e])=>e.w))};
+  const last=p.reduce((a,b)=>a[1].w<=b[1].w?a:b)[1];
+  return {t:p.some(([,e])=>e.on)?"h12":tierOf(last),n:p.reduce((a,[,e])=>a+e.n,0)};
 }
-function ranked(dom){
-  return SHIPS.map((sh,i)=>({sh,i,t:tier(dom,sh[0]),n:(EV[dom][sh[0]]||{}).n||0}))
-    .sort((a,b)=>TIER_RANK[a.t]-TIER_RANK[b.t]||b.n-a.n||a.i-b.i);
-}
+function inWindow(dom,cn,h){return parts(dom,cn).some(([,e])=>e.w<=h||e.on);}
+/* 事件所屬時段：持續中的事件算在近 12 小時；清單與明細共用 */
+const sliceOf=e=>e.st==="on"||e.w<=12?"h12":e.w<=24?"h24":e.w<=720?"d30":null;
+const ageTxt=w=>w<24?`${Math.max(1,Math.round(w))} 小時`:`${Math.floor(w/24)} 天`;
 
 /* ===== chat engine ===== */
 const chat=document.getElementById("chat");
-let t=15;
-function clock(){t++;return "下午7:"+String(40+t%20).padStart(2,"0");}
+let t=0;
+function clock(){t++;return "上午11:"+String(t%60).padStart(2,"0");}
 function clearQR(){const q=document.getElementById("qr");if(q)q.remove();}
-function add(html,isMe){
-  clearQR();
-  const d=document.createElement("div"); d.className="msg"+(isMe?" me":"");
-  d.innerHTML=(isMe?"":'<div class="av">🐟</div>')+html+'<span class="tm">'+clock()+'</span>';
-  chat.appendChild(d); requestAnimationFrame(()=>d.scrollIntoView({block:"start"})); return d;
-}
+function add(html,isMe){clearQR();const d=document.createElement("div");d.className="msg"+(isMe?" me":"");d.innerHTML=(isMe?"":'<div class="av">🐟</div>')+html+'<span class="tm">'+clock()+'</span>';chat.appendChild(d);requestAnimationFrame(()=>d.scrollIntoView({block:"start"}));return d;}
 function me(text){add('<div class="txt">'+text+'</div>',true);}
 function sys(text){const d=document.createElement("div");d.className="sys";d.textContent=text;chat.appendChild(d);}
-function qr(items){
-  const d=document.createElement("div");d.id="qr";d.className="qr";
-  d.innerHTML=items.map(i=>`<button class="qchip" onclick="${i.f}">${i.l}</button>`).join("");
-  chat.appendChild(d);requestAnimationFrame(()=>d.scrollIntoView({block:"end"}));
-}
+function qr(items){const d=document.createElement("div");d.id="qr";d.className="qr";d.innerHTML=items.map(i=>`<button class="qchip" onclick="${i.f}">${i.l}</button>`).join("");chat.appendChild(d);requestAnimationFrame(()=>d.scrollIntoView({block:"end"}));}
 function tileMsg(n){me(n);add('<div class="txt">（現有功能，流程不變，原型略過）</div>');}
 
 function openSafety(){
   me("船隊安全");
-  const c=d=>ranked(d).filter(x=>x.t!=="ok"&&x.t!=="x").length;
+  const c=d=>SHIPS.filter(sh=>SHOW_OPEN?["open","h12","h24","d30"].includes(shipState(d,sh[0]).t):eventsOf(d,sh[0]).some(e=>sliceOf(e))).length;
   add(`<div class="fx"><div class="hero"><div class="k">FLEET SAFETY</div><h2>船隊安全</h2><div class="s">請選擇要查看的安全狀態警示</div></div>
   <div class="ob">
-    <button class="fbtn nav" onclick="openSummary('nav')">🧭 航安狀態警示<span class="cnt">異常 ${c('nav')}</span></button>
-    <button class="fbtn ppl" onclick="openSummary('ppl')">👥 人安狀態警示<span class="cnt">異常 ${c('ppl')}</span></button>
-    <button class="fbtn cargo" onclick="openSummary('cargo')">📦 貨安狀態警示<span class="cnt">異常 ${c('cargo')}</span></button>
-  </div>
-  <div class="lsty"><span>全部清單樣式</span><div class="lseg" role="group" aria-label="全部清單樣式"><button data-s="list" class="${LSTYLE==="list"?"on":""}" onclick="pickLStyle('list')">A 列表</button><button data-s="grid" class="${LSTYLE==="grid"?"on":""}" onclick="pickLStyle('grid')">B 方格</button></div></div>
-  <div class="ft"><div class="upd">異常數＝近 30 日內曾異常艘數 · 🕘 2026/10/21 19:40</div></div></div>`);
-}
-/* 船隊安全卡上直接切換全部清單樣式（與左側說明欄同步） */
-function pickLStyle(s){
-  if(s===LSTYLE) return;
-  setLStyle(s);
-  if(!chat.querySelector(".lrow")&&!chat.querySelector(".fx.wide .cell.g")) sys(s==="list"?"清單樣式：A 列表（進入全部清單時套用）":"清單樣式：B 方格單字（進入全部清單時套用）");
+    <button class="fbtn nav" onclick="openList('nav')">🧭 航安狀態警示<span class="cnt">${SHOW_OPEN?"未解除":"異常"} ${c('nav')}</span></button>
+    <button class="fbtn ppl" onclick="openList('ppl')">👥 人安狀態警示<span class="cnt">${SHOW_OPEN?"未解除":"異常"} ${c('ppl')}</span></button>
+    <button class="fbtn cargo" onclick="openList('cargo')">📦 貨安狀態警示<span class="cnt">${SHOW_OPEN?"未解除":"異常"} ${c('cargo')}</span></button>
+  </div><div class="ft"><div class="upd">${SHOW_OPEN?"未解除＝目前有未結案事件的艘數":"異常數＝30 天內曾異常艘數"} · 🕘 ${NOW}</div></div></div>`);
 }
 
-/* ===== 異常摘要 ===== */
-function chips(dom,list,showN){return `<div class="grid">${list.map(x=>`<button class="cell r" title="${x.sh[0]}" onclick="openShip('${x.sh[0]}','${dom}','sum')">${x.sh[0][0]}${showN&&x.n?x.n:""}</button>`).join("")}</div>`;}
-function sec(dom,title,hint,list,showN,tagUpTo){
-  const TAG={now:"即時",h12:"12h",h24:"24h"};
-  const names=list.map(x=>x.sh[0]+(tagUpTo&&TAG[x.t]&&TIER_RANK[x.t]<=TIER_RANK[tagUpTo]?`（${TAG[x.t]}）`:"")).join("、");
-  return `<div class="sum-sec"><div class="sum-h"><b>${title} ${list.length} 艘</b></div>
-    ${list.length?chips(dom,list,showN)+(tagUpTo?`<div class="sum-names">${names}</div>`:""):`<div class="sum-none">🟢 無</div>`}</div>`;
-}
-function openSummary(dom){
-  me(TITLE[dom]+"狀態警示");
-  const r=ranked(dom);
-  const now=r.filter(x=>x.t==="now"), h24=r.filter(x=>["now","h12","h24"].includes(x.t)), d30=r.filter(x=>["now","h12","h24","d30"].includes(x.t)), nx=r.filter(x=>x.t==="x"), ok=r.filter(x=>x.t==="ok");
-  let body="";
-  if(dom==="nav") body+=sec(dom,"即時異常","最新一筆資料",now,false,null);
-  body+=sec(dom,"24 小時內","10/20 19:40 起",h24,false,"h24");
-  body+=sec(dom,"30 日內","09/22 起 · 格內＝異常次數",d30,true,null);
-  add(`<div class="fx wide"><div class="hero ${dom}"><div class="k">${TITLE[dom].toUpperCase()} · 全船隊 ${SHIPS.length} 艘</div><h2>${TITLE[dom]}異常摘要</h2><div class="s">🕘 查詢時間 2026/10/21 19:40 · 點船名看明細</div></div>
-    ${body}
-    <div class="sum-foot">${nx.length?`⚪ 無資料：${nx.map(x=>x.sh[0]).join("、")}<br>`:""}🟢 其餘 ${ok.length} 艘近 30 日無異常<br>30 日內格中數字＝異常次數</div>
-    <button class="pbtn ${dom}" onclick="openList('${dom}')">≡ 全部清單（${SHIPS.length} 艘）</button></div>`);
-}
-
-/* ===== 全部清單（正式版版型：每頁 8 艘、上一頁／下一頁；篩選走快速回覆） ===== */
+/* ===== 全部清單 ===== */
 const TYPES=[...new Set(SHIPS.map(s=>s[2]))];
-const LVL={r:"🔴",y:"🟡",g:"🟢"};
-let LF={dom:"nav",type:"全部",ais:"全部",risk:"全部",status:"全部"}, LP=1;
-function rowTier(dom,x){const e=EV[dom][x.sh[0]]||{};if(x.t==="ok")return "";return `<span class="tier ${x.t}">${TIER_LBL[x.t]}${x.t==="d30"&&e.n?" "+e.n+"次":""}</span>`;}
-function listRow(dom,x){
-  const cn=x.sh[0];
-  const cur=x.t==="now"?"r":x.t==="x"?"x":(x.t==="h12"||x.t==="h24")&&dom!=="nav"?"r":"g";
-  const lights=dom==="nav"
-    ?`<div class="lw"><span class="dot ${aisOf(cn)}"></span><small>AIS</small></div><div class="lw"><span class="dot ${riskOf(cn)}"></span><small>風險</small></div>`
-    :`<div class="lw"><span class="dot ${cur}"></span><small>${TITLE[dom]}</small></div>`;
-  return `<button class="lrow" onclick="openShip('${cn}','${dom}','list')"><div class="id"><div class="nm">${cn}${rowTier(dom,x)}</div><div class="en">${x.sh[1]} · ${x.sh[2]}</div></div><div class="lights">${lights}</div><span class="chev">›</span></button>`;
-}
-function listData(){
-  const d=LF.dom;
-  return ranked(d).filter(x=>{
-    if(LF.type!=="全部"&&x.sh[2]!==LF.type) return false;
-    if(d==="nav") return (LF.ais==="全部"||aisOf(x.sh[0])===LF.ais)&&(LF.risk==="全部"||riskOf(x.sh[0])===LF.risk);
-    return LF.status==="全部"||(LF.status==="異常"?x.t!=="ok"&&x.t!=="x":x.t==="ok");
-  });
-}
-function filterText(){
-  if(LF.dom==="nav") return `船型:${LF.type}｜AIS:${LF.ais==="全部"?"全部":LVL[LF.ais]}｜風險:${LF.risk==="全部"?"全部":LVL[LF.risk]}`;
-  return `船型:${LF.type}｜狀態:${LF.status==="異常"?"30 日內曾異常":LF.status==="安全"?"30 日內無異常":"全部"}`;
-}
+let LF={dom:"nav",type:"全部"};
+const cellR=(d,cn,n)=>`<button class="cell r" title="${cn}" onclick="openShip('${cn}','${d}')">${cn[0]}${n||""}</button>`;
 function listCard(){
-  const d=LF.dom,l=listData(),P=8;
-  const n=Math.max(1,Math.ceil(l.length/P)); if(LP>n)LP=n;
-  const hero=`<div class="hero ${d}"><div class="k">${filterText()}</div><h2>${TITLE[d]}全部清單</h2><div class="s">共 ${l.length} 艘 · 第 ${LP}/${n} 頁 · 依 即時→12h→24h→30日 排序</div></div>`;
-  if(!l.length) return `<div class="fx">${hero}<div class="lempty">🟢 此條件下無符合船舶</div></div>`;
-  return `<div class="fx">${hero}<div style="padding:4px 8px">${l.slice((LP-1)*P,LP*P).map(x=>listRow(d,x)).join("")}</div>
-   <div class="pager"><button class="gbtn" ${LP<=1?"disabled":""} onclick="turn(-1)">⬅️ 上一頁</button><button class="gbtn" ${LP>=n?"disabled":""} onclick="turn(1)">下一頁 ➡️</button></div></div>`;
-}
-function listQR(){
   const d=LF.dom;
-  const it=[{l:"◎ 異常摘要",f:`openSummary('${d}')`}].concat(d==="nav"?[{l:"🚢 船型",f:"pickType()"},{l:"📟 AIS",f:"pickLight('ais')"},{l:"🚨 風險",f:"pickLight('risk')"}]:[{l:"🚢 船型",f:"pickType()"},{l:"🔎 狀態",f:"pickStatus()"}]);
-  qr(it);
+  const L=SHIPS.filter(sh=>LF.type==="全部"||sh[2]===LF.type).map((sh,i)=>({sh,i,st:shipState(d,sh[0])}));
+  const hero=`<div class="hero ${d}"><div class="k">船型:${LF.type}</div><h2>${TITLE[d]}全部清單</h2><div class="s">共 ${L.length} 艘 · 🕘 ${NOW} · 點船名看明細</div></div>`;
+  if(!L.length) return `<div class="fx wide">${hero}<div class="lempty">🟢 此條件下無符合船舶</div></div>`;
+  const EVS=Object.fromEntries(L.map(x=>[x.sh[0],eventsOf(d,x.sh[0])]));
+  const cnt=(cn,ks,src)=>EVS[cn].filter(e=>ks.includes(sliceOf(e))&&(!src||e.k===src)).length;
+  const cw=h=>SHOW_OPEN?L.filter(x=>inWindow(d,x.sh[0],h)).length:L.filter(x=>cnt(x.sh[0],h===12?["h12"]:h===24?["h12","h24"]:["h12","h24","d30"])>0).length;
+  const openL=L.filter(x=>x.st.t==="open");
+  const cum=`<div class="cum">12 小時內 ${cw(12)} 艘｜24 小時內 ${cw(24)} 艘｜30 天內 ${cw(720)} 艘${SHOW_OPEN?`<br>尚未解除 ${openL.length} 艘`:""}</div>`;
+  let body="";
+  if(openL.length){
+    const rows=[["on","狀況持續中"],["cleared","已恢復・未結案"]].map(([k,lab])=>{
+      const g=openL.filter(x=>x.st.sub===k).sort((a,b)=>b.st.age-a.st.age);
+      if(!g.length) return "";
+      return `<div class="srcrow"><span class="srcl" style="width:6.6em">${lab}</span><div class="grid">${g.map(x=>cellR(d,x.sh[0],x.st.cnt)).join("")}</div></div><div class="rowtxt" style="margin-left:7.3em">${g.map(x=>`${x.sh[0]} ${x.st.age>720?`<b>${ageTxt(x.st.age)}</b>`:ageTxt(x.st.age)}`).join("、")}</div>`;
+    }).join("");
+    body+=`<div class="sum-sec"><div class="sum-h"><b>尚未解除 ${openL.length} 艘</b></div>${rows}</div>`;
+  }
+  if(!SHOW_OPEN){
+    /* 每艘船只列在最近一次異常的時段；同時段內依來源分排；格子不顯示數字 */
+    const tierS=cn=>["h12","h24","d30"].find(k=>cnt(cn,[k])>0)||null;
+    for(const k of ["h12","h24","d30"]){
+      const inK=L.filter(x=>tierS(x.sh[0])===k); if(!inK.length) continue;
+      const uniq=inK.length;
+      /* 航安：每艘只出現一次，依來源分三排：AIS＋風險／AIS／風險 */
+      const grid=g=>`<div class="grid">${g.map(x=>cellR(d,x.sh[0],"")).join("")}</div>`;
+      let rows;
+      if(false){ /* 航安來源分排：已改為與人安／貨安相同，一排顯示，來源點進明細看 */
+        const has=(x,src)=>cnt(x.sh[0],[k],src)>0;
+        rows=[["AIS＋風險",inK.filter(x=>has(x,"ais")&&has(x,"risk"))],["AIS",inK.filter(x=>has(x,"ais")&&!has(x,"risk"))],["風險",inK.filter(x=>!has(x,"ais")&&has(x,"risk"))]]
+          .filter(([,g])=>g.length).map(([lab,g])=>`<div class="srcrow"><span class="srcl" style="width:5.4em;white-space:nowrap">${lab}</span>${grid(g)}</div>`).join("");
+      }else rows=grid(inK);
+      body+=`<div class="sum-sec"><div class="sum-h"><b>${SEC[k]} ${uniq} 艘</b><small class="secd">${SECDATE[k]}</small></div>${rows}</div>`;
+    }
+    const xs=L.filter(x=>NODATA[d][x.sh[0]]), ok=L.filter(x=>!NODATA[d][x.sh[0]]&&cnt(x.sh[0],["h12","h24","d30"])===0);
+    if(xs.length) body+=`<div class="sum-sec"><div class="sum-h"><b>無資料 ${xs.length} 艘</b></div><div class="grid">${xs.map(x=>`<button class="cell x" title="${x.sh[0]}" onclick="openShip('${x.sh[0]}','${d}')">${x.sh[0][0]}</button>`).join("")}</div></div>`;
+    if(ok.length) body+=`<div class="sum-sec"><div class="sum-h"><b>正常 ${ok.length} 艘</b></div><div class="grid">${ok.map(x=>`<button class="cell g" title="${x.sh[0]}" onclick="openShip('${x.sh[0]}','${d}')">${x.sh[0][0]}</button>`).join("")}</div></div>`;
+  }
+  if(SHOW_OPEN) for(const k of ["h12","h24","d30"]){
+    const g=L.filter(x=>x.st.t===k); if(!g.length) continue;
+    if(d==="nav"){
+      const rows=["ais","risk"].map(src=>{
+        const gg=g.filter(x=>SRC.nav[x.sh[0]][src]&&tierOf(SRC.nav[x.sh[0]][src])===k).sort((a,b)=>SRC.nav[b.sh[0]][src].n-SRC.nav[a.sh[0]][src].n);
+        return gg.length?`<div class="srcrow"><span class="srcl">${SRCN[src]}</span><div class="grid">${gg.map(x=>cellR(d,x.sh[0],SRC.nav[x.sh[0]][src].n)).join("")}</div></div>`:"";
+      }).join("");
+      body+=`<div class="sum-sec"><div class="sum-h"><b>${SEC[k]} ${g.length} 艘</b></div>${rows}</div>`;
+    }else{
+      body+=`<div class="sum-sec"><div class="sum-h"><b>${SEC[k]} ${g.length} 艘</b></div><div class="grid">${g.sort((a,b)=>b.st.n-a.st.n).map(x=>cellR(d,x.sh[0],x.st.n)).join("")}</div></div>`;
+    }
+  }
+  if(SHOW_OPEN) for(const k of ["x","ok"]){
+    const g=L.filter(x=>x.st.t===k); if(!g.length) continue;
+    body+=`<div class="sum-sec"><div class="sum-h"><b>${SEC[k]} ${g.length} 艘</b></div><div class="grid">${g.map(x=>`<button class="cell ${k==="x"?"x":"g"}" title="${x.sh[0]}" onclick="openShip('${x.sh[0]}','${d}')">${x.sh[0][0]}</button>`).join("")}</div></div>`;
+  }
+  return `<div class="fx wide">${hero}${cum}${body}<div class="upd" style="padding:8px 10px 10px;line-height:1.6">${SHOW_OPEN?"格中數字＝次數（尚未解除：未結案筆數；其他：30 天內次數）<br>天數＝立案到現在；超過 30 天以紅字標示":"每艘船只列在最近一次異常的時段<br>紅＝有異常　綠＝30 天內無異常　灰＝無資料<br>完整紀錄與次數請點船名看明細"}</div></div>`;
 }
-let LSTYLE="list";
-const GLBL={now:"即時異常",h12:"12 小時內",h24:"12–24 小時",d30:"1–30 日",x:"無資料",ok:"正常"};
-function gridCard(){
-  const d=LF.dom,l=listData();
-  const hero=`<div class="hero ${d}"><div class="k">${filterText()}</div><h2>${TITLE[d]}全部清單</h2><div class="s">共 ${l.length} 艘 · 點船名看明細</div></div>`;
-  if(!l.length) return `<div class="fx wide">${hero}<div class="lempty">🟢 此條件下無符合船舶</div></div>`;
-  const body=["now","h12","h24","d30","x","ok"].map(k=>{
-    const g=l.filter(x=>x.t===k); if(!g.length) return "";
-    const c=k==="ok"?"g":k==="x"?"x":"r";
-    return `<div class="sum-sec"><div class="sum-h"><b>${GLBL[k]} ${g.length} 艘</b></div><div class="grid">${g.map(x=>`<button class="cell ${c}" title="${x.sh[0]}" onclick="openShip('${x.sh[0]}','${d}','list')">${x.sh[0][0]}</button>`).join("")}</div></div>`;
-  }).join("");
-  return `<div class="fx wide">${hero}${body}<div class="upd" style="padding:8px 0 10px">紅＝30 日內曾異常　綠＝正常　灰＝無資料</div></div>`;
-}
-function showList(){add(LSTYLE==="grid"?gridCard():listCard());listQR();}
-function setLStyle(s){
-  LSTYLE=s;document.getElementById("lsA").classList.toggle("on",s==="list");document.getElementById("lsB").classList.toggle("on",s==="grid");
-  document.querySelectorAll(".lseg button").forEach(b=>b.classList.toggle("on",b.dataset.s===s));
-  document.getElementById("lsnote").textContent=s==="list"
-    ?"A 列表：沿用正式版，每頁 8 艘、上一頁／下一頁。可看到英文船名、船型與 AIS／風險燈號。全船隊要翻 4 頁。"
-    :"B 方格單字：32 艘一張卡片看完、不分頁，依 即時→12h→24h→30 日→無資料→正常 分段。看不到燈號細節，需點進明細。篩選一樣用快速回覆鈕。";
-  if(chat.querySelector(".lrow")||chat.querySelector(".fx.wide .cell.g")){sys(s==="list"?"清單樣式：A 列表":"清單樣式：B 方格單字");LP=1;me(TITLE[LF.dom]+"全部清單");showList();}
-}
-function openList(dom){LP=1;LF={dom,type:"全部",ais:"全部",risk:"全部",status:"全部"};me(TITLE[dom]+"全部清單");showList();}
-function turn(k){LP+=k;me(k<0?"上一頁":"下一頁");showList();}
-function pickType(){me("船型");add('<div class="txt">請選擇船型</div>');qr(["全部",...TYPES].map(v=>({l:v,f:`setF('type','${v}')`})));}
-function pickLight(k){me(k==="ais"?"AIS":"風險");add(`<div class="txt">請選擇${k==="ais"?"AIS":"風險"}燈號</div>`);qr([{l:"全部",f:`setF('${k}','全部')`},{l:"🔴 紅",f:`setF('${k}','r')`},{l:"🟡 黃",f:`setF('${k}','y')`},{l:"🟢 綠",f:`setF('${k}','g')`}]);}
-function pickStatus(){me("狀態");add('<div class="txt">請選擇狀態</div>');qr([{l:"全部",f:"setF('status','全部')"},{l:"🔴 30 日內曾異常",f:"setF('status','異常')"},{l:"🟢 30 日內無異常",f:"setF('status','安全')"}]);}
-function setF(k,v){LF[k]=v;LP=1;me(k==="type"?"船型 "+v:k==="status"?"狀態 "+v:(k==="ais"?"AIS ":"風險 ")+(v==="全部"?"全部":LVL[v]));showList();}
-function clearFilter(){LP=1;LF={dom:LF.dom,type:"全部",ais:"全部",risk:"全部",status:"全部"};me("清除篩選");showList();}
+function showList(){add(listCard());qr([{l:"🚢 船型",f:"pickType()"}]);}
+function openList(dom){LF={dom,type:"全部"};me(TITLE[dom]+"狀態警示");showList();}
+function pickType(){me("船型");add('<div class="txt">請選擇船型</div>');qr(["全部",...TYPES].map(v=>({l:v,f:`setF('${v}')`})));}
+function setF(v){LF.type=v;me("船型 "+v);showList();}
 
-/* ===== 單船明細（正式版版型；事件歷程三段） ===== */
+/* ===== 單船明細 ===== */
 function fmt(w){
-  let m=19*60+40-Math.round(w*60)-((w*37)%50);
-  let day=21; while(m<0){m+=1440;day--;}
-  const dd=day===21?"今日":day===20?"昨日":(day>0?`10/${String(day).padStart(2,"0")}`:`09/${String(30+day).padStart(2,"0")}`);
+  let m=11*60-Math.round(w*60)-((w*37)%50),day=13;
+  while(m<0){m+=1440;day--;}
+  const dd=day===13?"今日":day===12?"昨日":(day>0?`11/${String(day).padStart(2,"0")}`:`10/${String(31+day).padStart(2,"0")}`);
   return dd+" "+String(Math.floor(m/60)).padStart(2,"0")+":"+String(Math.round(m%60)).padStart(2,"0");
 }
-const OLD={nav:["AIS 訊號中斷 8 分鐘","與鄰船 CPA 距離縮短","進入 NAVTEX 軍演區","偏離計畫航線 XTD 超過閾值","主機轉速異常"],ppl:["船員暈眩送醫評估","水手長手部扭傷"],cargo:["冷藏櫃溫度偏高","貨櫃綁紮複查"]};
+const OLD={ais:["訊號中斷 8 分鐘","目的地未填"],risk:["航線偏移（XTD 超過閾值）","速度異常（低於建議航速）","進入軍演電子圍籬"],main_ppl:["船員暈眩送醫評估","水手長手部扭傷"],main_cargo:["冷藏櫃溫度偏高","貨櫃綁紮複查"]};
 function eventsOf(dom,cn){
-  const e=EV[dom][cn]; if(!e||e.x) return [];
-  const out=[{w:e.w,d:e.d,on:!!e.now||(dom!=="nav"&&e.w<=12)}];
-  for(let i=1;i<e.n;i++) out.push({w:24+i*(26*24/Math.max(e.n,2))+((cn.charCodeAt(0)+i*13)%20),d:OLD[dom][(cn.charCodeAt(0)+i)%OLD[dom].length],on:false});
+  const out=[];
+  parts(dom,cn).forEach(([k,e],j)=>{
+    const pfx=dom==="nav"?SRCN[k]+"｜":"";
+    out.push({k,w:e.w,d:pfx+e.d,st:e.on?"on":e.open?"open":"closed"});
+    const pool=OLD[dom==="nav"?k:"main_"+dom];
+    for(let i=1;i<e.n;i++) out.push({k,w:24+i*(26*24/Math.max(e.n,2))+((cn.charCodeAt(0)+i*13+j*7)%20),d:pfx+pool[(cn.charCodeAt(0)+i+j)%pool.length],st:"closed"});
+  });
   return out.sort((a,b)=>a.w-b.w);
 }
 function sdot(v,txt){const c=v==="r"?"var(--red-d)":v==="g"?"var(--grn-d)":v==="y"?"#b9760a":"#8a97a3";return `<span class="sd"><span class="dot ${v}"></span><b style="color:${c}">${txt}</b></span>`;}
-function evItem(dom,e){return `<div class="ev"><div class="hb"><div class="hti">${fmt(e.w)}　${e.on?'<b style="color:var(--red-d)">持續中</b>':'已解除'}</div><div class="hd">${e.d}</div></div></div>`;}
-function openShip(cn,dom,from){
-  const sh=SHIPS.find(s=>s[0]===cn), L=TITLE[dom], e=EV[dom][cn], tt=tier(dom,cn);
+function evItem(e){
+  if(!SHOW_OPEN) return `<div class="ev"><div class="hb"><div class="hti">${fmt(e.w)}${e.st==="on"&&e.w>12?" 起":""}　${e.st==="on"?'<span class="st-on">持續中</span>':"已解除"}</div><div class="hd">${e.d}</div></div></div>`;
+  const st=e.st==="on"?`<span class="st-on">持續中・已 ${ageTxt(e.w)}</span>`:e.st==="open"?`<span class="st-open">已恢復・未結案・已 ${ageTxt(e.w)}</span>`:"已結案";
+  return `<div class="ev"><div class="hb"><div class="hti">${fmt(e.w)}　${st}</div><div class="hd">${e.d}</div></div></div>`;
+}
+function openShip(cn,dom){
+  const sh=SHIPS.find(s=>s[0]===cn),L=TITLE[dom],st=shipState(dom,cn),p=SRC[dom][cn]||{};
   me(cn+" "+L+"詳細狀況");
+  const tag=st.t==="open"?`未結案 ${st.cnt} 筆`:{h12:"⏱12h",h24:"⏱24h",d30:"⏱30天"}[st.t]||"";
   let stRow;
+  const onDesc=e=>e&&e.on?`<div class="sdesc">${e.d}</div>`:"";
   if(dom==="nav"){
     const a=aisOf(cn),r=riskOf(cn);
-    if(a==="g"&&r==="g") stRow=`<div class="srow"><span class="sl">目前</span><div><b style="color:var(--grn-d)">正常</b><span style="font-size:.82em;color:#5b6b78">（AIS、風險皆正常）</span></div></div>`; else stRow=`<div class="srow"><span class="sl">AIS</span><div>${sdot(a,{r:"優先避讓",y:"其餘／不明",g:"正常",x:"無資料"}[a])}</div></div>
-           <div class="srow"><span class="sl">風險</span><div>${sdot(r,{r:"高風險警示",y:"中度注意",g:"低風險"}[r])}${e&&e.now?`<div class="sdesc">${e.d}</div>`:""}</div></div>`;
+    if(a==="g"&&r==="g") stRow=`<div class="srow"><span class="sl">目前</span><div><b style="color:var(--grn-d)">正常</b><span style="font-size:.82em;color:#5b6b78">（AIS、風險皆正常）</span></div></div>`;
+    else stRow=`<div class="srow"><span class="sl">AIS</span><div>${sdot(a,{r:"優先避讓",y:"其餘／不明",g:"正常",x:"無資料"}[a])}${a==="x"?`<div class="sdesc">${NODATA.nav[cn]}</div>`:onDesc(p.ais)}</div></div>
+      <div class="srow"><span class="sl">風險</span><div>${sdot(r,{r:"高風險警示",y:"中度注意",g:"低風險"}[r])}${onDesc(p.risk)}</div></div>`;
   }else{
-    const v=tt==="x"?"x":(tt==="h12"||tt==="h24")?"r":"g";
-    stRow=`<div class="srow"><span class="sl">${L}</span><div>${sdot(v,v==="r"?"異常":v==="x"?"無資料":"正常")}${e&&(v!=="g")?`<div class="sdesc">${e.d}</div>`:""}</div></div>`;
+    const v=NODATA[dom][cn]?"x":p.main&&p.main.on?"r":"g";
+    stRow=v==="g"?`<div class="srow"><span class="sl">目前</span><div><b style="color:var(--grn-d)">正常</b></div></div>`
+      :`<div class="srow"><span class="sl">${L}</span><div>${sdot(v,v==="r"?"異常":"無資料")}<div class="sdesc">${v==="x"?NODATA[dom][cn]:p.main.d}</div></div></div>`;
   }
-  const ev=eventsOf(dom,cn), none=`<div class="enone">無${L}事件</div>`;
-  const seg=(t,a)=>a.length?`<div class="es">${t}</div>${a.map(x=>evItem(dom,x)).join("")}`:"";
-  const hist=!ev.length?"":`<div class="hr"></div><div class="eh">事件歷程（${L}，近 30 日 · 共 ${ev.length} 次）</div>`
-    +seg("近 12 小時",ev.filter(x=>x.w<=12))+seg("12–24 小時",ev.filter(x=>x.w>12&&x.w<=24))+seg("1–30 日",ev.filter(x=>x.w>24));
-  const back=from==="list"?`<button class="gbtn" onclick="me('返回${L}全部清單');showList()">‹ 返回${L}全部清單</button>`:`<button class="gbtn" onclick="openSummary('${dom}')">‹ 返回${L}異常摘要</button>`;
-  add(`<div class="fx"><div class="hero ${dom} big"><div class="k2">船舶詳細狀況・${L}${tt!=="ok"?`　<span class="tier ${tt}" style="font-size:.85em">${TIER_LBL[tt]}</span>`:""}</div><h2>${cn}</h2><div class="s2">${sh[1]} · 船型 ${sh[2]}</div></div>
-  <div class="dbody">${stRow}${hist}${back}<div class="upd">🕘 2026/10/21 19:40</div></div></div>`);
+  const ev=eventsOf(dom,cn).filter(x=>SHOW_OPEN||x.w<=720||x.st==="on");
+  const seg=(t,a)=>a.length?`<div class="es">${t}</div>${a.map(evItem).join("")}`:"";
+  const hist=!ev.length?"":`<div class="hr"></div><div class="eh">事件歷程（${L}，近 30 天 · 共 ${ev.length} 次）</div>`
+    +seg(`近 12 小時（${SECDATE.h12}）`,ev.filter(x=>(!SHOW_OPEN&&x.st==="on")||x.w<=12))+seg(`12～24 小時（${SECDATE.h24}）`,ev.filter(x=>!(!SHOW_OPEN&&x.st==="on")&&x.w>12&&x.w<=24))+seg(`24 小時～30 天（${SECDATE.d30}）`,ev.filter(x=>!(!SHOW_OPEN&&x.st==="on")&&x.w>24&&(x.w<=720||!SHOW_OPEN)))+seg("超過 30 天（未結案）",ev.filter(x=>x.w>720));
+  add(`<div class="fx"><div class="hero ${dom} big"><div class="k2">船舶詳細狀況・${L}${tag?`　<span class="tier">${tag}</span>`:""}</div><h2>${cn}</h2><div class="s2">${sh[1]} · 船型 ${sh[2]}</div></div>
+  <div class="dbody">${stRow}${hist}<button class="gbtn" onclick="me('返回${L}全部清單');showList()">‹ 返回${L}全部清單</button><div class="upd">🕘 ${NOW}</div></div></div>`);
 }
 
 /* ===== controls ===== */
-function resetChat(){chat.innerHTML="";t=15;sys("今天");add('<div class="txt">帳號已與戰情室綁定，請由下方選單選擇功能。</div>');}
+function resetChat(){chat.innerHTML="";t=0;sys("今天");add('<div class="txt">帳號已與戰情室綁定，請由下方選單選擇功能。</div>');}
 function setFS(el,v){document.querySelector(".screen").style.setProperty("--fs",v);document.querySelectorAll(".fschip").forEach(c=>c.classList.toggle("on",c===el));}
 function toggleMenu(){const r=document.getElementById("rich");r.classList.toggle("collapsed");document.getElementById("tri").textContent=r.classList.contains("collapsed")?"▴":"▾";}
 function go(n){
   resetChat();
   const rich=document.getElementById("rich");
   if(n>=2) openSafety();
-  if(n===3) openSummary("nav");
-  if(n===4){openSummary("nav");openList("nav");}
-  if(n===5){openSummary("nav");openShip("川明","nav","sum");}
-  if(n===6) openSummary("ppl");
+  if(n===3) openList("nav");
+  if(n===4){openList("nav");pickType();setF("C");}
+  if(n===5){openList("nav");openShip("碩明","nav");}
+  if(n===6) openList("ppl");
   if(n>=3&&!rich.classList.contains("collapsed")) toggleMenu();
   if(n<3&&rich.classList.contains("collapsed")) toggleMenu();
 }
-setLStyle("list");
 go(3);
 </script>
 
