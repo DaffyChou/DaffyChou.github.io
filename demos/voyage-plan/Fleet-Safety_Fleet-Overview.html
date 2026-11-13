@@ -245,13 +245,13 @@ table.def td.tl{white-space:nowrap}
         <tr><th>頂端累計</th><th>期間</th></tr>
         <tr><td>12 小時內</td><td>11/12 23:00～11/13 11:00</td></tr>
         <tr><td>24 小時內</td><td>11/12 11:00～11/13 11:00</td></tr>
-        <tr><td>30 天內</td><td>10/14 11:00～11/13 11:00</td></tr>
+        <tr><td>30 天內</td><td>10/15 00:00～11/13 11:00（含今天共 30 個日曆天）</td></tr>
       </table>
       <table class="def" style="margin-top:10px">
         <tr><th>順位</th><th>分段</th><th>條件</th></tr>
         <tr><td class="c">1</td><td class="tl"><b>近 12 小時</b></td><td>最近一次異常在 11/12 23:00～11/13 11:00，或目前仍持續</td></tr>
         <tr><td class="c">2</td><td class="tl"><b>12～24 小時</b></td><td>最近一次異常在 11/12 11:00～23:00</td></tr>
-        <tr><td class="c">3</td><td class="tl"><b>24 小時～30 天</b></td><td>最近一次異常在 10/14 11:00～11/12 11:00</td></tr>
+        <tr><td class="c">3</td><td class="tl"><b>24 小時～30 天</b></td><td>最近一次異常在 10/15 00:00～11/12 11:00</td></tr>
         <tr><td class="c">4</td><td class="tl">無資料</td><td>AIS 中斷／未回報</td></tr>
         <tr><td class="c">5</td><td class="tl">正常</td><td>30 天內無異常</td></tr>
       </table>
@@ -262,8 +262,7 @@ table.def td.tl{white-space:nowrap}
       <h3>待與陽明確認</h3>
       <ol class="q">
         <li><b>清單不顯示次數</b>：原需求「一月檢視在船名旁顯示 30 日內異常次數」改為在單船明細顯示「近 30 天・共 N 次」。</li>
-        <li><b>30 天</b>是否含當日（原型：從現在往回推 30×24 小時）。</li>
-        <li>後端航安每筆事件需記錄來源（AIS／風險），供單船明細顯示。</li>
+                <li>後端航安每筆事件需記錄來源（AIS／風險），供單船明細顯示。</li>
       </ol>
       <p class="vnote">「尚未解除（狀況持續中／已恢復・未結案）」功能已規劃但暫不開放，原型中隱藏。示範事件皆為系統監控項目。前版保留：_20261113_AIS風險兩排.html、_20261112.html、_20261021.html。</p>
     </div>
@@ -334,11 +333,13 @@ const RISK={"碩明":"r","英明":"r","震明":"r","盛明":"y"};
 const aisOf=cn=>AIS[cn]||"g", riskOf=cn=>RISK[cn]||"g";
 const SRCN={ais:"AIS",risk:"風險",main:""};
 const SEC={h12:"近 12 小時",h24:"12～24 小時",d30:"24 小時～30 天",x:"無資料",ok:"正常"};
-const SECDATE={h12:"11/12 23:00～現在",h24:"11/12 11:00～23:00",d30:"10/14 11:00～11/12 11:00"};
+const SECDATE={h12:"11/12 23:00～現在",h24:"11/12 11:00～23:00",d30:"10/15 00:00～11/12 11:00"};
+/* 30 天含當日：今天＋往前 29 天，自 10/15 00:00 起；距現在（11/13 11:00）29×24＋11＝707 小時 */
+const D30=29*24+11;
 const RANK={open:0,h12:1,h24:2,d30:3,x:4,ok:5};
 const parts=(dom,cn)=>Object.entries(SRC[dom][cn]||{});
 /* 單一來源（或人安／貨安）所屬時段 */
-const tierOf=e=>!e?"ok":(e.on||e.w<=12)?"h12":e.w<=24?"h24":e.w<=720?"d30":"ok";
+const tierOf=e=>!e?"ok":(e.on||e.w<=12)?"h12":e.w<=24?"h24":e.w<=D30?"d30":"ok";
 function shipState(dom,cn){
   if(NODATA[dom][cn]) return {t:"x"};
   const p=parts(dom,cn); if(!p.length) return {t:"ok"};
@@ -349,7 +350,7 @@ function shipState(dom,cn){
 }
 function inWindow(dom,cn,h){return parts(dom,cn).some(([,e])=>e.w<=h||e.on);}
 /* 事件所屬時段：持續中的事件算在近 12 小時；清單與明細共用 */
-const sliceOf=e=>e.st==="on"||e.w<=12?"h12":e.w<=24?"h24":e.w<=720?"d30":null;
+const sliceOf=e=>e.st==="on"||e.w<=12?"h12":e.w<=24?"h24":e.w<=D30?"d30":null;
 const ageTxt=w=>w<24?`${Math.max(1,Math.round(w))} 小時`:`${Math.floor(w/24)} 天`;
 
 /* ===== chat engine ===== */
@@ -387,7 +388,7 @@ function listCard(){
   const cnt=(cn,ks,src)=>EVS[cn].filter(e=>ks.includes(sliceOf(e))&&(!src||e.k===src)).length;
   const cw=h=>SHOW_OPEN?L.filter(x=>inWindow(d,x.sh[0],h)).length:L.filter(x=>cnt(x.sh[0],h===12?["h12"]:h===24?["h12","h24"]:["h12","h24","d30"])>0).length;
   const openL=L.filter(x=>x.st.t==="open");
-  const cum=`<div class="cum">12 小時內 ${cw(12)} 艘｜24 小時內 ${cw(24)} 艘｜30 天內 ${cw(720)} 艘${SHOW_OPEN?`<br>尚未解除 ${openL.length} 艘`:""}</div>`;
+  const cum=`<div class="cum">12 小時內 ${cw(12)} 艘｜24 小時內 ${cw(24)} 艘｜30 天內 ${cw(D30)} 艘${SHOW_OPEN?`<br>尚未解除 ${openL.length} 艘`:""}</div>`;
   let body="";
   if(openL.length){
     const rows=[["on","狀況持續中"],["cleared","已恢復・未結案"]].map(([k,lab])=>{
@@ -480,10 +481,10 @@ function openShip(cn,dom){
     stRow=v==="g"?`<div class="srow"><span class="sl">目前</span><div><b style="color:var(--grn-d)">正常</b></div></div>`
       :`<div class="srow"><span class="sl">${L}</span><div>${sdot(v,v==="r"?"異常":"無資料")}<div class="sdesc">${v==="x"?NODATA[dom][cn]:p.main.d}</div></div></div>`;
   }
-  const ev=eventsOf(dom,cn).filter(x=>SHOW_OPEN||x.w<=720||x.st==="on");
+  const ev=eventsOf(dom,cn).filter(x=>SHOW_OPEN||x.w<=D30||x.st==="on");
   const seg=(t,a)=>a.length?`<div class="es">${t}</div>${a.map(evItem).join("")}`:"";
   const hist=!ev.length?"":`<div class="hr"></div><div class="eh">事件歷程（${L}，近 30 天 · 共 ${ev.length} 次）</div>`
-    +seg(`近 12 小時（${SECDATE.h12}）`,ev.filter(x=>(!SHOW_OPEN&&x.st==="on")||x.w<=12))+seg(`12～24 小時（${SECDATE.h24}）`,ev.filter(x=>!(!SHOW_OPEN&&x.st==="on")&&x.w>12&&x.w<=24))+seg(`24 小時～30 天（${SECDATE.d30}）`,ev.filter(x=>!(!SHOW_OPEN&&x.st==="on")&&x.w>24&&(x.w<=720||!SHOW_OPEN)))+seg("超過 30 天（未結案）",ev.filter(x=>x.w>720));
+    +seg(`近 12 小時（${SECDATE.h12}）`,ev.filter(x=>(!SHOW_OPEN&&x.st==="on")||x.w<=12))+seg(`12～24 小時（${SECDATE.h24}）`,ev.filter(x=>!(!SHOW_OPEN&&x.st==="on")&&x.w>12&&x.w<=24))+seg(`24 小時～30 天（${SECDATE.d30}）`,ev.filter(x=>!(!SHOW_OPEN&&x.st==="on")&&x.w>24&&(x.w<=D30||!SHOW_OPEN)))+seg("超過 30 天（未結案）",ev.filter(x=>x.w>D30));
   add(`<div class="fx"><div class="hero ${dom} big"><div class="k2">船舶詳細狀況・${L}${tag?`　<span class="tier">${tag}</span>`:""}</div><h2>${cn}</h2><div class="s2">${sh[1]} · 船型 ${sh[2]}</div></div>
   <div class="dbody">${stRow}${hist}<button class="gbtn" onclick="me('返回${L}全部清單');showList()">‹ 返回${L}全部清單</button><div class="upd">🕘 ${NOW}</div></div></div>`);
 }
