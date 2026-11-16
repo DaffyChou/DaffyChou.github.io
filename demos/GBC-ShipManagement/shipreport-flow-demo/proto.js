@@ -182,8 +182,10 @@ Object.assign(ADJ[2],{
   DailyConsumption_FO_Sailing:A('新增檢查',0,'自動計算（航程耗油 ÷ 航行時間 × 24）；算出來不合理也能送出','算出來是 0 或負數時不能送出（通常是存量填錯）'),
   ROB_FO_DD:A('新增檢查',0,'結束定速航行的存量會自動帶入這裡；沒有檢查','沒有下錨就維持帶入值；有下錨才需要改，並要有下錨時間；要比結束定速航行時少或相等'),
   ROB_DO_DD:A('新增檢查',0,'結束定速航行的存量會自動帶入這裡；沒有檢查','沒有下錨就維持帶入值；有下錨才需要改，並要有下錨時間'),
-  ROB_FO_FWE:A('修 bug',0,'自動帶入時：有備俥存量先放備俥，再被起錨存量蓋掉（兩者都有時取起錨）。備俥比起錨晚，較晚的才是主機停俥前的存量（程式順序，待確認是否為設計）','自動帶入最晚階段的存量：備俥優先，沒有才取起錨；並檢查要比備俥時少'),
-  ROB_DO_FWE:A('修 bug',0,'自動帶入時：有備俥存量先放備俥，再被起錨存量蓋掉（兩者都有時取起錨）','自動帶入最晚階段的存量：備俥優先，沒有才取起錨')
+  ROB_FO_FWE:A('修 bug',0,'自動帶入時：有備俥存量先放備俥，再被起錨存量蓋掉（兩者都有時取起錨）；之後改起錨存量，會把船員手填的停俥存量也蓋掉。備俥比起錨晚，較晚的才是主機停俥前的存量（程式順序，待確認是否為設計）','自動帶入最晚階段的存量：備俥優先，沒有才取起錨；船員手填的停俥存量不會被蓋掉；並檢查要比備俥時少。停俥存量只記錄靠泊後的存量，不再參與等泊耗油計算'),
+  ROB_DO_FWE:A('修 bug',0,'自動帶入時：有備俥存量先放備俥，再被起錨存量蓋掉（兩者都有時取起錨）；之後改起錨存量，會把船員手填的停俥存量也蓋掉','自動帶入最晚階段的存量：備俥優先，沒有才取起錨；船員手填的不會被蓋掉'),
+  TotalConsumption_FO_Waiting:A('計算口徑',0,'下錨存量 − 主機停俥存量。停俥存量是靠泊後的真實存量且可手改，與起錨存量不同時，等泊耗油就被改變，折算每日耗油被放大（匯順 07/13：應為 0.32 噸、每天約 3 噸，算成 2.61 噸、每天 25.6 噸）','依序判斷，不看停俥存量：①沒下錨（缺下錨或起錨時間）＝ 0；②有填起錨：下錨 − 起錨；③沒填起錨：下錨 − 備俥存量並標示「估算」（客戶 11/11 要求，船員不會填起錨）；④備俥也沒填：留空並提示補填；⑤算出負數：留空並提示檢查；唯讀【估算方式待確認】'),
+  TotalConsumption_DO_Waiting:A('計算口徑',0,'下錨存量 − 主機停俥存量（同重油）','規則同重油（沒下錨 0、下錨 − 起錨、沒填起錨改用備俥估算）；唯讀')
 });
 ADJ[1]={
   ReportTime:A('新增檢查',0,'預設今天 12:00（午報本來就是 12:00），沒有檢查','午報固定 12:00（不是就提醒）；和現在差太多、比上一份早都只提醒（可能是補資料）；和上一份午報相隔約 24 小時'),
@@ -534,8 +536,14 @@ function recalc(){
     OILS.forEach(c=>{
       // 現行：結束定速航行存量 → 自動帶入下錨存量
       if(ev==='Report-2-ROB_'+c+'_EOSP') sv(F,'ROB_'+c+'_DD',g(F,'ROB_'+c+'_EOSP'));
-      // 調整：起錨／備俥存量 → 主機停俥存量帶入最晚階段（備俥優先；現行是起錨優先）
-      if(ev==='Report-2-ROB_'+c+'_AC'||ev==='Report-2-ROB_'+c+'_RSE'){const rse=g(F,'ROB_'+c+'_RSE'), ac=g(F,'ROB_'+c+'_AC'); sv(F,'ROB_'+c+'_FWE',rse!==''?rse:ac);}
+      // 起錨／備俥存量 → 主機停俥存量帶入
+      //   現行：起錨優先，而且每次都蓋掉船員手填的停俥存量
+      //   調整：最晚階段（備俥優先）；停俥存量空白或還是自動帶入的值才帶入，船員手填的不蓋掉
+      if(ev==='Report-2-ROB_'+c+'_AC'||ev==='Report-2-ROB_'+c+'_RSE'){
+        const rse=g(F,'ROB_'+c+'_RSE'), ac=g(F,'ROB_'+c+'_AC'), fe=q(F,'ROB_'+c+'_FWE');
+        if(mode==='cur') sv(F,'ROB_'+c+'_FWE',ac!==''?ac:rse);
+        else if(fe&&(fe.value===''||fe.value===fe.dataset.auto)){const v=rse!==''?rse:ac; fe.value=v; fe.dataset.auto=v;}
+      }
     });
     // 現行：航程時間＝結束定速航行時間 − 上一份離港報的開始定速航行時間
     const dep=lastOf(7), eo=getT(F,'EOSP');
@@ -544,7 +552,30 @@ function recalc(){
     const d1=getT(F,'Drifting'), d2=getT(F,'AnchorAweigh'), wh=(d1&&d2)?(new Date(d2)-new Date(d1))/36e5:null;
     sv(F,'TotalTime_Waiting',wh>0?(Math.round(wh*100)/100).toFixed(2):'');
     ['FO','DO'].forEach(c=>{
-      const dd=num(g(F,'ROB_'+c+'_DD')), fw=num(g(F,'ROB_'+c+'_FWE')), tw=(dd!=null&&fw!=null)?dd-fw:null;
+      // 等泊總耗油：現行＝下錨存量 − 主機停俥存量（停俥存量可手改，與起錨不同時就被改變）
+      //            調整＝依序判斷（客戶 11/11、11/12 確認）：沒下錨（缺下錨或起錨時間）→ 0；
+      //                  有填起錨 → 下錨 − 起錨；沒填起錨 → 下錨 − 備俥存量並標示「估算」；
+      //                  備俥也沒填或下錨沒填 → 留空並提示；算出負數 → 留空並提示檢查；停俥存量不參與
+      const dd=num(g(F,'ROB_'+c+'_DD')), fw=num(g(F,'ROB_'+c+'_FWE')), ac=num(g(F,'ROB_'+c+'_AC')), rs=num(g(F,'ROB_'+c+'_RSE'));
+      let tw=null, est=false, ph='缺少必要計算資料';
+      if(mode==='cur') tw=(dd!=null&&fw!=null)?dd-fw:null;
+      else if(!d1||!d2) tw=0;
+      else if(wh>0&&dd!=null){
+        const e=ac!=null?ac:rs;
+        if(e==null) ph='請填起錨時存量';
+        else{ tw=dd-e; est=(ac==null); if(tw<0){tw=null; est=false; ph='存量有誤，請檢查';} }
+      }
+      const twe=q(F,'TotalConsumption_'+c+'_Waiting');
+      if(twe){
+        twe.placeholder=ph;
+        let tag=twe.parentNode.querySelector('.proto-est');
+        if(est&&!tag){
+          tag=document.createElement('span'); tag.className='proto-est'; tag.textContent='估算';
+          tag.title='起錨存量未填，以「下錨 − 備俥存量」估算；請補填起錨存量';
+          tag.style.cssText='margin-left:6px;padding:1px 8px;border-radius:9px;font-size:.75rem;background:#fff3cd;color:#8a6d00;border:1px solid #e0c36a;white-space:nowrap';
+          twe.insertAdjacentElement('afterend',tag);
+        } else if(!est&&tag) tag.remove();
+      }
       sv(F,'TotalConsumption_'+c+'_Waiting',tw==null?'':f1(tw)); sv(F,'DailyConsumption_'+c+'_Waiting',(tw!=null&&tw!==0&&wh>0)?(tw/wh*24).toFixed(2):'');
       // 現行：航程總耗油＝上港完車存量 − 結束定速航行存量；平均油耗＝總耗油 ÷ 航程時間 × 24
       const a=num(g(F,'ROB_'+c+'_EOSP')), b=num(g(F,'ROB_'+c+'_COSP_LastPort')), t=(a!=null&&b!=null)?b-a:null;
@@ -869,7 +900,10 @@ const PRESETS={
    {label:'有下錨存量卻沒填下錨時間',desc:'下錨存量有填，但下錨時間空白，系統無法判斷等泊多久。',patch:{Drifting:''}},
    {label:'等泊耗油過高（掉 8 噸）',desc:'下錨 261.0、起錨 253.0：等泊 7 小時用了 8 噸，折算每天 27 噸，比航行平均還快——等泊時主機不是全速，很可能填錯。',patch:{ROB_FO_AC:253.0,ROB_FO_RSE:252.8,ROB_FO_FWE:251.6}},
    {label:'航次號打錯（26）',desc:'抵港報不換航次號，卻填成 26。',patch:{VoyageName:'26'}},
-   {label:'沒有下錨（正常情形）',good:true,stage:'sea2',desc:'本港直接靠泊、沒有下錨等泊。下錨存量維持自動帶入的值（等於結束定速航行），起錨區留空；連鎖核對表只核對 結束定速航行 → 備俥 → 主機停俥。',patch:{ReportTime:'2026-10-30T21:30',Drifting:'',AnchorAweigh:'',ROB_FO_DD:262.4,ROB_DO_DD:30.8,ROB_FO_AC:'',ROB_DO_AC:'',RSE:'2026-10-30T18:30',ROB_FO_RSE:261.6,ROB_DO_RSE:30.8,POB:'2026-10-30T19:00',TugAttended:'2026-10-30T19:10',FirstLineMadeFast:'2026-10-30T20:30',AllLineMadeFast:'2026-10-30T20:40',TugCastOff:'2026-10-30T20:50',DOP:'2026-10-30T20:50',TugLeft:'2026-10-30T21:00',FEW:'2026-10-30T21:00',ROB_FO_FWE:259.6,ROB_DO_FWE:30.6}}
+   {label:'沒有下錨（正常情形）',good:true,stage:'sea2',desc:'本港直接靠泊、沒有下錨等泊。下錨存量維持自動帶入的值（等於結束定速航行），起錨區留空；連鎖核對表只核對 結束定速航行 → 備俥 → 主機停俥。等泊耗油：現行用下錨 − 停俥算出 2.8 噸（實際沒等泊）；調整後沒有下錨＝ 0，等泊時間與每日耗油留空。',patch:{ReportTime:'2026-10-30T21:30',Drifting:'',AnchorAweigh:'',ROB_FO_DD:262.4,ROB_DO_DD:30.8,ROB_FO_AC:'',ROB_DO_AC:'',RSE:'2026-10-30T18:30',ROB_FO_RSE:261.6,ROB_DO_RSE:30.8,POB:'2026-10-30T19:00',TugAttended:'2026-10-30T19:10',FirstLineMadeFast:'2026-10-30T20:30',AllLineMadeFast:'2026-10-30T20:40',TugCastOff:'2026-10-30T20:50',DOP:'2026-10-30T20:50',TugLeft:'2026-10-30T21:00',FEW:'2026-10-30T21:00',ROB_FO_FWE:259.6,ROB_DO_FWE:30.6}},
+   {label:'停俥存量與起錨不同（等泊只有 2.45 小時）',good:true,desc:'下錨 00:00、起錨 02:27，等泊 2.45 小時，重油 261.0 → 260.8，真正等泊只用 0.2 噸（每天約 2.0 噸）。起錨後進港靠泊又用了 2 噸，主機停俥時船員照實填 258.8。切換「現行／調整後」對照：現行＝下錨 − 停俥＝2.2 噸，折算每天 21.6 噸（被放大，與匯順 07/13 同樣情形）；調整後＝下錨 − 起錨＝0.2 噸，每天 2.0 噸。',patch:{Drifting:'2026-10-31T00:00',AnchorAweigh:'2026-10-31T02:27',ROB_FO_DD:261.0,ROB_FO_AC:260.8,ROB_FO_RSE:260.6,ROB_FO_FWE:258.8}},
+   {label:'沒填起錨存量（估算）',good:true,desc:'船員沒填起錨存量（豐順、源順常見）。下錨 261.0、備俥 260.0、停俥 258.8，等泊 7 小時。現行＝下錨 − 停俥＝2.2 噸，折算每天 7.5 噸；調整後＝下錨 − 備俥存量估算＝1.0 噸，每天 3.4 噸，欄位旁標示「估算」，提醒補填起錨存量。',patch:{ROB_FO_AC:''}},
+   {label:'起錨與備俥存量都沒填',desc:'起錨、備俥存量都空白。現行仍用下錨 − 停俥算出 2.2 噸；調整後不拿停俥存量代替，等泊耗油留空，欄位提示「請填起錨時存量」。',patch:{ROB_FO_AC:'',ROB_FO_RSE:''}}
   ]},
  3:{stage:'daily2',title:'日電報',
   desc:'卸貨港第二天。上一份日電報（10/31 08:00）：重油 257.6、輕油 30.5、主機汽缸油 5.2、主機系統油 3.1、輔機系統油 1.8、淡水 42.0。今天 11/01 08:00：重油 256.4、輕油 30.4 由船員填；後四項已預先帶入，再依實測改成 5.1／3.1／1.7／41.0。前 24 小時耗量自動算：重油 1.2、輕油 0.1、汽缸油 0.1、主機系統油 0.0、輔機系統油 0.1、淡水 1.0 噸。',
@@ -997,6 +1031,7 @@ const TOUR={
   cosp:()=>runPreset(4,-1,'ROB_FO_COSP_LastPort'),
   chain:()=>runPreset(4,-1,'#proto-chain'),
   fwe:()=>runPreset(4,-1,'ROB_FO_FWE'),
+  wait:()=>runPreset(4,10,'TotalConsumption_FO_Waiting'),
   skip:()=>runPreset(4,PRESETS[4].errs.findIndex(e=>e.label.startsWith('沒有下錨')),'#proto-chain'),
   daily:()=>runPreset(3,-1,'ROB_FO'),
   comp:()=>runPreset(10,-1,'COSP_ROB_FO'),
@@ -1023,8 +1058,9 @@ function renderChg(){
    <div><h4>抵港報（六個油料區塊）</h4><ul>
     <li>前一港口油料：維持自動帶入上一份離港報的定速航行存量（重油、輕油、主機汽缸油、主機系統油、輔機系統油、淡水，六項都帶入、灰底唯讀）${go('cosp')}</li>
     <li>新增「存量連鎖核對」表：依時間順序核對六個階段的存量、耗油與折算每日耗油${go('chain')}</li>
-    <li>現行已自動帶入／計算，維持不變：結束定速航行存量 → 下錨存量；航程時間與距離、平均航速、平均油耗；等泊時間與耗油</li>
-    <li>主機停俥存量自動帶入，改取最晚階段（備俥優先；現行是起錨優先）【待確認】${go('fwe')}</li>
+    <li>現行已自動帶入／計算，維持不變：結束定速航行存量 → 下錨存量；航程時間與距離、平均航速、平均油耗；等泊時間</li>
+    <li>等泊耗油改為「下錨存量 − 起錨存量」（現行是下錨 − 主機停俥；停俥存量可手改，與起錨不同時等泊耗油被改變、每日耗油被放大）；沒有下錨＝ 0；沒填起錨存量時改用「下錨 − 備俥存量」估算並標示「估算」，備俥也沒填才留空提示【估算方式待確認】${go('wait')}</li>
+    <li>主機停俥存量自動帶入，改取最晚階段（備俥優先；現行是起錨優先）；船員手填的停俥存量不再被起錨存量蓋掉；停俥存量只記錄靠泊後存量，不參與等泊耗油【待確認】${go('fwe')}</li>
     <li>本港沒有下錨／漂航時，下錨、起錨兩區不用填，連鎖核對表自動略過${go('skip')}</li></ul></div>
    <div><h4>船位報／日電報／完工報／離港報</h4><ul>
     <li>日電報：重油、輕油存量預設空白（現行預設 0）、必填；主機汽缸油、主機系統油、輔機系統油、淡水預先帶入上一份日電報或抵港報的存量，找不到上一份時提醒；前 24 小時耗量維持自動算${go('daily')}</li>
