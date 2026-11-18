@@ -15,17 +15,22 @@
     U.kpis(el, [U.kpiFrom([id], 'FUEL_TOTAL', '總油耗', { agg: 'sum', unit: 't', good: null }), U.kpiFrom([id], 'EFF', '燃油效率', { d: 2, unit: '浬／噸', good: 'up' }),
       { k: '剩餘天數', v: s.stale ? null : (s.remain == null ? null : fmt(s.remain, 1) + ' 日'), d: s.stale ? '資料過期' : s.below ? '已低於最低存量' : '殘油庫存 ' + fmt(s.rob_res, 0) + ' t', cls: s.stale ? 'no' : s.below ? 'bad' : 'ok' },
       U.kpiFrom([id], 'AER', 'AER', { d: 2, good: 'down' })]);
+    if (U.sovSpark) U.sovSpark(el, id, ['FUEL_TOTAL', 'EFF', null, 'AER'], c);   // 近 12 個月小走勢（single-overview）；剩餘天數沒有逐月資料，不畫
   });
   U.reg('M3-c0', (el, c) => {
     const id = vid0(c);
     U.kpis(el, [U.kpiFrom([id], 'OTP', '準點率', { d: 1, unit: '%', good: 'up' }), U.kpiFrom([id], 'SLOT_UTIL', '艙位利用率', { d: 1, unit: '%', good: 'up' }),
       U.kpiFrom([id], 'SPEED_RATIO', '速度對設計航速比', { d: 2, good: null }), U.kpiFrom([id], 'CO2_TEUNM', 'TEU 浬碳強度', { d: 0, unit: 'g/(TEU·nm)', good: 'down' })]);
+    if (U.sovSpark) U.sovSpark(el, id, ['OTP', 'SLOT_UTIL', 'SPEED_RATIO', 'CO2_TEUNM'], c);   // 近 12 個月小走勢（single-overview）
   });
   function effTrend(el, c) {
     const id = vid0(c), s = U.series('EFF', id);
     const ma = s.map((_, i) => { const w = s.slice(Math.max(0, i - 5), i + 1).filter(x => x != null); return w.length >= 3 ? U.mean(w) : null; });
     const best = s.map((_, i) => { const w = s.slice(Math.max(0, i - 5), i + 1).filter(x => x != null); return w.length ? Math.max(...w) : null; });
-    U.lineChart(el, { yName: '浬／噸（每噸油跑幾浬）', series: [{ name: '月效率', data: s, markLine: mark(c) }, { name: '近 6 個月移動平均', data: ma, lineStyle: { type: 'dashed', width: 2 } }, { name: '近 6 個月最佳月份', data: best, lineStyle: { type: 'dotted', width: 1.5 } }] });
+    const cls = U.VBY[id].cls, peers = U.scopeVessels().filter(v => v.cls === cls && v.type === U.VBY[id].type).map(v => v.id);   // 同型船中間值（同級距本公司船，single-fuel-drive）
+    const med = peers.length >= 2 ? months.map((_, i) => { const a = peers.map(p => val('EFF', p, i)).filter(x => x != null).sort((x, y) => x - y); return a.length >= 2 ? +(a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2).toFixed(2) : null; }) : null;
+    U.lineChart(el, { yName: '浬／噸（每噸油跑幾浬）', legend: true, series: [{ name: '月效率', data: s, markLine: mark(c) }, { name: '近 6 個月移動平均', data: ma, lineStyle: { type: 'dashed', width: 2 } }, { name: '近 6 個月最佳月份', data: best, lineStyle: { type: 'dotted', width: 1.5 } }]
+      .concat(med ? [{ name: `同型船中間值（${cls}，${peers.length} 艘）`, data: med, lineStyle: { type: 'dashed', width: 2, color: COL().sub }, itemStyle: { color: COL().sub } }] : []) });
   }
   U.reg(['M3-b1', 'M3-c2'], effTrend);
   U.reg('M3-b2', (el, c) => { const id = vid0(c); U.stackChart(el, { yName: '噸', series: [['HSFO_T', 'HSFO'], ['VLSFO_T', 'VLSFO'], ['MGO_T', 'MGO（輕油）'], ['OTHER_T', '其他']].map(([m, n]) => ({ name: n, data: U.series(m, id) })) }); });
@@ -70,6 +75,13 @@
   U.reg('M3-c3', (el, c) => { const id = vid0(c); U.lineChart(el, { yName: '百分比（%）', series: [{ name: '艙位利用率', data: U.series('SLOT_UTIL', id), markLine: mark(c) }, { name: '空箱比例', data: U.series('EMPTY_SHARE', id) }, { name: '冷凍箱比例（占滿箱）', data: U.series('REEFER_SHARE', id) }] }); });
   U.reg('M3-c4', (el, c) => {
     const id = vid0(c), d = U.dailyWin(id, c.mi, 12, 0).filter(r => r[6] != null && r[3] != null), design = U.VBY[id].design, col = COL();
+    if (U.fuelOps && U.VBY[id].type === 'container') {   // 延誤 → 趕船 → 多燒的油（single-fuel-drive）：近 6 個月逐月
+      const F = []; for (let k = Math.max(0, c.mi - 5); k <= c.mi; k++) { const x = U.fuelOps.vessel(id, k); if (x) F.push(Object.assign({ mi: k }, x)); }
+      const tot = F.reduce((s, x) => s + (x.catchX || 0), 0), dly = F.filter(x => x.delay != null), avgD = dly.length ? dly.reduce((s, x) => s + x.delay, 0) / dly.length : null, cs = F.filter(x => x.catchShare != null), avgC = cs.length ? cs.reduce((s, x) => s + x.catchShare, 0) / cs.length : null;
+      el.classList.add('auto'); el.style.maxHeight = 'none';
+      el.innerHTML = `<div class="pkpi sv4"><div class="pk"><div class="note">平均到港延誤（近 6 個月）</div><b>${avgD == null ? '—' : fmt(avgD, 1) + ' 小時'}</b><div class="note">延誤是趕船的起因</div></div><div class="pk"><div class="note">趕船航段占比</div><b class="${avgC >= 70 ? 'bad' : avgC >= 50 ? 'warn' : ''}">${avgC == null ? '—' : fmt(avgC, 0) + '%'}</b><div class="note">50% 留意、70% 要處理</div></div><div class="pk"><div class="note">趕船多燒的油（估算）</div><b>${fmt(tot, 0)} 噸</b><div class="note">近 6 個月合計</div></div><div class="pk"><div class="note">最多的一個月</div><b>${F.length ? (() => { const m = F.slice().sort((a, b) => (b.catchX || 0) - (a.catchX || 0))[0]; return esc(months[m.mi]) + '　' + fmt(m.catchX || 0, 0) + ' 噸'; })() : '—'}</b><div class="note">加速 10% 估算</div></div></div><div data-sc style="height:17rem"></div>`;
+      el = el.querySelector('[data-sc]');
+    }
     U.scatterChart(el, { xName: '對地航速（節）', yName: '日耗油（噸／日）', empty: '沒有逐日資料', tip: p => `${p.data[2]}<br>航速 ${fmt(p.data[0], 1)} kn（${fmt(100 * p.data[0] / design, 0)}% 設計航速）<br>日耗油 ${fmt(p.data[1], 1)} t`,
       series: [{ name: '一般', data: d.filter(r => r[6] < 0.98 * design).map(r => [r[6], r[3], U.dayToDate(r[0])]), itemStyle: { color: col.pal[0], opacity: .5 } }, { name: '追趕（接近或超過設計航速）', data: d.filter(r => r[6] >= 0.98 * design).map(r => [r[6], r[3], U.dayToDate(r[0])]), itemStyle: { color: col.bad } }] });
   });

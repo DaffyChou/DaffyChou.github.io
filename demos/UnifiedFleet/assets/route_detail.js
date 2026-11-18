@@ -29,7 +29,7 @@
     const UL = U.unloadPlan ? U.unloadPlan(5).filter(x => idset.has(x.vid)) : [], ulTot = UL.reduce((s, x) => s + x.u.tot, 0);
     const nEv = rows.reduce((s, r) => s + r.n, 0), nHi = rows.reduce((s, r) => s + r.hi, 0);
     const worst = rows.filter(r => r.otp != null).sort((a, b) => a.otp - b.otp)[0];
-    const act = nHi ? `這一區有 ${nHi} 件要處理的警報事件${rows.filter(r => r.hi).length ? '（' + rows.filter(r => r.hi).map(r => r.sv.code + ' ' + r.hi + ' 件').join('、') + '）' : ''}，請到「運務管理 › 警報事件總覽」處理。`
+    const act = nHi ? `這一區有 ${nHi} 件要處理的警報事件${rows.filter(r => r.hi).length ? '（' + rows.filter(r => r.hi).map(r => r.sv.code + ' ' + r.hi + ' 件').join('、') + '）' : ''}，請到「運務管理 › 警報事件」處理。`
       : worst && worst.otp < 60 ? `${worst.sv.code} 本月準點率 ${fmt(worst.otp, 0)}%，是這一區最低：請點這條航線看是哪個港延誤。` : '這一區各航線目前正常，維持例行監看。';
     const oc = v => (v == null ? '' : v < 60 ? 'bad' : v < 75 ? 'warn' : '');
     const kp = (k, v, sub, c) => `<div class="pk"><div class="note">${k}</div><b class="${c || ''}">${v}</b><div class="note">${sub || ''}</div></div>`;
@@ -71,7 +71,7 @@
       const n24 = hot ? arr.filter(a => a.unlo === hot.u && (ts(a.etaCalc || a.etaRep) - CG.NOW) / HR <= 72).length : 0;
       const act = hot ? `${pn(hot.u)} 塞港${hot.idx != null ? '（指數 ' + fmt(hot.idx, 0) + '）' : ''}，本航線 ${n24} 艘 3 天內到港：請提早通知代理與碼頭預排泊位，必要時調整靠港順序或航速。`
         : E && !E.thin && E.repAbs >= 4 ? `回報 ETA 平均差 ${fmt(E.repAbs, 1)} 小時（計算 ETA ${fmt(E.calAbs, 1)} 小時）：請以計算 ETA 通知碼頭，並請船務檢討回報。`
-          : nHi ? `本航線有 ${nHi} 件要處理的警報事件，請到「運務管理 › 警報事件總覽」處理。` : '本航線各港目前順暢，維持例行監看。';
+          : nHi ? `本航線有 ${nHi} 件要處理的警報事件，請到「運務管理 › 警報事件」處理。` : '本航線各港目前順暢，維持例行監看。';
       // 航線上的船
       const ships = ids.map(id => {
         const a = arr.filter(x => x.vid === id).sort((p, q) => ts(p.etaCalc || p.etaRep) - ts(q.etaCalc || q.etaRep))[0], v = U.VBY[id];

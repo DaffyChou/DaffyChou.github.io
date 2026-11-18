@@ -162,7 +162,7 @@
   }
   // 右側的詳情面板（事件、船舶、切換設定）一次只開一個
   U.closeRight = except => {
-    ['evDrawer', 'vdDrawer', 'ctl'].forEach(id => { if (id !== except) { const e = document.getElementById(id); if (e) e.classList.remove('open'); } });
+    ['evDrawer', 'vdDrawer', 'ctl', 'rtDrawer'].forEach(id => { if (id !== except) { const e = document.getElementById(id); if (e) e.classList.remove('open'); } });
     if (except !== 'ctl') { const t = document.getElementById('ctlTg'); if (t) { t.classList.remove('open'); t.setAttribute('aria-expanded', 'false'); } }
     if (except !== 'evDrawer') openId = null;
   };

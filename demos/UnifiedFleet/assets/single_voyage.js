@@ -9,21 +9,64 @@
   const tag = (l, k) => `<span class="tag ${k}">${esc(l)}</span>`;
   const SV = () => (STATE.view.sv = STATE.view.sv || { p: 0 });   // p：前往港口與貨櫃選的第幾港（0＝下一港）
 
+  // ---------------- 計算 ETA（每一港都算）：計算 ETA 本來就是推算值，所以第 2 港以後也照同樣邏輯往後推（使用者 2026-11-19）
+  //   下一港：有到港預報的計算值就用；沒有時用「目前位置到港口的距離 ÷ 航速」。
+  //   第 2 港起：前一港 ETA ＋ 在前一港的停留時間 ＋ 前一港到這一港的航行時間；
+  //   停留與航行時間先用這艘船自己的歷史平均，沒有再用全船隊在該港／該航段的平均，再沒有就用距離 ÷ 這艘船近期平均航速（停留預設 24 小時）。
+  const iso = t => new Date(t).toISOString().slice(0, 19), avg = a => (a && a.length ? a.reduce((x, y) => x + y, 0) / a.length : null);
+  let HIST = null;
+  function hist() {
+    if (HIST) return HIST;
+    const R = U.risk.rows('calls').filter(r => r.nor).slice().sort((a, b) => a.vid - b.vid || (a.nor < b.nor ? -1 : 1)), stay = {}, sail = {}, add = (o, k, v) => (o[k] = o[k] || []).push(v);
+    R.forEach((r, i) => {
+      if (r.dep) { const h = (ts(r.dep) - ts(r.nor)) / HR; if (h > 0 && h < 240) { add(stay, r.vid + '|' + r.port, h); add(stay, '*|' + r.port, h); } }
+      const n = R[i + 1];
+      if (n && n.vid === r.vid && r.dep && n.nor) { const h = (ts(n.nor) - ts(r.dep)) / HR; if (h > 0 && h < 24 * 40) { add(sail, r.vid + '|' + r.port + '>' + n.port, h); add(sail, '*|' + r.port + '>' + n.port, h); } }
+    });
+    return (HIST = { stay, sail });
+  }
+  let XY = null;
+  const xy = u => { if (!XY) { const P = C.ports || {}; XY = new Map(Array.isArray(P) ? P : Object.entries(P)); } const v = XY.get(u); return Array.isArray(v) && v.length >= 2 && typeof v[0] === 'number' ? v : null; };   // C.ports＝{ UNLO: [lat, lon] }
+  function nm(a, b) {   // 兩點大圓距離（浬）× 1.15（航路繞行）
+    if (!a || !b) return null; const R = Math.PI / 180, d = Math.acos(Math.min(1, Math.sin(a[0] * R) * Math.sin(b[0] * R) + Math.cos(a[0] * R) * Math.cos(b[0] * R) * Math.cos((b[1] - a[1]) * R)));
+    return d * 3440.065 * 1.15;
+  }
+  const kn = vid => { const v = U.nums(U.series('SPEED_SOG', vid)).slice(-3); return avg(v) || 15; };
+  const stayH = (vid, u) => { const H = hist(); return avg(H.stay[vid + '|' + u]) || avg(H.stay['*|' + u]) || 24; };
+  const sailH = (vid, a, b) => { const H = hist(); const d = nm(xy(a), xy(b)); return avg(H.sail[vid + '|' + a + '>' + b]) || avg(H.sail['*|' + a + '>' + b]) || (d != null ? d / kn(vid) : 48); };
+  function fromPos(vid, a) {   // 下一港沒有計算值時推算（結果不會早於現在）
+    const NOW = CG.NOW, t0 = ts(a.posT) || NOW;
+    if (!(a.sog > 3)) {   // 停船（在前一港或錨泊）：在前一港停留完（或從現在起）再開過去
+      const base = Math.max(NOW, t0 + (a.last ? stayH(vid, a.last) : 0) * HR);
+      const d = a.lat != null ? nm([a.lat, a.lon], xy(a.unlo)) : null;
+      return base + (a.last ? sailH(vid, a.last, a.unlo) : d != null ? d / kn(vid) : 24) * HR;
+    }
+    const d = a.lat != null ? nm([a.lat, a.lon], xy(a.unlo)) : null;   // 航行中：目前位置到港口的距離 ÷ 對地航速
+    const t = d != null ? t0 + (d / a.sog) * HR : ts(a.etaRep) || NOW + 24 * HR;
+    return Math.max(t, NOW + HR);
+  }
+
   // 接下來停靠港（最多 4 個，依航線順序）：貨櫃船取船上貨櫃的卸貨港順序；沒有時只用到港預報的下一港。
-  // 只有下一港有到港預報（ETA），之後的港口沒有 ETA，不推估。
+  // 每一港都有計算 ETA（etaCalc）：下一港取到港預報的計算值（沒有時依位置推算），之後的港口往後推（見上方說明）；回報 ETA 只有下一港有。
   function ports(vid) {
     const a = U.nextArrival ? U.nextArrival(vid) : null, v = (C.vcargo || {})[vid], out = [];
     const L = v && v[7] ? v[7].map(r => r[0]) : [];
     if (a && a.unlo && !L.includes(a.unlo)) L.unshift(a.unlo);
     if (a && a.unlo && L[0] !== a.unlo) { L.splice(L.indexOf(a.unlo), 1); L.unshift(a.unlo); }
     [...new Set(L)].slice(0, 4).forEach((u, k) => out.push({ u, k, arr: a && a.unlo === u ? a : null }));
+    let t = null;
+    out.forEach((x, i) => {
+      if (i === 0) t = x.arr ? (x.arr.etaCalc ? ts(x.arr.etaCalc) : fromPos(vid, x.arr)) : null;
+      else if (t != null) t += (stayH(vid, out[i - 1].u) + sailH(vid, out[i - 1].u, x.u)) * HR;
+      x.etaCalc = t != null ? iso(t) : null;
+    });
     return out;
   }
   // 目前選的港口（前往港口與貨櫃的港口頁籤）：回傳和到港預報同樣格式的物件（之後的港口沒有 ETA）
   function cur(vid) {
     const P = ports(vid); if (!P.length) return null;
     const i = Math.min(SV().p || 0, P.length - 1), x = P[i];
-    return x.arr || { unlo: x.u, vid, etaCalc: null, etaRep: null, term: null, k: x.k, later: true };
+    return x.arr ? Object.assign({}, x.arr, { etaCalc: x.etaCalc, k: x.k }) : { unlo: x.u, vid, etaCalc: x.etaCalc, etaRep: null, term: null, k: x.k, later: true };
   }
   const ordN = k => (k === 0 ? '下一港' : '第 ' + (k + 1) + ' 港');
   U.sv = { ports, cur, ordN, state: SV };
@@ -99,8 +142,8 @@
     const vid = STATE.vessel; if (!vid || STATE.type !== 'container' || !CG.orgOk()) return '';
     const a = U.nextArrival ? U.nextArrival(vid) : null;
     if (!a) return `<span class="svsum"><span class="note">這艘船沒有到港預報</span></span>`;
-    const [sn, sk] = status(a);
-    return `<span class="svsum">${tag(sn, sk)}<span class="svsep">｜</span><span>下一港 <b>${esc(pn(a.unlo))}</b></span><span class="svsep">｜</span><span>${a.etaCalc ? '計算' : '回報'} ETA <b>${esc(hhmm(a.etaCalc || a.etaRep))}</b><span class="note">（UTC）</span></span></span>`;
+    const [sn, sk] = status(a), e0 = (ports(vid)[0] || {}).etaCalc || a.etaCalc;   // 計算 ETA 一律有值（沒有計算值時依位置推算）
+    return `<span class="svsum">${tag(sn, sk)}<span class="svsep">｜</span><span>下一港 <b>${esc(pn(a.unlo))}</b></span><span class="svsep">｜</span><span>計算 ETA <b>${esc(hhmm(e0 || a.etaRep))}</b><span class="note">（UTC）</span></span></span>`;
   };
   // 「前往港口」頁籤下方的港口切換（下一港、第 2 港…）
   U.svPortTabs = id => {
@@ -145,10 +188,10 @@
     if (noOrg(el)) return;
     const vid = c.vids[0], P = U.sv.ports(vid); if (!P.length) return U.emptyChart(el, '這艘船沒有到港預報與卸貨港資料。');
     const B = Object.fromEntries((U.portBoard ? U.portBoard() : []).map(b => [b.unlo, b]));
-    const rows = P.map(x => { const a = x.arr, ul = U.unloadAt ? U.unloadAt(vid, x.u) : null, gap = a && a.etaRep && a.etaCalc ? (ts(a.etaRep) - ts(a.etaCalc)) / HR : null;
-      return { k: x.k, ord: U.sv.ordN(x.k), port: pn(x.u), term: a && a.term || '', calc: a ? a.etaCalc : null, rep: a ? a.etaRep : null, gap, ul: ul ? ul.tot : null, ulx: ul, lv: (B[x.u] || {}).level || 'nodata' }; });
+    const rows = P.map(x => { const a = x.arr, ul = U.unloadAt ? U.unloadAt(vid, x.u) : null, gap = a && a.etaRep && x.etaCalc ? (ts(a.etaRep) - ts(x.etaCalc)) / HR : null;
+      return { k: x.k, ord: U.sv.ordN(x.k), port: pn(x.u), term: a && a.term || '', calc: x.etaCalc, rep: a ? a.etaRep : null, gap, ul: ul ? ul.tot : null, ulx: ul, lv: (B[x.u] || {}).level || 'nodata' }; });
     U.table(el, { rows, pageSize: 10, cols: [{ k: 'ord', t: '順序', h: r => (r.k === 0 ? tag(r.ord, 'ok') : esc(r.ord)) }, { k: 'port', t: '港口', h: r => '<b>' + esc(r.port) + '</b>' + (r.term ? ' <span class="note">' + esc(r.term) + '</span>' : '') },
-      { k: 'calc', t: '計算 ETA（UTC）', h: r => (r.calc ? esc(hhmm(r.calc)) : r.k === 0 && r.rep ? '<span class="note">尚未計算</span>' : '<span class="note">沒有到港預報</span>') }, { k: 'rep', t: '回報 ETA（UTC）', h: r => (r.rep ? esc(hhmm(r.rep)) : '—') },
+      { k: 'calc', t: '計算 ETA（UTC）', h: r => (r.calc ? esc(hhmm(r.calc)) : '—') }, { k: 'rep', t: '回報 ETA（UTC）', h: r => (r.rep ? esc(hhmm(r.rep)) : '—') },
       { k: 'gap', t: '回報－計算（小時）', n: true, h: r => (r.gap == null ? '—' : Math.abs(r.gap) > 6 ? tag((r.gap > 0 ? '+' : '') + fmt(r.gap, 0), 'warn') : (r.gap > 0 ? '+' : '') + fmt(r.gap, 0)) },
       { k: 'ul', t: '預計卸櫃（TEU）', n: true, h: r => (r.ul == null ? '—' : fmt(r.ul, 0) + `<div class="note">空 ${fmt(r.ulx.emp, 0)}・冷 ${fmt(r.ulx.rf, 0)}・危 ${fmt(r.ulx.dg, 0)}</div>`) },
       { k: 'lv', t: '港口狀況', h: r => tag(LVN[r.lv][0], LVN[r.lv][1]) }, { k: 'go', t: '', h: r => `<button type="button" class="lnk" data-svp="${r.k}">看這港 →</button>` }] });

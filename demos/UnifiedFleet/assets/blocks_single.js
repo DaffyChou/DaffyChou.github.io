@@ -12,7 +12,7 @@
   Object.entries(SRC).forEach(([n, s]) => { const f = U.getRenderer(s); if (f) U.reg(n, f); });
   Object.keys(U.RK.blocks).filter(b => U.RK.blocks[b].mod === 'M14').forEach(b => U.SINGLE.add(b));
 
-  const head = (a, c) => `<div class="note" style="margin-bottom:.4rem">這艘船（${esc(U.vname(c.vids[0]))}）${a.later ? U.sv.ordN(a.k) : '下一個靠港'}：<b>${esc(pn(a.unlo))}</b>${a.term ? '（' + esc(a.term) + '）' : ''}，${a.later ? '沒有到港預報（只有下一港有 ETA）' : '預計 ' + esc(String(a.etaCalc || a.etaRep || '—').replace('T', ' ').slice(0, 16)) + '（UTC）'}。</div>`;
+  const head = (a, c) => `<div class="note" style="margin-bottom:.4rem">這艘船（${esc(U.vname(c.vids[0]))}）${a.later ? U.sv.ordN(a.k) : '下一個靠港'}：<b>${esc(pn(a.unlo))}</b>${a.term ? '（' + esc(a.term) + '）' : ''}，預計 ${esc(String(a.etaCalc || a.etaRep || '—').replace('T', ' ').slice(0, 16))}（UTC，計算 ETA）。</div>`;
   const tgt = vid => (U.sv && U.sv.cur ? U.sv.cur(vid) : U.nextArrival(vid));   // 前往港口與貨櫃：目前選的港口（預設下一港）
   const none = el => U.emptyChart(el, '這艘船沒有到港預報，無法判斷前往的港口。');
   const orgChk = el => { if (!CG.orgOk()) { U.emptyChart(el, '此組織沒有貨務與運務資料（只有「模擬貨櫃公司」有）。'); return false; } return true; };
@@ -38,9 +38,13 @@
       if (tb && tools) { tools.querySelectorAll('.toolbar').forEach(x => x.remove()); tools.appendChild(tb); }
       (tools || el).querySelectorAll('[data-wm]').forEach(b => (b.onclick = () => { V.m = b.dataset.wm; U.getRenderer('M14-c11')(el, c); })); }
     if (V.m === 'm') { const s = U.portMonthly(a.unlo, U.STATE.type); if (!s.some(v => v != null)) return U.emptyChart(box, pn(a.unlo) + ' 沒有每月等待資料'); return U.lineChart(box, { yName: '小時', series: [{ name: pn(a.unlo) + ' 平均等待', data: s.map(v => (v == null ? null : +v.toFixed(2))) }] }); }
-    const res = CG.waitTrend(3).filter(r => r.unlo === a.unlo);
-    if (!res.length) return U.emptyChart(box, pn(a.unlo) + ' 沒有近 7 天的等泊資料');
-    U.lineChart(box, { x: res[0].days.map(d => (d.off === 0 ? '今天' : d.off + ' 天')), yName: '小時', legend: true, series: res.map(r => ({ name: r.cov === 'PORT' ? '全港' : '僅本公司船舶', data: r.days.map(d => d.avg) })) });
+    // 只畫一條：有全港資料就只畫全港（真實壅塞）；沒有才用本公司船舶（樣本少）。沒有船靠港的日子留空，不畫成 0（使用者 2026-11-19）
+    const res = CG.waitTrend(3).filter(r => r.unlo === a.unlo), has = r => r && r.days.some(d => d.avg != null && d.calls > 0);
+    const pick = res.find(r => r.cov === 'PORT' && has(r)) || res.find(has);
+    if (!pick) return U.emptyChart(box, pn(a.unlo) + ' 沒有近 7 天的等泊資料');
+    const isPort = pick.cov === 'PORT', nNo = pick.days.filter(d => !(d.calls > 0)).length;
+    box.insertAdjacentHTML('beforebegin', `<div class="note" style="margin:.1rem 0 .2rem">${isPort ? '資料範圍：全港（所有公司的船）' : '資料範圍：<b>僅本公司船舶</b>（這個港口沒有全港資料，樣本少，參考就好）'}${nNo ? `；${nNo} 天沒有船靠港，圖上留空` : ''}</div>`);
+    U.lineChart(box, { x: pick.days.map(d => (d.off === 0 ? '今天' : d.off + ' 天')), yName: '小時', legend: false, series: [{ name: isPort ? '全港平均等泊' : '本公司船舶平均等泊', data: pick.days.map(d => (d.calls > 0 && d.avg != null ? d.avg : null)), showSymbol: true, connectNulls: false }] });
   });
 
   U.reg('M14-c13', (el, c) => U.shipMap(el, { vids: c.vids, single: true, bulk: false }));

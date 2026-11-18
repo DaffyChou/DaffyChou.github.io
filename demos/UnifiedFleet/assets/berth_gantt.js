@@ -181,10 +181,12 @@
       const g = e.target.closest && e.target.closest('[data-k]');
       if (!g) { tip.hidden = true; return; }
       tip.innerHTML = html(flat[+g.dataset.k]); tip.hidden = false;
-      const r = wrap.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
-      let lx = e.clientX - r.left + 14, ly = e.clientY - r.top + 14;
-      if (lx + w > r.width) lx = Math.max(0, e.clientX - r.left - w - 14);
-      if (ly + h > r.height) ly = Math.max(0, r.height - h);
+      // 提示框跟著整個視窗定位（position:fixed），不會被甘特圖外框的 overflow 裁掉；靠近視窗右緣、下緣時改放到滑鼠左邊、上方
+      tip.style.position = 'fixed';
+      const w = tip.offsetWidth, h = tip.offsetHeight, VW = window.innerWidth, VH = window.innerHeight;
+      let lx = e.clientX + 14, ly = e.clientY + 14;
+      if (lx + w > VW - 4) lx = Math.max(4, e.clientX - w - 14);
+      if (ly + h > VH - 4) ly = Math.max(4, e.clientY - h - 14);
       tip.style.left = lx + 'px'; tip.style.top = ly + 'px';
     });
     sc.addEventListener('mouseleave', () => (tip.hidden = true));

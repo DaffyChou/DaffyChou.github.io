@@ -211,7 +211,7 @@
         { k: 'carbon', t: '歐盟碳成本（ETS＋FuelEU）', n: true, h: r => `<span title="ETS ${eur(r.ets)}＋FuelEU ${eur(r.fe)} 歐元">${eur(r.carbon)}</span><div class="note">ETS ${meur(r.ets)}＋FuelEU ${meur(r.fe)} 百萬</div>` },
         { k: 'dcarbon', t: '碳成本增減', n: true, h: r => sg(r.dcarbon) },
         { k: 'sur', t: '每噸用油加價', n: true, d: 0 }] });
-    el.querySelector('[data-t]').insertAdjacentHTML('beforeend', '<div class="note" style="margin-top:.2rem">金額單位：歐元。每噸用油加價＝歐盟碳成本 ÷ 全部用油噸數。</div>');
+    el.querySelector('[data-t]').insertAdjacentHTML('beforeend', '<div class="note" style="margin:.5rem 0 .9rem">金額單位：歐元。每噸用油加價＝歐盟碳成本 ÷ 全部用油噸數。</div>');
     // 增減瀑布圖：每個方案比照常營運，依序是燃料費、ETS、FuelEU 的增減，最後是淨增減（紅＝多花、綠＝省下）
     const col = COL(), Mx = v => v / 1e6, wfs = rows.slice(1).map(r => {
       let cum = 0;
@@ -223,9 +223,9 @@
     const stp = [1, 2, 5, 10].map(k => k * Math.pow(10, Math.floor(Math.log10(span / 5)))).find(s => s >= span / 5);   // 兩張圖共用同一個刻度，整數刻度好讀
     const yMin = Math.floor((Math.min(...all) - span * .06) / stp) * stp, yMax = Math.ceil((Math.max(...all) + span * .1) / stp) * stp;
     const wfEl = el.querySelector('[data-ch]');
-    wfEl.innerHTML = wfs.map((w, i) => `<div><div class="note"><b>${esc(w.r.n)}</b>${w.r.pool ? ' ' + POOL : ''}<br>比照常營運：淨${sg(w.r.net)} 歐元</div><div data-wf="${i}" style="height:12rem"></div></div>`).join('');
+    wfEl.innerHTML = wfs.map((w, i) => `<div><div class="wfh"><div class="wft"><b>${esc(w.r.n)}</b>${w.r.pool ? ' ' + POOL : ''}</div><div class="note">比照常營運：淨${sg(w.r.net)} 歐元</div></div><div data-wf="${i}" style="height:13rem"></div></div>`).join('');   // 標題、淨額、圖之間留間距
     wfs.forEach((w, i) => mkChart(wfEl.querySelector(`[data-wf="${i}"]`), {
-      grid: { left: 52, right: 12, top: 26, bottom: 26 }, legend: { show: false },
+      grid: { left: 52, right: 12, top: 40, bottom: 26 }, legend: { show: false },
       xAxis: { type: 'category', data: w.bars.map(b => b.k), axisTick: { show: false } },
       yAxis: { type: 'value', name: '百萬歐元（比照常營運）', min: +yMin.toFixed(4), max: +yMax.toFixed(4), interval: stp, axisLabel: { formatter: v => fmt(v, 1) } },
       tooltip: { trigger: 'item', formatter: p => { const b = w.bars[p.dataIndex]; return `${esc(b.k)}${b.net ? '（燃料費＋碳成本的淨變化）' : ''}<br>${sg(b.d)} 歐元`; } },

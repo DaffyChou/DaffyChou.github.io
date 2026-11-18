@@ -622,11 +622,11 @@ table.heat th.hp{overflow:hidden;text-overflow:ellipsis}table.heat td.c{min-widt
 
 /* 單船 CII */
 .ci1h{display:flex;gap:.8rem;align-items:center;margin-bottom:.7rem}.ci1g{flex:none;width:3rem;height:3rem;border-radius:.5rem;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:#fff}
-.ci1band{position:relative;height:1.6rem;border-radius:.35rem;overflow:visible;margin:.3rem 0 0}
+.ci1band{position:relative;height:1.6rem;border-radius:.35rem;overflow:visible;margin:2rem 0 0}   /* 上方留空間給比值標記的數字，才不會壓到上一行的單位說明 */
 .ci1band i{position:absolute;top:0;bottom:0;opacity:.85;display:flex;align-items:center;justify-content:center}.ci1band i:first-child{border-radius:.35rem 0 0 .35rem}.ci1band i:nth-child(5){border-radius:0 .35rem .35rem 0}
 .ci1band i span{font-style:normal;font-weight:700;font-size:.75rem;color:#fff}
 .ci1m{position:absolute;top:-.35rem;bottom:-.35rem;width:3px;margin-left:-1.5px;background:var(--ink);border-radius:2px;box-shadow:0 0 0 2px var(--card)}
-.ci1m em{position:absolute;top:-1.25rem;left:50%;transform:translateX(-50%);font-style:normal;font-size:.75rem;font-weight:700;white-space:nowrap}
+.ci1m em{position:absolute;top:-1.35rem;left:50%;transform:translateX(-50%);font-style:normal;font-size:.75rem;font-weight:700;white-space:nowrap;padding:0 .25rem;border-radius:.2rem;background:var(--card);color:var(--ink)}
 .ci1ax{position:relative;height:2rem;margin-bottom:.4rem}.ci1ax span{position:absolute;transform:translateX(-50%);font-size:.6875rem;color:var(--sub);text-align:center;line-height:1.2;top:.2rem}
 .ci1act{padding:.4rem .6rem;border-left:3px solid var(--acc);background:var(--sk);border-radius:.3rem;font-size:.8125rem;margin:.3rem 0 .5rem}
 .ci1c{height:13rem;width:100%}
@@ -964,3 +964,29 @@ div.svte{cursor:default}.svte:last-child{border-bottom:0}button.svte:hover{backg
 /* 燃油成本與營運（fuel-ops-cost）：重點數字可點，跳到對應卡片 */
 .kpi.kgo{cursor:pointer}.kpi.kgo:hover{border-color:var(--acc,var(--line))}
 .fo-note{margin:0 0 .5rem;font-size:.8125rem}
+/* 單船「油耗與航行」：原本半寬的卡片改整列，避免右邊空一塊、圖例擠在一起 */
+#main:has(#blk-M14-c24) #blk-M3-c2,#main:has(#blk-M14-c24) #blk-M3-c4,#main:has(#blk-M14-c24) #blk-M7-c3,#main:has(#blk-M14-b10) .grid>.blk{grid-column:span 12!important}
+
+/* ===== 營運總覽（fleet-overview-replan）：代表卡、看更多、航線詳情抽屜 ===== */
+.c2 .ch .tolist.more{font-weight:600}
+.ovsplit{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:.8rem;align-items:start}@media(max-width:48rem){.ovsplit{grid-template-columns:1fr}}
+.ovsplit .bt{font-size:.8125rem;color:var(--sub);margin:.2rem 0 .4rem}
+.ovlist{display:flex;flex-direction:column;border-top:1px solid var(--line)}.ovrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.5rem;align-items:center;padding:.45rem .2rem;border-bottom:1px solid var(--line);font-size:.8125rem}
+.ovrow .note{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovrow>span:last-child{font-weight:700}.ovrow .bad{color:var(--bad)}.ovrow .warn{color:var(--warn)}
+.rtd{padding:.6rem .9rem 1rem}.rtd .psh{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+/* 營運總覽：船期＋港口、貨量＋燃油各一列（半寬），法遵整列；表格內準點率依門檻上色 */
+#main:has(#blk-M15-c16) #blk-M1-c1{grid-column:span 6!important}
+#blk-M15-c17 [data-chart]{max-height:none}
+#blk-M15-c21 .bad,#blk-M15-c17 .bad{color:var(--bad);font-weight:700}#blk-M15-c21 .warn{color:var(--warn);font-weight:700}
+/* 法遵代表卡：數字卡與長條可點，列出該等級的船 */
+button.pk.cpk{font:inherit;text-align:left;color:var(--ink);cursor:pointer;transition:border-color .15s,background-color .15s}button.pk.cpk:hover{border-color:var(--acc)}button.pk.cpk.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card))}
+#blk-M15-c20 [data-c]{cursor:pointer}.cpl-h{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .9rem;margin:.6rem 0 .3rem;padding-top:.5rem;border-top:1px solid var(--line)}.cpl-h .lnk{margin-left:auto}
+#blk-M15-c20 .cpn{color:var(--acc);font-weight:600;cursor:pointer}#blk-M15-c20 [data-l] tbody tr{cursor:pointer}
+/* 篩選列前面沒有頁籤（例如「燃油成本與營運」）時，和標題留正常間距，不往上收 */
+#main > h2 + .opsf{margin-top:.7rem!important}
+/* 換燃料與 pooling 情境：瀑布圖上方的方案名稱與淨額，行距與間距放寬 */
+.wfh{line-height:1.6;margin-bottom:.45rem}.wfh .wft{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin-bottom:.15rem}.wfh .note{font-size:.8125rem}
+#blk-M8-c4 [data-sol],#blk-M8-b4 [data-sol],#blk-M14-c18 [data-sol],#blk-M14-b9 [data-sol]{margin:.9rem 0 .7rem;line-height:1.7}
+/* 數字卡後面接表格或圖時留間距（例如歐盟碳成本試算：數字卡與各船明細表） */
+.bc .kpis:not(:last-child),.bc [data-k]:not(:last-child){margin-bottom:.9rem}
+.bc .pkpi:not(:last-child){margin-bottom:.8rem}

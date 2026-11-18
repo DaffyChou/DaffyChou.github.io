@@ -42,6 +42,7 @@
     const dest = arr.find(a => a.unlo !== (inPort ? at : null)) || null;
     return { st: stale ? '位置過期' : inPort ? '在港' : '航行中', at, atNote: inPort ? '靠泊中' : last && last.dep ? '離港 ' + last.dep.slice(5, 16).replace('T', ' ') : '', dest: dest ? dest.unlo : null, eta: dest ? (dest.etaCalc || dest.etaRep || '').slice(5, 16).replace('T', ' ') : '' };
   }
+  U.rosterPos = posOf;                                      // 單船總覽的船舶動態沿用同一套位置判斷（single-overview）
   function build(c) {
     const themes = U.risk.themes[STATE.type];
     return c.vids.map(id => {
@@ -92,7 +93,7 @@
       let lastG = null, body = '';
       page.forEach(r => {
         if (f.grp && r[f.grp] !== lastG) { lastG = r[f.grp]; body += `<tr class="grp"><td colspan="${6 + cols.length}">${esc(lastG || '未分類')}</td></tr>`; }
-        body += `<tr data-id="${r.id}"><td class="nm"><a href="#" class="lnk" data-id="${r.id}">${esc(r.name)}</a></td><td>${esc(r.cls)}</td><td>${esc(r.svc || '—')}</td><td><span class="tag ${r.st === '位置過期' ? 'warn' : r.st === '在港' ? 'no' : 'ok'}">${r.st}</span></td><td class="ps">${r.at ? `<b>${esc(r.atp)}</b><div class="rsub">${esc(r.atNote)}</div>` : '—'}</td><td class="ps">${r.dest ? `<b>${esc(r.destp)}</b><div class="rsub">ETA ${esc(r.eta)}</div>` : '—'}</td>${cols.map(t => { const x = r.o[t.k], l = LV[x.level]; return t.k === 'alarm' ? `<td class="n lamp ${l[0]}" title="${esc('警報數：' + (x.summary || ''))}"><i></i>${x.value ? `<button type="button" class="lnk" data-alarm="${r.id}" title="到警報事件總覽，只看這艘船">${esc(x.text)}</button>` : esc(x.text || '0 件')}</td>` : `<td class="n lamp ${l[0]}" title="${esc(t.label + '：' + l[1] + '｜' + (x.summary || ''))}"><i></i>${esc(x.text || l[1])}</td>`; }).join('')}</tr>`;
+        body += `<tr data-id="${r.id}"><td class="nm"><a href="#" class="lnk" data-id="${r.id}">${esc(r.name)}</a></td><td>${esc(r.cls)}</td><td>${esc(r.svc || '—')}</td><td><span class="tag ${r.st === '位置過期' ? 'warn' : r.st === '在港' ? 'no' : 'ok'}">${r.st}</span></td><td class="ps">${r.at ? `<b>${esc(r.atp)}</b><div class="rsub">${esc(r.atNote)}</div>` : '—'}</td><td class="ps">${r.dest ? `<b>${esc(r.destp)}</b><div class="rsub">ETA ${esc(r.eta)}</div>` : '—'}</td>${cols.map(t => { const x = r.o[t.k], l = LV[x.level]; return t.k === 'alarm' ? `<td class="n lamp ${l[0]}" title="${esc('警報數：' + (x.summary || ''))}"><i></i>${x.value ? `<button type="button" class="lnk" data-alarm="${r.id}" title="到警報事件，只看這艘船">${esc(x.text)}</button>` : esc(x.text || '0 件')}</td>` : `<td class="n lamp ${l[0]}" title="${esc(t.label + '：' + l[1] + '｜' + (x.summary || ''))}"><i></i>${esc(x.text || l[1])}</td>`; }).join('')}</tr>`;
       });
       el.innerHTML = `<div class="rost">
         <div class="rsum"><button class="lvbtn bad${f.lv === 'high' ? ' on' : ''}" data-lv="high">要處理 <b>${cnt.high}</b> 艘</button><button class="lvbtn warn${f.lv === 'mid' ? ' on' : ''}" data-lv="mid">留意 <b>${cnt.mid}</b> 艘</button><button class="lvbtn ok${f.lv === 'low' ? ' on' : ''}" data-lv="low">正常 <b>${cnt.low}</b> 艘</button>

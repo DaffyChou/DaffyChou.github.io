@@ -49,7 +49,7 @@
     L.forEach(x => (lv = worse(lv, x.lv)));
     const ord = L.slice().sort((a, b) => (p.dir === 'below' ? a.v - b.v : Math.abs(b.v) - Math.abs(a.v)));
     const nh = L.filter(x => x.lv === 'high').length, nm = L.filter(x => x.lv === 'mid').length;
-    const m = (RK.metrics[p.metric] || { name: p.metric }).name;
+    const m = p.mname || (RK.metrics[p.metric] || { name: p.metric }).name;   // mname：沒有對應指標名稱時的白話名稱（例如結垢徵兆 FOUL）
     const u = p.unit || '';
     const sym = p.dir === 'below' ? '低於' : '高於';
     let s = nh + nm === 0 ? `${L.length} 艘的「${m}」都在正常範圍（${sym}留意門檻 ${p.mid}${u} 才會提示）` :
@@ -138,7 +138,7 @@
     return { level: lv, summary: bad.length ? `${bad.length} 艘的「${nm}」比自己近 6 個月平均高出 ${p.mid}% 以上` : `${L.length} 艘的「${nm}」都在自己近 6 個月平均附近`, items: bad.slice(0, 60).map(x => mkItem(x.id, `${vname(x.id)}　${fmt(x.v)}（平均 ${fmt(x.b)}，+${fmt(x.pct, 0)}%）`)) };
   };
 
-  K.foul_index = (p, c) => K.vessel_threshold({ metric: 'FOUL', dir: 'below', mid: p.mid, high: p.high, unit: p.unit }, c);
+  K.foul_index = (p, c) => K.vessel_threshold({ mname: '效率比近 6 個月最佳月份的落差', metric: 'FOUL', dir: 'below', mid: p.mid, high: p.high, unit: p.unit }, c);
 
   // 近 6 個月的離群日數（每日效率超出四分位距 1.5 倍；合格日不足 10 天回傳 null）
   function outlierOf(id, mi) {
@@ -398,7 +398,7 @@
       { k: 'otp', label: '準點率（近 6 個月）', bid: 'M4-c0', value: id => { const v = wmean('OTP', id, STATE.mi, 6); return { v, text: fv(v, 0, '%') }; }, num: true },
       { k: 'slot', label: '艙位利用率', kind: 'vessel_threshold', params: { metric: 'SLOT_UTIL', dir: 'below', mid: 68, high: 65, unit: '%', window: 6 }, value: id => { const v = wmean('SLOT_UTIL', id, STATE.mi, 6); return { v, text: fv(v, 0, '%') }; }, num: true },
       { k: 'cii', label: '碳強度評級', bid: 'M8-c1', value: id => ciiOf(id) },
-      { k: 'eff', label: '燃油效率差距', bid: 'M1-c4', value: mval('CLASS_DEV', 1, '%'), num: true },
+      { k: 'eff', label: '燃油效率差距', bid: 'M7-c0', value: mval('CLASS_DEV', 1, '%'), num: true },
       { k: 'pwait', label: '等泊時長（近 6 個月）', kind: 'vessel_threshold', params: { metric: 'PORT_WAIT_HR', dir: 'above', mid: 6, high: 12, unit: ' 小時', window: 6 }, value: id => { const v = wmean('PORT_WAIT_HR', id, STATE.mi, 6); return { v, text: fv(v, 1, ' 小時') }; }, num: true },
       { k: 'speed', label: '速度比', bid: 'M7-c1', value: mval('SPEED_RATIO', 2, ''), num: true },
       { k: 'catchup', label: '趕船航段占比', bid: 'M7-c2', value: mval('CATCHUP_SHARE', 0, '%'), num: true },

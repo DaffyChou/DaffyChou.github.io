@@ -116,6 +116,59 @@
       items: late.map(x => item(x.vid, `${x.term}　離港延誤 ${x.delay.toFixed(1)} 小時`)) };
   };
 
+  // ---- single-fuel-drive：單船「油耗與航行」
+  const worstOf = L => { let lv = 'nodata'; const R2 = { nodata: -1, low: 0, mid: 1, high: 2 }; L.forEach(x => { if (x && R2[x.level] > R2[lv]) lv = x.level; }); return lv; };
+  // 重點數字：燈號直接用清單「燃油效率差距」那一欄（同一份逐船評估，數字一定一致）
+  K.np_fuelkpi = (p, c) => {
+    const vid = c.vids[0], o = U.risk.byVessel(vid) || {}, e = o.eff;
+    const f = U.val ? U.val('FUEL_TOTAL', vid, c.mi) : null;
+    if (!e) return nd('沒有燃油效率資料');
+    return { level: e.level, summary: (f != null ? `本月用油 ${fmt(f, 0)} 噸；` : '') + `燃油效率對同型船：${e.text || '—'}（${e.summary || ''}）`, items: [] };
+  };
+  // 油花在哪裡：等待耗油占比（近 6 個月平均）；散裝另看輕油占比，取較差者
+  K.np_fuelwhere = (p, c) => {
+    const a = K.vessel_threshold({ metric: 'FUEL_WAIT_SHARE', dir: 'above', mid: p.mid, high: p.high, unit: '%', window: 6 }, c);
+    const b = p.mgo_mid != null ? K.vessel_threshold({ metric: 'MGO_SHARE', dir: 'above', mid: p.mgo_mid, high: p.mgo_high, unit: '%', window: 6 }, c) : null;
+    const lv = worstOf([a, b]);
+    if (lv === 'nodata') return nd('沒有營運狀態耗油資料');
+    return { level: lv, summary: `等待耗油占比：${a.summary}` + (b ? `；輕油占比：${b.summary}` : ''), items: (a.items || []).concat(b ? b.items || [] : []) };
+  };
+  // 等待燒掉的油（近 6 個月，依港口）：等待油耗占總油耗的比例
+  K.np_waitfuel = (p, c) => {
+    if (!U.fuelOps) return nd('沒有燃油成本的計算');
+    const vid = c.vids[0]; let w = 0, f = 0;
+    for (let k = Math.max(0, c.mi - 5); k <= c.mi; k++) { const x = U.fuelOps.vessel(vid, k); if (x) { w += x.wait || 0; f += x.fuel || 0; } }
+    if (!(f > 0)) return nd('近 6 個月沒有油耗資料');
+    const s = 100 * w / f, v = +s.toFixed(1), lv = v >= p.high ? 'high' : v >= p.mid ? 'mid' : 'low';
+    const P = {}; for (let k = Math.max(0, c.mi - 5); k <= c.mi; k++) U.fuelOps.byPort([vid], k).forEach(r => { const o = P[r.port] || (P[r.port] = { port: r.port, fuel: 0 }); o.fuel += r.fuel; });
+    const top = Object.values(P).sort((x, y) => y.fuel - x.fuel)[0];
+    return { level: lv, summary: `近 6 個月等待燒掉約 ${fmt(w, 0)} 噸油，占總油耗 ${fmt(s, 1)}%（${p.mid}% 留意、${p.high}% 要處理）` + (top ? `；最多的是 ${pn(top.port)}（${fmt(top.fuel, 0)} 噸）` : ''), items: [] };
+  };
+  // 主機與輔機：打滑率（近 6 個月）與冷凍箱比例（對自己平常），取較差者
+  K.np_engine = (p, c) => {
+    const a = K.vessel_threshold({ metric: 'SLIP', dir: 'above', mid: p.slip_mid, high: p.slip_high, unit: '%', window: 6 }, c);
+    const b = K.vs_baseline_avg({ metric: 'REEFER_SHARE', dir: 'above', mid: p.rf_mid, high: p.rf_high, unit: '%' }, c);
+    const lv = worstOf([a, b]);
+    if (lv === 'nodata') return nd('沒有打滑率與冷凍箱資料');
+    return { level: lv, summary: `打滑率：${a.summary}；冷凍箱比例：${b.summary}`, items: [] };
+  };
+
+  // ---- single-fuel-stock：單船「燃油與庫存」
+  // 重點數字：燈號直接用清單「剩餘天數」那一欄（同一份逐船評估）
+  K.np_stockkpi = (p, c) => {
+    const vid = c.vids[0], r = (U.risk.byVessel(vid) || {}).remain, s = (U.SN.snap || {})[vid];
+    if (!r) return nd('沒有庫存資料');
+    return { level: r.level, summary: (s && s.rob_res != null ? `殘油 ${fmt(s.rob_res, 0)} 噸、日耗 ${fmt(s.rate, 1)} 噸；` : '') + `剩餘天數 ${r.text || '—'}（${r.summary || ''}）`, items: r.items || [] };
+  };
+  // 加油紀錄：庫存守恆不符（資料品質）＋供油單與實測差（貨櫃），取較差者
+  K.np_bunkerrec = (p, c) => {
+    const a = K.dq_issues({ rules: ['BUNKER_ROB_MISMATCH'], mid: p.mid, high: p.high }, c);
+    const b = p.diff_mid != null ? K.vessel_threshold({ metric: 'BUNKER_DIFF', dir: 'abs_above', mid: p.diff_mid, high: p.diff_high, unit: '%', window: 12 }, c) : null;
+    const lv = worstOf([a, b]);
+    if (lv === 'nodata') return nd('這艘船沒有加油紀錄');
+    return { level: lv, summary: `庫存守恆：${a.summary}` + (b ? `；供油單與實測差：${b.summary}` : ''), items: (a.items || []).concat(b ? b.items || [] : []) };
+  };
+
   // ---- 單船「船上貨櫃」（模擬資料）：空櫃、冷櫃、危險櫃
   const vc = c => (CG.C.vcargo || {})[c.vids[0]];
   K.np_load = (p, c) => {

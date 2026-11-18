@@ -75,13 +75,15 @@
     if (navC === null) { try { const v = localStorage.getItem('uf_navc2'); navC = v === null ? matchMedia('(max-width:60rem)').matches : v === '1'; } catch (e) { navC = false; } }
     return navC;
   }
-  const LEVELS = [[1, '船隊總覽'], [2, '清單'], [3, '單船總覽']];
+  const LEVELS0 = [[1, '船隊總覽'], [2, '清單'], [3, '單船總覽']];
+  const lvName = l => (STATE.type === 'container' && ((U.IA.IA.cont || {}).levels || {})[l]) || LEVELS0[l - 1][1];   // 貨櫃輪第 2 層叫「船舶清單」（menu-order-naming）；散裝輪不變
+  const levels = () => LEVELS0.map(([l]) => [l, lvName(l)]);
   function buildNav() {
     const IAx = U.IA; IAx.validateLoc();
     const kids = l => (l === STATE.l && (l === 1 || l === 3) ? IAx.tabsAvail(l, STATE.type) : []);
     const cur = l => (l === 1 ? STATE.tab : STATE.st), attr = l => (l === 1 ? 'data-tab' : 'data-st');
     const secs = STATE.l === 1 || STATE.l === 3 ? IAx.sections(STATE.l, cur(STATE.l), STATE.type) : [];
-    $('#nav').innerHTML = `<button class="navtg" id="navTg" aria-label="收合或展開選單" title="收合或展開選單">«</button>` + LEVELS.map(([l, n]) =>
+    $('#nav').innerHTML = `<button class="navtg" id="navTg" aria-label="收合或展開選單" title="收合或展開選單">«</button>` + levels().map(([l, n]) =>
       `<div class="ng${l === STATE.l ? ' on' : ''}"><button class="nh" data-l="${l}" ${l === STATE.l ? 'aria-current="true"' : ''}><span class="mid">${l}</span><span class="mn">${n}</span></button>` +
       kids(l).filter((t, i, A) => !t[3] || i === 0 || A[i - 1][3] !== t[3]).map(t => { const sib = t[3] ? kids(l).filter(x => x[3] === t[3]) : [t], on = l === STATE.l && sib.some(x => x[0] === cur(l)); return `<button class="nt${on ? ' on' : ''}" ${attr(l)}="${t[0]}" title="${esc(sib.map(x => x[2] || '').join('；'))}">${esc(t[3] || t[1])}</button>` +
         (on && secs.length > 1 ? secs.map(x => `<button class="ns" data-sec="${x.m}">${esc(x.name)}</button>`).join('') : ''); }).join('') + '</div>').join('');
@@ -128,7 +130,7 @@
   }
   function cardNew(b) {
     const r = RK.blocks[b];
-    return `<section class="blk c2" id="blk-${b}" style="grid-column:span ${r.vis === 'table' ? 12 : r.span}"><div class="ch"><h4>${esc(r.title)}</h4><button class="qm" aria-expanded="false" title="這張圖的說明">?</button><span class="sp"></span><span class="tools" data-tools>${U.CLASSBLK.has(b) ? clsSel() : ''}</span><span class="scope" title="資料範圍">${esc(scopeText(b))}</span>${STATE.l === 1 ? `<button class="lnk tolist" data-tolist="${b}" title="到清單看每艘船的燈號，並依這個主題排序">查看清單</button>` : ''}</div>
+    return `<section class="blk c2" id="blk-${b}" style="grid-column:span ${r.vis === 'table' ? 12 : r.span}"><div class="ch"><h4>${esc(r.title)}</h4><button class="qm" aria-expanded="false" title="這張圖的說明">?</button><span class="sp"></span><span class="tools" data-tools>${U.CLASSBLK.has(b) ? clsSel() : ''}</span><span class="scope" title="資料範圍">${esc(scopeText(b))}</span>${STATE.l === 1 && U.MORE && U.MORE[b] ? `<button type="button" class="lnk tolist more" data-more="${U.MORE[b][0]}" title="到「${esc(U.MORE[b][1])}」看更多">看更多 →</button>` : ''}${STATE.l === 1 ? `<button class="lnk tolist" data-tolist="${b}" title="到${lvName(2)}看每艘船的燈號，並依這個主題排序">查看清單</button>` : ''}</div>
       <div class="cex" hidden><div class="bq">${esc(r.q)}</div>${r.ax ? `<div class="ax"><b>座標軸</b>　${esc(r.ax)}</div>` : ''}<div class="bm">${chipsFor(r.metrics)}</div></div>
       <div class="bc ${r.vis === 'table' || r.vis === 'kpi' || r.vis === 'form' || r.vis === 'map' || r.vis === 'board' ? 'auto' : ''}" data-chart></div>
       <div class="rs lv-no" data-rs><span class="dot"></span><b class="lvt">…</b><span class="sum" data-sum></span><button class="tg" aria-expanded="false">展開</button></div><div class="rd" data-rd hidden></div></section>`;
@@ -150,7 +152,7 @@
   }
   function crumbs() {
     const parts = [['1', '船隊總覽']];
-    if (STATE.l >= 2) parts.push(['2', '清單']);
+    if (STATE.l >= 2) parts.push(['2', lvName(2)]);
     if (STATE.l === 3) parts.push(['3', U.vname(STATE.vessel)]);
     return `<div class="crumb" role="navigation" aria-label="目前位置">${parts.map(([l, n], i) => (i === parts.length - 1 ? `<b>${esc(n)}</b>` : `<button class="lnk" data-crumb="${l}">${esc(n)}</button>`)).join('<span class="sep">›</span>')}</div>`;
   }
@@ -159,7 +161,7 @@
   }
   function vesselBar() {
     const L = U.IA.vesselList(), i = L.findIndex(v => v.id === STATE.vessel), v = U.VBY[STATE.vessel];
-    return `<div class="vbar"><button class="btn" data-step="-1">‹ 上一艘</button><span class="picker"><button class="btn pk" data-pick aria-haspopup="listbox"><strong>${esc(v.name)}</strong> ▾</button><div class="pop" data-pop hidden><input type="text" data-pq placeholder="搜尋船名" aria-label="搜尋船名"><div data-pl></div></div></span><span class="note">${esc(v.cls || '')}　第 ${i + 1} / ${L.length} 艘</span><button class="btn" data-step="1">下一艘 ›</button><button class="lnk" data-crumb="2">回清單</button></div>${lampStrip()}`;
+    return `<div class="vbar"><button class="btn" data-step="-1">‹ 上一艘</button><span class="picker"><button class="btn pk" data-pick aria-haspopup="listbox"><strong>${esc(v.name)}</strong> ▾</button><div class="pop" data-pop hidden><input type="text" data-pq placeholder="搜尋船名" aria-label="搜尋船名"><div data-pl></div></div></span><span class="note">${esc(v.cls || '')}　第 ${i + 1} / ${L.length} 艘</span><button class="btn" data-step="1">下一艘 ›</button><button class="lnk" data-crumb="2">回${lvName(2)}</button></div>${lampStrip()}`;
   }
   // 最近看過的船（記在瀏覽器，每種船型各自記 5 艘）
   function recentIds() { try { return JSON.parse(localStorage.getItem('uf_recent_' + STATE.type) || '[]').filter(id => U.VBY[id]); } catch (e) { return []; } }
@@ -181,14 +183,14 @@
     document.addEventListener('click', e => { if (!pop.hidden && !e.target.closest('.picker')) pop.hidden = true; }, { once: true, capture: true });
   }
   // 這艘船的各主題燈號（與清單同一份逐船評估）；有對應單船分頁的可點進去
-  const LAMP_TAB = { otp: 's_voy', slot: 's_load', eff: 's_fuel', speed: 's_diag', catchup: 's_diag', outlier: 's_diag', foul: 's_diag', remain: 's_stock', data: 's_stock', cii: 's_env' };
+  const LAMP_TAB = { otp: 's_voy', pwait: 's_voy', slot: 's_load', eff: 's_fuel', speed: 's_diag', catchup: 's_diag', outlier: 's_diag', foul: 's_diag', remain: 's_stock', data: 's_stock', cii: 's_env' };
   function lampStrip() {   // 只列要處理與留意（紅、黃）；正常與資料不足收進「＋N 項 ▾」，點了才展開
     const o = U.risk.byVessel(STATE.vessel), avail = U.IA.tabsAvail(3, STATE.type).map(t => t[0]), nm = U.IA.norm;
     const chip = ([k, x]) => {
       const tab = LAMP_TAB[k] && avail.includes(nm(LAMP_TAB[k])) ? nm(LAMP_TAB[k]) : '', c = { high: 'bad', mid: 'warn', low: 'ok', nodata: 'no' }[x.level];
       return `<${tab ? 'button data-lamp="' + tab + '"' : 'span'} class="lampchip ${c}" title="${esc(x.summary || '')}"><i></i>${esc(x.label)}　${esc(x.text || '')}</${tab ? 'button' : 'span'}>`;
     };
-    const E = Object.entries(o), R = { high: 0, mid: 1 }, hot = E.filter(([, x]) => x.level in R).sort((a, b) => R[a[1].level] - R[b[1].level]), rest = E.filter(([, x]) => !(x.level in R)), all = !!STATE.view.lampAll;
+    const E = Object.entries(o).filter(([k]) => !(U.sov && U.sov.HIDE.has(k))), R = { high: 0, mid: 1 }, /* 單船頁不顯示沒有對應圖表的燈號（警報數、資料品質） */ hot = E.filter(([, x]) => x.level in R).sort((a, b) => R[a[1].level] - R[b[1].level]), rest = E.filter(([, x]) => !(x.level in R)), all = !!STATE.view.lampAll;
     const nOk = rest.filter(([, x]) => x.level === 'low').length, nNo = rest.length - nOk;
     return `<div class="lamps${all ? ' all' : ''}" aria-label="這艘船各項燈號">${hot.length ? hot.map(chip).join('') : '<span class="note">各項都正常</span>'}${all ? rest.map(chip).join('') : ''}${rest.length ? `<button type="button" class="lampmore" data-lampall aria-expanded="${all}">${all ? '收起 ▴' : `＋${rest.length} 項（正常 ${nOk}${nNo ? '、資料不足 ' + nNo : ''}） ▾`}</button>` : ''}</div>`;
   }
@@ -219,7 +221,7 @@
     const l = STATE.l, id = l === 1 ? STATE.tab : l === 3 ? STATE.st : 'list';
     const bids = IAx.blocksAt(l, id, STATE.type);
     const vs = U.scopeVessels();
-    const title = l === 1 ? '船隊總覽' : l === 2 ? '清單' : '單船總覽';
+    const title = lvName(l);
     const meTab = l === 1 || l === 3 ? IAx.tabsAvail(l, STATE.type).find(t => t[0] === id) : null;
     const sibTabs = (() => { if (!meTab || !meTab[3]) return ''; const A = IAx.tabsAvail(l, STATE.type); return tabBar(A.filter(t => t[3] === meTab[3]).map(t => [t[0], t[1], t[2]]), id, l === 3 ? 'data-st' : 'data-tab'); })()
       + (meTab && (meTab[3] === '運務管理' || meTab[0] === 'fuelops') && STATE.type === 'container' && U.opsFilt && U.cargo && U.cargo.orgOk() ? `<div class="opsf" data-opsf>${U.opsFilt.html()}</div>` : '');   // 運務管理：四個頁籤共用的區域／航線／預報區間
@@ -236,6 +238,7 @@
     if (l === 3) { pushRecent(STATE.vessel); wirePicker(); }
     function renderLampWire() { $('#main').querySelectorAll('[data-lamp]').forEach(x => (x.onclick = () => { IAx.setLoc(3, x.dataset.lamp); STATE.scrollTo = null; U.bus.emit(); })); const lm = $('#main').querySelector('[data-lampall]'); if (lm) lm.onclick = () => { STATE.view.lampAll = !STATE.view.lampAll; lm.closest('.lamps').outerHTML = lampStrip(); renderLampWire(); if (U.cmdFit) U.cmdFit(); }; }
     renderLampWire();
+    $('#main').querySelectorAll('[data-more]').forEach(x => (x.onclick = () => { IAx.setLoc(1, x.dataset.more); STATE.scrollTo = null; U.bus.emit(); window.scrollTo(0, 0); }));   // 營運總覽代表卡的「看更多 →」
     $('#main').querySelectorAll('[data-crumb]').forEach(x => (x.onclick = () => goLevel(+x.dataset.crumb)));
     $('#main').querySelectorAll('[data-step]').forEach(x => (x.onclick = () => IAx.step(+x.dataset.step)));
     bids.forEach(b => {
