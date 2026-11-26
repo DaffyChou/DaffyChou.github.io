@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>船隊燃油與航運績效監控（模擬資料）</title>
+<link rel="stylesheet" href="assets/vendor/leaflet.css">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<header id="top">
+  <button class="btn navhd" id="navHd" aria-label="展開或收合左側選單" title="展開或收合左側選單">☰ 選單</button>
+  <h1>船隊燃油與航運績效監控</h1>
+  <span class="sim">模擬資料　非真實客戶資料</span>
+  <button type="button" class="btn langbtn" id="langBtn">EN</button>
+  <span class="authbox" id="authBox" aria-label="目前登入帳號"></span>
+  <button class="ctltag" id="ctlTg" aria-expanded="false" aria-controls="ctl" title="展開或收合切換設定">切換設定</button>
+</header>
+<aside class="ctl" id="ctl" aria-label="切換設定（示意）">
+  <h3>切換設定<small>示意用，可隨時切換</small></h3>
+  <div class="row"><span class="lb">船型</span><span class="seg" id="typeSeg" role="group" aria-label="船型"><button data-t="bulk">散裝輪</button><button data-t="container">貨櫃輪</button></span></div>
+  <label class="row"><span class="lb">組織</span><select id="orgSel" aria-label="組織"></select></label>
+  <label class="row"><span class="lb">月份</span><select id="monSel" aria-label="月份"></select></label>
+  <div class="row"><span class="lb">登入者</span><span class="ctlme" id="ctlMe"></span></div>
+  <div class="row"><button class="btn" id="glossBtn" aria-label="名詞小幫手">名詞小幫手</button><button class="btn" id="themeBtn" aria-label="切換日夜模式">日夜</button></div>
+</aside>
+<div class="login" id="login" hidden></div>
+<div class="layout">
+  <nav id="nav" aria-label="模組"></nav>
+  <main id="main"></main>
+</div>
+<script src="assets/echarts.min.js"></script>
+<script src="assets/vendor/leaflet.js"></script>
+<script src="assets/vendor/jquery.min.js"></script>
+<script src="assets/vendor/jquery.dataTables.min.js"></script>
+<script src="data/meta.js"></script>
+<script src="data/vm.js"></script>
+<script src="data/snap.js"></script>
+<script src="data/daily.js"></script>
+<script src="data/voy.js"></script>
+<script src="data/calls.js"></script>
+<script src="data/ledger.js"></script>
+<script src="data/bunker.js"></script>
+<script src="data/quality.js"></script>
+<script src="data/comp.js"></script>
+<script src="data/alarm.js"></script>
+<script src="data/classbase.js"></script>
+<script src="data/risk.js"></script>
+<script src="data/ia.js"></script>
+<script src="data/cargo.js"></script>
+<script src="data/carbon.js"></script>
+<script src="assets/core.js"></script>
+<script src="assets/cargo_engine.js"></script>
+<script src="assets/carbon_engine.js"></script>
+<script src="assets/env_kpi.js"></script>
+<script src="assets/risk.js"></script>
+<script src="assets/risk_cargo.js"></script>
+<script src="assets/risk_single.js"></script>
+<script src="assets/risk_single_ov.js"></script>
+<script src="assets/risk_dispatch.js"></script>
+<script src="assets/risk_carbon.js"></script>
+<script src="assets/risk_env.js"></script>
+<script src="assets/risk_berth.js"></script>
+<script src="assets/risk_rounds.js"></script>
+<script src="assets/risk_unload.js"></script>
+<script src="assets/risk_eta.js"></script>
+<script src="assets/risk_fleetov.js"></script>
+<script src="assets/fuel_ops.js"></script>
+<script src="assets/risk_fuelops.js"></script>
+<script src="assets/map.js"></script>
+<script src="assets/blocks.js"></script>
+<script src="assets/blocks_m1m2.js"></script>
+<script src="assets/blocks_m3m4.js"></script>
+<script src="assets/blocks_m5m6.js"></script>
+<script src="assets/blocks_m7.js"></script>
+<script src="assets/blocks_m8m9.js"></script>
+<script src="assets/blocks_carbon.js"></script>
+<script src="assets/blocks_env.js"></script>
+<script src="assets/blocks_m10m11.js"></script>
+<script src="assets/blocks_cargo.js"></script>
+<script src="assets/blocks_stockmap.js"></script>
+<script src="assets/blocks_bulk.js"></script>
+<script src="assets/blocks_ops.js"></script>
+<script src="assets/blocks_ops_arrivals.js"></script>
+<script src="assets/blocks_single.js"></script>
+<script src="assets/blocks_single_ov.js"></script>
+<script src="assets/blocks_load.js"></script>
+<script src="assets/berth_gantt.js"></script>
+<script src="assets/blocks_berth.js"></script>
+<script src="assets/blocks_unload.js"></script>
+<script src="assets/blocks_fuelops.js"></script>
+<script src="data/bsa.js"></script>
+<script src="data/locmap.js"></script>
+<script src="assets/service_monitor.js"></script>
+<script src="assets/route_detail.js"></script>
+<script src="assets/dispatch.js"></script>
+<script src="assets/events.js"></script>
+<script src="assets/ops_overview.js"></script>
+<script src="assets/command_map.js"></script>
+<script src="assets/single_voyage.js"></script>
+<script src="assets/single_fuel.js"></script>
+<script src="assets/single_stock.js"></script>
+<script src="assets/fleet_routes.js"></script>
+<script src="assets/fit_solo.js"></script>
+<script src="assets/roster.js"></script>
+<script src="assets/single_ov.js"></script>
+<script src="assets/shell.js"></script>
+<script src="data/i18n_en.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/perm.js"></script>
+<script src="assets/admin.js"></script>
+<script src="assets/notify.js"></script>
+<script src="assets/ai_insight.js"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
