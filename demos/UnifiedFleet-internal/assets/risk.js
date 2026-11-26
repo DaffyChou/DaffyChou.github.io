@@ -183,9 +183,9 @@
 
   K.config_gap = (p, c) => {
     const vs = c.vids.map(id => VBY[id]);
-    const unset = vs.filter(v => !(v.thr_res > 0) || !(v.thr_mgo > 0));
+    const unset = vs.filter(v => (U.fuel ? !U.fuel.allSet(v) : (!(v.thr_res > 0) || !(v.thr_mgo > 0))));   // fuel-threshold-lng：LNG 船另含 LNG 門檻
     const lv = unset.length ? 'mid' : 'low';
-    return { level: lv, summary: unset.length ? `${unset.length} 艘有油品門檻未設定（小於等於 0 視為未設定，不會觸發低庫存警報）` : `${vs.length} 艘的殘油與輕油門檻都已設定；循環油門檻目前不判斷`, items: unset.slice(0, 60).map(v => mkItem(v.id, vname(v.id))) };
+    return { level: lv, summary: unset.length ? `${unset.length} 艘有油品門檻未設定（小於等於 0 視為未設定，不會觸發低庫存警報）` : `${vs.length} 艘的油品門檻都已設定（殘油、輕油，LNG 船另含 LNG）；循環油門檻目前不判斷`, items: unset.slice(0, 60).map(v => mkItem(v.id, vname(v.id))) };
   };
 
   K.nodata = (p) => nd(p.reason || '資料不足');

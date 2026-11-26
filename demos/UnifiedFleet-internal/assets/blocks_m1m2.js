@@ -113,22 +113,31 @@
   function form(el, c) {
     el.classList.add('auto');
     const ro = U.can ? !U.can('data', 'edit') : false, dis = ro ? ' disabled' : '';   // 權限（perm.js）：沒有「資料與警報 › 改」時唯讀
-    const rows = c.vids.map(id => { const v = U.VBY[id]; return `<tr><td>${esc(v.name)}</td><td>${esc(v.cls || '')}</td>
-      <td class="n"><input data-id="${id}" data-f="thr_res" type="number" min="0" step="10" value="${v.thr_res ?? 0}" style="width:6rem"${dis}></td>
-      <td class="n"><input data-id="${id}" data-f="thr_mgo" type="number" min="0" step="5" value="${v.thr_mgo ?? 0}" style="width:5rem"${dis}></td>
-      <td class="n">${fmt(v.floor_res, 0)} / ${fmt(v.floor_dis, 0)}</td><td>${(v.thr_res > 0 && v.thr_mgo > 0) ? tag('已設定', 'ok') : tag('未設定（不觸發低庫存警報）', 'bad')}</td></tr>`; }).join('');
+    // fuel-threshold-lng：依船顯示會用的燃料（U.fuel，fuel_thr.js）；LNG 門檻用艙容 %，旁邊換算立方公尺；LNG 船的輕油含引燃油
+    const F = U.fuel;
+    const inp = (v, k, w) => { const K = F.KINDS[k]; return `<input data-id="${v.id}" data-k="${k}" type="number" min="0" max="${K.max}" step="${K.step}" value="${F.get(v, k) ?? 0}" style="width:${w}rem"${dis} aria-label="${esc(v.name)} ${esc(F.label(v, k))}門檻">`; };
+    const st = v => { const un = F.unsetKinds(v); return !un.length ? tag('已設定', 'ok') : tag(`未設定 ${un.map(k => F.KINDS[k].name).join('、')}（不觸發低庫存警報）`, 'bad'); };
+    const rows = c.vids.map(id => { const v = U.VBY[id], lng = F.isLng(v); return `<tr><td>${esc(v.name)}</td><td>${esc(v.cls || '')}</td>
+      <td>${lng ? tag('LNG 雙燃料', 'no') + ' ' : ''}<span class="note">${lng ? `LNG＋${esc(F.resName(v))}（備援）＋MGO` : `${esc(F.resName(v))}＋MGO`}</span></td>
+      <td class="n">${inp(v, 'RES', 6)}</td>
+      <td class="n">${inp(v, 'MGO', 5)}${lng ? '<div class="note">含引燃油</div>' : ''}</td>
+      <td class="n">${lng ? `${inp(v, 'LNG', 4.5)}<div class="note" data-m3="${id}">約 ${fmt(F.m3(v, F.get(v, 'LNG')), 0)} m³</div>` : '<span class="note">—</span>'}</td>
+      <td class="n">${fmt(v.floor_res, 0)} / ${fmt(v.floor_dis, 0)}</td><td data-st="${id}">${st(v)}</td></tr>`; }).join('');
     const sel = U.vname(STATE.vessel);
     const me = U.auth && U.auth.me();
     el.innerHTML = (ro ? `<div class="roban" role="note"><b>沒有修改權限</b>　目前角色「${esc(me ? me.role : '未登入')}」只能查看門檻；要修改請由有「資料與警報 › 改」權限的人員處理（權限在「系統管理 › 帳號與權限」設定）。</div>` : '')
       + `<div class="toolbar"><span class="note">示範：把所選船（${esc(sel)}）的庫存降到最低存量以下，觀察清單、燃油與庫存、資料與警報各頁的風險判讀即時改變。</span>
       <button class="btn" id="demoLow"${dis}>降低所選船庫存</button><button class="btn" id="demoReset"${dis}>還原全部</button></div>
-      <table class="t"><thead><tr><th>船名</th><th>級距</th><th class="n">殘油門檻 t</th><th class="n">輕油門檻 t</th><th class="n">最低存量底線（殘油／輕油）</th><th>狀態</th></tr></thead><tbody>${rows}</tbody></table>
-      <div class="note">門檻小於等於 0 視為未設定；循環油門檻目前不判斷（規格）。修改後立即重新評估風險判讀。</div>`;
-    el.querySelectorAll('input').forEach(i => (i.onchange = () => {
+      <div class="tscroll"><table class="t"><thead><tr><th>船名</th><th>級距</th><th>燃料</th><th class="n">殘油門檻 t</th><th class="n">輕油門檻 t</th><th class="n">LNG 門檻 %</th><th class="n">最低存量底線（殘油／輕油）</th><th>狀態</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="note">門檻小於等於 0 視為未設定（不觸發低庫存警報）；最新庫存低於門檻就觸發「最低庫存」。殘油：有脫硫塔的船燒 HSFO，其餘燒 VLSFO；LNG 雙燃料船以 LNG 為主燃料，VLSFO 為備援。輕油（MGO）：排放管制區與進港用，LNG 船另作為點燃 LNG 的引燃油。LNG：以艙容 % 設定（0～100），旁邊換算立方公尺；LNG 在艙內會慢慢蒸發（BOG），停港時存量也會下降。循環油門檻目前不判斷（規格）。修改後立即重新評估。</div>`;
+    el.querySelectorAll('input[data-k]').forEach(i => (i.onchange = () => {
       if (ro) return;
-      const v = U.VBY[+i.dataset.id], old = v[i.dataset.f];
-      v[i.dataset.f] = +i.value;
-      if (U.audit) U.audit.log('門檻設定', '門檻', `${v.name} › ${i.dataset.f === 'thr_res' ? '殘油門檻' : '輕油門檻'}`, old ?? 0, +i.value);   // 參數異動紀錄（admin.js）
+      const v = U.VBY[+i.dataset.id], k = i.dataset.k, K = F.KINDS[k], old = F.get(v, k), x = +i.value;
+      if (!Number.isFinite(x) || x < 0 || x > K.max) { i.value = old ?? 0; alert(`${F.label(v, k)}門檻要在 0～${K.max} ${K.unit}之間`); return; }
+      F.set(v, k, x);
+      if (U.audit) U.audit.log('門檻設定', '門檻', `${v.name} › ${F.label(v, k)}門檻`, old ?? 0, x);   // 參數異動紀錄（admin.js）
+      const m = el.querySelector(`[data-m3="${v.id}"]`); if (m && k === 'LNG') m.textContent = `約 ${fmt(F.m3(v, x), 0)} m³`;
+      const s = el.querySelector(`[data-st="${v.id}"]`); if (s) s.innerHTML = st(v);
       U.bus.emit();
     }));
     el.querySelector('#demoLow').onclick = () => {

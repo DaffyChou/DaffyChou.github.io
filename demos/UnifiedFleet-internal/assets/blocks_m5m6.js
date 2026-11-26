@@ -80,14 +80,16 @@
     return c.vids.map(id => {
       const v = U.VBY[id], s = U.SN.snap[id] || {};
       const st = s.stale ? '資料過期' : s.rob_res == null ? '資料不足' : s.below ? '已低於最低存量' : s.remain == null ? '資料不足' : s.rate === 0 ? '無耗用' : '正常';
-      return { id, name: v.name, rob: s.rob_res, mgo: s.rob_mgo, floor: v.floor_res, rate: s.rate, remain: s.stale ? null : s.remain, st, last: t2(s.last), v };
+      const lowF = U.lowStock ? U.lowStock.lowOf(id).map(e => U.fuel.KINDS[e.fuel || 'RES'].name) : [];   // fuel-threshold-lng：低於門檻的燃料
+      return { id, name: v.name, rob: s.rob_res, mgo: s.rob_mgo, lng: s.lng_pct ?? null, floor: v.floor_res, rate: s.rate, remain: s.stale ? null : s.remain, st: lowF.length && !s.stale ? '低於門檻' : st, lowF, last: t2(s.last), v };
     });
   }
-  const stCell = r => ({ '資料過期': tag('資料過期', 'warn'), '資料不足': tag('資料不足', 'no'), '已低於最低存量': tag('已低於最低存量', 'bad'), '無耗用': tag('無耗用', 'no'), '正常': tag('正常', 'ok') }[r.st]);
+  const stCell = r => (r.st === '低於門檻' ? tag(`低於門檻（${(r.lowF || []).join('、')}）`, 'bad') : { '資料過期': tag('資料過期', 'warn'), '資料不足': tag('資料不足', 'no'), '已低於最低存量': tag('已低於最低存量', 'bad'), '無耗用': tag('無耗用', 'no'), '正常': tag('正常', 'ok') }[r.st]);
   function remainTable(el, c) {
     const lim = STATE.type === 'container' ? 3 : 7;
     U.table(el, { sort: ['remain', 1], onRow: r => U.go('M3', r.id), rows: remainRows(c),
-      cols: [{ k: 'name', t: '船名' }, { k: 'rob', t: '殘油庫存 t', n: true, d: 0 }, { k: 'mgo', t: '輕油庫存 t', n: true, d: 0 }, { k: 'floor', t: '最低存量底線 t', n: true, d: 0 }, { k: 'rate', t: '日耗（近 30 天）t', n: true, d: 1 },
+      cols: [{ k: 'name', t: '船名', h: r => esc(r.name) + (U.fuel && U.fuel.isLng(r.v) ? ' <span class="tag no">LNG 雙燃料</span>' : '') }, { k: 'rob', t: '殘油庫存 t', n: true, d: 0 }, { k: 'mgo', t: '輕油庫存 t', n: true, d: 0 },
+        ...(c.vids.some(id => U.fuel && U.fuel.isLng(U.VBY[id])) ? [{ k: 'lng', t: 'LNG 艙容 %', n: true, d: 1, h: r => (r.lng == null ? '<span class="note">—</span>' : fmt(r.lng, 1)) }] : []), { k: 'floor', t: '最低存量底線 t', n: true, d: 0 }, { k: 'rate', t: '日耗（近 30 天）t', n: true, d: 1 },
         { k: 'remain', t: '剩餘天數', n: true, d: 1, h: r => r.remain == null ? '<span class="tag no">—</span>' : (r.remain < lim ? '<b>' + fmt(r.remain, 1) + '</b>' : fmt(r.remain, 1)) }, { k: 'st', t: '狀態', h: stCell }, { k: 'last', t: '庫存取自報表（UTC）' }] });
   }
   U.reg(['M6-b0', 'M6-c0'], remainTable);
@@ -131,7 +133,7 @@
       const v = r.v, svc = U.M.services.find(x => x.id === v.svc), ports = svc ? svc.ports.slice(0, -1) : [];
       const lastCall = R('calls').filter(k => k.vid === r.id).sort((a, b) => (a.nor < b.nor ? 1 : -1))[0];
       let next = null; if (lastCall && ports.length) { const i = ports.indexOf(lastCall.port); for (let k = 1; k <= ports.length; k++) { const p = ports[(i + k) % ports.length]; if (bunkerPorts.has(p)) { next = p; break; } } }
-      return { name: r.name, remain: r.remain, st: r.st, next: next ? U.ports(next) : '—', price: next && prices[next] ? prices[next].w / prices[next].q : null, id: r.id };
+      return { name: r.name, remain: r.remain, st: r.st, lowF: r.lowF, next: next ? U.ports(next) : '—', price: next && prices[next] ? prices[next].w / prices[next].q : null, id: r.id };
     });
     U.table(el, { sort: ['remain', 1], onRow: r => U.go('M3', r.id), rows, cols: [{ k: 'name', t: '船名' }, { k: 'remain', t: '剩餘天數', n: true, d: 1 }, { k: 'st', t: '狀態', h: stCell }, { k: 'next', t: '預估下一個可加油港（依輪班港序）' }, { k: 'price', t: '近 6 個月該港加權油價 USD/t', n: true, d: 0 }] });
   });

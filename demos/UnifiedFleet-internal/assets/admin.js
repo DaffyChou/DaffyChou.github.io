@@ -145,18 +145,19 @@
   };
   // ---------------- 補充資料上傳：三種 CSV（範本下載 → 上傳 → 預覽與錯誤列 → 確認套用；可還原預設）
   //   安全存量：存 uf_up_safety（{ '場站|櫃型|尺寸': 個數 }）→ cargo_engine.setSafety；缺櫃預估改用上傳值（依據顯示「上傳設定」）
-  //   各船油品門檻：存 uf_up_thr（{ 船 id: [殘油, 輕油] }）→ 直接改 VBY 的 thr_res／thr_mgo（燃油庫存預警、資料與警報都讀這兩個值）
+  //   各船油品門檻：存 uf_up_thr（{ 船 id: [殘油, 輕油, LNG] }；舊格式只有前兩個值）→ 直接改 VBY 的 thr_res／thr_mgo／thr_lng（U.fuel，fuel_thr.js）
   //   地點代碼對應：逐筆呼叫 U.locmap.set（和手動對應同一份）
   const jget = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
   const jset = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
-  const THR0 = {}; Object.values(U.VBY).forEach(v => (THR0[v.id] = [v.thr_res, v.thr_mgo]));   // 原始門檻（還原用）
+  const THR0 = {}; Object.values(U.VBY).forEach(v => (THR0[v.id] = U.fuel.vals(v)));   // 原始門檻（還原用）
   const VBYN = {}; Object.values(U.VBY).forEach(v => (VBYN[v.name.toLowerCase()] = v));
   function applySaved() {
     if (U.cargo && U.cargo.setSafety) U.cargo.setSafety(jget('uf_up_safety') || {});
     const t = jget('uf_up_thr') || {};
-    Object.keys(t).forEach(id => { const v = U.VBY[id]; if (v) { v.thr_res = t[id][0]; v.thr_mgo = t[id][1]; } });   // 只動有上傳的船，不蓋掉門檻設定頁的手動修改
+    Object.keys(t).forEach(id => { const v = U.VBY[id]; if (v) U.fuel.setVals(v, t[id]); });   // 只動有上傳的船，不蓋掉門檻設定頁的手動修改；舊格式（兩個值）不動 LNG
   }
   applySaved();
+  if (U.lowStock) U.lowStock.sync();   // fuel-threshold-lng：載入時先對齊低庫存警報（含上傳過的門檻），這次不寄信；之後改門檻才寄
   const num = s => (/^\s*-?\d+(\.\d+)?\s*$/.test(s) ? +s : NaN);
   const KINDS = {
     safety: {
@@ -178,20 +179,26 @@
       reset() { jset('uf_up_safety', null); },
     },
     thr: {
-      name: '各船油品門檻', file: '各船油品門檻範本.csv', cols: ['船名', '殘油門檻（噸）', '輕油門檻（噸）'], num: [1, 2],
-      help: '各船殘油、輕油的低庫存門檻（低於門檻就觸發低庫存警報；0＝未設定）。範本內是目前的值。',
-      rows() { return Object.values(U.VBY).filter(v => v.status === 'ACTIVE').map(v => [v.name, v.thr_res ?? 0, v.thr_mgo ?? 0]); },
+      // fuel-threshold-lng：多一欄 LNG 門檻（艙容 %，只有 LNG 雙燃料船填）；舊的三欄範本（船名、殘油、輕油）仍可上傳
+      name: '各船油品門檻', file: '各船油品門檻範本.csv', cols: ['船名', '殘油門檻（噸）', '輕油門檻（噸）', 'LNG門檻（艙容%）'], minCols: 3, num: [1, 2, 3],
+      help: '各船殘油、輕油的低庫存門檻（噸），LNG 雙燃料船另有 LNG 門檻（艙容 %，0～100）；最新庫存低於門檻就觸發低庫存警報，0＝未設定。不是 LNG 船的 LNG 欄留空。舊的三欄範本（沒有 LNG 欄）也可以上傳。範本內是目前的值。',
+      rows() { return Object.values(U.VBY).filter(v => v.status === 'ACTIVE').map(v => [v.name, v.thr_res ?? 0, v.thr_mgo ?? 0, U.fuel.isLng(v) ? (v.thr_lng ?? 0) : '']); },
       check(c) {
         const v = VBYN[String(c[0]).trim().toLowerCase()];
         if (!v) return { err: `找不到船名「${c[0]}」` };
-        const a = num(c[1]), b = num(c[2]);
+        const a = num(c[1]), b = num(c[2]), hasL = c.length > 3 && String(c[3]).trim() !== '', l = hasL ? num(c[3]) : null, lng = U.fuel.isLng(v);
         if (!Number.isFinite(a) || !Number.isFinite(b) || a < 0 || b < 0) return { err: '門檻要是 0 以上的數字' };
         if (a > 5000 || b > 2000) return { err: '門檻過大（殘油上限 5000 噸、輕油上限 2000 噸），數字不合理' };
-        return { key: v.id, label: v.name, old: `${v.thr_res ?? 0} / ${v.thr_mgo ?? 0}`, nv: `${a} / ${b}`, val: [a, b] };
+        if (hasL && !Number.isFinite(l)) return { err: 'LNG 門檻要是數字（艙容 %）' };
+        if (hasL && (l < 0 || l > 100)) return { err: 'LNG 門檻要在 0～100 之間（艙容 %）' };
+        if (hasL && !lng && l > 0) return { err: '這艘船不是 LNG 雙燃料船，LNG 門檻請留空' };
+        const cur = lng ? `${v.thr_res ?? 0} / ${v.thr_mgo ?? 0} / ${v.thr_lng ?? 0}%` : `${v.thr_res ?? 0} / ${v.thr_mgo ?? 0}`;
+        const nl = lng ? (hasL ? l : (v.thr_lng ?? 0)) : null;
+        return { key: v.id, label: v.name, old: cur, nv: lng ? `${a} / ${b} / ${nl}%` : `${a} / ${b}`, val: lng && hasL ? [a, b, l] : [a, b] };
       },
       apply(ok) { const m = jget('uf_up_thr') || {}; ok.forEach(x => (m[x.key] = x.val)); jset('uf_up_thr', m); },
       count: () => Object.keys(jget('uf_up_thr') || {}).length,
-      reset() { Object.keys(jget('uf_up_thr') || {}).forEach(id => { const v = U.VBY[id]; if (v) { v.thr_res = THR0[id][0]; v.thr_mgo = THR0[id][1]; } }); jset('uf_up_thr', null); },
+      reset() { Object.keys(jget('uf_up_thr') || {}).forEach(id => { const v = U.VBY[id]; if (v) U.fuel.setVals(v, THR0[id]); }); jset('uf_up_thr', null); },
     },
     loc: {
       name: '地點代碼對應', file: '地點代碼對應範本.csv', cols: ['代碼', '港口代碼', '碼頭代碼'], num: [],
@@ -231,9 +238,10 @@
     const K = KINDS[kind], A = parseCsv(text);
     if (!A.length) return { headErr: '檔案是空的', rows: [], ok: [], nErr: 1 };
     const h = A[0].map(s => String(s).trim());
-    if (h.length < K.cols.length || K.cols.some((c, i) => h[i] !== c)) return { headErr: `第 1 列（欄位名稱）要是：${K.cols.join('、')}；請用「下載範本」的格式`, rows: [], ok: [], nErr: 1 };
+    const need = K.minCols || K.cols.length;                                         // 有些種類後面的欄位可省略（例如油品門檻的 LNG 欄）
+    if (h.length < need || K.cols.some((c, i) => i < h.length && h[i] !== '' && h[i] !== c)) return { headErr: `第 1 列（欄位名稱）要是：${K.cols.join('、')}；請用「下載範本」的格式`, rows: [], ok: [], nErr: 1 };
     const seen = {}, rows = A.slice(1).map((cells, i) => {
-      const r = Object.assign({ n: i + 2, cells }, cells.length < K.cols.length ? { err: `欄位不足（要 ${K.cols.length} 欄）` } : K.check(cells.map(s => String(s).trim())));
+      const r = Object.assign({ n: i + 2, cells }, cells.length < need ? { err: `欄位不足（要 ${need} 欄）` } : K.check(cells.slice(0, Math.min(h.length, K.cols.length)).map(s => String(s).trim())));
       if (!r.err) { if (seen[r.key]) r.err = `和第 ${seen[r.key]} 列重複`; else seen[r.key] = r.n; }
       if (!r.err) r.same = String(r.old) === String(r.nv);
       return r;

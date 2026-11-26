@@ -310,10 +310,12 @@
             if (B && B.selected() === u) L.circleMarker([p[0], p[1] + o], { radius: 16, color: '#fff', weight: 3, fill: false, interactive: false }).addTo(groups.sel); });
           bounds.push([p[0], wrap(p[1])]);
         }
-        if ((S.layers.cong || single || B) && hasCong && map.getZoom() >= 10) {                 // 放大後把各碼頭分開畫（沒有碼頭座標，繞著港口示意排列）
+        if ((S.layers.cong || single || B) && hasCong && map.getZoom() >= 10) {                 // 放大後把各碼頭分開畫（示意位置：產生資料時放在港口附近的水邊，t[4]、t[5]；舊資料沒有就繞著港口排）
           const ts3 = (C.terminals || []).filter(t => t[1] === u && t[3]);
           ts3.forEach((t, k) => {
-            const ang = 2 * Math.PI * k / ts3.length - Math.PI / 2, la = p[0] + .03 * Math.sin(ang), lo = p[1] + .03 * Math.cos(ang) / Math.max(.3, Math.cos(p[0] * Math.PI / 180)), y = yardOf(t[0]);
+            const ang = 2 * Math.PI * k / ts3.length - Math.PI / 2, y = yardOf(t[0]);
+            let la = p[0] + .03 * Math.sin(ang), lo = p[1] + .03 * Math.cos(ang) / Math.max(.3, Math.cos(p[0] * Math.PI / 180));
+            if (t[4] != null) { la = t[4]; lo = t[5]; while (lo - p[1] > 180) lo -= 360; while (lo - p[1] < -180) lo += 360; }
             OFFS.forEach(o => { const m = L.marker([la, lo + o], { icon: termIcon(y ? col.pal[0] : col.no, 22, t[0]), keyboard: false }); m.bindTooltip(esc(t[0]) + (y ? '（空櫃存放點）' : ''), { direction: 'top', offset: [0, -10] }); m.bindPopup(termPopup(t, u)); m.addTo(groups.cong); });
           });
         }

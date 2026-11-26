@@ -68,8 +68,8 @@
 
   function events(el, c) {
     const set = new Set(c.vids), ev = window.UI_ALARM.events.filter(e => set.has(e.vid)).sort((a, b) => (a.start < b.start ? 1 : -1));
-    U.table(el, { limit: 80, onRow: r => U.go('M3', r.vid), rows: ev.map(e => ({ vid: e.vid, v: vname(e.vid), rule: RN[e.rule], start: e.start, end: e.end || null, val: e.value, thr: e.thr, open: !e.end })),
-      cols: [{ k: 'v', t: '船舶' }, { k: 'rule', t: '規則' }, { k: 'start', t: '觸發' }, { k: 'end', t: '恢復正常', h: r => (r.open ? tag('進行中', 'bad') : esc(r.end)) }, { k: 'val', t: '觸發值', n: true, d: 1 }, { k: 'thr', t: '門檻', n: true, d: 1 }], empty: '沒有警報事件' });
+    U.table(el, { limit: 80, onRow: r => U.go('M3', r.vid), rows: ev.map(e => ({ vid: e.vid, v: vname(e.vid), rule: RN[e.rule] + (e.rule === 'LSA' && U.fuel ? `（${U.fuel.KINDS[e.fuel || 'RES'].name}）` : ''), start: e.start, end: e.end || null, val: e.value, thr: e.thr, unit: e.rule === 'LSA' ? (e.fuel === 'LNG' ? '%' : '噸') : e.rule === 'REMAIN_DAYS' ? '天' : '%', open: !e.end })),
+      cols: [{ k: 'v', t: '船舶' }, { k: 'rule', t: '規則' }, { k: 'start', t: '觸發' }, { k: 'end', t: '恢復正常', h: r => (r.open ? tag('進行中', 'bad') : esc(r.end)) }, { k: 'val', t: '觸發值', n: true, d: 1 }, { k: 'thr', t: '門檻', n: true, d: 1 }, { k: 'unit', t: '單位' }], empty: '沒有警報事件' });
   }
   U.reg(['M11-b1', 'M11-c1'], events);
 

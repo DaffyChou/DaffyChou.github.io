@@ -114,7 +114,14 @@
   function forAlarm(rule, vid, al) {
     const v = U.VBY[vid] || {}, s = (U.SN && U.SN.snap || {})[vid] || {}, cause = [], action = [];
     if (rule === 'FCD') { cause.push(`當月每浬油耗比上月上升 ${fmt(al.value, 1)}%（門檻 ${al.thr}%）`); cause.push('常見原因：航速提高、天候海況變差、船殼或螺槳結垢、資料填報錯誤'); action.push('到單船「油耗與航行」比對航速與油耗、找出異常日'); action.push('若連續兩個月偏高，安排檢查船殼與螺槳'); }
-    else if (rule === 'LSA' || rule === 'REMAIN_DAYS') {
+    else if (rule === 'LSA' && al && al.fuel === 'LNG') {           // fuel-threshold-lng：LNG 低於門檻
+      cause.push(`LNG 剩艙容 ${al.value}%（約 ${fmt(U.fuel.m3(v, al.value), 0)} m³），低於門檻 ${al.thr}%；每天約用 ${fmt(s.lng_rate, 0)} m³，另有艙內自然蒸發（BOG）`);
+      cause.push('可加注 LNG 的港口與加注船比燃油少，錯過就要改燒備援的 VLSFO（碳排與歐盟碳成本較高）');
+      action.push('確認航線上下一個可加注 LNG 的港口與加注船檔期，提前預約'); action.push('若來不及加注，改用 VLSFO 備援並確認殘油庫存足夠');
+    } else if (rule === 'LSA' && al && al.fuel === 'MGO') {         // 輕油低於門檻
+      cause.push(`輕油（MGO）剩 ${al.value} 噸，低於門檻 ${al.thr} 噸；輕油用於排放管制區、進出港${U.fuel.isLng(v) ? '，也是 LNG 引擎的引燃油' : ''}`);
+      action.push('下一個加油港補足輕油，進入排放管制區前確認存量'); if (U.fuel.isLng(v)) action.push('引燃油不足時 LNG 引擎無法運轉，優先補足');
+    } else if (rule === 'LSA' || rule === 'REMAIN_DAYS') {
       if (s.rob_res != null) cause.push(`殘油 ${fmt(s.rob_res, 0)} 噸、日耗 ${fmt(s.rate, 1)} 噸，剩餘約 ${fmt(s.remain, 1)} 天`);
       cause.push(rule === 'LSA' ? `觸發值 ${al.value} 噸，低於該船門檻 ${al.thr} 噸（最低存量底線 ${fmt(v.floor_res, 0)} 噸）` : `剩餘天數 ${al.value} 天，低於門檻 ${al.thr} 天`);
       action.push('確認下一個可加油港與油價（燃油成本頁「油量與下一加油港」），安排加油'); action.push('加油前避免趕船，降低日耗');

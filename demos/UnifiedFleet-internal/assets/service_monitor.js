@@ -146,7 +146,8 @@
           <span class="svt"><small>原定 ${hm(x.pf)}${x.pfEst ? '＊' : ''}</small>${hm(x.t)}</span>
           <span class="svd">${x.diff == null ? '<small class="note">—</small>' : tag(Math.abs(x.diff) < 0.5 ? '準時' : (x.diff > 0 ? '晚 ' : '早 ') + fmt(Math.abs(x.diff), 0) + ' 時', x.lv)}<button type="button" class="lnk svbp" data-svbp="${x.vid}" title="看這艘船的示意配載圖（船圖）">船圖</button></span>
         </div>`;
-      const mid = `<div class="svnow"><span>資料基準 ${hm(CG.NOW)}（UTC）</span></div>`;
+      // 分隔線＝「現在」（模擬資料的基準時間）：上方已到港、下方還沒到
+      const mid = `<div class="svnow"><span class="svnowt"><span>↑ 已到港（實際）</span><b>現在 ${hm(CG.NOW)} UTC</b><span>↓ 預計到港</span></span></div>`;
       return `<div class="svdir"><div class="svdh"><b>${esc(b.name)}</b><span class="note">${esc(pn(b.from))} → ${esc(pn(b.to))}</span><span class="note">${rs.length} 筆</span></div>
         ${rs.length ? past.map(row).join('') + mid + (fut.length ? fut.map(row).join('') : '<div class="note svempty">之後 7 天沒有本公司船靠港</div>') : '<div class="note svempty">前後 7 天沒有本公司船靠港</div>'}</div>`;
     };

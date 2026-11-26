@@ -37,15 +37,18 @@
   U.reg(['M14-c29', 'M14-b12'], (el, c) => {
     const id = vid0(c), s = (U.SN.snap || {})[id] || {}, v = U.VBY[id], r = (U.risk.byVessel(id) || {}).remain || {}, bulk = v.type === 'bulk';
     const hrs = s.last ? (NOWMS() - Date.parse(s.last + 'Z')) / 3600000 : null, lb = bunkers(id).filter(b => b.qty > 0).pop(), fd = floorDate(id), np = bulk ? null : nextBunkerPort(id);
-    U.kpis(el, [
-      { k: '殘油（重油）庫存', v: s.rob_res == null ? null : fmt(s.rob_res, 0) + ' 噸', d: v.floor_res == null ? '' : '最低存量 ' + fmt(v.floor_res, 0) + ' 噸', cls: s.below ? 'bad' : 'no', g: '最近一份船報的重油（HSFO／VLSFO）殘油；最低存量是這艘船設定的底線。' },
-      { k: '輕油（MGO）庫存', v: s.rob_mgo == null ? null : fmt(s.rob_mgo, 0) + ' 噸', d: '排放管制區、進港用', cls: 'no', g: '輕油主要在排放管制區與港內使用。' },
+    // fuel-threshold-lng：LNG 雙燃料船多一張 LNG 庫存；各燃料標出門檻，低於門檻（最低庫存警報進行中）標紅
+    const F = U.fuel, lng = F && F.isLng(v), low = k => (U.lowStock ? U.lowStock.lowOf(id) : []).some(e => (e.fuel || 'RES') === k);
+    const thrTxt = k => (F && F.isSet(v, k) ? `門檻 ${fmt(F.get(v, k), 0)}${k === 'LNG' ? '%' : ' 噸'}` : '門檻未設定');
+    U.kpis(el, (lng ? [{ k: 'LNG 庫存', v: s.lng_pct == null ? null : fmt(s.lng_pct, 1) + '%', d: `約 ${fmt(s.rob_lng, 0)} m³（艙容 ${fmt(v.lng_cap, 0)} m³）・${thrTxt('LNG')}`, cls: low('LNG') ? 'bad' : 'no', g: 'LNG 雙燃料船的主燃料，以艙容 % 表示（示意）。LNG 在艙內會慢慢蒸發（BOG），停港時存量也會下降；每天約用 ' + fmt(s.lng_rate, 0) + ' m³。' }] : []).concat([
+      { k: lng ? `殘油（${F.resName(v)} 備援）庫存` : '殘油（重油）庫存', v: s.rob_res == null ? null : fmt(s.rob_res, 0) + ' 噸', d: (v.floor_res == null ? '' : '最低存量 ' + fmt(v.floor_res, 0) + ' 噸・') + thrTxt('RES'), cls: s.below || low('RES') ? 'bad' : 'no', g: lng ? 'LNG 雙燃料船沒有 LNG 可加時改燒的備援燃油（最近一份船報）。' : '最近一份船報的重油（HSFO／VLSFO）殘油；最低存量是這艘船設定的底線，門檻是低庫存警報的觸發值。' },
+      { k: '輕油（MGO）庫存', v: s.rob_mgo == null ? null : fmt(s.rob_mgo, 0) + ' 噸', d: (lng ? '排放管制區、進港、LNG 引燃油・' : '排放管制區、進港用・') + thrTxt('MGO'), cls: low('MGO') ? 'bad' : 'no', g: lng ? '輕油用於排放管制區與港內，也是點燃 LNG 的引燃油（pilot fuel），不足時 LNG 引擎無法運轉。' : '輕油主要在排放管制區與港內使用。' },
       { k: '日耗（近 30 天）', v: s.rate == null ? null : fmt(s.rate, 1) + ' 噸／日', d: '合格日的平均', cls: 'no', g: '近 30 天合格船報日的平均日耗，用來推算剩餘天數。' },
       { k: '剩餘天數', v: s.stale ? '資料過期' : r.text || null, d: s.stale ? `${hrs == null ? '' : fmt(hrs, 0) + ' 小時'}沒有船報，不判斷` : r.level === 'high' ? '要處理' : r.level === 'mid' ? '留意' : r.level === 'low' ? '正常' : '', cls: s.stale ? 'warn' : LVC[r.level] || 'no', g: '和清單「剩餘天數」同一個燈號（貨櫃 3 天留意、1.5 天要處理；散裝 7 天、3 天）。超過 48 小時沒船報標資料過期。' },
       { k: '上次加油', v: lb ? d10(lb.t) : null, d: lb ? `${pn(lb.port)}・${lb.g}・${fmt(lb.qty, 0)} 噸` : '沒有加油紀錄', cls: 'no', g: '最近一次加油紀錄。' },
       bulk ? { k: '預計需要加油', v: fd ? new Date(fd.t).toISOString().slice(0, 10) : null, d: fd ? `約 ${fmt(fd.days, 0)} 天後降到最低存量` : s.stale ? '資料過期，不推算' : '無法推算', cls: fd && fd.days < 7 ? 'warn' : 'no', g: '照目前日耗，殘油降到最低存量的日期（散裝沒有固定航線船期，改看日期）。' }
         : { k: '下次建議加油港', v: np ? pn(np) : null, d: fd ? `約 ${fmt(fd.days, 0)} 天後降到最低存量` : '依航線港序', cls: 'no', g: '依航線港序，從最近一次靠港往後找第一個有加油紀錄的港（同船隊「加油計畫」）。' },
-    ]);
+    ]));
   });
 
   // ---------------- 庫存走勢與預測（貨櫃 M14-c30、散裝 M14-b13）：每日船報殘油＋最低存量線＋推算＋加油前庫存點
@@ -56,12 +59,20 @@
     const B = bunkers(id).filter(b => b.ra != null && b.qty > 0 && Date.parse(b.t + 'Z') >= Math.max(lo, L[0][0]) && b.g !== 'MGO');   // 只畫在船報曲線範圍內的加油
     const fd = floorDate(id), s = (U.SN.snap || {})[id] || {}, last = L[L.length - 1];
     const proj = fd && v.floor_res != null ? [[last[0], last[1]], [fd.t, v.floor_res]] : null;
-    U.mkChart(el, { grid: { left: 56, right: 30, top: 34, bottom: 36 }, legend: { show: true, top: 0 }, xAxis: { type: 'time' }, yAxis: { type: 'value', name: '殘油（噸）', scale: true },
-      tooltip: { trigger: 'item', confine: true, formatter: p => (p.seriesName === '加油' ? p.data[2] : `${new Date(p.data[0]).toISOString().slice(0, 16).replace('T', ' ')}<br>${esc(p.seriesName)}：${fmt(p.data[1], 0)} 噸`) },
+    // fuel-threshold-lng：LNG 雙燃料船多畫 LNG 艙容 %（右軸，每週庫存）、LNG 門檻線與 LNG 加注點
+    const F = U.fuel, lng = F && F.isLng(v), D0 = Date.UTC(2024, 0, 1);
+    const LG = lng ? (s.lng_d || []).map(x => [D0 + x[0] * 86400000, x[1]]).filter(x => x[0] >= lo) : [];   // 近 120 天每日艙容 %
+    const LB = lng ? bunkers(id).filter(b => b.g === 'LNG' && Date.parse(b.t + 'Z') >= lo).map(b => { const t = Date.parse(b.t + 'Z'); return [t, (LG.filter(x => x[0] >= t - 86400000)[0] || LG[LG.length - 1] || [0, null])[1], `${d10(b.t)}　${esc(pn(b.port))}<br>LNG 加注 ${fmt(b.qty, 0)} 噸（約 ${fmt(b.qty / 0.45, 0)} m³）`]; }) : [];
+    const LS = lng && LG.length ? [{ name: 'LNG 艙容 %', type: 'line', yAxisIndex: 1, showSymbol: false, data: LG, lineStyle: { width: 2, color: col.pal[2] }, itemStyle: { color: col.pal[2] },
+        markLine: F.isSet(v, 'LNG') ? { symbol: 'none', silent: true, lineStyle: { color: col.warn, type: 'dashed' }, label: { formatter: 'LNG 門檻 ' + fmt(F.get(v, 'LNG'), 0) + '%', color: col.warn, fontSize: 11, position: 'insideStartTop' }, data: [{ yAxis: F.get(v, 'LNG') }] } : undefined }]
+        .concat(LB.length ? [{ name: 'LNG 加注', type: 'scatter', yAxisIndex: 1, symbol: 'diamond', symbolSize: 11, data: LB, itemStyle: { color: col.pal[2], borderColor: '#fff', borderWidth: 1 } }] : []) : [];
+    U.mkChart(el, { grid: { left: 56, right: lng ? 56 : 30, top: 34, bottom: 36 }, legend: { show: true, top: 0 }, xAxis: { type: 'time' },
+      yAxis: [{ type: 'value', name: '殘油（噸）', scale: true }].concat(lng ? [{ type: 'value', name: 'LNG 艙容 %', min: 0, max: 100, splitLine: { show: false } }] : []),
+      tooltip: { trigger: 'item', confine: true, formatter: p => (p.seriesName === '加油' || p.seriesName === 'LNG 加注' ? p.data[2] : `${new Date(p.data[0]).toISOString().slice(0, 16).replace('T', ' ')}<br>${esc(p.seriesName)}：${p.seriesName === 'LNG 艙容 %' ? fmt(p.data[1], 1) + '%' : fmt(p.data[1], 0) + ' 噸'}`) },
       series: [{ name: '殘油（船報）', type: 'line', showSymbol: false, data: L, lineStyle: { width: 2, color: col.pal[0] }, itemStyle: { color: col.pal[0] },
           markLine: v.floor_res == null ? undefined : { symbol: 'none', silent: true, lineStyle: { color: col.bad, type: 'dashed' }, label: { formatter: '最低存量 ' + fmt(v.floor_res, 0) + ' 噸', color: col.bad, fontSize: 11, position: 'insideEndTop' }, data: [{ yAxis: v.floor_res }] } }]
         .concat(proj ? [{ name: `照目前日耗推算（${new Date(fd.t).toISOString().slice(0, 10)} 到底線）`, type: 'line', showSymbol: true, symbolSize: 6, data: proj, lineStyle: { type: 'dashed', width: 2, color: col.sub }, itemStyle: { color: col.sub } }] : [])
-        .concat(B.length ? [{ name: '加油', type: 'scatter', symbolSize: 11, data: B.map(b => { const t = Date.parse(b.t + 'Z'), pre = L.filter(x => x[0] <= t).pop() || L[0]; return [t, pre[1], `${d10(b.t)}　${esc(pn(b.port))}<br>加油前 ${fmt(b.ra, 0)} 噸 → 加 ${fmt(b.qty, 0)} 噸（${esc(b.g)}）`]; }), itemStyle: { color: col.warn, borderColor: '#fff', borderWidth: 1 } }] : []) });   // 點標在曲線上（加油當時的船報殘油），提示框列加油紀錄上的加油前庫存
+        .concat(B.length ? [{ name: '加油', type: 'scatter', symbolSize: 11, data: B.map(b => { const t = Date.parse(b.t + 'Z'), pre = L.filter(x => x[0] <= t).pop() || L[0]; return [t, pre[1], `${d10(b.t)}　${esc(pn(b.port))}<br>加油前 ${fmt(b.ra, 0)} 噸 → 加 ${fmt(b.qty, 0)} 噸（${esc(b.g)}）`]; }), itemStyle: { color: col.warn, borderColor: '#fff', borderWidth: 1 } }] : []).concat(LS) });   // 點標在曲線上（加油當時的船報殘油），提示框列加油紀錄上的加油前庫存
   });
 
   // ---------------- 加油紀錄與單量差異（貨櫃 M14-c31，切換表格｜差異圖）、加油紀錄（散裝 M14-b14）

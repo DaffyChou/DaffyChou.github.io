@@ -73,13 +73,22 @@
     const lo = Date.parse(new Date(lo0).toISOString().slice(0, 7) + '-01T00:00:00Z');   // 月規則的時間只到月份（例如 2026-10＝10/1），起點放寬到該月 1 日
     window.UI_ALARM.events.forEach(a => {
       const r = RULES.find(x => x.id === a.rule), v = U.VBY[a.vid]; if (!r || !v) return;
-      const unit = a.rule === 'FCD' ? '%' : a.rule === 'OTP' ? '%' : a.rule === 'REMAIN_DAYS' ? ' 天' : ' 噸';
-      const facts = [['船舶', v.name], ['規則', r.name], ['觸發值', a.value + unit], ['門檻', a.thr + unit], ['觸發時間', a.start]];
+      const unit = a.rule === 'FCD' ? '%' : a.rule === 'OTP' ? '%' : a.rule === 'REMAIN_DAYS' ? ' 天' : a.fuel === 'LNG' ? '%' : ' 噸';
+      const facts = [['船舶', v.name], ['規則', r.name]].concat(a.rule === 'LSA' && U.fuel ? [['燃料', U.fuel.label(v, a.fuel || 'RES')]] : []).concat([['觸發值', a.value + unit], ['門檻', a.thr + unit], ['觸發時間', a.start]]);
       const ts = at(a.start), te = at(a.end);
       if (ts != null && ts >= lo && ts <= NOW) L.push({ t: ts, rule: r.id, act: 'open', src: 'alarm', vid: a.vid, lv: 'high', subj: `[要處理] ${r.name}：${v.name}（觸發值 ${a.value}${unit}，門檻 ${a.thr}${unit}）`, facts, alarm: a });
       if (te != null && te >= lo && te <= NOW) L.push({ t: te, rule: r.id, act: 'clear', src: 'alarm', vid: a.vid, lv: 'high', subj: `[恢復] ${r.name}：${v.name}`, facts: facts.concat([['恢復時間', a.end]]), alarm: a });
     });
     L.sort((a, b) => a.t - b.t).forEach(send);
+  }
+
+  // 低庫存即時判斷（fuel_thr.js 的 U.lowStock.sync）：觸發、恢復各寄一封（fuel-threshold-lng）
+  function onAlarm(type, a) {
+    const r = RULES.find(x => x.id === a.rule), v = U.VBY[a.vid]; if (!r || !v) return null;
+    const k = a.fuel || 'RES', unit = k === 'LNG' ? '%' : ' 噸', fl = U.fuel ? U.fuel.label(v, k) : k;
+    const facts = [['船舶', v.name], ['規則', r.name], ['燃料', fl], ['觸發值', a.value + unit], ['門檻', a.thr + unit], ['觸發時間', a.start]].concat(type === 'clear' ? [['恢復時間', a.end], ['恢復時庫存', (a.endValue ?? '—') + unit]] : []);
+    return send({ t: U.events ? U.events.now() : Date.now(), rule: r.id, act: type, src: 'alarm', vid: a.vid, lv: 'high', alarm: a, facts,
+      subj: type === 'clear' ? `[恢復] ${r.name}（${U.fuel ? U.fuel.KINDS[k].name : k}）：${v.name}` : `[要處理] ${r.name}（${U.fuel ? U.fuel.KINDS[k].name : k}）：${v.name}（觸發值 ${a.value}${unit}，門檻 ${a.thr}${unit}）` });
   }
 
   // 測試信：照該規則目前的收件人寄一封「[測試]」信（不受測試模式影響，收件人＝設定的收件人）
@@ -149,7 +158,7 @@
   U.pages = U.pages || {};
   U.pages.adm_mail = page;
 
-  U.notify = { RULES, cfg, setCfg, onEvent, seedAlarm, test, list: () => mails().slice(), get: id => mails().find(m => m.id === id) || null, who, rname, hm, MF,
+  U.notify = { RULES, cfg, setCfg, onEvent, onAlarm, seedAlarm, test, list: () => mails().slice(), get: id => mails().find(m => m.id === id) || null, who, rname, hm, MF,
     preview, wirePreview,
     reset() { ML = []; CFG = {}; try { [MKEY, CKEY, SKEY].forEach(k => localStorage.removeItem(k)); } catch (e) { } }, admins, LVN };
   seedAlarm();
